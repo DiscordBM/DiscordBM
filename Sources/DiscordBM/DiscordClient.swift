@@ -87,10 +87,12 @@ public struct DiscordClient {
     ) async throws -> HTTPClient.Response {
         try self.checkRateLimitsAllowRequest(to: endpoint)
         let data = try DiscordGlobalConfiguration.encoder.encode(payload)
+        var headers = self.authHeaders
+        headers.add(name: "Content-Type", value: "application/json")
         let request = try HTTPClient.Request(
             url: endpoint.url + query.makeForURL(),
             method: endpoint.httpMethod,
-            headers: self.authHeaders,
+            headers: headers,
             body: .bytes(data)
         )
         let response = try await client.execute(request: request).get()
