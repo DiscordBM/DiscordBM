@@ -2,7 +2,9 @@ import WebSocketKit
 import Logging
 import struct NIOCore.TimeAmount
 import struct Foundation.Data
+import struct Foundation.Date
 import class NIO.RepeatedTask
+import Atomics
 
 actor DiscordManager {
     
@@ -24,12 +26,15 @@ actor DiscordManager {
     public let id: String
     let logger: Logger
     
-    var isConnected = false
+    var isFullyConnected = false
     var sequenceNumber: Int? = nil
+    var lastEventDate = Date()
     var sessionId: String? = nil
     var resumeGatewayUrl: String? = nil
     
     var pingTask: RepeatedTask? = nil
+    var zombiedConnectionCheckerTask: RepeatedTask? = nil
+    let zombiedConnectionCounter = ManagedAtomic(0)
     
     public init(
         eventLoopGroup: EventLoopGroup,
@@ -52,12 +57,21 @@ actor DiscordManager {
         self.logger = DiscordGlobalConfiguration.makeLogger("DiscordManager_\(self.id)")
     }
     
-    func connect() {
+    public func connect() {
         Task {
             await connectAsync()
         }
     }
     
+    public func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) {
+        self.send(payload: .init(
+            opcode: .requestGuildMembers,
+            data: .requestGuildMembers(payload)
+        ), opcode: 0x1)
+    }
+}
+
+extension DiscordManager {
     private func connectAsync() async {
         let gatewayUrl = await getGatewayUrl()
         var configuration = WebSocketClient.Configuration()
@@ -80,17 +94,20 @@ actor DiscordManager {
     private func configureWebsocket() {
         self.setupOnText()
         self.setupOnClose()
+        self.setupzombiedConnectionCheckerTask()
         self.sendHello()
     }
     
     private func proccessEvent(_ event: Gateway.Event) {
+        self.lastEventDate = Date()
+        self.zombiedConnectionCounter.store(0, ordering: .relaxed)
         if let sequenceNumber = event.sequenceNumber {
             self.sequenceNumber = sequenceNumber
         }
         
         switch event.opcode {
         case .dispatch:
-            self.isConnected = true
+            self.isFullyConnected = true
         case .reconnect:
             break // will reconnect when we get the close notification
         case .heartbeat:
@@ -240,6 +257,27 @@ actor DiscordManager {
         self.send(payload: .init(opcode: .hello))
     }
     
+    private func setupzombiedConnectionCheckerTask() {
+        self.zombiedConnectionCheckerTask?.cancel()
+        let el = self.eventLoopGroup.any()
+        self.zombiedConnectionCheckerTask = el.scheduleRepeatedTask(
+            initialDelay: .seconds(30),
+            delay: .seconds(30)
+        ) { [weak self] _ in
+            guard let selfi = self else { return }
+            Task {
+                guard await selfi.lastEventDate.addingTimeInterval(60) < Date() else { return }
+                let counter = selfi.zombiedConnectionCounter.load(ordering: .relaxed)
+                if counter != 0 {
+                    await selfi.connect()
+                } else {
+                    await selfi.sendPing()
+                    selfi.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
+                }
+            }
+        }
+    }
+    
     private func schedulePingTask(every interval: TimeAmount) {
         self.pingTask?.cancel()
         let el = self.eventLoopGroup.any()
@@ -258,7 +296,7 @@ actor DiscordManager {
         self.send(payload: .init(opcode: .heartbeat))
     }
         
-    func send(payload: Gateway.Event, opcode: UInt8? = nil) {
+    private func send(payload: Gateway.Event, opcode: UInt8? = nil) {
         do {
             let data = try DiscordGlobalConfiguration.encoder.encode(payload)
             let opcode = opcode ?? UInt8(payload.opcode.rawValue)
