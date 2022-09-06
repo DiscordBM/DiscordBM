@@ -26,7 +26,6 @@ actor DiscordManager {
     public let id: String
     let logger: Logger
     
-    var isFullyConnected = false
     var sequenceNumber: Int? = nil
     var lastEventDate = Date()
     var sessionId: String? = nil
@@ -106,8 +105,6 @@ extension DiscordManager {
         }
         
         switch event.opcode {
-        case .dispatch:
-            self.isFullyConnected = true
         case .reconnect:
             break // will reconnect when we get the close notification
         case .heartbeat:
@@ -268,7 +265,11 @@ extension DiscordManager {
             Task {
                 guard await selfi.lastEventDate.addingTimeInterval(60) < Date() else { return }
                 let counter = selfi.zombiedConnectionCounter.load(ordering: .relaxed)
-                if counter != 0 {
+                let ws = await selfi.ws
+                if counter != 0 || ws == nil || ws!.isClosed {
+                    selfi.logger.error("Detected zombied connection. Will try to reconnect.", metadata: [
+                        "DiscordManagerID": .string(selfi.id),
+                    ])
                     await selfi.connect()
                 } else {
                     await selfi.sendPing()
