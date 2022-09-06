@@ -6,7 +6,7 @@ import struct Foundation.Date
 import class NIO.RepeatedTask
 import Atomics
 
-actor DiscordManager {
+public actor DiscordManager {
     
     var ws: WebSocket? {
         willSet {
@@ -272,6 +272,7 @@ extension DiscordManager {
                     ])
                     await selfi.connect()
                 } else {
+                    /// Try to see if discord responds to a ping before trying to reconnect.
                     await selfi.sendPing()
                     selfi.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
                 }
