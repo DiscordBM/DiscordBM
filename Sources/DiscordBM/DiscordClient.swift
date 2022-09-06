@@ -38,18 +38,11 @@ public struct DiscordClient {
     }
     
     public init(
-        eventLoopGroupProvider: HTTPClient.EventLoopGroupProvider,
-        httpVersion: HTTPClient.Configuration.HTTPVersion? = nil,
+        httpClient: HTTPClient,
         token: String,
         appId: String
     ) {
-        var config = HTTPClient.Configuration()
-        config.httpVersion = httpVersion ?? .http1Only
-        self.client = HTTPClient(
-            eventLoopGroupProvider: eventLoopGroupProvider,
-            configuration: config,
-            backgroundActivityLogger: DiscordGlobalConfiguration.makeLogger("AHC-BG")
-        )
+        self.client = httpClient
         self.token = token
         self.appId = appId
     }

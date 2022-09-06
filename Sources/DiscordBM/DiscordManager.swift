@@ -5,6 +5,7 @@ import struct Foundation.Data
 import struct Foundation.Date
 import class NIO.RepeatedTask
 import Atomics
+import AsyncHTTPClient
 
 public actor DiscordManager {
     
@@ -37,6 +38,7 @@ public actor DiscordManager {
     
     public init(
         eventLoopGroup: EventLoopGroup,
+        httpClient: HTTPClient,
         token: String,
         appId: String,
         presence: Gateway.Identify.PresenceUpdate? = nil,
@@ -45,7 +47,7 @@ public actor DiscordManager {
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = DiscordClient(
-            eventLoopGroupProvider: .shared(eventLoopGroup),
+            httpClient: httpClient,
             token: token,
             appId: appId
         )
