@@ -56,7 +56,7 @@ public actor DiscordManager {
         self.logger = DiscordGlobalConfiguration.makeLogger("DiscordManager_\(self.id)")
     }
     
-    public func connect() {
+    nonisolated public func connect() {
         Task {
             await connectAsync()
         }
@@ -245,7 +245,7 @@ extension DiscordManager {
                         "code": "\(String(describing: code))"
                     ]
                 )
-                await selfi.connect()
+                selfi.connect()
             }
         }
     }
@@ -270,7 +270,7 @@ extension DiscordManager {
                     selfi.logger.error("Detected zombied connection. Will try to reconnect.", metadata: [
                         "DiscordManagerID": .string(selfi.id),
                     ])
-                    await selfi.connect()
+                    selfi.connect()
                 } else {
                     /// Try to see if discord responds to a ping before trying to reconnect.
                     await selfi.sendPing()
