@@ -14,16 +14,16 @@ public actor DiscordManager {
         }
     }
     let eventLoopGroup: EventLoopGroup
-    public let client: DiscordClient
+    public nonisolated let client: DiscordClient
     
-    public let onEvent: (Gateway.Event) -> () = { _ in }
-    public let onEventParseFilure: (Error, String) -> () = { _, _ in }
+    var onEvents: [(Gateway.Event) -> ()] = []
+    var onEventParseFilures: [(Error, String) -> ()] = []
     
     let token: String
     let presence: Gateway.Identify.PresenceUpdate?
     let intents: [Gateway.Identify.Intent]
     
-    public let id: String
+    public nonisolated let id: String
     let logger: Logger
     
     var sequenceNumber: Int? = nil
@@ -67,6 +67,14 @@ public actor DiscordManager {
             opcode: .requestGuildMembers,
             data: .requestGuildMembers(payload)
         ), opcode: 0x1)
+    }
+    
+    public func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) {
+        self.onEvents.append(handler)
+    }
+    
+    public func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) {
+        self.onEventParseFilures.append(handler)
     }
 }
 
@@ -223,9 +231,13 @@ extension DiscordManager {
                     from: data
                 )
                 self.proccessEvent(event)
-                self.onEvent(event)
+                for onEvent in self.onEvents {
+                    onEvent(event)
+                }
             } catch {
-                self.onEventParseFilure(error, text)
+                for onEventParseFilure in self.onEventParseFilures {
+                    onEventParseFilure(error, text)
+                }
             }
         }
     }
