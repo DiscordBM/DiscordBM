@@ -10,6 +10,13 @@ import struct Foundation.UUID
 
 public actor DiscordManager {
     
+    enum ConnectionState: Int, AtomicValue {
+        case noConnection
+        case connecting
+        case configuring
+        case connected
+    }
+    
     var ws: WebSocket? {
         didSet {
             self.closeWebsocket(ws: oldValue)
@@ -33,7 +40,7 @@ public actor DiscordManager {
     var sessionId: String? = nil
     var resumeGatewayUrl: String? = nil
     nonisolated let pingTaskInterval = ManagedAtomic(0)
-    nonisolated let isConnecting = ManagedAtomic(false)
+    nonisolated let connectionState = ManagedAtomic(ConnectionState.noConnection)
     
     var pingTask: RepeatedTask? = nil
     var zombiedConnectionCheckerTask: RepeatedTask? = nil
@@ -84,9 +91,9 @@ public actor DiscordManager {
 
 extension DiscordManager {
     private func connectAsync() async {
-        guard self.isConnecting.compareExchange(
-            expected: false,
-            desired: true,
+        guard self.connectionState.compareExchange(
+            expected: .noConnection,
+            desired: .connecting,
             ordering: .relaxed
         ).exchanged else { return }
         self.lastEventDate = Date()
@@ -99,14 +106,14 @@ extension DiscordManager {
                 configuration: configuration,
                 on: eventLoopGroup
             )
-            self.isConnecting.store(false, ordering: .relaxed)
+            self.connectionState.store(.configuring, ordering: .relaxed)
             configureWebsocket()
         } catch {
             logger.error("Error while connecting to Discord through websocket.", metadata: [
                 "DiscordManagerID": .stringConvertible(id),
                 "error": "\(error)"
             ])
-            self.isConnecting.store(false, ordering: .relaxed)
+            self.connectionState.store(.noConnection, ordering: .relaxed)
             await eventLoopGroup.any().wait(.seconds(5))
             await connectAsync()
         }
@@ -157,6 +164,7 @@ extension DiscordManager {
             self.pingTaskInterval.store(hello.heartbeat_interval, ordering: .relaxed)
             self.sendResumeOrIdentify()
         case let .ready(payload):
+            self.connectionState.store(.connected, ordering: .relaxed)
             logger.notice("Received Discord Ready Notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
             ])
@@ -166,6 +174,7 @@ extension DiscordManager {
             logger.notice("Received successful resume notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
             ])
+            self.connectionState.store(.connected, ordering: .relaxed)
         default:
             break
         }
@@ -330,7 +339,7 @@ extension DiscordManager {
                         self.logger.error("Detected zombied connection. Will try to reconnect.", metadata: [
                             "DiscordManagerID": .stringConvertible(self.id),
                         ])
-                        self.isConnecting.store(false, ordering: .relaxed)
+                        self.connectionState.store(.noConnection, ordering: .relaxed)
                         self.connect()
                         reschedule(in: .seconds(30))
                     }
