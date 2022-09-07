@@ -33,6 +33,7 @@ public actor DiscordManager {
     var sessionId: String? = nil
     var resumeGatewayUrl: String? = nil
     nonisolated let pingTaskInterval = ManagedAtomic(0)
+    nonisolated let isConnecting = ManagedAtomic(false)
     
     var pingTask: RepeatedTask? = nil
     var zombiedConnectionCheckerTask: RepeatedTask? = nil
@@ -83,6 +84,8 @@ public actor DiscordManager {
 
 extension DiscordManager {
     private func connectAsync() async {
+        self.isConnecting.store(true, ordering: .relaxed)
+        self.lastEventDate = Date()
         let gatewayUrl = await getGatewayUrl()
         var configuration = WebSocketClient.Configuration()
         configuration.maxFrameSize = 1 << 31
@@ -92,18 +95,21 @@ extension DiscordManager {
                 configuration: configuration,
                 on: eventLoopGroup
             )
+            self.isConnecting.store(false, ordering: .relaxed)
             configureWebsocket()
         } catch {
             logger.error("Error while connecting to Discord through websocket.", metadata: [
                 "DiscordManagerID": .stringConvertible(id),
                 "error": "\(error)"
             ])
+            self.isConnecting.store(false, ordering: .relaxed)
             await eventLoopGroup.any().wait(.seconds(5))
             await connectAsync()
         }
     }
     
     private func configureWebsocket() {
+        self.connectionId.store(.random(in: 10_000..<100_000), ordering: .relaxed)
         self.setupOnText()
         self.setupOnClose()
         self.setupZombiedConnectionCheckerTask(
@@ -146,7 +152,6 @@ extension DiscordManager {
             self.schedulePingTask(every: interval)
             self.pingTaskInterval.store(hello.heartbeat_interval, ordering: .relaxed)
             self.sendResumeOrIdentify()
-            self.connectionId.store(.random(in: 10_000..<100_000), ordering: .relaxed)
         case let .ready(payload):
             logger.notice("Received Discord Ready Notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
@@ -163,7 +168,7 @@ extension DiscordManager {
     }
     
     private func getGatewayUrl() async -> String {
-        if let gatewayUrl = resumeGatewayUrl {
+        if let gatewayUrl = self.resumeGatewayUrl {
             return gatewayUrl
         } else if let gatewayUrl = try? await client.getGateway().decode().url {
             return gatewayUrl
@@ -284,6 +289,11 @@ extension DiscordManager {
             guard let `self` = self else { return }
             /// If connection has changed then end this instance.
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
+            func reschedule(in time: TimeAmount) {
+                el.scheduleTask(in: time) {
+                    self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
+                }
+            }
             Task {
                 let now = Date().timeIntervalSince1970
                 let lastEventInterval = await self.lastEventDate.timeIntervalSince1970
@@ -291,9 +301,7 @@ extension DiscordManager {
                 let tolerance = DiscordGlobalConfiguration.zombiedConnectionCheckerTolerance
                 let diff = tolerance - past
                 if diff > 0 {
-                    el.scheduleTask(in: .seconds(Int64(diff) + 1)) {
-                        self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
-                    }
+                    reschedule(in: .seconds(Int64(diff) + 1))
                 } else {
                     let tryToPingBeforeForceReconnect: Bool = await {
                         if self.zombiedConnectionCounter.load(ordering: .relaxed) != 0 {
@@ -313,15 +321,14 @@ extension DiscordManager {
                         /// Try to see if discord responds to a ping before trying to reconnect.
                         await self.sendPing()
                         self.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
+                        reschedule(in: .seconds(5))
                     } else {
                         self.logger.error("Detected zombied connection. Will try to reconnect.", metadata: [
                             "DiscordManagerID": .stringConvertible(self.id),
                         ])
+                        self.isConnecting.store(false, ordering: .relaxed)
                         self.connect()
-                    }
-                    
-                    el.scheduleTask(in: .seconds(5)) {
-                        self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
+                        reschedule(in: .seconds(30))
                     }
                 }
             }
