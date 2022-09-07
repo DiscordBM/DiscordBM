@@ -43,7 +43,7 @@ public actor DiscordManager {
     nonisolated let connectionState = ManagedAtomic(ConnectionState.noConnection)
     
     var pingTask: RepeatedTask? = nil
-    var zombiedConnectionCheckerTask: RepeatedTask? = nil
+    /// Counter to keep track of how many times in a sequence, a zombied connection was detected.
     nonisolated let zombiedConnectionCounter = ManagedAtomic(0)
     /// An ID to keep track of connection changes.
     nonisolated let connectionId = ManagedAtomic(Int.random(in: 10_000..<100_000))
