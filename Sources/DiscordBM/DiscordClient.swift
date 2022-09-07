@@ -18,8 +18,8 @@ public struct DiscordClient {
         
         public func decode() throws -> C {
             if (200..<300).contains(raw.status.code) {
-                if let body = raw.body {
-                    let data = body.getData(at: 0, length: body.readableBytes) ?? Data()
+                if let body = raw.body,
+                   let data = body.getData(at: 0, length: body.readableBytes) {
                     return try DiscordGlobalConfiguration.decoder.decode(C.self, from: data)
                 } else {
                     throw DiscordClientError.emptyBody
@@ -112,7 +112,11 @@ public struct DiscordClient {
 
 extension DiscordClient: CustomStringConvertible {
     public var description: String {
-        "DiscordClient(client: \(type(of: client)))"
+        "DiscordClient("
+        + "client: \(client), "
+        + "token: \(token.count > 6 ? String(token.dropLast(token.count - 6)) + "****" : "******"), "
+        + "appId: \(appId)"
+        + ")"
     }
 }
 

@@ -26,7 +26,7 @@ public actor DiscordManager {
     let intents: [Gateway.Identify.Intent]
     
     public nonisolated let id = UUID()
-    let logger: Logger
+    let logger = DiscordGlobalConfiguration.makeLogger("DiscordManager")
     
     var sequenceNumber: Int? = nil
     var lastEventDate = Date()
@@ -54,7 +54,6 @@ public actor DiscordManager {
         self.token = token
         self.presence = presence
         self.intents = intents
-        self.logger = DiscordGlobalConfiguration.makeLogger("DiscordManager")
     }
     
     nonisolated public func connect() {
@@ -96,6 +95,8 @@ extension DiscordManager {
                 "DiscordManagerID": .stringConvertible(id),
                 "error": "\(error)"
             ])
+            await eventLoopGroup.any().wait(.seconds(5))
+            await connectAsync()
         }
     }
     
