@@ -8,7 +8,7 @@ public enum HTTPClientProvider {
     case useShared(eventLoopGroup: EventLoopGroup, config: HTTPClient.Configuration? = nil)
     /// Provide an available HTTPClient instance.
     case available(HTTPClient)
-    #warning("Shutdown HTTPClient")
+    
     func makeClient() -> HTTPClient {
         switch self {
         case let .useShared(elg, config):
@@ -26,7 +26,7 @@ private class HTTPClientStorage {
     
     private init() { }
     static let shared = HTTPClientStorage()
-    
+    // TODO: Shutdown HTTPClient
     func getClient(elg: EventLoopGroup, config: HTTPClient.Configuration?) -> HTTPClient {
         lock.lock()
         defer { lock.unlock() }
@@ -34,15 +34,9 @@ private class HTTPClientStorage {
         if let shared = discordShared {
             return shared
         } else {
-            // TODO: don't use `.http1Only`?
-            let configuration = config ?? {
-                var config = HTTPClient.Configuration()
-                config.httpVersion = .http1Only
-                return config
-            }()
             discordShared = .init(
                 eventLoopGroupProvider: .shared(elg),
-                configuration: configuration,
+                configuration: config ?? .init(),
                 backgroundActivityLogger: DiscordGlobalConfiguration.makeLogger("D-AHC-BG")
             )
             return discordShared!
