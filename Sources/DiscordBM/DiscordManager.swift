@@ -10,6 +10,13 @@ import struct Foundation.UUID
 
 public actor DiscordManager {
     
+    enum ConnectionState: Int, AtomicValue {
+        case noConnection
+        case connecting
+        case configured
+        case connected
+    }
+    
     var ws: WebSocket? {
         didSet {
             self.closeWebsocket(ws: oldValue)
@@ -33,17 +40,17 @@ public actor DiscordManager {
     var sessionId: String? = nil
     var resumeGatewayUrl: String? = nil
     nonisolated let pingTaskInterval = ManagedAtomic(0)
-    nonisolated let isConnecting = ManagedAtomic(false)
+    nonisolated let connectionState = ManagedAtomic(ConnectionState.noConnection)
     
     var pingTask: RepeatedTask? = nil
-    var zombiedConnectionCheckerTask: RepeatedTask? = nil
+    /// Counter to keep track of how many times in a sequence, a zombied connection was detected.
     nonisolated let zombiedConnectionCounter = ManagedAtomic(0)
     /// An ID to keep track of connection changes.
     nonisolated let connectionId = ManagedAtomic(Int.random(in: 10_000..<100_000))
     
     public init(
         eventLoopGroup: EventLoopGroup,
-        httpClient: HTTPClient,
+        httpClientProvider: HTTPClientProvider? = nil,
         token: String,
         appId: String,
         presence: Gateway.Identify.PresenceUpdate? = nil,
@@ -51,7 +58,7 @@ public actor DiscordManager {
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = DiscordClient(
-            httpClient: httpClient,
+            httpClientProvider: httpClientProvider ?? .useShared(eventLoopGroup: eventLoopGroup),
             token: token,
             appId: appId
         )
@@ -84,31 +91,33 @@ public actor DiscordManager {
 
 extension DiscordManager {
     private func connectAsync() async {
-        guard self.isConnecting.compareExchange(
-            expected: false,
-            desired: true,
-            ordering: .relaxed
-        ).exchanged else { return }
+        let state = self.connectionState.load(ordering: .relaxed)
+        guard state == .noConnection || state == .configured else {
+            return
+        }
+        self.connectionState.store(.connecting, ordering: .relaxed)
         self.lastEventDate = Date()
+        self.pingTask?.cancel()
         let gatewayUrl = await getGatewayUrl()
         var configuration = WebSocketClient.Configuration()
         configuration.maxFrameSize = 1 << 31
-        do {
-            self.ws = try await WebSocket.asyncConnect(
-                to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)",
-                configuration: configuration,
-                on: eventLoopGroup
-            )
-            self.isConnecting.store(false, ordering: .relaxed)
-            configureWebsocket()
-        } catch {
+        WebSocket.connect(
+            to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
+            configuration: configuration,
+            on: eventLoopGroup
+        ) { ws in
+            self.ws = ws
+            self.configureWebsocket()
+        }.whenFailure { [self] error in
             logger.error("Error while connecting to Discord through websocket.", metadata: [
                 "DiscordManagerID": .stringConvertible(id),
                 "error": "\(error)"
             ])
-            self.isConnecting.store(false, ordering: .relaxed)
-            await eventLoopGroup.any().wait(.seconds(5))
-            await connectAsync()
+            self.connectionState.store(.noConnection, ordering: .relaxed)
+            Task {
+                await eventLoopGroup.any().wait(.seconds(5))
+                await connectAsync()
+            }
         }
     }
     
@@ -119,7 +128,7 @@ extension DiscordManager {
         self.setupZombiedConnectionCheckerTask(
             forConnectionWithId: connectionId.load(ordering: .relaxed)
         )
-        self.sendHello()
+        self.connectionState.store(.configured, ordering: .relaxed)
     }
     
     private func proccessEvent(_ event: Gateway.Event) {
@@ -160,12 +169,14 @@ extension DiscordManager {
             logger.notice("Received Discord Ready Notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
             ])
+            self.connectionState.store(.connected, ordering: .relaxed)
             self.sessionId = payload.session_id
             self.resumeGatewayUrl = payload.resume_gateway_url
         case .resumed:
             logger.notice("Received successful resume notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
             ])
+            self.connectionState.store(.connected, ordering: .relaxed)
         default:
             break
         }
@@ -280,10 +291,6 @@ extension DiscordManager {
         }
     }
     
-    private func sendHello() {
-        self.send(payload: .init(opcode: .hello))
-    }
-    
     private nonisolated func setupZombiedConnectionCheckerTask(
         forConnectionWithId connectionId: Int,
         on el: EventLoop? = nil
@@ -330,7 +337,7 @@ extension DiscordManager {
                         self.logger.error("Detected zombied connection. Will try to reconnect.", metadata: [
                             "DiscordManagerID": .stringConvertible(self.id),
                         ])
-                        self.isConnecting.store(false, ordering: .relaxed)
+                        self.connectionState.store(.noConnection, ordering: .relaxed)
                         self.connect()
                         reschedule(in: .seconds(30))
                     }
@@ -361,7 +368,15 @@ extension DiscordManager {
         do {
             let data = try DiscordGlobalConfiguration.encoder.encode(payload)
             let opcode = opcode ?? UInt8(payload.opcode.rawValue)
-            self.ws?.send(raw: data, opcode: .init(encodedWebSocketOpcode: opcode)!)
+            if let ws = self.ws {
+                ws.send(raw: data, opcode: .init(encodedWebSocketOpcode: opcode)!)
+            } else {
+                logger.warning("Trying to send through ws when a connection is not established.", metadata: [
+                    "DiscordManagerID": .stringConvertible(id),
+                    "payload": "\(payload)",
+                    "state": "\(self.connectionState.load(ordering: .relaxed))"
+                ])
+            }
         } catch {
             logger.warning("Could not encode payload. This is a library issue, please report.", metadata: [
                 "DiscordManagerID": .stringConvertible(id),
@@ -378,27 +393,6 @@ extension DiscordManager {
                 "DiscordManagerID": .stringConvertible(self.id),
                 "error": "\($0)"
             ])
-        }
-    }
-}
-
-//MARK: - +WebSocket
-private extension WebSocket {
-    static func asyncConnect(
-        to address: String,
-        configuration: WebSocketClient.Configuration,
-        on eventLoopGroup: EventLoopGroup
-    ) async throws -> WebSocket {
-        try await withCheckedThrowingContinuation { cont in
-            WebSocket.connect(
-                to: address,
-                configuration: configuration,
-                on: eventLoopGroup
-            ) {
-                cont.resume(returning: $0)
-            }.whenFailure {
-                cont.resume(throwing: $0)
-            }
         }
     }
 }

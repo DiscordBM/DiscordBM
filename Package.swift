@@ -29,7 +29,8 @@ let package = Package(
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 .product(name: "WebSocketKit", package: "websocket-kit"),
                 .product(name: "Atomics", package: "swift-atomics"),
-            ]),
+            ]
+        ),
         .testTarget(
             name: "DiscordBMTests",
             dependencies: ["DiscordBM"]),

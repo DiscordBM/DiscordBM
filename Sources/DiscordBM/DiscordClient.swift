@@ -38,11 +38,11 @@ public struct DiscordClient {
     }
     
     public init(
-        httpClient: HTTPClient,
+        httpClientProvider: HTTPClientProvider,
         token: String,
         appId: String
     ) {
-        self.client = httpClient
+        self.client = httpClientProvider.makeClient()
         self.token = token
         self.appId = appId
     }
