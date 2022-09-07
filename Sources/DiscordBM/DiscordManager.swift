@@ -15,7 +15,7 @@ public actor DiscordManager {
             self.closeWebsocket()
         }
     }
-    let eventLoopGroup: EventLoopGroup
+    nonisolated let eventLoopGroup: EventLoopGroup
     public nonisolated let client: DiscordClient
     
     var onEvents: [(Gateway.Event) -> ()] = []
@@ -32,10 +32,13 @@ public actor DiscordManager {
     var lastEventDate = Date()
     var sessionId: String? = nil
     var resumeGatewayUrl: String? = nil
+    nonisolated let pingTaskInterval = ManagedAtomic(0)
     
     var pingTask: RepeatedTask? = nil
     var zombiedConnectionCheckerTask: RepeatedTask? = nil
-    let zombiedConnectionCounter = ManagedAtomic(0)
+    nonisolated let zombiedConnectionCounter = ManagedAtomic(0)
+    /// An ID to keep track of connection changes.
+    nonisolated let connectionId = ManagedAtomic(Int.random(in: 10_000..<100_000))
     
     public init(
         eventLoopGroup: EventLoopGroup,
@@ -103,7 +106,9 @@ extension DiscordManager {
     private func configureWebsocket() {
         self.setupOnText()
         self.setupOnClose()
-        self.setupzombiedConnectionCheckerTask()
+        self.setupZombiedConnectionCheckerTask(
+            forConnectionWithId: connectionId.load(ordering: .relaxed)
+        )
         self.sendHello()
     }
     
@@ -139,7 +144,9 @@ extension DiscordManager {
             /// Disable ws automatic pings
             self.ws?.pingInterval = nil
             self.schedulePingTask(every: interval)
+            self.pingTaskInterval.store(hello.heartbeat_interval, ordering: .relaxed)
             self.sendResumeOrIdentify()
+            self.connectionId.store(.random(in: 10_000..<100_000), ordering: .relaxed)
         case let .ready(payload):
             logger.notice("Received Discord Ready Notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
@@ -246,20 +253,20 @@ extension DiscordManager {
     
     private func setupOnClose() {
         self.ws?.onClose.whenComplete { [weak self] _ in
-            guard let selfi = self else { return }
+            guard let `self` = self else { return }
             Task {
-                let code = await selfi.ws?.closeCode
-                selfi.logger.log(
+                let code = await self.ws?.closeCode
+                self.logger.log(
                     /// If its `nil` or `.goingAway`, then it's likely just a resume notice.
                     /// Otherwise it might be an error.
                     level: (code == nil || code == .goingAway) ? .warning : .error,
                     "Received Discord Connection Close Notification.",
                     metadata: [
-                        "DiscordManagerID": .stringConvertible(selfi.id),
+                        "DiscordManagerID": .stringConvertible(self.id),
                         "code": "\(String(describing: code))"
                     ]
                 )
-                selfi.connect()
+                self.connect()
             }
         }
     }
@@ -268,27 +275,54 @@ extension DiscordManager {
         self.send(payload: .init(opcode: .hello))
     }
     
-    private func setupzombiedConnectionCheckerTask() {
-        self.zombiedConnectionCheckerTask?.cancel()
-        let el = self.eventLoopGroup.any()
-        self.zombiedConnectionCheckerTask = el.scheduleRepeatedTask(
-            initialDelay: .seconds(30),
-            delay: .seconds(30)
-        ) { [weak self] _ in
-            guard let selfi = self else { return }
+    private nonisolated func setupZombiedConnectionCheckerTask(
+        forConnectionWithId connectionId: Int,
+        on el: EventLoop? = nil
+    ) {
+        let el = el ?? self.eventLoopGroup.any()
+        el.scheduleTask(in: .seconds(10)) { [weak self] in
+            guard let `self` = self else { return }
+            /// If connection has changed then end this instance.
+            guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             Task {
-                guard await selfi.lastEventDate.addingTimeInterval(60) < Date() else { return }
-                let counter = selfi.zombiedConnectionCounter.load(ordering: .relaxed)
-                let ws = await selfi.ws
-                if counter != 0 || ws == nil || ws!.isClosed {
-                    selfi.logger.error("Detected zombied connection. Will try to reconnect.", metadata: [
-                        "DiscordManagerID": .stringConvertible(selfi.id),
-                    ])
-                    selfi.connect()
+                let now = Date().timeIntervalSince1970
+                let lastEventInterval = await self.lastEventDate.timeIntervalSince1970
+                let past = now - lastEventInterval
+                let tolerance = DiscordGlobalConfiguration.zombiedConnectionCheckerTolerance
+                let diff = tolerance - past
+                if diff > 0 {
+                    el.scheduleTask(in: .seconds(Int64(diff) + 1)) {
+                        self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
+                    }
                 } else {
-                    /// Try to see if discord responds to a ping before trying to reconnect.
-                    await selfi.sendPing()
-                    selfi.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
+                    let tryToPingBeforeForceReconnect: Bool = await {
+                        if self.zombiedConnectionCounter.load(ordering: .relaxed) != 0 {
+                            return false
+                        } else if await self.ws == nil {
+                            return false
+                        } else if await self.ws!.isClosed {
+                            return false
+                        } else if self.pingTaskInterval.load(ordering: .relaxed) < Int(tolerance) {
+                            return false
+                        } else {
+                            return true
+                        }
+                    }()
+                    
+                    if tryToPingBeforeForceReconnect {
+                        /// Try to see if discord responds to a ping before trying to reconnect.
+                        await self.sendPing()
+                        self.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
+                    } else {
+                        self.logger.error("Detected zombied connection. Will try to reconnect.", metadata: [
+                            "DiscordManagerID": .stringConvertible(self.id),
+                        ])
+                        self.connect()
+                    }
+                    
+                    el.scheduleTask(in: .seconds(5)) {
+                        self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
+                    }
                 }
             }
         }
@@ -301,9 +335,9 @@ extension DiscordManager {
             initialDelay: interval,
             delay: interval
         ) { [weak self] _ in
-            guard let selfi = self else { return }
+            guard let `self` = self else { return }
             Task {
-                await selfi.sendPing()
+                await self.sendPing()
             }
         }
     }
@@ -328,16 +362,16 @@ extension DiscordManager {
     
     private func closeWebsocket() {
         ws?.close().whenFailure { [weak self] in
-            guard self != nil else { return }
-            self!.logger.warning("Connection close error.", metadata: [
-                "DiscordManagerID": .stringConvertible(self!.id),
+            guard let `self` = self else { return }
+            self.logger.warning("Connection close error.", metadata: [
+                "DiscordManagerID": .stringConvertible(self.id),
                 "error": "\($0)"
             ])
         }
     }
 }
 
-//MARK: - WebSocket
+//MARK: - +WebSocket
 private extension WebSocket {
     static func asyncConnect(
         to address: String,
@@ -358,6 +392,8 @@ private extension WebSocket {
     }
 }
 
+
+//MARK: - +EventLoop
 private extension EventLoop {
     func wait(_ time: TimeAmount) async {
         try? await self.scheduleTask(in: time, { }).futureResult.get()
