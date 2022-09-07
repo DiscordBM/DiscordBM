@@ -91,31 +91,33 @@ public actor DiscordManager {
 
 extension DiscordManager {
     private func connectAsync() async {
-        guard self.connectionState.compareExchange(
-            expected: .noConnection,
-            desired: .connecting,
-            ordering: .relaxed
-        ).exchanged else { return }
+        let state = self.connectionState.load(ordering: .relaxed)
+        guard state == .noConnection || state == .configured else {
+            return
+        }
+        self.connectionState.store(.connecting, ordering: .relaxed)
         self.lastEventDate = Date()
         self.pingTask?.cancel()
         let gatewayUrl = await getGatewayUrl()
         var configuration = WebSocketClient.Configuration()
         configuration.maxFrameSize = 1 << 31
-        do {
-            self.ws = try await WebSocket.asyncConnect(
-                to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)",
-                configuration: configuration,
-                on: eventLoopGroup
-            )
-            configureWebsocket()
-        } catch {
+        WebSocket.connect(
+            to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
+            configuration: configuration,
+            on: eventLoopGroup
+        ) { ws in
+            self.ws = ws
+            self.configureWebsocket()
+        }.whenFailure { [self] error in
             logger.error("Error while connecting to Discord through websocket.", metadata: [
                 "DiscordManagerID": .stringConvertible(id),
                 "error": "\(error)"
             ])
             self.connectionState.store(.noConnection, ordering: .relaxed)
-            await eventLoopGroup.any().wait(.seconds(5))
-            await connectAsync()
+            Task {
+                await eventLoopGroup.any().wait(.seconds(5))
+                await connectAsync()
+            }
         }
     }
     
@@ -391,27 +393,6 @@ extension DiscordManager {
                 "DiscordManagerID": .stringConvertible(self.id),
                 "error": "\($0)"
             ])
-        }
-    }
-}
-
-//MARK: - +WebSocket
-private extension WebSocket {
-    static func asyncConnect(
-        to address: String,
-        configuration: WebSocketClient.Configuration,
-        on eventLoopGroup: EventLoopGroup
-    ) async throws -> WebSocket {
-        try await withCheckedThrowingContinuation { cont in
-            WebSocket.connect(
-                to: address,
-                configuration: configuration,
-                on: eventLoopGroup
-            ) {
-                cont.resume(returning: $0)
-            }.whenFailure {
-                cont.resume(throwing: $0)
-            }
         }
     }
 }
