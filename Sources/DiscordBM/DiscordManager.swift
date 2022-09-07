@@ -371,7 +371,15 @@ extension DiscordManager {
         do {
             let data = try DiscordGlobalConfiguration.encoder.encode(payload)
             let opcode = opcode ?? UInt8(payload.opcode.rawValue)
-            self.ws?.send(raw: data, opcode: .init(encodedWebSocketOpcode: opcode)!)
+            if let ws = self.ws {
+                ws.send(raw: data, opcode: .init(encodedWebSocketOpcode: opcode)!)
+            } else {
+                logger.warning("Trying to send through ws when a connection is not established.", metadata: [
+                    "DiscordManagerID": .stringConvertible(id),
+                    "payload": "\(payload)",
+                    "state": "\(self.connectionState.load(ordering: .relaxed))"
+                ])
+            }
         } catch {
             logger.warning("Could not encode payload. This is a library issue, please report.", metadata: [
                 "DiscordManagerID": .stringConvertible(id),
