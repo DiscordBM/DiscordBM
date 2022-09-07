@@ -84,7 +84,11 @@ public actor DiscordManager {
 
 extension DiscordManager {
     private func connectAsync() async {
-        self.isConnecting.store(true, ordering: .relaxed)
+        guard self.isConnecting.compareExchange(
+            expected: false,
+            desired: true,
+            ordering: .relaxed
+        ).exchanged else { return }
         self.lastEventDate = Date()
         let gatewayUrl = await getGatewayUrl()
         var configuration = WebSocketClient.Configuration()
