@@ -126,7 +126,6 @@ extension DiscordManager {
         self.setupZombiedConnectionCheckerTask(
             forConnectionWithId: connectionId.load(ordering: .relaxed)
         )
-        self.sendHello()
         self.connectionState.store(.configured, ordering: .relaxed)
     }
     
@@ -288,10 +287,6 @@ extension DiscordManager {
                 self.connect()
             }
         }
-    }
-    
-    private func sendHello() {
-        self.send(payload: .init(opcode: .hello))
     }
     
     private nonisolated func setupZombiedConnectionCheckerTask(
