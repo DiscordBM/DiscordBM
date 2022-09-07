@@ -11,8 +11,8 @@ import struct Foundation.UUID
 public actor DiscordManager {
     
     var ws: WebSocket? {
-        willSet {
-            self.closeWebsocket(ws: ws)
+        didSet {
+            self.closeWebsocket(ws: oldValue)
         }
     }
     nonisolated let eventLoopGroup: EventLoopGroup
