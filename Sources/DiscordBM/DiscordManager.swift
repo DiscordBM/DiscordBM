@@ -97,6 +97,7 @@ extension DiscordManager {
             ordering: .relaxed
         ).exchanged else { return }
         self.lastEventDate = Date()
+        self.pingTask?.cancel()
         let gatewayUrl = await getGatewayUrl()
         var configuration = WebSocketClient.Configuration()
         configuration.maxFrameSize = 1 << 31
@@ -164,10 +165,10 @@ extension DiscordManager {
             self.pingTaskInterval.store(hello.heartbeat_interval, ordering: .relaxed)
             self.sendResumeOrIdentify()
         case let .ready(payload):
-            self.connectionState.store(.connected, ordering: .relaxed)
             logger.notice("Received Discord Ready Notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
             ])
+            self.connectionState.store(.connected, ordering: .relaxed)
             self.sessionId = payload.session_id
             self.resumeGatewayUrl = payload.resume_gateway_url
         case .resumed:
