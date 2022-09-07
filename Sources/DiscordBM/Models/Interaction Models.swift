@@ -1,4 +1,3 @@
-import NIO
 
 public struct InteractionResponse: Codable {
     

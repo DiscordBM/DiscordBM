@@ -13,7 +13,7 @@ public actor DiscordManager {
     enum ConnectionState: Int, AtomicValue {
         case noConnection
         case connecting
-        case configuring
+        case configured
         case connected
     }
     
@@ -50,7 +50,7 @@ public actor DiscordManager {
     
     public init(
         eventLoopGroup: EventLoopGroup,
-        httpClient: HTTPClient,
+        httpClientProvider: HTTPClientProvider? = nil,
         token: String,
         appId: String,
         presence: Gateway.Identify.PresenceUpdate? = nil,
@@ -58,7 +58,7 @@ public actor DiscordManager {
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = DiscordClient(
-            httpClient: httpClient,
+            httpClientProvider: httpClientProvider ?? .useShared(eventLoopGroup: eventLoopGroup),
             token: token,
             appId: appId
         )
@@ -106,7 +106,6 @@ extension DiscordManager {
                 configuration: configuration,
                 on: eventLoopGroup
             )
-            self.connectionState.store(.configuring, ordering: .relaxed)
             configureWebsocket()
         } catch {
             logger.error("Error while connecting to Discord through websocket.", metadata: [
@@ -127,6 +126,7 @@ extension DiscordManager {
             forConnectionWithId: connectionId.load(ordering: .relaxed)
         )
         self.sendHello()
+        self.connectionState.store(.configured, ordering: .relaxed)
     }
     
     private func proccessEvent(_ event: Gateway.Event) {
