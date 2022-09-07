@@ -12,7 +12,7 @@ public actor DiscordManager {
     
     var ws: WebSocket? {
         willSet {
-            self.closeWebsocket()
+            self.closeWebsocket(ws: ws)
         }
     }
     nonisolated let eventLoopGroup: EventLoopGroup
@@ -289,7 +289,7 @@ extension DiscordManager {
             guard let `self` = self else { return }
             /// If connection has changed then end this instance.
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-            func reschedule(in time: TimeAmount) {
+            @Sendable func reschedule(in time: TimeAmount) {
                 el.scheduleTask(in: time) {
                     self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
                 }
@@ -367,7 +367,7 @@ extension DiscordManager {
         }
     }
     
-    private func closeWebsocket() {
+    private nonisolated func closeWebsocket(ws: WebSocket?) {
         ws?.close().whenFailure { [weak self] in
             guard let `self` = self else { return }
             self.logger.warning("Connection close error.", metadata: [
