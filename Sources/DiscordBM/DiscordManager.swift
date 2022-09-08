@@ -3,7 +3,6 @@ import Logging
 import struct NIOCore.TimeAmount
 import struct Foundation.Data
 import struct Foundation.Date
-import class NIO.RepeatedTask
 import Atomics
 import AsyncHTTPClient
 import struct Foundation.UUID
@@ -18,7 +17,7 @@ public actor DiscordManager {
         case connected
     }
     
-    private var ws: WebSocket? {
+    private weak var ws: WebSocket? {
         didSet {
             self.closeWebsocket(ws: oldValue)
         }
@@ -138,6 +137,12 @@ public actor DiscordManager {
     public func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) {
         self.onEventParseFilures.append(handler)
     }
+    
+    public nonisolated func stop() {
+        Task {
+            await self.stopAsync()
+        }
+    }
 }
 
 extension DiscordManager {
@@ -150,7 +155,8 @@ extension DiscordManager {
         }
         /// Guard we're attempting to connect too fast
         if let connectIn = canTryToConnectIn() {
-            self.eventLoopGroup.any().scheduleTask(in: connectIn, { self.connect() })
+            await self.eventLoopGroup.any().wait(connectIn)
+            await self.connectAsync()
             return
         }
         self._state.store(.connecting, ordering: .relaxed)
@@ -180,7 +186,7 @@ extension DiscordManager {
     
     private func configureWebsocket() {
         let connId = self.connectionId.load(ordering: .relaxed)
-        self.setupOnText()
+        self.setupOnText(forConnectionWithId: connId)
         self.setupOnClose(forConnectionWithId: connId)
         self.setupZombiedConnectionCheckerTask(forConnectionWithId: connId)
         self._state.store(.configured, ordering: .relaxed)
@@ -301,8 +307,9 @@ extension DiscordManager {
         self.send(payload: identify)
     }
     
-    private func setupOnText() {
+    private func setupOnText(forConnectionWithId connectionId: Int) {
         self.ws?.onText { _, text in
+            guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             let data = Data(text.utf8)
             do {
                 let event = try DiscordGlobalConfiguration.decoder.decode(
@@ -322,10 +329,8 @@ extension DiscordManager {
     }
     
     private func setupOnClose(forConnectionWithId connectionId: Int) {
-        self.ws?.onClose.whenComplete { [weak self] _ in
-            guard let `self` = self,
-                  self.connectionId.load(ordering: .relaxed) == connectionId
-            else { return }
+        self.ws?.onClose.whenComplete { _ in
+            guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             Task {
                 let code = await self.ws?.closeCode
                 self.logger.log(
@@ -400,10 +405,10 @@ extension DiscordManager {
         self.eventLoopGroup.any().scheduleRepeatedTask(
             initialDelay: interval,
             delay: interval
-        ) { [weak self] _ in
-            guard let `self` = self,
-                  self.connectionId.load(ordering: .relaxed) == connectionId
-            else { return }
+        ) { task in
+            guard self.connectionId.load(ordering: .relaxed) == connectionId else {
+                return task.cancel()
+            }
             Task {
                 await self.sendPing(forConnectionWithId: connectionId)
             }
@@ -480,12 +485,17 @@ extension DiscordManager {
     }
     
     private nonisolated func closeWebsocket(ws: WebSocket?) {
-        ws?.close().whenFailure { [weak self] in
-            guard let `self` = self else { return }
+        ws?.close().whenFailure {
             self.logger.warning("Connection close error.", metadata: [
                 "error": "\($0)"
             ])
         }
+    }
+    
+    private func stopAsync() {
+        self.connectionId.store(.random(in: 10_000..<100_000), ordering: .relaxed)
+        self.closeWebsocket(ws: self.ws)
+        self._state.store(.noConnection, ordering: .relaxed)
     }
 }
 
