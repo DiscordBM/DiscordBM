@@ -85,6 +85,7 @@ public struct Gateway: Codable {
             case voiceServerUpdate(VoiceServerUpdate)
             case webhooksUpdate(WebhooksUpdate)
             case applicationCommandPermissionsUpdate(ApplicationCommandPermissionsUpdate)
+            case autoModerationActionExecution(AutoModerationActionExecution)
         }
         
         enum GatewayDecodingError: Error {
@@ -299,6 +300,8 @@ public struct Gateway: Codable {
                     self.data = try .webhooksUpdate(decodeData())
                 case "APPLICATION_COMMAND_PERMISSIONS_UPDATE":
                     self.data = try .applicationCommandPermissionsUpdate(decodeData())
+                case "AUTO_MODERATION_ACTION_EXECUTION":
+                    self.data = try .autoModerationActionExecution(decodeData())
                 default:
                     throw GatewayDecodingError.unhandledDataStructure
                 }
@@ -1949,5 +1952,94 @@ public struct Gateway: Codable {
         public var id: String
         public var guild_id: String
         public var application_id: String
+    }
+    
+    public struct AutoModerationActionExecution: Codable {
+        
+        public enum AutoModerationAction: Codable {
+            case blockMessage
+            case sendAlertMessage(channelId: String)
+            case timeout(durationSeconds: Int)
+            
+            private enum CodingKeys: String, CodingKey {
+                case type
+                case metadata
+            }
+            
+            private enum SendAlertMessageCodingKeys: String, CodingKey {
+                case channel_id
+            }
+            
+            private enum TimeoutCodingKeys: String, CodingKey {
+                case duration_seconds
+            }
+            
+            public init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                let type = try container.decode(Int.self, forKey: .type)
+                switch type {
+                case 1:
+                    self = .blockMessage
+                case 2:
+                    let channelId = try container.nestedContainer(
+                        keyedBy: SendAlertMessageCodingKeys.self,
+                        forKey: .metadata
+                    ).decode(String.self, forKey: .channel_id)
+                    self = .sendAlertMessage(channelId: channelId)
+                case 3:
+                    let durationSeconds = try container.nestedContainer(
+                        keyedBy: TimeoutCodingKeys.self,
+                        forKey: .metadata
+                    ).decode(Int.self, forKey: .duration_seconds)
+                    self = .timeout(durationSeconds: durationSeconds)
+                default:
+                    throw DecodingError.dataCorrupted(.init(
+                        codingPath: container.codingPath,
+                        debugDescription: "Unexpected AutoModerationAction 'type': \(type)"
+                    ))
+                }
+            }
+            
+            public func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                switch self {
+                case .blockMessage:
+                    try container.encode(1, forKey: .type)
+                case let .sendAlertMessage(channelId):
+                    try container.encode(2, forKey: .type)
+                    var metadataContainer = container.nestedContainer(
+                        keyedBy: SendAlertMessageCodingKeys.self,
+                        forKey: .metadata
+                    )
+                    try metadataContainer.encode(channelId, forKey: .channel_id)
+                case let .timeout(durationSeconds):
+                    try container.encode(3, forKey: .type)
+                    var metadataContainer = container.nestedContainer(
+                        keyedBy: TimeoutCodingKeys.self,
+                        forKey: .metadata
+                    )
+                    try metadataContainer.encode(durationSeconds, forKey: .duration_seconds)
+                }
+            }
+        }
+        
+        public enum TriggerKind: Int, Codable {
+            case keyword = 1
+            case spam = 3
+            case keywordPreset = 4
+            case mentionSpam = 5
+        }
+        
+        public var guild_id: String
+        public var action: AutoModerationAction
+        public var rule_id: String
+        public var rule_trigger_type: TriggerKind
+        public var user_id: String
+        public var channel_id: String?
+        public var message_id: String?
+        public var alert_system_message_id: String?
+        public var content: String?
+        public var matched_keyword: String?
+        public var matched_content: String?
     }
 }
