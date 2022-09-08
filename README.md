@@ -3,16 +3,36 @@
 A Discord libarary for making Discord bots in Swift.
 
 ## How to use
+First you need to initialize a `DiscordManager` instance, then tell it to connect and start using it:
+
+### Intializing A Manager With Vapor
 ```swift
-import NIO
+import DiscordBM
+import Vapor
+
+let app: Application = YOUR_VAPOR_APPLICATION
+let manager = DiscordManager(
+    eventLoopGroup: app.eventLoopGroup,
+    httpClient: app.http.client.shared,
+    token: YOUR_BOT_TOKEN,
+    appId: YOUR_APPLICATION_ID,
+    presence: .init( /// Set up bot's initial presence
+        activities: [.init(name: "Fortnite", type: .game)],
+        status: .online,
+        afk: false
+    ),
+    intents: [.guildMessages, .messageContent] /// Add all the intents you want
+)
+```
+
+### Intializing A Manager On Your Own
+```swift
+import DiscordBM
 import AsyncHTTPClient
 
-/// Optionally modify `DiscordGlobalConfiguration` proprerties.
-let eventLoopGroup: EventLoopGroup = ... /// Provide you app's `EventLoopGroup`
-let httpClient: HTTPClient = ... /// Provide you app's `HTTPClient`
-
+let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
 let manager = DiscordManager(
-    eventLoopGroup: eventLoopGroup,
+    eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,
     token: YOUR_BOT_TOKEN,
     appId: YOUR_APPLICATION_ID,
@@ -23,6 +43,17 @@ let manager = DiscordManager(
     ),
     intents: [.guildMessages, .messageContent] /// Add all the intents you want
 )
+
+/// it's important to shutdown the httpClient _after all requests are done_, even if one failed
+/// libraries like vapor take care of this on their own if you use the shared http client
+try await httpClient.shutdown()
+```
+
+### Using The Discord Manager
+```swift
+import DiscordBM
+
+let manager: DiscordManager = ... /// Make an instance like above
 
 /// Tell manager to connect to Discord
 manager.connect()
@@ -53,6 +84,19 @@ Task {
 }
 ```
 
+### Finding Your Bot Token
+In [Discord developer portal](https://discord.com/developers/applications):
+![Finding Bot Token](/images/bot_token.png)
+
+### Finding Your App ID
+In [Discord developer portal](https://discord.com/developers/applications):
+![Finding App ID](/images/bot_app_id.png)
+
+## Warnings
+This libarary will try to follow the no-breaking-changes-in-minor-versions rule, with exceptions:
+* If Discord has made some changes that need breaking changes in this library, but are not worth a major release and are rather small.
+* When adding enum cases.
+
 ## Wishlist / Not Yet supported:
 * Better documentation
 * More tests (add ci too)
@@ -62,3 +106,6 @@ Task {
 * Attachements support (for now, you can provide media links instead)
 * OAuth support
 * Full sharding support
+
+## Contribution
+Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.
