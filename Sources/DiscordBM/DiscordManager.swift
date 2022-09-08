@@ -64,12 +64,16 @@ public actor DiscordManager {
     /// Try count for connections.
     private var connectionTryCount = 0
     /// Seconds since 1970 when last connection happened.
-    private var lastConnectionTime = 0.0
+    private var lastConnectionDate = Date()
     
     //MARK: Zombied-connection-checker
     
     /// Counter to keep track of how many times in a sequence a zombied connection was detected.
     private nonisolated let zombiedConnectionCounter = ManagedAtomic(0)
+    
+    //MARK: Ping-pong tracking properties
+    private var unsuccessfulPingsCount = 0
+    private var lastPongDate = Date()
     
     public init(
         eventLoopGroup: EventLoopGroup,
@@ -134,6 +138,7 @@ public actor DiscordManager {
 }
 
 extension DiscordManager {
+    /// `_state` must be set to an appropriate value before triggering this function.
     private func connectAsync() async {
         /// Guard if other connections are in proccess
         let state = self._state.load(ordering: .relaxed)
@@ -192,7 +197,7 @@ extension DiscordManager {
         case .heartbeat:
             self.sendPing()
         case .heartbeatAccepted:
-            break // nothing to do
+            self.lastPongDate = Date()
         case .invalidSession:
             logger.warning("Got invalid session. Will try to reconnect.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
@@ -416,6 +421,20 @@ extension DiscordManager {
     
     private func sendPing() {
         self.send(payload: .init(opcode: .heartbeat))
+        Task {
+            await self.eventLoopGroup.any().wait(.seconds(5))
+            if self.lastPongDate.addingTimeInterval(5) < Date() {
+                /// Successful ping
+                self.unsuccessfulPingsCount = 0
+            } else {
+                /// Unsuccessful ping
+                self.unsuccessfulPingsCount += 1
+            }
+            if unsuccessfulPingsCount > 2 {
+                self._state.store(.noConnection, ordering: .relaxed)
+                self.connect()
+            }
+        }
     }
         
     private func send(payload: Gateway.Event, opcode: UInt8? = nil) {
@@ -442,7 +461,7 @@ extension DiscordManager {
     
     private func onSuccessfulConnection() {
         self._state.store(.connected, ordering: .relaxed)
-        self.lastConnectionTime = Date().timeIntervalSince1970
+        self.lastConnectionDate = Date()
         self.connectionTryCount = 0
     }
     
@@ -451,7 +470,7 @@ extension DiscordManager {
     /// Increases `connectionTryCount`.
     private func canTryToConnectIn() -> TimeAmount? {
         let tryCount = self.connectionTryCount
-        let lastConnection = self.lastConnectionTime
+        let lastConnection = self.lastConnectionDate.timeIntervalSince1970
         let now = Date().timeIntervalSince1970
         if tryCount == 0 {
             return nil
