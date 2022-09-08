@@ -205,6 +205,7 @@ extension DiscordManager {
             self.sequenceNumber = nil
             self.resumeGatewayUrl = nil
             self.sessionId = nil
+            self._state.store(.noConnection, ordering: .relaxed)
             self.connect()
         default:
             break
@@ -423,7 +424,7 @@ extension DiscordManager {
         self.send(payload: .init(opcode: .heartbeat))
         Task {
             await self.eventLoopGroup.any().wait(.seconds(5))
-            if self.lastPongDate.addingTimeInterval(5) < Date() {
+            if self.lastPongDate.addingTimeInterval(5) > Date() {
                 /// Successful ping
                 self.unsuccessfulPingsCount = 0
             } else {
@@ -463,6 +464,7 @@ extension DiscordManager {
         self._state.store(.connected, ordering: .relaxed)
         self.lastConnectionDate = Date()
         self.connectionTryCount = 0
+        self.unsuccessfulPingsCount = 0
     }
     
     /// Retuns `nil` if can connect immediately,
