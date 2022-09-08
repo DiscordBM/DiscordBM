@@ -92,6 +92,11 @@ In [Discord developer portal](https://discord.com/developers/applications):
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding App ID](/images/bot_app_id.png)
 
+## Warnings
+This libarary will try to follow the no-breaking-changes-in-minor-versions rule, with exceptions:
+* If Discord has made some changes that need breaking changes in this library, but are not worth a major release and are rather small.
+* When adding enum cases.
+
 ## Wishlist / Not Yet supported:
 * Better documentation
 * More tests (add ci too)
@@ -101,3 +106,6 @@ In [Discord developer portal](https://discord.com/developers/applications):
 * Attachements support (for now, you can provide media links instead)
 * OAuth support
 * Full sharding support
+
+## Contribution
+Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.
