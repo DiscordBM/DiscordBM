@@ -53,7 +53,7 @@ Task {
 }
 ```
 
-## Not (yet) supported:
+## Wishlist / Not Yet supported:
 * Better documentation
 * More tests (add ci too)
 * A snowflake type
