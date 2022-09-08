@@ -52,7 +52,7 @@ public actor DiscordManager {
     
     //MARK: Resume-related current-connection properties
     
-    /// The Discord-given sequence number for the current payloads sent to us.
+    /// The sequence number for the current payloads sent to us.
     private var sequenceNumber: Int? = nil
     /// The ID of the current discord-related session.
     private var sessionId: String? = nil
@@ -229,12 +229,12 @@ extension DiscordManager {
             self.pingTaskInterval.store(hello.heartbeat_interval, ordering: .relaxed)
             self.sendResumeOrIdentify()
         case let .ready(payload):
-            logger.notice("Received ready notice.")
+            logger.notice("Received ready notice. The connection is fully established now.")
             self.onSuccessfulConnection()
             self.sessionId = payload.session_id
             self.resumeGatewayUrl = payload.resume_gateway_url
         case .resumed:
-            logger.notice("Received successful resume notice.")
+            logger.notice("Received successful resume notice. The connection is fully established now.")
             self.onSuccessfulConnection()
         default:
             break
@@ -347,49 +347,47 @@ extension DiscordManager {
     ) {
         guard let tolerance = DiscordGlobalConfiguration.zombiedConnectionCheckerTolerance
         else { return }
-        let el = el ?? self.eventLoopGroup.any()
-        el.scheduleTask(in: .seconds(10)) { [weak self] in
-            guard let `self` = self else { return }
+        Task {
+            let el = el ?? self.eventLoopGroup.any()
+            await el.wait(.seconds(10))
+            
             /// If connection has changed then end this instance.
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-            @Sendable func reschedule(in time: TimeAmount) {
-                el.scheduleTask(in: time) {
-                    self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
-                }
+            func reschedule(in time: TimeAmount) async {
+                await el.wait(time)
+                self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
             }
-            Task {
-                let now = Date().timeIntervalSince1970
-                let lastEventInterval = await self.lastEventDate.timeIntervalSince1970
-                let past = now - lastEventInterval
-                let diff = tolerance - past
-                if diff > 0 {
-                    reschedule(in: .seconds(Int64(diff) + 1))
-                } else {
-                    let tryToPingBeforeForceReconnect: Bool = await {
-                        if self.zombiedConnectionCounter.load(ordering: .relaxed) != 0 {
-                            return false
-                        } else if await self.ws == nil {
-                            return false
-                        } else if await self.ws!.isClosed {
-                            return false
-                        } else if self.pingTaskInterval.load(ordering: .relaxed) < Int(tolerance) {
-                            return false
-                        } else {
-                            return true
-                        }
-                    }()
-                    
-                    if tryToPingBeforeForceReconnect {
-                        /// Try to see if discord responds to a ping before trying to reconnect.
-                        await self.sendPing()
-                        self.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
-                        reschedule(in: .seconds(5))
+            let now = Date().timeIntervalSince1970
+            let lastEventInterval = await self.lastEventDate.timeIntervalSince1970
+            let past = now - lastEventInterval
+            let diff = tolerance - past
+            if diff > 0 {
+                await reschedule(in: .seconds(Int64(diff) + 1))
+            } else {
+                let tryToPingBeforeForceReconnect: Bool = await {
+                    if self.zombiedConnectionCounter.load(ordering: .relaxed) != 0 {
+                        return false
+                    } else if await self.ws == nil {
+                        return false
+                    } else if await self.ws!.isClosed {
+                        return false
+                    } else if self.pingTaskInterval.load(ordering: .relaxed) < Int(tolerance) {
+                        return false
                     } else {
-                        self.logger.error("Detected zombied connection. Will try to reconnect.")
-                        self._state.store(.noConnection, ordering: .relaxed)
-                        self.connect()
-                        reschedule(in: .seconds(30))
+                        return true
                     }
+                }()
+                
+                if tryToPingBeforeForceReconnect {
+                    /// Try to see if discord responds to a ping before trying to reconnect.
+                    await self.sendPing()
+                    self.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
+                    await reschedule(in: .seconds(5))
+                } else {
+                    self.logger.error("Detected zombied connection. Will try to reconnect.")
+                    self._state.store(.noConnection, ordering: .relaxed)
+                    self.connect()
+                    await reschedule(in: .seconds(30))
                 }
             }
         }
