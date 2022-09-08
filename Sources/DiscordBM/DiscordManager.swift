@@ -199,19 +199,23 @@ extension DiscordManager {
         case .heartbeatAccepted:
             self.lastPongDate = Date()
         case .invalidSession:
-            logger.warning("Got invalid session. Will try to reconnect.", metadata: [
-                "DiscordManagerID": .stringConvertible(id)
-            ])
-            self.sequenceNumber = nil
-            self.resumeGatewayUrl = nil
-            self.sessionId = nil
-            self._state.store(.noConnection, ordering: .relaxed)
-            self.connect()
+            break /// handeled in event.data
         default:
             break
         }
         
         switch event.data {
+        case let .invalidSession(canResume):
+            logger.warning("Got invalid session. Will try to reconnect.", metadata: [
+                "DiscordManagerID": .stringConvertible(id)
+            ])
+            if !canResume {
+                self.sequenceNumber = nil
+                self.resumeGatewayUrl = nil
+                self.sessionId = nil
+            }
+            self._state.store(.noConnection, ordering: .relaxed)
+            self.connect()
         case let .hello(hello):
             let interval: TimeAmount = .milliseconds(Int64(hello.heartbeat_interval))
             /// Disable websocket-kit automatic pings
