@@ -442,9 +442,27 @@ public struct Gateway: Codable {
     }
     
     public struct ConnectionProperties: Codable {
-        public var os: String = "linux"
-        public let browser: String = "MahdiBM.Swift.Discord"
-        public let device: String = "MahdiBM.Swift.Discord"
+        public var os: String = {
+#if os(macOS)
+            return "macOS"
+#elseif os(Linux)
+            return "Linux"
+#elseif os(iOS)
+            return "iOS"
+#elseif os(watchOS)
+            return "watchOS"
+#elseif os(tvOS)
+            return "tvOS"
+#elseif os(Windows)
+            return "Windows"
+#elseif os(Android)
+            return "Android"
+#else
+            return "UknownOS"
+#endif
+        }()
+        public let browser: String = "MahdiBM.DiscordBM"
+        public let device: String = "MahdiBM.DiscordBM"
         
         enum CodingKeys: String, CodingKey {
             case os = "$os"

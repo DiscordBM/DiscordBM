@@ -17,38 +17,55 @@ public actor DiscordManager {
         case connected
     }
     
-    var ws: WebSocket? {
+    private var ws: WebSocket? {
         didSet {
             self.closeWebsocket(ws: oldValue)
         }
     }
-    nonisolated let eventLoopGroup: EventLoopGroup
+    private nonisolated let eventLoopGroup: EventLoopGroup
     public nonisolated let client: DiscordClient
     
-    var onEvents: [(Gateway.Event) -> ()] = []
-    var onEventParseFilures: [(Error, String) -> ()] = []
+    private var onEvents: [(Gateway.Event) -> ()] = []
+    private var onEventParseFilures: [(Error, String) -> ()] = []
     
-    let token: String
-    let presence: Gateway.Identify.PresenceUpdate?
-    let intents: [Gateway.Identify.Intent]
+    private let token: String
+    public nonisolated let identifyPayload: Gateway.Identify
     
     public nonisolated let id = UUID()
-    let logger = DiscordGlobalConfiguration.makeLogger("DiscordManager")
+    private let logger = DiscordGlobalConfiguration.makeLogger("DiscordManager")
     
-    var sequenceNumber: Int? = nil
-    var lastEventDate = Date()
-    var sessionId: String? = nil
-    var resumeGatewayUrl: String? = nil
-    nonisolated let pingTaskInterval = ManagedAtomic(0)
-    nonisolated let _state = ManagedAtomic(State.noConnection)
+    private var sequenceNumber: Int? = nil
+    private var sessionId: String? = nil
+    private var resumeGatewayUrl: String? = nil
+    private nonisolated let pingTaskInterval = ManagedAtomic(0)
+    private var lastEventDate = Date()
+    
+    private nonisolated let _state = ManagedAtomic(State.noConnection)
     public nonisolated var state: State {
         self._state.load(ordering: .relaxed)
     }
     
     /// Counter to keep track of how many times in a sequence, a zombied connection was detected.
-    nonisolated let zombiedConnectionCounter = ManagedAtomic(0)
+    private nonisolated let zombiedConnectionCounter = ManagedAtomic(0)
     /// An ID to keep track of connection changes.
-    nonisolated let connectionId = ManagedAtomic(Int.random(in: 10_000..<100_000))
+    private nonisolated let connectionId = ManagedAtomic(Int.random(in: 10_000..<100_000))
+    
+    public init(
+        eventLoopGroup: EventLoopGroup,
+        httpClient: HTTPClient,
+        token: String,
+        appId: String,
+        identifyPayload: Gateway.Identify
+    ) {
+        self.eventLoopGroup = eventLoopGroup
+        self.client = DiscordClient(
+            httpClient: httpClient,
+            token: token,
+            appId: appId
+        )
+        self.token = token
+        self.identifyPayload = identifyPayload
+    }
     
     public init(
         eventLoopGroup: EventLoopGroup,
@@ -58,18 +75,20 @@ public actor DiscordManager {
         presence: Gateway.Identify.PresenceUpdate? = nil,
         intents: [Gateway.Identify.Intent] = []
     ) {
-        self.eventLoopGroup = eventLoopGroup
-        self.client = DiscordClient(
+        self.init(
+            eventLoopGroup: eventLoopGroup,
             httpClient: httpClient,
             token: token,
-            appId: appId
+            appId: appId,
+            identifyPayload: .init(
+                token: token,
+                presence: presence,
+                intents: .init(values: intents)
+            )
         )
-        self.token = token
-        self.presence = presence
-        self.intents = intents
     }
     
-    nonisolated public func connect() {
+    public nonisolated func connect() {
         Task {
             await connectAsync()
         }
@@ -245,11 +264,7 @@ extension DiscordManager {
     private func sendIdentify() {
         let identify = Gateway.Event(
             opcode: .identify,
-            data: .identify(.init(
-                token: self.token,
-                presence: self.presence,
-                intents: .init(values: intents)
-            ))
+            data: .identify(identifyPayload)
         )
         self.send(payload: identify)
     }
