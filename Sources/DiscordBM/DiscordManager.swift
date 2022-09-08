@@ -26,7 +26,7 @@ public actor DiscordManager {
     private nonisolated let eventLoopGroup: EventLoopGroup
     public nonisolated let client: DiscordClient
     public nonisolated let id = UUID()
-    private let logger = DiscordGlobalConfiguration.makeLogger("DiscordManager")
+    private let logger: Logger
     
     //MARK: Event hooks
     private var onEvents: [(Gateway.Event) -> ()] = []
@@ -90,6 +90,9 @@ public actor DiscordManager {
         )
         self.token = token
         self.identifyPayload = identifyPayload
+        var logger = DiscordGlobalConfiguration.makeLogger("DiscordManager")
+        logger[metadataKey: "DiscordManagerID"] = .string(self.id.uuidString)
+        self.logger = logger
     }
     
     public init(
@@ -165,7 +168,6 @@ extension DiscordManager {
             self.configureWebsocket()
         }.whenFailure { [self] error in
             logger.error("Error while connecting to Discord through websocket.", metadata: [
-                "DiscordManagerID": .stringConvertible(id),
                 "error": "\(error)"
             ])
             self._state.store(.noConnection, ordering: .relaxed)
@@ -207,7 +209,6 @@ extension DiscordManager {
         switch event.data {
         case let .invalidSession(canResume):
             logger.warning("Got invalid session. Will try to reconnect.", metadata: [
-                "DiscordManagerID": .stringConvertible(id),
                 "canResume": .stringConvertible(canResume)
             ])
             if !canResume {
@@ -228,16 +229,12 @@ extension DiscordManager {
             self.pingTaskInterval.store(hello.heartbeat_interval, ordering: .relaxed)
             self.sendResumeOrIdentify()
         case let .ready(payload):
-            logger.notice("Received ready notice.", metadata: [
-                "DiscordManagerID": .stringConvertible(id)
-            ])
+            logger.notice("Received ready notice.")
             self.onSuccessfulConnection()
             self.sessionId = payload.session_id
             self.resumeGatewayUrl = payload.resume_gateway_url
         case .resumed:
-            logger.notice("Received successful resume notice.", metadata: [
-                "DiscordManagerID": .stringConvertible(id)
-            ])
+            logger.notice("Received successful resume notice.")
             self.onSuccessfulConnection()
         default:
             break
@@ -250,9 +247,7 @@ extension DiscordManager {
         } else if let gatewayUrl = try? await client.getGateway().decode().url {
             return gatewayUrl
         } else {
-            logger.error("Cannot get gateway url to connect to. Will retry in 5 seconds.", metadata: [
-                "DiscordManagerID": .stringConvertible(id)
-            ])
+            logger.error("Cannot get gateway url to connect to. Will retry in 5 seconds.")
             await self.eventLoopGroup.any().wait(.seconds(5))
             return await self.getGatewayUrl()
         }
@@ -287,16 +282,13 @@ extension DiscordManager {
             self.resumeGatewayUrl = nil
             self.sessionId = nil
             
-            logger.notice("Sent resume request to Discord.", metadata: [
-                "DiscordManagerID": .stringConvertible(id)
-            ])
+            logger.notice("Sent resume request to Discord.")
             
             return true
         }
         logger.notice("Can't resume last Discord connection.", metadata: [
             "sessionId_length": .stringConvertible(self.sessionId?.count ?? -1),
-            "lastSequenceNumber": .stringConvertible(self.sequenceNumber ?? -1),
-            "DiscordManagerID": .stringConvertible(id)
+            "lastSequenceNumber": .stringConvertible(self.sequenceNumber ?? -1)
         ])
         return false
     }
@@ -341,10 +333,7 @@ extension DiscordManager {
                     /// Otherwise it might be an error.
                     level: (code == nil || code == .goingAway) ? .warning : .error,
                     "Received connection close notification.",
-                    metadata: [
-                        "DiscordManagerID": .stringConvertible(self.id),
-                        "code": "\(String(describing: code))"
-                    ]
+                    metadata: ["code": "\(String(describing: code))"]
                 )
                 self._state.store(.noConnection, ordering: .relaxed)
                 self.connect()
@@ -396,9 +385,7 @@ extension DiscordManager {
                         self.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
                         reschedule(in: .seconds(5))
                     } else {
-                        self.logger.error("Detected zombied connection. Will try to reconnect.", metadata: [
-                            "DiscordManagerID": .stringConvertible(self.id),
-                        ])
+                        self.logger.error("Detected zombied connection. Will try to reconnect.")
                         self._state.store(.noConnection, ordering: .relaxed)
                         self.connect()
                         reschedule(in: .seconds(30))
@@ -451,14 +438,12 @@ extension DiscordManager {
                 ws.send(raw: data, opcode: .init(encodedWebSocketOpcode: opcode)!)
             } else {
                 logger.warning("Trying to send through ws when a connection is not established.", metadata: [
-                    "DiscordManagerID": .stringConvertible(id),
                     "payload": "\(payload)",
                     "state": "\(self._state.load(ordering: .relaxed))"
                 ])
             }
         } catch {
             logger.warning("Could not encode payload. This is a library issue, please report.", metadata: [
-                "DiscordManagerID": .stringConvertible(id),
                 "payload": "\(payload)",
                 "opcode": "\(opcode ?? 255)"
             ])
@@ -499,7 +484,6 @@ extension DiscordManager {
         ws?.close().whenFailure { [weak self] in
             guard let `self` = self else { return }
             self.logger.warning("Connection close error.", metadata: [
-                "DiscordManagerID": .stringConvertible(self.id),
                 "error": "\($0)"
             ])
         }
