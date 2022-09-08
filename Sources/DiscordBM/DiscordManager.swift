@@ -296,6 +296,8 @@ extension DiscordManager {
         forConnectionWithId connectionId: Int,
         on el: EventLoop? = nil
     ) {
+        guard let tolerance = DiscordGlobalConfiguration.zombiedConnectionCheckerTolerance
+        else { return }
         let el = el ?? self.eventLoopGroup.any()
         el.scheduleTask(in: .seconds(10)) { [weak self] in
             guard let `self` = self else { return }
@@ -310,7 +312,6 @@ extension DiscordManager {
                 let now = Date().timeIntervalSince1970
                 let lastEventInterval = await self.lastEventDate.timeIntervalSince1970
                 let past = now - lastEventInterval
-                let tolerance = DiscordGlobalConfiguration.zombiedConnectionCheckerTolerance
                 let diff = tolerance - past
                 if diff > 0 {
                     reschedule(in: .seconds(Int64(diff) + 1))

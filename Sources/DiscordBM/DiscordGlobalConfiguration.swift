@@ -10,7 +10,7 @@ public enum DiscordGlobalConfiguration {
     /// becomes suspicious that the current connection is not healthy anymore.
     /// It might take 5-10s more before the `zombiedConnectionChecker` makes
     /// sure and drops the connection.
-    public static var zombiedConnectionCheckerTolerance = 90.0
+    public static var zombiedConnectionCheckerTolerance: Double? = nil
 }
 
 //MARK: - DiscordDecoder
