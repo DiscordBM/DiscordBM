@@ -10,7 +10,7 @@ import struct Foundation.UUID
 
 public actor DiscordManager {
     
-    enum ConnectionState: Int, AtomicValue {
+    public enum State: Int, AtomicValue {
         case noConnection
         case connecting
         case configured
@@ -40,7 +40,10 @@ public actor DiscordManager {
     var sessionId: String? = nil
     var resumeGatewayUrl: String? = nil
     nonisolated let pingTaskInterval = ManagedAtomic(0)
-    nonisolated let connectionState = ManagedAtomic(ConnectionState.noConnection)
+    nonisolated let _state = ManagedAtomic(State.noConnection)
+    public nonisolated var state: State {
+        self._state.load(ordering: .relaxed)
+    }
     
     var pingTask: RepeatedTask? = nil
     /// Counter to keep track of how many times in a sequence, a zombied connection was detected.
@@ -91,11 +94,11 @@ public actor DiscordManager {
 
 extension DiscordManager {
     private func connectAsync() async {
-        let state = self.connectionState.load(ordering: .relaxed)
+        let state = self._state.load(ordering: .relaxed)
         guard state == .noConnection || state == .configured else {
             return
         }
-        self.connectionState.store(.connecting, ordering: .relaxed)
+        self._state.store(.connecting, ordering: .relaxed)
         self.lastEventDate = Date()
         self.pingTask?.cancel()
         let gatewayUrl = await getGatewayUrl()
@@ -113,7 +116,7 @@ extension DiscordManager {
                 "DiscordManagerID": .stringConvertible(id),
                 "error": "\(error)"
             ])
-            self.connectionState.store(.noConnection, ordering: .relaxed)
+            self._state.store(.noConnection, ordering: .relaxed)
             Task {
                 await eventLoopGroup.any().wait(.seconds(5))
                 await connectAsync()
@@ -127,7 +130,7 @@ extension DiscordManager {
         self.setupOnText()
         self.setupOnClose(forConnectionWithId: connId)
         self.setupZombiedConnectionCheckerTask(forConnectionWithId: connId)
-        self.connectionState.store(.configured, ordering: .relaxed)
+        self._state.store(.configured, ordering: .relaxed)
     }
     
     private func proccessEvent(_ event: Gateway.Event) {
@@ -168,14 +171,14 @@ extension DiscordManager {
             logger.notice("Received ready notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
             ])
-            self.connectionState.store(.connected, ordering: .relaxed)
+            self._state.store(.connected, ordering: .relaxed)
             self.sessionId = payload.session_id
             self.resumeGatewayUrl = payload.resume_gateway_url
         case .resumed:
             logger.notice("Received successful resume notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
             ])
-            self.connectionState.store(.connected, ordering: .relaxed)
+            self._state.store(.connected, ordering: .relaxed)
         default:
             break
         }
@@ -287,7 +290,7 @@ extension DiscordManager {
                         "code": "\(String(describing: code))"
                     ]
                 )
-                self.connectionState.store(.noConnection, ordering: .relaxed)
+                self._state.store(.noConnection, ordering: .relaxed)
                 self.connect()
             }
         }
@@ -340,7 +343,7 @@ extension DiscordManager {
                         self.logger.error("Detected zombied connection. Will try to reconnect.", metadata: [
                             "DiscordManagerID": .stringConvertible(self.id),
                         ])
-                        self.connectionState.store(.noConnection, ordering: .relaxed)
+                        self._state.store(.noConnection, ordering: .relaxed)
                         self.connect()
                         reschedule(in: .seconds(30))
                     }
@@ -377,7 +380,7 @@ extension DiscordManager {
                 logger.warning("Trying to send through ws when a connection is not established.", metadata: [
                     "DiscordManagerID": .stringConvertible(id),
                     "payload": "\(payload)",
-                    "state": "\(self.connectionState.load(ordering: .relaxed))"
+                    "state": "\(self._state.load(ordering: .relaxed))"
                 ])
             }
         } catch {
