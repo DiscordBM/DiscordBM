@@ -421,6 +421,8 @@ public struct Gateway: Codable {
             case directMessageTyping = 14
             case messageContent = 15
             case guildScheduledEvents = 16
+            case autoModerationConfiguration = 20
+            case autoModerationExecution = 21
         }
         
         public var token: String
