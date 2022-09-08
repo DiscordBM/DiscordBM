@@ -122,12 +122,11 @@ extension DiscordManager {
     }
     
     private func configureWebsocket() {
-        self.connectionId.store(.random(in: 10_000..<100_000), ordering: .relaxed)
+        let connId = Int.random(in: 10_000..<100_000)
+        self.connectionId.store(connId, ordering: .relaxed)
         self.setupOnText()
-        self.setupOnClose()
-        self.setupZombiedConnectionCheckerTask(
-            forConnectionWithId: connectionId.load(ordering: .relaxed)
-        )
+        self.setupOnClose(forConnectionWithId: connId)
+        self.setupZombiedConnectionCheckerTask(forConnectionWithId: connId)
         self.connectionState.store(.configured, ordering: .relaxed)
     }
     
@@ -160,7 +159,7 @@ extension DiscordManager {
         switch event.data {
         case let .hello(hello):
             let interval: TimeAmount = .milliseconds(Int64(hello.heartbeat_interval))
-            /// Disable ws automatic pings
+            /// Disable websocket-kit automatic pings
             self.ws?.pingInterval = nil
             self.schedulePingTask(every: interval)
             self.pingTaskInterval.store(hello.heartbeat_interval, ordering: .relaxed)
@@ -271,9 +270,11 @@ extension DiscordManager {
         }
     }
     
-    private func setupOnClose() {
+    private func setupOnClose(forConnectionWithId connectionId: Int) {
         self.ws?.onClose.whenComplete { [weak self] _ in
-            guard let `self` = self else { return }
+            guard let `self` = self,
+                  self.connectionId.load(ordering: .relaxed) == connectionId
+            else { return }
             Task {
                 let code = await self.ws?.closeCode
                 self.logger.log(
