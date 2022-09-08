@@ -207,7 +207,8 @@ extension DiscordManager {
         switch event.data {
         case let .invalidSession(canResume):
             logger.warning("Got invalid session. Will try to reconnect.", metadata: [
-                "DiscordManagerID": .stringConvertible(id)
+                "DiscordManagerID": .stringConvertible(id),
+                "canResume": .stringConvertible(canResume)
             ])
             if !canResume {
                 self.sequenceNumber = nil
