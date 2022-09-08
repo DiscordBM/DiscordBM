@@ -428,8 +428,8 @@ extension DiscordManager {
     private func sendPing() {
         self.send(payload: .init(opcode: .heartbeat))
         Task {
-            await self.eventLoopGroup.any().wait(.seconds(5))
-            if self.lastPongDate.addingTimeInterval(5) > Date() {
+            await self.eventLoopGroup.any().wait(.seconds(10))
+            if self.lastPongDate.addingTimeInterval(10) > Date() {
                 /// Successful ping
                 self.unsuccessfulPingsCount = 0
             } else {
