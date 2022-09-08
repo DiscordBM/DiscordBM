@@ -73,7 +73,8 @@ public actor DiscordManager {
         token: String,
         appId: String,
         presence: Gateway.Identify.PresenceUpdate? = nil,
-        intents: [Gateway.Identify.Intent] = []
+        intents: [Gateway.Identify.Intent] = [],
+        shard: IntPair? = nil
     ) {
         self.init(
             eventLoopGroup: eventLoopGroup,
@@ -82,6 +83,7 @@ public actor DiscordManager {
             appId: appId,
             identifyPayload: .init(
                 token: token,
+                shard: shard,
                 presence: presence,
                 intents: .init(values: intents)
             )

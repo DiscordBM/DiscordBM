@@ -61,4 +61,4 @@ Task {
 * Remove a few redundant structs
 * Attachements support (for now, you can provide media links instead)
 * OAuth support
-* Sharding support
+* Full sharding support
