@@ -10,6 +10,8 @@ public enum DiscordGlobalConfiguration {
     /// becomes suspicious that the current connection is not healthy anymore.
     /// It might take 5-10s more before the `zombiedConnectionChecker` makes
     /// sure and drops the connection.
+    /// Use this when your app has a decent amount of gateway traffic, so the lib
+    /// can be sure that the connection is zombied if there are no messages in the period.
     public static var zombiedConnectionCheckerTolerance: Double? = nil
 }
 

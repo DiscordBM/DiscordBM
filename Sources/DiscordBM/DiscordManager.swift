@@ -50,7 +50,7 @@ public actor DiscordManager {
     
     public init(
         eventLoopGroup: EventLoopGroup,
-        httpClientProvider: HTTPClientProvider? = nil,
+        httpClient: HTTPClient,
         token: String,
         appId: String,
         presence: Gateway.Identify.PresenceUpdate? = nil,
@@ -58,7 +58,7 @@ public actor DiscordManager {
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = DiscordClient(
-            httpClientProvider: httpClientProvider ?? .useShared(eventLoopGroup: eventLoopGroup),
+            httpClient: httpClient,
             token: token,
             appId: appId
         )
