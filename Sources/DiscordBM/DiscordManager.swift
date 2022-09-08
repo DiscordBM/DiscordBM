@@ -53,7 +53,7 @@ public actor DiscordManager {
     
     /// The sequence number for the current payloads sent to us.
     private var sequenceNumber: Int? = nil
-    /// The ID of the current discord-related session.
+    /// The ID of the current Discord-related session.
     private var sessionId: String? = nil
     /// Gateway URL for resuming the connection, so we don't have to make an api call.
     private var resumeGatewayUrl: String? = nil
@@ -267,36 +267,36 @@ extension DiscordManager {
     
     /// Returns whether or not it could send the `resume`.
     private func sendResumeAndReport() -> Bool {
-        if let sessionId = self.sessionId,
-           let lastSequenceNumber = self.sequenceNumber {
-            
-            let resume = Gateway.Event(
-                opcode: .resume,
-                data: .resume(.init(
-                    token: self.token,
-                    session_id: sessionId,
-                    seq: lastSequenceNumber
-                ))
-            )
-            self.send(
-                payload: resume,
-                opcode: UInt8(Gateway.Opcode.identify.rawValue)
-            )
-            
-            /// Invalidate these temporary info before for the next connection trial.
-            self.sequenceNumber = nil
-            self.resumeGatewayUrl = nil
-            self.sessionId = nil
-            
-            logger.notice("Sent resume request to Discord.")
-            
-            return true
+        guard let sessionId = self.sessionId,
+              let lastSequenceNumber = self.sequenceNumber else {
+            logger.notice("Can't resume last Discord connection.", metadata: [
+                "sessionId_length": .stringConvertible(self.sessionId?.count ?? -1),
+                "lastSequenceNumber": .stringConvertible(self.sequenceNumber ?? -1)
+            ])
+            return false
         }
-        logger.notice("Can't resume last Discord connection.", metadata: [
-            "sessionId_length": .stringConvertible(self.sessionId?.count ?? -1),
-            "lastSequenceNumber": .stringConvertible(self.sequenceNumber ?? -1)
-        ])
-        return false
+        
+        let resume = Gateway.Event(
+            opcode: .resume,
+            data: .resume(.init(
+                token: self.token,
+                session_id: sessionId,
+                seq: lastSequenceNumber
+            ))
+        )
+        self.send(
+            payload: resume,
+            opcode: UInt8(Gateway.Opcode.identify.rawValue)
+        )
+        
+        /// Invalidate these temporary info for the next connection.
+        self.sequenceNumber = nil
+        self.resumeGatewayUrl = nil
+        /// Don't invalidate `sessionId` because it'll be needed for the next resumes as well.
+        
+        logger.notice("Sent resume request to Discord.")
+        
+        return true
     }
     
     private func sendIdentify() {
