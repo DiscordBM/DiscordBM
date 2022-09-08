@@ -7,6 +7,7 @@ import class NIO.RepeatedTask
 import Atomics
 import AsyncHTTPClient
 import struct Foundation.UUID
+import Foundation
 
 public actor DiscordManager {
     
@@ -24,31 +25,51 @@ public actor DiscordManager {
     }
     private nonisolated let eventLoopGroup: EventLoopGroup
     public nonisolated let client: DiscordClient
-    
-    private var onEvents: [(Gateway.Event) -> ()] = []
-    private var onEventParseFilures: [(Error, String) -> ()] = []
-    
-    private let token: String
-    public nonisolated let identifyPayload: Gateway.Identify
-    
     public nonisolated let id = UUID()
     private let logger = DiscordGlobalConfiguration.makeLogger("DiscordManager")
     
-    private var sequenceNumber: Int? = nil
-    private var sessionId: String? = nil
-    private var resumeGatewayUrl: String? = nil
-    private nonisolated let pingTaskInterval = ManagedAtomic(0)
-    private var lastEventDate = Date()
+    //MARK: Event hooks
+    private var onEvents: [(Gateway.Event) -> ()] = []
+    private var onEventParseFilures: [(Error, String) -> ()] = []
     
+    //MARK: Connection data
+    private let token: String
+    public nonisolated let identifyPayload: Gateway.Identify
+    
+    //MARK: Connection state
     private nonisolated let _state = ManagedAtomic(State.noConnection)
     public nonisolated var state: State {
         self._state.load(ordering: .relaxed)
     }
     
-    /// Counter to keep track of how many times in a sequence, a zombied connection was detected.
-    private nonisolated let zombiedConnectionCounter = ManagedAtomic(0)
+    //MARK: Current connection properties
+    
     /// An ID to keep track of connection changes.
     private nonisolated let connectionId = ManagedAtomic(Int.random(in: 10_000..<100_000))
+    
+    private nonisolated let pingTaskInterval = ManagedAtomic(0)
+    private var lastEventDate = Date()
+    
+    //MARK: Resume-related current-connection properties
+    
+    /// The Discord-given sequence number for the current payloads sent to us.
+    private var sequenceNumber: Int? = nil
+    /// The ID of the current discord-related session.
+    private var sessionId: String? = nil
+    /// Gateway URL for resuming the connection, so we don't have to make an api call.
+    private var resumeGatewayUrl: String? = nil
+    
+    //MARK: Backoff properties
+    
+    /// Try count for connections.
+    private var connectionTryCount = 0
+    /// Seconds since 1970 when last connection happened.
+    private var lastConnectionTime = 0.0
+    
+    //MARK: Zombied-connection-checker
+    
+    /// Counter to keep track of how many times in a sequence a zombied connection was detected.
+    private nonisolated let zombiedConnectionCounter = ManagedAtomic(0)
     
     public init(
         eventLoopGroup: EventLoopGroup,
@@ -114,8 +135,14 @@ public actor DiscordManager {
 
 extension DiscordManager {
     private func connectAsync() async {
+        /// Guard if other connections are in proccess
         let state = self._state.load(ordering: .relaxed)
         guard state == .noConnection || state == .configured else {
+            return
+        }
+        /// Guard we're attempting to connect too fast
+        if let connectIn = canTryToConnectIn() {
+            self.eventLoopGroup.any().scheduleTask(in: connectIn, { self.connect() })
             return
         }
         self._state.store(.connecting, ordering: .relaxed)
@@ -193,14 +220,14 @@ extension DiscordManager {
             logger.notice("Received ready notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
             ])
-            self._state.store(.connected, ordering: .relaxed)
+            self.onSuccessfulConnection()
             self.sessionId = payload.session_id
             self.resumeGatewayUrl = payload.resume_gateway_url
         case .resumed:
             logger.notice("Received successful resume notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
             ])
-            self._state.store(.connected, ordering: .relaxed)
+            self.onSuccessfulConnection()
         default:
             break
         }
@@ -410,6 +437,35 @@ extension DiscordManager {
                 "payload": "\(payload)",
                 "opcode": "\(opcode ?? 255)"
             ])
+        }
+    }
+    
+    private func onSuccessfulConnection() {
+        self._state.store(.connected, ordering: .relaxed)
+        self.lastConnectionTime = Date().timeIntervalSince1970
+        self.connectionTryCount = 0
+    }
+    
+    /// Retuns `nil` if can connect immediately,
+    /// otherwise `TimeAmount` to wait before attempting to connect.
+    /// Increases `connectionTryCount`.
+    private func canTryToConnectIn() -> TimeAmount? {
+        let tryCount = self.connectionTryCount
+        let lastConnection = self.lastConnectionTime
+        let now = Date().timeIntervalSince1970
+        if tryCount == 0 {
+            return nil
+        }
+        let effectiveTryCount = min(tryCount, 7)
+        let factor = pow(Double(2), Double(effectiveTryCount))
+        let timePast = now - lastConnection
+        let waitMore = factor - timePast
+        if waitMore > 0 {
+            self.connectionTryCount += 1
+            let millis = Int64(waitMore * 1_000) + 1
+            return .milliseconds(millis)
+        } else {
+            return nil
         }
     }
     
