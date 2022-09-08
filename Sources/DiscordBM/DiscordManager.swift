@@ -45,7 +45,6 @@ public actor DiscordManager {
         self._state.load(ordering: .relaxed)
     }
     
-    var pingTask: RepeatedTask? = nil
     /// Counter to keep track of how many times in a sequence, a zombied connection was detected.
     nonisolated let zombiedConnectionCounter = ManagedAtomic(0)
     /// An ID to keep track of connection changes.
@@ -99,8 +98,8 @@ extension DiscordManager {
             return
         }
         self._state.store(.connecting, ordering: .relaxed)
+        self.connectionId.store(.random(in: 10_000..<100_000), ordering: .relaxed)
         self.lastEventDate = Date()
-        self.pingTask?.cancel()
         let gatewayUrl = await getGatewayUrl()
         var configuration = WebSocketClient.Configuration()
         configuration.maxFrameSize = 1 << 31
@@ -125,8 +124,7 @@ extension DiscordManager {
     }
     
     private func configureWebsocket() {
-        let connId = Int.random(in: 10_000..<100_000)
-        self.connectionId.store(connId, ordering: .relaxed)
+        let connId = self.connectionId.load(ordering: .relaxed)
         self.setupOnText()
         self.setupOnClose(forConnectionWithId: connId)
         self.setupZombiedConnectionCheckerTask(forConnectionWithId: connId)
@@ -164,7 +162,10 @@ extension DiscordManager {
             let interval: TimeAmount = .milliseconds(Int64(hello.heartbeat_interval))
             /// Disable websocket-kit automatic pings
             self.ws?.pingInterval = nil
-            self.schedulePingTask(every: interval)
+            self.setupPingTask(
+                forConnectionWithId: self.connectionId.load(ordering: .relaxed),
+                every: interval
+            )
             self.pingTaskInterval.store(hello.heartbeat_interval, ordering: .relaxed)
             self.sendResumeOrIdentify()
         case let .ready(payload):
@@ -352,14 +353,17 @@ extension DiscordManager {
         }
     }
     
-    private func schedulePingTask(every interval: TimeAmount) {
-        self.pingTask?.cancel()
-        let el = self.eventLoopGroup.any()
-        self.pingTask = el.scheduleRepeatedTask(
+    private func setupPingTask(
+        forConnectionWithId connectionId: Int,
+        every interval: TimeAmount
+    ) {
+        self.eventLoopGroup.any().scheduleRepeatedTask(
             initialDelay: interval,
             delay: interval
         ) { [weak self] _ in
-            guard let `self` = self else { return }
+            guard let `self` = self,
+                  self.connectionId.load(ordering: .relaxed) == connectionId
+            else { return }
             Task {
                 await self.sendPing()
             }
