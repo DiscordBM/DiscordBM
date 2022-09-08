@@ -316,7 +316,7 @@ public struct Gateway: Codable {
             var container = encoder.container(keyedBy: CodingKeys.self)
             
             switch self.opcode {
-            case .dispatch, .reconnect, .invalidSession, .heartbeatAccepted:
+            case .dispatch, .reconnect, .invalidSession, .heartbeatAccepted, .hello:
                 throw EncodingError.notSupposedToBeSent(
                     message: "`\(self.opcode.rawValue)` opcode is supposed to never be sent."
                 )
@@ -339,8 +339,6 @@ public struct Gateway: Codable {
             case .none:
                 try container.encodeNil(forKey: .data)
             case let .identify(payload):
-                try container.encode(payload, forKey: .data)
-            case let .hello(payload):
                 try container.encode(payload, forKey: .data)
             case let .resume(payload):
                 try container.encode(payload, forKey: .data)
