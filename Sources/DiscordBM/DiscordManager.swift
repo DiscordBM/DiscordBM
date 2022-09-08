@@ -165,7 +165,7 @@ extension DiscordManager {
             self.pingTaskInterval.store(hello.heartbeat_interval, ordering: .relaxed)
             self.sendResumeOrIdentify()
         case let .ready(payload):
-            logger.notice("Received Discord Ready Notice.", metadata: [
+            logger.notice("Received ready notice.", metadata: [
                 "DiscordManagerID": .stringConvertible(id)
             ])
             self.connectionState.store(.connected, ordering: .relaxed)
@@ -281,12 +281,13 @@ extension DiscordManager {
                     /// If its `nil` or `.goingAway`, then it's likely just a resume notice.
                     /// Otherwise it might be an error.
                     level: (code == nil || code == .goingAway) ? .warning : .error,
-                    "Received Discord Connection Close Notification.",
+                    "Received connection close notification.",
                     metadata: [
                         "DiscordManagerID": .stringConvertible(self.id),
                         "code": "\(String(describing: code))"
                     ]
                 )
+                self.connectionState.store(.noConnection, ordering: .relaxed)
                 self.connect()
             }
         }
