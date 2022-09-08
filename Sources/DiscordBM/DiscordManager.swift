@@ -47,7 +47,7 @@ public actor DiscordManager {
     /// An ID to keep track of connection changes.
     private nonisolated let connectionId = ManagedAtomic(Int.random(in: 10_000..<100_000))
     
-    private nonisolated let pingTaskInterval = ManagedAtomic(0)
+    private var pingTaskInterval = 0
     private var lastEventDate = Date()
     
     //MARK: Resume-related current-connection properties
@@ -197,7 +197,7 @@ extension DiscordManager {
         case .reconnect:
             break // will reconnect when we get the close notification
         case .heartbeat:
-            self.sendPing()
+            self.sendPing(forConnectionWithId: self.connectionId.load(ordering: .relaxed))
         case .heartbeatAccepted:
             self.lastPongDate = Date()
         case .invalidSession:
@@ -226,7 +226,7 @@ extension DiscordManager {
                 forConnectionWithId: self.connectionId.load(ordering: .relaxed),
                 every: interval
             )
-            self.pingTaskInterval.store(hello.heartbeat_interval, ordering: .relaxed)
+            self.pingTaskInterval = hello.heartbeat_interval
             self.sendResumeOrIdentify()
         case let .ready(payload):
             logger.notice("Received ready notice. The connection is fully established now.")
@@ -371,7 +371,7 @@ extension DiscordManager {
                         return false
                     } else if await self.ws!.isClosed {
                         return false
-                    } else if self.pingTaskInterval.load(ordering: .relaxed) < Int(tolerance) {
+                    } else if await self.pingTaskInterval < Int(tolerance) {
                         return false
                     } else {
                         return true
@@ -380,7 +380,7 @@ extension DiscordManager {
                 
                 if tryToPingBeforeForceReconnect {
                     /// Try to see if discord responds to a ping before trying to reconnect.
-                    await self.sendPing()
+                    await self.sendPing(forConnectionWithId: connectionId)
                     self.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
                     await reschedule(in: .seconds(5))
                 } else {
@@ -405,15 +405,16 @@ extension DiscordManager {
                   self.connectionId.load(ordering: .relaxed) == connectionId
             else { return }
             Task {
-                await self.sendPing()
+                await self.sendPing(forConnectionWithId: connectionId)
             }
         }
     }
     
-    private func sendPing() {
+    private func sendPing(forConnectionWithId connectionId: Int) {
         self.send(payload: .init(opcode: .heartbeat))
         Task {
             await self.eventLoopGroup.any().wait(.seconds(10))
+            guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             if self.lastPongDate.addingTimeInterval(10) > Date() {
                 /// Successful ping
                 self.unsuccessfulPingsCount = 0
