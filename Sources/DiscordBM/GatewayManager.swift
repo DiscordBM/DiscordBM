@@ -178,7 +178,7 @@ extension GatewayManager {
             logger.warning("Cannont try to connect immediatly due to backoff.", metadata: [
                 "wait-milliseconds": .stringConvertible(connectIn.nanoseconds / 1_000_000)
             ])
-            await self.eventLoopGroup.any().wait(connectIn)
+            await self.sleep(for: connectIn)
             await self.connectAsync()
             return
         }
@@ -201,7 +201,7 @@ extension GatewayManager {
             ])
             self._state.store(.noConnection, ordering: .relaxed)
             Task {
-                await eventLoopGroup.any().wait(.seconds(5))
+                await self.sleep(for: .seconds(5))
                 await connectAsync()
             }
         }
@@ -277,7 +277,7 @@ extension GatewayManager {
             return gatewayUrl
         } else {
             logger.error("Cannot get gateway url to connect to. Will retry in 5 seconds.")
-            await self.eventLoopGroup.any().wait(.seconds(5))
+            await self.sleep(for: .seconds(5))
             return await self.getGatewayUrl()
         }
     }
@@ -383,12 +383,12 @@ extension GatewayManager {
         else { return }
         Task {
             let el = el ?? self.eventLoopGroup.any()
-            await el.wait(.seconds(10))
+            await self.sleep(for: .seconds(10))
             
             /// If connection has changed then end this instance.
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             func reschedule(in time: TimeAmount) async {
-                await el.wait(time)
+                await self.sleep(for: time)
                 self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
             }
             let now = Date().timeIntervalSince1970
@@ -451,7 +451,7 @@ extension GatewayManager {
     private func sendPing(forConnectionWithId connectionId: Int) {
         self.send(payload: .init(opcode: .heartbeat))
         Task {
-            await self.eventLoopGroup.any().wait(.seconds(10))
+            await self.sleep(for: .seconds(10))
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             if self.lastPongDate.addingTimeInterval(10) > Date() {
                 /// Successful ping
@@ -539,12 +539,21 @@ extension GatewayManager {
         self.closeWebsocket(ws: self.ws)
         self._state.store(.noConnection, ordering: .relaxed)
     }
-}
-
-
-//MARK: - +EventLoop
-private extension EventLoop {
-    func wait(_ time: TimeAmount) async {
-        try? await self.scheduleTask(in: time, { }).futureResult.get()
+    
+    private func sleep(for time: TimeAmount) async {
+        do {
+            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
+                try await Task.sleep(
+                    until: .now + .nanoseconds(time.nanoseconds),
+                    clock: .continuous
+                )
+            } else {
+                try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
+            }
+        } catch {
+            logger.warning("Task failed to sleep properly.", metadata: [
+                "error": "\(error)"
+            ])
+        }
     }
 }
