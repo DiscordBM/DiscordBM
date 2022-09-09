@@ -1,5 +1,7 @@
 # DiscordBM
 
+[![Build Status](https://github.com/MahdiBM/TwitchIRC/actions/workflows/tests.yml/badge.svg)](https://github.com/MahdiBM/TwitchIRC/actions/workflows/tests.yml)
+
 A Discord libarary for making Discord bots in Swift.
 
 ## How to use
@@ -103,7 +105,7 @@ This libarary will try to follow the no-breaking-changes-in-minor-versions rule,
 * A snowflake type
 * Support more endpoints
 * Remove a few redundant structs
-* Attachements support (for now, you can provide media links instead)
+* Attachements support (You can provide media links instead, for now, which is better anyway)
 * OAuth support
 * Full sharding support
 
