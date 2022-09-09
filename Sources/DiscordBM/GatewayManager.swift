@@ -165,6 +165,7 @@ public actor GatewayManager {
 extension GatewayManager {
     /// `_state` must be set to an appropriate value before triggering this function.
     private func connectAsync() async {
+        logger.trace("Connect method triggered")
         /// Guard if other connections are in proccess
         let state = self._state.load(ordering: .relaxed)
         guard state == .noConnection || state == .configured else {
@@ -175,7 +176,7 @@ extension GatewayManager {
         }
         /// Guard we're attempting to connect too fast
         if let connectIn = canTryToConnectIn() {
-            logger.warning("Cannont try to connect immediatly due to backoff.", metadata: [
+            logger.warning("Cannont try to connect immediatly due to backoff", metadata: [
                 "wait-milliseconds": .stringConvertible(connectIn.nanoseconds / 1_000_000)
             ])
             await self.sleep(for: connectIn)
@@ -188,15 +189,17 @@ extension GatewayManager {
         let gatewayUrl = await getGatewayUrl()
         var configuration = WebSocketClient.Configuration()
         configuration.maxFrameSize = DiscordGlobalConfiguration.webSocketMaxFrameSize
+        logger.trace("Will try to connect to Discord through websocket")
         WebSocket.connect(
             to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
             configuration: configuration,
             on: eventLoopGroup
         ) { ws in
+            self.logger.trace("Connected to Discord through websocket. Will configure")
             self.ws = ws
             self.configureWebsocket()
         }.whenFailure { [self] error in
-            logger.error("Error while connecting to Discord through websocket.", metadata: [
+            logger.error("WebSocket error while connecting to Discord", metadata: [
                 "error": "\(error)"
             ])
             self._state.store(.noConnection, ordering: .relaxed)
@@ -237,7 +240,7 @@ extension GatewayManager {
         
         switch event.data {
         case let .invalidSession(canResume):
-            logger.warning("Got invalid session. Will try to reconnect.", metadata: [
+            logger.warning("Got invalid session. Will try to reconnect", metadata: [
                 "canResume": .stringConvertible(canResume)
             ])
             if !canResume {
@@ -248,6 +251,7 @@ extension GatewayManager {
             self._state.store(.noConnection, ordering: .relaxed)
             self.connect()
         case let .hello(hello):
+            logger.trace("Received 'hello'")
             let interval: TimeAmount = .milliseconds(Int64(hello.heartbeat_interval))
             /// Disable websocket-kit automatic pings
             self.ws?.pingInterval = nil
@@ -258,12 +262,12 @@ extension GatewayManager {
             self.pingTaskInterval = hello.heartbeat_interval
             self.sendResumeOrIdentify()
         case let .ready(payload):
-            logger.notice("Received ready notice. The connection is fully established now.")
+            logger.notice("Received ready notice. The onnection is fully established now")
             self.onSuccessfulConnection()
             self.sessionId = payload.session_id
             self.resumeGatewayUrl = payload.resume_gateway_url
         case .resumed:
-            logger.notice("Received successful resume notice. The connection is fully established now.")
+            logger.notice("Received resume notice. The connection is fully established now")
             self.onSuccessfulConnection()
         default:
             break
@@ -271,40 +275,40 @@ extension GatewayManager {
     }
     
     private func getGatewayUrl() async -> String {
+        logger.trace("Will try to get Discord gateway url")
         if let gatewayUrl = self.resumeGatewayUrl {
+            logger.trace("Got Discord gateway url from `resumeGatewayUrl`")
             return gatewayUrl
         } else if let gatewayUrl = try? await client.getGateway().decode().url {
+            logger.trace("Got Discord gateway url from api call")
             return gatewayUrl
         } else {
-            logger.error("Cannot get gateway url to connect to. Will retry in 5 seconds.")
+            logger.error("Cannot get gateway url to connect to. Will retry in 5 seconds")
             await self.sleep(for: .seconds(5))
             return await self.getGatewayUrl()
         }
     }
     
     private func sendResumeOrIdentify() {
-        if !self.sendResumeAndReport() {
+        if let sessionId = self.sessionId,
+           let lastSequenceNumber = self.sequenceNumber {
+            self.sendResume(sessionId: sessionId, sequenceNumber: lastSequenceNumber)
+        } else {
+            logger.debug("Can't resume last Discord connection. Will identify", metadata: [
+                "sessionId_length": .stringConvertible(self.sessionId?.count ?? -1),
+                "lastSequenceNumber": .stringConvertible(self.sequenceNumber ?? -1)
+            ])
             self.sendIdentify()
         }
     }
     
-    /// Returns whether or not it could send the `resume`.
-    private func sendResumeAndReport() -> Bool {
-        guard let sessionId = self.sessionId,
-              let lastSequenceNumber = self.sequenceNumber else {
-            logger.notice("Can't resume last Discord connection.", metadata: [
-                "sessionId_length": .stringConvertible(self.sessionId?.count ?? -1),
-                "lastSequenceNumber": .stringConvertible(self.sequenceNumber ?? -1)
-            ])
-            return false
-        }
-        
+    private func sendResume(sessionId: String, sequenceNumber: Int) {
         let resume = Gateway.Event(
             opcode: .resume,
             data: .resume(.init(
                 token: self.token,
                 session_id: sessionId,
-                seq: lastSequenceNumber
+                seq: sequenceNumber
             ))
         )
         self.send(
@@ -312,14 +316,12 @@ extension GatewayManager {
             opcode: UInt8(Gateway.Opcode.identify.rawValue)
         )
         
-        /// Invalidate these temporary info for the next connection.
+        /// Invalidate these temporary info for the next connection, incase this one fails.
         self.sequenceNumber = nil
         self.resumeGatewayUrl = nil
         /// Don't invalidate `sessionId` because it'll be needed for the next resumes as well.
         
-        logger.notice("Sent resume request to Discord.")
-        
-        return true
+        logger.trace("Sent resume request to Discord")
     }
     
     private func sendIdentify() {
@@ -333,6 +335,7 @@ extension GatewayManager {
     
     private func setupOnText(forConnectionWithId connectionId: Int) {
         self.ws?.onText { _, text in
+            self.logger.trace("Got text from websocket \(text)")
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             let data = Data(text.utf8)
             do {
@@ -340,11 +343,13 @@ extension GatewayManager {
                     Gateway.Event.self,
                     from: data
                 )
+                self.logger.trace("Decoded event: \(event)")
                 self.proccessEvent(event)
                 for onEvent in self.onEvents {
                     onEvent(event)
                 }
             } catch {
+                self.logger.trace("Failed to decode event. Error: \(error)")
                 for onEventParseFilure in self.onEventParseFilures {
                     onEventParseFilure(error, text)
                 }
@@ -354,6 +359,7 @@ extension GatewayManager {
     
     private func setupOnClose(forConnectionWithId connectionId: Int) {
         self.ws?.onClose.whenComplete { _ in
+            self.logger.trace("Recevied connection close notification for a websocket")
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             Task {
                 let code: WebSocketErrorCode?
@@ -365,8 +371,8 @@ extension GatewayManager {
                 self.logger.log(
                     /// If its `nil` or `.goingAway`, then it's likely just a resume notice.
                     /// Otherwise it might be an error.
-                    level: (code == nil || code == .goingAway) ? .warning : .error,
-                    "Received connection close notification.",
+                    level: (code == nil || code == .goingAway) ? .notice : .error,
+                    "Received connection close notification. Will try to reconnect",
                     metadata: ["code": "\(String(describing: code))"]
                 )
                 self._state.store(.noConnection, ordering: .relaxed)
@@ -382,6 +388,7 @@ extension GatewayManager {
         guard let tolerance = DiscordGlobalConfiguration.zombiedConnectionCheckerTolerance
         else { return }
         Task {
+            logger.trace("Will check for zombied connection")
             let el = el ?? self.eventLoopGroup.any()
             await self.sleep(for: .seconds(10))
             
@@ -413,12 +420,13 @@ extension GatewayManager {
                 }()
                 
                 if tryToPingBeforeForceReconnect {
+                    logger.trace("Will increase the zombied connection counter")
                     /// Try to see if discord responds to a ping before trying to reconnect.
                     await self.sendPing(forConnectionWithId: connectionId)
                     self.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
                     await reschedule(in: .seconds(5))
                 } else {
-                    self.logger.error("Detected zombied connection. Will try to reconnect.")
+                    self.logger.error("Detected zombied connection. Will try to reconnect")
                     self._state.store(.noConnection, ordering: .relaxed)
                     self.connect()
                     await reschedule(in: .seconds(30))
@@ -436,6 +444,7 @@ extension GatewayManager {
             delay: interval
         ) { task in
             guard self.connectionId.load(ordering: .relaxed) == connectionId else {
+                self.logger.trace("Canceled a ping task with connection id: \(connectionId)")
                 return task.cancel()
             }
             Task {
@@ -449,18 +458,22 @@ extension GatewayManager {
     }
     
     private func sendPing(forConnectionWithId connectionId: Int) {
+        logger.trace("Will ping for connection id \(connectionId)")
         self.send(payload: .init(opcode: .heartbeat))
         Task {
             await self.sleep(for: .seconds(10))
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             if self.lastPongDate.addingTimeInterval(10) > Date() {
+                logger.trace("Successful ping")
                 /// Successful ping
                 self.unsuccessfulPingsCount = 0
             } else {
+                logger.trace("Unsuccessful ping")
                 /// Unsuccessful ping
                 self.unsuccessfulPingsCount += 1
             }
             if unsuccessfulPingsCount > 2 {
+                logger.error("Too many unsuccessful pings. Will try to reconnect")
                 self._state.store(.noConnection, ordering: .relaxed)
                 self.connect()
             }
@@ -474,13 +487,13 @@ extension GatewayManager {
             if let ws = self.ws {
                 ws.send(raw: data, opcode: .init(encodedWebSocketOpcode: opcode)!)
             } else {
-                logger.warning("Trying to send through ws when a connection is not established.", metadata: [
+                logger.warning("Trying to send through ws when a connection is not established", metadata: [
                     "payload": "\(payload)",
                     "state": "\(self._state.load(ordering: .relaxed))"
                 ])
             }
         } catch {
-            logger.warning("Could not encode payload. This is a library issue, please report.", metadata: [
+            logger.error("Could not encode payload. This is a library issue, please report", metadata: [
                 "payload": "\(payload)",
                 "opcode": "\(opcode ?? 255)"
             ])
@@ -498,11 +511,11 @@ extension GatewayManager {
     /// Increases `connectionTryCount`.
     private func canTryToConnectIn() -> TimeAmount? {
         let tryCount = self.connectionTryCount
-        let lastConnection = self.lastIdentifyDate.timeIntervalSince1970
+        let lastIdentify = self.lastIdentifyDate.timeIntervalSince1970
         let now = Date().timeIntervalSince1970
         if tryCount == 0 {
             /// Even if the last connection was successful, don't try to connect too fast.
-            let timePast = now - lastConnection
+            let timePast = now - lastIdentify
             let minTimePast = 15.0
             if timePast > minTimePast {
                 return nil
@@ -514,7 +527,7 @@ extension GatewayManager {
         } else {
             let effectiveTryCount = min(tryCount, 7)
             let factor = pow(Double(2), Double(effectiveTryCount))
-            let timePast = now - lastConnection
+            let timePast = now - lastIdentify
             let waitMore = factor - timePast
             if waitMore > 0 {
                 self.connectionTryCount += 1
@@ -527,8 +540,9 @@ extension GatewayManager {
     }
     
     private nonisolated func closeWebsocket(ws: WebSocket?) {
+        logger.trace("Will close a websocket")
         ws?.close().whenFailure {
-            self.logger.warning("Connection close error.", metadata: [
+            self.logger.warning("Connection close error", metadata: [
                 "error": "\($0)"
             ])
         }
@@ -551,7 +565,7 @@ extension GatewayManager {
                 try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
             }
         } catch {
-            logger.warning("Task failed to sleep properly.", metadata: [
+            logger.warning("Task failed to sleep properly", metadata: [
                 "error": "\(error)"
             ])
         }
