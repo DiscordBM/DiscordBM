@@ -63,8 +63,11 @@ public actor GatewayManager {
     
     /// Try count for connections.
     private var connectionTryCount = 0
-    /// Seconds since 1970 when last connection happened.
-    private var lastConnectionDate = Date()
+    /// Seconds since 1970 when last identify happened.
+    ///
+    /// Discord only cares about the identify payload and if we send
+    /// more than 1000 identifies in a day, Discord revokes the bot token.
+    private var lastIdentifyDate = Date()
     
     //MARK: Zombied-connection-checker
     
@@ -160,6 +163,9 @@ extension GatewayManager {
         }
         /// Guard we're attempting to connect too fast
         if let connectIn = canTryToConnectIn() {
+            logger.warning("Cannont try to connect immediatly due to backoff.", metadata: [
+                "wait-milliseconds": .stringConvertible(connectIn.nanoseconds / 1_000_000)
+            ])
             await self.eventLoopGroup.any().wait(connectIn)
             await self.connectAsync()
             return
@@ -305,6 +311,7 @@ extension GatewayManager {
     }
     
     private func sendIdentify() {
+        self.lastIdentifyDate = Date()
         let identify = Gateway.Event(
             opcode: .identify,
             data: .identify(identifyPayload)
@@ -470,7 +477,6 @@ extension GatewayManager {
     
     private func onSuccessfulConnection() {
         self._state.store(.connected, ordering: .relaxed)
-        self.lastConnectionDate = Date()
         self.connectionTryCount = 0
         self.unsuccessfulPingsCount = 0
     }
@@ -480,21 +486,31 @@ extension GatewayManager {
     /// Increases `connectionTryCount`.
     private func canTryToConnectIn() -> TimeAmount? {
         let tryCount = self.connectionTryCount
-        let lastConnection = self.lastConnectionDate.timeIntervalSince1970
+        let lastConnection = self.lastIdentifyDate.timeIntervalSince1970
         let now = Date().timeIntervalSince1970
         if tryCount == 0 {
-            return nil
-        }
-        let effectiveTryCount = min(tryCount, 7)
-        let factor = pow(Double(2), Double(effectiveTryCount))
-        let timePast = now - lastConnection
-        let waitMore = factor - timePast
-        if waitMore > 0 {
-            self.connectionTryCount += 1
-            let millis = Int64(waitMore * 1_000) + 1
-            return .milliseconds(millis)
+            /// Even if the last connection was successful, don't try to connect too fast.
+            let timePast = now - lastConnection
+            let minTimePast = 15.0
+            if timePast > minTimePast {
+                return nil
+            } else {
+                let remaining = minTimePast - timePast
+                let millies = Int64(remaining * 1_000)
+                return .milliseconds(millies)
+            }
         } else {
-            return nil
+            let effectiveTryCount = min(tryCount, 7)
+            let factor = pow(Double(2), Double(effectiveTryCount))
+            let timePast = now - lastConnection
+            let waitMore = factor - timePast
+            if waitMore > 0 {
+                self.connectionTryCount += 1
+                let millis = Int64(waitMore * 1_000) + 1
+                return .milliseconds(millis)
+            } else {
+                return nil
+            }
         }
     }
     
