@@ -1,4 +1,5 @@
 import WebSocketKit
+import enum NIOWebSocket.WebSocketErrorCode
 import Logging
 import struct NIOCore.TimeAmount
 import struct Foundation.Data
@@ -103,18 +104,22 @@ public actor DiscordManager {
         intents: [Gateway.Identify.Intent] = [],
         shard: IntPair? = nil
     ) {
-        self.init(
-            eventLoopGroup: eventLoopGroup,
+        self.eventLoopGroup = eventLoopGroup
+        self.client = DiscordClient(
             httpClient: httpClient,
             token: token,
-            appId: appId,
-            identifyPayload: .init(
-                token: token,
-                shard: shard,
-                presence: presence,
-                intents: .init(values: intents)
-            )
+            appId: appId
         )
+        self.token = token
+        self.identifyPayload = .init(
+            token: self.token,
+            shard: shard,
+            presence: presence,
+            intents: .init(values: intents)
+        )
+        var logger = DiscordGlobalConfiguration.makeLogger("DiscordManager")
+        logger[metadataKey: "DiscordManagerID"] = .string(self.id.uuidString)
+        self.logger = logger
     }
     
     public nonisolated func connect() {
@@ -332,7 +337,12 @@ extension DiscordManager {
         self.ws?.onClose.whenComplete { _ in
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             Task {
-                let code = await self.ws?.closeCode
+                let code: WebSocketErrorCode?
+#if swift(>=5.7)
+                code = await self.ws?.closeCode
+#else
+                code = self.ws?.closeCode
+#endif
                 self.logger.log(
                     /// If its `nil` or `.goingAway`, then it's likely just a resume notice.
                     /// Otherwise it might be an error.
@@ -410,7 +420,11 @@ extension DiscordManager {
                 return task.cancel()
             }
             Task {
+#if swift(>=5.7)
                 await self.sendPing(forConnectionWithId: connectionId)
+#else
+                self.sendPing(forConnectionWithId: connectionId)
+#endif
             }
         }
     }
