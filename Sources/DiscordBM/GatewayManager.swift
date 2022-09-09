@@ -65,9 +65,9 @@ public actor GatewayManager {
     private var connectionTryCount = 0
     /// Seconds since 1970 when last identify happened.
     ///
-    /// Discord only cares about the identify payload and if we send
-    /// more than 1000 identifies in a day, Discord revokes the bot token.
-    private var lastIdentifyDate = Date()
+    /// Discord only cares about the identify payload for rate-limiting and if we send
+    /// more than 1000 identifies in a day, Discord will revoke the bot token.
+    private var lastIdentifyDate = Date.distantPast
     
     //MARK: Zombied-connection-checker
     
