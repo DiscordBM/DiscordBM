@@ -557,10 +557,14 @@ extension GatewayManager {
     private func sleep(for time: TimeAmount) async {
         do {
             if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
+#if swift(>=5.7)
                 try await Task.sleep(
                     until: .now + .nanoseconds(time.nanoseconds),
                     clock: .continuous
                 )
+#else
+                try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
+#endif
             } else {
                 try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
             }
