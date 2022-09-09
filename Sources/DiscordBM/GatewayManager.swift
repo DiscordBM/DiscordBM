@@ -187,7 +187,7 @@ extension GatewayManager {
         self.lastEventDate = Date()
         let gatewayUrl = await getGatewayUrl()
         var configuration = WebSocketClient.Configuration()
-        configuration.maxFrameSize = 1 << 31
+        configuration.maxFrameSize = DiscordGlobalConfiguration.webSocketMaxFrameSize
         WebSocket.connect(
             to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
             configuration: configuration,

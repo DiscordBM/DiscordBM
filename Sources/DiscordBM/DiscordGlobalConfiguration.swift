@@ -13,6 +13,7 @@ public enum DiscordGlobalConfiguration {
     /// Use this when your app has a constant flow of gateway traffic, so the lib
     /// can be sure that the connection is zombied if there are no messages in the period.
     public static var zombiedConnectionCheckerTolerance: Double? = nil
+    public static var webSocketMaxFrameSize = 1 << 31
 }
 
 //MARK: - DiscordDecoder
