@@ -9,7 +9,7 @@ import AsyncHTTPClient
 import struct Foundation.UUID
 import Foundation
 
-public actor DiscordManager {
+public actor GatewayManager {
     
     public enum State: Int, AtomicValue {
         case noConnection
@@ -90,8 +90,8 @@ public actor DiscordManager {
         )
         self.token = token
         self.identifyPayload = identifyPayload
-        var logger = DiscordGlobalConfiguration.makeLogger("DiscordManager")
-        logger[metadataKey: "DiscordManagerID"] = .string(self.id.uuidString)
+        var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
+        logger[metadataKey: "GatewayManagerID"] = .string(self.id.uuidString)
         self.logger = logger
     }
     
@@ -117,8 +117,8 @@ public actor DiscordManager {
             presence: presence,
             intents: .init(values: intents)
         )
-        var logger = DiscordGlobalConfiguration.makeLogger("DiscordManager")
-        logger[metadataKey: "DiscordManagerID"] = .string(self.id.uuidString)
+        var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
+        logger[metadataKey: "GatewayManagerID"] = .string(self.id.uuidString)
         self.logger = logger
     }
     
@@ -150,7 +150,7 @@ public actor DiscordManager {
     }
 }
 
-extension DiscordManager {
+extension GatewayManager {
     /// `_state` must be set to an appropriate value before triggering this function.
     private func connectAsync() async {
         /// Guard if other connections are in proccess

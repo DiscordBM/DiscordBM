@@ -5,7 +5,7 @@
 A Discord libarary for making Discord bots in Swift.
 
 ## How to use
-First you need to initialize a `DiscordManager` instance, then tell it to connect and start using it:
+First you need to initialize a `GatewayManager` instance, then tell it to connect and start using it:
 
 ### Intializing A Manager With Vapor
 ```swift
@@ -13,7 +13,7 @@ import DiscordBM
 import Vapor
 
 let app: Application = YOUR_VAPOR_APPLICATION
-let manager = DiscordManager(
+let manager = GatewayManager(
     eventLoopGroup: app.eventLoopGroup,
     httpClient: app.http.client.shared,
     token: YOUR_BOT_TOKEN,
@@ -33,7 +33,7 @@ import DiscordBM
 import AsyncHTTPClient
 
 let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-let manager = DiscordManager(
+let manager = GatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,
     token: YOUR_BOT_TOKEN,
@@ -51,11 +51,11 @@ let manager = DiscordManager(
 try await httpClient.shutdown()
 ```
 
-### Using The Discord Manager
+### Using The Gateway Manager
 ```swift
 import DiscordBM
 
-let manager: DiscordManager = ... /// Make an instance like above
+let manager: GatewayManager = ... /// Make an instance like above
 
 /// Tell manager to connect to Discord
 manager.connect()
