@@ -11,11 +11,20 @@ import Foundation
 
 public actor GatewayManager {
     
-    public enum State: Int, AtomicValue {
+    public enum State: Int, AtomicValue, CustomStringConvertible {
         case noConnection
         case connecting
         case configured
         case connected
+        
+        public var description: String {
+            switch self {
+            case .noConnection: return "noConnection"
+            case .connecting: return "connecting"
+            case .configured: return "configured"
+            case .connected: return "connected"
+            }
+        }
     }
     
     private weak var ws: WebSocket? {
@@ -159,6 +168,9 @@ extension GatewayManager {
         /// Guard if other connections are in proccess
         let state = self._state.load(ordering: .relaxed)
         guard state == .noConnection || state == .configured else {
+            logger.warning("Gatway state doesn't allow a new connection", metadata: [
+                "state": .stringConvertible(state)
+            ])
             return
         }
         /// Guard we're attempting to connect too fast
