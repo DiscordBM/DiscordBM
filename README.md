@@ -101,7 +101,7 @@ This libarary will try to follow the no-breaking-changes-in-minor-versions rule,
 
 ## Wishlist / Not Yet supported:
 * Better documentation
-* More tests (add ci too)
+* More tests (currently very little tests)
 * A snowflake type
 * Support more endpoints
 * Remove a few redundant structs
