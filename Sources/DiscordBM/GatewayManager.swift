@@ -383,22 +383,18 @@ extension GatewayManager {
         }
     }
     
-    private func setupZombiedConnectionCheckerTask(
-        forConnectionWithId connectionId: Int,
-        on el: EventLoop? = nil
-    ) {
+    private func setupZombiedConnectionCheckerTask(forConnectionWithId connectionId: Int) {
         guard let tolerance = DiscordGlobalConfiguration.zombiedConnectionCheckerTolerance
         else { return }
         Task {
             logger.trace("Will check for zombied connection")
-            let el = el ?? self.eventLoopGroup.any()
             await self.sleep(for: .seconds(10))
             
             /// If connection has changed then end this instance.
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             func reschedule(in time: TimeAmount) async {
                 await self.sleep(for: time)
-                self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
+                self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId)
             }
             let now = Date().timeIntervalSince1970
             let lastEvent = self.lastEventDate.timeIntervalSince1970
