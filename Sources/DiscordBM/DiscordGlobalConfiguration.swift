@@ -5,6 +5,8 @@ public enum DiscordGlobalConfiguration {
     public static var apiVersion = 10
     public static var decoder: DiscordDecoder = JSONDecoder()
     public static var encoder: DiscordEncoder = JSONEncoder()
+    /// Function to make loggers with. You can override it with your own logger.
+    /// The `String` argument represents the label of the logger.
     public static var makeLogger: (String) -> Logger = { Logger(label: $0) }
     /// How many seconds till each connection's `zombiedConnectionChecker`
     /// becomes suspicious that the current connection is not healthy anymore.

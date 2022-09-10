@@ -34,7 +34,8 @@ public actor GatewayManager {
     }
     private nonisolated let eventLoopGroup: EventLoopGroup
     public nonisolated let client: DiscordClient
-    public nonisolated let id = UUID()
+    private static let idGenerator = ManagedAtomic(0)
+    public nonisolated let id: Int = GatewayManager.idGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
     private let logger: Logger
     
     //MARK: Event hooks
@@ -103,7 +104,7 @@ public actor GatewayManager {
         self.token = token
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
-        logger[metadataKey: "GatewayManagerID"] = .string(self.id.uuidString)
+        logger[metadataKey: "gateway-manager-id"] = .string("\(self.id)")
         self.logger = logger
     }
     
@@ -130,7 +131,7 @@ public actor GatewayManager {
             intents: .init(values: intents)
         )
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
-        logger[metadataKey: "GatewayManagerID"] = .string(self.id.uuidString)
+        logger[metadataKey: "gateway-manager-id"] = .string("\(self.id)")
         self.logger = logger
     }
     
@@ -262,7 +263,7 @@ extension GatewayManager {
             self.pingTaskInterval = hello.heartbeat_interval
             self.sendResumeOrIdentify()
         case let .ready(payload):
-            logger.notice("Received ready notice. The onnection is fully established now")
+            logger.notice("Received ready notice. The connection is fully established now")
             self.onSuccessfulConnection()
             self.sessionId = payload.session_id
             self.resumeGatewayUrl = payload.resume_gateway_url
@@ -556,22 +557,33 @@ extension GatewayManager {
     
     private func sleep(for time: TimeAmount) async {
         do {
-            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
-#if swift(>=5.7)
-                try await Task.sleep(
-                    until: .now + .nanoseconds(time.nanoseconds),
-                    clock: .continuous
-                )
-#else
-                try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
-#endif
-            } else {
-                try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
-            }
+            try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
         } catch {
             logger.warning("Task failed to sleep properly", metadata: [
                 "error": "\(error)"
             ])
         }
     }
+    
+    // Not yet in use due to Xcode 14 problems with CI
+//    private func sleep(for time: TimeAmount) async {
+//        do {
+//            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
+//#if swift(>=5.7)
+//                try await Task.sleep(
+//                    until: .now + .nanoseconds(time.nanoseconds),
+//                    clock: .continuous
+//                )
+//#else
+//                try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
+//#endif
+//            } else {
+//                try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
+//            }
+//        } catch {
+//            logger.warning("Task failed to sleep properly", metadata: [
+//                "error": "\(error)"
+//            ])
+//        }
+//    }
 }
