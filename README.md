@@ -2,12 +2,12 @@
 
 [![Build Status](https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg)](https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml)
 
-A Discord libarary for making Discord bots in Swift.
+A library for making Discord bots in Swift.
 
-## How to use
+## How To Use
 First you need to initialize a `GatewayManager` instance, then tell it to connect and start using it:
 
-### Intializing A Manager With Vapor
+### Initializing A Manager With Vapor
 ```swift
 import DiscordBM
 import Vapor
@@ -27,7 +27,7 @@ let manager = GatewayManager(
 )
 ```
 
-### Intializing A Manager On Your Own
+### Initializing A Manager On Your Own
 ```swift
 import DiscordBM
 import AsyncHTTPClient
@@ -95,17 +95,17 @@ In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding App ID](/images/bot_app_id.png)
 
 ## Warnings
-This libarary will try to follow the no-breaking-changes-in-minor-versions rule, with exceptions:
+This library will try to follow the no-breaking-changes-in-minor-versions rule, with exceptions:
 * If Discord has made some changes that need breaking changes in this library, but are not worth a major release and are rather small.
 * When adding enum cases.
 
-## Wishlist / Not Yet supported:
+## Wishlist / Not Yet Supported:
 * Better documentation
 * More tests (currently very little tests)
 * A snowflake type
 * Support more endpoints
 * Remove a few redundant structs
-* Attachements support (You can provide media links instead, for now, which is better anyway)
+* Attachments support (You can provide media links instead, for now, which is better anyway)
 * OAuth support
 * Full sharding support
 
