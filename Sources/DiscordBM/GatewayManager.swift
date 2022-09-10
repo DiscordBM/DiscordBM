@@ -104,7 +104,7 @@ public actor GatewayManager {
         self.token = token
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
-        logger[metadataKey: "gateway-manager-id"] = .string("\(self.id)")
+        logger[metadataKey: "GatewayManager-id"] = .string("\(self.id)")
         self.logger = logger
     }
     
@@ -448,6 +448,7 @@ extension GatewayManager {
                 self.logger.trace("Canceled a ping task with connection id: \(connectionId)")
                 return task.cancel()
             }
+            self.logger.trace("Will send automatic ping for connection id: \(connectionId)")
             Task {
 #if swift(>=5.7)
                 await self.sendPing(forConnectionWithId: connectionId)
@@ -464,7 +465,10 @@ extension GatewayManager {
         Task {
             await self.sleep(for: .seconds(10))
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-            if self.lastPongDate.addingTimeInterval(10) > Date() {
+            /// 13 == 10 + 5. 10 seconds that we sleeped, + 5 seconds tolerance.
+            /// The tolerance being too long should not matter as pings usually happen
+            /// only once in ~45 sconds, and a successful ping will reset the counter anyway.
+            if self.lastPongDate.addingTimeInterval(15) > Date() {
                 logger.trace("Successful ping")
                 /// Successful ping
                 self.unsuccessfulPingsCount = 0
@@ -541,7 +545,7 @@ extension GatewayManager {
     }
     
     private nonisolated func closeWebsocket(ws: WebSocket?) {
-        logger.trace("Will close a websocket")
+        logger.trace("Will possibly close a websocket")
         ws?.close().whenFailure {
             self.logger.warning("Connection close error", metadata: [
                 "error": "\($0)"
@@ -565,7 +569,7 @@ extension GatewayManager {
         }
     }
     
-    // Not yet in use due to Xcode 14 problems with CI
+    // Not yet in use due to Xcode 14 availability check problems in CI
 //    private func sleep(for time: TimeAmount) async {
 //        do {
 //            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {

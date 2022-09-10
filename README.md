@@ -86,6 +86,9 @@ Task {
 }
 ```
 
+### Starting The Bot
+If you don't use a library like Vapor that does this for you, you'll need to call `RunLoop.current.run()` from a non-async context, to start your app. Otherwise your executable will exit immediately after every run.
+
 ### Finding Your Bot Token
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding Bot Token](/images/bot_token.png)

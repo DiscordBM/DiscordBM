@@ -203,8 +203,7 @@ public struct CommandOption: Codable {
     public var type: Kind
     public var name: String
     public var name_localizations: [String: String]?
-    /// Required for command creation (i think).
-    public var description: String?
+    public var description: String
     public var description_localizations: [String: String]?
     public var required: Bool?
     public var choices: [Choice]?
@@ -216,7 +215,7 @@ public struct CommandOption: Codable {
     /// Available when user inputs a value for the option.
     public var value: StringIntDoubleBool?
     
-    public init(type: Kind, name: String, name_localizations: [String : String]? = nil, description: String? = nil, description_localizations: [String : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [CommandOption]? = nil, channel_types: TolerantDecodeArray<ChannelKind>? = nil, min_value: IntDouble? = nil, max_value: IntDouble? = nil, autocomplete: Bool? = nil) {
+    public init(type: Kind, name: String, name_localizations: [String : String]? = nil, description: String, description_localizations: [String : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [CommandOption]? = nil, channel_types: [ChannelKind]? = nil, min_value: IntDouble? = nil, max_value: IntDouble? = nil, autocomplete: Bool? = nil) {
         self.type = type
         self.name = name
         self.name_localizations = name_localizations
@@ -225,7 +224,7 @@ public struct CommandOption: Codable {
         self.required = required
         self.choices = choices
         self.options = options
-        self.channel_types = channel_types
+        self.channel_types = channel_types == nil ? nil : .init(channel_types!)
         self.min_value = min_value
         self.max_value = max_value
         self.autocomplete = autocomplete
