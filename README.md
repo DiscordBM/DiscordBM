@@ -28,6 +28,7 @@ let manager = GatewayManager(
 ```
 
 ### Initializing A Manager On Your Own
+Make sure you've added [AsyncHTTPClient](https://github.com/swift-server/async-http-client) to your dependancies.
 ```swift
 import DiscordBM
 import AsyncHTTPClient
@@ -96,6 +97,25 @@ In [Discord developer portal](https://discord.com/developers/applications):
 ### Finding Your App ID
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding App ID](/images/bot_app_id.png)
+
+## How To Add DiscordBM To Your Project
+
+To use the `DiscordBM` library in a SwiftPM project, 
+add the following line to the dependencies in your `Package.swift` file:
+
+```swift
+.package(url: "https://github.com/MahdiBM/DiscordBM", branch: "main"),
+```
+
+Include `"DiscordBM"` as a dependency for your targets:
+
+```swift
+.target(name: "<target>", dependencies: [
+    .product(name: "DiscordBM", package: "DiscordBM"),
+]),
+```
+
+Finally, add `import DiscordBM` to your source code.
 
 ## Warnings
 This library will try to follow the no-breaking-changes-in-minor-versions rule, with exceptions:
