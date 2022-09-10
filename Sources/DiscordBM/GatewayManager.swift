@@ -55,7 +55,7 @@ public actor GatewayManager {
     //MARK: Current connection properties
     
     /// An ID to keep track of connection changes.
-    private nonisolated let connectionId = ManagedAtomic(Int.random(in: 10_000..<100_000))
+    private nonisolated let connectionId = ManagedAtomic(Int.random(in: Int.min...Int.max))
     
     private var pingTaskInterval = 0
     private var lastEventDate = Date()
@@ -142,6 +142,7 @@ public actor GatewayManager {
     }
     
     public func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) {
+        /// This took a lot of time to figure out, not sure why it needs opcode `0x1`.
         self.send(payload: .init(
             opcode: .requestGuildMembers,
             data: .requestGuildMembers(payload)
@@ -156,9 +157,9 @@ public actor GatewayManager {
         self.onEventParseFilures.append(handler)
     }
     
-    public nonisolated func stop() {
+    public nonisolated func disconnect() {
         Task {
-            await self.stopAsync()
+            await self.disconnectAsync()
         }
     }
 }
@@ -185,7 +186,7 @@ extension GatewayManager {
             return
         }
         self._state.store(.connecting, ordering: .relaxed)
-        self.connectionId.store(.random(in: 10_000..<100_000), ordering: .relaxed)
+        self.connectionId.store(.random(in: Int.min...Int.max), ordering: .relaxed)
         self.lastEventDate = Date()
         let gatewayUrl = await getGatewayUrl()
         var configuration = WebSocketClient.Configuration()
@@ -382,7 +383,7 @@ extension GatewayManager {
         }
     }
     
-    private nonisolated func setupZombiedConnectionCheckerTask(
+    private func setupZombiedConnectionCheckerTask(
         forConnectionWithId connectionId: Int,
         on el: EventLoop? = nil
     ) {
@@ -400,20 +401,20 @@ extension GatewayManager {
                 self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId, on: el)
             }
             let now = Date().timeIntervalSince1970
-            let lastEventInterval = await self.lastEventDate.timeIntervalSince1970
-            let past = now - lastEventInterval
+            let lastEvent = self.lastEventDate.timeIntervalSince1970
+            let past = now - lastEvent
             let diff = tolerance - past
             if diff > 0 {
                 await reschedule(in: .seconds(Int64(diff) + 1))
             } else {
-                let tryToPingBeforeForceReconnect: Bool = await {
+                let tryToPingBeforeForceReconnect: Bool = {
                     if self.zombiedConnectionCounter.load(ordering: .relaxed) != 0 {
                         return false
-                    } else if await self.ws == nil {
+                    } else if self.ws == nil {
                         return false
-                    } else if await self.ws!.isClosed {
+                    } else if self.ws!.isClosed {
                         return false
-                    } else if await self.pingTaskInterval < Int(tolerance) {
+                    } else if self.pingTaskInterval < Int(tolerance) {
                         return false
                     } else {
                         return true
@@ -423,7 +424,7 @@ extension GatewayManager {
                 if tryToPingBeforeForceReconnect {
                     logger.trace("Will increase the zombied connection counter")
                     /// Try to see if discord responds to a ping before trying to reconnect.
-                    await self.sendPing(forConnectionWithId: connectionId)
+                    self.sendPing(forConnectionWithId: connectionId)
                     self.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
                     await reschedule(in: .seconds(5))
                 } else {
@@ -465,7 +466,7 @@ extension GatewayManager {
         Task {
             await self.sleep(for: .seconds(10))
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-            /// 13 == 10 + 5. 10 seconds that we sleeped, + 5 seconds tolerance.
+            /// 15 == 10 + 5. 10 seconds that we sleeped, + 5 seconds tolerance.
             /// The tolerance being too long should not matter as pings usually happen
             /// only once in ~45 sconds, and a successful ping will reset the counter anyway.
             if self.lastPongDate.addingTimeInterval(15) > Date() {
@@ -553,8 +554,8 @@ extension GatewayManager {
         }
     }
     
-    private func stopAsync() {
-        self.connectionId.store(.random(in: 10_000..<100_000), ordering: .relaxed)
+    private func disconnectAsync() {
+        self.connectionId.store(.random(in: Int.min...Int.max), ordering: .relaxed)
         self.closeWebsocket(ws: self.ws)
         self._state.store(.noConnection, ordering: .relaxed)
     }
