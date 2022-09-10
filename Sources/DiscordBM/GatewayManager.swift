@@ -441,22 +441,15 @@ extension GatewayManager {
         forConnectionWithId connectionId: Int,
         every interval: TimeAmount
     ) {
-        self.eventLoopGroup.any().scheduleRepeatedTask(
-            initialDelay: interval,
-            delay: interval
-        ) { task in
+        Task {
+            await self.sleep(for: interval)
             guard self.connectionId.load(ordering: .relaxed) == connectionId else {
                 self.logger.trace("Canceled a ping task with connection id: \(connectionId)")
-                return task.cancel()
+                return // cancel
             }
             self.logger.trace("Will send automatic ping for connection id: \(connectionId)")
-            Task {
-#if swift(>=5.7)
-                await self.sendPing(forConnectionWithId: connectionId)
-#else
-                self.sendPing(forConnectionWithId: connectionId)
-#endif
-            }
+            self.sendPing(forConnectionWithId: connectionId)
+            self.setupPingTask(forConnectionWithId: connectionId, every: interval)
         }
     }
     
