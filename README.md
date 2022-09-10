@@ -105,12 +105,11 @@ This library will try to follow the no-breaking-changes-in-minor-versions rule, 
 ## Wishlist / Not Yet Supported:
 * Better documentation
 * More tests (currently very little tests)
-* A snowflake type
-* Support more endpoints
+* Support more endpoints (Easy to add yourself; PRs appreciated)
 * Remove a few redundant structs
 * Attachments support (You can provide media links instead, for now, which is better anyway)
 * OAuth support
-* Full sharding support
+* Discord client caching
 
 ## Contribution
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.

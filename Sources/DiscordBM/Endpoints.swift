@@ -4,6 +4,7 @@ import NIOHTTP1
 /// API Endpoint.
 enum Endpoint {
     case getGateway
+    case getGatewayBot
     
     case createInteractionResponse(id: String, token: String)
     case editOriginalInteractionResponse(appId: String, token: String)
@@ -37,6 +38,8 @@ enum Endpoint {
         switch self {
         case .getGateway:
             return "gateway"
+        case .getGatewayBot:
+            return "gateway/bot"
         case let .createInteractionResponse(id, token):
             return "interactions/\(id)/\(token)/callback"
         case let .editOriginalInteractionResponse(appId, token):
@@ -90,6 +93,7 @@ enum Endpoint {
     var httpMethod: HTTPMethod {
         switch self {
         case .getGateway: return .GET
+        case .getGatewayBot: return .GET
         case .createInteractionResponse: return .POST
         case .editOriginalInteractionResponse: return .PATCH
         case .deleteGatewayInteractionResponse: return .DELETE
@@ -116,26 +120,27 @@ enum Endpoint {
     var id: Int {
         switch self {
         case .getGateway: return 1
-        case .createInteractionResponse: return 2
-        case .editOriginalInteractionResponse: return 3
-        case .deleteGatewayInteractionResponse: return 4
-        case .postFollowupGatewayInteractionResponse: return 5
-        case .editGatewayInteractionResponseFollowup: return 6
-        case .postChannelCreateMessage: return 7
-        case .patchChannelEditMessage: return 8
-        case .deleteChannelMessage: return 9
-        case .createApplicationGlobalCommand: return 10
-        case .getApplicationGlobalCommands: return 11
-        case .deleteApplicationGlobalCommand: return 12
-        case .getGuild: return 13
-        case .searchGuildMembers: return 14
-        case .getGuildMember: return 15
-        case .getChannel: return 16
-        case .leaveGuild: return 17
-        case .createGuildRole: return 18
-        case .addGuildMemberRole: return 19
-        case .removeGuildMemberRole: return 20
-        case .addReaction: return 21
+        case .getGatewayBot: return 2
+        case .createInteractionResponse: return 3
+        case .editOriginalInteractionResponse: return 4
+        case .deleteGatewayInteractionResponse: return 5
+        case .postFollowupGatewayInteractionResponse: return 6
+        case .editGatewayInteractionResponseFollowup: return 7
+        case .postChannelCreateMessage: return 8
+        case .patchChannelEditMessage: return 9
+        case .deleteChannelMessage: return 10
+        case .createApplicationGlobalCommand: return 11
+        case .getApplicationGlobalCommands: return 12
+        case .deleteApplicationGlobalCommand: return 13
+        case .getGuild: return 14
+        case .searchGuildMembers: return 15
+        case .getGuildMember: return 16
+        case .getChannel: return 17
+        case .leaveGuild: return 18
+        case .createGuildRole: return 19
+        case .addGuildMemberRole: return 20
+        case .removeGuildMemberRole: return 21
+        case .addReaction: return 22
         }
     }
 }

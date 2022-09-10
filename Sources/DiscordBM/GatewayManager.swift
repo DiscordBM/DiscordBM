@@ -29,21 +29,20 @@ public actor GatewayManager {
     
     private weak var ws: WebSocket? {
         didSet {
-            self.closeWebsocket(ws: oldValue)
+            self.closeWebSocket(ws: oldValue)
         }
     }
     private nonisolated let eventLoopGroup: EventLoopGroup
     public nonisolated let client: DiscordClient
     private static let idGenerator = ManagedAtomic(0)
-    public nonisolated let id: Int = GatewayManager.idGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
+    public nonisolated let id = GatewayManager.idGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
     private let logger: Logger
     
     //MARK: Event hooks
     private var onEvents: [(Gateway.Event) -> ()] = []
-    private var onEventParseFilures: [(Error, String) -> ()] = []
+    private var onEventParseFailures: [(Error, String) -> ()] = []
     
     //MARK: Connection data
-    private let token: String
     public nonisolated let identifyPayload: Gateway.Identify
     
     //MARK: Connection state
@@ -69,11 +68,16 @@ public actor GatewayManager {
     /// Gateway URL for resuming the connection, so we don't have to make an api call.
     private var resumeGatewayUrl: String? = nil
     
+    //MARK: Shard-ing
+    
+    private var maxConcurrency: Int? = nil
+    private var isFirstConnection = true
+    
     //MARK: Backoff properties
     
     /// Try count for connections.
     private var connectionTryCount = 0
-    /// Seconds since 1970 when last identify happened.
+    /// When last identify happened.
     ///
     /// Discord only cares about the identify payload for rate-limiting and if we send
     /// more than 1000 identifies in a day, Discord will revoke the bot token.
@@ -91,17 +95,15 @@ public actor GatewayManager {
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
-        token: String,
         appId: String,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = DiscordClient(
             httpClient: httpClient,
-            token: token,
+            token: identifyPayload.token,
             appId: appId
         )
-        self.token = token
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "GatewayManager-id"] = .string("\(self.id)")
@@ -123,9 +125,8 @@ public actor GatewayManager {
             token: token,
             appId: appId
         )
-        self.token = token
         self.identifyPayload = .init(
-            token: self.token,
+            token: token,
             shard: shard,
             presence: presence,
             intents: .init(values: intents)
@@ -154,7 +155,7 @@ public actor GatewayManager {
     }
     
     public func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) {
-        self.onEventParseFilures.append(handler)
+        self.onEventParseFailures.append(handler)
     }
     
     public nonisolated func disconnect() {
@@ -168,17 +169,17 @@ extension GatewayManager {
     /// `_state` must be set to an appropriate value before triggering this function.
     private func connectAsync() async {
         logger.trace("Connect method triggered")
-        /// Guard if other connections are in proccess
+        /// Guard if other connections are in process
         let state = self._state.load(ordering: .relaxed)
         guard state == .noConnection || state == .configured else {
-            logger.warning("Gatway state doesn't allow a new connection", metadata: [
+            logger.warning("Gateway state doesn't allow a new connection", metadata: [
                 "state": .stringConvertible(state)
             ])
             return
         }
         /// Guard we're attempting to connect too fast
         if let connectIn = canTryToConnectIn() {
-            logger.warning("Cannont try to connect immediatly due to backoff", metadata: [
+            logger.warning("Cannot try to connect immediately due to backoff", metadata: [
                 "wait-milliseconds": .stringConvertible(connectIn.nanoseconds / 1_000_000)
             ])
             await self.sleep(for: connectIn)
@@ -189,17 +190,19 @@ extension GatewayManager {
         self.connectionId.store(.random(in: Int.min...Int.max), ordering: .relaxed)
         self.lastEventDate = Date()
         let gatewayUrl = await getGatewayUrl()
+        logger.trace("Will wait for other shards if needed")
+        await waitInShardQueueIfNeeded()
         var configuration = WebSocketClient.Configuration()
         configuration.maxFrameSize = DiscordGlobalConfiguration.webSocketMaxFrameSize
-        logger.trace("Will try to connect to Discord through websocket")
+        logger.trace("Will try to connect to Discord through web-socket")
         WebSocket.connect(
             to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
             configuration: configuration,
             on: eventLoopGroup
         ) { ws in
-            self.logger.trace("Connected to Discord through websocket. Will configure")
+            self.logger.trace("Connected to Discord through web-socket. Will configure")
             self.ws = ws
-            self.configureWebsocket()
+            self.configureWebSocket()
         }.whenFailure { [self] error in
             logger.error("WebSocket error while connecting to Discord", metadata: [
                 "error": "\(error)"
@@ -212,7 +215,7 @@ extension GatewayManager {
         }
     }
     
-    private func configureWebsocket() {
+    private func configureWebSocket() {
         let connId = self.connectionId.load(ordering: .relaxed)
         self.setupOnText(forConnectionWithId: connId)
         self.setupOnClose(forConnectionWithId: connId)
@@ -220,7 +223,7 @@ extension GatewayManager {
         self._state.store(.configured, ordering: .relaxed)
     }
     
-    private func proccessEvent(_ event: Gateway.Event) {
+    private func processEvent(_ event: Gateway.Event) {
         self.lastEventDate = Date()
         self.zombiedConnectionCounter.store(0, ordering: .relaxed)
         if let sequenceNumber = event.sequenceNumber {
@@ -281,13 +284,20 @@ extension GatewayManager {
         if let gatewayUrl = self.resumeGatewayUrl {
             logger.trace("Got Discord gateway url from `resumeGatewayUrl`")
             return gatewayUrl
-        } else if let gatewayUrl = try? await client.getGateway().decode().url {
-            logger.trace("Got Discord gateway url from api call")
-            return gatewayUrl
         } else {
-            logger.error("Cannot get gateway url to connect to. Will retry in 5 seconds")
-            await self.sleep(for: .seconds(5))
-            return await self.getGatewayUrl()
+            if identifyPayload.shard == nil,
+               let gatewayUrl = try? await client.getGateway().decode().url {
+                logger.trace("Got Discord gateway url from gateway api call")
+                return gatewayUrl
+            } else if let gatewayBot = try? await client.getGatewayBot().decode() {
+                logger.trace("Got Discord gateway url from gateway-bot api call. Max concurrency: \(gatewayBot.session_start_limit.max_concurrency)")
+                self.maxConcurrency = gatewayBot.session_start_limit.max_concurrency
+                return gatewayBot.url
+            } else {
+                logger.error("Cannot get gateway url to connect to. Will retry in 5 seconds")
+                await self.sleep(for: .seconds(5))
+                return await self.getGatewayUrl()
+            }
         }
     }
     
@@ -308,7 +318,7 @@ extension GatewayManager {
         let resume = Gateway.Event(
             opcode: .resume,
             data: .resume(.init(
-                token: self.token,
+                token: identifyPayload.token,
                 session_id: sessionId,
                 seq: sequenceNumber
             ))
@@ -346,14 +356,14 @@ extension GatewayManager {
                     from: data
                 )
                 self.logger.trace("Decoded event: \(event)")
-                self.proccessEvent(event)
+                self.processEvent(event)
                 for onEvent in self.onEvents {
                     onEvent(event)
                 }
             } catch {
                 self.logger.trace("Failed to decode event. Error: \(error)")
-                for onEventParseFilure in self.onEventParseFilures {
-                    onEventParseFilure(error, text)
+                for onEventParseFailure in self.onEventParseFailures {
+                    onEventParseFailure(error, text)
                 }
             }
         }
@@ -361,7 +371,7 @@ extension GatewayManager {
     
     private func setupOnClose(forConnectionWithId connectionId: Int) {
         self.ws?.onClose.whenComplete { _ in
-            self.logger.trace("Recevied connection close notification for a websocket")
+            self.logger.trace("Received connection close notification for a web-socket")
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             Task {
                 let code: WebSocketErrorCode?
@@ -455,9 +465,9 @@ extension GatewayManager {
         Task {
             await self.sleep(for: .seconds(10))
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-            /// 15 == 10 + 5. 10 seconds that we sleeped, + 5 seconds tolerance.
+            /// 15 == 10 + 5. 10 seconds that we slept, + 5 seconds tolerance.
             /// The tolerance being too long should not matter as pings usually happen
-            /// only once in ~45 sconds, and a successful ping will reset the counter anyway.
+            /// only once in ~45 seconds, and a successful ping will reset the counter anyway.
             if self.lastPongDate.addingTimeInterval(15) > Date() {
                 logger.trace("Successful ping")
                 /// Successful ping
@@ -516,8 +526,8 @@ extension GatewayManager {
                 return nil
             } else {
                 let remaining = minTimePast - timePast
-                let millies = Int64(remaining * 1_000)
-                return .milliseconds(millies)
+                let millis = Int64(remaining * 1_000)
+                return .milliseconds(millis)
             }
         } else {
             let effectiveTryCount = min(tryCount, 7)
@@ -534,8 +544,26 @@ extension GatewayManager {
         }
     }
     
-    private nonisolated func closeWebsocket(ws: WebSocket?) {
-        logger.trace("Will possibly close a websocket")
+    private func waitInShardQueueIfNeeded() async {
+        if isFirstConnection,
+           let shard = identifyPayload.shard,
+           let maxConcurrency = maxConcurrency {
+            isFirstConnection = false
+            let bucketIndex = shard.first / maxConcurrency
+            if bucketIndex > 0 {
+                /// Wait 2 seconds for each bucket index.
+                /// These 2 seconds is just a number I deemed safe.
+                /// Optimally we should implement managing all shards of a bot together
+                /// so we can know when shards connect and can start the new bucket, but
+                /// that doesn't seem easy as shard might be running outside only 1
+                /// process and we won't be able to know manage them easily.
+                await self.sleep(for: .seconds(Int64(bucketIndex) * 2))
+            }
+        }
+    }
+    
+    private nonisolated func closeWebSocket(ws: WebSocket?) {
+        logger.trace("Will possibly close a web-socket")
         ws?.close().whenFailure {
             self.logger.warning("Connection close error", metadata: [
                 "error": "\($0)"
@@ -545,8 +573,9 @@ extension GatewayManager {
     
     private func disconnectAsync() {
         self.connectionId.store(.random(in: Int.min...Int.max), ordering: .relaxed)
-        self.closeWebsocket(ws: self.ws)
+        self.closeWebSocket(ws: self.ws)
         self._state.store(.noConnection, ordering: .relaxed)
+        self.isFirstConnection = true
     }
     
     private func sleep(for time: TimeAmount) async {

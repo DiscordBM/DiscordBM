@@ -124,8 +124,13 @@ extension DiscordClient: CustomStringConvertible {
 
 extension DiscordClient {
     
-    public func getGateway() async throws -> Response<Gateway.GatewayUrl> {
+    public func getGateway() async throws -> Response<GatewayUrl> {
         let endpoint = Endpoint.getGateway
+        return try await self.send(to: endpoint)
+    }
+    
+    public func getGatewayBot() async throws -> Response<GatewayBot> {
+        let endpoint = Endpoint.getGatewayBot
         return try await self.send(to: endpoint)
     }
     

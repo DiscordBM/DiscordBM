@@ -1920,24 +1920,6 @@ public struct Gateway: Codable {
         public var guild_scheduled_event_id: String?
     }
     
-    public struct GatewayUrl: Codable {
-        public var url: String
-    }
-    
-    public struct GatewayBot: Codable {
-        
-        public struct SessionStartLimit: Codable {
-            public var total: Int
-            public var remaining: Int
-            public var reset_after: Int
-            public var max_concurrency: Int
-        }
-        
-        public var url: String
-        public var shards: Int
-        public var session_start_limit: SessionStartLimit
-    }
-    
     public struct ApplicationCommandPermissionsUpdate: Codable {
         
         public struct Permission: Codable {
@@ -2040,4 +2022,22 @@ public struct Gateway: Codable {
         public var matched_keyword: String?
         public var matched_content: String?
     }
+}
+
+public struct GatewayUrl: Codable {
+    public var url: String
+}
+
+public struct GatewayBot: Codable {
+    
+    public struct SessionStartLimit: Codable {
+        public var total: Int
+        public var remaining: Int
+        public var reset_after: Int
+        public var max_concurrency: Int
+    }
+    
+    public var url: String
+    public var shards: Int
+    public var session_start_limit: SessionStartLimit
 }
