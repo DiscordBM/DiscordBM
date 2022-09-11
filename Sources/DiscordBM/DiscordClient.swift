@@ -3,8 +3,8 @@ import AsyncHTTPClient
 import NIOHTTP1
 
 public enum DiscordClientError: Error {
-    case rateLimited(endpoint: String)
-    case cantAttemptToDecode(status: HTTPResponseStatus)
+    case rateLimited(url: String)
+    case cantAttemptToDecode
     case emptyBody
 }
 
@@ -25,7 +25,7 @@ public struct DiscordClient {
                     throw DiscordClientError.emptyBody
                 }
             } else {
-                throw DiscordClientError.cantAttemptToDecode(status: raw.status)
+                throw DiscordClientError.cantAttemptToDecode
             }
         }
     }
@@ -46,7 +46,7 @@ public struct DiscordClient {
     
     private func checkRateLimitsAllowRequest(to endpoint: Endpoint) throws {
         if !rateLimiter.canRequest(to: "\(endpoint.id)") {
-            throw DiscordClientError.rateLimited(endpoint: "\(endpoint)")
+            throw DiscordClientError.rateLimited(url: "\(endpoint.url)")
         }
     }
     
@@ -118,7 +118,7 @@ extension DiscordClient: CustomStringConvertible {
     }
 }
 
-//MARK: - API-call functions
+//MARK: - Public functions
 
 extension DiscordClient {
     
@@ -132,16 +132,16 @@ extension DiscordClient {
         return try await self.send(to: endpoint)
     }
     
-    public func postGatewayInteractionResponse(
+    public func createInteractionResponse(
         id: String,
         token: String,
         payload: InteractionResponse
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> Response<InteractionResponse.CallbackData> {
         let endpoint = Endpoint.createInteractionResponse(id: id, token: token)
         return try await self.send(to: endpoint, payload: payload)
     }
     
-    public func editGatewayInteractionResponse(
+    public func editInteractionResponse(
         token: String,
         payload: InteractionResponse.CallbackData
     ) async throws -> HTTPClient.Response {
@@ -149,14 +149,14 @@ extension DiscordClient {
         return try await self.send(to: endpoint, payload: payload)
     }
     
-    public func deleteGatewayInteractionResponse(
+    public func deleteInteractionResponse(
         token: String
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.deleteGatewayInteractionResponse(appId: appId, token: token)
+        let endpoint = Endpoint.deleteOriginalInteractionResponse(appId: appId, token: token)
         return try await self.send(to: endpoint)
     }
     
-    public func postFollowupGatewayInteractionResponse(
+    public func createFollowupInteractionResponse(
         token: String,
         payload: InteractionResponse
     ) async throws -> HTTPClient.Response {
@@ -164,7 +164,7 @@ extension DiscordClient {
         return try await self.send(to: endpoint, payload: payload)
     }
     
-    public func editGatewayInteractionResponseFollowup(
+    public func editFollowupInteractionResponse(
         id: String,
         token: String,
         payload: InteractionResponse
@@ -173,34 +173,34 @@ extension DiscordClient {
         return try await self.send(to: endpoint, payload: payload)
     }
     
-    public func postChannelCreateMessage(
+    public func createMessage(
         channelId: String,
         payload: ChannelCreateMessage
-    ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.postChannelCreateMessage(channelId: channelId)
+    ) async throws -> Response<Gateway.Message> {
+        let endpoint = Endpoint.postCreateMessage(channelId: channelId)
         return try await self.send(to: endpoint, payload: payload)
     }
     
-    public func patchChannelEditMessage(
+    public func editMessage(
         channelId: String,
         messageId: String,
         payload: ChannelEditMessage
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.patchChannelEditMessage(channelId: channelId, messageId: messageId)
+        let endpoint = Endpoint.patchEditMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint, payload: payload)
     }
     
-    public func deleteChannelMessage(
+    public func deleteMessage(
         channelId: String,
         messageId: String
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.deleteChannelMessage(channelId: channelId, messageId: messageId)
+        let endpoint = Endpoint.deleteMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint)
     }
     
     public func createApplicationGlobalCommand(
         payload: SlashCommand
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> Response<SlashCommand> {
         let endpoint = Endpoint.createApplicationGlobalCommand(appId: appId)
         return try await self.send(to: endpoint, payload: payload)
     }

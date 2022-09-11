@@ -8,13 +8,13 @@ enum Endpoint {
     
     case createInteractionResponse(id: String, token: String)
     case editOriginalInteractionResponse(appId: String, token: String)
-    case deleteGatewayInteractionResponse(appId: String, token: String)
+    case deleteOriginalInteractionResponse(appId: String, token: String)
     case postFollowupGatewayInteractionResponse(appId: String, token: String)
     case editGatewayInteractionResponseFollowup(appId: String, id: String, token: String)
     
-    case postChannelCreateMessage(channelId: String)
-    case patchChannelEditMessage(channelId: String, messageId: String)
-    case deleteChannelMessage(channelId: String, messageId: String)
+    case postCreateMessage(channelId: String)
+    case patchEditMessage(channelId: String, messageId: String)
+    case deleteMessage(channelId: String, messageId: String)
     
     case createApplicationGlobalCommand(appId: String)
     case getApplicationGlobalCommands(appId: String)
@@ -44,17 +44,17 @@ enum Endpoint {
             return "interactions/\(id)/\(token)/callback"
         case let .editOriginalInteractionResponse(appId, token):
             return "webhooks/\(appId)/\(token)/messages/@original"
-        case let .deleteGatewayInteractionResponse(appId, token):
+        case let .deleteOriginalInteractionResponse(appId, token):
             return "webhooks/\(appId)/\(token)/messages/@original"
         case let .postFollowupGatewayInteractionResponse(appId, token):
             return "webhooks/\(appId)/\(token)"
         case let .editGatewayInteractionResponseFollowup(appId, id, token):
             return "webhooks/\(appId)/\(token)/messages/\(id)"
-        case let .postChannelCreateMessage(channelId):
+        case let .postCreateMessage(channelId):
             return "channels/\(channelId)/messages"
-        case let .patchChannelEditMessage(channelId, messageId):
+        case let .patchEditMessage(channelId, messageId):
             return "channels/\(channelId)/messages/\(messageId)"
-        case let .deleteChannelMessage(channelId, messageId):
+        case let .deleteMessage(channelId, messageId):
             return "channels/\(channelId)/messages/\(messageId)"
         case let .createApplicationGlobalCommand(appId):
             return "applications/\(appId)/commands"
@@ -96,12 +96,12 @@ enum Endpoint {
         case .getGatewayBot: return .GET
         case .createInteractionResponse: return .POST
         case .editOriginalInteractionResponse: return .PATCH
-        case .deleteGatewayInteractionResponse: return .DELETE
+        case .deleteOriginalInteractionResponse: return .DELETE
         case .postFollowupGatewayInteractionResponse: return .POST
         case .editGatewayInteractionResponseFollowup: return .PATCH
-        case .postChannelCreateMessage: return .POST
-        case .patchChannelEditMessage: return .PATCH
-        case .deleteChannelMessage: return .DELETE
+        case .postCreateMessage: return .POST
+        case .patchEditMessage: return .PATCH
+        case .deleteMessage: return .DELETE
         case .createApplicationGlobalCommand: return .POST
         case .getApplicationGlobalCommands: return .GET
         case .deleteApplicationGlobalCommand: return .DELETE
@@ -123,12 +123,12 @@ enum Endpoint {
         case .getGatewayBot: return 2
         case .createInteractionResponse: return 3
         case .editOriginalInteractionResponse: return 4
-        case .deleteGatewayInteractionResponse: return 5
+        case .deleteOriginalInteractionResponse: return 5
         case .postFollowupGatewayInteractionResponse: return 6
         case .editGatewayInteractionResponseFollowup: return 7
-        case .postChannelCreateMessage: return 8
-        case .patchChannelEditMessage: return 9
-        case .deleteChannelMessage: return 10
+        case .postCreateMessage: return 8
+        case .patchEditMessage: return 9
+        case .deleteMessage: return 10
         case .createApplicationGlobalCommand: return 11
         case .getApplicationGlobalCommands: return 12
         case .deleteApplicationGlobalCommand: return 13
