@@ -1,6 +1,31 @@
 import Foundation
 import NIOHTTP1
 
+public enum EndpointIdentity: Int, Hashable, CaseIterable {
+    case getGateway
+    case getGatewayBot
+    case createInteractionResponse
+    case editOriginalInteractionResponse
+    case deleteOriginalInteractionResponse
+    case postFollowupGatewayInteractionResponse
+    case editGatewayInteractionResponseFollowup
+    case postCreateMessage
+    case patchEditMessage
+    case deleteMessage
+    case createApplicationGlobalCommand
+    case getApplicationGlobalCommands
+    case deleteApplicationGlobalCommand
+    case getGuild
+    case searchGuildMembers
+    case getGuildMember
+    case getChannel
+    case leaveGuild
+    case createGuildRole
+    case addGuildMemberRole
+    case removeGuildMemberRole
+    case addReaction
+}
+
 /// API Endpoint.
 enum Endpoint {
     case getGateway
@@ -33,6 +58,37 @@ enum Endpoint {
     case removeGuildMemberRole(guildId: String, userId: String, roleId: String)
     
     case addReaction(channelId: String, messageId: String, emoji: String)
+    
+    var identity: EndpointIdentity {
+        switch self {
+        case .getGateway: return .getGateway
+        case .getGatewayBot: return .getGatewayBot
+        case .createInteractionResponse: return .createInteractionResponse
+        case .editOriginalInteractionResponse: return .editOriginalInteractionResponse
+        case .deleteOriginalInteractionResponse: return .deleteOriginalInteractionResponse
+        case .postFollowupGatewayInteractionResponse: return .postFollowupGatewayInteractionResponse
+        case .editGatewayInteractionResponseFollowup: return .editGatewayInteractionResponseFollowup
+        case .postCreateMessage: return .postCreateMessage
+        case .patchEditMessage: return .patchEditMessage
+        case .deleteMessage: return .deleteMessage
+        case .createApplicationGlobalCommand: return .createApplicationGlobalCommand
+        case .getApplicationGlobalCommands: return .getApplicationGlobalCommands
+        case .deleteApplicationGlobalCommand: return .deleteApplicationGlobalCommand
+        case .getGuild: return .getGuild
+        case .searchGuildMembers: return .searchGuildMembers
+        case .getGuildMember: return .getGuildMember
+        case .getChannel: return .getChannel
+        case .leaveGuild: return .leaveGuild
+        case .createGuildRole: return .createGuildRole
+        case .addGuildMemberRole: return .addGuildMemberRole
+        case .removeGuildMemberRole: return .removeGuildMemberRole
+        case .addReaction: return .addReaction
+        }
+    }
+    
+    var isCacheable: Bool {
+        self.httpMethod == .GET
+    }
     
     var urlSuffix: String {
         switch self {
