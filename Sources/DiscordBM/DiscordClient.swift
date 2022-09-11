@@ -55,6 +55,8 @@ public struct DiscordClient {
         if self.cachingBehavior.isDisabled {
             self.cache = nil
         } else {
+            /// So each token has its own cache, because
+            /// answers might be different for different tokens.
             self.cache = ClientCacheStorage.shared.cache(for: token)
         }
     }
@@ -67,14 +69,14 @@ public struct DiscordClient {
         }
     }
     
-    private func checkRateLimitsAllowRequest(to endpoint: Endpoint) throws {
-        if !rateLimiter.canRequest(to: "\(endpoint.id)") {
+    private func checkRateLimitsAllowRequest(to endpoint: Endpoint) async throws {
+        if await !rateLimiter.canRequest(to: "\(endpoint.id)") {
             throw DiscordClientError.rateLimited(url: "\(endpoint.url)")
         }
     }
     
-    private func includeInRateLimits(endpoint: Endpoint, headers: HTTPHeaders) {
-        rateLimiter.include(endpointId: "\(endpoint.id)", headers: headers)
+    private func includeInRateLimits(endpoint: Endpoint, headers: HTTPHeaders) async {
+        await rateLimiter.include(endpointId: "\(endpoint.id)", headers: headers)
     }
     
     private func getFromCache(
@@ -114,14 +116,14 @@ public struct DiscordClient {
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
             return cached
         }
-        try self.checkRateLimitsAllowRequest(to: endpoint)
+        try await self.checkRateLimitsAllowRequest(to: endpoint)
         let request = try HTTPClient.Request(
             url: endpoint.url + queries.makeForURL(),
             method: endpoint.httpMethod,
             headers: ["Authorization": "Bot \(token)"]
         )
         let response = try await client.execute(request: request).get()
-        self.includeInRateLimits(endpoint: endpoint, headers: response.headers)
+        await self.includeInRateLimits(endpoint: endpoint, headers: response.headers)
         await self.saveInCache(
             response: response,
             identity: identity,
@@ -147,7 +149,7 @@ public struct DiscordClient {
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
             return cached
         }
-        try self.checkRateLimitsAllowRequest(to: endpoint)
+        try await self.checkRateLimitsAllowRequest(to: endpoint)
         let data = try DiscordGlobalConfiguration.encoder.encode(payload)
         let request = try HTTPClient.Request(
             url: endpoint.url + queries.makeForURL(),
@@ -159,7 +161,7 @@ public struct DiscordClient {
             body: .bytes(data)
         )
         let response = try await client.execute(request: request).get()
-        self.includeInRateLimits(endpoint: endpoint, headers: response.headers)
+        await self.includeInRateLimits(endpoint: endpoint, headers: response.headers)
         await self.saveInCache(
             response: response,
             identity: identity,

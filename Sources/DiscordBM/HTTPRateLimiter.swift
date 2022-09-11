@@ -1,8 +1,9 @@
 import struct Foundation.Date
-import NIOConcurrencyHelpers
 import NIOHTTP1
 
-final class HTTPRateLimiter {
+private let logger = DiscordGlobalConfiguration.makeLogger("HTTPRateLimiter")
+
+actor HTTPRateLimiter {
     
     private struct Bucket: Hashable, CustomStringConvertible {
         fileprivate var bucket: String
@@ -63,30 +64,23 @@ final class HTTPRateLimiter {
     
     let label: String
     
-    private static let logger = DiscordGlobalConfiguration.makeLogger("HTTPRateLimiter")
-    
     /// [Endpoint-ID: Bucket-ID]
     private var endpoints: [String: String] = [:]
     
     /// [Bucket-ID: Bucket]
     private var buckets: [String: Bucket] = [:]
     
-    private let lock = Lock()
-    
     init(label: String) {
         self.label = label
     }
     
     func canRequest(to endpointId: String) -> Bool {
-        self.lock.lock()
-        defer { self.lock.unlock() }
-        
         if let bucketId = self.endpoints[endpointId],
            let bucket = self.buckets[bucketId] {
             if bucket.canRequest() {
                 return true
             } else {
-                Self.logger.warning("Hit HTTP Rate-Limit.", metadata: [
+                logger.warning("Hit HTTP Rate-Limit.", metadata: [
                     "label": .string(label),
                     "endpointId": .string(endpointId),
                     "bucket": .stringConvertible(bucket)
@@ -100,10 +94,6 @@ final class HTTPRateLimiter {
     
     func include(endpointId: String, headers: HTTPHeaders) {
         guard let newBucket = Bucket(from: headers) else { return }
-        
-        self.lock.lock()
-        defer { self.lock.unlock() }
-        
         if !(self.endpoints[endpointId] == newBucket.bucket) {
             self.endpoints[endpointId] = newBucket.bucket
         }
