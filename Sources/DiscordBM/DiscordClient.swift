@@ -6,6 +6,7 @@ public enum DiscordClientError: Error {
     case rateLimited(url: String)
     case cantAttemptToDecode
     case emptyBody
+    case appIdParameterNotProvided
 }
 
 /// The fact that this could be used by multiple different `DiscordClient`s with
@@ -34,16 +35,25 @@ public struct DiscordClient {
     
     private let client: HTTPClient
     private let token: String
-    private let appId: String
+    public let appId: String?
     
+    /// If you provide no app id, you will need to pass to every function on call site.
     public init(
         httpClient: HTTPClient,
         token: String,
-        appId: String
+        appId: String?
     ) {
         self.client = httpClient
         self.token = token
         self.appId = appId
+    }
+    
+    private func requireAppId(_ providedAppId: String?) throws -> String {
+        if let appId = providedAppId ?? self.appId {
+            return appId
+        } else {
+            throw DiscordClientError.appIdParameterNotProvided
+        }
     }
     
     private func checkRateLimitsAllowRequest(to endpoint: Endpoint) throws {
@@ -115,7 +125,7 @@ extension DiscordClient: CustomStringConvertible {
         "DiscordClient("
         + "client: \(client), "
         + "token: \(token.dropLast(max(0, token.count - 6)))****, "
-        + "appId: \(appId)"
+        + "appId: \(appId ?? "NULL")"
         + ")"
     }
 }
@@ -144,34 +154,51 @@ extension DiscordClient {
     }
     
     public func editInteractionResponse(
+        appId: String? = nil,
         token: String,
         payload: InteractionResponse.CallbackData
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.editOriginalInteractionResponse(appId: appId, token: token)
+        let endpoint = Endpoint.editOriginalInteractionResponse(
+            appId: try requireAppId(appId),
+            token: token
+        )
         return try await self.send(to: endpoint, payload: payload)
     }
     
     public func deleteInteractionResponse(
+        appId: String? = nil,
         token: String
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.deleteOriginalInteractionResponse(appId: appId, token: token)
+        let endpoint = Endpoint.deleteOriginalInteractionResponse(
+            appId: try requireAppId(appId),
+            token: token
+        )
         return try await self.send(to: endpoint)
     }
     
     public func createFollowupInteractionResponse(
+        appId: String? = nil,
         token: String,
         payload: InteractionResponse
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.postFollowupGatewayInteractionResponse(appId: appId, token: token)
+        let endpoint = Endpoint.postFollowupGatewayInteractionResponse(
+            appId: try requireAppId(appId),
+            token: token
+        )
         return try await self.send(to: endpoint, payload: payload)
     }
     
     public func editFollowupInteractionResponse(
+        appId: String? = nil,
         id: String,
         token: String,
         payload: InteractionResponse
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.editGatewayInteractionResponseFollowup(appId: appId, id: id, token: token)
+        let endpoint = Endpoint.editGatewayInteractionResponseFollowup(
+            appId: try requireAppId(appId),
+            id: id,
+            token: token
+        )
         return try await self.send(to: endpoint, payload: payload)
     }
     
@@ -201,19 +228,28 @@ extension DiscordClient {
     }
     
     public func createApplicationGlobalCommand(
+        appId: String? = nil,
         payload: SlashCommand
     ) async throws -> Response<SlashCommand> {
-        let endpoint = Endpoint.createApplicationGlobalCommand(appId: appId)
+        let endpoint = Endpoint.createApplicationGlobalCommand(appId: try requireAppId(appId))
         return try await self.send(to: endpoint, payload: payload)
     }
     
-    public func getApplicationGlobalCommands() async throws -> Response<[SlashCommand]> {
-        let endpoint = Endpoint.getApplicationGlobalCommands(appId: appId)
+    public func getApplicationGlobalCommands(
+        appId: String? = nil
+    ) async throws -> Response<[SlashCommand]> {
+        let endpoint = Endpoint.getApplicationGlobalCommands(appId: try requireAppId(appId))
         return try await send(to: endpoint)
     }
     
-    public func deleteApplicationGlobalCommand(id: String) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.deleteApplicationGlobalCommand(appId: appId, id: id)
+    public func deleteApplicationGlobalCommand(
+        appId: String? = nil,
+        id: String
+    ) async throws -> HTTPClient.Response {
+        let endpoint = Endpoint.deleteApplicationGlobalCommand(
+            appId: try requireAppId(appId),
+            id: id
+        )
         return try await self.send(to: endpoint)
     }
     

@@ -90,7 +90,7 @@ public actor GatewayManager {
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
-        appId: String,
+        appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
@@ -109,7 +109,7 @@ public actor GatewayManager {
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
         token: String,
-        appId: String,
+        appId: String? = nil,
         presence: Gateway.Identify.PresenceUpdate? = nil,
         intents: [Gateway.Identify.Intent] = [],
         shard: IntPair? = nil

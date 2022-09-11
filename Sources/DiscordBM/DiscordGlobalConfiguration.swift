@@ -2,7 +2,8 @@ import Foundation
 import Logging
 
 public enum DiscordGlobalConfiguration {
-    public static var apiVersion = 10
+    /// Currently only 10 is supported
+    public static let apiVersion = 10
     public static var decoder: DiscordDecoder = JSONDecoder()
     public static var encoder: DiscordEncoder = JSONEncoder()
     /// Function to make loggers with. You can override it with your own logger.
