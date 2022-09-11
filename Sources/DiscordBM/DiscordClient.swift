@@ -41,7 +41,7 @@ public struct DiscordClient {
     private let cachingBehavior: CachingBehavior
     public let appId: String?
     
-    /// If you provide no app id, you'll need to pass to every function on call site.
+    /// If you provide no app id, you'll need to pass it to some functions on call site.
     public init(
         httpClient: HTTPClient,
         token: String,
@@ -78,10 +78,11 @@ public struct DiscordClient {
     }
     
     private func getFromCache(
-        identity: EndpointIdentity,
+        identity: CacheableEndpointIdentity?,
         queries: [String: String]
     ) async -> HTTPClient.Response? {
-        await cache?.get(item: .init(
+        guard let identity = identity else { return nil }
+        return await cache?.get(item: .init(
             identity: identity,
             queries: queries
         ))
@@ -89,10 +90,11 @@ public struct DiscordClient {
     
     private func saveInCache(
         response: HTTPClient.Response,
-        identity: EndpointIdentity,
+        identity: CacheableEndpointIdentity?,
         queries: [String: String]
     ) async {
-        guard (200..<300).contains(response.status.code),
+        guard let identity = identity,
+              (200..<300).contains(response.status.code),
               let ttl = self.cachingBehavior.getTTL(for: identity)
         else { return }
         await cache?.add(
@@ -108,7 +110,7 @@ public struct DiscordClient {
         to endpoint: Endpoint,
         queries: [String: String] = [:]
     ) async throws -> HTTPClient.Response {
-        let identity = endpoint.identity
+        let identity = CacheableEndpointIdentity(endpoint: endpoint)
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
             return cached
         }
@@ -141,7 +143,7 @@ public struct DiscordClient {
         queries: [String: String] = [:],
         payload: E
     ) async throws -> HTTPClient.Response {
-        let identity = endpoint.identity
+        let identity = CacheableEndpointIdentity(endpoint: endpoint)
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
             return cached
         }
@@ -399,7 +401,7 @@ extension DiscordClient {
 public struct CachingBehavior {
     
     /// [ID: TTL]
-    private var storage = [EndpointIdentity: Double]()
+    private var storage = [CacheableEndpointIdentity: Double]()
     /// This instance's default TTL for all endpoints.
     public var defaultTTL = 5.0
     public var isDisabled = false
@@ -409,12 +411,15 @@ public struct CachingBehavior {
     /// Doesn't allow caching at all.
     public static let disabled = CachingBehavior(isDisabled: true)
     
-    public mutating func modifyBehavior(for identity: EndpointIdentity, ttl: Double? = nil) {
+    public mutating func modifyBehavior(
+        of identity: CacheableEndpointIdentity,
+        ttl: Double? = nil
+    ) {
         guard !self.isDisabled else { return }
         self.storage[identity] = ttl ?? 0
     }
     
-    func getTTL(for identity: EndpointIdentity) -> Double? {
+    func getTTL(for identity: CacheableEndpointIdentity) -> Double? {
         guard !self.isDisabled else { return nil }
         guard let ttl = self.storage[identity] else { return self.defaultTTL }
         if ttl == 0 {
@@ -453,7 +458,7 @@ private final class ClientCacheStorage {
 private actor ClientCache {
     
     struct CacheableItem: Hashable {
-        let identity: EndpointIdentity
+        let identity: CacheableEndpointIdentity
         let queries: [String: String]
     }
     
