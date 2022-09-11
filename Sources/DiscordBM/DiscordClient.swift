@@ -212,10 +212,8 @@ extension DiscordClient {
         return try await send(to: endpoint)
     }
     
-    public func deleteApplicationGlobalCommand(
-        commandId: String
-    ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.deleteApplicationGlobalCommand(appId: appId, id: commandId)
+    public func deleteApplicationGlobalCommand(id: String) async throws -> HTTPClient.Response {
+        let endpoint = Endpoint.deleteApplicationGlobalCommand(appId: appId, id: id)
         return try await self.send(to: endpoint)
     }
     
