@@ -8,13 +8,6 @@ public enum DiscordGlobalConfiguration {
     /// Function to make loggers with. You can override it with your own logger.
     /// The `String` argument represents the label of the logger.
     public static var makeLogger: (String) -> Logger = { Logger(label: $0) }
-    /// How many seconds till each connection's `zombiedConnectionChecker`
-    /// becomes suspicious that the current connection is not healthy anymore.
-    /// It might take 5-10s more before the `zombiedConnectionChecker` makes
-    /// sure and drops the connection.
-    /// Use this when your app has a constant flow of gateway traffic, so the lib
-    /// can be sure that the connection is zombied if there are no messages in the period.
-    public static var zombiedConnectionCheckerTolerance: Double? = nil
     public static var webSocketMaxFrameSize = 1 << 31
 }
 

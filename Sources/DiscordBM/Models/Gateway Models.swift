@@ -19,6 +19,7 @@ public struct Gateway: Codable {
     public struct Event: Codable {
         
         public enum Payload {
+            case heartbeat(lastSequenceNumber: Int?)
             case identify(Identify)
             case hello(Hello)
             case ready(Ready)
@@ -338,6 +339,8 @@ public struct Gateway: Codable {
             switch self.data {
             case .none:
                 try container.encodeNil(forKey: .data)
+            case let .heartbeat(lastSequenceNumber):
+                try container.encode(lastSequenceNumber, forKey: .data)
             case let .identify(payload):
                 try container.encode(payload, forKey: .data)
             case let .resume(payload):
@@ -806,6 +809,7 @@ public struct Gateway: Codable {
         public var flags: IntBitField<Flag>?
         public var available_tags: [String]?
         public var template: String?
+        public var member_ids_preview: [String]?
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
     }
@@ -852,9 +856,9 @@ public struct Gateway: Codable {
         public var thread_member: ThreadMember?
         public var available_tags: [String]?
         public var template: String?
+        public var member_ids_preview: [String]?
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
-        public var member_ids_preview: [String]?
     }
     
     public struct ThreadDelete: Codable {

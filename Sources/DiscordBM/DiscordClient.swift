@@ -8,6 +8,8 @@ public enum DiscordClientError: Error {
     case emptyBody
 }
 
+/// The fact that this could be used by multiple different `DiscordClient`s with
+/// different `token`s should not matter because buckets are random anyway.
 private let rateLimiter = HTTPRateLimiter(label: "DiscordClientRateLimiter")
 
 public struct DiscordClient {

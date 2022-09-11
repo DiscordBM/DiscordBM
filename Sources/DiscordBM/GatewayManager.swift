@@ -83,11 +83,6 @@ public actor GatewayManager {
     /// more than 1000 identifies in a day, Discord will revoke the bot token.
     private var lastIdentifyDate = Date.distantPast
     
-    //MARK: Zombied-connection-checker
-    
-    /// Counter to keep track of how many times in a sequence a zombied connection was detected.
-    private nonisolated let zombiedConnectionCounter = ManagedAtomic(0)
-    
     //MARK: Ping-pong tracking properties
     private var unsuccessfulPingsCount = 0
     private var lastPongDate = Date()
@@ -219,15 +214,13 @@ extension GatewayManager {
         let connId = self.connectionId.load(ordering: .relaxed)
         self.setupOnText(forConnectionWithId: connId)
         self.setupOnClose(forConnectionWithId: connId)
-        self.setupZombiedConnectionCheckerTask(forConnectionWithId: connId)
         self._state.store(.configured, ordering: .relaxed)
     }
     
     private func processEvent(_ event: Gateway.Event) {
-        self.lastEventDate = Date()
-        self.zombiedConnectionCounter.store(0, ordering: .relaxed)
         if let sequenceNumber = event.sequenceNumber {
             self.sequenceNumber = sequenceNumber
+            self.lastEventDate = Date()
         }
         
         switch event.opcode {
@@ -238,7 +231,7 @@ extension GatewayManager {
         case .heartbeatAccepted:
             self.lastPongDate = Date()
         case .invalidSession:
-            break /// handeled in event.data
+            break /// handled in event.data
         default:
             break
         }
@@ -393,56 +386,6 @@ extension GatewayManager {
         }
     }
     
-    private func setupZombiedConnectionCheckerTask(forConnectionWithId connectionId: Int) {
-        guard let tolerance = DiscordGlobalConfiguration.zombiedConnectionCheckerTolerance
-        else { return }
-        Task {
-            logger.trace("Will check for zombied connection")
-            await self.sleep(for: .seconds(10))
-            
-            /// If connection has changed then end this instance.
-            guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-            func reschedule(in time: TimeAmount) async {
-                await self.sleep(for: time)
-                self.setupZombiedConnectionCheckerTask(forConnectionWithId: connectionId)
-            }
-            let now = Date().timeIntervalSince1970
-            let lastEvent = self.lastEventDate.timeIntervalSince1970
-            let past = now - lastEvent
-            let diff = tolerance - past
-            if diff > 0 {
-                await reschedule(in: .seconds(Int64(diff) + 1))
-            } else {
-                let tryToPingBeforeForceReconnect: Bool = {
-                    if self.zombiedConnectionCounter.load(ordering: .relaxed) != 0 {
-                        return false
-                    } else if self.ws == nil {
-                        return false
-                    } else if self.ws!.isClosed {
-                        return false
-                    } else if self.pingTaskInterval < Int(tolerance) {
-                        return false
-                    } else {
-                        return true
-                    }
-                }()
-                
-                if tryToPingBeforeForceReconnect {
-                    logger.trace("Will increase the zombied connection counter")
-                    /// Try to see if discord responds to a ping before trying to reconnect.
-                    self.sendPing(forConnectionWithId: connectionId)
-                    self.zombiedConnectionCounter.wrappingIncrement(ordering: .relaxed)
-                    await reschedule(in: .seconds(5))
-                } else {
-                    self.logger.error("Detected zombied connection. Will try to reconnect")
-                    self._state.store(.noConnection, ordering: .relaxed)
-                    self.connect()
-                    await reschedule(in: .seconds(30))
-                }
-            }
-        }
-    }
-    
     private func setupPingTask(
         forConnectionWithId connectionId: Int,
         every interval: TimeAmount
@@ -461,7 +404,10 @@ extension GatewayManager {
     
     private func sendPing(forConnectionWithId connectionId: Int) {
         logger.trace("Will ping for connection id \(connectionId)")
-        self.send(payload: .init(opcode: .heartbeat))
+        self.send(payload: .init(
+            opcode: .heartbeat,
+            data: .heartbeat(lastSequenceNumber: self.sequenceNumber)
+        ))
         Task {
             await self.sleep(for: .seconds(10))
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
