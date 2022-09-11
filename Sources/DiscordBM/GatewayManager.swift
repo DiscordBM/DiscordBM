@@ -127,7 +127,7 @@ public actor GatewayManager {
             intents: .init(values: intents)
         )
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
-        logger[metadataKey: "gateway-manager-id"] = .string("\(self.id)")
+        logger[metadataKey: "GatewayManager-id"] = .string("\(self.id)")
         self.logger = logger
     }
     
