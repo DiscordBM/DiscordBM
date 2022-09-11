@@ -10,11 +10,11 @@ enum Endpoint {
     case editOriginalInteractionResponse(appId: String, token: String)
     case deleteGatewayInteractionResponse(appId: String, token: String)
     case postFollowupGatewayInteractionResponse(appId: String, token: String)
-    case editGatewayInteractionResponseFollowup(appId: String, token: String, id: String)
+    case editGatewayInteractionResponseFollowup(appId: String, id: String, token: String)
     
-    case postChannelCreateMessage(channel: String)
-    case patchChannelEditMessage(channel: String, messageId: String)
-    case deleteChannelMessage(channel: String, messageId: String)
+    case postChannelCreateMessage(channelId: String)
+    case patchChannelEditMessage(channelId: String, messageId: String)
+    case deleteChannelMessage(channelId: String, messageId: String)
     
     case createApplicationGlobalCommand(appId: String)
     case getApplicationGlobalCommands(appId: String)
@@ -48,14 +48,14 @@ enum Endpoint {
             return "webhooks/\(appId)/\(token)/messages/@original"
         case let .postFollowupGatewayInteractionResponse(appId, token):
             return "webhooks/\(appId)/\(token)"
-        case let .editGatewayInteractionResponseFollowup(appId, token, id):
+        case let .editGatewayInteractionResponseFollowup(appId, id, token):
             return "webhooks/\(appId)/\(token)/messages/\(id)"
-        case let .postChannelCreateMessage(channel):
-            return "channels/\(channel)/messages"
-        case let .patchChannelEditMessage(channel, messageId):
-            return "channels/\(channel)/messages/\(messageId)"
-        case let .deleteChannelMessage(channel, messageId):
-            return "channels/\(channel)/messages/\(messageId)"
+        case let .postChannelCreateMessage(channelId):
+            return "channels/\(channelId)/messages"
+        case let .patchChannelEditMessage(channelId, messageId):
+            return "channels/\(channelId)/messages/\(messageId)"
+        case let .deleteChannelMessage(channelId, messageId):
+            return "channels/\(channelId)/messages/\(messageId)"
         case let .createApplicationGlobalCommand(appId):
             return "applications/\(appId)/commands"
         case let .getApplicationGlobalCommands(appId):

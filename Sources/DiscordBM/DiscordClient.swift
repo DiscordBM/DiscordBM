@@ -33,9 +33,6 @@ public struct DiscordClient {
     private let client: HTTPClient
     private let token: String
     private let appId: String
-    private var authHeaders: HTTPHeaders {
-        ["Authorization": "Bot \(token)"]
-    }
     
     public init(
         httpClient: HTTPClient,
@@ -65,7 +62,7 @@ public struct DiscordClient {
         let request = try HTTPClient.Request(
             url: endpoint.url + query.makeForURL(),
             method: endpoint.httpMethod,
-            headers: self.authHeaders
+            headers: ["Authorization": "Bot \(token)"]
         )
         let response = try await client.execute(request: request).get()
         self.includeInRateLimits(endpoint: endpoint, headers: response.headers)
@@ -87,12 +84,13 @@ public struct DiscordClient {
     ) async throws -> HTTPClient.Response {
         try self.checkRateLimitsAllowRequest(to: endpoint)
         let data = try DiscordGlobalConfiguration.encoder.encode(payload)
-        var headers = self.authHeaders
-        headers.add(name: "Content-Type", value: "application/json")
         let request = try HTTPClient.Request(
             url: endpoint.url + query.makeForURL(),
             method: endpoint.httpMethod,
-            headers: headers,
+            headers: [
+                "Authorization": "Bot \(token)",
+                "Content-Type": "application/json"
+            ],
             body: .bytes(data)
         )
         let response = try await client.execute(request: request).get()
@@ -114,7 +112,7 @@ extension DiscordClient: CustomStringConvertible {
     public var description: String {
         "DiscordClient("
         + "client: \(client), "
-        + "token: \(token.count > 6 ? String(token.dropLast(token.count - 6)) + "****" : "******"), "
+        + "token: \(token.dropLast(max(0, token.count - 6)))****, "
         + "appId: \(appId)"
         + ")"
     }
@@ -151,7 +149,9 @@ extension DiscordClient {
         return try await self.send(to: endpoint, payload: payload)
     }
     
-    public func deleteGatewayInteractionResponse(token: String) async throws -> HTTPClient.Response {
+    public func deleteGatewayInteractionResponse(
+        token: String
+    ) async throws -> HTTPClient.Response {
         let endpoint = Endpoint.deleteGatewayInteractionResponse(appId: appId, token: token)
         return try await self.send(to: endpoint)
     }
@@ -165,36 +165,36 @@ extension DiscordClient {
     }
     
     public func editGatewayInteractionResponseFollowup(
-        token: String,
         id: String,
+        token: String,
         payload: InteractionResponse
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.editGatewayInteractionResponseFollowup(appId: appId, token: token, id: id)
+        let endpoint = Endpoint.editGatewayInteractionResponseFollowup(appId: appId, id: id, token: token)
         return try await self.send(to: endpoint, payload: payload)
     }
     
     public func postChannelCreateMessage(
-        id: String,
+        channelId: String,
         payload: ChannelCreateMessage
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.postChannelCreateMessage(channel: id)
+        let endpoint = Endpoint.postChannelCreateMessage(channelId: channelId)
         return try await self.send(to: endpoint, payload: payload)
     }
     
     public func patchChannelEditMessage(
-        channel: String,
+        channelId: String,
         messageId: String,
         payload: ChannelEditMessage
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.patchChannelEditMessage(channel: channel, messageId: messageId)
+        let endpoint = Endpoint.patchChannelEditMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint, payload: payload)
     }
     
     public func deleteChannelMessage(
-        channel: String,
+        channelId: String,
         messageId: String
     ) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.deleteChannelMessage(channel: channel, messageId: messageId)
+        let endpoint = Endpoint.deleteChannelMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint)
     }
     
@@ -210,8 +210,10 @@ extension DiscordClient {
         return try await send(to: endpoint)
     }
     
-    public func deleteApplicationGlobalCommand(id: String) async throws -> HTTPClient.Response {
-        let endpoint = Endpoint.deleteApplicationGlobalCommand(appId: appId, id: id)
+    public func deleteApplicationGlobalCommand(
+        commandId: String
+    ) async throws -> HTTPClient.Response {
+        let endpoint = Endpoint.deleteApplicationGlobalCommand(appId: appId, id: commandId)
         return try await self.send(to: endpoint)
     }
     
