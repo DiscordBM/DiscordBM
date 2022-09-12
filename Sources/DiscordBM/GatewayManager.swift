@@ -367,27 +367,42 @@ extension GatewayManager {
     }
     
     private func setupOnClose(forConnectionWithId connectionId: Int) {
-        self.ws?.onClose.whenComplete { _ in
+        self.ws?.onClose.whenComplete { [weak self] _ in
+            guard let `self` = self else { return }
             self.logger.trace("Received connection close notification for a web-socket")
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             Task {
-                let code: WebSocketErrorCode?
-#if swift(>=5.7)
-                code = await self.ws?.closeCode
-#else
-                code = self.ws?.closeCode
-#endif
+                let (code, codeDesc) = await self.getCloseCodeAndDescription()
                 self.logger.log(
                     /// If its `nil` or `.goingAway`, then it's likely just a resume notice.
                     /// Otherwise it might be an error.
                     level: (code == nil || code == .goingAway) ? .notice : .error,
                     "Received connection close notification. Will try to reconnect",
-                    metadata: ["code": "\(String(describing: code))"]
+                    metadata: ["code": .string(codeDesc)]
                 )
                 self._state.store(.noConnection, ordering: .relaxed)
                 self.connect()
             }
         }
+    }
+    
+    private func getCloseCodeAndDescription() -> (WebSocketErrorCode?, String) {
+        let code = self.ws?.closeCode
+        let description: String
+        switch code {
+        case let .unknown(codeNumber):
+            switch Gateway.CloseCode(rawValue: Int(codeNumber)) {
+            case let .some(discordCode):
+                description = "\(discordCode)"
+            case .none:
+                description = "\(codeNumber)"
+            }
+        case let .some(anyOtherCode):
+            description = "\(anyOtherCode)"
+        case .none:
+            description = "nil"
+        }
+        return (code, description)
     }
     
     private func setupPingTask(
@@ -448,7 +463,7 @@ extension GatewayManager {
                 ])
             }
         } catch {
-            logger.error("Could not encode payload. This is a library issue, please report", metadata: [
+            logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
                 "payload": "\(payload)",
                 "opcode": "\(opcode ?? 255)"
             ])
@@ -461,7 +476,7 @@ extension GatewayManager {
         self.unsuccessfulPingsCount = 0
     }
     
-    /// Retuns `nil` if can connect immediately,
+    /// Returns `nil` if can connect immediately,
     /// otherwise `TimeAmount` to wait before attempting to connect.
     /// Increases `connectionTryCount`.
     private func canTryToConnectIn() -> TimeAmount? {
@@ -505,8 +520,8 @@ extension GatewayManager {
                 /// These 2 seconds is just a number I deemed safe.
                 /// Optimally we should implement managing all shards of a bot together
                 /// so we can know when shards connect and can start the new bucket, but
-                /// that doesn't seem easy as shard might be running outside only 1
-                /// process and we won't be able to know manage them easily.
+                /// that doesn't seem easy as shards might be running outside only 1
+                /// process and we won't be able to manage them easily.
                 await self.sleep(for: .seconds(Int64(bucketIndex) * 2))
             }
         }

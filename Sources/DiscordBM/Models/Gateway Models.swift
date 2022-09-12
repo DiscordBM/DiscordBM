@@ -355,7 +355,7 @@ public struct Gateway: Codable {
         }
     }
     
-    public enum CloseEventCode: Int, Codable {
+    public enum CloseCode: Int, Codable {
         case unknownError = 4000
         case unknownOpcode = 4001
         case decodeError = 4002
