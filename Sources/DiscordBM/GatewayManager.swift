@@ -61,7 +61,6 @@ public actor GatewayManager {
     private nonisolated let connectionId = ManagedAtomic(UInt(0))
     
     private var pingTaskInterval = 0
-    private var lastEventDate = Date()
     
     //MARK: Resume-related current-connection properties
     
@@ -190,7 +189,6 @@ extension GatewayManager {
         }
         self._state.store(.connecting, ordering: .relaxed)
         self.connectionId.wrappingIncrement(ordering: .relaxed)
-        self.lastEventDate = Date()
         self.lastSend = .distantPast
         let gatewayUrl = await getGatewayUrl()
         logger.trace("Will wait for other shards if needed")
@@ -228,7 +226,6 @@ extension GatewayManager {
     private func processEvent(_ event: Gateway.Event) {
         if let sequenceNumber = event.sequenceNumber {
             self.sequenceNumber = sequenceNumber
-            self.lastEventDate = Date()
         }
         
         switch event.opcode {
