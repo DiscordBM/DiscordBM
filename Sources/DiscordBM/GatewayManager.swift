@@ -58,7 +58,7 @@ public actor GatewayManager {
     //MARK: Current connection properties
     
     /// An ID to keep track of connection changes.
-    private nonisolated let connectionId = ManagedAtomic(Int.random(in: Int.min...Int.max))
+    private nonisolated let connectionId = ManagedAtomic(UInt(0))
     
     private var pingTaskInterval = 0
     private var lastEventDate = Date()
@@ -73,7 +73,6 @@ public actor GatewayManager {
     private var resumeGatewayUrl: String? = nil
     
     //MARK: Shard-ing
-    
     private var maxConcurrency: Int? = nil
     private var isFirstConnection = true
     
@@ -107,7 +106,7 @@ public actor GatewayManager {
         )
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
-        logger[metadataKey: "GatewayManager-id"] = .string("\(self.id)")
+        logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
     }
     
@@ -135,7 +134,7 @@ public actor GatewayManager {
             intents: .init(values: intents)
         )
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
-        logger[metadataKey: "GatewayManager-id"] = .string("\(self.id)")
+        logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
     }
     
@@ -190,7 +189,7 @@ extension GatewayManager {
             return
         }
         self._state.store(.connecting, ordering: .relaxed)
-        self.connectionId.store(.random(in: Int.min...Int.max), ordering: .relaxed)
+        self.connectionId.wrappingIncrement(ordering: .relaxed)
         self.lastEventDate = Date()
         self.lastSend = .distantPast
         let gatewayUrl = await getGatewayUrl()
@@ -347,7 +346,7 @@ extension GatewayManager {
         self.send(payload: identify)
     }
     
-    private func setupOnText(forConnectionWithId connectionId: Int) {
+    private func setupOnText(forConnectionWithId connectionId: UInt) {
         self.ws?.onText { _, text in
             self.logger.trace("Got text from websocket \(text)")
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
@@ -371,7 +370,7 @@ extension GatewayManager {
         }
     }
     
-    private func setupOnClose(forConnectionWithId connectionId: Int) {
+    private func setupOnClose(forConnectionWithId connectionId: UInt) {
         self.ws?.onClose.whenComplete { [weak self] _ in
             guard let `self` = self else { return }
             self.logger.trace("Received connection close notification for a web-socket")
@@ -411,7 +410,7 @@ extension GatewayManager {
     }
     
     private func setupPingTask(
-        forConnectionWithId connectionId: Int,
+        forConnectionWithId connectionId: UInt,
         every interval: TimeAmount
     ) {
         Task {
@@ -426,7 +425,7 @@ extension GatewayManager {
         }
     }
     
-    private func sendPing(forConnectionWithId connectionId: Int) {
+    private func sendPing(forConnectionWithId connectionId: UInt) {
         logger.trace("Will ping for connection id \(connectionId)")
         self.send(payload: .init(
             opcode: .heartbeat,
@@ -458,7 +457,7 @@ extension GatewayManager {
     private func send(
         payload: Gateway.Event,
         opcode: UInt8? = nil,
-        connectionId: Int? = nil,
+        connectionId: UInt? = nil,
         tryCount: Int = 0
     ) {
         if let connectionId = connectionId,
@@ -580,7 +579,7 @@ extension GatewayManager {
     }
     
     private func disconnectAsync() {
-        self.connectionId.store(.random(in: Int.min...Int.max), ordering: .relaxed)
+        self.connectionId.wrappingIncrement(ordering: .relaxed)
         self.closeWebSocket(ws: self.ws)
         self._state.store(.noConnection, ordering: .relaxed)
         self.isFirstConnection = true
