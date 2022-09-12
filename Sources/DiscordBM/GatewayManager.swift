@@ -286,19 +286,21 @@ extension GatewayManager {
             logger.trace("Got Discord gateway url from `resumeGatewayUrl`")
             return gatewayUrl
         } else {
-            if identifyPayload.shard == nil,
-               let gatewayUrl = try? await client.getGateway().decode().url {
-                logger.trace("Got Discord gateway url from gateway api call")
-                return gatewayUrl
-            } else if let gatewayBot = try? await client.getGatewayBot().decode() {
-                logger.trace("Got Discord gateway url from gateway-bot api call. Max concurrency: \(gatewayBot.session_start_limit.max_concurrency)")
-                self.maxConcurrency = gatewayBot.session_start_limit.max_concurrency
-                return gatewayBot.url
+            if identifyPayload.shard == nil {
+                if let gatewayUrl = try? await client.getGateway().decode().url {
+                    logger.trace("Got Discord gateway url from gateway api call")
+                    return gatewayUrl
+                }
             } else {
-                logger.error("Cannot get gateway url to connect to. Will retry in 5 seconds")
-                await self.sleep(for: .seconds(5))
-                return await self.getGatewayUrl()
+                if let gatewayBot = try? await client.getGatewayBot().decode() {
+                    logger.trace("Got Discord gateway url from gateway-bot api call. Max concurrency: \(gatewayBot.session_start_limit.max_concurrency)")
+                    self.maxConcurrency = gatewayBot.session_start_limit.max_concurrency
+                    return gatewayBot.url
+                }
             }
+            logger.error("Cannot get gateway url to connect to. Will retry in 5 seconds")
+            await self.sleep(for: .seconds(5))
+            return await self.getGatewayUrl()
         }
     }
     
