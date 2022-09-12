@@ -330,6 +330,7 @@ extension GatewayManager {
         )
         
         /// Invalidate these temporary info for the next connection, incase this one fails.
+        /// This will be a notice for the next connection to don't try resuming anymore.
         self.sequenceNumber = nil
         self.resumeGatewayUrl = nil
         /// Don't invalidate `sessionId` because it'll be needed for the next resumes as well.
@@ -382,7 +383,12 @@ extension GatewayManager {
                     /// Otherwise it might be an error.
                     level: (code == nil || code == .goingAway) ? .notice : .error,
                     "Received connection close notification. Will try to reconnect",
-                    metadata: ["code": .string(codeDesc)]
+                    metadata: [
+                        "code": .string(codeDesc),
+                        "closedConnectionId": .stringConvertible(
+                            self.connectionId.load(ordering: .relaxed)
+                        )
+                    ]
                 )
                 self._state.store(.noConnection, ordering: .relaxed)
                 self.connect()
@@ -447,7 +453,9 @@ extension GatewayManager {
                 self.unsuccessfulPingsCount += 1
             }
             if unsuccessfulPingsCount > 2 {
-                logger.error("Too many unsuccessful pings. Will try to reconnect")
+                logger.error("Too many unsuccessful pings. Will try to reconnect", metadata: [
+                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                ])
                 self._state.store(.noConnection, ordering: .relaxed)
                 self.connect()
             }
@@ -469,7 +477,8 @@ extension GatewayManager {
             logger.error("Send queue is too busy, will cancel sending a payload", metadata: [
                 "failedTryCount": .stringConvertible(tryCount),
                 "payload": "\(payload)",
-                "opcode": "\(String(describing: opcode))"
+                "opcode": "\(String(describing: opcode))",
+                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
             ])
             return
         }
@@ -500,13 +509,15 @@ extension GatewayManager {
             } else {
                 logger.warning("Trying to send through ws when a connection is not established", metadata: [
                     "payload": "\(payload)",
-                    "state": "\(self._state.load(ordering: .relaxed))"
+                    "state": .stringConvertible(self._state.load(ordering: .relaxed)),
+                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                 ])
             }
         } catch {
             logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
                 "payload": "\(payload)",
-                "opcode": "\(opcode ?? 255)"
+                "opcode": .stringConvertible(opcode ?? 255),
+                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
             ])
         }
     }
@@ -579,6 +590,9 @@ extension GatewayManager {
     }
     
     private func disconnectAsync() {
+        logger.trace("Will disconnect", metadata: [
+            "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+        ])
         self.connectionId.wrappingIncrement(ordering: .relaxed)
         self.closeWebSocket(ws: self.ws)
         self._state.store(.noConnection, ordering: .relaxed)
