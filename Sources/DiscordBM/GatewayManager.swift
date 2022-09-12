@@ -35,7 +35,8 @@ public actor GatewayManager {
     private nonisolated let eventLoopGroup: EventLoopGroup
     public nonisolated let client: DiscordClient
     private static let idGenerator = ManagedAtomic(0)
-    public nonisolated let id = GatewayManager.idGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
+    public nonisolated let id = GatewayManager.idGenerator
+        .wrappingIncrementThenLoad(ordering: .relaxed)
     private let logger: Logger
     
     //MARK: Event hooks
@@ -50,6 +51,9 @@ public actor GatewayManager {
     public nonisolated var state: State {
         self._state.load(ordering: .relaxed)
     }
+    
+    //MARK: Send queue
+    private var lastSend = Date.distantPast
     
     //MARK: Current connection properties
     
@@ -188,6 +192,7 @@ extension GatewayManager {
         self._state.store(.connecting, ordering: .relaxed)
         self.connectionId.store(.random(in: Int.min...Int.max), ordering: .relaxed)
         self.lastEventDate = Date()
+        self.lastSend = .distantPast
         let gatewayUrl = await getGatewayUrl()
         logger.trace("Will wait for other shards if needed")
         await waitInShardQueueIfNeeded()
@@ -449,8 +454,45 @@ extension GatewayManager {
             }
         }
     }
-        
-    private func send(payload: Gateway.Event, opcode: UInt8? = nil) {
+    
+    private func send(
+        payload: Gateway.Event,
+        opcode: UInt8? = nil,
+        connectionId: Int? = nil,
+        tryCount: Int = 0
+    ) {
+        if let connectionId = connectionId,
+           self.connectionId.load(ordering: .relaxed) != connectionId {
+            return
+        }
+        /// Can't keep a payload in queue forever, it'll exhaust bot's resources eventually.
+        guard tryCount <= 10 else {
+            logger.error("Send queue is too busy, will cancel sending a payload", metadata: [
+                "failedTryCount": .stringConvertible(tryCount),
+                "payload": "\(payload)",
+                "opcode": "\(String(describing: opcode))"
+            ])
+            return
+        }
+        /// If there has been a send in the last `waitTime`, queue this
+        /// payload to be sent after its been `waitTime` already.
+        let waitTime = 0.25
+        let now = Date().timeIntervalSince1970
+        let past = now - self.lastSend.timeIntervalSince1970
+        guard past > waitTime else {
+            let waitMore = waitTime - past + 0.001
+            self.lastSend = Date().addingTimeInterval(waitMore)
+            Task {
+                await self.sleep(for: .milliseconds(Int64(waitMore * 1_000)))
+                self.send(
+                    payload: payload,
+                    opcode: opcode,
+                    connectionId: connectionId ?? self.connectionId.load(ordering: .relaxed),
+                    tryCount: tryCount + 1
+                )
+            }
+            return
+        }
         do {
             let data = try DiscordGlobalConfiguration.encoder.encode(payload)
             let opcode = opcode ?? UInt8(payload.opcode.rawValue)
@@ -474,6 +516,7 @@ extension GatewayManager {
         self._state.store(.connected, ordering: .relaxed)
         self.connectionTryCount = 0
         self.unsuccessfulPingsCount = 0
+        self.lastSend = .distantPast
     }
     
     /// Returns `nil` if can connect immediately,
@@ -517,7 +560,7 @@ extension GatewayManager {
             let bucketIndex = shard.first / maxConcurrency
             if bucketIndex > 0 {
                 /// Wait 2 seconds for each bucket index.
-                /// These 2 seconds is just a number I deemed safe.
+                /// These 2 seconds is nothing scientific.
                 /// Optimally we should implement managing all shards of a bot together
                 /// so we can know when shards connect and can start the new bucket, but
                 /// that doesn't seem easy as shards might be running outside only 1
@@ -541,6 +584,7 @@ extension GatewayManager {
         self.closeWebSocket(ws: self.ws)
         self._state.store(.noConnection, ordering: .relaxed)
         self.isFirstConnection = true
+        self.lastSend = .distantPast
     }
     
     private func sleep(for time: TimeAmount) async {
