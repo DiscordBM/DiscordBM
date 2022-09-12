@@ -593,6 +593,7 @@ extension GatewayManager {
             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
         ])
         self.connectionId.wrappingIncrement(ordering: .relaxed)
+        self.connectionTryCount = 0
         self.closeWebSocket(ws: self.ws)
         self._state.store(.noConnection, ordering: .relaxed)
         self.isFirstConnection = true
