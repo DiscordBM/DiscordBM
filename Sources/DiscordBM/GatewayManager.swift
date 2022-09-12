@@ -480,10 +480,9 @@ extension GatewayManager {
         let now = Date().timeIntervalSince1970
         let past = now - self.lastSend.timeIntervalSince1970
         guard past > waitTime else {
-            let waitMore = waitTime - past + 0.001
-            self.lastSend = Date().addingTimeInterval(waitMore)
+            let waitMore = Int64((waitTime - past) * 1_000) + 1
             Task {
-                await self.sleep(for: .milliseconds(Int64(waitMore * 1_000)))
+                await self.sleep(for: .milliseconds(waitMore))
                 self.send(
                     payload: payload,
                     opcode: opcode,
@@ -497,6 +496,7 @@ extension GatewayManager {
             let data = try DiscordGlobalConfiguration.encoder.encode(payload)
             let opcode = opcode ?? UInt8(payload.opcode.rawValue)
             if let ws = self.ws {
+                self.lastSend = Date()
                 ws.send(raw: data, opcode: .init(encodedWebSocketOpcode: opcode)!)
             } else {
                 logger.warning("Trying to send through ws when a connection is not established", metadata: [
