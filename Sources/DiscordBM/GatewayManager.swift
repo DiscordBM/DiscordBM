@@ -265,12 +265,16 @@ extension GatewayManager {
             self.pingTaskInterval = hello.heartbeat_interval
             self.sendResumeOrIdentify()
         case let .ready(payload):
-            logger.notice("Received ready notice. The connection is fully established now")
+            logger.notice("Received ready notice. The connection is fully established", metadata: [
+                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+            ])
             self.onSuccessfulConnection()
             self.sessionId = payload.session_id
             self.resumeGatewayUrl = payload.resume_gateway_url
         case .resumed:
-            logger.notice("Received resume notice. The connection is fully established now")
+            logger.notice("Received resume notice. The connection is fully established", metadata: [
+                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+            ])
             self.onSuccessfulConnection()
         default:
             break
