@@ -48,7 +48,7 @@ let manager = GatewayManager(
 )
 
 /// it's important to shutdown the httpClient _after all requests are done_, even if one failed
-/// libraries like vapor take care of this on their own if you use the shared http client
+/// libraries like Vapor take care of this on their own if you use the shared http client
 try await httpClient.shutdown()
 ```
 
@@ -122,9 +122,9 @@ This library will try to follow the no-breaking-changes-in-minor-versions rule, 
 * If Discord has made some changes that need breaking changes in this library, but are not worth a major release and are rather small.
 * When adding enum cases.
 
-## Wishlist / Not Yet Supported:
+## Wishlist / Not Yet Supported
 * Better documentation
-* More tests (currently very little tests)
+* More tests (Currently very little tests)
 * Support more endpoints (Easy to add yourself; PRs appreciated)
 * Make eveything Sendable
 * Remove a few redundant structs
