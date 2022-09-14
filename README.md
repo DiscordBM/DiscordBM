@@ -2,12 +2,12 @@
 
 [![Build Status](https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg)](https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml)
 
-A library for making Discord bots in Swift.
+A Swift library for making Discord bots.
 
 ## How To Use
 First you need to initialize a `GatewayManager` instance, then tell it to connect and start using it:
 
-### Initializing A Manager With Vapor
+### Initializing a Gateway Manager With Vapor
 ```swift
 import DiscordBM
 import Vapor
@@ -17,8 +17,9 @@ let manager = GatewayManager(
     eventLoopGroup: app.eventLoopGroup,
     httpClient: app.http.client.shared,
     token: YOUR_BOT_TOKEN,
-    appId: YOUR_APPLICATION_ID,
+    appId: YOUR_APP_ID,
     presence: .init( /// Set up bot's initial presence
+        /// Will show up as "Playing Fortnite"
         activities: [.init(name: "Fortnite", type: .game)],
         status: .online,
         afk: false
@@ -27,7 +28,7 @@ let manager = GatewayManager(
 )
 ```
 
-### Initializing A Manager On Your Own
+### Initializing a Gateway Manager On Your Own
 Make sure you've added [AsyncHTTPClient](https://github.com/swift-server/async-http-client) to your dependancies.
 ```swift
 import DiscordBM
@@ -38,9 +39,10 @@ let manager = GatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,
     token: YOUR_BOT_TOKEN,
-    appId: YOUR_APPLICATION_ID,
+    appId: YOUR_APP_ID,
     presence: .init( /// Set up bot's initial presence
-        activities: [.init(name: "Fortnite", type: .game)],
+        /// Will show up as "Playing Fortnite"
+        activities: [.init(name: "Fortnite", type: .game)], 
         status: .online,
         afk: false
     ),
@@ -57,9 +59,6 @@ try await httpClient.shutdown()
 import DiscordBM
 
 let manager: GatewayManager = ... /// Make an instance like above
-
-/// Tell manager to connect to Discord
-manager.connect()
 
 /// Add event handlers
 Task {
@@ -78,6 +77,9 @@ Task {
     }
 }
 
+/// Tell manager to connect to Discord
+manager.connect()
+
 /// Use `manager.client` to send requests to discord.
 Task {
     try await manager.client.createMessage(
@@ -86,7 +88,7 @@ Task {
     )
 }
 
-// If you don't use libraires like Vapor that do this for you, 
+// If you don't use libraries like Vapor that do this for you, 
 // you'll need to uncomment this line and call it from a non-async context.
 // Otherwise your executable will exit immediately after every run.
 // RunLoop.current.run()
@@ -106,7 +108,7 @@ To use the `DiscordBM` library in a SwiftPM project,
 add the following line to the dependencies in your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/MahdiBM/DiscordBM", branch: "main"),
+.package(url: "https://github.com/MahdiBM/DiscordBM", from: "1.0.0-beta.1"),
 ```
 
 Include `"DiscordBM"` as a dependency for your targets:
