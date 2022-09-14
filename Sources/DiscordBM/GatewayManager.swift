@@ -1,13 +1,10 @@
-import WebSocketKit
-import enum NIOWebSocket.WebSocketErrorCode
-import Logging
-import struct NIOCore.TimeAmount
-import struct Foundation.Data
-import struct Foundation.Date
-import Atomics
-import AsyncHTTPClient
-import struct Foundation.UUID
 import Foundation
+import WebSocketKit
+import AsyncHTTPClient
+import Atomics
+import Logging
+import enum NIOWebSocket.WebSocketErrorCode
+import struct NIOCore.TimeAmount
 
 public actor GatewayManager {
     

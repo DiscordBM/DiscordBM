@@ -2,7 +2,7 @@ import Foundation
 import Logging
 
 public enum DiscordGlobalConfiguration {
-    /// Currently only 10 is supported
+    /// Currently only 10 is supported.
     public static let apiVersion = 10
     public static var decoder: DiscordDecoder = JSONDecoder()
     public static var encoder: DiscordEncoder = JSONEncoder()

@@ -1,4 +1,4 @@
-import Foundation
+import struct Foundation.Calendar
 
 extension Calendar {
     static let utc: Calendar = {

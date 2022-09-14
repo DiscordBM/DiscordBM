@@ -1,4 +1,3 @@
-import Foundation
 import NIOHTTP1
 
 public enum CacheableEndpointIdentity: Int, Hashable, CaseIterable {

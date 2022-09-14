@@ -1,7 +1,7 @@
-import Foundation
 import AsyncHTTPClient
 import NIOHTTP1
 import NIOConcurrencyHelpers
+import struct Foundation.Date
 
 public enum DiscordClientError: Error {
     case rateLimited(url: String)
