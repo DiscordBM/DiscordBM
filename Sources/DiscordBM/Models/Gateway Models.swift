@@ -805,6 +805,7 @@ public struct Gateway: Codable {
         public var member: ThreadMember?
         public var default_auto_archive_duration: Int?
         public var default_thread_rate_limit_per_user: Int?
+        public var default_reaction_emoji: String?
         public var permissions: StringBitField<Permission>?
         public var flags: IntBitField<Flag>?
         public var available_tags: [String]?
@@ -1281,7 +1282,8 @@ public struct Gateway: Codable {
         public var inviter: User?
         public var max_age: Int
         public var max_uses: Int
-        public var target_type: Int?
+        public var target_user_type: Int? // FIXME: TYPIFY; are these two the same?
+        public var target_type: Int? // FIXME: TYPIFY; are these two the same?
         public var target_user: User?
         public var target_application: PartialApplication?
         public var temporary: Bool
