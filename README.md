@@ -80,15 +80,17 @@ Task {
 
 /// Use `manager.client` to send requests to discord.
 Task {
-    try await manager.client.postChannelCreateMessage(
-        id: CHANNEL_ID,
+    try await manager.client.createMessage(
+        channelId: CHANNEL_ID,
         payload: .init(content: "Hello Everybody!")
     )
 }
-```
 
-### Starting The Bot
-If you don't use a library like Vapor that does this for you, you'll need to call `RunLoop.current.run()` from a non-async context, to start your app. Otherwise your executable will exit immediately after every run.
+// If you don't use libraires like Vapor that do this for you, 
+// you'll need to uncomment this line and call it from a non-async context.
+// Otherwise your executable will exit immediately after every run.
+// RunLoop.current.run()
+```
 
 ### Finding Your Bot Token
 In [Discord developer portal](https://discord.com/developers/applications):
