@@ -126,10 +126,14 @@ This library will try to follow the no-breaking-changes-in-minor-versions rule, 
 * Better documentation
 * More tests (currently very little tests)
 * Support more endpoints (Easy to add yourself; PRs appreciated)
+* Make eveything Sendable
 * Remove a few redundant structs
-* Attachments support (You can provide media links instead, for now, which is better anyway)
-* OAuth support
-* Discord client caching
+* Attachments support (For now you can provide media links instead, which is usually better anyway)
+* OAuth-2 support
+
+## Showcase
+You can see Vapor community's Penny bot as a showcase of using this library in production. Penny is used to give coins to the helpful members of the Vapor community as a sign of appreciation.   
+Penny is available [here](https://github.com/vapor/penny-bot) and you can find `DiscordBM` used in the [PennyBOT](https://github.com/vapor/penny-bot/tree/main/CODE/Sources/PennyBOT) target.
 
 ## Contribution
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.
