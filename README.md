@@ -52,6 +52,8 @@ let manager = GatewayManager(
 /// it's important to shutdown the httpClient _after all requests are done_, even if one failed
 /// libraries like Vapor take care of this on their own if you use the shared http client
 try await httpClient.shutdown()
+/// Use `syncShutdown()` in non-async contexts
+try httpClient.syncShutdown()
 ```
 
 ### Using The Gateway Manager
