@@ -851,6 +851,7 @@ public struct Gateway: Codable {
         public var thread_metadata: ThreadMetadata
         public var member: ThreadMember?
         public var default_auto_archive_duration: Int?
+        public var default_reaction_emoji: String?
         public var permissions: StringBitField<Channel.Permission>?
         public var flags: IntBitField<Channel.Flag>?
         public var newly_created: Bool?
