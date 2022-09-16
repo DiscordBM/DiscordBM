@@ -134,8 +134,9 @@ This library will try to follow the no-breaking-changes-in-minor-versions rule, 
 * Support more endpoints (Easy to add yourself; PRs appreciated)
 * Make eveything Sendable
 * Remove a few redundant structs
+* Support gateway payload compression 
 * Attachments support (For now you can provide media links instead, which is usually better anyway)
-* OAuth-2 support
+* OAuth-2 support (Not really needed for bots, so not a priority)
 
 ## Showcase
 You can see Vapor community's Penny bot as a showcase of using this library in production. Penny is used to give coins to the helpful members of the Vapor community as a sign of appreciation.   
