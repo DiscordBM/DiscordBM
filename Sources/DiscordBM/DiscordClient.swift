@@ -69,13 +69,17 @@ public struct DiscordClient {
     }
     
     private func checkRateLimitsAllowRequest(to endpoint: Endpoint) async throws {
-        if await !rateLimiter.canRequest(to: "\(endpoint.id)") {
+        if await !rateLimiter.canRequest(to: endpoint) {
             throw DiscordClientError.rateLimited(url: "\(endpoint.url)")
         }
     }
     
-    private func includeInRateLimits(endpoint: Endpoint, headers: HTTPHeaders) async {
-        await rateLimiter.include(endpointId: "\(endpoint.id)", headers: headers)
+    private func includeInRateLimits(
+        endpoint: Endpoint,
+        headers: HTTPHeaders,
+        status: HTTPResponseStatus
+    ) async {
+        await rateLimiter.include(endpoint: endpoint, headers: headers, status: status)
     }
     
     private func getFromCache(
@@ -122,7 +126,11 @@ public struct DiscordClient {
             headers: ["Authorization": "Bot \(token._storage)"]
         )
         let response = try await client.execute(request: request).get()
-        await self.includeInRateLimits(endpoint: endpoint, headers: response.headers)
+        await self.includeInRateLimits(
+            endpoint: endpoint,
+            headers: response.headers,
+            status: response.status
+        )
         await self.saveInCache(
             response: response,
             identity: identity,
@@ -160,7 +168,11 @@ public struct DiscordClient {
             body: .bytes(data)
         )
         let response = try await client.execute(request: request).get()
-        await self.includeInRateLimits(endpoint: endpoint, headers: response.headers)
+        await self.includeInRateLimits(
+            endpoint: endpoint,
+            headers: response.headers,
+            status: response.status
+        )
         await self.saveInCache(
             response: response,
             identity: identity,

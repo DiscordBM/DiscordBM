@@ -1,5 +1,6 @@
 import struct Foundation.Date
 import NIOHTTP1
+import AsyncHTTPClient
 
 private let logger = DiscordGlobalConfiguration.makeLogger("DiscordBM.HTTPRateLimiter")
 
@@ -65,46 +66,74 @@ actor HTTPRateLimiter {
     let label: String
     
     /// [Endpoint-ID: Bucket-ID]
-    private var endpoints: [String: String] = [:]
+    private var endpoints: [Int: String] = [:]
     
     /// [Bucket-ID: Bucket]
     private var buckets: [String: Bucket] = [:]
     
     /// To take care of the global rate limit.
-    private var requestsThisSecond: (second: Int, count: Int) = (0, 0)
+    private var requestsThisSecond: (id: Int, count: Int) = (0, 0)
+    
+    /// Only 10K invalid requests allowed each 10 minutes.
+    /// Fixed 10 minute intervals, which I'm not sure if it's the correct implementation.
+    private var invalidRequestsIn10Minutes: (id: Int, count: Int) = (0, 0)
     
     init(label: String) {
         self.label = label
     }
     
-    private func globalRateLimitAllows() -> Bool {
-        let now = Int(Date().timeIntervalSince1970)
-        if self.requestsThisSecond.second == now {
+    private func currentGlobalRateLimitId() -> Int {
+        Int(Date().timeIntervalSince1970)
+    }
+    
+    private func current10MinutelyRateLimitId() -> Int {
+        Int(Date().timeIntervalSince1970) / 600
+    }
+    
+    private func check10MinutelyInvalidRequestsLimitAllows() -> Bool {
+        let tenMinutelyId = self.current10MinutelyRateLimitId()
+        if invalidRequestsIn10Minutes.id == tenMinutelyId,
+           invalidRequestsIn10Minutes.count >= 10_000 {
+            logger.warning("Hit HTTP Global Invalid Requests Limit.", metadata: [
+                "label": .string(label)
+            ])
+            return false
+        } else {
+            return true
+        }
+    }
+    
+    private func globalRateLimitAllowsAndAddRecord() -> Bool {
+        let globalId = self.currentGlobalRateLimitId()
+        if self.requestsThisSecond.id == globalId {
             if self.requestsThisSecond.count >= DiscordGlobalConfiguration.globalRateLimit {
                 logger.warning("Hit HTTP Global Rate-Limit.", metadata: [
                     "label": .string(label)
                 ])
                 return false
             } else {
-                self.requestsThisSecond = (now, self.requestsThisSecond.count + 1)
+                self.requestsThisSecond.count += 1
                 return true
             }
         } else {
-            self.requestsThisSecond = (now, 1)
+            self.requestsThisSecond = (globalId, 1)
             return true
         }
     }
     
-    func canRequest(to endpointId: String) -> Bool {
-        guard globalRateLimitAllows() else { return false }
-        if let bucketId = self.endpoints[endpointId],
+    func canRequest(to endpoint: Endpoint) -> Bool {
+        guard endpoint.countsAgainstGlobalRateLimit,
+              check10MinutelyInvalidRequestsLimitAllows(),
+              globalRateLimitAllowsAndAddRecord()
+        else { return false }
+        if let bucketId = self.endpoints[endpoint.id],
            let bucket = self.buckets[bucketId] {
             if bucket.canRequest() {
                 return true
             } else {
                 logger.warning("Hit HTTP Bucket Rate-Limit.", metadata: [
                     "label": .string(label),
-                    "endpointId": .string(endpointId),
+                    "endpointId": .stringConvertible(endpoint.id),
                     "bucket": .stringConvertible(bucket)
                 ])
                 return false
@@ -114,10 +143,20 @@ actor HTTPRateLimiter {
         }
     }
     
-    func include(endpointId: String, headers: HTTPHeaders) {
+    func include(endpoint: Endpoint, headers: HTTPHeaders, status: HTTPResponseStatus) {
+        /// Add to invalid requests limit if needed.
+        if [429, 403, 401].contains(status.code) {
+            let id = self.current10MinutelyRateLimitId()
+            if self.invalidRequestsIn10Minutes.id == id {
+                self.invalidRequestsIn10Minutes.count += 1
+            } else {
+                self.invalidRequestsIn10Minutes = (id, 1)
+            }
+        }
+        /// Take care of the rate limit headers.
         guard let newBucket = Bucket(from: headers) else { return }
-        if !(self.endpoints[endpointId] == newBucket.bucket) {
-            self.endpoints[endpointId] = newBucket.bucket
+        if !(self.endpoints[endpoint.id] == newBucket.bucket) {
+            self.endpoints[endpoint.id] = newBucket.bucket
         }
         self.buckets[newBucket.bucket] = newBucket
     }

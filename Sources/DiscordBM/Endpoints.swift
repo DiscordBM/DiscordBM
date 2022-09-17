@@ -153,6 +153,17 @@ enum Endpoint {
         }
     }
     
+    /// Interaction endpoints don't count against the global rate limit.
+    /// Even if the global rate-limit is exceeded, you can still respond to interactions.
+    var countsAgainstGlobalRateLimit: Bool {
+        switch self {
+        case .createInteractionResponse, .editOriginalInteractionResponse, .deleteOriginalInteractionResponse, .postFollowupGatewayInteractionResponse, .editGatewayInteractionResponseFollowup:
+            return false
+        case .getGateway, .getGatewayBot, .postCreateMessage, .patchEditMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .leaveGuild, .createGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .addReaction:
+            return true
+        }
+    }
+    
     var id: Int {
         switch self {
         case .getGateway: return 1
