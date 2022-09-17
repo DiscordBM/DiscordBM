@@ -297,8 +297,8 @@ extension GatewayManager {
                     return gatewayBot.url
                 }
             }
-            logger.error("Cannot get gateway url to connect to. Will retry in 5 seconds")
-            await self.sleep(for: .seconds(5))
+            logger.error("Cannot get gateway url to connect to. Will retry in 10 seconds")
+            await self.sleep(for: .seconds(10))
             return await self.getGatewayUrl()
         }
     }
