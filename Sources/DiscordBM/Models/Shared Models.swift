@@ -813,14 +813,7 @@ public struct Secret:
     CustomStringConvertible,
     CustomDebugStringConvertible {
     
-    private var _storage: String
-    
-    /// Don't really want to pull CryptoKit just for a secure hash. This should suffice.
-    internal func unsecureHash() -> Int {
-        var hasher = Hasher()
-        hasher.combine(self._storage)
-        return hasher.finalize()
-    }
+    internal var _storage: String
     
     public init(stringLiteral value: String) {
         self._storage = value

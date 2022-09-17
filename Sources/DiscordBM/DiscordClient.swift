@@ -119,7 +119,7 @@ public struct DiscordClient {
         let request = try HTTPClient.Request(
             url: endpoint.url + queries.makeForURL(),
             method: endpoint.httpMethod,
-            headers: ["Authorization": "Bot \(token)"]
+            headers: ["Authorization": "Bot \(token._storage)"]
         )
         let response = try await client.execute(request: request).get()
         await self.includeInRateLimits(endpoint: endpoint, headers: response.headers)
@@ -154,7 +154,7 @@ public struct DiscordClient {
             url: endpoint.url + queries.makeForURL(),
             method: endpoint.httpMethod,
             headers: [
-                "Authorization": "Bot \(token)",
+                "Authorization": "Bot \(token._storage)",
                 "Content-Type": "application/json"
             ],
             body: .bytes(data)
@@ -424,8 +424,8 @@ public struct CachingBehavior {
 //MARK: - ClientCacheStorage
 private final class ClientCacheStorage {
     
-    /// [TokenHash: ClientCache]
-    private var storage = [Int: ClientCache]()
+    /// [Token: ClientCache]
+    private var storage = [String: ClientCache]()
     private let lock = Lock()
     
     private init() { }
@@ -433,14 +433,14 @@ private final class ClientCacheStorage {
     static let shared = ClientCacheStorage()
     
     func cache(for token: Secret) -> ClientCache {
-        let hash = token.unsecureHash()
+        let token = token._storage
         self.lock.lock()
         defer { self.lock.unlock() }
-        if let cache = self.storage[hash] {
+        if let cache = self.storage[token] {
             return cache
         } else {
             let cache = ClientCache()
-            self.storage[hash] = cache
+            self.storage[token] = cache
             return cache
         }
     }
