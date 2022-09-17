@@ -805,3 +805,53 @@ public enum OAuthScope: String, Codable {
     case voice = "voice"
     case webhookIncoming = "webhook.incoming"
 }
+
+/// A type that will try to keep its content a secret unless encoded by an encoder.
+public struct Secret:
+    Codable,
+    ExpressibleByStringLiteral,
+    CustomStringConvertible,
+    CustomDebugStringConvertible {
+    
+    private var _storage: String
+    
+    /// Don't really want to pull CryptoKit just for a secure hash. This should suffice.
+    internal func unsecureHash() -> Int {
+        var hasher = Hasher()
+        hasher.combine(self._storage)
+        return hasher.finalize()
+    }
+    
+    public init(stringLiteral value: String) {
+        self._storage = value
+    }
+    
+    public init(_ value: String) {
+        self._storage = value
+    }
+    
+    public var description: String {
+        let count = _storage.count
+        let keepCount = count > 24 ? 6 : 0
+        let dropped = _storage.dropLast(count - keepCount)
+        return "\(dropped)****"
+    }
+    
+    public var debugDescription: String {
+        "\(self)".debugDescription
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        self._storage = try container.decode(String.self)
+    }
+    
+    public mutating func set(to newValue: String) {
+        self._storage = newValue
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self._storage)
+    }
+}

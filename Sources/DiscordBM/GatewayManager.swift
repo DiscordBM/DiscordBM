@@ -116,6 +116,7 @@ public actor GatewayManager {
         intents: [Gateway.Identify.Intent] = [],
         shard: IntPair? = nil
     ) {
+        let token = Secret(token)
         self.eventLoopGroup = eventLoopGroup
         self.client = DiscordClient(
             httpClient: httpClient,

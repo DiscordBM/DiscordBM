@@ -429,7 +429,7 @@ public struct Gateway: Codable {
             case autoModerationExecution = 21
         }
         
-        public var token: String
+        public var token: Secret
         public var properties: ConnectionProperties = ConnectionProperties()
         public var compress: Bool?
         public var large_threshold: Int?
@@ -437,8 +437,17 @@ public struct Gateway: Codable {
         public var presence: PresenceUpdate?
         public var intents: IntBitField<Intent>
         
-        public init(token: String, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: PresenceUpdate? = nil, intents: IntBitField<Intent>) {
+        public init(token: Secret, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: PresenceUpdate? = nil, intents: IntBitField<Intent>) {
             self.token = token
+            self.compress = compress
+            self.large_threshold = large_threshold
+            self.shard = shard
+            self.presence = presence
+            self.intents = intents
+        }
+        
+        public init(token: String, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: PresenceUpdate? = nil, intents: IntBitField<Intent>) {
+            self.token = Secret(token)
             self.compress = compress
             self.large_threshold = large_threshold
             self.shard = shard
@@ -478,11 +487,11 @@ public struct Gateway: Codable {
     }
     
     public struct Resume: Codable {
-        public var token: String
+        public var token: Secret
         public var session_id: String
         public var seq: Int
         
-        public init(token: String, session_id: String, seq: Int) {
+        public init(token: Secret, session_id: String, seq: Int) {
             self.token = token
             self.session_id = session_id
             self.seq = seq

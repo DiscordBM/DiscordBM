@@ -35,7 +35,7 @@ public struct DiscordClient {
     }
     
     private let client: HTTPClient
-    private let token: String
+    private let token: Secret
     private let cache: ClientCache?
     private let cachingBehavior: CachingBehavior
     public let appId: String?
@@ -43,7 +43,7 @@ public struct DiscordClient {
     /// If you provide no app id, you'll need to pass it to some functions on call site.
     public init(
         httpClient: HTTPClient,
-        token: String,
+        token: Secret,
         appId: String?,
         cachingBehavior: CachingBehavior = .default
     ) {
@@ -176,16 +176,6 @@ public struct DiscordClient {
     ) async throws -> Response<C> {
         let response = try await self.send(to: endpoint, queries: queries, payload: payload)
         return Response(raw: response)
-    }
-}
-
-extension DiscordClient: CustomStringConvertible {
-    public var description: String {
-        "DiscordClient("
-        + "client: \(client), "
-        + "token: \(token.dropLast(max(0, token.count - 6)))****, "
-        + "appId: \(appId ?? "NULL")"
-        + ")"
     }
 }
 
@@ -434,22 +424,23 @@ public struct CachingBehavior {
 //MARK: - ClientCacheStorage
 private final class ClientCacheStorage {
     
-    /// [ID: ClientCache]
-    private var storage = [String: ClientCache]()
+    /// [TokenHash: ClientCache]
+    private var storage = [Int: ClientCache]()
     private let lock = Lock()
     
     private init() { }
     
     static let shared = ClientCacheStorage()
     
-    func cache(for id: String) -> ClientCache {
+    func cache(for token: Secret) -> ClientCache {
+        let hash = token.unsecureHash()
         self.lock.lock()
         defer { self.lock.unlock() }
-        if let cache = self.storage[id] {
+        if let cache = self.storage[hash] {
             return cache
         } else {
             let cache = ClientCache()
-            self.storage[id] = cache
+            self.storage[hash] = cache
             return cache
         }
     }
