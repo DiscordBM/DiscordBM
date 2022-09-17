@@ -94,7 +94,7 @@ actor HTTPRateLimiter {
     private func check1MinutelyInvalidRequestsLimitAllows() -> Bool {
         let oneMinutelyId = self.current1MinutelyRateLimitId()
         if invalidRequestsIn1Minute.id == oneMinutelyId,
-           invalidRequestsIn1Minute.count >= 10_000 {
+           invalidRequestsIn1Minute.count >= 1_000 {
             logger.warning("Hit HTTP Global Invalid Requests Limit.", metadata: [
                 "label": .string(label)
             ])
