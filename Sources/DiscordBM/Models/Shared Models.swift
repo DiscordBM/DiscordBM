@@ -530,50 +530,51 @@ public struct IntPair: Codable {
     }
 }
 
-//MARK: - DecodeTolerable
+//MARK: - TolerantDecode
 
-private let decodeTolerableLogger = DiscordGlobalConfiguration.makeLogger("DecodeTolerable")
+private let tolerantDecodeLogger = DiscordGlobalConfiguration.makeLogger("DecodeTolerable")
 
-public struct TolerantDecodeArray<Element>: Codable, ExpressibleByArrayLiteral
-where Element: RawRepresentable, Element.RawValue: Codable
-{
+public struct TolerantDecodeArray<Element>:
+    Codable,
+    ExpressibleByArrayLiteral
+where Element: RawRepresentable,
+      Element.RawValue: Codable {
     
-    public var values: [Element]
+    public var values: [Element] = []
+    public var unknownValues: [Element.RawValue] = []
     
-    public init<S>(_ values: S) where S: Sequence, S.Element == Element {
-        self.values = .init(values)
+    public init(_ values: [Element], unknownValues: [Element.RawValue] = []) {
+        self.values = values
+        self.unknownValues = unknownValues
     }
     
     public init(arrayLiteral elements: Element...) {
         self.values = elements
     }
     
-    public init() {
-        self.values = []
-    }
+    public init() { }
     
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
         
         var values: ContiguousArray<Element> = []
-        var badValues: [Element.RawValue] = []
         while !container.isAtEnd {
             let rawValue = try container.decode(Element.RawValue.self)
             if let value = Element.init(rawValue: rawValue) {
                 values.append(value)
             } else {
-                badValues.append(rawValue)
+                self.unknownValues.append(rawValue)
             }
         }
-        if !badValues.isEmpty {
-            decodeTolerableLogger.warning("DecodeTolerable found unconsidered values.", metadata: [
+        if !self.unknownValues.isEmpty {
+            tolerantDecodeLogger.warning("TolerantDecodeArray found unconsidered values.", metadata: [
                 "values": "\(values)",
-                "badValues": "\(badValues)",
+                "unknownValues": "\(self.unknownValues)",
                 "codingPath": "\(container.codingPath.map(\.debugDescription))",
                 "type": "\(Swift._typeName(Self.self))"
             ])
         }
-        self.init(values)
+        self.values = Array(values)
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -773,4 +774,34 @@ public struct DiscordColor: Codable, ExpressibleByIntegerLiteral {
     public func encode(to encoder: Encoder) throws {
         try self.value.encode(to: encoder)
     }
+}
+
+public enum OAuthScope: String, Codable {
+    case activitiesRead = "activities.read"
+    case activitiesWrite = "activities.write"
+    case applicationsBuildsRead = "applications.builds.read"
+    case applicationsBuildsUpload = "applications.builds.upload"
+    case applicationsCommands = "applications.commands"
+    case applicationsCommandsUpdate = "applications.commands.update"
+    case applicationsCommandsPermissionsUpdate = "applications.commands.permissions.update"
+    case applicationsEntitlements = "applications.entitlements"
+    case applicationsStoreUpdate = "applications.store.update"
+    case bot = "bot"
+    case connections = "connections"
+    case DMChannelsRead = "dm_channels.read"
+    case email = "email"
+    case GDMJoin = "gdm.join"
+    case guilds = "guilds"
+    case guildsJoin = "guilds.join"
+    case guildsMembersRead = "guilds.members.read"
+    case identify = "identify"
+    case messagesRead = "messages.read"
+    case relationshipsRead = "relationships.read"
+    case rpc = "rpc"
+    case rpcActivitiesWrite = "rpc.activities.write"
+    case rpcNotificationsRead = "rpc.notifications.read"
+    case rpcVoiceRead = "rpc.voice.read"
+    case rpcVoiceWrite = "rpc.voice.write"
+    case voice = "voice"
+    case webhookIncoming = "webhook.incoming"
 }

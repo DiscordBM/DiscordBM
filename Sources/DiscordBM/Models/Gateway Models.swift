@@ -619,7 +619,7 @@ public struct Gateway: Codable {
         }
         
         public struct InstallParams: Codable {
-            public var scopes: [String]
+            public var scopes: TolerantDecodeArray<OAuthScope>
             public var permissions: StringBitField<Channel.Permission>
         }
         
@@ -1242,7 +1242,7 @@ public struct Gateway: Codable {
             public var bot: User?
             public var primary_sku_id: String?
             public var cover_image: String?
-            public var scopes: [String]?
+            public var scopes: TolerantDecodeArray<OAuthScope>?
         }
         
         public var id: String
@@ -1263,7 +1263,7 @@ public struct Gateway: Codable {
         public var guild_id: String
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
-        public var scopes: [String]?
+        public var scopes: TolerantDecodeArray<OAuthScope>?
     }
     
     public struct IntegrationDelete: Codable {
