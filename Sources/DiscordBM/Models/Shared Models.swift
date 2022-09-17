@@ -807,6 +807,7 @@ public enum OAuthScope: String, Codable {
 }
 
 /// A type that will try to keep its content a secret unless encoded by an encoder.
+/// This is to stop leaking the token in the logs, for whatever reason.
 public struct Secret:
     Codable,
     ExpressibleByStringLiteral,
