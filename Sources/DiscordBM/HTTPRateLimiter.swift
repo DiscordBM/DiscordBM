@@ -1,7 +1,7 @@
 import struct Foundation.Date
 import NIOHTTP1
 
-private let logger = DiscordGlobalConfiguration.makeLogger("HTTPRateLimiter")
+private let logger = DiscordGlobalConfiguration.makeLogger("DiscordBM.HTTPRateLimiter")
 
 actor HTTPRateLimiter {
     
@@ -70,17 +70,39 @@ actor HTTPRateLimiter {
     /// [Bucket-ID: Bucket]
     private var buckets: [String: Bucket] = [:]
     
+    /// To take care of the global rate limit.
+    private var requestsThisSecond: (second: Int, count: Int) = (0, 0)
+    
     init(label: String) {
         self.label = label
     }
     
+    private func globalRateLimitAllows() -> Bool {
+        let now = Int(Date().timeIntervalSince1970)
+        if self.requestsThisSecond.second == now {
+            if self.requestsThisSecond.count >= DiscordGlobalConfiguration.globalRateLimit {
+                logger.warning("Hit HTTP Global Rate-Limit.", metadata: [
+                    "label": .string(label)
+                ])
+                return false
+            } else {
+                self.requestsThisSecond = (now, self.requestsThisSecond.count + 1)
+                return true
+            }
+        } else {
+            self.requestsThisSecond = (now, 1)
+            return true
+        }
+    }
+    
     func canRequest(to endpointId: String) -> Bool {
+        guard globalRateLimitAllows() else { return false }
         if let bucketId = self.endpoints[endpointId],
            let bucket = self.buckets[bucketId] {
             if bucket.canRequest() {
                 return true
             } else {
-                logger.warning("Hit HTTP Rate-Limit.", metadata: [
+                logger.warning("Hit HTTP Bucket Rate-Limit.", metadata: [
                     "label": .string(label),
                     "endpointId": .string(endpointId),
                     "bucket": .stringConvertible(bucket)
