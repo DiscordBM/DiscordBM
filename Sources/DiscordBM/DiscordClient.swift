@@ -69,7 +69,7 @@ public struct DiscordClient {
     }
     
     private func checkRateLimitsAllowRequest(to endpoint: Endpoint) async throws {
-        if await !rateLimiter.canRequest(to: endpoint) {
+        if await !rateLimiter.shouldRequest(to: endpoint) {
             throw DiscordClientError.rateLimited(url: "\(endpoint.url)")
         }
     }
@@ -459,6 +459,8 @@ private final class ClientCacheStorage {
 }
 
 //MARK: - ClientCache
+
+/// This doesn't use the Cache-Control header because I couldn't find a 2xx response with a Cache-Control header returned by Discord.
 private actor ClientCache {
     
     struct CacheableItem: Hashable {

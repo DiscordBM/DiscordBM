@@ -11,6 +11,8 @@ actor HTTPRateLimiter {
         private var limit: Int
         private var remaining: Int
         private var reset: Double
+        /// Seconds after the request that the bucket will expire after.
+        /// We use `reset` instead of this, they both do the same thing in the end.
         private var resetAfter: Double
         
         var description: String {
@@ -41,7 +43,7 @@ actor HTTPRateLimiter {
             self.resetAfter = resetAfter
         }
         
-        func canRequest() -> Bool {
+        func shouldRequest() -> Bool {
             if remaining > 0 {
                 return true
             } else {
@@ -99,7 +101,7 @@ actor HTTPRateLimiter {
         /// Check not locked
         if let lockedUntil = self.noRequestsUntil {
             if lockedUntil > Date() {
-                logger.warning("HTTP rate-limiter has been locked for 30s due to invalid requests.", metadata: [
+                logger.error("HTTP rate-limiter has been locked for 10s due to invalid requests.", metadata: [
                     "label": .string(label)
                 ])
                 return false
@@ -111,10 +113,10 @@ actor HTTPRateLimiter {
         let oneMinutelyId = self.currentMinutelyRateLimitId()
         if invalidRequestsIn1Minute.id == oneMinutelyId,
            invalidRequestsIn1Minute.count >= 1_000 {
-            logger.warning("Hit HTTP Global Invalid Requests Limit.", metadata: [
+            logger.critical("Hit HTTP global invalid-requests limit. Will accept no requests for 10s to avoid getting ip-banned.", metadata: [
                 "label": .string(label)
             ])
-            self.noRequestsUntil = Date().addingTimeInterval(30)
+            self.noRequestsUntil = Date().addingTimeInterval(10)
             return false
         } else {
             return true
@@ -139,17 +141,17 @@ actor HTTPRateLimiter {
         }
     }
     
-    func canRequest(to endpoint: Endpoint) -> Bool {
+    func shouldRequest(to endpoint: Endpoint) -> Bool {
         guard minutelyInvalidRequestsLimitAllows() else { return false }
         if endpoint.countsAgainstGlobalRateLimit {
             guard globalRateLimitAllowsAndAddRecord() else { return false }
         }
         if let bucketId = self.endpoints[endpoint.id],
            let bucket = self.buckets[bucketId] {
-            if bucket.canRequest() {
+            if bucket.shouldRequest() {
                 return true
             } else {
-                logger.warning("Hit HTTP Bucket Rate-Limit.", metadata: [
+                logger.warning("Hit HTTP Bucket rate-limit.", metadata: [
                     "label": .string(label),
                     "endpointId": .stringConvertible(endpoint.id),
                     "bucket": .stringConvertible(bucket)
