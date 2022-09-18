@@ -130,7 +130,7 @@ This library will try to follow the no-breaking-changes-in-minor-versions rule, 
 
 ## Wishlist / Not Yet Supported
 * Better documentation
-* More tests (Currently very little tests)
+* More tests
 * Support more endpoints (Easy to add yourself; PRs appreciated)
 * Make eveything Sendable
 * Remove a few redundant structs
