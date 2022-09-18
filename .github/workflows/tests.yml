@@ -8,8 +8,7 @@ jobs:
       matrix:
         swiftver:
           - swift:5.6
-          - swift:5.6.1
-          - swift:5.6.2
+          - swift:5.7
           - swiftlang/swift:nightly-main
         swiftos:
           - focal
