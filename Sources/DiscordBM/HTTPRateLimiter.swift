@@ -123,10 +123,11 @@ actor HTTPRateLimiter {
     }
     
     func canRequest(to endpoint: Endpoint) -> Bool {
-        guard endpoint.countsAgainstGlobalRateLimit,
-              check1MinutelyInvalidRequestsLimitAllows(),
-              globalRateLimitAllowsAndAddRecord()
-        else { return false }
+        if endpoint.countsAgainstGlobalRateLimit {
+            guard check1MinutelyInvalidRequestsLimitAllows(),
+                  globalRateLimitAllowsAndAddRecord()
+            else { return false }
+        }
         if let bucketId = self.endpoints[endpoint.id],
            let bucket = self.buckets[bucketId] {
             if bucket.canRequest() {
