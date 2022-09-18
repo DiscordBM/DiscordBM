@@ -75,9 +75,13 @@ actor HTTPRateLimiter {
     private var requestsThisSecond: (id: Int, count: Int) = (0, 0)
     
     /// Only 10K invalid requests allowed each 10 minutes.
-    /// We keep track of 1K / 1 minute. Even that amount of bad requests is stills way too much.
-    /// Fixed 10 minute intervals, which I'm not sure if it's the correct implementation.
+    /// We keep track of 1K / 1 minute. Even that amount of bad requests is still way too much.
     private var invalidRequestsIn1Minute: (id: Int, count: Int) = (0, 0)
+    
+    /// Hitting the invalid requests limit will ban you for one day.
+    /// Your code should be good enough not to send that many invalid requests.
+    /// This is to prevent getting ip-banned.
+    private var noRequestsUntil: Date? = nil
     
     init(label: String) {
         self.label = label
@@ -87,17 +91,30 @@ actor HTTPRateLimiter {
         Int(Date().timeIntervalSince1970)
     }
     
-    private func current1MinutelyRateLimitId() -> Int {
+    private func currentMinutelyRateLimitId() -> Int {
         Int(Date().timeIntervalSince1970) / 60
     }
     
-    private func check1MinutelyInvalidRequestsLimitAllows() -> Bool {
-        let oneMinutelyId = self.current1MinutelyRateLimitId()
+    private func minutelyInvalidRequestsLimitAllows() -> Bool {
+        /// Check not locked
+        if let lockedUntil = self.noRequestsUntil {
+            if lockedUntil > Date() {
+                logger.warning("HTTP rate-limiter has been locked for 30s due to invalid requests.", metadata: [
+                    "label": .string(label)
+                ])
+                return false
+            } else {
+                self.noRequestsUntil = nil
+            }
+        }
+        /// Check the counter again
+        let oneMinutelyId = self.currentMinutelyRateLimitId()
         if invalidRequestsIn1Minute.id == oneMinutelyId,
            invalidRequestsIn1Minute.count >= 1_000 {
             logger.warning("Hit HTTP Global Invalid Requests Limit.", metadata: [
                 "label": .string(label)
             ])
+            self.noRequestsUntil = Date().addingTimeInterval(30)
             return false
         } else {
             return true
@@ -123,10 +140,9 @@ actor HTTPRateLimiter {
     }
     
     func canRequest(to endpoint: Endpoint) -> Bool {
+        guard minutelyInvalidRequestsLimitAllows() else { return false }
         if endpoint.countsAgainstGlobalRateLimit {
-            guard check1MinutelyInvalidRequestsLimitAllows(),
-                  globalRateLimitAllowsAndAddRecord()
-            else { return false }
+            guard globalRateLimitAllowsAndAddRecord() else { return false }
         }
         if let bucketId = self.endpoints[endpoint.id],
            let bucket = self.buckets[bucketId] {
@@ -148,7 +164,7 @@ actor HTTPRateLimiter {
     func include(endpoint: Endpoint, headers: HTTPHeaders, status: HTTPResponseStatus) {
         /// Add to invalid requests limit if needed.
         if [429, 403, 401].contains(status.code) {
-            let id = self.current1MinutelyRateLimitId()
+            let id = self.currentMinutelyRateLimitId()
             if self.invalidRequestsIn1Minute.id == id {
                 self.invalidRequestsIn1Minute.count += 1
             } else {
