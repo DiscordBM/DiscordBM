@@ -24,7 +24,8 @@ public struct DiscordClient {
         
         public func decode() async throws -> C {
             if (200..<300).contains(raw.status.code) {
-                let buffer = try await raw.body.collect(upTo: collectUpTo)
+                var buffer = ByteBuffer()
+                try await raw.body.collect(upTo: collectUpTo, into: &buffer)
                 if let data = buffer.getData(at: 0, length: buffer.readableBytes) {
                     return try DiscordGlobalConfiguration.decoder.decode(C.self, from: data)
                 } else {
