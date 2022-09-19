@@ -1,7 +1,7 @@
 import AsyncHTTPClient
 import NIOHTTP1
 import NIOConcurrencyHelpers
-import struct NIO.TimeAmount
+import NIO
 import struct Foundation.Date
 
 public enum DiscordClientError: Error {
