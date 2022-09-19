@@ -89,7 +89,7 @@ public actor GatewayManager {
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
-        clientCachingBehavior: CachingBehavior = .default,
+        clientConfiguration: DiscordClient.Configuration = .init(),
         appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
@@ -98,7 +98,7 @@ public actor GatewayManager {
             httpClient: httpClient,
             token: identifyPayload.token,
             appId: appId,
-            cachingBehavior: clientCachingBehavior
+            configuration: clientConfiguration
         )
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
@@ -109,7 +109,7 @@ public actor GatewayManager {
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
-        clientCachingBehavior: CachingBehavior = .default,
+        clientConfiguration: DiscordClient.Configuration = .init(),
         token: String,
         appId: String? = nil,
         presence: Gateway.Identify.PresenceUpdate? = nil,
@@ -122,7 +122,7 @@ public actor GatewayManager {
             httpClient: httpClient,
             token: token,
             appId: appId,
-            cachingBehavior: clientCachingBehavior
+            configuration: clientConfiguration
         )
         self.identifyPayload = .init(
             token: token,
