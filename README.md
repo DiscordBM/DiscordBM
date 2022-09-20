@@ -132,7 +132,6 @@ This library will try to follow the no-breaking-changes-in-minor-versions rule, 
 * Better documentation
 * More tests
 * Support more endpoints (Easy to add yourself; PRs appreciated)
-* Make eveything Sendable
 * Remove a few redundant structs
 * Support gateway payload compression 
 * Attachments support (For now you can provide media links instead, which is usually better anyway)
