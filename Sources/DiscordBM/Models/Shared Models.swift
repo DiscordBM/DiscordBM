@@ -417,13 +417,13 @@ public protocol BitField: ExpressibleByArrayLiteral {
     init(values: [R], unknownValues: [Int])
 }
 
-public extension BitField {
+extension BitField {
     
-    init(arrayLiteral elements: R...) {
+    public init(arrayLiteral elements: R...) {
         self.init(values: elements, unknownValues: [])
     }
     
-    init(bitValue: Int) {
+    public init(bitValue: Int) {
         var bitValue = bitValue
         var values: ContiguousArray<R> = []
         var unknownValues: [Int] = []
@@ -441,10 +441,10 @@ public extension BitField {
         }
         
         if !unknownValues.isEmpty {
-            bitFieldLogger.warning("Non empty unknown values", metadata: [
+            bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
                 "unknownValues": "\(unknownValues)",
                 "values": "\(values.map(\.rawValue))",
-                "type": "\(Swift._typeName(R.self))"
+                "rawType": "\(Swift._typeName(R.self))"
             ])
         }
         
@@ -452,6 +452,12 @@ public extension BitField {
             values: Array(values),
             unknownValues: unknownValues
         )
+    }
+    
+    public func toBitValue() -> Int {
+        (values.map(\.rawValue) + unknownValues)
+            .map({ 1 << $0 })
+            .reduce(into: 0, +=)
     }
 }
 
@@ -476,7 +482,7 @@ where R: RawRepresentable, R.RawValue == Int {
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        let value = (values.map(\.rawValue) + unknownValues).map({ 1 << $0 }).reduce(into: 0, +=)
+        let value = self.toBitValue()
         try container.encode(value)
     }
 }
@@ -505,7 +511,7 @@ where R: RawRepresentable, R.RawValue == Int {
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        let value = (values.map(\.rawValue) + unknownValues).map({ 1 << $0 }).reduce(into: 0, +=)
+        let value = self.toBitValue()
         try container.encode("\(value)")
     }
 }
