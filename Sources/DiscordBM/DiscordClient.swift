@@ -115,7 +115,7 @@ public struct DiscordClient {
     
     private func execute(_ request: HTTPClient.Request) async throws -> HTTPClient.Response {
         try await self.client.execute(
-            request: { fatalError() }(),
+            request: request,
             deadline: .now() + configuration.requestTimeout,
             logger: configuration.enableLoggingForRequests
             ? DiscordGlobalConfiguration.makeLogger("DiscordClientHTTPRequest")
