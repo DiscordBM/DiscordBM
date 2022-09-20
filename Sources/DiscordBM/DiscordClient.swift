@@ -86,7 +86,7 @@ public struct DiscordClient {
     
     private func getFromCache(
         identity: CacheableEndpointIdentity?,
-        queries: [String: String]
+        queries: [(String, String)]
     ) async -> HTTPClient.Response? {
         guard let identity = identity else { return nil }
         return await cache?.get(item: .init(
@@ -98,7 +98,7 @@ public struct DiscordClient {
     private func saveInCache(
         response: HTTPClient.Response,
         identity: CacheableEndpointIdentity?,
-        queries: [String: String]
+        queries: [(String, String)]
     ) async {
         guard let identity = identity,
               (200..<300).contains(response.status.code),
@@ -125,7 +125,7 @@ public struct DiscordClient {
     
     private func send(
         to endpoint: Endpoint,
-        queries: [String: String] = [:]
+        queries: [(String, String)] = []
     ) async throws -> HTTPClient.Response {
         let identity = CacheableEndpointIdentity(endpoint: endpoint)
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
@@ -133,7 +133,7 @@ public struct DiscordClient {
         }
         try await self.checkRateLimitsAllowRequest(to: endpoint)
         var request = try HTTPClient.Request(
-            url: endpoint.url + queries.makeForURL(),
+            url: endpoint.url + queries.makeForURLQuery(),
             method: endpoint.httpMethod
         )
         request.headers = ["Authorization": "Bot \(token._storage)"]
@@ -153,7 +153,7 @@ public struct DiscordClient {
     
     private func send<C: Codable>(
         to endpoint: Endpoint,
-        queries: [String: String] = [:]
+        queries: [(String, String)] = []
     ) async throws -> Response<C> {
         let response = try await self.send(to: endpoint, queries: queries)
         return Response(raw: response)
@@ -161,7 +161,7 @@ public struct DiscordClient {
     
     private func send<E: Encodable>(
         to endpoint: Endpoint,
-        queries: [String: String] = [:],
+        queries: [(String, String)] = [],
         payload: E
     ) async throws -> HTTPClient.Response {
         let identity = CacheableEndpointIdentity(endpoint: endpoint)
@@ -171,7 +171,7 @@ public struct DiscordClient {
         try await self.checkRateLimitsAllowRequest(to: endpoint)
         let data = try DiscordGlobalConfiguration.encoder.encode(payload)
         var request = try HTTPClient.Request(
-            url: endpoint.url + queries.makeForURL(),
+            url: endpoint.url + queries.makeForURLQuery(),
             method: endpoint.httpMethod
         )
         request.headers = [
@@ -195,7 +195,7 @@ public struct DiscordClient {
     
     private func send<E: Encodable, C: Codable>(
         to endpoint: Endpoint,
-        queries: [String: String] = [:],
+        queries: [(String, String)] = [],
         payload: E
     ) async throws -> Response<C> {
         let response = try await self.send(to: endpoint, queries: queries, payload: payload)
@@ -397,8 +397,8 @@ extension DiscordClient {
         return try await self.send(
             to: endpoint,
             queries: [
-                "query": query,
-                "limit": "\(limit)"
+                ("query", query),
+                ("limit", "\(limit)")
             ]
         )
     }
@@ -498,7 +498,23 @@ private actor ClientCache {
     
     struct CacheableItem: Hashable {
         let identity: CacheableEndpointIdentity
-        let queries: [String: String]
+        let queries: [(String, String)]
+        
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(identity)
+            for (key, value) in queries {
+                hasher.combine(key)
+                hasher.combine(value)
+            }
+        }
+        
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.identity == rhs.identity &&
+            lhs.queries.elementsEqual(rhs.queries, by: {
+                $0.0 == $1.0 &&
+                $0.1 == $1.1
+            })
+        }
     }
     
     /// [ID: ExpirationTime]
@@ -542,17 +558,6 @@ private actor ClientCache {
             }
         }
         await setupGarbageCollector()
-    }
-}
-
-//MARK: +Dictionary<(String, String)>
-private extension Dictionary where Key == String, Value == String {
-    func makeForURL() -> String {
-        if self.isEmpty {
-            return ""
-        } else {
-            return "?" + self.map({ "\($0)=\($1)" }).joined(separator: "&")
-        }
     }
 }
 
