@@ -1,7 +1,7 @@
 
-public struct Guild: Codable {
+public struct Guild: Sendable, Codable {
     
-    public enum VerificationLevel: Int, Codable {
+    public enum VerificationLevel: Int, Sendable, Codable {
         case none = 0
         case low = 1
         case medium = 2
@@ -9,7 +9,7 @@ public struct Guild: Codable {
         case veryHigh = 4
     }
     
-    public enum Feature: String, Codable {
+    public enum Feature: String, Sendable, Codable {
         case animatedBanner = "ANIMATED_BANNER"
         case animatedIcon = "ANIMATED_ICON"
         case banner = "BANNER"
@@ -42,28 +42,28 @@ public struct Guild: Codable {
         case enabledDiscoverableBefore = "ENABLED_DISCOVERABLE_BEFORE"
     }
     
-    public enum MFALevel: Int, Codable {
+    public enum MFALevel: Int, Sendable, Codable {
         case none = 0
         case elevated = 1
     }
     
-    public enum SystemChannelFlag: Int {
+    public enum SystemChannelFlag: Int, Sendable {
         case suppressJoinNotifications = 0
         case suppressPremiumSubscriptions = 1
         case suppressGuildReminderNotifications = 2
         case suppressJoinNotificationReplies = 3
     }
     
-    public enum PremiumTier: Int, Codable {
+    public enum PremiumTier: Int, Sendable, Codable {
         case none = 0
         case tier1 = 1
         case tier2 = 2
         case tier3 = 3
     }
     
-    public struct WelcomeScreen: Codable {
+    public struct WelcomeScreen: Sendable, Codable {
         
-        public struct Channel: Codable {
+        public struct Channel: Sendable, Codable {
             public var channel_id: String
             public var description: String
             public var emoji_id: String?
@@ -74,7 +74,7 @@ public struct Guild: Codable {
         public var welcome_channels: [Channel]
     }
     
-    public enum NSFWLevel: Int, Codable {
+    public enum NSFWLevel: Int, Sendable, Codable {
         case `default` = 0
         case explicit = 1
         case safe = 2
@@ -144,7 +144,7 @@ public struct Guild: Codable {
     public var max_stage_video_channel_users: Int?
 }
 
-public struct CreateGuildRole: Codable {
+public struct CreateGuildRole: Sendable, Codable {
     public var name: String?
     public var permissions: StringBitField<Gateway.Channel.Permission>?
     public var color: DiscordColor?

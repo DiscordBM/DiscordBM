@@ -1,7 +1,7 @@
 
-public struct SlashCommand: Codable {
+public struct SlashCommand: Sendable, Codable {
     
-    public enum Kind: Int, Codable {
+    public enum Kind: Int, Sendable, Codable {
         case chatInput = 1
         case user = 2
         case message = 3

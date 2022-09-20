@@ -1,4 +1,4 @@
-import AsyncHTTPClient
+@preconcurrency import AsyncHTTPClient
 import NIOHTTP1
 import NIOConcurrencyHelpers
 import NIOCore
@@ -555,3 +555,9 @@ private extension Dictionary where Key == String, Value == String {
         }
     }
 }
+
+//MARK: Sendable
+extension DiscordClient: Sendable { }
+extension DiscordClient.Response: Sendable where C: Sendable { }
+extension DiscordClient.Configuration: Sendable { }
+extension DiscordClient.Configuration.CachingBehavior: Sendable { }

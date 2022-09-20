@@ -8,7 +8,7 @@ import struct NIOCore.TimeAmount
 
 public actor GatewayManager {
     
-    public enum State: Int, AtomicValue, CustomStringConvertible {
+    public enum State: Int, Sendable, AtomicValue, CustomStringConvertible {
         case noConnection
         case connecting
         case configured
@@ -29,7 +29,7 @@ public actor GatewayManager {
             self.closeWebSocket(ws: oldValue)
         }
     }
-    private nonisolated let eventLoopGroup: EventLoopGroup
+    private let eventLoopGroup: EventLoopGroup
     public nonisolated let client: DiscordClient
     private static let idGenerator = ManagedAtomic(0)
     public nonisolated let id = GatewayManager.idGenerator
@@ -446,11 +446,9 @@ extension GatewayManager {
             /// only once in ~45 seconds, and a successful ping will reset the counter anyway.
             if self.lastPongDate.addingTimeInterval(15) > Date() {
                 logger.trace("Successful ping")
-                /// Successful ping
                 self.unsuccessfulPingsCount = 0
             } else {
                 logger.trace("Unsuccessful ping")
-                /// Unsuccessful ping
                 self.unsuccessfulPingsCount += 1
             }
             if unsuccessfulPingsCount > 2 {

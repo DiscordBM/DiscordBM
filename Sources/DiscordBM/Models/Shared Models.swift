@@ -1,17 +1,17 @@
 import Foundation
 
-public struct ActionRow: Codable {
+public struct ActionRow: Sendable, Codable {
     
-    public struct Component: Codable {
+    public struct Component: Sendable, Codable {
         
-        public enum Kind: Int, Codable {
+        public enum Kind: Int, Sendable, Codable {
             case container = 1
             case button = 2
             case selectMenu = 3
             case textInput = 4
         }
         
-        public struct Option: Codable {
+        public struct Option: Sendable, Codable {
             public var value: String
             public var label: String
             public var description: String?
@@ -48,7 +48,7 @@ public struct ActionRow: Codable {
     }
 }
 
-public enum StringIntDoubleBool: Codable {
+public enum StringIntDoubleBool: Sendable, Codable {
     case string(String)
     case int(Int)
     case double(Double)
@@ -99,7 +99,7 @@ public enum StringIntDoubleBool: Codable {
     }
 }
 
-public enum StringOrInt: Codable {
+public enum StringOrInt: Sendable, Codable {
     case string(String)
     case int(Int)
     
@@ -131,9 +131,9 @@ public enum StringOrInt: Codable {
     }
 }
 
-public struct CommandOption: Codable {
+public struct CommandOption: Sendable, Codable {
     
-    public enum Kind: Int, Codable {
+    public enum Kind: Int, Sendable, Codable {
         case subCommand = 1
         case subCommandGroup = 2
         case string = 3
@@ -147,7 +147,7 @@ public struct CommandOption: Codable {
         case attachment = 11
     }
     
-    public struct Choice: Codable {
+    public struct Choice: Sendable, Codable {
         
         public var name: String
         public var name_localizations: [String: String]?
@@ -160,7 +160,7 @@ public struct CommandOption: Codable {
         }
     }
     
-    public enum ChannelKind: Int, Codable {
+    public enum ChannelKind: Int, Sendable, Codable {
         case guildText = 0
         case dm = 1
         case guildVoice = 2
@@ -175,7 +175,7 @@ public struct CommandOption: Codable {
         case guildForum = 15
     }
     
-    public enum IntDouble: Codable {
+    public enum IntDouble: Sendable, Codable {
         case int(Int)
         case double(Double)
         
@@ -231,9 +231,9 @@ public struct CommandOption: Codable {
     }
 }
 
-public struct Hashes: Codable {
+public struct Hashes: Sendable, Codable {
     
-    public struct Item: Codable {
+    public struct Item: Sendable, Codable {
         public var omitted: Bool?
         public var hash: String
         
@@ -256,7 +256,7 @@ public struct Hashes: Codable {
     }
 }
 
-public enum DiscordLocale: String, Codable {
+public enum DiscordLocale: String, Sendable, Codable {
     case danish = "da"
     case german = "de"
     case englishUK = "en-GB"
@@ -289,7 +289,7 @@ public enum DiscordLocale: String, Codable {
     case korean = "ko"
 }
 
-public struct DiscordTimestamp: Codable {
+public struct DiscordTimestamp: Sendable, Codable {
     
     public enum DecodingError: Error {
         case unexpectedFormat([CodingKey], String)
@@ -481,6 +481,8 @@ where R: RawRepresentable, R.RawValue == Int {
     }
 }
 
+extension IntBitField: Sendable where R: Sendable { }
+
 public struct StringBitField<R>: BitField, Codable
 where R: RawRepresentable, R.RawValue == Int {
     
@@ -508,7 +510,9 @@ where R: RawRepresentable, R.RawValue == Int {
     }
 }
 
-public struct IntPair: Codable {
+extension StringBitField: Sendable where R: Sendable { }
+
+public struct IntPair: Sendable, Codable {
     public var first: Int
     public var second: Int
     
@@ -582,9 +586,11 @@ where Element: RawRepresentable,
     }
 }
 
-public struct Embed: Codable {
+extension TolerantDecodeArray: Sendable where Element: Sendable, Element.RawValue: Sendable { }
+
+public struct Embed: Sendable, Codable {
     
-    public enum Kind: String, Codable {
+    public enum Kind: String, Sendable, Codable {
         case rich = "rich"
         case image = "image"
         case video = "video"
@@ -594,7 +600,7 @@ public struct Embed: Codable {
         case autoModerationMessage = "auto_moderation_message"
     }
     
-    public struct Footer: Codable {
+    public struct Footer: Sendable, Codable {
         public var text: String
         public var icon_url: String?
         public var proxy_icon_url: String?
@@ -606,7 +612,7 @@ public struct Embed: Codable {
         }
     }
     
-    public struct Media: Codable {
+    public struct Media: Sendable, Codable {
         public var url: String
         public var proxy_url: String?
         public var height: Int?
@@ -620,7 +626,7 @@ public struct Embed: Codable {
         }
     }
     
-    public struct Provider: Codable {
+    public struct Provider: Sendable, Codable {
         public var name: String?
         public var url: String?
         
@@ -630,7 +636,7 @@ public struct Embed: Codable {
         }
     }
     
-    public struct Author: Codable {
+    public struct Author: Sendable, Codable {
         public var name: String
         public var url: String?
         public var icon_url: String?
@@ -644,7 +650,7 @@ public struct Embed: Codable {
         }
     }
     
-    public struct Field: Codable {
+    public struct Field: Sendable, Codable {
         public var name: String
         public var value: String
         public var inline: Bool?
@@ -703,7 +709,7 @@ public struct Embed: Codable {
 }
 
 
-public struct TolerantDecodeDate: Codable {
+public struct TolerantDecodeDate: Sendable, Codable {
     
     public var date: Date
     
@@ -725,7 +731,7 @@ public struct TolerantDecodeDate: Codable {
     }
 }
 
-public struct DiscordColor: Codable, ExpressibleByIntegerLiteral {
+public struct DiscordColor: Sendable, Codable, ExpressibleByIntegerLiteral {
     
     public let value: Int
     
@@ -776,7 +782,7 @@ public struct DiscordColor: Codable, ExpressibleByIntegerLiteral {
     }
 }
 
-public enum OAuthScope: String, Codable {
+public enum OAuthScope: String, Sendable, Codable {
     case activitiesRead = "activities.read"
     case activitiesWrite = "activities.write"
     case applicationsBuildsRead = "applications.builds.read"
@@ -809,6 +815,7 @@ public enum OAuthScope: String, Codable {
 /// A type that will try to keep its content a secret unless encoded by an encoder.
 /// This is to stop leaking the token in the logs, for whatever reason.
 public struct Secret:
+    Sendable,
     Codable,
     ExpressibleByStringLiteral,
     CustomStringConvertible,

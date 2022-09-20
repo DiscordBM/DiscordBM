@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-public enum CacheableEndpointIdentity: Int, Hashable, CaseIterable {
+public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable {
     case getGateway
     case getGatewayBot
     case getApplicationGlobalCommands

@@ -1,8 +1,8 @@
 import Foundation
 
-public struct Gateway: Codable {
+public struct Gateway: Sendable, Codable {
     
-    public enum Opcode: Int, Codable {
+    public enum Opcode: Int, Sendable, Codable {
         case dispatch = 0
         case heartbeat = 1
         case identify = 2
@@ -16,9 +16,9 @@ public struct Gateway: Codable {
         case heartbeatAccepted = 11
     }
     
-    public struct Event: Codable {
+    public struct Event: Sendable, Codable {
         
-        public enum Payload {
+        public enum Payload: Sendable {
             case heartbeat(lastSequenceNumber: Int?)
             case identify(Identify)
             case hello(Hello)
@@ -355,7 +355,7 @@ public struct Gateway: Codable {
         }
     }
     
-    public enum CloseCode: Int, Codable {
+    public enum CloseCode: Int, Sendable, Codable {
         case unknownError = 4000
         case unknownOpcode = 4001
         case decodeError = 4002
@@ -391,9 +391,9 @@ public struct Gateway: Codable {
         }
     }
     
-    public struct Identify: Codable {
+    public struct Identify: Sendable, Codable {
         
-        public struct PresenceUpdate: Codable {
+        public struct PresenceUpdate: Sendable, Codable {
             public var since: Int?
             public var activities: [Activity]
             public var status: Status
@@ -407,7 +407,7 @@ public struct Gateway: Codable {
             }
         }
         
-        public enum Intent: Int {
+        public enum Intent: Int, Sendable {
             case guilds = 0
             case guildMembers = 1
             case guildBans = 2
@@ -456,7 +456,7 @@ public struct Gateway: Codable {
         }
     }
     
-    public struct ConnectionProperties: Codable {
+    public struct ConnectionProperties: Sendable, Codable {
         public var os: String = {
 #if os(macOS)
             return "macOS"
@@ -486,7 +486,7 @@ public struct Gateway: Codable {
         }
     }
     
-    public struct Resume: Codable {
+    public struct Resume: Sendable, Codable {
         public var token: Secret
         public var session_id: String
         public var seq: Int
@@ -498,7 +498,7 @@ public struct Gateway: Codable {
         }
     }
     
-    public struct VoiceStateUpdate: Codable {
+    public struct VoiceStateUpdate: Sendable, Codable {
         public var guild_id: String
         public var channel_id: String?
         public var self_mute: Bool
@@ -514,7 +514,7 @@ public struct Gateway: Codable {
         public var suppress: Bool?
     }
     
-    public enum Status: String, Codable {
+    public enum Status: String, Sendable, Codable {
         case online = "online"
         case doNotDisturb = "dnd"
         case afk = "idle"
@@ -522,19 +522,19 @@ public struct Gateway: Codable {
         case offline = "offline"
     }
     
-    public struct Hello: Codable {
+    public struct Hello: Sendable, Codable {
         public var heartbeat_interval: Int
     }
     
-    public struct User: Codable {
+    public struct User: Sendable, Codable {
         
-        public enum PremiumKind: Int, Codable {
+        public enum PremiumKind: Int, Sendable, Codable {
             case none = 0
             case nitroClassic = 1
             case nitro = 2
         }
         
-        public enum Flag: Int {
+        public enum Flag: Int, Sendable {
             case staff = 0
             case partner = 1
             case hypeSquad = 2
@@ -570,7 +570,7 @@ public struct Gateway: Codable {
         public var avatar_decoration: String?
     }
     
-    public struct PartialUser: Codable {
+    public struct PartialUser: Sendable, Codable {
         public var id: String
         public var username: String?
         public var discriminator: String?
@@ -589,13 +589,13 @@ public struct Gateway: Codable {
         public var avatar_decoration: String?
     }
     
-    public struct PartialApplication: Codable {
+    public struct PartialApplication: Sendable, Codable {
         
-        public struct Team: Codable {
+        public struct Team: Sendable, Codable {
             
-            public struct Member: Codable {
+            public struct Member: Sendable, Codable {
                 
-                public enum State: Int, Codable {
+                public enum State: Int, Sendable, Codable {
                     case invited = 1
                     case accepted = 2
                 }
@@ -613,7 +613,7 @@ public struct Gateway: Codable {
             public var owner_user_id: String
         }
         
-        public enum Flag: Int {
+        public enum Flag: Int, Sendable {
             case gatewayPresence = 12
             case gatewayPresenceLimited = 13
             case gatewayGuildMembers = 14
@@ -627,7 +627,7 @@ public struct Gateway: Codable {
             case unknownFlag23 = 23
         }
         
-        public struct InstallParams: Codable {
+        public struct InstallParams: Sendable, Codable {
             public var scopes: TolerantDecodeArray<OAuthScope>
             public var permissions: StringBitField<Channel.Permission>
         }
@@ -658,14 +658,14 @@ public struct Gateway: Codable {
         public var hook: Bool?
     }
     
-    public struct UnavailableGuild: Codable {
+    public struct UnavailableGuild: Sendable, Codable {
         public var id: String
         public var unavailable: Bool?
     }
     
-    public struct Ready: Codable {
+    public struct Ready: Sendable, Codable {
         
-        public struct AudioContextSettings: Codable {
+        public struct AudioContextSettings: Sendable, Codable {
             
         }
         
@@ -687,7 +687,7 @@ public struct Gateway: Codable {
         public var audio_context_settings: AudioContextSettings?
     }
     
-    public struct ThreadMetadata: Codable {
+    public struct ThreadMetadata: Sendable, Codable {
         public var archived: Bool
         public var auto_archive_duration: Int
         public var archive_timestamp: DiscordTimestamp
@@ -696,7 +696,7 @@ public struct Gateway: Codable {
         public var create_timestamp: DiscordTimestamp?
     }
     
-    public struct ThreadMember: Codable {
+    public struct ThreadMember: Sendable, Codable {
         public var id: String
         public var user_id: String?
         public var join_timestamp: DiscordTimestamp
@@ -708,9 +708,9 @@ public struct Gateway: Codable {
         public var muted: Bool?
     }
     
-    public struct Channel: Codable {
+    public struct Channel: Sendable, Codable {
         
-        public enum Kind: Int, Codable {
+        public enum Kind: Int, Sendable, Codable {
             case guildText = 0
             case dm = 1
             case guildVoice = 2
@@ -725,7 +725,7 @@ public struct Gateway: Codable {
             case guildForum = 15
         }
         
-        public enum Permission: Int, Codable {
+        public enum Permission: Int, Sendable, Codable {
             case createInstantInvite = 0
             case kickMembers = 1
             case banMembers = 2
@@ -770,9 +770,9 @@ public struct Gateway: Codable {
             case unknownValue41 = 41
         }
         
-        public struct Overwrite: Codable {
+        public struct Overwrite: Sendable, Codable {
             
-            public enum Kind: Int, Codable {
+            public enum Kind: Int, Sendable, Codable {
                 case role = 0
                 case member = 1
             }
@@ -783,7 +783,7 @@ public struct Gateway: Codable {
             public var deny: StringBitField<Permission>
         }
         
-        public enum Flag: Int {
+        public enum Flag: Int, Sendable {
             case pinned = 1
         }
         
@@ -824,7 +824,7 @@ public struct Gateway: Codable {
         public var hashes: Hashes?
     }
     
-    public struct PartialChannel: Codable {
+    public struct PartialChannel: Sendable, Codable {
         public var id: String
         public var type: Channel.Kind
         public var name: String?
@@ -833,7 +833,7 @@ public struct Gateway: Codable {
         public var thread_metadata: ThreadMetadata?
     }
     
-    public struct ThreadCreate: Codable {
+    public struct ThreadCreate: Sendable, Codable {
         public var id: String
         public var type: Channel.Kind
         public var guild_id: String?
@@ -872,21 +872,21 @@ public struct Gateway: Codable {
         public var hashes: Hashes?
     }
     
-    public struct ThreadDelete: Codable {
+    public struct ThreadDelete: Sendable, Codable {
         public var id: String
         public var type: Channel.Kind
         public var guild_id: String?
         public var parent_id: String?
     }
     
-    public struct ThreadListSync: Codable {
+    public struct ThreadListSync: Sendable, Codable {
         public var guild_id: String
         public var channel_ids: [String]?
         public var threads: [Channel]
         public var members: [ThreadMember]
     }
     
-    public struct ThreadMemberUpdate: Codable {
+    public struct ThreadMemberUpdate: Sendable, Codable {
         public var id: String
         public var user_id: String?
         public var join_timestamp: DiscordTimestamp
@@ -897,11 +897,11 @@ public struct Gateway: Codable {
         public var guild_id: String
     }
     
-    public struct ThreadMembersUpdate: Codable {
+    public struct ThreadMembersUpdate: Sendable, Codable {
         
-        public struct ThreadMember: Codable {
+        public struct ThreadMember: Sendable, Codable {
             
-            public struct ThreadMemberPresenceUpdate: Codable {
+            public struct ThreadMemberPresenceUpdate: Sendable, Codable {
                 public var user: PartialUser
                 public var guild_id: String?
                 public var status: Status
@@ -928,13 +928,13 @@ public struct Gateway: Codable {
         public var removed_member_ids: [String]?
     }
     
-    public struct ChannelPinsUpdate: Codable {
+    public struct ChannelPinsUpdate: Sendable, Codable {
         public var guild_id: String?
         public var channel_id: String
         public var last_pin_timestamp: DiscordTimestamp?
     }
     
-    public struct PartialVoiceState: Codable {
+    public struct PartialVoiceState: Sendable, Codable {
         public var guild_id: String?
         public var channel_id: String?
         public var user_id: String?
@@ -950,12 +950,12 @@ public struct Gateway: Codable {
         public var request_to_speak_timestamp: DiscordTimestamp?
     }
     
-    public struct GuildBan: Codable {
+    public struct GuildBan: Sendable, Codable {
         public var guild_id: String
         public var user: User
     }
     
-    public struct Emoji: Codable {
+    public struct Emoji: Sendable, Codable {
         public var id: String?
         public var name: String?
         public var roles: [String]?
@@ -968,21 +968,21 @@ public struct Gateway: Codable {
         public var hashes: Hashes?
     }
     
-    public struct GuildEmojisUpdate: Codable {
+    public struct GuildEmojisUpdate: Sendable, Codable {
         public var guild_id: String
         public var emojis: [Emoji]
         public var hashes: Hashes?
         public var guild_hashes: Hashes?
     }
     
-    public struct Sticker: Codable {
+    public struct Sticker: Sendable, Codable {
         
-        public enum Kind: Int, Codable {
+        public enum Kind: Int, Sendable, Codable {
             case standard = 1
             case guild = 2
         }
         
-        public enum FormatKind: Int, Codable {
+        public enum FormatKind: Int, Sendable, Codable {
             case png = 1
             case apng = 2
             case lottie = 3
@@ -1002,18 +1002,18 @@ public struct Gateway: Codable {
         public var sort_value: Int?
     }
     
-    public struct GuildStickersUpdate: Codable {
+    public struct GuildStickersUpdate: Sendable, Codable {
         public var guild_id: String
         public var stickers: [Sticker]
         public var hashes: Hashes?
         public var guild_hashes: Hashes?
     }
     
-    public struct GuildIntegrationsUpdate: Codable {
+    public struct GuildIntegrationsUpdate: Sendable, Codable {
         public var guild_id: String
     }
     
-    public struct GuildMemberAdd: Codable {
+    public struct GuildMemberAdd: Sendable, Codable {
         public var guild_id: String
         public var roles: [String]
         public var hoisted_role: String?
@@ -1031,12 +1031,12 @@ public struct Gateway: Codable {
         public var communication_disabled_until: DiscordTimestamp?
     }
     
-    public struct GuildMemberRemove: Codable {
+    public struct GuildMemberRemove: Sendable, Codable {
         public var guild_id: String
         public var user: User
     }
     
-    public struct GuildMemberUpdate: Codable {
+    public struct GuildMemberUpdate: Sendable, Codable {
         public var guild_id: String
         public var roles: [String]
         public var hoisted_role: String?
@@ -1053,7 +1053,7 @@ public struct Gateway: Codable {
         public var communication_disabled_until: DiscordTimestamp?
     }
     
-    public struct GuildMembersChunk: Codable {
+    public struct GuildMembersChunk: Sendable, Codable {
         public var guild_id: String
         public var members: Set<Member>
         public var chunk_index: Int
@@ -1063,7 +1063,7 @@ public struct Gateway: Codable {
         public var nonce: String?
     }
     
-    public struct RequestGuildMembers: Codable {
+    public struct RequestGuildMembers: Sendable, Codable {
         public var guild_id: String
         public var query: String = ""
         public var limit: Int = 0
@@ -1081,17 +1081,17 @@ public struct Gateway: Codable {
         }
     }
     
-    public struct GuildJoinRequestUpdate: Codable {
+    public struct GuildJoinRequestUpdate: Sendable, Codable {
         
-        public struct Request: Codable {
+        public struct Request: Sendable, Codable {
             
-            public struct FormResponse: Codable {
+            public struct FormResponse: Sendable, Codable {
                 
-                public enum FieldKind: String, Codable {
+                public enum FieldKind: String, Sendable, Codable {
                     case terms = "TERMS"
                 }
                 
-                public struct Automation: Codable { }
+                public struct Automation: Sendable, Codable { }
                 
                 public var values: [String]
                 public var response: Bool
@@ -1115,7 +1115,7 @@ public struct Gateway: Codable {
             public var actioned_at: String /// Seems to be a Snowflake ?!
         }
         
-        public enum Status: String, Codable {
+        public enum Status: String, Sendable, Codable {
             case approved = "APPROVED"
         }
         
@@ -1124,15 +1124,15 @@ public struct Gateway: Codable {
         public var guild_id: String
     }
     
-    public struct GuildJoinRequestDelete: Codable {
+    public struct GuildJoinRequestDelete: Sendable, Codable {
         public var id: String
         public var guild_id: String
         public var user_id: String
     }
     
-    public struct Role: Codable {
+    public struct Role: Sendable, Codable {
         
-        public struct Tags: Codable {
+        public struct Tags: Sendable, Codable {
             public var bot_id: String?
             public var integration_id: String?
             public var premium_subscriber: Bool?
@@ -1154,40 +1154,40 @@ public struct Gateway: Codable {
         public var hashes: Hashes?
     }
     
-    public struct GuildRole: Codable {
+    public struct GuildRole: Sendable, Codable {
         public var guild_id: String
         public var role: Role
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
     }
     
-    public struct GuildRoleDelete: Codable {
+    public struct GuildRoleDelete: Sendable, Codable {
         public var guild_id: String
         public var role_id: String
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
     }
     
-    public struct GuildScheduledEvent: Codable {
+    public struct GuildScheduledEvent: Sendable, Codable {
         
-        public enum PrivacyLevel: Int, Codable {
+        public enum PrivacyLevel: Int, Sendable, Codable {
             case guildOnly = 2
         }
         
-        public enum Status: Int, Codable {
+        public enum Status: Int, Sendable, Codable {
             case scheduled = 1
             case active = 2
             case completed = 3
             case canceled = 4
         }
         
-        public enum EntityKind: Int, Codable {
+        public enum EntityKind: Int, Sendable, Codable {
             case stageInstance = 1
             case voice = 2
             case external = 3
         }
         
-        public struct EntityMetadata: Codable {
+        public struct EntityMetadata: Sendable, Codable {
             public var location: String?
         }
         
@@ -1210,38 +1210,38 @@ public struct Gateway: Codable {
         public var sku_ids: [String]?
     }
     
-    public struct GuildScheduledEventUser: Codable {
+    public struct GuildScheduledEventUser: Sendable, Codable {
         public var guild_scheduled_event_id: String
         public var user_id: String
         public var guild_id: String
     }
     
-    public struct GuildApplicationCommandIndexUpdate: Codable {
+    public struct GuildApplicationCommandIndexUpdate: Sendable, Codable {
         public var hashes: Hashes
         public var guild_hashes: Hashes
         public var application_command_counts: [String: Int]
         public var guild_id: String
     }
     
-    public struct Integration: Codable {
+    public struct Integration: Sendable, Codable {
         
-        public enum Kind: String, Codable {
+        public enum Kind: String, Sendable, Codable {
             case twitch
             case youtube
             case discord
         }
         
-        public enum ExpireBehavior: Int, Codable {
+        public enum ExpireBehavior: Int, Sendable, Codable {
             case removeRole = 0
             case kick = 1
         }
         
-        public struct Account: Codable {
+        public struct Account: Sendable, Codable {
             public var id: String
             public var name: String
         }
         
-        public struct IntegrationApp: Codable {
+        public struct IntegrationApp: Sendable, Codable {
             public var id: String
             public var name: String
             public var icon: String?
@@ -1275,7 +1275,7 @@ public struct Gateway: Codable {
         public var scopes: TolerantDecodeArray<OAuthScope>?
     }
     
-    public struct IntegrationDelete: Codable {
+    public struct IntegrationDelete: Sendable, Codable {
         public var id: String
         public var guild_id: String
         public var application_id: String?
@@ -1283,7 +1283,7 @@ public struct Gateway: Codable {
         public var guild_hashes: Hashes?
     }
     
-    public struct InviteCreate: Codable {
+    public struct InviteCreate: Sendable, Codable {
         public var type: Int? // FIXME: TYPIFY
         public var channel_id: String
         public var code: String
@@ -1301,13 +1301,13 @@ public struct Gateway: Codable {
         public var expires_at: DiscordTimestamp?
     }
     
-    public struct InviteDelete: Codable {
+    public struct InviteDelete: Sendable, Codable {
         public var channel_id: String
         public var guild_id: String?
         public var code: String
     }
     
-    public struct PartialMember: Codable {
+    public struct PartialMember: Sendable, Codable {
         public var user: User?
         public var nick: String?
         public var avatar: String?
@@ -1325,7 +1325,11 @@ public struct Gateway: Codable {
     }
     
     public final class DereferenceBox<C>: Codable, CustomStringConvertible where C: Codable {
-        public var value: C
+        public let value: C
+        
+        public init(value: C) {
+            self.value = value
+        }
         
         public init(from decoder: Decoder) throws {
             value = try C.init(from: decoder)
@@ -1341,18 +1345,18 @@ public struct Gateway: Codable {
     }
     
     // MessageCreate
-    public struct Message: Codable {
+    public struct Message: Sendable, Codable {
         
-        public struct MessageReference: Codable {
+        public struct MessageReference: Sendable, Codable {
             public var message_id: String?
             public var channel_id: String?
             public var guild_id: String?
             public var fail_if_not_exists: Bool?
         }
         
-        public struct Interaction: Codable {
+        public struct Interaction: Sendable, Codable {
             
-            public enum Kind: Int, Codable {
+            public enum Kind: Int, Sendable, Codable {
                 case ping = 1
                 case applicationCommand = 2
                 case messageComponent = 3
@@ -1367,7 +1371,7 @@ public struct Gateway: Codable {
             public var member: PartialMember?
         }
         
-        public enum Kind: Int, Codable {
+        public enum Kind: Int, Sendable, Codable {
             case `default` = 0
             case recipientAdd = 1
             case recipientRemove = 2
@@ -1394,7 +1398,7 @@ public struct Gateway: Codable {
             case autoModerationAction = 24
         }
         
-        public enum Flag: Int {
+        public enum Flag: Int, Sendable {
             case crossposted = 0
             case isCrosspost = 1
             case suppressEmbeds = 2
@@ -1407,7 +1411,7 @@ public struct Gateway: Codable {
             case unknownValue10 = 10
         }
         
-        public struct Mention: Codable {
+        public struct Mention: Sendable, Codable {
             public var id: String
             public var username: String
             public var discriminator: String
@@ -1427,14 +1431,14 @@ public struct Gateway: Codable {
             public var avatar_decoration: String?
         }
         
-        public struct ChannelMention: Codable {
+        public struct ChannelMention: Sendable, Codable {
             public var id: String
             public var guild_id: String
             public var type: Channel.Kind
             public var name: String
         }
         
-        public struct Attachment: Codable {
+        public struct Attachment: Sendable, Codable {
             public var id: String
             public var filename: String
             public var description: String?
@@ -1447,15 +1451,15 @@ public struct Gateway: Codable {
             public var ephemeral: Bool?
         }
         
-        public struct Reaction: Codable {
+        public struct Reaction: Sendable, Codable {
             public var count: Int
             public var me: Bool
             public var emoji: PartialEmoji
         }
         
-        public struct Activity: Codable {
+        public struct Activity: Sendable, Codable {
             
-            public enum Kind: Int, Codable {
+            public enum Kind: Int, Sendable, Codable {
                 case join = 1
                 case spectate = 2
                 case listen = 3
@@ -1466,7 +1470,7 @@ public struct Gateway: Codable {
             public var party_id: String?
         }
         
-        public struct StickerItem: Codable {
+        public struct StickerItem: Sendable, Codable {
             public var id: String
             public var name: String
             public var format_type: Sticker.FormatKind
@@ -1506,7 +1510,7 @@ public struct Gateway: Codable {
         public var position: Int?
     }
     
-    public struct PartialMessage: Codable {
+    public struct PartialMessage: Sendable, Codable {
         public var id: String
         public var channel_id: String
         public var guild_id: String?
@@ -1541,19 +1545,19 @@ public struct Gateway: Codable {
         public var position: Int?
     }
     
-    public struct MessageDelete: Codable {
+    public struct MessageDelete: Sendable, Codable {
         public var id: String
         public var channel_id: String
         public var guild_id: String?
     }
     
-    public struct MessageDeleteBulk : Codable {
+    public struct MessageDeleteBulk : Sendable, Codable {
         public var ids: [String]
         public var channel_id: String
         public var guild_id: String?
     }
     
-    public struct Member: Codable, Hashable {
+    public struct Member: Sendable, Codable, Hashable {
         public var user: User?
         public var nick: String?
         public var avatar: String?
@@ -1600,7 +1604,7 @@ public struct Gateway: Codable {
         }
     }
     
-    public struct MessageReactionAdd: Codable {
+    public struct MessageReactionAdd: Sendable, Codable {
         public var user_id: String
         public var channel_id: String
         public var message_id: String
@@ -1609,7 +1613,7 @@ public struct Gateway: Codable {
         public var emoji: Emoji
     }
     
-    public struct MessageReactionRemove: Codable {
+    public struct MessageReactionRemove: Sendable, Codable {
         public var user_id: String
         public var channel_id: String
         public var message_id: String
@@ -1617,28 +1621,28 @@ public struct Gateway: Codable {
         public var emoji: Emoji
     }
     
-    public struct MessageReactionRemoveAll : Codable {
+    public struct MessageReactionRemoveAll : Sendable, Codable {
         public var channel_id: String
         public var message_id: String
         public var guild_id: String?
     }
     
-    public struct MessageReactionRemoveEmoji: Codable {
+    public struct MessageReactionRemoveEmoji: Sendable, Codable {
         public var channel_id: String
         public var guild_id: String?
         public var message_id: String
         public var emoji: Emoji
     }
     
-    public struct PresenceUpdate: Codable {
+    public struct PresenceUpdate: Sendable, Codable {
         
-        public struct ClientStatus: Codable {
+        public struct ClientStatus: Sendable, Codable {
             public var desktop: String?
             public var mobile: String?
             public var web: String?
         }
         
-        public struct Game: Codable {
+        public struct Game: Sendable, Codable {
             public var type: Int //FIXME: Make enum
             public var state: String?
             public var name: String
@@ -1659,7 +1663,7 @@ public struct Gateway: Codable {
         public var game: Game?
     }
     
-    public struct PartialPresenceUpdate: Codable {
+    public struct PartialPresenceUpdate: Sendable, Codable {
         public var user: PartialUser?
         public var guild_id: String?
         public var status: Status?
@@ -1668,7 +1672,7 @@ public struct Gateway: Codable {
         public var game: PresenceUpdate.Game?
     }
     
-    public struct PartialEmoji: Codable {
+    public struct PartialEmoji: Sendable, Codable {
         public var name: String
         public var id: String?
         public var animated: Bool?
@@ -1680,9 +1684,9 @@ public struct Gateway: Codable {
         }
     }
     
-    public struct Activity: Codable {
+    public struct Activity: Sendable, Codable {
         
-        public enum Kind: Int, Codable {
+        public enum Kind: Int, Sendable, Codable {
             case game = 0
             case streaming = 1
             case listening = 2
@@ -1691,7 +1695,7 @@ public struct Gateway: Codable {
             case competing = 5
         }
         
-        public struct Timestamps: Codable {
+        public struct Timestamps: Sendable, Codable {
             public var start: Int?
             public var end: Int?
             
@@ -1701,7 +1705,7 @@ public struct Gateway: Codable {
             }
         }
         
-        public struct Party: Codable {
+        public struct Party: Sendable, Codable {
             public var id: String?
             public var size: IntPair?
             
@@ -1711,7 +1715,7 @@ public struct Gateway: Codable {
             }
         }
         
-        public struct Assets: Codable {
+        public struct Assets: Sendable, Codable {
             public var large_image: String?
             public var large_text: String?
             public var small_image: String?
@@ -1725,7 +1729,7 @@ public struct Gateway: Codable {
             }
         }
         
-        public struct Secrets: Codable {
+        public struct Secrets: Sendable, Codable {
             public var join: String?
             public var spectate: String?
             public var match: String?
@@ -1737,7 +1741,7 @@ public struct Gateway: Codable {
             }
         }
         
-        public enum Flag: Int {
+        public enum Flag: Int, Sendable {
             case instance = 0
             case join = 1
             case spectate = 2
@@ -1749,7 +1753,7 @@ public struct Gateway: Codable {
             case embedded = 8
         }
         
-        public struct Button: Codable {
+        public struct Button: Sendable, Codable {
             public var label: String
             public var url: String
             
@@ -1813,7 +1817,7 @@ public struct Gateway: Codable {
         }
     }
     
-    public struct TypingStart: Codable {
+    public struct TypingStart: Sendable, Codable {
         public var channel_id: String
         public var guild_id: String?
         public var user_id: String
@@ -1821,20 +1825,20 @@ public struct Gateway: Codable {
         public var member: Member?
     }
     
-    public struct VoiceServerUpdate: Codable {
+    public struct VoiceServerUpdate: Sendable, Codable {
         public var token: String
         public var guild_id: String
         public var endpoint: String?
     }
     
-    public struct WebhooksUpdate: Codable {
+    public struct WebhooksUpdate: Sendable, Codable {
         public var guild_id: String
         public var channel_id: String
     }
     
-    public struct InteractionCreate: Codable {
+    public struct InteractionCreate: Sendable, Codable {
         
-        public enum Kind: Int, Codable {
+        public enum Kind: Int, Sendable, Codable {
             case ping = 1
             case applicationCommand = 2
             case messageComponent = 3
@@ -1842,9 +1846,9 @@ public struct Gateway: Codable {
             case modalSubmit = 5
         }
         
-        public struct Data: Codable {
+        public struct Data: Sendable, Codable {
             
-            public struct ResolvedData: Codable {
+            public struct ResolvedData: Sendable, Codable {
                 public var users: [String: User]?
                 public var members: [String: PartialMember]?
                 public var roles: [String: Role]?
@@ -1853,9 +1857,9 @@ public struct Gateway: Codable {
                 public var attachments: [String: Message.Attachment]?
             }
             
-            public struct Option: Codable {
+            public struct Option: Sendable, Codable {
                 
-                public enum Kind: Int, Codable {
+                public enum Kind: Int, Sendable, Codable {
                     case subCommand = 1
                     case subCommandGroup = 2
                     case string = 3
@@ -1876,14 +1880,14 @@ public struct Gateway: Codable {
                 public var focused: Bool?
             }
             
-            public enum ComponentKind: Int, Codable {
+            public enum ComponentKind: Int, Sendable, Codable {
                 case actionRow = 1
                 case button = 2
                 case selectMenu = 3
                 case textInput = 4
             }
             
-            public struct SelectOption: Codable {
+            public struct SelectOption: Sendable, Codable {
                 public var label: String
                 public var value: String
                 public var description: String?
@@ -1920,9 +1924,9 @@ public struct Gateway: Codable {
         public var app_permissions: StringBitField<Channel.Permission>?
     }
     
-    public struct StageInstance: Codable {
+    public struct StageInstance: Sendable, Codable {
         
-        public enum PrivacyLevel: Int, Codable {
+        public enum PrivacyLevel: Int, Sendable, Codable {
             case `public` = 1
             case guildOnly = 2
         }
@@ -1936,9 +1940,9 @@ public struct Gateway: Codable {
         public var guild_scheduled_event_id: String?
     }
     
-    public struct ApplicationCommandPermissionsUpdate: Codable {
+    public struct ApplicationCommandPermissionsUpdate: Sendable, Codable {
         
-        public struct Permission: Codable {
+        public struct Permission: Sendable, Codable {
             public var type: Channel.Permission // FIXME: NOT SURE
             public var permission: Bool
             public var id: String
@@ -1950,9 +1954,9 @@ public struct Gateway: Codable {
         public var application_id: String
     }
     
-    public struct AutoModerationActionExecution: Codable {
+    public struct AutoModerationActionExecution: Sendable, Codable {
         
-        public enum AutoModerationAction: Codable {
+        public enum AutoModerationAction: Sendable, Codable {
             case blockMessage
             case sendAlertMessage(channelId: String)
             case timeout(durationSeconds: Int)
@@ -2019,7 +2023,7 @@ public struct Gateway: Codable {
             }
         }
         
-        public enum TriggerKind: Int, Codable {
+        public enum TriggerKind: Int, Sendable, Codable {
             case keyword = 1
             case spam = 3
             case keywordPreset = 4
@@ -2040,13 +2044,13 @@ public struct Gateway: Codable {
     }
 }
 
-public struct GatewayUrl: Codable {
+public struct GatewayUrl: Sendable, Codable {
     public var url: String
 }
 
-public struct GatewayBot: Codable {
+public struct GatewayBot: Sendable, Codable {
     
-    public struct SessionStartLimit: Codable {
+    public struct SessionStartLimit: Sendable, Codable {
         public var total: Int
         public var remaining: Int
         public var reset_after: Int
@@ -2057,3 +2061,6 @@ public struct GatewayBot: Codable {
     public var shards: Int
     public var session_start_limit: SessionStartLimit
 }
+
+//MARK: Sendable
+extension Gateway.DereferenceBox: Sendable where C: Sendable { }

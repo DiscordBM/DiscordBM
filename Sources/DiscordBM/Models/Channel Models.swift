@@ -1,10 +1,10 @@
 import Foundation
 
-public struct ChannelCreateMessage: Codable {
+public struct ChannelCreateMessage: Sendable, Codable {
     
-    public struct AllowedMentions: Codable {
+    public struct AllowedMentions: Sendable, Codable {
         
-        public enum Kind: String, Codable {
+        public enum Kind: String, Sendable, Codable {
             case roles
             case users
             case everyone
@@ -23,7 +23,7 @@ public struct ChannelCreateMessage: Codable {
         }
     }
     
-    public struct Reference: Codable {
+    public struct Reference: Sendable, Codable {
         public var message_id: String?
         public var channel_id: String?
         public var guild_id: String?
@@ -37,7 +37,7 @@ public struct ChannelCreateMessage: Codable {
         }
     }
     
-    public struct Attachment: Codable {
+    public struct Attachment: Sendable, Codable {
         public var id: String
         public var filename: String?
         public var description: String?
@@ -90,7 +90,7 @@ public struct ChannelCreateMessage: Codable {
     }
 }
 
-public struct ChannelEditMessage: Codable {
+public struct ChannelEditMessage: Sendable, Codable {
     
     public typealias AllowedMentions = ChannelCreateMessage.AllowedMentions
     public typealias Attachment = ChannelCreateMessage.Attachment

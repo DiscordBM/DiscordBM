@@ -1,7 +1,7 @@
 
-public struct InteractionResponse: Codable {
+public struct InteractionResponse: Sendable, Codable {
     
-    public enum Kind: Int, Codable {
+    public enum Kind: Int, Sendable, Codable {
         case pong = 1
         case message = 4
         case messageEditWithLoadingState = 5
@@ -11,11 +11,11 @@ public struct InteractionResponse: Codable {
         case modal = 9
     }
     
-    public struct CallbackData: Codable {
+    public struct CallbackData: Sendable, Codable {
         
-        public struct AllowedMentions: Codable {
+        public struct AllowedMentions: Sendable, Codable {
             
-            public enum Kind: String, Codable {
+            public enum Kind: String, Sendable, Codable {
                 case roles
                 case users
                 case everyone
@@ -27,7 +27,7 @@ public struct InteractionResponse: Codable {
             public let replied_user: Bool
         }
         
-        public struct Attachment: Codable {
+        public struct Attachment: Sendable, Codable {
             public let id: String
             public let filename: String
             public let description: String?
