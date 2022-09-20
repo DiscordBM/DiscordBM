@@ -457,7 +457,7 @@ public struct Gateway: Sendable, Codable {
     }
     
     public struct ConnectionProperties: Sendable, Codable {
-        public var os: String = {
+        public let os: String = {
 #if os(macOS)
             return "macOS"
 #elseif os(Linux)
@@ -473,11 +473,11 @@ public struct Gateway: Sendable, Codable {
 #elseif os(Android)
             return "Android"
 #else
-            return "UknownOS"
+            return "UnknownOS"
 #endif
         }()
-        public let browser: String = "MahdiBM.DiscordBM"
-        public let device: String = "MahdiBM.DiscordBM"
+        public let browser: String = "DiscordBM"
+        public let device: String = "DiscordBM"
         
         enum CodingKeys: String, CodingKey {
             case os = "$os"
