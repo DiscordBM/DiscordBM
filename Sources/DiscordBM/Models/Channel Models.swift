@@ -15,8 +15,8 @@ public struct ChannelCreateMessage: Sendable, Codable {
         public var users: [String]
         public var replied_user: Bool
         
-        public init(parse: TolerantDecodeArray<AllowedMentions.Kind>, roles: [String], users: [String], replied_user: Bool) {
-            self.parse = parse
+        public init(parse: [AllowedMentions.Kind], roles: [String], users: [String], replied_user: Bool) {
+            self.parse = .init(parse)
             self.roles = roles
             self.users = users
             self.replied_user = replied_user

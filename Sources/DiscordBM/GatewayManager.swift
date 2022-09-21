@@ -57,8 +57,6 @@ public actor GatewayManager {
     /// An ID to keep track of connection changes.
     private nonisolated let connectionId = ManagedAtomic(UInt(0))
     
-    private var pingTaskInterval = 0
-    
     //MARK: Resume-related current-connection properties
     
     /// The sequence number for the current payloads sent to us.
@@ -74,11 +72,11 @@ public actor GatewayManager {
     
     //MARK: Backoff properties
     
-    /// Try count for connections.
+    /// Try count for connections, so we can have exponential backoff.
     private var connectionTryCount = 0
     /// When last identify happened.
     ///
-    /// Discord only cares about the identify payload for rate-limiting and if we send
+    /// Discord cares about the identify payload for rate-limiting and if we send
     /// more than 1000 identifies in a day, Discord will revoke the bot token.
     private var lastIdentifyDate = Date.distantPast
     
@@ -112,9 +110,9 @@ public actor GatewayManager {
         clientConfiguration: DiscordClient.Configuration = .init(),
         token: String,
         appId: String? = nil,
+        shard: IntPair? = nil,
         presence: Gateway.Identify.PresenceUpdate? = nil,
-        intents: [Gateway.Identify.Intent] = [],
-        shard: IntPair? = nil
+        intents: [Gateway.Identify.Intent] = []
     ) {
         let token = Secret(token)
         self.eventLoopGroup = eventLoopGroup
@@ -128,7 +126,7 @@ public actor GatewayManager {
             token: token,
             shard: shard,
             presence: presence,
-            intents: .init(values: intents)
+            intents: intents
         )
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
@@ -260,7 +258,6 @@ extension GatewayManager {
                 forConnectionWithId: self.connectionId.load(ordering: .relaxed),
                 every: interval
             )
-            self.pingTaskInterval = hello.heartbeat_interval
             self.sendResumeOrIdentify()
         case let .ready(payload):
             logger.notice("Received ready notice. The connection is fully established", metadata: [

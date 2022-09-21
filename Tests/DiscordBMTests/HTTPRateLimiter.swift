@@ -129,7 +129,6 @@ class HTTPRateLimiterTests: XCTestCase {
     }
     
     func testEmptyHeaders() async throws {
-        let rateLimiter = HTTPRateLimiter(label: "Test")
         await rateLimiter.include(
             endpoint: endpoint,
             headers: [:],

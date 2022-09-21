@@ -7,9 +7,9 @@ import Logging
 
 public enum DiscordClientError: Error {
     case rateLimited(url: String)
-    case cantAttemptToDecode
+    case cantAttemptToDecodeDueToBadStatusCode
     case emptyBody
-    case appIdParameterNotProvided
+    case appIdParameterRequired
 }
 
 /// The fact that this could be used by multiple different `DiscordClient`s with
@@ -31,7 +31,7 @@ public struct DiscordClient {
                     throw DiscordClientError.emptyBody
                 }
             } else {
-                throw DiscordClientError.cantAttemptToDecode
+                throw DiscordClientError.cantAttemptToDecodeDueToBadStatusCode
             }
         }
     }
@@ -66,7 +66,9 @@ public struct DiscordClient {
         if let appId = providedAppId ?? self.appId {
             return appId
         } else {
-            throw DiscordClientError.appIdParameterNotProvided
+            /// You have not passed your app id in the init of `DiscordClient`.
+            /// You need to pass it in the function parameters.
+            throw DiscordClientError.appIdParameterRequired
         }
     }
     

@@ -31,7 +31,7 @@ public struct SlashCommand: Sendable, Codable {
         self.description_localizations = description_localizations
         self.options = options
         self.dm_permission = dm_permission
-        self.default_member_permissions = default_member_permissions.map { .init(values: $0) }
+        self.default_member_permissions = default_member_permissions.map { .init($0) }
         self.type = type
     }
 }

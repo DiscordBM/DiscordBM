@@ -26,7 +26,7 @@ public actor AuthManager: Sendable {
         if withSlashCommands {
             scopes.append(.applicationsCommands)
         }
-        let permissions = StringBitField<Gateway.Channel.Permission>(values: permissions)
+        let permissions = StringBitField<Gateway.Channel.Permission>(permissions)
         let queries = [
             ("client_id", self.clientId),
             ("permissions", "\(permissions.toBitValue())"),
