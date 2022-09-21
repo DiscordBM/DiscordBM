@@ -414,13 +414,13 @@ public protocol BitField: ExpressibleByArrayLiteral {
     associatedtype R: RawRepresentable where R.RawValue == Int
     var values: [R] { get set }
     var unknownValues: [Int] { get set }
-    init(values: [R], unknownValues: [Int])
+    init(_ values: [R], unknownValues: [Int])
 }
 
 extension BitField {
     
     public init(arrayLiteral elements: R...) {
-        self.init(values: elements, unknownValues: [])
+        self.init(elements, unknownValues: [])
     }
     
     public init(bitValue: Int) {
@@ -449,7 +449,7 @@ extension BitField {
         }
         
         self.init(
-            values: Array(values),
+            Array(values),
             unknownValues: unknownValues
         )
     }
@@ -469,7 +469,7 @@ where R: RawRepresentable, R.RawValue == Int {
     public var values: [R]
     public var unknownValues: [Int]
     
-    public init(values: [R], unknownValues: [Int] = []) {
+    public init(_ values: [R], unknownValues: [Int] = []) {
         self.values = values
         self.unknownValues = unknownValues
     }
@@ -495,7 +495,7 @@ where R: RawRepresentable, R.RawValue == Int {
     public var values: [R]
     public var unknownValues: [Int]
     
-    public init(values: [R], unknownValues: [Int] = []) {
+    public init(_ values: [R], unknownValues: [Int] = []) {
         self.values = values
         self.unknownValues = unknownValues
     }

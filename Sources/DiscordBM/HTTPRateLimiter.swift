@@ -12,7 +12,7 @@ actor HTTPRateLimiter {
         private var remaining: Int
         private var reset: Double
         /// Seconds after the request that the bucket will expire after.
-        /// We use `reset` instead of this, they both do the same thing in the end.
+        /// We use `reset` instead of this, they both do the same thing at the end.
         private var resetAfter: Double
         
         var description: String {
@@ -47,12 +47,7 @@ actor HTTPRateLimiter {
             if remaining > 0 {
                 return true
             } else {
-                let now = Date().timeIntervalSince1970
-                if reset < now {
-                    return true
-                } else {
-                    return false
-                }
+                return reset < Date().timeIntervalSince1970
             }
         }
         
@@ -77,7 +72,7 @@ actor HTTPRateLimiter {
     private var requestsThisSecond: (id: Int, count: Int) = (0, 0)
     
     /// Only 10K invalid requests allowed each 10 minutes.
-    /// We keep track of 1K / 1 minute. Even that amount of bad requests is still way too much.
+    /// We keep track of 1K / 1 minute so we can prevent hitting the limit easier.
     private var invalidRequestsIn1Minute: (id: Int, count: Int) = (0, 0)
     
     /// Hitting the invalid requests limit will ban you for one day.
@@ -141,6 +136,11 @@ actor HTTPRateLimiter {
         }
     }
     
+    /// Should request to the endpoint or not.
+    /// This also adds a record to the global rate-limit, so if this returns true,
+    /// you should make sure the request is sent, or otherwise this rate-limiter's
+    /// global rate-limit will be less than the max amount and might not allow you
+    /// to make too many requests per second, when it should.
     func shouldRequest(to endpoint: Endpoint) -> Bool {
         guard minutelyInvalidRequestsLimitAllows() else { return false }
         if endpoint.countsAgainstGlobalRateLimit {

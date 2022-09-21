@@ -153,9 +153,9 @@ public struct CreateGuildRole: Sendable, Codable {
     public var unicode_emoji: String?
     public var mentionable: Bool?
     
-    public init(name: String? = nil, permissions: StringBitField<Gateway.Channel.Permission>? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
+    public init(name: String? = nil, permissions: [Gateway.Channel.Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
         self.name = name
-        self.permissions = permissions
+        self.permissions = permissions.map { .init($0) }
         self.color = color
         self.hoist = hoist
         self.unicode_emoji = unicode_emoji

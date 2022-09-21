@@ -437,22 +437,22 @@ public struct Gateway: Sendable, Codable {
         public var presence: PresenceUpdate?
         public var intents: IntBitField<Intent>
         
-        public init(token: Secret, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: PresenceUpdate? = nil, intents: IntBitField<Intent>) {
+        public init(token: Secret, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: PresenceUpdate? = nil, intents: [Intent]) {
             self.token = token
             self.compress = compress
             self.large_threshold = large_threshold
             self.shard = shard
             self.presence = presence
-            self.intents = intents
+            self.intents = .init(intents)
         }
         
-        public init(token: String, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: PresenceUpdate? = nil, intents: IntBitField<Intent>) {
+        public init(token: String, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: PresenceUpdate? = nil, intents: [Intent]) {
             self.token = Secret(token)
             self.compress = compress
             self.large_threshold = large_threshold
             self.shard = shard
             self.presence = presence
-            self.intents = intents
+            self.intents = .init(intents)
         }
     }
     
@@ -1794,7 +1794,7 @@ public struct Gateway: Sendable, Codable {
         public var platform: String?
         public var supported_platforms: [String]?
         
-        public init(name: String, type: Kind, url: String? = nil, created_at: Int? = nil, timestamps: Timestamps? = nil, application_id: String? = nil, details: String? = nil, state: String? = nil, emoji: PartialEmoji? = nil, party: Party? = nil, assets: Assets? = nil, secrets: Secrets? = nil, instance: Bool? = nil, flags: IntBitField<Flag>? = nil, buttons: [Button]? = nil, sync_id: String? = nil, session_id: String? = nil, platform: String? = nil, supported_platforms: [String]? = nil) {
+        public init(name: String, type: Kind, url: String? = nil, created_at: Int? = nil, timestamps: Timestamps? = nil, application_id: String? = nil, details: String? = nil, state: String? = nil, emoji: PartialEmoji? = nil, party: Party? = nil, assets: Assets? = nil, secrets: Secrets? = nil, instance: Bool? = nil, flags: [Flag]? = nil, buttons: [Button]? = nil, sync_id: String? = nil, session_id: String? = nil, platform: String? = nil, supported_platforms: [String]? = nil) {
             self.name = name
             self.type = type
             self.url = url
@@ -1808,7 +1808,7 @@ public struct Gateway: Sendable, Codable {
             self.assets = assets
             self.secrets = secrets
             self.instance = instance
-            self.flags = flags
+            self.flags = flags.map { .init($0) }
             self.buttons = buttons
             self.sync_id = sync_id
             self.session_id = session_id
