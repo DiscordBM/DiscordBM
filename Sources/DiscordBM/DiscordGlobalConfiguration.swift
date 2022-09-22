@@ -10,7 +10,7 @@ public enum DiscordGlobalConfiguration {
     /// The `String` argument represents the label of the logger.
     public static var makeLogger: (String) -> Logger = { Logger(label: $0) }
     public static var webSocketMaxFrameSize = 1 << 31
-    /// Global rate-limit for requests per second. 50 by default as of now.
+    /// Global rate-limit for requests per second. Currently 50 by default.
     public static var globalRateLimit = 50
 }
 

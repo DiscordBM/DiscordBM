@@ -719,7 +719,7 @@ public struct Gateway: Sendable, Codable {
             case guildForum = 15
         }
         
-        public enum Permission: Int, Sendable, Codable {
+        public enum Permission: Int, Sendable, Hashable, Codable {
             case createInstantInvite = 0
             case kickMembers = 1
             case banMembers = 2

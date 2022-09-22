@@ -86,7 +86,7 @@ class HTTPRateLimiterTests: XCTestCase {
             )
         }
         
-        /// Still only 999 invalid requests, so should allow requests.
+        /// Still only 499 invalid requests, so should allow requests.
         do {
             let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
             XCTAssertEqual(shouldRequest, true)

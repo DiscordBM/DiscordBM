@@ -411,23 +411,29 @@ private enum BitFieldError: Error {
 }
 
 public protocol BitField: ExpressibleByArrayLiteral {
-    associatedtype R: RawRepresentable where R.RawValue == Int
-    var values: [R] { get set }
-    var unknownValues: [Int] { get set }
-    init(_ values: [R], unknownValues: [Int])
+    associatedtype R: RawRepresentable where R: Hashable, R.RawValue == Int
+    var values: Set<R> { get set }
+    var unknownValues: Set<Int> { get set }
+    init(_ values: Set<R>, unknownValues: Set<Int>)
 }
+
+private let bitFieldLogger = DiscordGlobalConfiguration.makeLogger("BitField")
 
 extension BitField {
     
     public init(arrayLiteral elements: R...) {
-        self.init(elements, unknownValues: [])
+        self.init(Set(elements), unknownValues: [])
+    }
+    
+    public init(_ elements: [R]) {
+        self.init(Set(elements), unknownValues: [])
     }
     
     public init(bitValue: Int) {
         var bitValue = bitValue
         var values: ContiguousArray<R> = []
-        var unknownValues: [Int] = []
-        while bitValue != 0 {
+        var unknownValues: Set<Int> = []
+        while bitValue > 0 {
             let halfUp = (bitValue / 2) + 1
             let log = log2(Double(halfUp))
             let intValue = Int(log.rounded(.up))
@@ -435,7 +441,7 @@ extension BitField {
             if let newValue = R(rawValue: intValue) {
                 values.append(newValue)
             } else {
-                unknownValues.append(intValue)
+                unknownValues.insert(intValue)
             }
             bitValue -= 1 << intValue
         }
@@ -449,7 +455,7 @@ extension BitField {
         }
         
         self.init(
-            Array(values),
+            Set(values),
             unknownValues: unknownValues
         )
     }
@@ -461,15 +467,13 @@ extension BitField {
     }
 }
 
-private let bitFieldLogger = DiscordGlobalConfiguration.makeLogger("BitField")
-
 public struct IntBitField<R>: BitField, Codable
-where R: RawRepresentable, R.RawValue == Int {
+where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
-    public var values: [R]
-    public var unknownValues: [Int]
+    public var values: Set<R>
+    public var unknownValues: Set<Int>
     
-    public init(_ values: [R], unknownValues: [Int] = []) {
+    public init(_ values: Set<R>, unknownValues: Set<Int> = []) {
         self.values = values
         self.unknownValues = unknownValues
     }
@@ -490,12 +494,12 @@ where R: RawRepresentable, R.RawValue == Int {
 extension IntBitField: Sendable where R: Sendable { }
 
 public struct StringBitField<R>: BitField, Codable
-where R: RawRepresentable, R.RawValue == Int {
+where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
-    public var values: [R]
-    public var unknownValues: [Int]
+    public var values: Set<R>
+    public var unknownValues: Set<Int>
     
-    public init(_ values: [R], unknownValues: [Int] = []) {
+    public init(_ values: Set<R>, unknownValues: Set<Int> = []) {
         self.values = values
         self.unknownValues = unknownValues
     }
