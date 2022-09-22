@@ -72,7 +72,7 @@ actor HTTPRateLimiter {
     private var requestsThisSecond: (id: Int, count: Int) = (0, 0)
     
     /// Only 10K invalid requests allowed each 10 minutes.
-    /// We keep track of 1K / 1 minute so we can prevent hitting the limit easier.
+    /// We keep track of 500 / 1 minute so we can prevent hitting the limit easier.
     private var invalidRequestsIn1Minute: (id: Int, count: Int) = (0, 0)
     
     /// Hitting the invalid requests limit will ban you for one day.
@@ -107,7 +107,7 @@ actor HTTPRateLimiter {
         /// Check the counter again
         let oneMinutelyId = self.currentMinutelyRateLimitId()
         if invalidRequestsIn1Minute.id == oneMinutelyId,
-           invalidRequestsIn1Minute.count >= 1_000 {
+           invalidRequestsIn1Minute.count >= 500 {
             logger.critical("Hit HTTP global invalid-requests limit. Will accept no requests for 10s to avoid getting ip-banned.", metadata: [
                 "label": .string(label)
             ])
@@ -118,7 +118,7 @@ actor HTTPRateLimiter {
         }
     }
     
-    private func globalRateLimitAllowsAndAddRecord() -> Bool {
+    private func globalRateLimitAllows() -> Bool {
         let globalId = self.currentGlobalRateLimitId()
         if self.requestsThisSecond.id == globalId {
             if self.requestsThisSecond.count >= DiscordGlobalConfiguration.globalRateLimit {
@@ -136,6 +136,15 @@ actor HTTPRateLimiter {
         }
     }
     
+    private func addGlobalRateLimitRecord() {
+        let globalId = self.currentGlobalRateLimitId()
+        if self.requestsThisSecond.id == globalId {
+            self.requestsThisSecond.count += 1
+        } else {
+            self.requestsThisSecond = (globalId, 1)
+        }
+    }
+    
     /// Should request to the endpoint or not.
     /// This also adds a record to the global rate-limit, so if this returns true,
     /// you should make sure the request is sent, or otherwise this rate-limiter's
@@ -144,11 +153,12 @@ actor HTTPRateLimiter {
     func shouldRequest(to endpoint: Endpoint) -> Bool {
         guard minutelyInvalidRequestsLimitAllows() else { return false }
         if endpoint.countsAgainstGlobalRateLimit {
-            guard globalRateLimitAllowsAndAddRecord() else { return false }
+            guard globalRateLimitAllows() else { return false }
         }
         if let bucketId = self.endpoints[endpoint.id],
            let bucket = self.buckets[bucketId] {
             if bucket.shouldRequest() {
+                self.addGlobalRateLimitRecord()
                 return true
             } else {
                 logger.warning("Hit HTTP Bucket rate-limit.", metadata: [

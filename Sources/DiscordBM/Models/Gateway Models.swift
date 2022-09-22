@@ -476,8 +476,8 @@ public struct Gateway: Sendable, Codable {
             return "UnknownOS"
 #endif
         }()
-        public let browser: String = "DiscordBM"
-        public let device: String = "DiscordBM"
+        public let browser = "DiscordBM"
+        public let device = "DiscordBM"
         
         enum CodingKeys: String, CodingKey {
             case os = "$os"
@@ -490,12 +490,6 @@ public struct Gateway: Sendable, Codable {
         public var token: Secret
         public var session_id: String
         public var seq: Int
-        
-        public init(token: Secret, session_id: String, seq: Int) {
-            self.token = token
-            self.session_id = session_id
-            self.seq = seq
-        }
     }
     
     public struct VoiceStateUpdate: Sendable, Codable {
