@@ -78,7 +78,7 @@ class HTTPRateLimiterTests: XCTestCase {
     
     func testBucketAllowsButReachedGlobalInvalidRequests() async throws {
         let invalidStatuses: [HTTPResponseStatus] = [.tooManyRequests, .forbidden, .unauthorized]
-        for _ in 0..<999 {
+        for _ in 0..<499 {
             await rateLimiter.include(
                 endpoint: endpoint,
                 headers: [:],
