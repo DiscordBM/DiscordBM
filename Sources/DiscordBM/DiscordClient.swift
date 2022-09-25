@@ -7,9 +7,11 @@ import Logging
 
 public enum DiscordClientError: Error {
     case rateLimited(url: String)
-    case cantAttemptToDecodeDueToBadStatusCode
-    case emptyBody
+    case cantAttemptToDecodeDueToBadStatusCode(raw: HTTPClient.Response)
+    case emptyBody(raw: HTTPClient.Response)
     case appIdParameterRequired
+    /// Can only send one of those query parameters.
+    case queryParametersMutuallyExclusive(queries: [(String, String?)])
 }
 
 /// The fact that this could be used by multiple different `DiscordClient`s with
@@ -28,10 +30,10 @@ public struct DiscordClient {
                    let data = body.getData(at: 0, length: body.readableBytes) {
                     return try DiscordGlobalConfiguration.decoder.decode(C.self, from: data)
                 } else {
-                    throw DiscordClientError.emptyBody
+                    throw DiscordClientError.emptyBody(raw: raw)
                 }
             } else {
-                throw DiscordClientError.cantAttemptToDecodeDueToBadStatusCode
+                throw DiscordClientError.cantAttemptToDecodeDueToBadStatusCode(raw: raw)
             }
         }
     }
@@ -413,6 +415,7 @@ extension DiscordClient {
         return try await self.send(to: endpoint)
     }
     
+    /// NOTE: `around`, `before` and `after` are mutually exclusive.
     public func getChannelMessages(
         channelId: String,
         around: String? = nil,
@@ -420,6 +423,11 @@ extension DiscordClient {
         after: String? = nil,
         limit: Int? = nil
     ) async throws -> Response<[Gateway.Message]> {
+        guard [around == nil, before == nil, after == nil].filter({ $0 == true }).count >= 2 else {
+            throw DiscordClientError.queryParametersMutuallyExclusive(
+                queries: [("around", around), ("before", before), ("after", after)]
+            )
+        }
         let endpoint = Endpoint.getChannelMessages(id: channelId)
         return try await self.send(
             to: endpoint,
