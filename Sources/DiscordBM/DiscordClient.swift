@@ -12,6 +12,7 @@ public enum DiscordClientError: Error {
     case appIdParameterRequired
     /// Can only send one of those query parameters.
     case queryParametersMutuallyExclusive(queries: [(String, String?)])
+    case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)
 }
 
 /// The fact that this could be used by multiple different `DiscordClient`s with
@@ -205,6 +206,28 @@ public struct DiscordClient {
         let response = try await self.send(to: endpoint, queries: queries, payload: payload)
         return Response(raw: response)
     }
+    
+    private func checkMutuallyExclusive(queries: [(String, String?)]) throws {
+        guard queries.filter({ $0.1 != nil }).count < 2 else {
+            throw DiscordClientError.queryParametersMutuallyExclusive(queries: queries)
+        }
+    }
+    
+    private func checkInBounds(
+        name: String,
+        value: Int?,
+        lowerBound: Int,
+        upperBound: Int
+    ) throws {
+        guard value.map({ (lowerBound...upperBound).contains($0) }) != false else {
+            throw DiscordClientError.queryParameterOutOfBounds(
+                name: name,
+                value: value.map({ "\($0)" }),
+                lowerBound: 1,
+                upperBound: 1_000
+            )
+        }
+    }
 }
 
 //MARK: - Public functions
@@ -395,14 +418,15 @@ extension DiscordClient {
     public func searchGuildMembers(
         guildId: String,
         query: String,
-        limit: Int = 1000
+        limit: Int? = nil
     ) async throws -> Response<[Gateway.Member]> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = Endpoint.searchGuildMembers(id: guildId)
         return try await self.send(
             to: endpoint,
             queries: [
                 ("query", query),
-                ("limit", "\(limit)")
+                ("limit", limit.map({ "\($0)" }))
             ]
         )
     }
@@ -423,11 +447,11 @@ extension DiscordClient {
         after: String? = nil,
         limit: Int? = nil
     ) async throws -> Response<[Gateway.Message]> {
-        guard [around == nil, before == nil, after == nil].filter({ $0 == true }).count >= 2 else {
-            throw DiscordClientError.queryParametersMutuallyExclusive(
-                queries: [("around", around), ("before", before), ("after", after)]
-            )
-        }
+        try checkMutuallyExclusive(queries: [
+            ("around", around),
+            ("before", before),
+            ("after", after)
+        ])
         let endpoint = Endpoint.getChannelMessages(id: channelId)
         return try await self.send(
             to: endpoint,
