@@ -7,8 +7,8 @@ import Logging
 
 public enum DiscordClientError: Error {
     case rateLimited(url: String)
-    case cantAttemptToDecodeDueToBadStatusCode(raw: HTTPClient.Response)
-    case emptyBody(raw: HTTPClient.Response)
+    case cantAttemptToDecodeDueToBadStatusCode(raw: DiscordClient.HTTPResponse)
+    case emptyBody(raw: DiscordClient.HTTPResponse)
     case appIdParameterRequired
     /// Can only send one of those query parameters.
     case queryParametersMutuallyExclusive(queries: [(String, String?)])
@@ -21,9 +21,34 @@ private let rateLimiter = HTTPRateLimiter(label: "DiscordClientRateLimiter")
 
 public struct DiscordClient {
     
+    public struct HTTPResponse: Sendable {
+        internal var _response: HTTPClient.Response
+        
+        /// Remote host of the request.
+        public var host: String {
+            _response.host
+        }
+        /// Response HTTP status.
+        public var status: HTTPResponseStatus {
+            _response.status
+        }
+        /// Response HTTP version.
+        public var version: HTTPVersion {
+            _response.version
+        }
+        /// Reponse HTTP headers.
+        public var headers: HTTPHeaders {
+            _response.headers
+        }
+        /// Response body.
+        public var body: ByteBuffer? {
+            _response.body
+        }
+    }
+    
     public struct Response<C> where C: Codable {
         
-        public let raw: HTTPClient.Response
+        public let raw: HTTPResponse
         
         public func decode() throws -> C {
             if (200..<300).contains(raw.status.code) {
@@ -65,7 +90,7 @@ public struct DiscordClient {
         }
     }
     
-    private func requireAppId(_ providedAppId: String?) throws -> String {
+    func requireAppId(_ providedAppId: String?) throws -> String {
         if let appId = providedAppId ?? self.appId {
             return appId
         } else {
@@ -75,13 +100,13 @@ public struct DiscordClient {
         }
     }
     
-    private func checkRateLimitsAllowRequest(to endpoint: Endpoint) async throws {
+    func checkRateLimitsAllowRequest(to endpoint: Endpoint) async throws {
         if await !rateLimiter.shouldRequest(to: endpoint) {
             throw DiscordClientError.rateLimited(url: "\(endpoint.url)")
         }
     }
     
-    private func includeInRateLimits(
+    func includeInRateLimits(
         endpoint: Endpoint,
         headers: HTTPHeaders,
         status: HTTPResponseStatus
@@ -89,10 +114,10 @@ public struct DiscordClient {
         await rateLimiter.include(endpoint: endpoint, headers: headers, status: status)
     }
     
-    private func getFromCache(
+    func getFromCache(
         identity: CacheableEndpointIdentity?,
         queries: [(String, String?)]
-    ) async -> HTTPClient.Response? {
+    ) async -> HTTPResponse? {
         guard let identity = identity else { return nil }
         return await cache?.get(item: .init(
             identity: identity,
@@ -100,8 +125,8 @@ public struct DiscordClient {
         ))
     }
     
-    private func saveInCache(
-        response: HTTPClient.Response,
+    func saveInCache(
+        response: HTTPResponse,
         identity: CacheableEndpointIdentity?,
         queries: [(String, String?)]
     ) async {
@@ -118,20 +143,22 @@ public struct DiscordClient {
         )
     }
     
-    private func execute(_ request: HTTPClient.Request) async throws -> HTTPClient.Response {
-        try await self.client.execute(
-            request: request,
-            deadline: .now() + configuration.requestTimeout,
-            logger: configuration.enableLoggingForRequests
-            ? DiscordGlobalConfiguration.makeLogger("DiscordClientHTTPRequest")
-            : Logger(label: "DBM-no-op-logger", factory: { _ in SwiftLogNoOpLogHandler() })
-        ).get()
+    func execute(_ request: HTTPClient.Request) async throws -> HTTPResponse {
+        HTTPResponse(
+            _response: try await self.client.execute(
+                request: request,
+                deadline: .now() + configuration.requestTimeout,
+                logger: configuration.enableLoggingForRequests
+                ? DiscordGlobalConfiguration.makeLogger("DiscordClientHTTPRequest")
+                : Logger(label: "DBM-no-op-logger", factory: { _ in SwiftLogNoOpLogHandler() })
+            ).get()
+        )
     }
     
-    private func send(
+    func send(
         to endpoint: Endpoint,
         queries: [(String, String?)] = []
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let identity = CacheableEndpointIdentity(endpoint: endpoint)
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
             return cached
@@ -156,7 +183,7 @@ public struct DiscordClient {
         return response
     }
     
-    private func send<C: Codable>(
+    func send<C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)] = []
     ) async throws -> Response<C> {
@@ -164,11 +191,11 @@ public struct DiscordClient {
         return Response(raw: response)
     }
     
-    private func send<E: Encodable>(
+    func send<E: Encodable>(
         to endpoint: Endpoint,
         queries: [(String, String?)] = [],
         payload: E
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let identity = CacheableEndpointIdentity(endpoint: endpoint)
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
             return cached
@@ -198,7 +225,7 @@ public struct DiscordClient {
         return response
     }
     
-    private func send<E: Encodable, C: Codable>(
+    func send<E: Encodable, C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)] = [],
         payload: E
@@ -207,13 +234,13 @@ public struct DiscordClient {
         return Response(raw: response)
     }
     
-    private func checkMutuallyExclusive(queries: [(String, String?)]) throws {
+    func checkMutuallyExclusive(queries: [(String, String?)]) throws {
         guard queries.filter({ $0.1 != nil }).count < 2 else {
             throw DiscordClientError.queryParametersMutuallyExclusive(queries: queries)
         }
     }
     
-    private func checkInBounds(
+    func checkInBounds(
         name: String,
         value: Int?,
         lowerBound: Int,
@@ -257,7 +284,7 @@ extension DiscordClient {
         appId: String? = nil,
         token: String,
         payload: InteractionResponse.CallbackData
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let endpoint = Endpoint.editOriginalInteractionResponse(
             appId: try requireAppId(appId),
             token: token
@@ -268,7 +295,7 @@ extension DiscordClient {
     public func deleteInteractionResponse(
         appId: String? = nil,
         token: String
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let endpoint = Endpoint.deleteOriginalInteractionResponse(
             appId: try requireAppId(appId),
             token: token
@@ -280,7 +307,7 @@ extension DiscordClient {
         appId: String? = nil,
         token: String,
         payload: InteractionResponse
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let endpoint = Endpoint.postFollowupGatewayInteractionResponse(
             appId: try requireAppId(appId),
             token: token
@@ -293,7 +320,7 @@ extension DiscordClient {
         id: String,
         token: String,
         payload: InteractionResponse
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let endpoint = Endpoint.editGatewayInteractionResponseFollowup(
             appId: try requireAppId(appId),
             id: id,
@@ -314,7 +341,7 @@ extension DiscordClient {
         channelId: String,
         messageId: String,
         payload: ChannelEditMessage
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let endpoint = Endpoint.patchEditMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint, payload: payload)
     }
@@ -322,7 +349,7 @@ extension DiscordClient {
     public func deleteMessage(
         channelId: String,
         messageId: String
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let endpoint = Endpoint.deleteMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint)
     }
@@ -345,7 +372,7 @@ extension DiscordClient {
     public func deleteApplicationGlobalCommand(
         appId: String? = nil,
         id: String
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let endpoint = Endpoint.deleteApplicationGlobalCommand(
             appId: try requireAppId(appId),
             id: id
@@ -363,7 +390,7 @@ extension DiscordClient {
         return try await self.send(to: endpoint)
     }
     
-    public func leaveGuild(id: String) async throws -> HTTPClient.Response {
+    public func leaveGuild(id: String) async throws -> HTTPResponse {
         let endpoint = Endpoint.leaveGuild(id: id)
         return try await self.send(to: endpoint)
     }
@@ -380,7 +407,7 @@ extension DiscordClient {
         guildId: String,
         userId: String,
         roleId: String
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let endpoint = Endpoint.addGuildMemberRole(
             guildId: guildId,
             userId: userId,
@@ -393,7 +420,7 @@ extension DiscordClient {
         guildId: String,
         userId: String,
         roleId: String
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let endpoint = Endpoint.removeGuildMemberRole(
             guildId: guildId,
             userId: userId,
@@ -406,7 +433,7 @@ extension DiscordClient {
         channelId: String,
         messageId: String,
         emoji: String
-    ) async throws -> HTTPClient.Response {
+    ) async throws -> HTTPResponse {
         let endpoint = Endpoint.addReaction(
             channelId: channelId,
             messageId: messageId,
@@ -578,10 +605,12 @@ private actor ClientCache {
         }
     }
     
+    typealias HTTPResponse = DiscordClient.HTTPResponse
+    
     /// [ID: ExpirationTime]
     private var timeTable = [CacheableItem: Double]()
     /// [ID: Response]
-    private var storage = [CacheableItem: HTTPClient.Response]()
+    private var storage = [CacheableItem: HTTPResponse]()
     
     init() {
         Task {
@@ -589,12 +618,12 @@ private actor ClientCache {
         }
     }
     
-    func add(response: HTTPClient.Response, item: CacheableItem, ttl: Double) {
+    func add(response: HTTPResponse, item: CacheableItem, ttl: Double) {
         self.timeTable[item] = Date().timeIntervalSince1970 + ttl
         self.storage[item] = response
     }
     
-    func get(item: CacheableItem) -> HTTPClient.Response? {
+    func get(item: CacheableItem) -> HTTPResponse? {
         if let time = self.timeTable[item] {
             if time > Date().timeIntervalSince1970 {
                 return storage[item]
