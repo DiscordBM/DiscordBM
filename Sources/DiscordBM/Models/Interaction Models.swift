@@ -57,16 +57,16 @@ public struct InteractionResponse: Sendable, Codable {
         public var content: String?
         public var embeds: [Embed]?
         public var allowedMentions: AllowedMentions?
-        public var flags: Int?
+        public var flags: IntBitField<Gateway.Message.Flag>?
         public var components: [ActionRow]?
         public var attachments: [Attachment]?
         
-        public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: AllowedMentions? = nil, flags: Int? = nil, components: [ActionRow]? = nil, attachments: [Attachment]? = nil) {
+        public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: AllowedMentions? = nil, flags: [Gateway.Message.Flag]? = nil, components: [ActionRow]? = nil, attachments: [Attachment]? = nil) {
             self.tts = tts
             self.content = content
             self.embeds = embeds
             self.allowedMentions = allowedMentions
-            self.flags = flags
+            self.flags = flags.map { .init($0) }
             self.components = components
             self.attachments = attachments
         }

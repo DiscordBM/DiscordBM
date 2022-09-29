@@ -73,9 +73,9 @@ public struct ChannelCreateMessage: Sendable, Codable {
     public var files: [String]?
     public var payload_json: String?
     public var attachments: [Attachment]?
-    public var flags: Int?
+    public var flags: IntBitField<Gateway.Message.Flag>?
     
-    public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: Reference? = nil, components: [ActionRow]? = nil, sticker_ids: [String]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Attachment]? = nil, flags: Int? = nil) {
+    public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: Reference? = nil, components: [ActionRow]? = nil, sticker_ids: [String]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Attachment]? = nil, flags: [Gateway.Message.Flag]? = nil) {
         self.content = content
         self.tts = tts
         self.embeds = embeds
@@ -86,7 +86,7 @@ public struct ChannelCreateMessage: Sendable, Codable {
         self.files = files
         self.payload_json = payload_json
         self.attachments = attachments
-        self.flags = flags
+        self.flags = flags.map { .init($0) }
     }
 }
 
@@ -97,17 +97,17 @@ public struct ChannelEditMessage: Sendable, Codable {
     
     public var content: String?
     public var embeds: [Embed]?
-    public var flags: Int?
+    public var flags: IntBitField<Gateway.Message.Flag>?
     public var allowed_mentions: AllowedMentions?
     public var components: [ActionRow]?
     public var files: [String]?
     public var payload_json: String?
     public var attachments: [ChannelCreateMessage.Attachment]?
     
-    public init(content: String? = nil, embeds: [Embed]? = nil, flags: Int? = nil, allowed_mentions: AllowedMentions? = nil, components: [ActionRow]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Attachment]? = nil) {
+    public init(content: String? = nil, embeds: [Embed]? = nil, flags: [Gateway.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [ActionRow]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Attachment]? = nil) {
         self.content = content
         self.embeds = embeds
-        self.flags = flags
+        self.flags = flags.map { .init($0) }
         self.allowed_mentions = allowed_mentions
         self.components = components
         self.files = files
