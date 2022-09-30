@@ -19,4 +19,23 @@ class DiscordColorTests: XCTestCase {
         let hex = color.asHex
         XCTAssertEqual(hex, "#A0B9FF")
     }
+    
+    func testLowerBound() {
+        _ = DiscordColor(value: 0)
+        _ = DiscordColor(red: 0, green: 0, blue: 0)
+        _ = DiscordColor(hex: "#000000")
+    }
+    
+    func testUpperBound() {
+        _ = DiscordColor(value: 16777215)
+        _ = DiscordColor(red: 255, green: 255, blue: 255)
+        _ = DiscordColor(hex: "#FFFFFF")
+    }
+    
+    func testInsensitiveHex() {
+        XCTAssertEqual(DiscordColor(hex: "#FFFFFF").value, 16777215)
+        XCTAssertEqual(DiscordColor(hex: "FFFFFF").value, 16777215)
+        XCTAssertEqual(DiscordColor(hex: "#ffffff").value, 16777215)
+        XCTAssertEqual(DiscordColor(hex: "ffffff").value, 16777215)
+    }
 }
