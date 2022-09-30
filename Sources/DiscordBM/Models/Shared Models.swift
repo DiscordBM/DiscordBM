@@ -747,8 +747,8 @@ public struct DiscordColor: Sendable, Codable, ExpressibleByIntegerLiteral {
     
     public var asRGB: (red: Int, green: Int, blue: Int) {
         let red = value >> 16
-        let green = (value - (red << 16)) >> 8
-        let blue = value - (red << 16) - (green << 8)
+        let green = (value & 0x00FF00) >> 8
+        let blue = value & 0x0000FF
         return (red, green, blue)
     }
     
