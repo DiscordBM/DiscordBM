@@ -774,12 +774,12 @@ public struct DiscordColor: Sendable, Codable, ExpressibleByIntegerLiteral {
     }
     
     public init(hex: String) {
-        var hex = hex
+        var dropCount = 0
         if hex.hasPrefix("#") {
-            hex.removeFirst()
+            dropCount = 1
         }
-        precondition(hex.count == 6, "Hex color must be 6 letters long.")
-        self.value = Int(hex, radix: 16)!
+        precondition((hex.count - dropCount) == 6, "Hex color must be 6 letters long.")
+        self.value = Int(hex.dropFirst(dropCount), radix: 16)!
     }
     
     public init(from decoder: Decoder) throws {
