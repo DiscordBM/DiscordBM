@@ -36,7 +36,7 @@ public struct DiscordClient {
         public var version: HTTPVersion {
             _response.version
         }
-        /// Reponse HTTP headers.
+        /// Response HTTP headers.
         public var headers: HTTPHeaders {
             _response.headers
         }
@@ -559,7 +559,7 @@ private final class ClientCacheStorage {
     
     /// [Token: ClientCache]
     private var storage = [String: ClientCache]()
-    private let lock = Lock()
+    private let lock = NIOLock()
     
     private init() { }
     
