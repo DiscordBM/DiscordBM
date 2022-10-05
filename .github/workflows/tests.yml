@@ -13,7 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         container:
-          - swift:5.5-bionic
           - swift:5.6-focal
           - swift:5.7-jammy
           - swiftlang/swift:nightly-main-jammy
