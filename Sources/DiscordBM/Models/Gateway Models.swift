@@ -814,6 +814,7 @@ public struct Gateway: Sendable, Codable {
         public var available_tags: [String]?
         public var template: String?
         public var member_ids_preview: [String]?
+        public var version: Int?
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
     }
@@ -862,6 +863,7 @@ public struct Gateway: Sendable, Codable {
         public var available_tags: [String]?
         public var template: String?
         public var member_ids_preview: [String]?
+        public var version: Int?
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
     }
