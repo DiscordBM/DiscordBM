@@ -1146,6 +1146,7 @@ public struct Gateway: Sendable, Codable {
         public var mentionable: Bool
         public var flags: IntBitField<User.Flag>? // FIXME not sure about `User.Flag`
         public var tags: Tags?
+        public var version: Int?
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
     }
