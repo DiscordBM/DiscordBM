@@ -14,27 +14,27 @@ public protocol DiscordClient {
     func send(
         to endpoint: Endpoint,
         queries: [(String, String?)]
-    ) async throws -> HTTPResponse
+    ) async throws -> DiscordHTTPResponse
     
     func send<C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)]
-    ) async throws -> ClientResponse<C>
+    ) async throws -> DiscordClientResponse<C>
     
     func send<E: Encodable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         payload: E
-    ) async throws -> HTTPResponse
+    ) async throws -> DiscordHTTPResponse
     
     func send<E: Encodable, C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         payload: E
-    ) async throws -> ClientResponse<C>
+    ) async throws -> DiscordClientResponse<C>
 }
 
-public struct HTTPResponse: Sendable {
+public struct DiscordHTTPResponse: Sendable {
     let _response: HTTPClient.Response
     
     internal init(_response: HTTPClient.Response) {
@@ -79,8 +79,8 @@ public struct HTTPResponse: Sendable {
     }
 }
 
-public struct ClientResponse<C> where C: Codable {
-    public let raw: HTTPResponse
+public struct DiscordClientResponse<C> where C: Codable {
+    public let raw: DiscordHTTPResponse
     
     public func decode() throws -> C {
         if (200..<300).contains(raw.status.code) {
@@ -149,8 +149,8 @@ public struct ClientConfiguration {
 
 public enum DiscordClientError: Error {
     case rateLimited(url: String)
-    case cantAttemptToDecodeDueToBadStatusCode(raw: HTTPResponse)
-    case emptyBody(raw: HTTPResponse)
+    case cantAttemptToDecodeDueToBadStatusCode(raw: DiscordHTTPResponse)
+    case emptyBody(raw: DiscordHTTPResponse)
     case appIdParameterRequired
     /// Can only send one of those query parameters.
     case queryParametersMutuallyExclusive(queries: [(String, String?)])
@@ -160,8 +160,8 @@ public enum DiscordClientError: Error {
 //MARK: - Private +DiscordClient
 private extension DiscordClient {
     
-    func execute(_ request: HTTPClient.Request) async throws -> HTTPResponse {
-        HTTPResponse(
+    func execute(_ request: HTTPClient.Request) async throws -> DiscordHTTPResponse {
+        DiscordHTTPResponse(
             _response: try await self.client.execute(
                 request: request,
                 deadline: .now() + configuration.requestTimeout,
@@ -208,12 +208,12 @@ private extension DiscordClient {
 //MARK: - Public +DiscordClient
 public extension DiscordClient {
     
-    func getGateway() async throws -> ClientResponse<GatewayUrl> {
+    func getGateway() async throws -> DiscordClientResponse<GatewayUrl> {
         let endpoint = Endpoint.getGateway
         return try await self.send(to: endpoint, queries: [])
     }
     
-    func getGatewayBot() async throws -> ClientResponse<GatewayBot> {
+    func getGatewayBot() async throws -> DiscordClientResponse<GatewayBot> {
         let endpoint = Endpoint.getGatewayBot
         return try await self.send(to: endpoint, queries: [])
     }
@@ -222,7 +222,7 @@ public extension DiscordClient {
         id: String,
         token: String,
         payload: InteractionResponse
-    ) async throws -> ClientResponse<InteractionResponse.CallbackData> {
+    ) async throws -> DiscordClientResponse<InteractionResponse.CallbackData> {
         let endpoint = Endpoint.createInteractionResponse(id: id, token: token)
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
@@ -231,7 +231,7 @@ public extension DiscordClient {
         appId: String? = nil,
         token: String,
         payload: InteractionResponse.CallbackData
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.editOriginalInteractionResponse(
             appId: try requireAppId(appId),
             token: token
@@ -242,7 +242,7 @@ public extension DiscordClient {
     func deleteInteractionResponse(
         appId: String? = nil,
         token: String
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.deleteOriginalInteractionResponse(
             appId: try requireAppId(appId),
             token: token
@@ -254,7 +254,7 @@ public extension DiscordClient {
         appId: String? = nil,
         token: String,
         payload: InteractionResponse
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.postFollowupGatewayInteractionResponse(
             appId: try requireAppId(appId),
             token: token
@@ -267,7 +267,7 @@ public extension DiscordClient {
         id: String,
         token: String,
         payload: InteractionResponse
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.editGatewayInteractionResponseFollowup(
             appId: try requireAppId(appId),
             id: id,
@@ -279,7 +279,7 @@ public extension DiscordClient {
     func createMessage(
         channelId: String,
         payload: ChannelCreateMessage
-    ) async throws -> ClientResponse<Gateway.Message> {
+    ) async throws -> DiscordClientResponse<Gateway.Message> {
         let endpoint = Endpoint.postCreateMessage(channelId: channelId)
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
@@ -288,7 +288,7 @@ public extension DiscordClient {
         channelId: String,
         messageId: String,
         payload: ChannelEditMessage
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.patchEditMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
@@ -296,7 +296,7 @@ public extension DiscordClient {
     func deleteMessage(
         channelId: String,
         messageId: String
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.deleteMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint, queries: [])
     }
@@ -304,14 +304,14 @@ public extension DiscordClient {
     func createApplicationGlobalCommand(
         appId: String? = nil,
         payload: SlashCommand
-    ) async throws -> ClientResponse<SlashCommand> {
+    ) async throws -> DiscordClientResponse<SlashCommand> {
         let endpoint = Endpoint.createApplicationGlobalCommand(appId: try requireAppId(appId))
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
     
     func getApplicationGlobalCommands(
         appId: String? = nil
-    ) async throws -> ClientResponse<[SlashCommand]> {
+    ) async throws -> DiscordClientResponse<[SlashCommand]> {
         let endpoint = Endpoint.getApplicationGlobalCommands(appId: try requireAppId(appId))
         return try await send(to: endpoint, queries: [])
     }
@@ -319,7 +319,7 @@ public extension DiscordClient {
     func deleteApplicationGlobalCommand(
         appId: String? = nil,
         id: String
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.deleteApplicationGlobalCommand(
             appId: try requireAppId(appId),
             id: id
@@ -327,17 +327,17 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [])
     }
     
-    func getGuild(id: String) async throws -> ClientResponse<Guild> {
+    func getGuild(id: String) async throws -> DiscordClientResponse<Guild> {
         let endpoint = Endpoint.getGuild(id: id)
         return try await self.send(to: endpoint, queries: [])
     }
     
-    func getChannel(id: String) async throws -> ClientResponse<Gateway.Channel> {
+    func getChannel(id: String) async throws -> DiscordClientResponse<Gateway.Channel> {
         let endpoint = Endpoint.getChannel(id: id)
         return try await self.send(to: endpoint, queries: [])
     }
     
-    func leaveGuild(id: String) async throws -> HTTPResponse {
+    func leaveGuild(id: String) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.leaveGuild(id: id)
         return try await self.send(to: endpoint, queries: [])
     }
@@ -345,7 +345,7 @@ public extension DiscordClient {
     func createGuildRole(
         guildId: String,
         payload: CreateGuildRole
-    ) async throws -> ClientResponse<Gateway.Role> {
+    ) async throws -> DiscordClientResponse<Gateway.Role> {
         let endpoint = Endpoint.createGuildRole(guildId: guildId)
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
@@ -354,7 +354,7 @@ public extension DiscordClient {
         guildId: String,
         userId: String,
         roleId: String
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.addGuildMemberRole(
             guildId: guildId,
             userId: userId,
@@ -367,7 +367,7 @@ public extension DiscordClient {
         guildId: String,
         userId: String,
         roleId: String
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.removeGuildMemberRole(
             guildId: guildId,
             userId: userId,
@@ -380,7 +380,7 @@ public extension DiscordClient {
         channelId: String,
         messageId: String,
         emoji: String
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.addReaction(
             channelId: channelId,
             messageId: messageId,
@@ -393,7 +393,7 @@ public extension DiscordClient {
         guildId: String,
         query: String,
         limit: Int? = nil
-    ) async throws -> ClientResponse<[Gateway.Member]> {
+    ) async throws -> DiscordClientResponse<[Gateway.Member]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = Endpoint.searchGuildMembers(id: guildId)
         return try await self.send(
@@ -408,7 +408,7 @@ public extension DiscordClient {
     func getGuildMember(
         guildId: String,
         userId: String
-    ) async throws -> ClientResponse<Gateway.Member> {
+    ) async throws -> DiscordClientResponse<Gateway.Member> {
         let endpoint = Endpoint.getGuildMember(id: guildId, userId: userId)
         return try await self.send(to: endpoint, queries: [])
     }
@@ -420,7 +420,7 @@ public extension DiscordClient {
         before: String? = nil,
         after: String? = nil,
         limit: Int? = nil
-    ) async throws -> ClientResponse<[Gateway.Message]> {
+    ) async throws -> DiscordClientResponse<[Gateway.Message]> {
         try checkMutuallyExclusive(queries: [
             ("around", around),
             ("before", before),
@@ -441,7 +441,7 @@ public extension DiscordClient {
     func getChannelMessage(
         channelId: String,
         messageId: String
-    ) async throws -> ClientResponse<Gateway.Message> {
+    ) async throws -> DiscordClientResponse<Gateway.Message> {
         let endpoint = Endpoint.getChannelMessage(id: channelId, messageId: messageId)
         return try await self.send(to: endpoint, queries: [])
     }
@@ -497,7 +497,7 @@ public struct DefaultDiscordClient: DiscordClient {
     func getFromCache(
         identity: CacheableEndpointIdentity?,
         queries: [(String, String?)]
-    ) async -> HTTPResponse? {
+    ) async -> DiscordHTTPResponse? {
         guard let identity = identity else { return nil }
         return await cache?.get(item: .init(
             identity: identity,
@@ -506,7 +506,7 @@ public struct DefaultDiscordClient: DiscordClient {
     }
     
     func saveInCache(
-        response: HTTPResponse,
+        response: DiscordHTTPResponse,
         identity: CacheableEndpointIdentity?,
         queries: [(String, String?)]
     ) async {
@@ -526,7 +526,7 @@ public struct DefaultDiscordClient: DiscordClient {
     public func send(
         to endpoint: Endpoint,
         queries: [(String, String?)] = []
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let identity = CacheableEndpointIdentity(endpoint: endpoint)
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
             return cached
@@ -554,16 +554,16 @@ public struct DefaultDiscordClient: DiscordClient {
     public func send<C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)] = []
-    ) async throws -> ClientResponse<C> {
+    ) async throws -> DiscordClientResponse<C> {
         let response = try await self.send(to: endpoint, queries: queries)
-        return ClientResponse(raw: response)
+        return DiscordClientResponse(raw: response)
     }
     
     public func send<E: Encodable>(
         to endpoint: Endpoint,
         queries: [(String, String?)] = [],
         payload: E
-    ) async throws -> HTTPResponse {
+    ) async throws -> DiscordHTTPResponse {
         let identity = CacheableEndpointIdentity(endpoint: endpoint)
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
             return cached
@@ -597,9 +597,9 @@ public struct DefaultDiscordClient: DiscordClient {
         to endpoint: Endpoint,
         queries: [(String, String?)] = [],
         payload: E
-    ) async throws -> ClientResponse<C> {
+    ) async throws -> DiscordClientResponse<C> {
         let response = try await self.send(to: endpoint, queries: queries, payload: payload)
-        return ClientResponse(raw: response)
+        return DiscordClientResponse(raw: response)
     }
 }
 
@@ -657,7 +657,7 @@ private actor ClientCache {
     /// [ID: ExpirationTime]
     private var timeTable = [CacheableItem: Double]()
     /// [ID: Response]
-    private var storage = [CacheableItem: HTTPResponse]()
+    private var storage = [CacheableItem: DiscordHTTPResponse]()
     
     init() {
         Task {
@@ -665,12 +665,12 @@ private actor ClientCache {
         }
     }
     
-    func add(response: HTTPResponse, item: CacheableItem, ttl: Double) {
+    func add(response: DiscordHTTPResponse, item: CacheableItem, ttl: Double) {
         self.timeTable[item] = Date().timeIntervalSince1970 + ttl
         self.storage[item] = response
     }
     
-    func get(item: CacheableItem) -> HTTPResponse? {
+    func get(item: CacheableItem) -> DiscordHTTPResponse? {
         if let time = self.timeTable[item] {
             if time > Date().timeIntervalSince1970 {
                 return storage[item]
@@ -700,6 +700,6 @@ private actor ClientCache {
 
 //MARK: Sendable
 extension DefaultDiscordClient: Sendable { }
-extension ClientResponse: Sendable where C: Sendable { }
+extension DiscordClientResponse: Sendable where C: Sendable { }
 extension ClientConfiguration: Sendable { }
 extension ClientConfiguration.CachingBehavior: Sendable { }
