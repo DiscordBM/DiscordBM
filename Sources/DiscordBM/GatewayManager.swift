@@ -34,7 +34,7 @@ public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
     }
 }
 
-public actor DefaultGatewayManager: GatewayManager {
+public actor BotGatewayManager: GatewayManager {
     
     private weak var ws: WebSocket? {
         didSet {
@@ -45,7 +45,7 @@ public actor DefaultGatewayManager: GatewayManager {
     public nonisolated let client: any DiscordClient
     private nonisolated let maxFrameSize: Int
     private static let idGenerator = ManagedAtomic(0)
-    public nonisolated let id = DefaultGatewayManager.idGenerator
+    public nonisolated let id = BotGatewayManager.idGenerator
         .wrappingIncrementThenLoad(ordering: .relaxed)
     private let logger: Logger
     
@@ -122,6 +122,23 @@ public actor DefaultGatewayManager: GatewayManager {
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
+        client: any DiscordClient,
+        maxFrameSize: Int =  1 << 31,
+        appId: String? = nil,
+        identifyPayload: Gateway.Identify
+    ) {
+        self.eventLoopGroup = eventLoopGroup
+        self.client = client
+        self.maxFrameSize = maxFrameSize
+        self.identifyPayload = identifyPayload
+        var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
+        logger[metadataKey: "gateway-id"] = .string("\(self.id)")
+        self.logger = logger
+    }
+    
+    public init(
+        eventLoopGroup: EventLoopGroup,
+        httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
         token: String,
@@ -179,7 +196,7 @@ public actor DefaultGatewayManager: GatewayManager {
     }
 }
 
-extension DefaultGatewayManager {
+extension BotGatewayManager {
     /// `_state` must be set to an appropriate value before triggering this function.
     private func connectAsync() async {
         logger.trace("Connect method triggered")
