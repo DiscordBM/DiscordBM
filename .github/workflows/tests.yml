@@ -29,7 +29,7 @@ jobs:
       fail-fast: false
       matrix:
         xcode:
-          - latest-stable
+          # - latest-stable
           - latest
         include:
           - xcode: latest-stable
