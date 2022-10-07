@@ -30,7 +30,8 @@ public actor GatewayManager {
         }
     }
     private let eventLoopGroup: EventLoopGroup
-    public nonisolated let client: DiscordClient
+    public nonisolated let client: any DiscordClient
+    public nonisolated let maxFrameSize: Int
     private static let idGenerator = ManagedAtomic(0)
     public nonisolated let id = GatewayManager.idGenerator
         .wrappingIncrementThenLoad(ordering: .relaxed)
@@ -88,6 +89,7 @@ public actor GatewayManager {
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
+        maxFrameSize: Int =  1 << 31,
         appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
@@ -98,6 +100,7 @@ public actor GatewayManager {
             appId: appId,
             configuration: clientConfiguration
         )
+        self.maxFrameSize = maxFrameSize
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
@@ -108,6 +111,7 @@ public actor GatewayManager {
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
+        maxFrameSize: Int =  1 << 31,
         token: String,
         appId: String? = nil,
         shard: IntPair? = nil,
@@ -122,6 +126,7 @@ public actor GatewayManager {
             appId: appId,
             configuration: clientConfiguration
         )
+        self.maxFrameSize = maxFrameSize
         self.identifyPayload = .init(
             token: token,
             shard: shard,
@@ -190,7 +195,7 @@ extension GatewayManager {
         logger.trace("Will wait for other shards if needed")
         await waitInShardQueueIfNeeded()
         var configuration = WebSocketClient.Configuration()
-        configuration.maxFrameSize = DiscordGlobalConfiguration.webSocketMaxFrameSize
+        configuration.maxFrameSize = self.maxFrameSize
         logger.trace("Will try to connect to Discord through web-socket")
         WebSocket.connect(
             to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
