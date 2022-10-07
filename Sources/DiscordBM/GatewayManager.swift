@@ -6,34 +6,46 @@ import Logging
 import enum NIOWebSocket.WebSocketErrorCode
 import struct NIOCore.TimeAmount
 
-public actor GatewayManager {
+public protocol GatewayManager: AnyActor {
+    nonisolated var client: any DiscordClient { get }
+    nonisolated var id: Int { get }
+    nonisolated var state: GatewayState { get }
     
-    public enum State: Int, Sendable, AtomicValue, CustomStringConvertible {
-        case noConnection
-        case connecting
-        case configured
-        case connected
-        
-        public var description: String {
-            switch self {
-            case .noConnection: return "noConnection"
-            case .connecting: return "connecting"
-            case .configured: return "configured"
-            case .connected: return "connected"
-            }
+    nonisolated func connect()
+    func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
+    func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
+    func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
+    nonisolated func disconnect()
+}
+
+public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
+    case noConnection
+    case connecting
+    case configured
+    case connected
+    
+    public var description: String {
+        switch self {
+        case .noConnection: return "noConnection"
+        case .connecting: return "connecting"
+        case .configured: return "configured"
+        case .connected: return "connected"
         }
     }
+}
+
+public actor DefaultGatewayManager: GatewayManager {
     
     private weak var ws: WebSocket? {
         didSet {
             self.closeWebSocket(ws: oldValue)
         }
     }
-    private let eventLoopGroup: EventLoopGroup
+    private let eventLoopGroup: any EventLoopGroup
     public nonisolated let client: any DiscordClient
-    public nonisolated let maxFrameSize: Int
+    private nonisolated let maxFrameSize: Int
     private static let idGenerator = ManagedAtomic(0)
-    public nonisolated let id = GatewayManager.idGenerator
+    public nonisolated let id = DefaultGatewayManager.idGenerator
         .wrappingIncrementThenLoad(ordering: .relaxed)
     private let logger: Logger
     
@@ -42,11 +54,11 @@ public actor GatewayManager {
     private var onEventParseFailures: [(Error, String) -> ()] = []
     
     //MARK: Connection data
-    public nonisolated let identifyPayload: Gateway.Identify
+    private nonisolated let identifyPayload: Gateway.Identify
     
     //MARK: Connection state
-    private nonisolated let _state = ManagedAtomic(State.noConnection)
-    public nonisolated var state: State {
+    private nonisolated let _state = ManagedAtomic(GatewayState.noConnection)
+    public nonisolated var state: GatewayState {
         self._state.load(ordering: .relaxed)
     }
     
@@ -167,7 +179,7 @@ public actor GatewayManager {
     }
 }
 
-extension GatewayManager {
+extension DefaultGatewayManager {
     /// `_state` must be set to an appropriate value before triggering this function.
     private func connectAsync() async {
         logger.trace("Connect method triggered")
