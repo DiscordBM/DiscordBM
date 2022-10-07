@@ -80,7 +80,12 @@ public struct DiscordHTTPResponse: Sendable {
 }
 
 public struct DiscordClientResponse<C> where C: Codable {
+    
     public let raw: DiscordHTTPResponse
+    
+    public init(raw: DiscordHTTPResponse) {
+        self.raw = raw
+    }
     
     public func decode() throws -> C {
         if (200..<300).contains(raw.status.code) {
