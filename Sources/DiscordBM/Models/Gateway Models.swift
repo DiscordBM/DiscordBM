@@ -960,6 +960,7 @@ public struct Gateway: Sendable, Codable {
         public var managed: Bool?
         public var animated: Bool?
         public var available: Bool?
+        public var version: Int?
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
     }

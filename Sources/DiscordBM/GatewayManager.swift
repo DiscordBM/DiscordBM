@@ -31,6 +31,7 @@ public protocol GatewayManager: AnyObject {
     nonisolated func disconnect()
 }
 #endif
+
 public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
     case noConnection
     case connecting

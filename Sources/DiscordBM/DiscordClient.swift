@@ -80,7 +80,6 @@ public struct DiscordHTTPResponse: Sendable {
 }
 
 public struct DiscordClientResponse<C> where C: Codable {
-    
     public let raw: DiscordHTTPResponse
     
     public init(raw: DiscordHTTPResponse) {
