@@ -5,7 +5,7 @@
 A Swift library for making Discord bots.
 
 ## How To Use
-First you need to initialize a `GatewayManager` instance, then tell it to connect and start using it:
+First you need to initialize a `BotGatewayManager` instance, then tell it to connect and start using it:
 
 ### Initializing a Gateway Manager With Vapor
 ```swift
@@ -13,7 +13,7 @@ import DiscordBM
 import Vapor
 
 let app: Application = YOUR_VAPOR_APPLICATION
-let manager = GatewayManager(
+let manager = BotGatewayManager(
     eventLoopGroup: app.eventLoopGroup,
     httpClient: app.http.client.shared,
     token: YOUR_BOT_TOKEN,
@@ -35,7 +35,7 @@ import DiscordBM
 import AsyncHTTPClient
 
 let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-let manager = GatewayManager(
+let manager = BotGatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,
     token: YOUR_BOT_TOKEN,
@@ -51,16 +51,16 @@ let manager = GatewayManager(
 
 /// it's important to shutdown the httpClient _after all requests are done_, even if one failed
 /// libraries like Vapor take care of this on their own if you use the shared http client
-try await httpClient.shutdown()
-/// Use `syncShutdown()` in non-async contexts
 try httpClient.syncShutdown()
+/// Prefer to use `shutdown()` in async contexts:
+/// try await httpClient.shutdown()
 ```
 
 ### Using The Gateway Manager
 ```swift
 import DiscordBM
 
-let manager: GatewayManager = ... /// Make an instance like above
+let manager: BotGatewayManager = ... /// Make an instance like above
 
 /// Add event handlers
 Task {
@@ -90,10 +90,10 @@ Task {
     )
 }
 
-// If you don't use libraries like Vapor that do this for you, 
-// you'll need to uncomment this line and call it from a non-async context.
-// Otherwise your executable will exit immediately after every run.
-// RunLoop.current.run()
+/// If you don't use libraries like Vapor that do this for you, 
+/// you'll need to uncomment this line and call it from a non-async context.
+/// Otherwise your executable will exit immediately after every run.
+/// RunLoop.current.run()
 ```
 
 ### Finding Your Bot Token

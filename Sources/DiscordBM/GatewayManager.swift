@@ -6,33 +6,59 @@ import Logging
 import enum NIOWebSocket.WebSocketErrorCode
 import struct NIOCore.TimeAmount
 
-public actor GatewayManager {
+#if swift(>=5.7)
+public protocol GatewayManager: AnyActor {
+    nonisolated var client: any DiscordClient { get }
+    nonisolated var id: Int { get }
+    nonisolated var state: GatewayState { get }
     
-    public enum State: Int, Sendable, AtomicValue, CustomStringConvertible {
-        case noConnection
-        case connecting
-        case configured
-        case connected
-        
-        public var description: String {
-            switch self {
-            case .noConnection: return "noConnection"
-            case .connecting: return "connecting"
-            case .configured: return "configured"
-            case .connected: return "connected"
-            }
+    nonisolated func connect()
+    func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
+    func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
+    func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
+    nonisolated func disconnect()
+}
+#else
+public protocol GatewayManager: AnyObject {
+    nonisolated var client: any DiscordClient { get }
+    nonisolated var id: Int { get }
+    nonisolated var state: GatewayState { get }
+    
+    nonisolated func connect()
+    func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
+    func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
+    func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
+    nonisolated func disconnect()
+}
+#endif
+public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
+    case noConnection
+    case connecting
+    case configured
+    case connected
+    
+    public var description: String {
+        switch self {
+        case .noConnection: return "noConnection"
+        case .connecting: return "connecting"
+        case .configured: return "configured"
+        case .connected: return "connected"
         }
     }
+}
+
+public actor BotGatewayManager: GatewayManager {
     
     private weak var ws: WebSocket? {
         didSet {
             self.closeWebSocket(ws: oldValue)
         }
     }
-    private let eventLoopGroup: EventLoopGroup
-    public nonisolated let client: DiscordClient
+    private let eventLoopGroup: any EventLoopGroup
+    public nonisolated let client: any DiscordClient
+    private nonisolated let maxFrameSize: Int
     private static let idGenerator = ManagedAtomic(0)
-    public nonisolated let id = GatewayManager.idGenerator
+    public nonisolated let id = BotGatewayManager.idGenerator
         .wrappingIncrementThenLoad(ordering: .relaxed)
     private let logger: Logger
     
@@ -41,11 +67,11 @@ public actor GatewayManager {
     private var onEventParseFailures: [(Error, String) -> ()] = []
     
     //MARK: Connection data
-    public nonisolated let identifyPayload: Gateway.Identify
+    private nonisolated let identifyPayload: Gateway.Identify
     
     //MARK: Connection state
-    private nonisolated let _state = ManagedAtomic(State.noConnection)
-    public nonisolated var state: State {
+    private nonisolated let _state = ManagedAtomic(GatewayState.noConnection)
+    public nonisolated var state: GatewayState {
         self._state.load(ordering: .relaxed)
     }
     
@@ -87,17 +113,14 @@ public actor GatewayManager {
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
-        clientConfiguration: DiscordClient.Configuration = .init(),
+        client: any DiscordClient,
+        maxFrameSize: Int =  1 << 31,
         appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
-        self.client = DiscordClient(
-            httpClient: httpClient,
-            token: identifyPayload.token,
-            appId: appId,
-            configuration: clientConfiguration
-        )
+        self.client = client
+        self.maxFrameSize = maxFrameSize
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
@@ -107,7 +130,30 @@ public actor GatewayManager {
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
-        clientConfiguration: DiscordClient.Configuration = .init(),
+        clientConfiguration: ClientConfiguration = .init(),
+        maxFrameSize: Int =  1 << 31,
+        appId: String? = nil,
+        identifyPayload: Gateway.Identify
+    ) {
+        self.eventLoopGroup = eventLoopGroup
+        self.client = DefaultDiscordClient(
+            httpClient: httpClient,
+            token: identifyPayload.token,
+            appId: appId,
+            configuration: clientConfiguration
+        )
+        self.maxFrameSize = maxFrameSize
+        self.identifyPayload = identifyPayload
+        var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
+        logger[metadataKey: "gateway-id"] = .string("\(self.id)")
+        self.logger = logger
+    }
+    
+    public init(
+        eventLoopGroup: EventLoopGroup,
+        httpClient: HTTPClient,
+        clientConfiguration: ClientConfiguration = .init(),
+        maxFrameSize: Int =  1 << 31,
         token: String,
         appId: String? = nil,
         shard: IntPair? = nil,
@@ -116,12 +162,13 @@ public actor GatewayManager {
     ) {
         let token = Secret(token)
         self.eventLoopGroup = eventLoopGroup
-        self.client = DiscordClient(
+        self.client = DefaultDiscordClient(
             httpClient: httpClient,
             token: token,
             appId: appId,
             configuration: clientConfiguration
         )
+        self.maxFrameSize = maxFrameSize
         self.identifyPayload = .init(
             token: token,
             shard: shard,
@@ -162,7 +209,7 @@ public actor GatewayManager {
     }
 }
 
-extension GatewayManager {
+extension BotGatewayManager {
     /// `_state` must be set to an appropriate value before triggering this function.
     private func connectAsync() async {
         logger.trace("Connect method triggered")
@@ -190,7 +237,7 @@ extension GatewayManager {
         logger.trace("Will wait for other shards if needed")
         await waitInShardQueueIfNeeded()
         var configuration = WebSocketClient.Configuration()
-        configuration.maxFrameSize = DiscordGlobalConfiguration.webSocketMaxFrameSize
+        configuration.maxFrameSize = self.maxFrameSize
         logger.trace("Will try to connect to Discord through web-socket")
         WebSocket.connect(
             to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
