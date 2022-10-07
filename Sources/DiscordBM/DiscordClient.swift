@@ -108,7 +108,7 @@ public struct ClientConfiguration {
         public var isDisabled = false
         
         /// Caches all cacheable endpoints for 5 seconds.
-        public static let `default` = CachingBehavior()
+        public static let enabled = CachingBehavior()
         /// Doesn't allow caching at all.
         public static let disabled = CachingBehavior(isDisabled: true)
         
@@ -137,7 +137,7 @@ public struct ClientConfiguration {
     public var enableLoggingForRequests: Bool
     
     public init(
-        cachingBehavior: CachingBehavior = .default,
+        cachingBehavior: CachingBehavior = .disabled,
         requestTimeout: TimeAmount = .seconds(30),
         enableLoggingForRequests: Bool = false
     ) {
