@@ -87,12 +87,12 @@ public actor GatewayManager {
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
-        clientConfiguration: DiscordClient.Configuration = .init(),
+        clientConfiguration: ClientConfiguration = .init(),
         appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
-        self.client = DiscordClient(
+        self.client = DefaultDiscordClient(
             httpClient: httpClient,
             token: identifyPayload.token,
             appId: appId,
@@ -107,7 +107,7 @@ public actor GatewayManager {
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
-        clientConfiguration: DiscordClient.Configuration = .init(),
+        clientConfiguration: ClientConfiguration = .init(),
         token: String,
         appId: String? = nil,
         shard: IntPair? = nil,
@@ -116,7 +116,7 @@ public actor GatewayManager {
     ) {
         let token = Secret(token)
         self.eventLoopGroup = eventLoopGroup
-        self.client = DiscordClient(
+        self.client = DefaultDiscordClient(
             httpClient: httpClient,
             token: token,
             appId: appId,
