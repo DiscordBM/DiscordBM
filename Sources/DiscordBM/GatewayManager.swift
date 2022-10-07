@@ -6,6 +6,7 @@ import Logging
 import enum NIOWebSocket.WebSocketErrorCode
 import struct NIOCore.TimeAmount
 
+#if swift(>=5.7)
 public protocol GatewayManager: AnyActor {
     nonisolated var client: any DiscordClient { get }
     nonisolated var id: Int { get }
@@ -17,7 +18,19 @@ public protocol GatewayManager: AnyActor {
     func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
     nonisolated func disconnect()
 }
-
+#else
+public protocol GatewayManager: AnyObject {
+    nonisolated var client: any DiscordClient { get }
+    nonisolated var id: Int { get }
+    nonisolated var state: GatewayState { get }
+    
+    nonisolated func connect()
+    func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
+    func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
+    func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
+    nonisolated func disconnect()
+}
+#endif
 public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
     case noConnection
     case connecting
