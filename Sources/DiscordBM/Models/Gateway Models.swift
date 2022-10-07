@@ -997,6 +997,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String?
         public var user: User?
         public var sort_value: Int?
+        public var version: Int?
     }
     
     public struct GuildStickersUpdate: Sendable, Codable {
