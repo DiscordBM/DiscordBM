@@ -100,6 +100,23 @@ public actor BotGatewayManager: GatewayManager {
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
+        client: any DiscordClient,
+        maxFrameSize: Int =  1 << 31,
+        appId: String? = nil,
+        identifyPayload: Gateway.Identify
+    ) {
+        self.eventLoopGroup = eventLoopGroup
+        self.client = client
+        self.maxFrameSize = maxFrameSize
+        self.identifyPayload = identifyPayload
+        var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
+        logger[metadataKey: "gateway-id"] = .string("\(self.id)")
+        self.logger = logger
+    }
+    
+    public init(
+        eventLoopGroup: EventLoopGroup,
+        httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
         appId: String? = nil,
@@ -112,23 +129,6 @@ public actor BotGatewayManager: GatewayManager {
             appId: appId,
             configuration: clientConfiguration
         )
-        self.maxFrameSize = maxFrameSize
-        self.identifyPayload = identifyPayload
-        var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
-        logger[metadataKey: "gateway-id"] = .string("\(self.id)")
-        self.logger = logger
-    }
-    
-    public init(
-        eventLoopGroup: EventLoopGroup,
-        httpClient: HTTPClient,
-        client: any DiscordClient,
-        maxFrameSize: Int =  1 << 31,
-        appId: String? = nil,
-        identifyPayload: Gateway.Identify
-    ) {
-        self.eventLoopGroup = eventLoopGroup
-        self.client = client
         self.maxFrameSize = maxFrameSize
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
