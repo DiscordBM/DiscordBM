@@ -31,8 +31,6 @@ jobs:
         xcode:
           # - latest-stable
           - latest
-        include:
-          - xcode: latest-stable
     runs-on: macos-12
     steps:
       - name: Select latest available Xcode
