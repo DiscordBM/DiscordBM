@@ -18,10 +18,7 @@ class GatewayModelsTests: XCTestCase {
             XCTAssertEqual(decoded.opcode, .heartbeatAccepted)
             XCTAssertEqual(decoded.sequenceNumber, nil)
             XCTAssertEqual(decoded.type, nil)
-            switch decoded.data {
-            case .none: break
-            default: XCTFail("Unexpected data: \(String(describing: decoded.data))")
-            }
+            XCTAssertTrue(decoded.data == nil)
         }
         
         do {

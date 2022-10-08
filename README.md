@@ -104,6 +104,11 @@ In [Discord developer portal](https://discord.com/developers/applications):
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding App ID](/images/bot_app_id.png)
 
+## Testability
+`DiscordBM` comes with tools to make testing your app easier.   
+* You can type-erase your `BotGatewayManager`s using the `GatewayManager` protocol so you can override your gateway manager with a mocked implementation in tests.   
+* You can also do the same for `DefaultDiscordClient` and type-erase it using the `DiscordClient` protocol so you can provide a mocked implementation when testing.
+
 ## How To Add DiscordBM To Your Project
 
 To use the `DiscordBM` library in a SwiftPM project, 
