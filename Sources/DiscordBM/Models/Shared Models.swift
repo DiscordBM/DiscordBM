@@ -289,7 +289,7 @@ public enum DiscordLocale: String, Sendable, Codable {
     case korean = "ko"
 }
 
-public struct DiscordTimestamp: Sendable, Codable {
+public struct DiscordTimestamp: Sendable, Codable, Equatable {
     
     public enum DecodingError: Error {
         case unexpectedFormat([CodingKey], String)
