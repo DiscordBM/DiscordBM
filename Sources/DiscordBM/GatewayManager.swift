@@ -33,6 +33,7 @@ public protocol GatewayManager: AnyObject {
 #endif
 
 public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
+    case dead
     case noConnection
     case connecting
     case configured
@@ -40,6 +41,7 @@ public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
     
     public var description: String {
         switch self {
+        case .dead: return "dead"
         case .noConnection: return "noConnection"
         case .connecting: return "connecting"
         case .configured: return "configured"
@@ -159,7 +161,7 @@ public actor BotGatewayManager: GatewayManager {
         appId: String? = nil,
         shard: IntPair? = nil,
         presence: Gateway.Identify.PresenceUpdate? = nil,
-        intents: [Gateway.Identify.Intent] = []
+        intents: [Gateway.Intent] = []
     ) {
         let token = Secret(token)
         self.eventLoopGroup = eventLoopGroup
@@ -436,8 +438,13 @@ extension BotGatewayManager {
                         )
                     ]
                 )
-                self._state.store(.noConnection, ordering: .relaxed)
-                self.connect()
+                if await self.canTryReconnect() {
+                    self._state.store(.noConnection, ordering: .relaxed)
+                    self.connect()
+                } else {
+                    self._state.store(.dead, ordering: .relaxed)
+                    self.logger.critical("Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/MahdiBM/DiscordBM/issues if you think this is a library issue")
+                }
             }
         }
     }
@@ -447,7 +454,7 @@ extension BotGatewayManager {
         let description: String
         switch code {
         case let .unknown(codeNumber):
-            switch Gateway.CloseCode(rawValue: Int(codeNumber)) {
+            switch Gateway.CloseCode(rawValue: codeNumber) {
             case let .some(discordCode):
                 description = "\(discordCode)"
             case .none:
@@ -459,6 +466,16 @@ extension BotGatewayManager {
             description = "nil"
         }
         return (code, description)
+    }
+    
+    private func canTryReconnect() -> Bool {
+        guard let code = self.ws?.closeCode else { return true }
+        switch code {
+        case let .unknown(codeNumber):
+            guard let discordCode = Gateway.CloseCode(rawValue: codeNumber) else { return true }
+            return discordCode.canTryReconnect
+        default: return true
+        }
     }
     
     private func setupPingTask(

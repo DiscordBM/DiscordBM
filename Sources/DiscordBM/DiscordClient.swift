@@ -111,8 +111,13 @@ public struct ClientConfiguration {
         public var defaultTTL = 5.0
         public var isDisabled = false
         
-        /// Caches all cacheable endpoints for 5 seconds.
-        public static let enabled = CachingBehavior()
+        /// Caches all cacheable endpoints for 5 seconds,
+        /// except for `getGateway` which is cached for an hour.
+        public static let enabled = {
+            var behavior = CachingBehavior()
+            behavior.modifyBehavior(of: .getGateway, ttl: 3600)
+            return behavior
+        }()
         /// Doesn't allow caching at all.
         public static let disabled = CachingBehavior(isDisabled: true)
         
@@ -212,12 +217,12 @@ private extension DiscordClient {
 //MARK: - Public +DiscordClient
 public extension DiscordClient {
     
-    func getGateway() async throws -> DiscordClientResponse<GatewayUrl> {
+    func getGateway() async throws -> DiscordClientResponse<Gateway.Url> {
         let endpoint = Endpoint.getGateway
         return try await self.send(to: endpoint, queries: [])
     }
     
-    func getGatewayBot() async throws -> DiscordClientResponse<GatewayBot> {
+    func getGatewayBot() async throws -> DiscordClientResponse<Gateway.BotConnectionInfo> {
         let endpoint = Endpoint.getGatewayBot
         return try await self.send(to: endpoint, queries: [])
     }
@@ -283,7 +288,7 @@ public extension DiscordClient {
     func createMessage(
         channelId: String,
         payload: ChannelCreateMessage
-    ) async throws -> DiscordClientResponse<Gateway.Message> {
+    ) async throws -> DiscordClientResponse<Gateway.MessageCreate> {
         let endpoint = Endpoint.postCreateMessage(channelId: channelId)
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
@@ -336,7 +341,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [])
     }
     
-    func getChannel(id: String) async throws -> DiscordClientResponse<Gateway.Channel> {
+    func getChannel(id: String) async throws -> DiscordClientResponse<Channel> {
         let endpoint = Endpoint.getChannel(id: id)
         return try await self.send(to: endpoint, queries: [])
     }
@@ -349,7 +354,7 @@ public extension DiscordClient {
     func createGuildRole(
         guildId: String,
         payload: CreateGuildRole
-    ) async throws -> DiscordClientResponse<Gateway.Role> {
+    ) async throws -> DiscordClientResponse<Role> {
         let endpoint = Endpoint.createGuildRole(guildId: guildId)
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
@@ -397,7 +402,7 @@ public extension DiscordClient {
         guildId: String,
         query: String,
         limit: Int? = nil
-    ) async throws -> DiscordClientResponse<[Gateway.Member]> {
+    ) async throws -> DiscordClientResponse<[Guild.Member]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = Endpoint.searchGuildMembers(id: guildId)
         return try await self.send(
@@ -412,7 +417,7 @@ public extension DiscordClient {
     func getGuildMember(
         guildId: String,
         userId: String
-    ) async throws -> DiscordClientResponse<Gateway.Member> {
+    ) async throws -> DiscordClientResponse<Guild.Member> {
         let endpoint = Endpoint.getGuildMember(id: guildId, userId: userId)
         return try await self.send(to: endpoint, queries: [])
     }
@@ -424,7 +429,7 @@ public extension DiscordClient {
         before: String? = nil,
         after: String? = nil,
         limit: Int? = nil
-    ) async throws -> DiscordClientResponse<[Gateway.Message]> {
+    ) async throws -> DiscordClientResponse<[Gateway.MessageCreate]> {
         try checkMutuallyExclusive(queries: [
             ("around", around),
             ("before", before),
@@ -445,7 +450,7 @@ public extension DiscordClient {
     func getChannelMessage(
         channelId: String,
         messageId: String
-    ) async throws -> DiscordClientResponse<Gateway.Message> {
+    ) async throws -> DiscordClientResponse<Gateway.MessageCreate> {
         let endpoint = Endpoint.getChannelMessage(id: channelId, messageId: messageId)
         return try await self.send(to: endpoint, queries: [])
     }

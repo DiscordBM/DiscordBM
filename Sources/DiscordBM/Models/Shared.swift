@@ -16,14 +16,15 @@ public struct ActionRow: Sendable, Codable {
             public var label: String
             public var description: String?
             public var `default`: Bool?
-            public var emoji: Gateway.PartialEmoji?
+            /// FIXME: `Emoji` or `ActivityEmoji`?
+            public var emoji: Emoji?
         }
         
         public let type: Kind
         public let components: [Component]?
         public var style: Int?
         public var custom_id: String?
-        public var emoji: Gateway.Emoji?
+        public var emoji: Emoji?
         public var url: String?
         public var label: String?
         public var placeholder: String?
@@ -598,127 +599,6 @@ where Element: RawRepresentable,
 
 extension TolerantDecodeArray: Sendable where Element: Sendable, Element.RawValue: Sendable { }
 
-public struct Embed: Sendable, Codable {
-    
-    public enum Kind: String, Sendable, Codable {
-        case rich = "rich"
-        case image = "image"
-        case video = "video"
-        case gifv = "gifv"
-        case article = "article"
-        case link = "link"
-        case autoModerationMessage = "auto_moderation_message"
-    }
-    
-    public struct Footer: Sendable, Codable {
-        public var text: String
-        public var icon_url: String?
-        public var proxy_icon_url: String?
-        
-        public init(text: String, icon_url: String? = nil, proxy_icon_url: String? = nil) {
-            self.text = text
-            self.icon_url = icon_url
-            self.proxy_icon_url = proxy_icon_url
-        }
-    }
-    
-    public struct Media: Sendable, Codable {
-        public var url: String
-        public var proxy_url: String?
-        public var height: Int?
-        public var width: Int?
-        
-        public init(url: String, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil) {
-            self.url = url
-            self.proxy_url = proxy_url
-            self.height = height
-            self.width = width
-        }
-    }
-    
-    public struct Provider: Sendable, Codable {
-        public var name: String?
-        public var url: String?
-        
-        public init(name: String? = nil, url: String? = nil) {
-            self.name = name
-            self.url = url
-        }
-    }
-    
-    public struct Author: Sendable, Codable {
-        public var name: String
-        public var url: String?
-        public var icon_url: String?
-        public var proxy_icon_url: String?
-        
-        public init(name: String, url: String? = nil, icon_url: String? = nil, proxy_icon_url: String? = nil) {
-            self.name = name
-            self.url = url
-            self.icon_url = icon_url
-            self.proxy_icon_url = proxy_icon_url
-        }
-    }
-    
-    public struct Field: Sendable, Codable {
-        public var name: String
-        public var value: String
-        public var inline: Bool?
-        
-        public init(name: String, value: String, inline: Bool? = nil) {
-            self.name = name
-            self.value = value
-            self.inline = inline
-        }
-    }
-    
-    public var title: String?
-    public var type: Kind?
-    public var description: String?
-    public var url: String?
-    public var timestamp: TolerantDecodeDate? = nil
-    public var color: DiscordColor?
-    public var footer: Footer?
-    public var image: Media?
-    public var thumbnail: Media?
-    public var video: Media?
-    public var provider: Provider?
-    public var author: Author?
-    public var fields: [Field]?
-    public var reference_id: String?
-    
-    public init(title: String? = nil, type: Embed.Kind? = nil, description: String? = nil, url: String? = nil, timestamp: Date? = nil, color: DiscordColor? = nil, footer: Embed.Footer? = nil, image: Embed.Media? = nil, thumbnail: Embed.Media? = nil, video: Embed.Media? = nil, provider: Embed.Provider? = nil, author: Embed.Author? = nil, fields: [Embed.Field]? = nil, reference_id: String? = nil) {
-        self.title = title
-        self.type = type
-        self.description = description
-        self.url = url
-        self.timestamp = timestamp == nil ? nil : .init(date: timestamp!)
-        self.color = color
-        self.footer = footer
-        self.image = image
-        self.thumbnail = thumbnail
-        self.video = video
-        self.provider = provider
-        self.author = author
-        self.fields = fields
-        self.reference_id = reference_id
-    }
-    
-    private var fieldsLength: Int {
-        fields?.reduce(into: 0, { $0 = $1.name.count + $1.value.count }) ?? 0
-    }
-    
-    /// The length that matters towards the Discord limit (currently 6000 across all embeds).
-    public var contentLength: Int {
-        (title?.count ?? 0) +
-        (description?.count ?? 0) +
-        fieldsLength +
-        (footer?.text.count ?? 0) +
-        (author?.name.count ?? 0)
-    }
-}
-
-
 public struct TolerantDecodeDate: Sendable, Codable {
     
     public var date: Date
@@ -866,3 +746,25 @@ public struct Secret:
         try container.encode(self._storage)
     }
 }
+
+public final class DereferenceBox<C>: Codable, CustomStringConvertible where C: Codable {
+    public let value: C
+    
+    public init(value: C) {
+        self.value = value
+    }
+    
+    public init(from decoder: Decoder) throws {
+        value = try C.init(from: decoder)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        try value.encode(to: encoder)
+    }
+    
+    public var description: String {
+        "\(value)"
+    }
+}
+
+extension DereferenceBox: Sendable where C: Sendable { }

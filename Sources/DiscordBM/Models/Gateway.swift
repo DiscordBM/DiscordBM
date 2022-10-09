@@ -2,6 +2,7 @@ import Foundation
 
 public struct Gateway: Sendable, Codable {
     
+    /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#opcodes-and-status-codes
     public enum Opcode: Int, Sendable, Codable {
         case dispatch = 0
         case heartbeat = 1
@@ -18,7 +19,10 @@ public struct Gateway: Sendable, Codable {
     
     public struct Event: Sendable, Codable {
         
+        /// This enum is just for swiftly organizing Discord gateway event's `data`.
+        /// You need to read each case's inner payload's documentation for more info.
         public enum Payload: Sendable {
+            /// https://discord.com/developers/docs/topics/gateway-events#heartbeat
             case heartbeat(lastSequenceNumber: Int?)
             case identify(Identify)
             case hello(Hello)
@@ -26,7 +30,9 @@ public struct Gateway: Sendable, Codable {
             /// Is sent when we want to send a resume request
             case resume(Resume)
             /// Is received when Discord has ended replying our lost events, after a resume
+            /// https://discord.com/developers/docs/topics/gateway-events#resumed
             case resumed
+            /// https://discord.com/developers/docs/topics/gateway-events#invalid-session
             case invalidSession(canResume: Bool)
             case channelCreate(Channel)
             case channelUpdate(Channel)
@@ -65,11 +71,11 @@ public struct Gateway: Sendable, Codable {
             case integrationCreate(Integration)
             case integrationUpdate(Integration)
             case integrationDelete(IntegrationDelete)
-            case interactionCreate(InteractionCreate)
+            case interactionCreate(Interaction)
             case inviteCreate(InviteCreate)
             case inviteDelete(InviteDelete)
-            case messageCreate(Message)
-            case messageUpdate(PartialMessage)
+            case messageCreate(MessageCreate)
+            case messageUpdate(Channel.PartialMessage)
             case messageDelete(MessageDelete)
             case messageDeleteBulk(MessageDeleteBulk)
             case messageReactionAdd(MessageReactionAdd)
@@ -82,7 +88,7 @@ public struct Gateway: Sendable, Codable {
             case stageInstanceUpdate(StageInstance)
             case typingStart(TypingStart)
             case userUpdate(User)
-            case voiceStateUpdate(VoiceStateUpdate)
+            case voiceStateUpdate(VoiceState)
             case voiceServerUpdate(VoiceServerUpdate)
             case webhooksUpdate(WebhooksUpdate)
             case applicationCommandPermissionsUpdate(ApplicationCommandPermissionsUpdate)
@@ -355,7 +361,8 @@ public struct Gateway: Sendable, Codable {
         }
     }
     
-    public enum CloseCode: Int, Sendable, Codable {
+    /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
+    public enum CloseCode: UInt16, Sendable, Codable {
         case unknownError = 4000
         case unknownOpcode = 4001
         case decodeError = 4002
@@ -391,8 +398,42 @@ public struct Gateway: Sendable, Codable {
         }
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#identify
     public struct Identify: Sendable, Codable {
         
+        /// https://discord.com/developers/docs/topics/gateway-events#identify-identify-connection-properties
+        public struct ConnectionProperties: Sendable, Codable {
+            public let os: String = {
+#if os(macOS)
+                return "macOS"
+#elseif os(Linux)
+                return "Linux"
+#elseif os(iOS)
+                return "iOS"
+#elseif os(watchOS)
+                return "watchOS"
+#elseif os(tvOS)
+                return "tvOS"
+#elseif os(Windows)
+                return "Windows"
+#elseif os(Android)
+                return "Android"
+#else
+                return "Unknown-OS"
+#endif
+            }()
+            public let browser = "DiscordBM"
+            public let device = "DiscordBM"
+            
+            enum CodingKeys: String, CodingKey {
+                case os = "$os"
+                case browser = "$browser"
+                case device = "$device"
+            }
+        }
+        
+        /// FIXME: move under Gateway?
+        /// https://discord.com/developers/docs/topics/gateway-events#presence-update-presence-update-event-fields
         public struct PresenceUpdate: Sendable, Codable {
             public var since: Int?
             public var activities: [Activity]
@@ -407,30 +448,8 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
-        public enum Intent: Int, Sendable {
-            case guilds = 0
-            case guildMembers = 1
-            case guildBans = 2
-            case guildEmojisAndStickers = 3
-            case guildIntegrations = 4
-            case guildWebhooks = 5
-            case guildInvites = 6
-            case guildVoiceStates = 7
-            case guildPresences = 8
-            case guildMessages = 9
-            case guildMessageReactions = 10
-            case guildMessageTyping = 11
-            case directMessages = 12
-            case directMessageReactions = 13
-            case directMessageTyping = 14
-            case messageContent = 15
-            case guildScheduledEvents = 16
-            case autoModerationConfiguration = 20
-            case autoModerationExecution = 21
-        }
-        
         public var token: Secret
-        public var properties: ConnectionProperties = ConnectionProperties()
+        public var properties = ConnectionProperties()
         public var compress: Bool?
         public var large_threshold: Int?
         public var shard: IntPair?
@@ -456,58 +475,37 @@ public struct Gateway: Sendable, Codable {
         }
     }
     
-    public struct ConnectionProperties: Sendable, Codable {
-        public let os: String = {
-#if os(macOS)
-            return "macOS"
-#elseif os(Linux)
-            return "Linux"
-#elseif os(iOS)
-            return "iOS"
-#elseif os(watchOS)
-            return "watchOS"
-#elseif os(tvOS)
-            return "tvOS"
-#elseif os(Windows)
-            return "Windows"
-#elseif os(Android)
-            return "Android"
-#else
-            return "UnknownOS"
-#endif
-        }()
-        public let browser = "DiscordBM"
-        public let device = "DiscordBM"
-        
-        enum CodingKeys: String, CodingKey {
-            case os = "$os"
-            case browser = "$browser"
-            case device = "$device"
-        }
+    /// https://discord.com/developers/docs/topics/gateway#gateway-intents
+    public enum Intent: Int, Sendable {
+        case guilds = 0
+        case guildMembers = 1
+        case guildBans = 2
+        case guildEmojisAndStickers = 3
+        case guildIntegrations = 4
+        case guildWebhooks = 5
+        case guildInvites = 6
+        case guildVoiceStates = 7
+        case guildPresences = 8
+        case guildMessages = 9
+        case guildMessageReactions = 10
+        case guildMessageTyping = 11
+        case directMessages = 12
+        case directMessageReactions = 13
+        case directMessageTyping = 14
+        case messageContent = 15
+        case guildScheduledEvents = 16
+        case autoModerationConfiguration = 20
+        case autoModerationExecution = 21
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#resume-resume-structure
     public struct Resume: Sendable, Codable {
         public var token: Secret
         public var session_id: String
         public var seq: Int
     }
     
-    public struct VoiceStateUpdate: Sendable, Codable {
-        public var guild_id: String
-        public var channel_id: String?
-        public var self_mute: Bool
-        public var self_deaf: Bool
-        public var self_video: Bool?
-        public var self_stream: Bool?
-        public var user_id: String?
-        public var mute: Bool?
-        public var deaf: Bool?
-        public var request_to_speak_timestamp: DiscordTimestamp?
-        public var session_id: String?
-        public var member: Member?
-        public var suppress: Bool?
-    }
-    
+    /// https://discord.com/developers/docs/topics/gateway-events#update-presence-status-types
     public enum Status: String, Sendable, Codable {
         case online = "online"
         case doNotDisturb = "dnd"
@@ -516,149 +514,15 @@ public struct Gateway: Sendable, Codable {
         case offline = "offline"
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#hello-hello-structure
     public struct Hello: Sendable, Codable {
         public var heartbeat_interval: Int
     }
     
-    public struct User: Sendable, Codable {
-        
-        public enum PremiumKind: Int, Sendable, Codable {
-            case none = 0
-            case nitroClassic = 1
-            case nitro = 2
-        }
-        
-        public enum Flag: Int, Sendable {
-            case staff = 0
-            case partner = 1
-            case hypeSquad = 2
-            case BugHunterLevel1 = 3
-            case hypeSquadOnlineHouse1 = 6
-            case hypeSquadOnlineHouse2 = 7
-            case hypeSquadOnlineHouse3 = 8
-            case premiumEarlySupporter = 9
-            case teamPseudoUser = 10
-            case bugHunterLevel2 = 14
-            case verifiedBot = 16
-            case verifiedDeveloper = 17
-            case certifiedModerator = 18
-            case botHttpInteractions = 19
-            case unknownValue20 = 20
-        }
-        
-        public var id: String
-        public var username: String
-        public var discriminator: String
-        public var avatar: String?
-        public var bot: Bool?
-        public var system: Bool?
-        public var mfa_enabled: Bool?
-        public var banner: String?
-        public var accent_color: DiscordColor?
-        public var locale: DiscordLocale?
-        public var verified: Bool?
-        public var email: String?
-        public var flags: IntBitField<Flag>?
-        public var premium_type: PremiumKind?
-        public var public_flags: IntBitField<Flag>?
-        public var avatar_decoration: String?
-    }
-    
-    public struct PartialUser: Sendable, Codable {
-        public var id: String
-        public var username: String?
-        public var discriminator: String?
-        public var avatar: String?
-        public var bot: Bool?
-        public var system: Bool?
-        public var mfa_enabled: Bool?
-        public var banner: String?
-        public var accent_color: DiscordColor?
-        public var locale: DiscordLocale?
-        public var verified: Bool?
-        public var email: String?
-        public var flags: IntBitField<User.Flag>?
-        public var premium_type: User.PremiumKind?
-        public var public_flags: IntBitField<User.Flag>?
-        public var avatar_decoration: String?
-    }
-    
-    public struct PartialApplication: Sendable, Codable {
-        
-        public struct Team: Sendable, Codable {
-            
-            public struct Member: Sendable, Codable {
-                
-                public enum State: Int, Sendable, Codable {
-                    case invited = 1
-                    case accepted = 2
-                }
-                
-                public var membership_state: State
-                public var permissions: [String]
-                public var team_id: String?
-                public var user: PartialUser
-            }
-            
-            public var icon: String?
-            public var id: String
-            public var members: [Member]
-            public var name: String
-            public var owner_user_id: String
-        }
-        
-        public enum Flag: Int, Sendable {
-            case gatewayPresence = 12
-            case gatewayPresenceLimited = 13
-            case gatewayGuildMembers = 14
-            case gatewayGuildMembersLimited = 15
-            case verificationPendingGuildLimit = 16
-            case embedded = 17
-            case gatewayMessageContent = 18
-            case gatewayMessageContentLimited = 19
-            case unknownFlag20 = 20
-            case unknownFlag21 = 21
-            case unknownFlag23 = 23
-        }
-        
-        public struct InstallParams: Sendable, Codable {
-            public var scopes: TolerantDecodeArray<OAuthScope>
-            public var permissions: StringBitField<Channel.Permission>
-        }
-        
-        public var id: String
-        public var name: String?
-        public var icon: String?
-        public var description: String?
-        public var rpc_origins: [String]?
-        public var bot_public: Bool?
-        public var bot_require_code_grant: Bool?
-        public var terms_of_service_url: String?
-        public var privacy_policy_url: String?
-        public var owner: PartialUser?
-        public var verify_key: String?
-        public var team: Team?
-        public var guild_id: String?
-        public var primary_sku_id: String?
-        public var slug: String?
-        public var cover_image: String?
-        public var flags: IntBitField<Flag>?
-        public var tags: [String]?
-        public var install_params: InstallParams?
-        public var custom_install_url: String?
-        public var summary: String?
-        public var type: Int?
-        public var max_participants: Int?
-        public var hook: Bool?
-    }
-    
-    public struct UnavailableGuild: Sendable, Codable {
-        public var id: String
-        public var unavailable: Bool?
-    }
-    
+    /// https://discord.com/developers/docs/topics/gateway-events#ready-ready-event-fields
     public struct Ready: Sendable, Codable {
         
+        /// FIXME
         public struct AudioContextSettings: Sendable, Codable {
             
         }
@@ -681,153 +545,8 @@ public struct Gateway: Sendable, Codable {
         public var audio_context_settings: AudioContextSettings?
     }
     
-    public struct ThreadMetadata: Sendable, Codable {
-        public var archived: Bool
-        public var auto_archive_duration: Int
-        public var archive_timestamp: DiscordTimestamp
-        public var locked: Bool
-        public var invitable: Bool?
-        public var create_timestamp: DiscordTimestamp?
-    }
-    
-    public struct ThreadMember: Sendable, Codable {
-        public var id: String
-        public var user_id: String?
-        public var join_timestamp: DiscordTimestamp
-        /// FIXME:
-        /// Not documented what exactly the flags are.
-        /// Discord says: "any user-thread settings, currently only used for notifications".
-        public var flags: Int
-        public var mute_config: String?
-        public var muted: Bool?
-    }
-    
-    public struct Channel: Sendable, Codable {
-        
-        public enum Kind: Int, Sendable, Codable {
-            case guildText = 0
-            case dm = 1
-            case guildVoice = 2
-            case groupDm = 3
-            case guildCategory = 4
-            case guildNews = 5
-            case guildNewsThread = 10
-            case guildPublicThread = 11
-            case guildPrivateThread = 12
-            case guildStageVoice = 13
-            case guildDirectory = 14
-            case guildForum = 15
-        }
-        
-        public enum Permission: Int, Sendable, Hashable, Codable {
-            case createInstantInvite = 0
-            case kickMembers = 1
-            case banMembers = 2
-            case administrator = 3
-            case manageChannels = 4
-            case manageGuild = 5
-            case addReactions = 6
-            case viewAuditLog = 7
-            case prioritySpeaker = 8
-            case stream = 9
-            case viewChannel = 10
-            case sendMessages = 11
-            case sendTtsMessages = 12
-            case manageMessages = 13
-            case embedLinks = 14
-            case attachFiles = 15
-            case readMessageHistory = 16
-            case mentionEveryone = 17
-            case useExternalEmojis = 18
-            case viewGuildInsights = 19
-            case connect = 20
-            case speak = 21
-            case muteMembers = 22
-            case deafenMembers = 23
-            case moveMembers = 24
-            case useVAD = 25
-            case changeNickname = 26
-            case manageNicknames = 27
-            case manageRoles = 28
-            case manageWebHooks = 29
-            case manageEmojisAndStickers = 30
-            case useApplicationCommands = 31
-            case requestToSpeak = 32
-            case manageEvents = 33
-            case manageThreads = 34
-            case createPublicThreads = 35
-            case createPrivateThreads = 36
-            case useExternalStickers = 37
-            case sendMessagesInThreads = 38
-            case useEmbeddedActivities = 39
-            case moderateMembers = 40
-            case unknownValue41 = 41
-        }
-        
-        public struct Overwrite: Sendable, Codable {
-            
-            public enum Kind: Int, Sendable, Codable {
-                case role = 0
-                case member = 1
-            }
-            
-            public var id: String
-            public var type: Kind
-            public var allow: StringBitField<Permission>
-            public var deny: StringBitField<Permission>
-        }
-        
-        public enum Flag: Int, Sendable {
-            case pinned = 1
-        }
-        
-        public var id: String
-        public var type: Kind
-        public var guild_id: String?
-        public var position: Int?
-        public var permission_overwrites: [Overwrite]?
-        public var name: String?
-        public var topic: String?
-        public var nsfw: Bool?
-        public var last_message_id: String?
-        public var bitrate: Int?
-        public var user_limit: Int?
-        public var rate_limit_per_user: Int?
-        public var recipients: [User]?
-        public var icon: String?
-        public var owner_id: String?
-        public var application_id: String?
-        public var parent_id: String?
-        public var last_pin_timestamp: DiscordTimestamp?
-        public var rtc_region: String?
-        public var video_quality_mode: Int?
-        public var message_count: Int?
-        public var total_message_sent: Int?
-        public var member_count: Int?
-        public var thread_metadata: ThreadMetadata?
-        public var member: ThreadMember?
-        public var default_auto_archive_duration: Int?
-        public var default_thread_rate_limit_per_user: Int?
-        public var default_reaction_emoji: String?
-        public var permissions: StringBitField<Permission>?
-        public var flags: IntBitField<Flag>?
-        public var available_tags: [String]?
-        public var template: String?
-        public var member_ids_preview: [String]?
-        public var version: Int?
-        public var guild_hashes: Hashes?
-        public var hashes: Hashes?
-    }
-    
-    public struct PartialChannel: Sendable, Codable {
-        public var id: String
-        public var type: Channel.Kind
-        public var name: String?
-        public var permissions: StringBitField<Channel.Permission>?
-        public var parent_id: String?
-        public var thread_metadata: ThreadMetadata?
-    }
-    
+    /// A ``Channel`` object with a few differences.
+    /// https://discord.com/developers/docs/topics/gateway-events#thread-create
     public struct ThreadCreate: Sendable, Codable {
         public var id: String
         public var type: Channel.Kind
@@ -868,6 +587,7 @@ public struct Gateway: Sendable, Codable {
         public var hashes: Hashes?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#thread-delete
     public struct ThreadDelete: Sendable, Codable {
         public var id: String
         public var type: Channel.Kind
@@ -875,6 +595,7 @@ public struct Gateway: Sendable, Codable {
         public var parent_id: String?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#thread-list-sync-thread-list-sync-event-fields
     public struct ThreadListSync: Sendable, Codable {
         public var guild_id: String
         public var channel_ids: [String]?
@@ -882,38 +603,46 @@ public struct Gateway: Sendable, Codable {
         public var members: [ThreadMember]
     }
     
+    /// A ``ThreadMember`` with a `guild_id` field.
+    /// https://discord.com/developers/docs/topics/gateway-events#thread-member-update
     public struct ThreadMemberUpdate: Sendable, Codable {
         public var id: String
         public var user_id: String?
         public var join_timestamp: DiscordTimestamp
         /// FIXME:
-        /// Not documented what exactly the flags are.
+        /// The field is documented but doesn't say what exactly it is.
         /// Discord says: "any user-thread settings, currently only used for notifications".
         public var flags: Int
         public var guild_id: String
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#thread-members-update-thread-members-update-event-fields
     public struct ThreadMembersUpdate: Sendable, Codable {
         
+        /// A ``ThreadMember`` with some extra fields.
+        /// https://discord.com/developers/docs/resources/channel#thread-member-object-thread-member-structure
+        /// https://discord.com/developers/docs/topics/gateway-events#thread-members-update-thread-members-update-event-fields
         public struct ThreadMember: Sendable, Codable {
             
+            /// A ``PresenceUpdate`` with nullable `guild_id`.
+            /// https://discord.com/developers/docs/topics/gateway-events#presence-update-presence-update-event-fields
             public struct ThreadMemberPresenceUpdate: Sendable, Codable {
                 public var user: PartialUser
                 public var guild_id: String?
                 public var status: Status
                 public var activities: [Activity]
-                public var client_status: PresenceUpdate.ClientStatus
-                public var game: PresenceUpdate.Game?
+                public var client_status: ClientStatus
+                public var game: Game?
             }
-            
+
             public var id: String
             public var user_id: String?
             public var join_timestamp: DiscordTimestamp
             /// FIXME:
-            /// Not documented what exactly the flags are.
+            /// The field is documented but doesn't say what exactly it is.
             /// Discord says: "any user-thread settings, currently only used for notifications".
             public var flags: Int
-            public var member: Member
+            public var member: Guild.Member
             public var presence: ThreadMemberPresenceUpdate?
         }
         
@@ -924,47 +653,20 @@ public struct Gateway: Sendable, Codable {
         public var removed_member_ids: [String]?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#channel-pins-update-channel-pins-update-event-fields
     public struct ChannelPinsUpdate: Sendable, Codable {
         public var guild_id: String?
         public var channel_id: String
         public var last_pin_timestamp: DiscordTimestamp?
     }
     
-    public struct PartialVoiceState: Sendable, Codable {
-        public var guild_id: String?
-        public var channel_id: String?
-        public var user_id: String?
-        public var member: Member?
-        public var session_id: String?
-        public var deaf: Bool?
-        public var mute: Bool?
-        public var self_deaf: Bool?
-        public var self_mute: Bool?
-        public var self_stream: Bool?
-        public var self_video: Bool?
-        public var suppress: Bool?
-        public var request_to_speak_timestamp: DiscordTimestamp?
-    }
-    
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-ban-add-guild-ban-add-event-fields
     public struct GuildBan: Sendable, Codable {
         public var guild_id: String
         public var user: User
     }
     
-    public struct Emoji: Sendable, Codable {
-        public var id: String?
-        public var name: String?
-        public var roles: [String]?
-        public var user: User?
-        public var require_colons: Bool?
-        public var managed: Bool?
-        public var animated: Bool?
-        public var available: Bool?
-        public var version: Int?
-        public var guild_hashes: Hashes?
-        public var hashes: Hashes?
-    }
-    
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update-guild-emojis-update-event-fields
     public struct GuildEmojisUpdate: Sendable, Codable {
         public var guild_id: String
         public var emojis: [Emoji]
@@ -972,34 +674,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_hashes: Hashes?
     }
     
-    public struct Sticker: Sendable, Codable {
-        
-        public enum Kind: Int, Sendable, Codable {
-            case standard = 1
-            case guild = 2
-        }
-        
-        public enum FormatKind: Int, Sendable, Codable {
-            case png = 1
-            case apng = 2
-            case lottie = 3
-        }
-        
-        public var id: String
-        public var pack_id: String?
-        public var name: String
-        public var description: String?
-        public var tags: String
-        public var asset: String?
-        public var type: Kind
-        public var format_type: FormatKind
-        public var available: Bool?
-        public var guild_id: String?
-        public var user: User?
-        public var sort_value: Int?
-        public var version: Int?
-    }
-    
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-stickers-update-guild-stickers-update-event-fields
     public struct GuildStickersUpdate: Sendable, Codable {
         public var guild_id: String
         public var stickers: [Sticker]
@@ -1007,10 +682,13 @@ public struct Gateway: Sendable, Codable {
         public var guild_hashes: Hashes?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-integrations-update-guild-integrations-update-event-fields
     public struct GuildIntegrationsUpdate: Sendable, Codable {
         public var guild_id: String
     }
     
+    /// A ``GuildMember`` with an extra `guild_id` field.
+    /// https://discord.com/developers/docs/resources/guild#guild-member-object
     public struct GuildMemberAdd: Sendable, Codable {
         public var guild_id: String
         public var roles: [String]
@@ -1029,11 +707,13 @@ public struct Gateway: Sendable, Codable {
         public var communication_disabled_until: DiscordTimestamp?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-member-remove-guild-member-remove-event-fields
     public struct GuildMemberRemove: Sendable, Codable {
         public var guild_id: String
         public var user: User
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-member-update-guild-member-update-event-fields
     public struct GuildMemberUpdate: Sendable, Codable {
         public var guild_id: String
         public var roles: [String]
@@ -1051,9 +731,10 @@ public struct Gateway: Sendable, Codable {
         public var communication_disabled_until: DiscordTimestamp?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-members-chunk
     public struct GuildMembersChunk: Sendable, Codable {
         public var guild_id: String
-        public var members: Set<Member>
+        public var members: [Guild.Member]
         public var chunk_index: Int
         public var chunk_count: Int
         public var not_found: [String]?
@@ -1061,6 +742,7 @@ public struct Gateway: Sendable, Codable {
         public var nonce: String?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
     public struct RequestGuildMembers: Sendable, Codable {
         public var guild_id: String
         public var query: String = ""
@@ -1079,6 +761,7 @@ public struct Gateway: Sendable, Codable {
         }
     }
     
+    /// FIXME: undocumented?
     public struct GuildJoinRequestUpdate: Sendable, Codable {
         
         public struct Request: Sendable, Codable {
@@ -1122,37 +805,14 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String
     }
     
+    /// FIXME: undocumented?
     public struct GuildJoinRequestDelete: Sendable, Codable {
         public var id: String
         public var guild_id: String
         public var user_id: String
     }
     
-    public struct Role: Sendable, Codable {
-        
-        public struct Tags: Sendable, Codable {
-            public var bot_id: String?
-            public var integration_id: String?
-            public var premium_subscriber: Bool?
-        }
-        
-        public var id: String
-        public var name: String
-        public var color: DiscordColor
-        public var hoist: Bool
-        public var icon: String?
-        public var unicode_emoji: String?
-        public var position: Int
-        public var permissions: StringBitField<Channel.Permission>
-        public var managed: Bool
-        public var mentionable: Bool
-        public var flags: IntBitField<User.Flag>? // FIXME not sure about `User.Flag`
-        public var tags: Tags?
-        public var version: Int?
-        public var guild_hashes: Hashes?
-        public var hashes: Hashes?
-    }
-    
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-role-create-guild-role-create-event-fields
     public struct GuildRole: Sendable, Codable {
         public var guild_id: String
         public var role: Role
@@ -1160,6 +820,7 @@ public struct Gateway: Sendable, Codable {
         public var hashes: Hashes?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-role-delete
     public struct GuildRoleDelete: Sendable, Codable {
         public var guild_id: String
         public var role_id: String
@@ -1167,54 +828,15 @@ public struct Gateway: Sendable, Codable {
         public var hashes: Hashes?
     }
     
-    public struct GuildScheduledEvent: Sendable, Codable {
-        
-        public enum PrivacyLevel: Int, Sendable, Codable {
-            case guildOnly = 2
-        }
-        
-        public enum Status: Int, Sendable, Codable {
-            case scheduled = 1
-            case active = 2
-            case completed = 3
-            case canceled = 4
-        }
-        
-        public enum EntityKind: Int, Sendable, Codable {
-            case stageInstance = 1
-            case voice = 2
-            case external = 3
-        }
-        
-        public struct EntityMetadata: Sendable, Codable {
-            public var location: String?
-        }
-        
-        public var id: String
-        public var guild_id: String
-        public var channel_id: String?
-        public var creator_id: String?
-        public var name: String
-        public var description: String?
-        public var scheduled_start_time: DiscordTimestamp
-        public var scheduled_end_time: DiscordTimestamp?
-        public var privacy_level: PrivacyLevel
-        public var status: Status
-        public var entity_type: EntityKind
-        public var entity_id: String?
-        public var entity_metadata: EntityMetadata?
-        public var creator: User?
-        public var user_count: Int?
-        public var image: String?
-        public var sku_ids: [String]?
-    }
-    
+    /// Used for guild-scheduled-event-user add and remove events.
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-add-guild-scheduled-event-user-add-event-fields
     public struct GuildScheduledEventUser: Sendable, Codable {
         public var guild_scheduled_event_id: String
         public var user_id: String
         public var guild_id: String
     }
     
+    /// FIXME: undocumented?
     public struct GuildApplicationCommandIndexUpdate: Sendable, Codable {
         public var hashes: Hashes
         public var guild_hashes: Hashes
@@ -1222,35 +844,22 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String
     }
     
+    /// An ``Integration`` with an extra `guild_id` field.
+    /// https://discord.com/developers/docs/topics/gateway-events#integration-create
+    /// https://discord.com/developers/docs/resources/guild#integration-object
     public struct Integration: Sendable, Codable {
         
+        /// https://discord.com/developers/docs/resources/guild#integration-object-integration-structure
         public enum Kind: String, Sendable, Codable {
             case twitch
             case youtube
             case discord
         }
         
+        /// https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors
         public enum ExpireBehavior: Int, Sendable, Codable {
             case removeRole = 0
             case kick = 1
-        }
-        
-        public struct Account: Sendable, Codable {
-            public var id: String
-            public var name: String
-        }
-        
-        public struct IntegrationApp: Sendable, Codable {
-            public var id: String
-            public var name: String
-            public var icon: String?
-            public var description: String
-            public var summary: String?
-            public var type: Int?
-            public var bot: User?
-            public var primary_sku_id: String?
-            public var cover_image: String?
-            public var scopes: TolerantDecodeArray<OAuthScope>?
         }
         
         public var id: String
@@ -1263,17 +872,18 @@ public struct Gateway: Sendable, Codable {
         public var expire_behavior: ExpireBehavior?
         public var expire_grace_period: Int?
         public var user: User?
-        public var account: Account
+        public var account: IntegrationAccount
         public var synced_at: DiscordTimestamp?
         public var subscriber_count: Int?
         public var revoked: Bool?
-        public var application: IntegrationApp?
+        public var application: IntegrationApplication?
         public var guild_id: String
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
         public var scopes: TolerantDecodeArray<OAuthScope>?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#integration-delete-integration-delete-event-fields
     public struct IntegrationDelete: Sendable, Codable {
         public var id: String
         public var guild_id: String
@@ -1282,7 +892,15 @@ public struct Gateway: Sendable, Codable {
         public var guild_hashes: Hashes?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#invite-create-invite-create-event-fields
     public struct InviteCreate: Sendable, Codable {
+        
+        /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
+        public enum TargetKind: Int, Sendable, Codable {
+            case stream = 1
+            case embeddedApplication = 2
+        }
+        
         public var type: Int? // FIXME: TYPIFY
         public var channel_id: String
         public var code: String
@@ -1291,8 +909,7 @@ public struct Gateway: Sendable, Codable {
         public var inviter: User?
         public var max_age: Int
         public var max_uses: Int
-        public var target_user_type: Int? // FIXME: TYPIFY; are these two the same?
-        public var target_type: Int? // FIXME: TYPIFY; are these two the same?
+        public var target_type: TargetKind
         public var target_user: User?
         public var target_application: PartialApplication?
         public var temporary: Bool
@@ -1300,208 +917,44 @@ public struct Gateway: Sendable, Codable {
         public var expires_at: DiscordTimestamp?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#invite-delete
     public struct InviteDelete: Sendable, Codable {
         public var channel_id: String
         public var guild_id: String?
         public var code: String
     }
     
-    public struct PartialMember: Sendable, Codable {
-        public var user: User?
-        public var nick: String?
-        public var avatar: String?
-        public var roles: [String]?
-        public var hoisted_role: String?
-        public var joined_at: DiscordTimestamp?
-        public var premium_since: DiscordTimestamp?
-        public var deaf: Bool?
-        public var mute: Bool?
-        public var pending: Bool?
-        public var is_pending: Bool?
-        public var flags: IntBitField<User.Flag>? // FIXME not sure about `User.Flag`
-        public var permissions: StringBitField<Channel.Permission>?
-        public var communication_disabled_until: DiscordTimestamp?
-    }
-    
-    public final class DereferenceBox<C>: Codable, CustomStringConvertible where C: Codable {
-        public let value: C
-        
-        public init(value: C) {
-            self.value = value
-        }
-        
-        public init(from decoder: Decoder) throws {
-            value = try C.init(from: decoder)
-        }
-        
-        public func encode(to encoder: Encoder) throws {
-            try value.encode(to: encoder)
-        }
-        
-        public var description: String {
-            "\(value)"
-        }
-    }
-    
-    // MessageCreate
-    public struct Message: Sendable, Codable {
-        
-        public struct MessageReference: Sendable, Codable {
-            public var message_id: String?
-            public var channel_id: String?
-            public var guild_id: String?
-            public var fail_if_not_exists: Bool?
-        }
-        
-        public struct Interaction: Sendable, Codable {
-            
-            public enum Kind: Int, Sendable, Codable {
-                case ping = 1
-                case applicationCommand = 2
-                case messageComponent = 3
-                case applicationCommandAutocomplete = 4
-                case modalSubmit = 5
-            }
-            
-            public var id: String
-            public var type: Kind
-            public var name: String
-            public var user: User
-            public var member: PartialMember?
-        }
-        
-        public enum Kind: Int, Sendable, Codable {
-            case `default` = 0
-            case recipientAdd = 1
-            case recipientRemove = 2
-            case call = 3
-            case channelNameChange = 4
-            case channelIconChange = 5
-            case channelPinnedMessage = 6
-            case guildMemberJoin = 7
-            case userPremiumGuildSubscription = 8
-            case userPremiumGuildSubscriptionTier1 = 9
-            case userPremiumGuildSubscriptionTier2 = 10
-            case userPremiumGuildSubscriptionTier3 = 11
-            case channelFollowAdd = 12
-            case guildDiscoveryDisqualified = 14
-            case guildDiscoveryRequalified = 15
-            case guildDiscoveryGracePeriodInitialWarning = 16
-            case guildDiscoveryGracePeriodFinalWarning = 17
-            case threadCreated = 18
-            case reply = 19
-            case chatInputCommand = 20
-            case threadStarterMessage = 21
-            case guildInviteReminder = 22
-            case contextMenuCommand = 23
-            case autoModerationAction = 24
-        }
-        
-        public enum Flag: Int, Sendable {
-            case crossposted = 0
-            case isCrosspost = 1
-            case suppressEmbeds = 2
-            case sourceMessageDeleted = 3
-            case urgent = 4
-            case hasThread = 5
-            case ephemeral = 6
-            case loading = 7
-            case failedToMentionSomeRolesInThread = 8
-            case unknownValue10 = 10
-        }
-        
-        public struct Mention: Sendable, Codable {
-            public var id: String
-            public var username: String
-            public var discriminator: String
-            public var avatar: String?
-            public var bot: Bool?
-            public var system: Bool?
-            public var mfa_enabled: Bool?
-            public var banner: String?
-            public var accent_color: DiscordColor?
-            public var locale: DiscordLocale?
-            public var verified: Bool?
-            public var email: String?
-            public var flags: IntBitField<User.Flag>?
-            public var premium_type: User.PremiumKind?
-            public var public_flags: IntBitField<User.Flag>?
-            public var member: Member?
-            public var avatar_decoration: String?
-        }
-        
-        public struct ChannelMention: Sendable, Codable {
-            public var id: String
-            public var guild_id: String
-            public var type: Channel.Kind
-            public var name: String
-        }
-        
-        public struct Attachment: Sendable, Codable {
-            public var id: String
-            public var filename: String
-            public var description: String?
-            public var content_type: String?
-            public var size: Int
-            public var url: String
-            public var proxy_url: String
-            public var height: Int?
-            public var width: Int?
-            public var ephemeral: Bool?
-        }
-        
-        public struct Reaction: Sendable, Codable {
-            public var count: Int
-            public var me: Bool
-            public var emoji: PartialEmoji
-        }
-        
-        public struct Activity: Sendable, Codable {
-            
-            public enum Kind: Int, Sendable, Codable {
-                case join = 1
-                case spectate = 2
-                case listen = 3
-                case joinRequest = 5
-            }
-            
-            public var type: Kind
-            public var party_id: String?
-        }
-        
-        public struct StickerItem: Sendable, Codable {
-            public var id: String
-            public var name: String
-            public var format_type: Sticker.FormatKind
-        }
-        
+    /// A ``Message`` object with a few extra fields.
+    /// https://discord.com/developers/docs/topics/gateway-events#message-create
+    /// https://discord.com/developers/docs/resources/channel#message-object
+    public struct MessageCreate: Sendable, Codable {
         public var id: String
         public var channel_id: String
         public var guild_id: String?
         public var author: PartialUser?
-        public var member: PartialMember?
+        public var member: Guild.PartialMember?
         public var content: String
         public var timestamp: DiscordTimestamp
         public var edited_timestamp: DiscordTimestamp?
         public var tts: Bool
         public var mention_everyone: Bool
-        public var mentions: [Mention]
+        public var mentions: [User]
         public var mention_roles: [String]
-        public var mention_channels: [ChannelMention]?
-        public var attachments: [Attachment]
+        public var mention_channels: [Channel.Message.ChannelMention]?
+        public var attachments: [Channel.Message.Attachment]
         public var embeds: [Embed]
-        public var reactions: [Reaction]?
+        public var reactions: [Channel.Message.Reaction]?
         public var nonce: StringOrInt?
         public var pinned: Bool
         public var webhook_id: String?
-        public var type: Kind
+        public var type: Channel.Message.Kind
         public var activity: Activity?
         public var application: PartialApplication?
         public var application_id: String?
-        public var message_reference: MessageReference?
-        public var flags: IntBitField<Flag>?
-        public var referenced_message: DereferenceBox<Message>?
-        public var interaction: Interaction?
+        public var message_reference: Channel.Message.MessageReference?
+        public var flags: IntBitField<Channel.Message.Flag>?
+        public var referenced_message: DereferenceBox<MessageCreate>?
+        public var interaction: MessageInteraction?
         public var thread: Channel?
         public var components: [ActionRow]?
         public var sticker_items: [StickerItem]?
@@ -1509,109 +962,31 @@ public struct Gateway: Sendable, Codable {
         public var position: Int?
     }
     
-    public struct PartialMessage: Sendable, Codable {
-        public var id: String
-        public var channel_id: String
-        public var guild_id: String?
-        public var author: PartialUser?
-        public var member: PartialMember?
-        public var content: String?
-        public var timestamp: DiscordTimestamp?
-        public var edited_timestamp: DiscordTimestamp?
-        public var tts: Bool?
-        public var mention_everyone: Bool?
-        public var mentions: [Message.Mention]?
-        public var mention_roles: [String]?
-        public var mention_channels: [Message.ChannelMention]?
-        public var attachments: [Message.Attachment]?
-        public var embeds: [Embed]?
-        public var reactions: [Message.Reaction]?
-        public var nonce: StringOrInt?
-        public var pinned: Bool?
-        public var webhook_id: String?
-        public var type: Message.Kind?
-        public var activity: Message.Activity?
-        public var application: PartialApplication?
-        public var application_id: String?
-        public var message_reference: Message.MessageReference?
-        public var flags: IntBitField<Message.Flag>?
-        public var referenced_message: DereferenceBox<PartialMessage>?
-        public var interaction: Message.Interaction?
-        public var thread: Channel?
-        public var components: [ActionRow]?
-        public var sticker_items: [Message.StickerItem]?
-        public var stickers: [Sticker]?
-        public var position: Int?
-    }
-    
+    /// https://discord.com/developers/docs/topics/gateway-events#message-delete
     public struct MessageDelete: Sendable, Codable {
         public var id: String
         public var channel_id: String
         public var guild_id: String?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#message-delete-bulk-message-delete-bulk-event-fields
     public struct MessageDeleteBulk : Sendable, Codable {
         public var ids: [String]
         public var channel_id: String
         public var guild_id: String?
     }
     
-    public struct Member: Sendable, Codable, Hashable {
-        public var user: User?
-        public var nick: String?
-        public var avatar: String?
-        public var roles: [String]
-        public var hoisted_role: String?
-        public var joined_at: DiscordTimestamp
-        public var premium_since: DiscordTimestamp?
-        public var deaf: Bool
-        public var mute: Bool
-        public var pending: Bool?
-        public var is_pending: Bool?
-        public var flags: IntBitField<User.Flag>? // FIXME not sure about `User.Flag`
-        public var permissions: StringBitField<Channel.Permission>?
-        public var communication_disabled_until: DiscordTimestamp?
-        
-        public func hash(into hasher: inout Hasher) {
-            hasher.combine(user!.id)
-        }
-        
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.user!.id == rhs.user!.id
-        }
-        
-        public func hasRole(withId id: String, guildId: String) -> Bool {
-            /// guildId == id <-> role == @everyone
-            guildId == id || self.roles.contains(where: { $0 == id })
-        }
-        
-        public init(guildMemberAdd: GuildMemberAdd) {
-            self.roles = guildMemberAdd.roles
-            self.hoisted_role = guildMemberAdd.hoisted_role
-            self.user = guildMemberAdd.user
-            self.nick = guildMemberAdd.nick
-            self.avatar = guildMemberAdd.avatar
-            self.joined_at = guildMemberAdd.joined_at
-            self.premium_since = guildMemberAdd.premium_since
-            self.deaf = guildMemberAdd.deaf
-            self.mute = guildMemberAdd.mute
-            self.pending = guildMemberAdd.pending
-            self.is_pending = guildMemberAdd.is_pending
-            self.flags = guildMemberAdd.flags
-            self.permissions = guildMemberAdd.permissions
-            self.communication_disabled_until = guildMemberAdd.communication_disabled_until
-        }
-    }
-    
+    /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-add-message-reaction-add-event-fields
     public struct MessageReactionAdd: Sendable, Codable {
         public var user_id: String
         public var channel_id: String
         public var message_id: String
         public var guild_id: String?
-        public var member: Member?
+        public var member: Guild.Member?
         public var emoji: Emoji
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove
     public struct MessageReactionRemove: Sendable, Codable {
         public var user_id: String
         public var channel_id: String
@@ -1620,12 +995,14 @@ public struct Gateway: Sendable, Codable {
         public var emoji: Emoji
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-all
     public struct MessageReactionRemoveAll : Sendable, Codable {
         public var channel_id: String
         public var message_id: String
         public var guild_id: String?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-emoji
     public struct MessageReactionRemoveEmoji: Sendable, Codable {
         public var channel_id: String
         public var guild_id: String?
@@ -1633,27 +1010,29 @@ public struct Gateway: Sendable, Codable {
         public var emoji: Emoji
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#client-status-object
+    public struct ClientStatus: Sendable, Codable {
+        public var desktop: String?
+        public var mobile: String?
+        public var web: String?
+    }
+    
+    /// FIXME: undocumented?
+    public struct Game: Sendable, Codable {
+        public var type: Int //FIXME: Make enum
+        public var state: String?
+        public var name: String
+        public var created_at: TolerantDecodeDate
+        public var id: String
+        public var session_id: String?
+        public var emoji: Emoji?
+        public var platform: String?
+        public var timestamps: [DiscordTimestamp]?
+        public var application_id: String?
+    }
+    
+    /// https://discord.com/developers/docs/topics/gateway-events#presence-update-presence-update-event-fields
     public struct PresenceUpdate: Sendable, Codable {
-        
-        public struct ClientStatus: Sendable, Codable {
-            public var desktop: String?
-            public var mobile: String?
-            public var web: String?
-        }
-        
-        public struct Game: Sendable, Codable {
-            public var type: Int //FIXME: Make enum
-            public var state: String?
-            public var name: String
-            public var created_at: TolerantDecodeDate
-            public var id: String
-            public var session_id: String?
-            public var emoji: Emoji?
-            public var platform: String?
-            public var timestamps: [DiscordTimestamp]?
-            public var application_id: String?
-        }
-        
         public var user: PartialUser
         public var guild_id: String
         public var status: Status
@@ -1662,29 +1041,21 @@ public struct Gateway: Sendable, Codable {
         public var game: Game?
     }
     
+    /// Partial ``PresenceUpdate`` object.
+    /// https://discord.com/developers/docs/topics/gateway-events#presence-update-presence-update-event-fields
     public struct PartialPresenceUpdate: Sendable, Codable {
         public var user: PartialUser?
         public var guild_id: String?
         public var status: Status?
         public var activities: [Activity]?
-        public var client_status: PresenceUpdate.ClientStatus
-        public var game: PresenceUpdate.Game?
+        public var client_status: ClientStatus
+        public var game: Game?
     }
     
-    public struct PartialEmoji: Sendable, Codable {
-        public var name: String
-        public var id: String?
-        public var animated: Bool?
-        
-        public init(name: String, id: String? = nil, animated: Bool? = nil) {
-            self.name = name
-            self.id = id
-            self.animated = animated
-        }
-    }
-    
+    /// https://discord.com/developers/docs/topics/gateway-events#activity-object
     public struct Activity: Sendable, Codable {
         
+        /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
         public enum Kind: Int, Sendable, Codable {
             case game = 0
             case streaming = 1
@@ -1694,6 +1065,7 @@ public struct Gateway: Sendable, Codable {
             case competing = 5
         }
         
+        /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-timestamps
         public struct Timestamps: Sendable, Codable {
             public var start: Int?
             public var end: Int?
@@ -1704,6 +1076,20 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
+        /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-emoji
+        public struct ActivityEmoji: Sendable, Codable {
+            public var name: String
+            public var id: String?
+            public var animated: Bool?
+            
+            public init(name: String, id: String? = nil, animated: Bool? = nil) {
+                self.name = name
+                self.id = id
+                self.animated = animated
+            }
+        }
+        
+        /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-party
         public struct Party: Sendable, Codable {
             public var id: String?
             public var size: IntPair?
@@ -1714,6 +1100,7 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
+        /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-assets
         public struct Assets: Sendable, Codable {
             public var large_image: String?
             public var large_text: String?
@@ -1728,6 +1115,7 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
+        /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-secrets
         public struct Secrets: Sendable, Codable {
             public var join: String?
             public var spectate: String?
@@ -1740,6 +1128,7 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
+        /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-flags
         public enum Flag: Int, Sendable {
             case instance = 0
             case join = 1
@@ -1752,6 +1141,7 @@ public struct Gateway: Sendable, Codable {
             case embedded = 8
         }
         
+        /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-buttons
         public struct Button: Sendable, Codable {
             public var label: String
             public var url: String
@@ -1781,7 +1171,7 @@ public struct Gateway: Sendable, Codable {
         public var application_id: String?
         public var details: String?
         public var state: String?
-        public var emoji: PartialEmoji?
+        public var emoji: ActivityEmoji?
         public var party: Party?
         public var assets: Assets?
         public var secrets: Secrets?
@@ -1793,7 +1183,7 @@ public struct Gateway: Sendable, Codable {
         public var platform: String?
         public var supported_platforms: [String]?
         
-        public init(name: String, type: Kind, url: String? = nil, created_at: Int? = nil, timestamps: Timestamps? = nil, application_id: String? = nil, details: String? = nil, state: String? = nil, emoji: PartialEmoji? = nil, party: Party? = nil, assets: Assets? = nil, secrets: Secrets? = nil, instance: Bool? = nil, flags: [Flag]? = nil, buttons: [Button]? = nil, sync_id: String? = nil, session_id: String? = nil, platform: String? = nil, supported_platforms: [String]? = nil) {
+        public init(name: String, type: Kind, url: String? = nil, created_at: Int? = nil, timestamps: Timestamps? = nil, application_id: String? = nil, details: String? = nil, state: String? = nil, emoji: ActivityEmoji? = nil, party: Party? = nil, assets: Assets? = nil, secrets: Secrets? = nil, instance: Bool? = nil, flags: [Flag]? = nil, buttons: [Button]? = nil, sync_id: String? = nil, session_id: String? = nil, platform: String? = nil, supported_platforms: [String]? = nil) {
             self.name = name
             self.type = type
             self.url = url
@@ -1816,133 +1206,34 @@ public struct Gateway: Sendable, Codable {
         }
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#typing-start-typing-start-event-fields
     public struct TypingStart: Sendable, Codable {
         public var channel_id: String
         public var guild_id: String?
         public var user_id: String
         public var timestamp: Int
-        public var member: Member?
+        public var member: Guild.Member?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#voice-server-update-voice-server-update-event-fields
     public struct VoiceServerUpdate: Sendable, Codable {
         public var token: String
         public var guild_id: String
         public var endpoint: String?
     }
     
+    /// https://discord.com/developers/docs/topics/gateway-events#webhooks-update-webhooks-update-event-fields
     public struct WebhooksUpdate: Sendable, Codable {
         public var guild_id: String
         public var channel_id: String
     }
     
-    public struct InteractionCreate: Sendable, Codable {
-        
-        public enum Kind: Int, Sendable, Codable {
-            case ping = 1
-            case applicationCommand = 2
-            case messageComponent = 3
-            case applicationCommandAutocomplete = 4
-            case modalSubmit = 5
-        }
-        
-        public struct Data: Sendable, Codable {
-            
-            public struct ResolvedData: Sendable, Codable {
-                public var users: [String: User]?
-                public var members: [String: PartialMember]?
-                public var roles: [String: Role]?
-                public var channels: [String: PartialChannel]?
-                public var messages: [String: PartialMessage]?
-                public var attachments: [String: Message.Attachment]?
-            }
-            
-            public struct Option: Sendable, Codable {
-                
-                public enum Kind: Int, Sendable, Codable {
-                    case subCommand = 1
-                    case subCommandGroup = 2
-                    case string = 3
-                    case integer = 4
-                    case boolean = 5
-                    case user = 6
-                    case channel = 7
-                    case role = 8
-                    case mentionable = 9
-                    case number = 10
-                    case attachment = 11
-                }
-                
-                public var name: String
-                public var type: Kind
-                public var value: StringIntDoubleBool?
-                public var options: [Option]?
-                public var focused: Bool?
-            }
-            
-            public enum ComponentKind: Int, Sendable, Codable {
-                case actionRow = 1
-                case button = 2
-                case selectMenu = 3
-                case textInput = 4
-            }
-            
-            public struct SelectOption: Sendable, Codable {
-                public var label: String
-                public var value: String
-                public var description: String?
-                public var emoji: PartialEmoji?
-                public var `default`: Bool?
-            }
-            
-            public var id: String
-            public var name: String
-            public var type: Kind
-            public var resolved: ResolvedData?
-            public var options: [Option]?
-            public var guild_id: String?
-            public var custom_id: String?
-            public var component_type: ComponentKind?
-            public var values: [SelectOption]?
-            public var target_id: String?
-            public var components: [ActionRow]?
-        }
-        
-        public var id: String
-        public var application_id: String
-        public var type: Kind
-        public var data: Data?
-        public var guild_id: String?
-        public var channel_id: String?
-        public var member: Member?
-        public var user: User?
-        public var token: String
-        public var version: Int
-        public var message: Message?
-        public var locale: DiscordLocale?
-        public var guild_locale: DiscordLocale?
-        public var app_permissions: StringBitField<Channel.Permission>?
-    }
-    
-    public struct StageInstance: Sendable, Codable {
-        
-        public enum PrivacyLevel: Int, Sendable, Codable {
-            case `public` = 1
-            case guildOnly = 2
-        }
-        
-        public var id: String
-        public var guild_id: String
-        public var channel_id: String
-        public var topic: String
-        public var privacy_level: PrivacyLevel
-        public var discoverable_disabled: Bool
-        public var guild_scheduled_event_id: String?
-    }
-    
+    /// Undocumented
     public struct ApplicationCommandPermissionsUpdate: Sendable, Codable {
         
+        /// Undocumented
         public struct Permission: Sendable, Codable {
-            public var type: Channel.Permission // FIXME: NOT SURE
+            public var type: Channel.Permission // FIXME: not sure
             public var permission: Bool
             public var id: String
         }
@@ -1953,8 +1244,10 @@ public struct Gateway: Sendable, Codable {
         public var application_id: String
     }
     
+    /// Undocumented
     public struct AutoModerationActionExecution: Sendable, Codable {
         
+        /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object
         public enum AutoModerationAction: Sendable, Codable {
             case blockMessage
             case sendAlertMessage(channelId: String)
@@ -2022,6 +1315,7 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
+        /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types
         public enum TriggerKind: Int, Sendable, Codable {
             case keyword = 1
             case spam = 3
@@ -2041,25 +1335,24 @@ public struct Gateway: Sendable, Codable {
         public var matched_keyword: String?
         public var matched_content: String?
     }
-}
-
-public struct GatewayUrl: Sendable, Codable {
-    public var url: String
-}
-
-public struct GatewayBot: Sendable, Codable {
     
-    public struct SessionStartLimit: Sendable, Codable {
-        public var total: Int
-        public var remaining: Int
-        public var reset_after: Int
-        public var max_concurrency: Int
+    /// https://discord.com/developers/docs/topics/gateway#get-gateway
+    public struct Url: Sendable, Codable {
+        public var url: String
     }
     
-    public var url: String
-    public var shards: Int
-    public var session_start_limit: SessionStartLimit
+    /// https://discord.com/developers/docs/topics/gateway#get-gateway-bot-json-response
+    public struct BotConnectionInfo: Sendable, Codable {
+        
+        public struct SessionStartLimit: Sendable, Codable {
+            public var total: Int
+            public var remaining: Int
+            public var reset_after: Int
+            public var max_concurrency: Int
+        }
+        
+        public var url: String
+        public var shards: Int
+        public var session_start_limit: SessionStartLimit
+    }
 }
-
-//MARK: Sendable
-extension Gateway.DereferenceBox: Sendable where C: Sendable { }

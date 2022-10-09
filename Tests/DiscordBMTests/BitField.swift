@@ -3,7 +3,7 @@ import XCTest
 
 class BitFieldTests: XCTestCase {
     
-    typealias Raw = Gateway.Channel.Permission
+    typealias Raw = Channel.Permission
     let allCases: [Raw] = [.createInstantInvite, .kickMembers, .banMembers, .administrator, .manageChannels, .manageGuild, .addReactions, .viewAuditLog, .prioritySpeaker, .stream, .viewChannel, .sendMessages, .sendTtsMessages, .manageMessages, .embedLinks, .attachFiles, .readMessageHistory, .mentionEveryone, .useExternalEmojis, .viewGuildInsights, .connect, .speak, .muteMembers, .deafenMembers, .moveMembers, .useVAD, .changeNickname, .manageNicknames, .manageRoles, .manageWebHooks, .manageEmojisAndStickers, .useApplicationCommands, .requestToSpeak, .manageEvents, .manageThreads, .createPublicThreads, .createPrivateThreads, .useExternalStickers, .sendMessagesInThreads, .useEmbeddedActivities, .moderateMembers, .unknownValue41]
     
     /// To make sure `IntBitField` and `StringBitField` have similar behavior,
