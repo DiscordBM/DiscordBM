@@ -49,32 +49,13 @@ public struct Interaction: Sendable, Codable {
             public var focused: Bool?
         }
         
-        public enum ComponentKind: Int, Sendable, Codable {
-            case actionRow = 1
-            case button = 2
-            case selectMenu = 3
-            case textInput = 4
-        }
-        
-        public struct SelectOption: Sendable, Codable {
-            public var label: String
-            public var value: String
-            public var description: String?
-            public var emoji: Emoji?
-            public var `default`: Bool?
-        }
-        
         public var id: String
         public var name: String
         public var type: Kind
         public var resolved: ResolvedData?
         public var options: [Option]?
         public var guild_id: String?
-        public var custom_id: String?
-        public var component_type: ComponentKind?
-        public var values: [SelectOption]?
         public var target_id: String?
-        public var components: [ActionRow]?
     }
     
     public var id: String
@@ -90,11 +71,13 @@ public struct Interaction: Sendable, Codable {
     public var message: Channel.Message?
     public var locale: DiscordLocale?
     public var guild_locale: DiscordLocale?
-    public var app_permissions: StringBitField<Channel.Permission>?
+    public var app_permissions: StringBitField<Permission>?
 }
 
+/// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object
 public struct InteractionResponse: Sendable, Codable {
     
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
     public enum Kind: Int, Sendable, Codable {
         case pong = 1
         case message = 4
@@ -105,57 +88,18 @@ public struct InteractionResponse: Sendable, Codable {
         case modal = 9
     }
     
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structure
     public struct CallbackData: Sendable, Codable {
-        
-        public struct AllowedMentions: Sendable, Codable {
-            
-            public enum Kind: String, Sendable, Codable {
-                case roles
-                case users
-                case everyone
-            }
-            
-            public let parse: TolerantDecodeArray<Kind>
-            public let roles: [String]
-            public let users: [String]
-            public let replied_user: Bool
-        }
-        
-        public struct Attachment: Sendable, Codable {
-            public let id: String
-            public let filename: String
-            public let description: String?
-            public let content_type: String?
-            public let size: Int
-            public let url: String
-            public let proxy_url: String
-            public let height: Int?
-            public let width: Int?
-            public let ephemeral: Bool?
-            
-            public init(id: String, filename: String, description: String?, content_type: String?, size: Int, url: String, proxy_url: String, height: Int?, width: Int?, ephemeral: Bool?) {
-                self.id = id
-                self.filename = filename
-                self.description = description
-                self.content_type = content_type
-                self.size = size
-                self.url = url
-                self.proxy_url = proxy_url
-                self.height = height
-                self.width = width
-                self.ephemeral = ephemeral
-            }
-        }
         
         public var tts: Bool?
         public var content: String?
         public var embeds: [Embed]?
-        public var allowedMentions: AllowedMentions?
+        public var allowedMentions: Channel.AllowedMentions?
         public var flags: IntBitField<Channel.Message.Flag>?
-        public var components: [ActionRow]?
-        public var attachments: [Attachment]?
+        public var components: [Interaction.ActionRow]?
+        public var attachments: [Channel.Message.Attachment]?
         
-        public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: AllowedMentions? = nil, flags: [Channel.Message.Flag]? = nil, components: [ActionRow]? = nil, attachments: [Attachment]? = nil) {
+        public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: Channel.AllowedMentions? = nil, flags: [Channel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [Channel.Message.Attachment]? = nil) {
             self.tts = tts
             self.content = content
             self.embeds = embeds
@@ -169,7 +113,7 @@ public struct InteractionResponse: Sendable, Codable {
     public var type: Kind
     public var data: CallbackData?
     
-    public init(type: InteractionResponse.Kind, data: InteractionResponse.CallbackData? = nil) {
+    public init(type: Kind, data: CallbackData? = nil) {
         self.type = type
         self.data = data
     }
@@ -177,18 +121,170 @@ public struct InteractionResponse: Sendable, Codable {
 
 /// https://discord.com/developers/docs/interactions/receiving-and-responding#message-interaction-object-message-interaction-structure
 public struct MessageInteraction: Sendable, Codable {
-    
-    public enum Kind: Int, Sendable, Codable {
-        case ping = 1
-        case applicationCommand = 2
-        case messageComponent = 3
-        case applicationCommandAutocomplete = 4
-        case modalSubmit = 5
-    }
-    
     public var id: String
-    public var type: Kind
+    public var type: Interaction.Kind
     public var name: String
     public var user: User
     public var member: Guild.PartialMember?
+}
+
+extension Interaction {
+    /// https://discord.com/developers/docs/interactions/message-components#action-rows
+    public struct ActionRow: Sendable, Codable {
+        
+        /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
+        public enum Kind: Int, Sendable, Codable {
+            case container = 1
+            case button = 2
+            case selectMenu = 3
+            case textInput = 4
+        }
+        
+        /// https://discord.com/developers/docs/interactions/message-components#button-object-button-structure
+        public struct Button: Sendable, Codable {
+            
+            /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
+            public enum Style: Int, Sendable, Codable {
+                case primary = 1
+                case secondary = 2
+                case success = 3
+                case danger = 4
+                case link = 5
+            }
+            
+            public var type: Kind = .button
+            public var style: Style?
+            public var label: String?
+            public var emoji: PartialEmoji?
+            public var custom_id: String?
+            public var url: String?
+            public var disabled: Bool?
+            
+            public init(style: Style? = nil, label: String? = nil, emoji: PartialEmoji? = nil, custom_id: String? = nil, url: String? = nil, disabled: Bool? = nil) {
+                self.style = style
+                self.label = label
+                self.emoji = emoji
+                self.custom_id = custom_id
+                self.url = url
+                self.disabled = disabled
+            }
+        }
+        
+        /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
+        public struct SelectMenu: Sendable, Codable {
+            
+        /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure
+            public struct Option: Sendable, Codable {
+                public var label: String
+                public var value: String
+                public var description: String?
+                public var emoji: PartialEmoji?
+                public var `default`: Bool?
+                
+                public init(label: String, value: String, description: String? = nil, emoji: PartialEmoji? = nil, `default`: Bool? = nil) {
+                    self.label = label
+                    self.value = value
+                    self.description = description
+                    self.emoji = emoji
+                    self.`default` = `default`
+                }
+            }
+            
+            public var custom_id: String
+            public var options: [Option]
+            public var placeholder: String?
+            public var min_values: Int?
+            public var max_values: Int?
+            public var disabled: Bool?
+            
+            public init(custom_id: String, options: [Option], placeholder: String? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
+                self.custom_id = custom_id
+                self.options = options
+                self.placeholder = placeholder
+                self.min_values = min_values
+                self.max_values = max_values
+                self.disabled = disabled
+            }
+        }
+        
+        /// https://discord.com/developers/docs/interactions/message-components#text-inputs
+        public struct TextInput: Sendable, Codable {
+            
+        /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
+            public enum Style: Int, Sendable, Codable {
+                case short = 1
+                case paragraph = 2
+            }
+            
+            public var custom_id: String
+            public var style: Style
+            public var label: String
+            public var min_length: Int?
+            public var max_length: Int?
+            public var required: Bool?
+            public var value: String?
+            public var placeholder: String?
+            
+            public init(custom_id: String, style: Interaction.ActionRow.TextInput.Style, label: String, min_length: Int? = nil, max_length: Int? = nil, required: Bool? = nil, value: String? = nil, placeholder: String? = nil) {
+                self.custom_id = custom_id
+                self.style = style
+                self.label = label
+                self.min_length = min_length
+                self.max_length = max_length
+                self.required = required
+                self.value = value
+                self.placeholder = placeholder
+            }
+        }
+        
+        public enum Component: Sendable, Codable {
+            case button(Button)
+            case selectMenu(SelectMenu)
+            case textInput(TextInput)
+            
+            enum CodingError: Error {
+                case containerIsSupposedToOnlyAppearAtTopLevel
+            }
+            
+            enum CodingKeys: CodingKey {
+                case type
+            }
+            
+            public init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                let type = try container.decode(Kind.self, forKey: .type)
+                switch type {
+                case .container:
+                    throw CodingError.containerIsSupposedToOnlyAppearAtTopLevel
+                case .button:
+                    self = try .button(.init(from: decoder))
+                case .selectMenu:
+                    self = try .selectMenu(.init(from: decoder))
+                case .textInput:
+                    self = try .textInput(.init(from: decoder))
+                }
+            }
+            
+            public func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                switch self {
+                case let .button(button):
+                    try container.encode(Kind.button, forKey: .type)
+                    try button.encode(to: encoder)
+                case let .selectMenu(selectMenu):
+                    try container.encode(Kind.selectMenu, forKey: .type)
+                    try selectMenu.encode(to: encoder)
+                case let .textInput(textInput):
+                    try container.encode(Kind.textInput, forKey: .type)
+                    try textInput.encode(to: encoder)
+                }
+            }
+        }
+        
+        public var components: [Component]
+        
+        public init(components: [Component]) {
+            self.components = components
+        }
+    }
 }

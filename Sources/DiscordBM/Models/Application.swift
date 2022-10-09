@@ -2,28 +2,7 @@
 /// https://discord.com/developers/docs/resources/application#application-object-application-structure
 public struct PartialApplication: Sendable, Codable {
     
-    public struct Team: Sendable, Codable {
-        
-        public struct Member: Sendable, Codable {
-            
-            public enum State: Int, Sendable, Codable {
-                case invited = 1
-                case accepted = 2
-            }
-            
-            public var membership_state: State
-            public var permissions: [String]
-            public var team_id: String?
-            public var user: PartialUser
-        }
-        
-        public var icon: String?
-        public var id: String
-        public var members: [Member]
-        public var name: String
-        public var owner_user_id: String
-    }
-    
+    /// https://discord.com/developers/docs/resources/application#application-object-application-flags
     public enum Flag: Int, Sendable {
         case gatewayPresence = 12
         case gatewayPresenceLimited = 13
@@ -38,9 +17,10 @@ public struct PartialApplication: Sendable, Codable {
         case unknownFlag23 = 23
     }
     
+    /// https://discord.com/developers/docs/resources/application#install-params-object
     public struct InstallParams: Sendable, Codable {
-        public var scopes: TolerantDecodeArray<OAuthScope>
-        public var permissions: StringBitField<Channel.Permission>
+        public var scopes: TolerantDecodeArray<OAuth2Scope>
+        public var permissions: StringBitField<Permission>
     }
     
     public var id: String
@@ -69,32 +49,123 @@ public struct PartialApplication: Sendable, Codable {
     public var hook: Bool?
 }
 
+/// Discord docs call Slash Command, Application Command.
+/// https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
 public struct SlashCommand: Sendable, Codable {
     
+    /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
     public enum Kind: Int, Sendable, Codable {
         case chatInput = 1
         case user = 2
         case message = 3
     }
     
+    /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure
+    public struct Option: Sendable, Codable {
+        
+    /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+        public enum Kind: Int, Sendable, Codable {
+            case subCommand = 1
+            case subCommandGroup = 2
+            case string = 3
+            case integer = 4
+            case boolean = 5
+            case user = 6
+            case channel = 7
+            case role = 8
+            case mentionable = 9
+            case number = 10
+            case attachment = 11
+        }
+        
+        /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-choice-structure
+        public struct Choice: Sendable, Codable {
+            
+            public var name: String
+            public var name_localizations: [DiscordLocale: String]?
+            public var value: StringIntDoubleBool
+            
+            public init(name: String, name_localizations: [DiscordLocale : String]? = nil, value: StringIntDoubleBool) {
+                self.name = name
+                self.name_localizations = name_localizations
+                self.value = value
+            }
+        }
+        
+        public enum IntDouble: Sendable, Codable {
+            case int(Int)
+            case double(Double)
+            
+            public init(from decoder: Decoder) throws {
+                let container = try decoder.singleValueContainer()
+                if let int = try? container.decode(Int.self) {
+                    self = .int(int)
+                } else {
+                    let double = try container.decode(Double.self)
+                    self = .double(double)
+                }
+            }
+            
+            public func encode(to encoder: Encoder) throws {
+                var container = encoder.singleValueContainer()
+                switch self {
+                case let .int(int):
+                    try container.encode(int)
+                case let .double(double):
+                    try container.encode(double)
+                }
+            }
+        }
+        
+        public var type: Kind
+        public var name: String
+        public var name_localizations: [String: String]?
+        public var description: String
+        public var description_localizations: [String: String]?
+        public var required: Bool?
+        public var choices: [Choice]?
+        public var options: [Option]?
+        public var channel_types: [Channel.Kind]?
+        public var min_value: IntDouble?
+        public var max_value: IntDouble?
+        public var autocomplete: Bool?
+        /// Available after decode when user has inputted a value for the option.
+        public var value: StringIntDoubleBool?
+        
+        public init(type: Kind, name: String, name_localizations: [String : String]? = nil, description: String, description_localizations: [String : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [Option]? = nil, channel_types: [Channel.Kind]? = nil, min_value: IntDouble? = nil, max_value: IntDouble? = nil, autocomplete: Bool? = nil) {
+            self.type = type
+            self.name = name
+            self.name_localizations = name_localizations
+            self.description = description
+            self.description_localizations = description_localizations
+            self.required = required
+            self.choices = choices
+            self.options = options
+            self.channel_types = channel_types == nil ? nil : .init(channel_types!)
+            self.min_value = min_value
+            self.max_value = max_value
+            self.autocomplete = autocomplete
+        }
+    }
+    
     public var name: String
-    public var name_localizations: [String: String]?
+    public var name_localizations: [DiscordLocale: String]?
     public var description: String
-    public var description_localizations: [String: String]?
-    public var options: [CommandOption]?
+    public var description_localizations: [DiscordLocale: String]?
+    public var options: [Option]?
     public var dm_permission: Bool?
-    public var default_member_permissions: StringBitField<Channel.Permission>?
+    public var default_member_permissions: StringBitField<Permission>?
     public var type: Kind?
     
-    //MARK: Below fields are returned by Discord, and you don't need to send.
-    /// deprecated
+    //MARK: Below fields are only returned by Discord, and you don't need to send.
+    /// Deprecated
     var default_permission: Bool?
     public var id: String?
     public var application_id: String?
     public var guild_id: String?
     public var version: String?
     
-    public init(name: String, name_localizations: [String : String]? = nil, description: String, description_localizations: [String : String]? = nil, options: [CommandOption]? = nil, dm_permission: Bool? = nil, default_member_permissions: [Channel.Permission]? = nil, type: Kind? = nil) {
+    public init(name: String, name_localizations: [DiscordLocale: String]? = nil, description: String, description_localizations: [DiscordLocale: String]? = nil, options: [Option]? = nil, dm_permission: Bool? = nil, default_member_permissions: [Permission]? = nil, type: Kind? = nil) {
         self.name = name
         self.name_localizations = name_localizations
         self.description = description

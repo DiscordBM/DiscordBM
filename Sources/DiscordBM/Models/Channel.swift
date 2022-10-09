@@ -3,6 +3,7 @@ import Foundation
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
 public struct Channel: Sendable, Codable {
     
+    /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
     public enum Kind: Int, Sendable, Codable {
         case guildText = 0
         case dm = 1
@@ -18,53 +19,10 @@ public struct Channel: Sendable, Codable {
         case guildForum = 15
     }
     
-    public enum Permission: Int, Sendable, Hashable, Codable {
-        case createInstantInvite = 0
-        case kickMembers = 1
-        case banMembers = 2
-        case administrator = 3
-        case manageChannels = 4
-        case manageGuild = 5
-        case addReactions = 6
-        case viewAuditLog = 7
-        case prioritySpeaker = 8
-        case stream = 9
-        case viewChannel = 10
-        case sendMessages = 11
-        case sendTtsMessages = 12
-        case manageMessages = 13
-        case embedLinks = 14
-        case attachFiles = 15
-        case readMessageHistory = 16
-        case mentionEveryone = 17
-        case useExternalEmojis = 18
-        case viewGuildInsights = 19
-        case connect = 20
-        case speak = 21
-        case muteMembers = 22
-        case deafenMembers = 23
-        case moveMembers = 24
-        case useVAD = 25
-        case changeNickname = 26
-        case manageNicknames = 27
-        case manageRoles = 28
-        case manageWebHooks = 29
-        case manageEmojisAndStickers = 30
-        case useApplicationCommands = 31
-        case requestToSpeak = 32
-        case manageEvents = 33
-        case manageThreads = 34
-        case createPublicThreads = 35
-        case createPrivateThreads = 36
-        case useExternalStickers = 37
-        case sendMessagesInThreads = 38
-        case useEmbeddedActivities = 39
-        case moderateMembers = 40
-        case unknownValue41 = 41
-    }
-    
+    /// https://discord.com/developers/docs/resources/channel#overwrite-object
     public struct Overwrite: Sendable, Codable {
         
+        /// https://discord.com/developers/docs/resources/channel#overwrite-object
         public enum Kind: Int, Sendable, Codable {
             case role = 0
             case member = 1
@@ -76,8 +34,16 @@ public struct Channel: Sendable, Codable {
         public var deny: StringBitField<Permission>
     }
     
+    /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
     public enum Flag: Int, Sendable {
         case pinned = 1
+        case requireTag = 4
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
+    public enum VideoQualityMode: Int, Sendable, Codable {
+        case auto = 1
+        case full = 2
     }
     
     public var id: String
@@ -99,7 +65,7 @@ public struct Channel: Sendable, Codable {
     public var parent_id: String?
     public var last_pin_timestamp: DiscordTimestamp?
     public var rtc_region: String?
-    public var video_quality_mode: Int?
+    public var video_quality_mode: VideoQualityMode?
     public var message_count: Int?
     public var total_message_sent: Int?
     public var member_count: Int?
@@ -205,7 +171,7 @@ extension Channel {
         public struct Reaction: Sendable, Codable {
             public var count: Int
             public var me: Bool
-            public var emoji: Emoji
+            public var emoji: PartialEmoji
         }
         
         /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-structure
@@ -251,7 +217,7 @@ extension Channel {
         public var referenced_message: DereferenceBox<Message>?
         public var interaction: MessageInteraction?
         public var thread: Channel?
-        public var components: [ActionRow]?
+        public var components: [Interaction.ActionRow]?
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
@@ -286,7 +252,7 @@ extension Channel {
         public var referenced_message: DereferenceBox<PartialMessage>?
         public var interaction: MessageInteraction?
         public var thread: Channel?
-        public var components: [ActionRow]?
+        public var components: [Interaction.ActionRow]?
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
@@ -321,15 +287,16 @@ public struct PartialChannel: Sendable, Codable {
     public var id: String
     public var type: Channel.Kind
     public var name: String?
-    public var permissions: StringBitField<Channel.Permission>?
+    public var permissions: StringBitField<Permission>?
     public var parent_id: String?
     public var thread_metadata: ThreadMetadata?
 }
 
-public struct ChannelCreateMessage: Sendable, Codable {
-    
+extension Channel {
+    /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
     public struct AllowedMentions: Sendable, Codable {
         
+        /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
         public enum Kind: String, Sendable, Codable {
             case roles
             case users
@@ -348,83 +315,62 @@ public struct ChannelCreateMessage: Sendable, Codable {
             self.replied_user = replied_user
         }
     }
-    
-    public struct Attachment: Sendable, Codable {
-        public var id: String
-        public var filename: String?
-        public var description: String?
-        public var content_type: String?
-        public var size: Int?
-        public var url: String?
-        public var proxy_url: String?
-        public var height: Int?
-        public var width: Int?
-        public var ephemeral: Bool?
+}
+
+extension Channel {
+    /// https://discord.com/developers/docs/resources/channel#create-message-jsonform-params
+    public struct CreateMessage: Sendable, Codable {
+        public var content: String?
+        public var tts: Bool?
+        public var embeds: [Embed]?
+        public var allowed_mentions: AllowedMentions?
+        public var message_reference: Channel.Message.MessageReference?
+        public var components: [Interaction.ActionRow]?
+        public var sticker_ids: [String]?
+        public var files: [String]?
+        public var payload_json: String?
+        public var attachments: [Message.Attachment]?
+        public var flags: IntBitField<Channel.Message.Flag>?
         
-        public init(id: String, filename: String? = nil, description: String? = nil, content_type: String? = nil, size: Int? = nil, url: String? = nil, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil, ephemeral: Bool? = nil) {
-            self.id = id
-            self.filename = filename
-            self.description = description
-            self.content_type = content_type
-            self.size = size
-            self.url = url
-            self.proxy_url = proxy_url
-            self.height = height
-            self.width = width
-            self.ephemeral = ephemeral
+        public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: Channel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Message.Attachment]? = nil, flags: [Channel.Message.Flag]? = nil) {
+            self.content = content
+            self.tts = tts
+            self.embeds = embeds
+            self.allowed_mentions = allowed_mentions
+            self.message_reference = message_reference
+            self.components = components
+            self.sticker_ids = sticker_ids
+            self.files = files
+            self.payload_json = payload_json
+            self.attachments = attachments
+            self.flags = flags.map { .init($0) }
         }
-    }
-    
-    public var content: String?
-    public var tts: Bool?
-    public var embeds: [Embed]?
-    public var allowed_mentions: AllowedMentions?
-    public var message_reference: Channel.Message.MessageReference?
-    public var components: [ActionRow]?
-    public var sticker_ids: [String]?
-    public var files: [String]?
-    public var payload_json: String?
-    public var attachments: [Attachment]?
-    public var flags: IntBitField<Channel.Message.Flag>?
-    
-    public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: Channel.Message.MessageReference? = nil, components: [ActionRow]? = nil, sticker_ids: [String]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Attachment]? = nil, flags: [Channel.Message.Flag]? = nil) {
-        self.content = content
-        self.tts = tts
-        self.embeds = embeds
-        self.allowed_mentions = allowed_mentions
-        self.message_reference = message_reference
-        self.components = components
-        self.sticker_ids = sticker_ids
-        self.files = files
-        self.payload_json = payload_json
-        self.attachments = attachments
-        self.flags = flags.map { .init($0) }
     }
 }
 
-public struct ChannelEditMessage: Sendable, Codable {
-    
-    public typealias AllowedMentions = ChannelCreateMessage.AllowedMentions
-    public typealias Attachment = ChannelCreateMessage.Attachment
-    
-    public var content: String?
-    public var embeds: [Embed]?
-    public var flags: IntBitField<Channel.Message.Flag>?
-    public var allowed_mentions: AllowedMentions?
-    public var components: [ActionRow]?
-    public var files: [String]?
-    public var payload_json: String?
-    public var attachments: [ChannelCreateMessage.Attachment]?
-    
-    public init(content: String? = nil, embeds: [Embed]? = nil, flags: [Channel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [ActionRow]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Attachment]? = nil) {
-        self.content = content
-        self.embeds = embeds
-        self.flags = flags.map { .init($0) }
-        self.allowed_mentions = allowed_mentions
-        self.components = components
-        self.files = files
-        self.payload_json = payload_json
-        self.attachments = attachments
+extension Channel {
+    /// https://discord.com/developers/docs/resources/channel#edit-message-jsonform-params
+    public struct EditMessage: Sendable, Codable {
+        
+        public var content: String?
+        public var embeds: [Embed]?
+        public var flags: IntBitField<Channel.Message.Flag>?
+        public var allowed_mentions: AllowedMentions?
+        public var components: [Interaction.ActionRow]?
+        public var files: [String]?
+        public var payload_json: String?
+        public var attachments: [Message.Attachment]?
+        
+        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [Channel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Message.Attachment]? = nil) {
+            self.content = content
+            self.embeds = embeds
+            self.flags = flags.map { .init($0) }
+            self.allowed_mentions = allowed_mentions
+            self.components = components
+            self.files = files
+            self.payload_json = payload_json
+            self.attachments = attachments
+        }
     }
 }
 

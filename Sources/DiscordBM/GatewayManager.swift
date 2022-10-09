@@ -160,7 +160,7 @@ public actor BotGatewayManager: GatewayManager {
         token: String,
         appId: String? = nil,
         shard: IntPair? = nil,
-        presence: Gateway.Identify.PresenceUpdate? = nil,
+        presence: Gateway.Identify.Presence? = nil,
         intents: [Gateway.Intent] = []
     ) {
         let token = Secret(token)

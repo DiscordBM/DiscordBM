@@ -84,7 +84,7 @@ class GatewayModelsTests: XCTestCase {
             XCTAssertEqual(message.timestamp.date.timeIntervalSince1970, 1665171847.295)
             XCTAssertTrue(message.referenced_message == nil)
             XCTAssertEqual(message.pinned, false)
-            XCTAssertEqual(message.nonce?.stringValue, "1028029979960541184")
+            XCTAssertEqual(message.nonce?.asString, "1028029979960541184")
             XCTAssertTrue(message.mentions.isEmpty)
             XCTAssertEqual(message.mention_roles, [])
             XCTAssertEqual(message.mention_everyone, false)

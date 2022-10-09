@@ -15,8 +15,8 @@ public struct Guild: Sendable, Codable {
         public var mute: Bool
         public var pending: Bool?
         public var is_pending: Bool?
-        public var flags: IntBitField<User.Flag>? // FIXME not sure about `User.Flag`
-        public var permissions: StringBitField<Channel.Permission>?
+        public var flags: IntBitField<User.Flag>? // Undocumented
+        public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
         
         public func hasRole(withId id: String, guildId: String) -> Bool {
@@ -134,7 +134,7 @@ public struct Guild: Sendable, Codable {
     public var discovery_splash: String?
     public var owner: Bool?
     public var owner_id: String
-    public var permissions: StringBitField<Channel.Permission>?
+    public var permissions: StringBitField<Permission>?
     /// Deprecated
     public var region: String?
     public var afk_channel_id: String?
@@ -145,7 +145,7 @@ public struct Guild: Sendable, Codable {
     public var default_message_notifications: DefaultMessageNotificationLevel
     public var explicit_content_filter: ExplicitContentFilterLevel
     public var roles: [Role]
-    public var emojis: [Emoji]
+    public var emojis: [PartialEmoji]
     public var features: TolerantDecodeArray<Feature>
     public var mfa_level: MFALevel
     public var application_id: String?
@@ -192,6 +192,8 @@ public struct Guild: Sendable, Codable {
 }
 
 extension Guild {
+    /// A partial ``Guild.Member`` object.
+    /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
     public struct PartialMember: Sendable, Codable {
         public var user: User?
         public var nick: String?
@@ -204,8 +206,8 @@ extension Guild {
         public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
-        public var flags: IntBitField<User.Flag>? // FIXME not sure about `User.Flag`
-        public var permissions: StringBitField<Channel.Permission>?
+        public var flags: IntBitField<User.Flag>? // Undocumented
+        public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }
 }
@@ -233,20 +235,20 @@ public struct IntegrationApplication: Sendable, Codable {
     public var bot: User?
     public var primary_sku_id: String?
     public var cover_image: String?
-    public var scopes: TolerantDecodeArray<OAuthScope>?
+    public var scopes: TolerantDecodeArray<OAuth2Scope>?
 }
 
 /// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
 public struct CreateGuildRole: Sendable, Codable {
     public var name: String?
-    public var permissions: StringBitField<Channel.Permission>?
+    public var permissions: StringBitField<Permission>?
     public var color: DiscordColor?
     public var hoist: Bool?
 //    public var icon: ImageData? not supported
     public var unicode_emoji: String?
     public var mentionable: Bool?
     
-    public init(name: String? = nil, permissions: [Channel.Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
+    public init(name: String? = nil, permissions: [Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
         self.name = name
         self.permissions = permissions.map { .init($0) }
         self.color = color

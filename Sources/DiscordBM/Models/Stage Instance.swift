@@ -2,6 +2,7 @@
 /// https://discord.com/developers/docs/resources/stage-instance#stage-instance-object
 public struct StageInstance: Sendable, Codable {
     
+    /// https://discord.com/developers/docs/resources/stage-instance#stage-instance-object-privacy-level
     public enum PrivacyLevel: Int, Sendable, Codable {
         case `public` = 1
         case guildOnly = 2

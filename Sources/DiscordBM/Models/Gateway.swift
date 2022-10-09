@@ -17,6 +17,8 @@ public struct Gateway: Sendable, Codable {
         case heartbeatAccepted = 11
     }
     
+    /// A gateway event.
+    /// https://discord.com/developers/docs/topics/gateway#gateway-events
     public struct Event: Sendable, Codable {
         
         /// This enum is just for swiftly organizing Discord gateway event's `data`.
@@ -432,9 +434,8 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
-        /// FIXME: move under Gateway?
         /// https://discord.com/developers/docs/topics/gateway-events#presence-update-presence-update-event-fields
-        public struct PresenceUpdate: Sendable, Codable {
+        public struct Presence: Sendable, Codable {
             public var since: Int?
             public var activities: [Activity]
             public var status: Status
@@ -453,10 +454,10 @@ public struct Gateway: Sendable, Codable {
         public var compress: Bool?
         public var large_threshold: Int?
         public var shard: IntPair?
-        public var presence: PresenceUpdate?
+        public var presence: Presence?
         public var intents: IntBitField<Intent>
         
-        public init(token: Secret, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: PresenceUpdate? = nil, intents: [Intent]) {
+        public init(token: Secret, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
             self.token = token
             self.compress = compress
             self.large_threshold = large_threshold
@@ -465,7 +466,7 @@ public struct Gateway: Sendable, Codable {
             self.intents = .init(intents)
         }
         
-        public init(token: String, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: PresenceUpdate? = nil, intents: [Intent]) {
+        public init(token: String, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
             self.token = Secret(token)
             self.compress = compress
             self.large_threshold = large_threshold
@@ -522,10 +523,8 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#ready-ready-event-fields
     public struct Ready: Sendable, Codable {
         
-        /// FIXME
-        public struct AudioContextSettings: Sendable, Codable {
-            
-        }
+        /// Undocumented
+        public struct AudioContextSettings: Sendable, Codable { }
         
         public var v: Int
         public var user: User
@@ -535,10 +534,10 @@ public struct Gateway: Sendable, Codable {
         public var application: PartialApplication
         public var presences: [PresenceUpdate]
         public var geo_ordered_rtc_regions: [String]
-        public var guild_join_requests: [String] // FIXME
+        public var guild_join_requests: [String] // Undocumented
         public var private_channels: [Channel]
-        public var user_settings: [String: String] // FIXME
-        public var relationships: [String] // FIXME
+        public var user_settings: [String: String] // Undocumented
+        public var relationships: [String] // Undocumented
         public var session_type: String?
         public var auth_session_id_hash: String?
         public var resume_gateway_url: String?
@@ -575,7 +574,7 @@ public struct Gateway: Sendable, Codable {
         public var member: ThreadMember?
         public var default_auto_archive_duration: Int?
         public var default_reaction_emoji: String?
-        public var permissions: StringBitField<Channel.Permission>?
+        public var permissions: StringBitField<Permission>?
         public var flags: IntBitField<Channel.Flag>?
         public var newly_created: Bool?
         public var thread_member: ThreadMember?
@@ -669,7 +668,7 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update-guild-emojis-update-event-fields
     public struct GuildEmojisUpdate: Sendable, Codable {
         public var guild_id: String
-        public var emojis: [Emoji]
+        public var emojis: [PartialEmoji]
         public var hashes: Hashes?
         public var guild_hashes: Hashes?
     }
@@ -703,7 +702,7 @@ public struct Gateway: Sendable, Codable {
         public var pending: Bool?
         public var is_pending: Bool?
         public var flags: IntBitField<User.Flag> // FIXME not sure about `User.Flag`
-        public var permissions: StringBitField<Channel.Permission>?
+        public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }
     
@@ -761,7 +760,7 @@ public struct Gateway: Sendable, Codable {
         }
     }
     
-    /// FIXME: undocumented?
+    /// Undocumented
     public struct GuildJoinRequestUpdate: Sendable, Codable {
         
         public struct Request: Sendable, Codable {
@@ -805,7 +804,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String
     }
     
-    /// FIXME: undocumented?
+    /// Undocumented
     public struct GuildJoinRequestDelete: Sendable, Codable {
         public var id: String
         public var guild_id: String
@@ -828,7 +827,8 @@ public struct Gateway: Sendable, Codable {
         public var hashes: Hashes?
     }
     
-    /// Used for guild-scheduled-event-user add and remove events.
+    /// Not the same as what Discord calls `Guild Scheduled Event User`.
+    /// This is used for guild-scheduled-event-user add and remove events.
     /// https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-add-guild-scheduled-event-user-add-event-fields
     public struct GuildScheduledEventUser: Sendable, Codable {
         public var guild_scheduled_event_id: String
@@ -836,7 +836,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String
     }
     
-    /// FIXME: undocumented?
+    /// Undocumented
     public struct GuildApplicationCommandIndexUpdate: Sendable, Codable {
         public var hashes: Hashes
         public var guild_hashes: Hashes
@@ -880,7 +880,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
-        public var scopes: TolerantDecodeArray<OAuthScope>?
+        public var scopes: TolerantDecodeArray<OAuth2Scope>?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#integration-delete-integration-delete-event-fields
@@ -956,7 +956,7 @@ public struct Gateway: Sendable, Codable {
         public var referenced_message: DereferenceBox<MessageCreate>?
         public var interaction: MessageInteraction?
         public var thread: Channel?
-        public var components: [ActionRow]?
+        public var components: [Interaction.ActionRow]?
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
@@ -983,7 +983,7 @@ public struct Gateway: Sendable, Codable {
         public var message_id: String
         public var guild_id: String?
         public var member: Guild.Member?
-        public var emoji: Emoji
+        public var emoji: PartialEmoji
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove
@@ -992,7 +992,7 @@ public struct Gateway: Sendable, Codable {
         public var channel_id: String
         public var message_id: String
         public var guild_id: String?
-        public var emoji: Emoji
+        public var emoji: PartialEmoji
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-all
@@ -1007,7 +1007,7 @@ public struct Gateway: Sendable, Codable {
         public var channel_id: String
         public var guild_id: String?
         public var message_id: String
-        public var emoji: Emoji
+        public var emoji: PartialEmoji
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#client-status-object
@@ -1017,15 +1017,15 @@ public struct Gateway: Sendable, Codable {
         public var web: String?
     }
     
-    /// FIXME: undocumented?
+    /// Undocumented
     public struct Game: Sendable, Codable {
-        public var type: Int //FIXME: Make enum
+        public var type: Int // Undocumented
         public var state: String?
         public var name: String
         public var created_at: TolerantDecodeDate
         public var id: String
         public var session_id: String?
-        public var emoji: Emoji?
+        public var emoji: PartialEmoji?
         public var platform: String?
         public var timestamps: [DiscordTimestamp]?
         public var application_id: String?
@@ -1232,13 +1232,13 @@ public struct Gateway: Sendable, Codable {
     public struct ApplicationCommandPermissionsUpdate: Sendable, Codable {
         
         /// Undocumented
-        public struct Permission: Sendable, Codable {
-            public var type: Channel.Permission // FIXME: not sure
+        public struct UpdatePermission: Sendable, Codable {
+            public var type: Permission // Undocumented
             public var permission: Bool
             public var id: String
         }
         
-        public var permissions: [Permission]
+        public var permissions: [UpdatePermission]
         public var id: String
         public var guild_id: String
         public var application_id: String
@@ -1344,6 +1344,7 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway#get-gateway-bot-json-response
     public struct BotConnectionInfo: Sendable, Codable {
         
+        /// https://discord.com/developers/docs/topics/gateway#session-start-limit-object-session-start-limit-structure
         public struct SessionStartLimit: Sendable, Codable {
             public var total: Int
             public var remaining: Int
