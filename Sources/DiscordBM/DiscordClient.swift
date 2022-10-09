@@ -287,7 +287,7 @@ public extension DiscordClient {
     
     func createMessage(
         channelId: String,
-        payload: Channel.CreateMessage
+        payload: DiscordChannel.CreateMessage
     ) async throws -> DiscordClientResponse<Gateway.MessageCreate> {
         let endpoint = Endpoint.postCreateMessage(channelId: channelId)
         return try await self.send(to: endpoint, queries: [], payload: payload)
@@ -296,7 +296,7 @@ public extension DiscordClient {
     func editMessage(
         channelId: String,
         messageId: String,
-        payload: Channel.EditMessage
+        payload: DiscordChannel.EditMessage
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.patchEditMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint, queries: [], payload: payload)
@@ -341,7 +341,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [])
     }
     
-    func getChannel(id: String) async throws -> DiscordClientResponse<Channel> {
+    func getChannel(id: String) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = Endpoint.getChannel(id: id)
         return try await self.send(to: endpoint, queries: [])
     }

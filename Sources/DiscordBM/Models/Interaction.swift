@@ -20,8 +20,8 @@ public struct Interaction: Sendable, Codable {
             public var members: [String: Guild.PartialMember]?
             public var roles: [String: Role]?
             public var channels: [String: PartialChannel]?
-            public var messages: [String: Channel.PartialMessage]?
-            public var attachments: [String: Channel.Message.Attachment]?
+            public var messages: [String: DiscordChannel.PartialMessage]?
+            public var attachments: [String: DiscordChannel.Message.Attachment]?
         }
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
@@ -68,7 +68,7 @@ public struct Interaction: Sendable, Codable {
     public var user: User?
     public var token: String
     public var version: Int
-    public var message: Channel.Message?
+    public var message: DiscordChannel.Message?
     public var locale: DiscordLocale?
     public var guild_locale: DiscordLocale?
     public var app_permissions: StringBitField<Permission>?
@@ -94,12 +94,12 @@ public struct InteractionResponse: Sendable, Codable {
         public var tts: Bool?
         public var content: String?
         public var embeds: [Embed]?
-        public var allowedMentions: Channel.AllowedMentions?
-        public var flags: IntBitField<Channel.Message.Flag>?
+        public var allowedMentions: DiscordChannel.AllowedMentions?
+        public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var components: [Interaction.ActionRow]?
-        public var attachments: [Channel.Message.Attachment]?
+        public var attachments: [DiscordChannel.Message.Attachment]?
         
-        public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: Channel.AllowedMentions? = nil, flags: [Channel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [Channel.Message.Attachment]? = nil) {
+        public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: DiscordChannel.AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [DiscordChannel.Message.Attachment]? = nil) {
             self.tts = tts
             self.content = content
             self.embeds = embeds

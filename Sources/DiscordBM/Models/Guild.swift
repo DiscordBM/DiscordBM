@@ -158,8 +158,8 @@ public struct Guild: Sendable, Codable {
     public var member_count: Int?
     public var voice_states: [PartialVoiceState]?
     public var members: [Member]?
-    public var channels: [Channel]?
-    public var threads: [Channel]?
+    public var channels: [DiscordChannel]?
+    public var threads: [DiscordChannel]?
     public var presences: [Gateway.PartialPresenceUpdate]?
     public var max_presences: Int?
     public var max_members: Int?

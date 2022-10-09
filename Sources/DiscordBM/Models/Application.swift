@@ -125,14 +125,14 @@ public struct SlashCommand: Sendable, Codable {
         public var required: Bool?
         public var choices: [Choice]?
         public var options: [Option]?
-        public var channel_types: [Channel.Kind]?
+        public var channel_types: [DiscordChannel.Kind]?
         public var min_value: IntDouble?
         public var max_value: IntDouble?
         public var autocomplete: Bool?
         /// Available after decode when user has inputted a value for the option.
         public var value: StringIntDoubleBool?
         
-        public init(type: Kind, name: String, name_localizations: [String : String]? = nil, description: String, description_localizations: [String : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [Option]? = nil, channel_types: [Channel.Kind]? = nil, min_value: IntDouble? = nil, max_value: IntDouble? = nil, autocomplete: Bool? = nil) {
+        public init(type: Kind, name: String, name_localizations: [String : String]? = nil, description: String, description_localizations: [String : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [Option]? = nil, channel_types: [DiscordChannel.Kind]? = nil, min_value: IntDouble? = nil, max_value: IntDouble? = nil, autocomplete: Bool? = nil) {
             self.type = type
             self.name = name
             self.name_localizations = name_localizations

@@ -36,12 +36,12 @@ public struct Gateway: Sendable, Codable {
             case resumed
             /// https://discord.com/developers/docs/topics/gateway-events#invalid-session
             case invalidSession(canResume: Bool)
-            case channelCreate(Channel)
-            case channelUpdate(Channel)
-            case channelDelete(Channel)
+            case channelCreate(DiscordChannel)
+            case channelUpdate(DiscordChannel)
+            case channelDelete(DiscordChannel)
             case channelPinsUpdate(ChannelPinsUpdate)
             case threadCreate(ThreadCreate)
-            case threadUpdate(Channel)
+            case threadUpdate(DiscordChannel)
             case threadDelete(ThreadDelete)
             case threadSyncList(ThreadListSync)
             case threadMemberUpdate(ThreadMemberUpdate)
@@ -77,7 +77,7 @@ public struct Gateway: Sendable, Codable {
             case inviteCreate(InviteCreate)
             case inviteDelete(InviteDelete)
             case messageCreate(MessageCreate)
-            case messageUpdate(Channel.PartialMessage)
+            case messageUpdate(DiscordChannel.PartialMessage)
             case messageDelete(MessageDelete)
             case messageDeleteBulk(MessageDeleteBulk)
             case messageReactionAdd(MessageReactionAdd)
@@ -535,7 +535,7 @@ public struct Gateway: Sendable, Codable {
         public var presences: [PresenceUpdate]
         public var geo_ordered_rtc_regions: [String]
         public var guild_join_requests: [String] // Undocumented
-        public var private_channels: [Channel]
+        public var private_channels: [DiscordChannel]
         public var user_settings: [String: String] // Undocumented
         public var relationships: [String] // Undocumented
         public var session_type: String?
@@ -548,10 +548,10 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#thread-create
     public struct ThreadCreate: Sendable, Codable {
         public var id: String
-        public var type: Channel.Kind
+        public var type: DiscordChannel.Kind
         public var guild_id: String?
         public var position: Int?
-        public var permission_overwrites: [Channel.Overwrite]?
+        public var permission_overwrites: [DiscordChannel.Overwrite]?
         public var name: String?
         public var topic: String?
         public var nsfw: Bool?
@@ -575,7 +575,7 @@ public struct Gateway: Sendable, Codable {
         public var default_auto_archive_duration: Int?
         public var default_reaction_emoji: String?
         public var permissions: StringBitField<Permission>?
-        public var flags: IntBitField<Channel.Flag>?
+        public var flags: IntBitField<DiscordChannel.Flag>?
         public var newly_created: Bool?
         public var thread_member: ThreadMember?
         public var available_tags: [String]?
@@ -589,7 +589,7 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#thread-delete
     public struct ThreadDelete: Sendable, Codable {
         public var id: String
-        public var type: Channel.Kind
+        public var type: DiscordChannel.Kind
         public var guild_id: String?
         public var parent_id: String?
     }
@@ -598,7 +598,7 @@ public struct Gateway: Sendable, Codable {
     public struct ThreadListSync: Sendable, Codable {
         public var guild_id: String
         public var channel_ids: [String]?
-        public var threads: [Channel]
+        public var threads: [DiscordChannel]
         public var members: [ThreadMember]
     }
     
@@ -940,22 +940,22 @@ public struct Gateway: Sendable, Codable {
         public var mention_everyone: Bool
         public var mentions: [User]
         public var mention_roles: [String]
-        public var mention_channels: [Channel.Message.ChannelMention]?
-        public var attachments: [Channel.Message.Attachment]
+        public var mention_channels: [DiscordChannel.Message.ChannelMention]?
+        public var attachments: [DiscordChannel.Message.Attachment]
         public var embeds: [Embed]
-        public var reactions: [Channel.Message.Reaction]?
+        public var reactions: [DiscordChannel.Message.Reaction]?
         public var nonce: StringOrInt?
         public var pinned: Bool
         public var webhook_id: String?
-        public var type: Channel.Message.Kind
+        public var type: DiscordChannel.Message.Kind
         public var activity: Activity?
         public var application: PartialApplication?
         public var application_id: String?
-        public var message_reference: Channel.Message.MessageReference?
-        public var flags: IntBitField<Channel.Message.Flag>?
+        public var message_reference: DiscordChannel.Message.MessageReference?
+        public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var referenced_message: DereferenceBox<MessageCreate>?
         public var interaction: MessageInteraction?
-        public var thread: Channel?
+        public var thread: DiscordChannel?
         public var components: [Interaction.ActionRow]?
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?

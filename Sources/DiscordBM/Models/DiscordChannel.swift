@@ -1,7 +1,7 @@
 import Foundation
 
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
-public struct Channel: Sendable, Codable {
+public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
     public enum Kind: Int, Sendable, Codable {
@@ -84,7 +84,7 @@ public struct Channel: Sendable, Codable {
     public var hashes: Hashes?
 }
 
-extension Channel {
+extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#message-object
     public struct Message: Sendable, Codable {
         
@@ -149,7 +149,7 @@ extension Channel {
         public struct ChannelMention: Sendable, Codable {
             public var id: String
             public var guild_id: String
-            public var type: Channel.Kind
+            public var type: DiscordChannel.Kind
             public var name: String
         }
         
@@ -216,7 +216,7 @@ extension Channel {
         public var flags: IntBitField<Flag>?
         public var referenced_message: DereferenceBox<Message>?
         public var interaction: MessageInteraction?
-        public var thread: Channel?
+        public var thread: DiscordChannel?
         public var components: [Interaction.ActionRow]?
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
@@ -224,7 +224,7 @@ extension Channel {
     }
 }
 
-extension Channel {
+extension DiscordChannel {
     /// Partial ``Channel.Message`` object.
     public struct PartialMessage: Sendable, Codable {
         public var id: String
@@ -236,22 +236,22 @@ extension Channel {
         public var tts: Bool?
         public var mention_everyone: Bool?
         public var mention_roles: [String]?
-        public var mention_channels: [Channel.Message.ChannelMention]?
-        public var attachments: [Channel.Message.Attachment]?
+        public var mention_channels: [DiscordChannel.Message.ChannelMention]?
+        public var attachments: [DiscordChannel.Message.Attachment]?
         public var embeds: [Embed]?
-        public var reactions: [Channel.Message.Reaction]?
+        public var reactions: [DiscordChannel.Message.Reaction]?
         public var nonce: StringOrInt?
         public var pinned: Bool?
         public var webhook_id: String?
-        public var type: Channel.Message.Kind?
-        public var activity: Channel.Message.Activity?
+        public var type: DiscordChannel.Message.Kind?
+        public var activity: DiscordChannel.Message.Activity?
         public var application: PartialApplication?
         public var application_id: String?
-        public var message_reference: Channel.Message.MessageReference?
-        public var flags: IntBitField<Channel.Message.Flag>?
+        public var message_reference: DiscordChannel.Message.MessageReference?
+        public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var referenced_message: DereferenceBox<PartialMessage>?
         public var interaction: MessageInteraction?
-        public var thread: Channel?
+        public var thread: DiscordChannel?
         public var components: [Interaction.ActionRow]?
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
@@ -285,14 +285,14 @@ public struct ThreadMember: Sendable, Codable {
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
 public struct PartialChannel: Sendable, Codable {
     public var id: String
-    public var type: Channel.Kind
+    public var type: DiscordChannel.Kind
     public var name: String?
     public var permissions: StringBitField<Permission>?
     public var parent_id: String?
     public var thread_metadata: ThreadMetadata?
 }
 
-extension Channel {
+extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
     public struct AllowedMentions: Sendable, Codable {
         
@@ -317,22 +317,22 @@ extension Channel {
     }
 }
 
-extension Channel {
+extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#create-message-jsonform-params
     public struct CreateMessage: Sendable, Codable {
         public var content: String?
         public var tts: Bool?
         public var embeds: [Embed]?
         public var allowed_mentions: AllowedMentions?
-        public var message_reference: Channel.Message.MessageReference?
+        public var message_reference: DiscordChannel.Message.MessageReference?
         public var components: [Interaction.ActionRow]?
         public var sticker_ids: [String]?
         public var files: [String]?
         public var payload_json: String?
         public var attachments: [Message.Attachment]?
-        public var flags: IntBitField<Channel.Message.Flag>?
+        public var flags: IntBitField<DiscordChannel.Message.Flag>?
         
-        public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: Channel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Message.Attachment]? = nil, flags: [Channel.Message.Flag]? = nil) {
+        public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Message.Attachment]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
             self.content = content
             self.tts = tts
             self.embeds = embeds
@@ -348,20 +348,20 @@ extension Channel {
     }
 }
 
-extension Channel {
+extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#edit-message-jsonform-params
     public struct EditMessage: Sendable, Codable {
         
         public var content: String?
         public var embeds: [Embed]?
-        public var flags: IntBitField<Channel.Message.Flag>?
+        public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var allowed_mentions: AllowedMentions?
         public var components: [Interaction.ActionRow]?
         public var files: [String]?
         public var payload_json: String?
         public var attachments: [Message.Attachment]?
         
-        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [Channel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Message.Attachment]? = nil) {
+        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [DiscordChannel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Message.Attachment]? = nil) {
             self.content = content
             self.embeds = embeds
             self.flags = flags.map { .init($0) }
