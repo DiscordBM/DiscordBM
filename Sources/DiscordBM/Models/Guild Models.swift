@@ -125,6 +125,7 @@ public struct Guild: Sendable, Codable {
     public var preferred_locale: DiscordLocale
     public var public_updates_channel_id: String?
     public var max_video_channel_users: Int?
+    public var max_stage_video_channel_users: Int?
     public var approximate_member_count: Int?
     public var approximate_presence_count: Int?
     public var welcome_screen: [WelcomeScreen]?
@@ -139,9 +140,9 @@ public struct Guild: Sendable, Codable {
     public var nsfw: Bool
     public var application_command_counts: [String: Int]?
     public var embedded_activities: [Gateway.Activity]?
+    public var version: Int?
     public var guild_id: String?
     public var hashes: Hashes?
-    public var max_stage_video_channel_users: Int?
 }
 
 public struct CreateGuildRole: Sendable, Codable {
