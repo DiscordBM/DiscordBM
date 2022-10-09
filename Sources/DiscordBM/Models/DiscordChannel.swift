@@ -189,6 +189,28 @@ extension DiscordChannel {
             public var party_id: String?
         }
         
+        /// A ``User`` with an extra `member` field.
+        /// https://discord.com/developers/docs/resources/user#user-object-user-structure
+        public struct MentionUser: Sendable, Codable {
+            public var id: String
+            public var username: String
+            public var discriminator: String
+            public var avatar: String?
+            public var bot: Bool?
+            public var system: Bool?
+            public var mfa_enabled: Bool?
+            public var banner: String?
+            public var accent_color: DiscordColor?
+            public var locale: DiscordLocale?
+            public var verified: Bool?
+            public var email: String?
+            public var flags: IntBitField<User.Flag>?
+            public var premium_type: User.PremiumKind?
+            public var public_flags: IntBitField<Flag>?
+            public var avatar_decoration: String?
+            public var member: Guild.Member?
+        }
+        
         public var id: String
         public var channel_id: String
         public var guild_id: String?
@@ -199,7 +221,7 @@ extension DiscordChannel {
         public var edited_timestamp: DiscordTimestamp?
         public var tts: Bool
         public var mention_everyone: Bool
-        public var mentions: [User]
+        public var mentions: [MentionUser]
         public var mention_roles: [String]
         public var mention_channels: [ChannelMention]?
         public var attachments: [Attachment]
@@ -235,6 +257,7 @@ extension DiscordChannel {
         public var edited_timestamp: DiscordTimestamp?
         public var tts: Bool?
         public var mention_everyone: Bool?
+        public var mentions: [Message.MentionUser]?
         public var mention_roles: [String]?
         public var mention_channels: [DiscordChannel.Message.ChannelMention]?
         public var attachments: [DiscordChannel.Message.Attachment]?
@@ -256,6 +279,8 @@ extension DiscordChannel {
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
+        public var member: Guild.Member?
+        public var guild_id: String?
     }
 }
 
