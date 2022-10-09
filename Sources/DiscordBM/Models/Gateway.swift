@@ -909,7 +909,7 @@ public struct Gateway: Sendable, Codable {
         public var inviter: User?
         public var max_age: Int
         public var max_uses: Int
-        public var target_type: TargetKind
+        public var target_type: TargetKind?
         public var target_user: User?
         public var target_application: PartialApplication?
         public var temporary: Bool
