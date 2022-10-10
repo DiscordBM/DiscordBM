@@ -304,14 +304,6 @@ extension BitField {
             bitValue -= 1 << intValue
         }
         
-        if !unknownValues.isEmpty {
-            bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
-                "unknownValues": "\(unknownValues)",
-                "values": "\(values.map(\.rawValue))",
-                "rawType": "\(Swift._typeName(R.self))"
-            ])
-        }
-        
         self.init(
             Set(values),
             unknownValues: unknownValues
@@ -341,6 +333,14 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         let container = try decoder.singleValueContainer()
         let int = try container.decode(Int.self)
         self.init(bitValue: int)
+        if !self.unknownValues.isEmpty {
+            bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
+                "unknownValues": "\(unknownValues)",
+                "values": "\(values.map(\.rawValue))",
+                "rawType": "\(Swift._typeName(R.self))",
+                "codingPath": "\(decoder.codingPath)"
+            ])
+        }
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -371,6 +371,14 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
             throw BitFieldError.notRepresentingInt
         }
         self.init(bitValue: int)
+        if !self.unknownValues.isEmpty {
+            bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
+                "unknownValues": "\(unknownValues)",
+                "values": "\(values.map(\.rawValue))",
+                "rawType": "\(Swift._typeName(R.self))",
+                "codingPath": "\(decoder.codingPath)"
+            ])
+        }
     }
     
     public func encode(to encoder: Encoder) throws {
