@@ -352,7 +352,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
 
 extension IntBitField: Sendable where R: Sendable { }
 
-/// A bit-field that decode/encodes itself as an string.
+/// A bit-field that decode/encodes itself as a string.
 public struct StringBitField<R>: BitField, Codable
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
