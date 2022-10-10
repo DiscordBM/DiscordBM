@@ -5,7 +5,7 @@ public struct PartialEmoji: Sendable, Codable {
     public var id: String?
     public var name: String?
     public var roles: [String]?
-    public var user: User?
+    public var user: DiscordUser?
     public var require_colons: Bool?
     public var managed: Bool?
     public var animated: Bool?
@@ -14,7 +14,7 @@ public struct PartialEmoji: Sendable, Codable {
     public var guild_hashes: Hashes?
     public var hashes: Hashes?
     
-    public init(id: String? = nil, name: String? = nil, roles: [String]? = nil, user: User? = nil, require_colons: Bool? = nil, managed: Bool? = nil, animated: Bool? = nil, available: Bool? = nil, version: Int? = nil, guild_hashes: Hashes? = nil, hashes: Hashes? = nil) {
+    public init(id: String? = nil, name: String? = nil, roles: [String]? = nil, user: DiscordUser? = nil, require_colons: Bool? = nil, managed: Bool? = nil, animated: Bool? = nil, available: Bool? = nil, version: Int? = nil, guild_hashes: Hashes? = nil, hashes: Hashes? = nil) {
         self.id = id
         self.name = name
         self.roles = roles

@@ -40,7 +40,7 @@ public struct GuildScheduledEvent: Sendable, Codable {
     public var entity_type: EntityKind
     public var entity_id: String?
     public var entity_metadata: EntityMetadata?
-    public var creator: User?
+    public var creator: DiscordUser?
     public var user_count: Int?
     public var image: String?
     public var sku_ids: [String]?

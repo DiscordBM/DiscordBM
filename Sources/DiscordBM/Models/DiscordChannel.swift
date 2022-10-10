@@ -58,7 +58,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var bitrate: Int?
     public var user_limit: Int?
     public var rate_limit_per_user: Int?
-    public var recipients: [User]?
+    public var recipients: [DiscordUser]?
     public var icon: String?
     public var owner_id: String?
     public var application_id: String?
@@ -204,9 +204,9 @@ extension DiscordChannel {
             public var locale: DiscordLocale?
             public var verified: Bool?
             public var email: String?
-            public var flags: IntBitField<User.Flag>?
-            public var premium_type: User.PremiumKind?
-            public var public_flags: IntBitField<Flag>?
+            public var flags: IntBitField<DiscordUser.Flag>?
+            public var premium_type: DiscordUser.PremiumKind?
+            public var public_flags: IntBitField<DiscordUser.Flag>?
             public var avatar_decoration: String?
             public var member: Guild.Member?
         }

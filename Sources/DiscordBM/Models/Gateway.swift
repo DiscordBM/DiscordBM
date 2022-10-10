@@ -89,7 +89,7 @@ public struct Gateway: Sendable, Codable {
             case stageInstanceDelete(StageInstance)
             case stageInstanceUpdate(StageInstance)
             case typingStart(TypingStart)
-            case userUpdate(User)
+            case userUpdate(DiscordUser)
             case voiceStateUpdate(VoiceState)
             case voiceServerUpdate(VoiceServerUpdate)
             case webhooksUpdate(WebhooksUpdate)
@@ -144,25 +144,10 @@ public struct Gateway: Sendable, Codable {
                     ))
                 }
                 self.data = nil
-            case .identify:
+            case .identify, .presenceUpdate, .voiceStateUpdate, .resume, .requestGuildMembers:
                 throw DecodingError.dataCorrupted(.init(
                     codingPath: container.codingPath,
-                    debugDescription: "`identify` opcode is supposed to never be received."
-                ))
-            case .presenceUpdate:
-                throw DecodingError.dataCorrupted(.init(
-                    codingPath: container.codingPath,
-                    debugDescription: "`presenceUpdate` opcode is supposed to never be received."
-                ))
-            case .voiceStateUpdate:
-                throw DecodingError.dataCorrupted(.init(
-                    codingPath: container.codingPath,
-                    debugDescription: "`voiceStateUpdate` opcode is supposed to never be received."
-                ))
-            case .resume:
-                throw DecodingError.dataCorrupted(.init(
-                    codingPath: container.codingPath,
-                    debugDescription: "`resume` opcode is supposed to never be received."
+                    debugDescription: "'\(opcode)' opcode is supposed to never be received."
                 ))
             case .reconnect:
                 guard try container.decodeNil(forKey: .data) else {
@@ -172,11 +157,6 @@ public struct Gateway: Sendable, Codable {
                     ))
                 }
                 self.data = nil
-            case .requestGuildMembers:
-                throw DecodingError.dataCorrupted(.init(
-                    codingPath: container.codingPath,
-                    debugDescription: "`requestGuildMembers` opcode is supposed to never be received."
-                ))
             case .invalidSession:
                 self.data = try .invalidSession(canResume: decodeData())
             case .hello:
@@ -527,7 +507,7 @@ public struct Gateway: Sendable, Codable {
         public struct AudioContextSettings: Sendable, Codable { }
         
         public var v: Int
-        public var user: User
+        public var user: DiscordUser
         public var guilds: [UnavailableGuild]
         public var session_id: String
         public var shard: IntPair?
@@ -559,7 +539,7 @@ public struct Gateway: Sendable, Codable {
         public var bitrate: Int?
         public var user_limit: Int?
         public var rate_limit_per_user: Int?
-        public var recipients: [User]?
+        public var recipients: [DiscordUser]?
         public var icon: String?
         public var owner_id: String?
         public var application_id: String?
@@ -662,7 +642,7 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#guild-ban-add-guild-ban-add-event-fields
     public struct GuildBan: Sendable, Codable {
         public var guild_id: String
-        public var user: User
+        public var user: DiscordUser
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update-guild-emojis-update-event-fields
@@ -692,7 +672,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String
         public var roles: [String]
         public var hoisted_role: String?
-        public var user: User
+        public var user: DiscordUser
         public var nick: String?
         public var avatar: String?
         public var joined_at: DiscordTimestamp
@@ -701,7 +681,7 @@ public struct Gateway: Sendable, Codable {
         public var mute: Bool
         public var pending: Bool?
         public var is_pending: Bool?
-        public var flags: IntBitField<User.Flag> // FIXME not sure about `User.Flag`
+        public var flags: IntBitField<DiscordUser.Flag> // FIXME not sure about `User.Flag`
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }
@@ -709,7 +689,7 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#guild-member-remove-guild-member-remove-event-fields
     public struct GuildMemberRemove: Sendable, Codable {
         public var guild_id: String
-        public var user: User
+        public var user: DiscordUser
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#guild-member-update-guild-member-update-event-fields
@@ -717,14 +697,14 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String
         public var roles: [String]
         public var hoisted_role: String?
-        public var user: User
+        public var user: DiscordUser
         public var nick: String?
         public var avatar: String?
         public var joined_at: DiscordTimestamp?
         public var premium_since: DiscordTimestamp?
         public var deaf: Bool?
         public var mute: Bool?
-        public var flags: IntBitField<User.Flag>? // FIXME not sure about `User.Flag`
+        public var flags: IntBitField<DiscordUser.Flag>? // FIXME not sure about `User.Flag`
         public var pending: Bool?
         public var is_pending: Bool?
         public var communication_disabled_until: DiscordTimestamp?
@@ -783,7 +763,7 @@ public struct Gateway: Sendable, Codable {
             }
             
             public var user_id: String
-            public var user: User
+            public var user: DiscordUser
             public var rejection_reason: String?
             public var last_seen: DiscordTimestamp
             public var created_at: DiscordTimestamp
@@ -791,7 +771,7 @@ public struct Gateway: Sendable, Codable {
             public var guild_id: String
             public var form_responses: [FormResponse]
             public var application_status: Status
-            public var actioned_by_user: User
+            public var actioned_by_user: DiscordUser
             public var actioned_at: String /// Seems to be a Snowflake ?!
         }
         
@@ -871,7 +851,7 @@ public struct Gateway: Sendable, Codable {
         public var enable_emoticons: Bool?
         public var expire_behavior: ExpireBehavior?
         public var expire_grace_period: Int?
-        public var user: User?
+        public var user: DiscordUser?
         public var account: IntegrationAccount
         public var synced_at: DiscordTimestamp?
         public var subscriber_count: Int?
@@ -906,11 +886,11 @@ public struct Gateway: Sendable, Codable {
         public var code: String
         public var created_at: DiscordTimestamp
         public var guild_id: String?
-        public var inviter: User?
+        public var inviter: DiscordUser?
         public var max_age: Int
         public var max_uses: Int
         public var target_type: TargetKind?
-        public var target_user: User?
+        public var target_user: DiscordUser?
         public var target_application: PartialApplication?
         public var temporary: Bool
         public var uses: Int

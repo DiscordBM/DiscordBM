@@ -4,7 +4,7 @@ public struct Guild: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
     public struct Member: Sendable, Codable {
-        public var user: User?
+        public var user: DiscordUser?
         public var nick: String?
         public var avatar: String?
         public var roles: [String]
@@ -15,7 +15,7 @@ public struct Guild: Sendable, Codable {
         public var mute: Bool
         public var pending: Bool?
         public var is_pending: Bool?
-        public var flags: IntBitField<User.Flag>? // Undocumented
+        public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
         
@@ -195,7 +195,7 @@ extension Guild {
     /// A partial ``Guild.Member`` object.
     /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
     public struct PartialMember: Sendable, Codable {
-        public var user: User?
+        public var user: DiscordUser?
         public var nick: String?
         public var avatar: String?
         public var roles: [String]?
@@ -206,7 +206,7 @@ extension Guild {
         public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
-        public var flags: IntBitField<User.Flag>? // Undocumented
+        public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }
@@ -232,7 +232,7 @@ public struct IntegrationApplication: Sendable, Codable {
     public var description: String
     public var summary: String?
     public var type: Int?
-    public var bot: User?
+    public var bot: DiscordUser?
     public var primary_sku_id: String?
     public var cover_image: String?
     public var scopes: TolerantDecodeArray<OAuth2Scope>?

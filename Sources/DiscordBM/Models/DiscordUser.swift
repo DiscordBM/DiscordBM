@@ -1,6 +1,6 @@
 
 /// https://discord.com/developers/docs/resources/user#user-object-user-structure
-public struct User: Sendable, Codable {
+public struct DiscordUser: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/user#user-object-premium-types
     public enum PremiumKind: Int, Sendable, Codable {
@@ -61,8 +61,8 @@ public struct PartialUser: Sendable, Codable {
     public var locale: DiscordLocale?
     public var verified: Bool?
     public var email: String?
-    public var flags: IntBitField<User.Flag>?
-    public var premium_type: User.PremiumKind?
-    public var public_flags: IntBitField<User.Flag>?
+    public var flags: IntBitField<DiscordUser.Flag>?
+    public var premium_type: DiscordUser.PremiumKind?
+    public var public_flags: IntBitField<DiscordUser.Flag>?
     public var avatar_decoration: String?
 }

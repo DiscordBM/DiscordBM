@@ -16,7 +16,7 @@ public struct Interaction: Sendable, Codable {
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
         public struct ResolvedData: Sendable, Codable {
-            public var users: [String: User]?
+            public var users: [String: DiscordUser]?
             public var members: [String: Guild.PartialMember]?
             public var roles: [String: Role]?
             public var channels: [String: PartialChannel]?
@@ -65,7 +65,7 @@ public struct Interaction: Sendable, Codable {
     public var guild_id: String?
     public var channel_id: String?
     public var member: Guild.Member?
-    public var user: User?
+    public var user: DiscordUser?
     public var token: String
     public var version: Int
     public var message: DiscordChannel.Message?
@@ -124,7 +124,7 @@ public struct MessageInteraction: Sendable, Codable {
     public var id: String
     public var type: Interaction.Kind
     public var name: String
-    public var user: User
+    public var user: DiscordUser
     public var member: Guild.PartialMember?
 }
 
