@@ -420,12 +420,16 @@ extension BotGatewayManager {
     }
     
     private func setupOnClose(forConnectionWithId connectionId: UInt) {
-        self.ws?.onClose.whenComplete { [weak self] _ in
+        guard let ws = self.ws else {
+            logger.error("Cannot setup websocket on-close because there are no active websockets. This is an issue in the library, please report: https://github.com/MahdiBM/DiscordBM/issues")
+            return
+        }
+        ws.onClose.whenComplete { [weak self] _ in
             guard let `self` = self else { return }
             self.logger.debug("Received connection close notification for a web-socket")
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             Task {
-                let (code, codeDesc) = await self.getCloseCodeAndDescription()
+                let (code, codeDesc) = await self.getCloseCodeAndDescription(of: ws)
                 self.logger.log(
                     /// If its `nil` or `.goingAway`, then it's likely just a resume notice.
                     /// Otherwise it might be an error.
@@ -449,8 +453,8 @@ extension BotGatewayManager {
         }
     }
     
-    private func getCloseCodeAndDescription() -> (WebSocketErrorCode?, String) {
-        let code = self.ws?.closeCode
+    private func getCloseCodeAndDescription(of ws: WebSocket?) -> (WebSocketErrorCode?, String) {
+        let code = ws?.closeCode
         let description: String
         switch code {
         case let .unknown(codeNumber):
