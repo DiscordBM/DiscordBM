@@ -421,7 +421,7 @@ extension BotGatewayManager {
     
     private func setupOnClose(forConnectionWithId connectionId: UInt) {
         guard let ws = self.ws else {
-            logger.error("Cannot setup websocket on-close because there are no active websockets. This is an issue in the library, please report: https://github.com/MahdiBM/DiscordBM/issues")
+            logger.error("Cannot setup web-socket on-close because there are no active web-sockets. This is an issue in the library, please report: https://github.com/MahdiBM/DiscordBM/issues")
             return
         }
         ws.onClose.whenComplete { [weak self] _ in
@@ -476,8 +476,7 @@ extension BotGatewayManager {
     }
     
     private nonisolated func canTryReconnect(ws: WebSocket) -> Bool {
-        guard let code = ws.closeCode else { return true }
-        switch code {
+        switch ws.closeCode {
         case let .unknown(codeNumber):
             guard let discordCode = Gateway.CloseCode(rawValue: codeNumber) else { return true }
             return discordCode.canTryReconnect
@@ -602,6 +601,7 @@ extension BotGatewayManager {
     /// Increases `connectionTryCount`.
     private func canTryToConnectIn() -> TimeAmount? {
         let tryCount = self.connectionTryCount
+        self.connectionTryCount += 1
         let lastIdentify = self.lastIdentifyDate.timeIntervalSince1970
         let now = Date().timeIntervalSince1970
         if tryCount == 0 {
@@ -621,7 +621,6 @@ extension BotGatewayManager {
             let timePast = now - lastIdentify
             let waitMore = factor - timePast
             if waitMore > 0 {
-                self.connectionTryCount += 1
                 let millis = Int64(waitMore * 1_000) + 1
                 return .milliseconds(millis)
             } else {
