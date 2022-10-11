@@ -146,7 +146,7 @@ public enum DiscordLocale: String, Sendable, Codable {
 }
 
 /// A timestamp that decode/encodes itself how Discord expects.
-public struct DiscordTimestamp: Sendable, Codable, Equatable {
+public struct DiscordTimestamp: Codable {
     
     public enum DecodingError: Error {
         case unexpectedFormat([CodingKey], String)
@@ -262,6 +262,12 @@ public struct DiscordTimestamp: Sendable, Codable, Equatable {
         try container.encode(str)
     }
 }
+
+#if swift(>=5.7)
+extension DiscordTimestamp: Sendable { }
+#else
+extension DiscordTimestamp: @unchecked Sendable { }
+#endif
 
 private enum BitFieldError: Error {
     case notRepresentingInt
@@ -469,7 +475,7 @@ where Element: RawRepresentable,
 extension TolerantDecodeArray: Sendable where Element: Sendable, Element.RawValue: Sendable { }
 
 /// A ``Date`` and ``DiscordTimestamp`` that tolerates decode failures.
-public struct TolerantDecodeDate: Sendable, Codable {
+public struct TolerantDecodeDate: Codable {
     
     public var date: Date
     
@@ -490,6 +496,12 @@ public struct TolerantDecodeDate: Sendable, Codable {
         try container.encode(self.date)
     }
 }
+
+#if swift(>=5.7)
+extension TolerantDecodeDate: Sendable { }
+#else
+extension TolerantDecodeDate: @unchecked Sendable { }
+#endif
 
 /// A dynamic color type that decode/encodes itself as an integer which Discord expects.
 public struct DiscordColor: Sendable, Codable, ExpressibleByIntegerLiteral {
