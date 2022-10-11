@@ -3,7 +3,7 @@ import Foundation
 public struct Gateway: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#opcodes-and-status-codes
-    public enum Opcode: Int, Sendable, Codable {
+    public enum Opcode: Int, Sendable, Codable, CustomStringConvertible {
         case dispatch = 0
         case heartbeat = 1
         case identify = 2
@@ -15,9 +15,25 @@ public struct Gateway: Sendable, Codable {
         case invalidSession = 9
         case hello = 10
         case heartbeatAccepted = 11
+        
+        public var description: String {
+            switch self {
+            case .dispatch: return "dispatch"
+            case .heartbeat: return "heartbeat"
+            case .identify: return "identify"
+            case .presenceUpdate: return "presenceUpdate"
+            case .voiceStateUpdate: return "voiceStateUpdate"
+            case .resume: return "resume"
+            case .reconnect: return "reconnect"
+            case .requestGuildMembers: return "requestGuildMembers"
+            case .invalidSession: return "invalidSession"
+            case .hello: return "hello"
+            case .heartbeatAccepted: return "heartbeatAccepted"
+            }
+        }
     }
     
-    /// A gateway event.
+    /// The top-level gateway event.
     /// https://discord.com/developers/docs/topics/gateway#gateway-events
     public struct Event: Sendable, Codable {
         
@@ -136,11 +152,11 @@ public struct Gateway: Sendable, Codable {
             }
             
             switch opcode {
-            case .heartbeat:
+            case .heartbeat, .heartbeatAccepted, .reconnect:
                 guard try container.decodeNil(forKey: .data) else {
                     throw DecodingError.typeMismatch(Optional<Never>.self, .init(
                         codingPath: container.codingPath,
-                        debugDescription: "`heartbeat` opcode is supposed to have no data."
+                        debugDescription: "`\(opcode)` opcode is supposed to have no data."
                     ))
                 }
                 self.data = nil
@@ -149,26 +165,10 @@ public struct Gateway: Sendable, Codable {
                     codingPath: container.codingPath,
                     debugDescription: "'\(opcode)' opcode is supposed to never be received."
                 ))
-            case .reconnect:
-                guard try container.decodeNil(forKey: .data) else {
-                    throw DecodingError.typeMismatch(Optional<Never>.self, .init(
-                        codingPath: container.codingPath,
-                        debugDescription: "`reconnect` opcode is supposed to have no data."
-                    ))
-                }
-                self.data = nil
             case .invalidSession:
                 self.data = try .invalidSession(canResume: decodeData())
             case .hello:
                 self.data = try .hello(decodeData())
-            case .heartbeatAccepted:
-                guard try container.decodeNil(forKey: .data) else {
-                    throw DecodingError.typeMismatch(Optional<Never>.self, .init(
-                        codingPath: container.codingPath,
-                        debugDescription: "`heartbeatAccepted` opcode is supposed to have no data."
-                    ))
-                }
-                self.data = nil
             case .dispatch:
                 switch self.type {
                 case "READY":

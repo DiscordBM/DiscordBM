@@ -217,16 +217,19 @@ private extension DiscordClient {
 //MARK: - Public +DiscordClient
 public extension DiscordClient {
     
+    /// https://discord.com/developers/docs/topics/gateway#get-gateway
     func getGateway() async throws -> DiscordClientResponse<Gateway.Url> {
         let endpoint = Endpoint.getGateway
         return try await self.send(to: endpoint, queries: [])
     }
     
+    /// https://discord.com/developers/docs/topics/gateway#get-gateway-bot
     func getGatewayBot() async throws -> DiscordClientResponse<Gateway.BotConnectionInfo> {
         let endpoint = Endpoint.getGatewayBot
         return try await self.send(to: endpoint, queries: [])
     }
     
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
     func createInteractionResponse(
         id: String,
         token: String,
@@ -236,6 +239,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
     
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
     func editInteractionResponse(
         appId: String? = nil,
         token: String,
@@ -248,6 +252,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
     
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
     func deleteInteractionResponse(
         appId: String? = nil,
         token: String
@@ -259,6 +264,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [])
     }
     
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
     func createFollowupInteractionResponse(
         appId: String? = nil,
         token: String,
@@ -271,6 +277,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
     
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
     func editFollowupInteractionResponse(
         appId: String? = nil,
         id: String,
@@ -285,6 +292,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
     
+    /// https://discord.com/developers/docs/resources/channel#create-message
     func createMessage(
         channelId: String,
         payload: DiscordChannel.CreateMessage
@@ -293,6 +301,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
     
+    /// https://discord.com/developers/docs/resources/channel#edit-message
     func editMessage(
         channelId: String,
         messageId: String,
@@ -302,6 +311,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
     
+    /// https://discord.com/developers/docs/resources/channel#delete-message
     func deleteMessage(
         channelId: String,
         messageId: String
@@ -310,6 +320,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [])
     }
     
+    /// https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
     func createApplicationGlobalCommand(
         appId: String? = nil,
         payload: SlashCommand
@@ -318,6 +329,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
     
+    /// https://discord.com/developers/docs/interactions/application-commands#get-global-application-commands
     func getApplicationGlobalCommands(
         appId: String? = nil
     ) async throws -> DiscordClientResponse<[SlashCommand]> {
@@ -325,6 +337,7 @@ public extension DiscordClient {
         return try await send(to: endpoint, queries: [])
     }
     
+    /// https://discord.com/developers/docs/interactions/application-commands#delete-global-application-command
     func deleteApplicationGlobalCommand(
         appId: String? = nil,
         id: String
@@ -336,21 +349,31 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [])
     }
     
-    func getGuild(id: String) async throws -> DiscordClientResponse<Guild> {
+    /// https://discord.com/developers/docs/resources/guild#get-guild
+    func getGuild(
+        id: String,
+        withCounts: Bool? = nil
+    ) async throws -> DiscordClientResponse<Guild> {
         let endpoint = Endpoint.getGuild(id: id)
-        return try await self.send(to: endpoint, queries: [])
+        return try await self.send(
+            to: endpoint,
+            queries: [("with_counts", withCounts?.description)]
+        )
     }
     
+    /// https://discord.com/developers/docs/resources/channel#get-channel
     func getChannel(id: String) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = Endpoint.getChannel(id: id)
         return try await self.send(to: endpoint, queries: [])
     }
     
+    /// https://discord.com/developers/docs/resources/user#leave-guild
     func leaveGuild(id: String) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.leaveGuild(id: id)
         return try await self.send(to: endpoint, queries: [])
     }
     
+    /// https://discord.com/developers/docs/resources/guild#create-guild-role
     func createGuildRole(
         guildId: String,
         payload: CreateGuildRole
@@ -359,6 +382,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
     
+    /// https://discord.com/developers/docs/resources/guild#add-guild-member-role
     func addGuildMemberRole(
         guildId: String,
         userId: String,
@@ -372,6 +396,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [])
     }
     
+    /// https://discord.com/developers/docs/resources/guild#remove-guild-member-role
     func removeGuildMemberRole(
         guildId: String,
         userId: String,
@@ -385,6 +410,7 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [])
     }
     
+    /// https://discord.com/developers/docs/topics/gateway#message-reaction-add
     func addReaction(
         channelId: String,
         messageId: String,
@@ -398,6 +424,8 @@ public extension DiscordClient {
         return try await self.send(to: endpoint, queries: [])
     }
     
+    /// NOTE: `limit`, if provided, must be between `1` and `1_000`.
+    /// https://discord.com/developers/docs/resources/guild#search-guild-members
     func searchGuildMembers(
         guildId: String,
         query: String,
@@ -409,11 +437,12 @@ public extension DiscordClient {
             to: endpoint,
             queries: [
                 ("query", query),
-                ("limit", limit.map({ "\($0)" }))
+                ("limit", limit?.description)
             ]
         )
     }
     
+    /// https://discord.com/developers/docs/resources/guild#get-guild-member
     func getGuildMember(
         guildId: String,
         userId: String
@@ -423,6 +452,7 @@ public extension DiscordClient {
     }
     
     /// NOTE: `around`, `before` and `after` are mutually exclusive.
+    /// https://discord.com/developers/docs/resources/channel#get-channel-messages
     func getChannelMessages(
         channelId: String,
         around: String? = nil,
@@ -447,6 +477,7 @@ public extension DiscordClient {
         )
     }
     
+    /// https://discord.com/developers/docs/resources/channel#get-channel-message
     func getChannelMessage(
         channelId: String,
         messageId: String
