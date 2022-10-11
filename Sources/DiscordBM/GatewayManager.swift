@@ -33,7 +33,7 @@ public protocol GatewayManager: AnyObject {
 #endif
 
 public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
-    case dead
+    case stopped
     case noConnection
     case connecting
     case configured
@@ -41,7 +41,7 @@ public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
     
     public var description: String {
         switch self {
-        case .dead: return "dead"
+        case .stopped: return "stopped"
         case .noConnection: return "noConnection"
         case .connecting: return "connecting"
         case .configured: return "configured"
@@ -446,15 +446,19 @@ extension BotGatewayManager {
                     self._state.store(.noConnection, ordering: .relaxed)
                     self.connect()
                 } else {
-                    self._state.store(.dead, ordering: .relaxed)
                     self.logger.critical("Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/MahdiBM/DiscordBM/issues if you think this is a library issue")
+                    self.connectionId.wrappingIncrement(ordering: .relaxed)
+                    self.connectionTryCount = 0
+                    self._state.store(.stopped, ordering: .relaxed)
+                    self.isFirstConnection = true
+                    self.lastSend = .distantPast
                 }
             }
         }
     }
     
-    private func getCloseCodeAndDescription(of ws: WebSocket?) -> (WebSocketErrorCode?, String) {
-        let code = ws?.closeCode
+    private func getCloseCodeAndDescription(of ws: WebSocket) -> (WebSocketErrorCode?, String) {
+        let code = ws.closeCode
         let description: String
         switch code {
         case let .unknown(codeNumber):
@@ -661,7 +665,7 @@ extension BotGatewayManager {
         self.connectionId.wrappingIncrement(ordering: .relaxed)
         self.connectionTryCount = 0
         self.closeWebSocket(ws: self.ws)
-        self._state.store(.noConnection, ordering: .relaxed)
+        self._state.store(.stopped, ordering: .relaxed)
         self.isFirstConnection = true
         self.lastSend = .distantPast
     }
