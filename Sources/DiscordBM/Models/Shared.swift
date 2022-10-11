@@ -269,10 +269,6 @@ extension DiscordTimestamp: Sendable { }
 extension DiscordTimestamp: @unchecked Sendable { }
 #endif
 
-private enum BitFieldError: Error {
-    case notRepresentingInt
-}
-
 /// A protocol for bit-fields.
 public protocol BitField: ExpressibleByArrayLiteral {
     associatedtype R: RawRepresentable where R: Hashable, R.RawValue == Int
@@ -362,6 +358,10 @@ extension IntBitField: Sendable where R: Sendable { }
 public struct StringBitField<R>: BitField, Codable
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
+    enum DecodingError: Error {
+        case notRepresentingInt
+    }
+    
     public var values: Set<R>
     public var unknownValues: Set<Int>
     
@@ -374,7 +374,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         let container = try decoder.singleValueContainer()
         let string = try container.decode(String.self)
         guard let int = Int(string) else {
-            throw BitFieldError.notRepresentingInt
+            throw DecodingError.notRepresentingInt
         }
         self.init(bitValue: int)
         if !self.unknownValues.isEmpty {
