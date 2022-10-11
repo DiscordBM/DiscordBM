@@ -113,7 +113,7 @@ public struct ClientConfiguration {
         
         /// Caches all cacheable endpoints for 5 seconds,
         /// except for `getGateway` which is cached for an hour.
-        public static let enabled = {
+        public static let enabled = { () -> CachingBehavior in
             var behavior = CachingBehavior()
             behavior.modifyBehavior(of: .getGateway, ttl: 3600)
             return behavior
