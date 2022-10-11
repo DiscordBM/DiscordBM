@@ -1,53 +1,6 @@
 import Foundation
 
-public struct ActionRow: Sendable, Codable {
-    
-    public struct Component: Sendable, Codable {
-        
-        public enum Kind: Int, Sendable, Codable {
-            case container = 1
-            case button = 2
-            case selectMenu = 3
-            case textInput = 4
-        }
-        
-        public struct Option: Sendable, Codable {
-            public var value: String
-            public var label: String
-            public var description: String?
-            public var `default`: Bool?
-            public var emoji: Gateway.PartialEmoji?
-        }
-        
-        public let type: Kind
-        public let components: [Component]?
-        public var style: Int?
-        public var custom_id: String?
-        public var emoji: Gateway.Emoji?
-        public var url: String?
-        public var label: String?
-        public var placeholder: String?
-        public var disabled: Bool?
-        public var `default`: Bool?
-        public var max_values: Int?
-        public var min_values: Int?
-        public var options: [Option]?
-        
-        public init(type: Kind, components: [Component]) {
-            self.type = type
-            self.components = components
-        }
-    }
-    
-    public var type = 1
-    public var components: [Component]
-    
-    public init(type: Int = 1, components: [Component]) {
-        self.type = type
-        self.components = components
-    }
-}
-
+/// To dynamically decode/encode String or Int or Double or Bool.
 public enum StringIntDoubleBool: Sendable, Codable {
     case string(String)
     case int(Int)
@@ -99,11 +52,12 @@ public enum StringIntDoubleBool: Sendable, Codable {
     }
 }
 
+/// To dynamically decode/encode String or Int.
 public enum StringOrInt: Sendable, Codable {
     case string(String)
     case int(Int)
     
-    public var stringValue: String {
+    public var asString: String {
         switch self {
         case .string(let string): return string
         case .int(let int): return "\(int)"
@@ -131,106 +85,7 @@ public enum StringOrInt: Sendable, Codable {
     }
 }
 
-public struct CommandOption: Sendable, Codable {
-    
-    public enum Kind: Int, Sendable, Codable {
-        case subCommand = 1
-        case subCommandGroup = 2
-        case string = 3
-        case integer = 4
-        case boolean = 5
-        case user = 6
-        case channel = 7
-        case role = 8
-        case mentionable = 9
-        case number = 10
-        case attachment = 11
-    }
-    
-    public struct Choice: Sendable, Codable {
-        
-        public var name: String
-        public var name_localizations: [String: String]?
-        public var value: StringIntDoubleBool
-        
-        public init(name: String, name_localizations: [String : String]? = nil, value: StringIntDoubleBool) {
-            self.name = name
-            self.name_localizations = name_localizations
-            self.value = value
-        }
-    }
-    
-    public enum ChannelKind: Int, Sendable, Codable {
-        case guildText = 0
-        case dm = 1
-        case guildVoice = 2
-        case groupDm = 3
-        case guildCategory = 4
-        case guildNews = 5
-        case guildNewsThread = 10
-        case guildPublicThread = 11
-        case guildPrivateThread = 12
-        case guildStageVoice = 13
-        case guildDirectory = 14
-        case guildForum = 15
-    }
-    
-    public enum IntDouble: Sendable, Codable {
-        case int(Int)
-        case double(Double)
-        
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let int = try? container.decode(Int.self) {
-                self = .int(int)
-            } else {
-                let double = try container.decode(Double.self)
-                self = .double(double)
-            }
-        }
-        
-        public func encode(to encoder: Encoder) throws {
-            var container = encoder.singleValueContainer()
-            switch self {
-            case let .int(int):
-                try container.encode(int)
-            case let .double(double):
-                try container.encode(double)
-            }
-        }
-    }
-    
-    public var type: Kind
-    public var name: String
-    public var name_localizations: [String: String]?
-    public var description: String
-    public var description_localizations: [String: String]?
-    public var required: Bool?
-    public var choices: [Choice]?
-    public var options: [CommandOption]?
-    public var channel_types: TolerantDecodeArray<ChannelKind>?
-    public var min_value: IntDouble?
-    public var max_value: IntDouble?
-    public var autocomplete: Bool?
-    /// Available when user inputs a value for the option.
-    public var value: StringIntDoubleBool?
-    
-    public init(type: Kind, name: String, name_localizations: [String : String]? = nil, description: String, description_localizations: [String : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [CommandOption]? = nil, channel_types: [ChannelKind]? = nil, min_value: IntDouble? = nil, max_value: IntDouble? = nil, autocomplete: Bool? = nil) {
-        self.type = type
-        self.name = name
-        self.name_localizations = name_localizations
-        self.description = description
-        self.description_localizations = description_localizations
-        self.required = required
-        self.choices = choices
-        self.options = options
-        self.channel_types = channel_types == nil ? nil : .init(channel_types!)
-        self.min_value = min_value
-        self.max_value = max_value
-        self.autocomplete = autocomplete
-    }
-}
-
+/// Not sure what exactly it is. Some kind of hash container.
 public struct Hashes: Sendable, Codable {
     
     public struct Item: Sendable, Codable {
@@ -256,6 +111,7 @@ public struct Hashes: Sendable, Codable {
     }
 }
 
+/// https://discord.com/developers/docs/reference#locales
 public enum DiscordLocale: String, Sendable, Codable {
     case danish = "da"
     case german = "de"
@@ -289,7 +145,8 @@ public enum DiscordLocale: String, Sendable, Codable {
     case korean = "ko"
 }
 
-public struct DiscordTimestamp: Sendable, Codable, Equatable {
+/// A timestamp that decode/encodes itself how Discord expects.
+public struct DiscordTimestamp: Codable {
     
     public enum DecodingError: Error {
         case unexpectedFormat([CodingKey], String)
@@ -406,10 +263,17 @@ public struct DiscordTimestamp: Sendable, Codable, Equatable {
     }
 }
 
+#if swift(>=5.7)
+extension DiscordTimestamp: Sendable { }
+#else
+extension DiscordTimestamp: @unchecked Sendable { }
+#endif
+
 private enum BitFieldError: Error {
     case notRepresentingInt
 }
 
+/// A protocol for bit-fields.
 public protocol BitField: ExpressibleByArrayLiteral {
     associatedtype R: RawRepresentable where R: Hashable, R.RawValue == Int
     var values: Set<R> { get set }
@@ -446,14 +310,6 @@ extension BitField {
             bitValue -= 1 << intValue
         }
         
-        if !unknownValues.isEmpty {
-            bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
-                "unknownValues": "\(unknownValues)",
-                "values": "\(values.map(\.rawValue))",
-                "rawType": "\(Swift._typeName(R.self))"
-            ])
-        }
-        
         self.init(
             Set(values),
             unknownValues: unknownValues
@@ -467,6 +323,7 @@ extension BitField {
     }
 }
 
+/// A bit-field that decode/encodes itself as an integer.
 public struct IntBitField<R>: BitField, Codable
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
@@ -482,6 +339,14 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         let container = try decoder.singleValueContainer()
         let int = try container.decode(Int.self)
         self.init(bitValue: int)
+        if !self.unknownValues.isEmpty {
+            bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
+                "unknownValues": "\(unknownValues)",
+                "values": "\(values.map(\.rawValue))",
+                "rawType": "\(Swift._typeName(R.self))",
+                "codingPath": "\(decoder.codingPath)"
+            ])
+        }
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -493,6 +358,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
 
 extension IntBitField: Sendable where R: Sendable { }
 
+/// A bit-field that decode/encodes itself as a string.
 public struct StringBitField<R>: BitField, Codable
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
@@ -511,6 +377,14 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
             throw BitFieldError.notRepresentingInt
         }
         self.init(bitValue: int)
+        if !self.unknownValues.isEmpty {
+            bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
+                "unknownValues": "\(unknownValues)",
+                "values": "\(values.map(\.rawValue))",
+                "rawType": "\(Swift._typeName(R.self))",
+                "codingPath": "\(decoder.codingPath)"
+            ])
+        }
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -522,6 +396,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
 
 extension StringBitField: Sendable where R: Sendable { }
 
+/// An array consisting of two integers.
 public struct IntPair: Sendable, Codable {
     public var first: Int
     public var second: Int
@@ -548,6 +423,7 @@ public struct IntPair: Sendable, Codable {
 
 private let tolerantDecodeLogger = DiscordGlobalConfiguration.makeLogger("DecodeTolerable")
 
+/// An ``Array`` that tolerates decode failure of its elements.
 public struct TolerantDecodeArray<Element>:
     Codable,
     ExpressibleByArrayLiteral
@@ -598,128 +474,8 @@ where Element: RawRepresentable,
 
 extension TolerantDecodeArray: Sendable where Element: Sendable, Element.RawValue: Sendable { }
 
-public struct Embed: Sendable, Codable {
-    
-    public enum Kind: String, Sendable, Codable {
-        case rich = "rich"
-        case image = "image"
-        case video = "video"
-        case gifv = "gifv"
-        case article = "article"
-        case link = "link"
-        case autoModerationMessage = "auto_moderation_message"
-    }
-    
-    public struct Footer: Sendable, Codable {
-        public var text: String
-        public var icon_url: String?
-        public var proxy_icon_url: String?
-        
-        public init(text: String, icon_url: String? = nil, proxy_icon_url: String? = nil) {
-            self.text = text
-            self.icon_url = icon_url
-            self.proxy_icon_url = proxy_icon_url
-        }
-    }
-    
-    public struct Media: Sendable, Codable {
-        public var url: String
-        public var proxy_url: String?
-        public var height: Int?
-        public var width: Int?
-        
-        public init(url: String, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil) {
-            self.url = url
-            self.proxy_url = proxy_url
-            self.height = height
-            self.width = width
-        }
-    }
-    
-    public struct Provider: Sendable, Codable {
-        public var name: String?
-        public var url: String?
-        
-        public init(name: String? = nil, url: String? = nil) {
-            self.name = name
-            self.url = url
-        }
-    }
-    
-    public struct Author: Sendable, Codable {
-        public var name: String
-        public var url: String?
-        public var icon_url: String?
-        public var proxy_icon_url: String?
-        
-        public init(name: String, url: String? = nil, icon_url: String? = nil, proxy_icon_url: String? = nil) {
-            self.name = name
-            self.url = url
-            self.icon_url = icon_url
-            self.proxy_icon_url = proxy_icon_url
-        }
-    }
-    
-    public struct Field: Sendable, Codable {
-        public var name: String
-        public var value: String
-        public var inline: Bool?
-        
-        public init(name: String, value: String, inline: Bool? = nil) {
-            self.name = name
-            self.value = value
-            self.inline = inline
-        }
-    }
-    
-    public var title: String?
-    public var type: Kind?
-    public var description: String?
-    public var url: String?
-    public var timestamp: TolerantDecodeDate? = nil
-    public var color: DiscordColor?
-    public var footer: Footer?
-    public var image: Media?
-    public var thumbnail: Media?
-    public var video: Media?
-    public var provider: Provider?
-    public var author: Author?
-    public var fields: [Field]?
-    public var reference_id: String?
-    
-    public init(title: String? = nil, type: Embed.Kind? = nil, description: String? = nil, url: String? = nil, timestamp: Date? = nil, color: DiscordColor? = nil, footer: Embed.Footer? = nil, image: Embed.Media? = nil, thumbnail: Embed.Media? = nil, video: Embed.Media? = nil, provider: Embed.Provider? = nil, author: Embed.Author? = nil, fields: [Embed.Field]? = nil, reference_id: String? = nil) {
-        self.title = title
-        self.type = type
-        self.description = description
-        self.url = url
-        self.timestamp = timestamp == nil ? nil : .init(date: timestamp!)
-        self.color = color
-        self.footer = footer
-        self.image = image
-        self.thumbnail = thumbnail
-        self.video = video
-        self.provider = provider
-        self.author = author
-        self.fields = fields
-        self.reference_id = reference_id
-    }
-    
-    private var fieldsLength: Int {
-        fields?.reduce(into: 0, { $0 = $1.name.count + $1.value.count }) ?? 0
-    }
-    
-    /// The length that matters towards the Discord limit (currently 6000 across all embeds).
-    public var contentLength: Int {
-        (title?.count ?? 0) +
-        (description?.count ?? 0) +
-        fieldsLength +
-        (footer?.text.count ?? 0) +
-        (author?.name.count ?? 0)
-    }
-}
-
-
-public struct TolerantDecodeDate: Sendable, Codable {
+/// A ``Date`` and ``DiscordTimestamp`` that tolerates decode failures.
+public struct TolerantDecodeDate: Codable {
     
     public var date: Date
     
@@ -741,6 +497,13 @@ public struct TolerantDecodeDate: Sendable, Codable {
     }
 }
 
+#if swift(>=5.7)
+extension TolerantDecodeDate: Sendable { }
+#else
+extension TolerantDecodeDate: @unchecked Sendable { }
+#endif
+
+/// A dynamic color type that decode/encodes itself as an integer which Discord expects.
 public struct DiscordColor: Sendable, Codable, ExpressibleByIntegerLiteral {
     
     public let value: Int
@@ -757,29 +520,33 @@ public struct DiscordColor: Sendable, Codable, ExpressibleByIntegerLiteral {
     }
     
     public init(integerLiteral value: Int) {
-        self.init(value: value)
+        self.init(value: value)!
     }
     
-    public init(value: Int) {
-        precondition(value >= 0, "Color cannot be negative.")
-        precondition(value < (1 << 24), "Value \(value) exceeds max RGB.")
+    public init? (value: Int) {
+        guard value >= 0,
+              value < (1 << 24)
+        else { return nil }
         self.value = value
     }
     
-    public init(red: Int, green: Int, blue: Int) {
-        precondition((0..<256).contains(red), "Red value \(red) is not in RGB component range.")
-        precondition((0..<256).contains(green), "Green value \(green) is not in RGB component range.")
-        precondition((0..<256).contains(blue), "Blue value \(blue) is not in RGB component range.")
+    public init? (red: Int, green: Int, blue: Int) {
+        guard (0..<256).contains(red),
+              (0..<256).contains(green),
+              (0..<256).contains(blue)
+        else { return nil }
         self.value = (red << 16) + (green << 8) + blue
     }
     
-    public init(hex: String) {
+    public init? (hex: String) {
         var dropCount = 0
         if hex.hasPrefix("#") {
             dropCount = 1
         }
-        precondition((hex.count - dropCount) == 6, "Hex color must be 6 letters long.")
-        self.value = Int(hex.dropFirst(dropCount), radix: 16)!
+        guard let value = Int(hex.dropFirst(dropCount), radix: 16) else {
+            return nil
+        }
+        self.value = value
     }
     
     public init(from decoder: Decoder) throws {
@@ -792,37 +559,7 @@ public struct DiscordColor: Sendable, Codable, ExpressibleByIntegerLiteral {
     }
 }
 
-public enum OAuthScope: String, Sendable, Codable {
-    case activitiesRead = "activities.read"
-    case activitiesWrite = "activities.write"
-    case applicationsBuildsRead = "applications.builds.read"
-    case applicationsBuildsUpload = "applications.builds.upload"
-    case applicationsCommands = "applications.commands"
-    case applicationsCommandsUpdate = "applications.commands.update"
-    case applicationsCommandsPermissionsUpdate = "applications.commands.permissions.update"
-    case applicationsEntitlements = "applications.entitlements"
-    case applicationsStoreUpdate = "applications.store.update"
-    case bot = "bot"
-    case connections = "connections"
-    case DMChannelsRead = "dm_channels.read"
-    case email = "email"
-    case GDMJoin = "gdm.join"
-    case guilds = "guilds"
-    case guildsJoin = "guilds.join"
-    case guildsMembersRead = "guilds.members.read"
-    case identify = "identify"
-    case messagesRead = "messages.read"
-    case relationshipsRead = "relationships.read"
-    case rpc = "rpc"
-    case rpcActivitiesWrite = "rpc.activities.write"
-    case rpcNotificationsRead = "rpc.notifications.read"
-    case rpcVoiceRead = "rpc.voice.read"
-    case rpcVoiceWrite = "rpc.voice.write"
-    case voice = "voice"
-    case webhookIncoming = "webhook.incoming"
-}
-
-/// A type that will try to keep its content a secret unless encoded by an encoder.
+/// A type that will try to keep its content a secret when used with string interpolation.
 /// This is to stop leaking the token in the logs, for whatever reason.
 public struct Secret:
     Sendable,
@@ -866,3 +603,26 @@ public struct Secret:
         try container.encode(self._storage)
     }
 }
+
+/// A class so we can use the same type recursively in itself.
+public final class DereferenceBox<C>: Codable, CustomStringConvertible where C: Codable {
+    public let value: C
+    
+    public init(value: C) {
+        self.value = value
+    }
+    
+    public init(from decoder: Decoder) throws {
+        value = try C.init(from: decoder)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        try value.encode(to: encoder)
+    }
+    
+    public var description: String {
+        "\(value)"
+    }
+}
+
+extension DereferenceBox: Sendable where C: Sendable { }

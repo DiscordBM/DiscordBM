@@ -33,6 +33,7 @@ public protocol GatewayManager: AnyObject {
 #endif
 
 public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
+    case dead
     case noConnection
     case connecting
     case configured
@@ -40,6 +41,7 @@ public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
     
     public var description: String {
         switch self {
+        case .dead: return "dead"
         case .noConnection: return "noConnection"
         case .connecting: return "connecting"
         case .configured: return "configured"
@@ -158,8 +160,8 @@ public actor BotGatewayManager: GatewayManager {
         token: String,
         appId: String? = nil,
         shard: IntPair? = nil,
-        presence: Gateway.Identify.PresenceUpdate? = nil,
-        intents: [Gateway.Identify.Intent] = []
+        presence: Gateway.Identify.Presence? = nil,
+        intents: [Gateway.Intent] = []
     ) {
         let token = Secret(token)
         self.eventLoopGroup = eventLoopGroup
@@ -213,7 +215,7 @@ public actor BotGatewayManager: GatewayManager {
 extension BotGatewayManager {
     /// `_state` must be set to an appropriate value before triggering this function.
     private func connectAsync() async {
-        logger.trace("Connect method triggered")
+        logger.debug("Connect method triggered")
         /// Guard if other connections are in process
         let state = self._state.load(ordering: .relaxed)
         guard state == .noConnection || state == .configured else {
@@ -245,7 +247,7 @@ extension BotGatewayManager {
             configuration: configuration,
             on: eventLoopGroup
         ) { ws in
-            self.logger.trace("Connected to Discord through web-socket. Will configure")
+            self.logger.debug("Connected to Discord through web-socket. Will configure")
             self.ws = ws
             self.configureWebSocket()
         }.whenFailure { [self] error in
@@ -298,7 +300,7 @@ extension BotGatewayManager {
             self._state.store(.noConnection, ordering: .relaxed)
             self.connect()
         case let .hello(hello):
-            logger.trace("Received 'hello'")
+            logger.debug("Received 'hello'")
             let interval: TimeAmount = .milliseconds(Int64(hello.heartbeat_interval))
             /// Disable websocket-kit automatic pings
             self.ws?.pingInterval = nil
@@ -325,7 +327,7 @@ extension BotGatewayManager {
     }
     
     private func getGatewayUrl() async -> String {
-        logger.trace("Will try to get Discord gateway url")
+        logger.debug("Will try to get Discord gateway url")
         if let gatewayUrl = self.resumeGatewayUrl {
             logger.trace("Got Discord gateway url from `resumeGatewayUrl`")
             return gatewayUrl
@@ -381,7 +383,7 @@ extension BotGatewayManager {
         self.resumeGatewayUrl = nil
         /// Don't invalidate `sessionId` because it'll be needed for the next resumes as well.
         
-        logger.trace("Sent resume request to Discord")
+        logger.debug("Sent resume request to Discord")
     }
     
     private func sendIdentify() {
@@ -395,7 +397,7 @@ extension BotGatewayManager {
     
     private func setupOnText(forConnectionWithId connectionId: UInt) {
         self.ws?.onText { _, text in
-            self.logger.trace("Got text from websocket \(text)")
+            self.logger.debug("Got text from websocket \(text)")
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             let data = Data(text.utf8)
             do {
@@ -403,13 +405,13 @@ extension BotGatewayManager {
                     Gateway.Event.self,
                     from: data
                 )
-                self.logger.trace("Decoded event: \(event)")
+                self.logger.debug("Decoded event: \(event)")
                 self.processEvent(event)
                 for onEvent in self.onEvents {
                     onEvent(event)
                 }
             } catch {
-                self.logger.trace("Failed to decode event. Error: \(error)")
+                self.logger.debug("Failed to decode event. Error: \(error)")
                 for onEventParseFailure in self.onEventParseFailures {
                     onEventParseFailure(error, text)
                 }
@@ -420,7 +422,7 @@ extension BotGatewayManager {
     private func setupOnClose(forConnectionWithId connectionId: UInt) {
         self.ws?.onClose.whenComplete { [weak self] _ in
             guard let `self` = self else { return }
-            self.logger.trace("Received connection close notification for a web-socket")
+            self.logger.debug("Received connection close notification for a web-socket")
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             Task {
                 let (code, codeDesc) = await self.getCloseCodeAndDescription()
@@ -436,8 +438,13 @@ extension BotGatewayManager {
                         )
                     ]
                 )
-                self._state.store(.noConnection, ordering: .relaxed)
-                self.connect()
+                if await self.canTryReconnect() {
+                    self._state.store(.noConnection, ordering: .relaxed)
+                    self.connect()
+                } else {
+                    self._state.store(.dead, ordering: .relaxed)
+                    self.logger.critical("Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/MahdiBM/DiscordBM/issues if you think this is a library issue")
+                }
             }
         }
     }
@@ -447,7 +454,7 @@ extension BotGatewayManager {
         let description: String
         switch code {
         case let .unknown(codeNumber):
-            switch Gateway.CloseCode(rawValue: Int(codeNumber)) {
+            switch Gateway.CloseCode(rawValue: codeNumber) {
             case let .some(discordCode):
                 description = "\(discordCode)"
             case .none:
@@ -461,6 +468,16 @@ extension BotGatewayManager {
         return (code, description)
     }
     
+    private func canTryReconnect() -> Bool {
+        guard let code = self.ws?.closeCode else { return true }
+        switch code {
+        case let .unknown(codeNumber):
+            guard let discordCode = Gateway.CloseCode(rawValue: codeNumber) else { return true }
+            return discordCode.canTryReconnect
+        default: return true
+        }
+    }
+    
     private func setupPingTask(
         forConnectionWithId connectionId: UInt,
         every interval: TimeAmount
@@ -471,7 +488,7 @@ extension BotGatewayManager {
                 self.logger.trace("Canceled a ping task with connection id: \(connectionId)")
                 return // cancel
             }
-            self.logger.trace("Will send automatic ping for connection id: \(connectionId)")
+            self.logger.debug("Will send automatic ping for connection id: \(connectionId)")
             self.sendPing(forConnectionWithId: connectionId)
             self.setupPingTask(forConnectionWithId: connectionId, every: interval)
         }
@@ -497,7 +514,7 @@ extension BotGatewayManager {
                 self.unsuccessfulPingsCount += 1
             }
             if unsuccessfulPingsCount > 2 {
-                logger.error("Too many unsuccessful pings. Will try to reconnect", metadata: [
+                logger.debug("Too many unsuccessful pings. Will try to reconnect", metadata: [
                     "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                 ])
                 self._state.store(.noConnection, ordering: .relaxed)
@@ -625,7 +642,7 @@ extension BotGatewayManager {
     }
     
     private nonisolated func closeWebSocket(ws: WebSocket?) {
-        logger.trace("Will possibly close a web-socket")
+        logger.debug("Will possibly close a web-socket")
         ws?.close().whenFailure {
             self.logger.warning("Connection close error", metadata: [
                 "error": "\($0)"
@@ -634,7 +651,7 @@ extension BotGatewayManager {
     }
     
     private func disconnectAsync() {
-        logger.trace("Will disconnect", metadata: [
+        logger.debug("Will disconnect", metadata: [
             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
         ])
         self.connectionId.wrappingIncrement(ordering: .relaxed)

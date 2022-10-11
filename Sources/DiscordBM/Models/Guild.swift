@@ -1,6 +1,31 @@
 
+/// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
 public struct Guild: Sendable, Codable {
     
+    /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
+    public struct Member: Sendable, Codable {
+        public var user: DiscordUser?
+        public var nick: String?
+        public var avatar: String?
+        public var roles: [String]
+        public var hoisted_role: String?
+        public var joined_at: DiscordTimestamp
+        public var premium_since: DiscordTimestamp?
+        public var deaf: Bool
+        public var mute: Bool
+        public var pending: Bool?
+        public var is_pending: Bool?
+        public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
+        public var permissions: StringBitField<Permission>?
+        public var communication_disabled_until: DiscordTimestamp?
+        
+        public func hasRole(withId id: String, guildId: String) -> Bool {
+            /// guildId == id <-> role == @everyone
+            guildId == id || self.roles.contains(where: { $0 == id })
+        }
+    }
+    
+    /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level
     public enum VerificationLevel: Int, Sendable, Codable {
         case none = 0
         case low = 1
@@ -9,6 +34,20 @@ public struct Guild: Sendable, Codable {
         case veryHigh = 4
     }
     
+    /// https://discord.com/developers/docs/resources/guild#guild-object-default-message-notification-level
+    public enum DefaultMessageNotificationLevel: Int, Sendable, Codable {
+        case allMessages = 0
+        case onlyMentions = 1
+    }
+    
+    /// https://discord.com/developers/docs/resources/guild#guild-object-explicit-content-filter-level
+    public enum ExplicitContentFilterLevel: Int, Sendable, Codable {
+        case disabled = 0
+        case memberWithoutRoles = 1
+        case allMembers = 2
+    }
+    
+    /// https://discord.com/developers/docs/resources/guild#guild-object-guild-features
     public enum Feature: String, Sendable, Codable {
         case animatedBanner = "ANIMATED_BANNER"
         case animatedIcon = "ANIMATED_ICON"
@@ -42,11 +81,13 @@ public struct Guild: Sendable, Codable {
         case enabledDiscoverableBefore = "ENABLED_DISCOVERABLE_BEFORE"
     }
     
+    /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
     public enum MFALevel: Int, Sendable, Codable {
         case none = 0
         case elevated = 1
     }
     
+    /// https://discord.com/developers/docs/resources/guild#guild-object-system-channel-flags
     public enum SystemChannelFlag: Int, Sendable {
         case suppressJoinNotifications = 0
         case suppressPremiumSubscriptions = 1
@@ -54,6 +95,7 @@ public struct Guild: Sendable, Codable {
         case suppressJoinNotificationReplies = 3
     }
     
+    /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier
     public enum PremiumTier: Int, Sendable, Codable {
         case none = 0
         case tier1 = 1
@@ -61,8 +103,10 @@ public struct Guild: Sendable, Codable {
         case tier3 = 3
     }
     
+    /// https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-structure
     public struct WelcomeScreen: Sendable, Codable {
         
+        /// https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-channel-structure
         public struct Channel: Sendable, Codable {
             public var channel_id: String
             public var description: String
@@ -74,6 +118,7 @@ public struct Guild: Sendable, Codable {
         public var welcome_channels: [Channel]
     }
     
+    /// https://discord.com/developers/docs/resources/guild#guild-object-guild-nsfw-level
     public enum NSFWLevel: Int, Sendable, Codable {
         case `default` = 0
         case explicit = 1
@@ -89,17 +134,18 @@ public struct Guild: Sendable, Codable {
     public var discovery_splash: String?
     public var owner: Bool?
     public var owner_id: String
-    public var permissions: StringBitField<Gateway.Channel.Permission>?
+    public var permissions: StringBitField<Permission>?
+    /// Deprecated
     public var region: String?
     public var afk_channel_id: String?
     public var afk_timeout: Int
     public var widget_enabled: Bool?
     public var widget_channel_id: String?
     public var verification_level: VerificationLevel
-    public var default_message_notifications: Int
-    public var explicit_content_filter: Int
-    public var roles: [Gateway.Role]
-    public var emojis: [Gateway.Emoji]
+    public var default_message_notifications: DefaultMessageNotificationLevel
+    public var explicit_content_filter: ExplicitContentFilterLevel
+    public var roles: [Role]
+    public var emojis: [PartialEmoji]
     public var features: TolerantDecodeArray<Feature>
     public var mfa_level: MFALevel
     public var application_id: String?
@@ -110,10 +156,10 @@ public struct Guild: Sendable, Codable {
     public var large: Bool?
     public var unavailable: Bool?
     public var member_count: Int?
-    public var voice_states: [Gateway.PartialVoiceState]?
-    public var members: Set<Gateway.Member>?
-    public var channels: [Gateway.Channel]?
-    public var threads: [Gateway.Channel]?
+    public var voice_states: [PartialVoiceState]?
+    public var members: [Member]?
+    public var channels: [DiscordChannel]?
+    public var threads: [DiscordChannel]?
     public var presences: [Gateway.PartialPresenceUpdate]?
     public var max_presences: Int?
     public var max_members: Int?
@@ -130,9 +176,9 @@ public struct Guild: Sendable, Codable {
     public var approximate_presence_count: Int?
     public var welcome_screen: [WelcomeScreen]?
     public var nsfw_level: NSFWLevel
-    public var stage_instances: [Gateway.StageInstance]?
-    public var stickers: [Gateway.Sticker]?
-    public var guild_scheduled_events: [Gateway.GuildScheduledEvent]?
+    public var stage_instances: [StageInstance]?
+    public var stickers: [Sticker]?
+    public var guild_scheduled_events: [GuildScheduledEvent]?
     public var premium_progress_bar_enabled: Bool
     public var `lazy`: Bool?
     public var hub_type: String?
@@ -145,16 +191,64 @@ public struct Guild: Sendable, Codable {
     public var hashes: Hashes?
 }
 
+extension Guild {
+    /// A partial ``Guild.Member`` object.
+    /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
+    public struct PartialMember: Sendable, Codable {
+        public var user: DiscordUser?
+        public var nick: String?
+        public var avatar: String?
+        public var roles: [String]?
+        public var hoisted_role: String?
+        public var joined_at: DiscordTimestamp?
+        public var premium_since: DiscordTimestamp?
+        public var deaf: Bool?
+        public var mute: Bool?
+        public var pending: Bool?
+        public var is_pending: Bool?
+        public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
+        public var permissions: StringBitField<Permission>?
+        public var communication_disabled_until: DiscordTimestamp?
+    }
+}
+
+/// https://discord.com/developers/docs/resources/guild#unavailable-guild-object
+public struct UnavailableGuild: Sendable, Codable {
+    public var id: String
+    public var unavailable: Bool?
+}
+
+/// https://discord.com/developers/docs/resources/guild#integration-account-object
+public struct IntegrationAccount: Sendable, Codable {
+    public var id: String
+    public var name: String
+}
+
+/// https://discord.com/developers/docs/resources/guild#integration-application-object-integration-application-structure
+public struct IntegrationApplication: Sendable, Codable {
+    public var id: String
+    public var name: String
+    public var icon: String?
+    public var description: String
+    public var summary: String?
+    public var type: Int?
+    public var bot: DiscordUser?
+    public var primary_sku_id: String?
+    public var cover_image: String?
+    public var scopes: TolerantDecodeArray<OAuth2Scope>?
+}
+
+/// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
 public struct CreateGuildRole: Sendable, Codable {
     public var name: String?
-    public var permissions: StringBitField<Gateway.Channel.Permission>?
+    public var permissions: StringBitField<Permission>?
     public var color: DiscordColor?
     public var hoist: Bool?
 //    public var icon: ImageData? not supported
     public var unicode_emoji: String?
     public var mentionable: Bool?
     
-    public init(name: String? = nil, permissions: [Gateway.Channel.Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
+    public init(name: String? = nil, permissions: [Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
         self.name = name
         self.permissions = permissions.map { .init($0) }
         self.color = color

@@ -20,13 +20,13 @@ public actor AuthManager: Sendable {
     /// The bot will immediately join servers which authorize your bot through this URL.
     public nonisolated func makeBotAuthorizationURL(
         withSlashCommands: Bool = true,
-        permissions: [Gateway.Channel.Permission] = []
+        permissions: [Permission] = []
     ) -> String {
-        var scopes: [OAuthScope] = [.bot]
+        var scopes: [OAuth2Scope] = [.bot]
         if withSlashCommands {
             scopes.append(.applicationsCommands)
         }
-        let permissions = StringBitField<Gateway.Channel.Permission>(permissions)
+        let permissions = StringBitField<Permission>(permissions)
         let queries = [
             ("client_id", self.clientId),
             ("permissions", "\(permissions.toBitValue())"),
