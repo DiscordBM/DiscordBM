@@ -34,6 +34,25 @@ public protocol DiscordClient {
     ) async throws -> DiscordClientResponse<C>
 }
 
+public extension DiscordClient {
+    func send<C: Codable>(
+        to endpoint: Endpoint,
+        queries: [(String, String?)]
+    ) async throws -> DiscordClientResponse<C> {
+        let response = try await self.send(to: endpoint, queries: queries)
+        return DiscordClientResponse(raw: response)
+    }
+    
+    func send<E: Encodable, C: Codable>(
+        to endpoint: Endpoint,
+        queries: [(String, String?)],
+        payload: E
+    ) async throws -> DiscordClientResponse<C> {
+        let response = try await self.send(to: endpoint, queries: queries, payload: payload)
+        return DiscordClientResponse(raw: response)
+    }
+}
+
 public struct DiscordHTTPResponse: Sendable {
     let _response: HTTPClient.Response
     
@@ -591,14 +610,6 @@ public struct DefaultDiscordClient: DiscordClient {
         return response
     }
     
-    public func send<C: Codable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)] = []
-    ) async throws -> DiscordClientResponse<C> {
-        let response = try await self.send(to: endpoint, queries: queries)
-        return DiscordClientResponse(raw: response)
-    }
-    
     public func send<E: Encodable>(
         to endpoint: Endpoint,
         queries: [(String, String?)] = [],
@@ -631,15 +642,6 @@ public struct DefaultDiscordClient: DiscordClient {
             queries: queries
         )
         return response
-    }
-    
-    public func send<E: Encodable, C: Codable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)] = [],
-        payload: E
-    ) async throws -> DiscordClientResponse<C> {
-        let response = try await self.send(to: endpoint, queries: queries, payload: payload)
-        return DiscordClientResponse(raw: response)
     }
 }
 
