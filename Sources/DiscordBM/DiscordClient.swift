@@ -7,9 +7,7 @@ import Logging
 
 public protocol DiscordClient {
     
-    var client: HTTPClient { get }
     var appId: String? { get }
-    var configuration: ClientConfiguration { get }
     
     func send(
         to endpoint: Endpoint,
@@ -187,18 +185,6 @@ public enum DiscordClientError: Error {
 
 //MARK: - Private +DiscordClient
 private extension DiscordClient {
-    
-    func execute(_ request: HTTPClient.Request) async throws -> DiscordHTTPResponse {
-        DiscordHTTPResponse(
-            _response: try await self.client.execute(
-                request: request,
-                deadline: .now() + configuration.requestTimeout,
-                logger: configuration.enableLoggingForRequests
-                ? DiscordGlobalConfiguration.makeLogger("DiscordClientHTTPRequest")
-                : Logger(label: "DBM-no-op-logger", factory: { _ in SwiftLogNoOpLogHandler() })
-            ).get()
-        )
-    }
     
     func requireAppId(_ providedAppId: String?) throws -> String {
         if let appId = providedAppId ?? self.appId {
@@ -513,11 +499,11 @@ private let rateLimiter = HTTPRateLimiter(label: "DiscordClientRateLimiter")
 //MARK: - DefaultDiscordClient
 public struct DefaultDiscordClient: DiscordClient {
     
-    public let client: HTTPClient
-    private let token: Secret
+    let client: HTTPClient
+    public let token: Secret
     public let appId: String?
+    let configuration: ClientConfiguration
     private let cache: ClientCache?
-    public let configuration: ClientConfiguration
     
     /// If you provide no app id, you'll need to pass it to some functions on call site.
     public init(
@@ -579,6 +565,18 @@ public struct DefaultDiscordClient: DiscordClient {
                 identity: identity,
                 queries: queries
             ), ttl: ttl
+        )
+    }
+    
+    func execute(_ request: HTTPClient.Request) async throws -> DiscordHTTPResponse {
+        DiscordHTTPResponse(
+            _response: try await self.client.execute(
+                request: request,
+                deadline: .now() + configuration.requestTimeout,
+                logger: configuration.enableLoggingForRequests
+                ? DiscordGlobalConfiguration.makeLogger("DiscordClientHTTPRequest")
+                : Logger(label: "DBM-no-op-logger", factory: { _ in SwiftLogNoOpLogHandler() })
+            ).get()
         )
     }
     
