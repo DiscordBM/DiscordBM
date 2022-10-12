@@ -211,7 +211,7 @@ private extension DiscordClient {
         guard value.map({ (lowerBound...upperBound).contains($0) }) != false else {
             throw DiscordClientError.queryParameterOutOfBounds(
                 name: name,
-                value: value.map({ "\($0)" }),
+                value: value?.description,
                 lowerBound: 1,
                 upperBound: 1_000
             )
@@ -504,6 +504,7 @@ public struct DefaultDiscordClient: DiscordClient {
     public let appId: String?
     let configuration: ClientConfiguration
     private let cache: ClientCache?
+    let logger = DiscordGlobalConfiguration.makeLogger("DefaultDiscordClient")
     
     /// If you provide no app id, you'll need to pass it to some functions on call site.
     public init(
@@ -574,7 +575,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 request: request,
                 deadline: .now() + configuration.requestTimeout,
                 logger: configuration.enableLoggingForRequests
-                ? DiscordGlobalConfiguration.makeLogger("DiscordClientHTTPRequest")
+                ? DiscordGlobalConfiguration.makeLogger("DBM+HTTPClient")
                 : Logger(label: "DBM-no-op-logger", factory: { _ in SwiftLogNoOpLogHandler() })
             ).get()
         )
@@ -594,7 +595,15 @@ public struct DefaultDiscordClient: DiscordClient {
             method: endpoint.httpMethod
         )
         request.headers = ["Authorization": "Bot \(token._storage)"]
+        logger.debug("Will send a request to Discord", metadata: [
+            "url": .stringConvertible(request.url),
+            "method": .string(request.method.rawValue),
+            "body-bytes": "nil",
+        ])
         let response = try await self.execute(request)
+        logger.debug("Received a response from Discord", metadata: [
+            "response": .string("\(response._response)")
+        ])
         await self.includeInRateLimits(
             endpoint: endpoint,
             headers: response.headers,
@@ -628,7 +637,15 @@ public struct DefaultDiscordClient: DiscordClient {
             "Content-Type": "application/json"
         ]
         request.body = .bytes(data)
+        logger.debug("Will send a request to Discord", metadata: [
+            "url": .stringConvertible(request.url),
+            "method": .string(request.method.rawValue),
+            "body-bytes": .stringConvertible(data)
+        ])
         let response = try await self.execute(request)
+        logger.debug("Received a response from Discord", metadata: [
+            "response": .string("\(response._response)")
+        ])
         await self.includeInRateLimits(
             endpoint: endpoint,
             headers: response.headers,
