@@ -16,7 +16,7 @@ public protocol GatewayManager: AnyActor {
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
     func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
     func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
-    nonisolated func disconnect()
+    func disconnect() async
 }
 #else
 public protocol GatewayManager: AnyObject {
@@ -28,7 +28,7 @@ public protocol GatewayManager: AnyObject {
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
     func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
     func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
-    nonisolated func disconnect()
+    func disconnect() async
 }
 #endif
 
@@ -101,13 +101,22 @@ public actor BotGatewayManager: GatewayManager {
     
     //MARK: Backoff properties
     
-    /// Try count for connections, so we can have exponential backoff.
-    private var connectionTryCount = 0
-    /// When last identify happened.
-    ///
     /// Discord cares about the identify payload for rate-limiting and if we send
     /// more than 1000 identifies in a day, Discord will revoke the bot token.
-    private var lastIdentifyDate = Date.distantPast
+    private let connectionBackoff = Backoff(
+        base: 2,
+        maxExponentiation: 7,
+        coefficient: 1,
+        minTimePast: 15
+    )
+    
+//    /// Try count for connections, so we can have exponential backoff.
+//    private var connectionTryCount = 0
+//    /// When last identify happened.
+//    ///
+//    /// Discord cares about the identify payload for rate-limiting and if we send
+//    /// more than 1000 identifies in a day, Discord will revoke the bot token.
+//    private var lastIdentifyDate = Date.distantPast
     
     //MARK: Ping-pong tracking properties
     private var unsuccessfulPingsCount = 0
@@ -205,10 +214,16 @@ public actor BotGatewayManager: GatewayManager {
         self.onEventParseFailures.append(handler)
     }
     
-    public nonisolated func disconnect() {
-        Task {
-            await self.disconnectAsync()
-        }
+    public func disconnect() async {
+        logger.debug("Will disconnect", metadata: [
+            "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+        ])
+        self.connectionId.wrappingIncrement(ordering: .relaxed)
+        await connectionBackoff.resetTryCount()
+        self.closeWebSocket(ws: self.ws)
+        self._state.store(.stopped, ordering: .relaxed)
+        self.isFirstConnection = true
+        self.lastSend = .distantPast
     }
 }
 
@@ -225,7 +240,7 @@ extension BotGatewayManager {
             return
         }
         /// Guard we're attempting to connect too fast
-        if let connectIn = canTryToConnectIn() {
+        if let connectIn = await connectionBackoff.canPerformIn() {
             logger.warning("Cannot try to connect immediately due to backoff", metadata: [
                 "wait-milliseconds": .stringConvertible(connectIn.nanoseconds / 1_000_000)
             ])
@@ -269,7 +284,7 @@ extension BotGatewayManager {
         self._state.store(.configured, ordering: .relaxed)
     }
     
-    private func processEvent(_ event: Gateway.Event) {
+    private func processEvent(_ event: Gateway.Event) async {
         if let sequenceNumber = event.sequenceNumber {
             self.sequenceNumber = sequenceNumber
         }
@@ -308,19 +323,19 @@ extension BotGatewayManager {
                 forConnectionWithId: self.connectionId.load(ordering: .relaxed),
                 every: interval
             )
-            self.sendResumeOrIdentify()
+            await self.sendResumeOrIdentify()
         case let .ready(payload):
             logger.notice("Received ready notice. The connection is fully established", metadata: [
                 "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
             ])
-            self.onSuccessfulConnection()
+            await self.onSuccessfulConnection()
             self.sessionId = payload.session_id
             self.resumeGatewayUrl = payload.resume_gateway_url
         case .resumed:
             logger.notice("Received resume notice. The connection is fully established", metadata: [
                 "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
             ])
-            self.onSuccessfulConnection()
+            await self.onSuccessfulConnection()
         default:
             break
         }
@@ -350,7 +365,7 @@ extension BotGatewayManager {
         }
     }
     
-    private func sendResumeOrIdentify() {
+    private func sendResumeOrIdentify() async {
         if let sessionId = self.sessionId,
            let lastSequenceNumber = self.sequenceNumber {
             self.sendResume(sessionId: sessionId, sequenceNumber: lastSequenceNumber)
@@ -359,7 +374,7 @@ extension BotGatewayManager {
                 "sessionId_length": .stringConvertible(self.sessionId?.count ?? -1),
                 "lastSequenceNumber": .stringConvertible(self.sequenceNumber ?? -1)
             ])
-            self.sendIdentify()
+            await self.sendIdentify()
         }
     }
     
@@ -374,7 +389,7 @@ extension BotGatewayManager {
         )
         self.send(
             payload: resume,
-            opcode: UInt8(Gateway.Opcode.identify.rawValue)
+            opcode: Gateway.Opcode.identify.rawValue
         )
         
         /// Invalidate these temporary info for the next connection, incase this one fails.
@@ -386,8 +401,8 @@ extension BotGatewayManager {
         logger.debug("Sent resume request to Discord")
     }
     
-    private func sendIdentify() {
-        self.lastIdentifyDate = Date()
+    private func sendIdentify() async {
+        await connectionBackoff.willTry()
         let identify = Gateway.Event(
             opcode: .identify,
             data: .identify(identifyPayload)
@@ -406,7 +421,9 @@ extension BotGatewayManager {
                     from: data
                 )
                 self.logger.debug("Decoded event: \(event)")
-                self.processEvent(event)
+                Task {
+                    await self.processEvent(event)
+                }
                 for onEvent in self.onEvents {
                     onEvent(event)
                 }
@@ -569,7 +586,7 @@ extension BotGatewayManager {
         }
         do {
             let data = try DiscordGlobalConfiguration.encoder.encode(payload)
-            let opcode = opcode ?? UInt8(payload.opcode.rawValue)
+            let opcode = opcode ?? payload.opcode.rawValue
             if let ws = self.ws {
                 self.lastSend = Date()
                 ws.send(raw: data, opcode: .init(encodedWebSocketOpcode: opcode)!)
@@ -589,44 +606,11 @@ extension BotGatewayManager {
         }
     }
     
-    private func onSuccessfulConnection() {
+    private func onSuccessfulConnection() async {
         self._state.store(.connected, ordering: .relaxed)
-        self.connectionTryCount = 0
+        await connectionBackoff.resetTryCount()
         self.unsuccessfulPingsCount = 0
         self.lastSend = .distantPast
-    }
-    
-    /// Returns `nil` if can connect immediately,
-    /// otherwise `TimeAmount` to wait before attempting to connect.
-    /// Increases `connectionTryCount`.
-    private func canTryToConnectIn() -> TimeAmount? {
-        let tryCount = self.connectionTryCount
-        self.connectionTryCount += 1
-        let lastIdentify = self.lastIdentifyDate.timeIntervalSince1970
-        let now = Date().timeIntervalSince1970
-        if tryCount == 0 {
-            /// Even if the last connection was successful, don't try to connect too fast.
-            let timePast = now - lastIdentify
-            let minTimePast = 15.0
-            if timePast > minTimePast {
-                return nil
-            } else {
-                let remaining = minTimePast - timePast
-                let millis = Int64(remaining * 1_000)
-                return .milliseconds(millis)
-            }
-        } else {
-            let effectiveTryCount = min(tryCount, 7)
-            let factor = pow(Double(2), Double(effectiveTryCount))
-            let timePast = now - lastIdentify
-            let waitMore = factor - timePast
-            if waitMore > 0 {
-                let millis = Int64(waitMore * 1_000) + 1
-                return .milliseconds(millis)
-            } else {
-                return nil
-            }
-        }
     }
     
     private func waitInShardQueueIfNeeded() async {
@@ -654,18 +638,6 @@ extension BotGatewayManager {
                 "error": "\($0)"
             ])
         }
-    }
-    
-    private func disconnectAsync() {
-        logger.debug("Will disconnect", metadata: [
-            "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-        ])
-        self.connectionId.wrappingIncrement(ordering: .relaxed)
-        self.connectionTryCount = 0
-        self.closeWebSocket(ws: self.ws)
-        self._state.store(.stopped, ordering: .relaxed)
-        self.isFirstConnection = true
-        self.lastSend = .distantPast
     }
     
     private func sleep(for time: TimeAmount) async {

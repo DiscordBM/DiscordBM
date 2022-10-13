@@ -3,7 +3,7 @@ import Foundation
 public struct Gateway: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#opcodes-and-status-codes
-    public enum Opcode: Int, Sendable, Codable, CustomStringConvertible {
+    public enum Opcode: UInt8, Sendable, Codable, CustomStringConvertible {
         case dispatch = 0
         case heartbeat = 1
         case identify = 2

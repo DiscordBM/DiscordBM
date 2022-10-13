@@ -3,6 +3,7 @@ import NIOHTTP1
 import NIOConcurrencyHelpers
 import NIOCore
 import struct Foundation.Date
+import struct Foundation.UUID
 import Logging
 
 public protocol DiscordClient {
@@ -595,15 +596,25 @@ public struct DefaultDiscordClient: DiscordClient {
             method: endpoint.httpMethod
         )
         request.headers = ["Authorization": "Bot \(token._storage)"]
+        
+        let requestLogId: String?
+        if logger.logLevel >= .debug {
+            requestLogId = UUID().uuidString
+        } else {
+            requestLogId = nil
+        }
         logger.debug("Will send a request to Discord", metadata: [
             "url": .stringConvertible(request.url),
             "method": .string(request.method.rawValue),
             "body-bytes": "nil",
+            "request-id": .string(requestLogId ?? "nil")
         ])
         let response = try await self.execute(request)
         logger.debug("Received a response from Discord", metadata: [
-            "response": .string("\(response._response)")
+            "response": .string("\(response._response)"),
+            "request-id": .string(requestLogId ?? "nil")
         ])
+        
         await self.includeInRateLimits(
             endpoint: endpoint,
             headers: response.headers,
@@ -637,15 +648,25 @@ public struct DefaultDiscordClient: DiscordClient {
             "Content-Type": "application/json"
         ]
         request.body = .bytes(data)
+        
+        let requestLogId: String?
+        if logger.logLevel >= .debug {
+            requestLogId = UUID().uuidString
+        } else {
+            requestLogId = nil
+        }
         logger.debug("Will send a request to Discord", metadata: [
             "url": .stringConvertible(request.url),
             "method": .string(request.method.rawValue),
-            "body-bytes": .stringConvertible(data)
+            "body-bytes": .stringConvertible(data),
+            "request-id": .string(requestLogId ?? "nil")
         ])
         let response = try await self.execute(request)
         logger.debug("Received a response from Discord", metadata: [
-            "response": .string("\(response._response)")
+            "response": .string("\(response._response)"),
+            "request-id": .string(requestLogId ?? "nil")
         ])
+        
         await self.includeInRateLimits(
             endpoint: endpoint,
             headers: response.headers,
