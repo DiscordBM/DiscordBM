@@ -14,8 +14,6 @@ class GatewayConnectionTests: XCTestCase {
             try! elg.syncShutdownGracefully()
         }
         
-        let intents: [Gateway.Intent] = [.guilds, .guildBans, .guildEmojisAndStickers, .guildIntegrations, .guildWebhooks, .guildInvites, .guildVoiceStates, .guildMessages, .guildMessageReactions, .guildMessageTyping, .directMessages, .directMessageReactions, .directMessageTyping, .guildScheduledEvents, .autoModerationConfiguration, .autoModerationExecution, .guildMessages, .guildPresences, .messageContent]
-        
         let bot = BotGatewayManager(
             eventLoopGroup: elg,
             httpClient: httpClient,
@@ -26,10 +24,10 @@ class GatewayConnectionTests: XCTestCase {
                 status: .invisible,
                 afk: false
             ),
-            intents: intents
+            intents: [.guilds, .guildBans, .guildEmojisAndStickers, .guildIntegrations, .guildWebhooks, .guildInvites, .guildVoiceStates, .guildMessages, .guildMessageReactions, .guildMessageTyping, .directMessages, .directMessageReactions, .directMessageTyping, .guildScheduledEvents, .autoModerationConfiguration, .autoModerationExecution, .guildMessages, .guildPresences, .messageContent]
         )
-        
-        let expectation = expectation(description: "Connected")
+
+        let expectation = XCTestExpectation(description: "Connected")
         var _ready: Gateway.Ready?
         var didHello = false
         await bot.addEventHandler { event in
