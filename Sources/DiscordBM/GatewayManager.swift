@@ -12,7 +12,7 @@ public protocol GatewayManager: AnyActor {
     nonisolated var id: Int { get }
     nonisolated var state: GatewayState { get }
     
-    nonisolated func connect()
+    func connect() async
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
     func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
     func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
@@ -24,7 +24,7 @@ public protocol GatewayManager: AnyObject {
     nonisolated var id: Int { get }
     nonisolated var state: GatewayState { get }
     
-    nonisolated func connect()
+    func connect() async
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
     func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
     func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
@@ -186,9 +186,52 @@ public actor BotGatewayManager: GatewayManager {
         self.logger = logger
     }
     
-    public nonisolated func connect() {
-        Task {
-            await connectAsync()
+    /// `_state` must be set to an appropriate value before triggering this function.
+    public func connect() async {
+        logger.debug("Connect method triggered")
+        /// Guard if other connections are in process
+        let state = self._state.load(ordering: .relaxed)
+        guard state == .noConnection || state == .configured else {
+            logger.warning("Gateway state doesn't allow a new connection", metadata: [
+                "state": .stringConvertible(state)
+            ])
+            return
+        }
+        /// Guard we're attempting to connect too fast
+        if let connectIn = await connectionBackoff.canPerformIn() {
+            logger.warning("Cannot try to connect immediately due to backoff", metadata: [
+                "wait-milliseconds": .stringConvertible(connectIn.nanoseconds / 1_000_000)
+            ])
+            await self.sleep(for: connectIn)
+            await self.connect()
+            return
+        }
+        self._state.store(.connecting, ordering: .relaxed)
+        self.connectionId.wrappingIncrement(ordering: .relaxed)
+        self.lastSend = .distantPast
+        let gatewayUrl = await getGatewayUrl()
+        logger.trace("Will wait for other shards if needed")
+        await waitInShardQueueIfNeeded()
+        var configuration = WebSocketClient.Configuration()
+        configuration.maxFrameSize = self.maxFrameSize
+        logger.trace("Will try to connect to Discord through web-socket")
+        WebSocket.connect(
+            to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
+            configuration: configuration,
+            on: eventLoopGroup
+        ) { ws in
+            self.logger.debug("Connected to Discord through web-socket. Will configure")
+            self.ws = ws
+            self.configureWebSocket()
+        }.whenFailure { [self] error in
+            logger.error("WebSocket error while connecting to Discord", metadata: [
+                "error": "\(error)"
+            ])
+            self._state.store(.noConnection, ordering: .relaxed)
+            Task {
+                await self.sleep(for: .seconds(5))
+                await self.connect()
+            }
         }
     }
     
@@ -222,55 +265,6 @@ public actor BotGatewayManager: GatewayManager {
 }
 
 extension BotGatewayManager {
-    /// `_state` must be set to an appropriate value before triggering this function.
-    private func connectAsync() async {
-        logger.debug("Connect method triggered")
-        /// Guard if other connections are in process
-        let state = self._state.load(ordering: .relaxed)
-        guard state == .noConnection || state == .configured else {
-            logger.warning("Gateway state doesn't allow a new connection", metadata: [
-                "state": .stringConvertible(state)
-            ])
-            return
-        }
-        /// Guard we're attempting to connect too fast
-        if let connectIn = await connectionBackoff.canPerformIn() {
-            logger.warning("Cannot try to connect immediately due to backoff", metadata: [
-                "wait-milliseconds": .stringConvertible(connectIn.nanoseconds / 1_000_000)
-            ])
-            await self.sleep(for: connectIn)
-            await self.connectAsync()
-            return
-        }
-        self._state.store(.connecting, ordering: .relaxed)
-        self.connectionId.wrappingIncrement(ordering: .relaxed)
-        self.lastSend = .distantPast
-        let gatewayUrl = await getGatewayUrl()
-        logger.trace("Will wait for other shards if needed")
-        await waitInShardQueueIfNeeded()
-        var configuration = WebSocketClient.Configuration()
-        configuration.maxFrameSize = self.maxFrameSize
-        logger.trace("Will try to connect to Discord through web-socket")
-        WebSocket.connect(
-            to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
-            configuration: configuration,
-            on: eventLoopGroup
-        ) { ws in
-            self.logger.debug("Connected to Discord through web-socket. Will configure")
-            self.ws = ws
-            self.configureWebSocket()
-        }.whenFailure { [self] error in
-            logger.error("WebSocket error while connecting to Discord", metadata: [
-                "error": "\(error)"
-            ])
-            self._state.store(.noConnection, ordering: .relaxed)
-            Task {
-                await self.sleep(for: .seconds(5))
-                await connectAsync()
-            }
-        }
-    }
-    
     private func configureWebSocket() {
         let connId = self.connectionId.load(ordering: .relaxed)
         self.setupOnText(forConnectionWithId: connId)
@@ -307,7 +301,7 @@ extension BotGatewayManager {
                 self.sessionId = nil
             }
             self._state.store(.noConnection, ordering: .relaxed)
-            self.connect()
+            await self.connect()
         case let .hello(hello):
             logger.debug("Received 'hello'")
             let interval: TimeAmount = .milliseconds(Int64(hello.heartbeat_interval))
@@ -455,7 +449,7 @@ extension BotGatewayManager {
                 )
                 if self.canTryReconnect(ws: ws) {
                     self._state.store(.noConnection, ordering: .relaxed)
-                    self.connect()
+                    await self.connect()
                 } else {
                     self._state.store(.stopped, ordering: .relaxed)
                     self.connectionId.wrappingIncrement(ordering: .relaxed)
@@ -535,7 +529,7 @@ extension BotGatewayManager {
                     "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                 ])
                 self._state.store(.noConnection, ordering: .relaxed)
-                self.connect()
+                await self.connect()
             }
         }
     }

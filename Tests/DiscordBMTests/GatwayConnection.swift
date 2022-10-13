@@ -41,7 +41,7 @@ class GatewayConnectionTests: XCTestCase {
             }
         }
         
-        bot.connect()
+        await bot.connect()
         wait(for: [expectation], timeout: 5)
         
         XCTAssertTrue(didHello)
