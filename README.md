@@ -4,29 +4,19 @@
 
 A Swift library for making Discord bots.
 
+## Notable Features
+* Everything async/await. Full integration with all the latest Server-Side Swift packages.
+* Connect to the Discord gateway and receive all events easily.
+* Send requests to the Discord API using library's Discord client.
+* Easily decode Discord's API responses using the hard-typed APIs.
+* Abstractions for easier testability.
+
+## Showcase
+You can see Vapor community's Penny bot as a showcase of using this library in production. Penny is used to give coins to the helpful members of the Vapor community as a sign of appreciation.   
+Penny is available [here](https://github.com/vapor/penny-bot) and you can find `DiscordBM` used in the [PennyBOT](https://github.com/vapor/penny-bot/tree/main/CODE/Sources/PennyBOT) target.
+
 ## How To Use
 First you need to initialize a `BotGatewayManager` instance, then tell it to connect and start using it:
-
-### Initializing a Gateway Manager With Vapor
-```swift
-import DiscordBM
-import Vapor
-
-let app: Application = YOUR_VAPOR_APPLICATION
-let manager = BotGatewayManager(
-    eventLoopGroup: app.eventLoopGroup,
-    httpClient: app.http.client.shared,
-    token: YOUR_BOT_TOKEN,
-    appId: YOUR_APP_ID,
-    presence: .init( /// Set up bot's initial presence
-        /// Will show up as "Playing Fortnite"
-        activities: [.init(name: "Fortnite", type: .game)],
-        status: .online,
-        afk: false
-    ),
-    intents: [.guildMessages, .messageContent] /// Add all the intents you want
-)
-```
 
 ### Initializing a Gateway Manager On Your Own
 Make sure you've added [AsyncHTTPClient](https://github.com/swift-server/async-http-client) to your dependancies.
@@ -35,7 +25,7 @@ import DiscordBM
 import AsyncHTTPClient
 
 let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-let manager = BotGatewayManager(
+let bot = BotGatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,
     token: YOUR_BOT_TOKEN,
@@ -55,16 +45,38 @@ try httpClient.syncShutdown()
 /// Prefer to use `shutdown()` in async contexts:
 /// try await httpClient.shutdown()
 ```
+See the [GatewayConnection tests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/DiscordBMTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
+
+### Initializing a Gateway Manager With Vapor
+```swift
+import DiscordBM
+import Vapor
+
+let app: Application = YOUR_VAPOR_APPLICATION
+let bot = BotGatewayManager(
+    eventLoopGroup: app.eventLoopGroup,
+    httpClient: app.http.client.shared,
+    token: YOUR_BOT_TOKEN,
+    appId: YOUR_APP_ID,
+    presence: .init( /// Set up bot's initial presence
+        /// Will show up as "Playing Fortnite"
+        activities: [.init(name: "Fortnite", type: .game)],
+        status: .online,
+        afk: false
+    ),
+    intents: [.guildMessages, .messageContent] /// Add all the intents you want
+)
+```
 
 ### Using The Gateway Manager
 ```swift
 import DiscordBM
 
-let manager: BotGatewayManager = ... /// Make an instance like above
+let bot: BotGatewayManager = ... /// Make an instance like above
 
 /// Add event handlers
 Task {
-    await manager.addEventHandler { event in
+    await bot.addEventHandler { event in
         switch event.data {
         case let .messageCreate(message):
             print("GOT MESSAGE!", message)
@@ -74,17 +86,17 @@ Task {
     }
     
     /// If you care about library parsing failures, handle them here
-    await manager.addEventParseFailureHandler { error, text in
+    await bot.addEventParseFailureHandler { error, text in
         /// Handle the failure using the `error` thrown and the `text` received.
     }
 }
 
-/// Tell manager to connect to Discord
-manager.connect()
+/// Tell the manager to connect to Discord
+bot.connect()
 
-/// Use `manager.client` to send requests to discord.
+/// Use `bot.client` to send requests to discord.
 Task {
-    try await manager.client.createMessage(
+    try await bot.client.createMessage(
         channelId: CHANNEL_ID,
         payload: .init(content: "Hello Everybody!")
     )
@@ -139,9 +151,6 @@ This library will try to follow the no-breaking-changes-in-minor-versions rule, 
 * Support gateway payload compression
 * OAuth-2 support (Not really needed for bots, so not a priority)
 
-## Showcase
-You can see Vapor community's Penny bot as a showcase of using this library in production. Penny is used to give coins to the helpful members of the Vapor community as a sign of appreciation.   
-Penny is available [here](https://github.com/vapor/penny-bot) and you can find `DiscordBM` used in the [PennyBOT](https://github.com/vapor/penny-bot/tree/main/CODE/Sources/PennyBOT) target.
-
-## Contribution
+## Contribution & Support
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.
+I'm also actively looking for any new info in the Discord API, and will add them to the library as soon as I can.
