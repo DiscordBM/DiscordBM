@@ -6,11 +6,10 @@ import XCTest
 class DiscordClientTests: XCTestCase {
     
     func testMessageSendDelete() async throws {
-        let elg = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        let httpClient = HTTPClient(eventLoopGroupProvider: .shared(elg))
+        
+        let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         defer {
             try! httpClient.syncShutdown()
-            try! elg.syncShutdownGracefully()
         }
         
         let client = DefaultDiscordClient(

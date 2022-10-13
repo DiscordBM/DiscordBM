@@ -7,15 +7,13 @@ class GatewayConnectionTests: XCTestCase {
     
     func testConnect() async throws {
         
-        let elg = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        let httpClient = HTTPClient(eventLoopGroupProvider: .shared(elg))
+        let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         defer {
             try! httpClient.syncShutdown()
-            try! elg.syncShutdownGracefully()
         }
         
         let bot = BotGatewayManager(
-            eventLoopGroup: elg,
+            eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             token: Constants.token,
             appId: Constants.appId,
