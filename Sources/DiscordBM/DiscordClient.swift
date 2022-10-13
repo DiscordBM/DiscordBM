@@ -512,7 +512,7 @@ public struct DefaultDiscordClient: DiscordClient {
         httpClient: HTTPClient,
         token: Secret,
         appId: String?,
-        configuration: ClientConfiguration
+        configuration: ClientConfiguration = .init()
     ) {
         self.client = httpClient
         self.token = token
@@ -525,6 +525,21 @@ public struct DefaultDiscordClient: DiscordClient {
             /// answers might be different for different tokens.
             self.cache = ClientCacheStorage.shared.cache(for: token)
         }
+    }
+    
+    /// If you provide no app id, you'll need to pass it to some functions on call site.
+    public init(
+        httpClient: HTTPClient,
+        token: String,
+        appId: String?,
+        configuration: ClientConfiguration = .init()
+    ) {
+        self.init(
+            httpClient: httpClient,
+            token: Secret(token),
+            appId: appId,
+            configuration: configuration
+        )
     }
     
     func checkRateLimitsAllowRequest(to endpoint: Endpoint) async throws {

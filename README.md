@@ -135,7 +135,6 @@ This library will try to follow the no-breaking-changes-in-minor-versions rule, 
 
 ## Wishlist / Not Yet Supported
 * Support more endpoints (Easy to add yourself; PRs appreciated)
-* More tests
 * Attachments support (For now you can provide media links instead, which is usually better anyway)
 * Support gateway payload compression
 * OAuth-2 support (Not really needed for bots, so not a priority)

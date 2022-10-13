@@ -1,7 +1,7 @@
 @testable import DiscordBM
 import XCTest
 
-class ExponentialBackoffTests: XCTestCase {
+class BackoffTests: XCTestCase {
     
     func testNoWaitTimeForTheFirstTime() async {
         for _ in 0..<10 {

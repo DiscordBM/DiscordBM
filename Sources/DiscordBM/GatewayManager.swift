@@ -103,20 +103,14 @@ public actor BotGatewayManager: GatewayManager {
     
     /// Discord cares about the identify payload for rate-limiting and if we send
     /// more than 1000 identifies in a day, Discord will revoke the bot token.
+    /// This does not necessarily prevent your bot token getting revoked,
+    /// but in the worst case, doesn't let it happen sooner than 8 hours.
     private let connectionBackoff = Backoff(
         base: 2,
         maxExponentiation: 7,
         coefficient: 1,
         minTimePast: 15
     )
-    
-//    /// Try count for connections, so we can have exponential backoff.
-//    private var connectionTryCount = 0
-//    /// When last identify happened.
-//    ///
-//    /// Discord cares about the identify payload for rate-limiting and if we send
-//    /// more than 1000 identifies in a day, Discord will revoke the bot token.
-//    private var lastIdentifyDate = Date.distantPast
     
     //MARK: Ping-pong tracking properties
     private var unsuccessfulPingsCount = 0
