@@ -7,7 +7,7 @@ actor Backoff {
     let base: Double
     let maxExponentiation: Int
     let coefficient: Double
-    let minTimePast: TimeInterval
+    let minBackoff: TimeInterval
     var tryCount = 0
     var previousTry = Date.distantPast.timeIntervalSince1970
     
@@ -15,12 +15,12 @@ actor Backoff {
         base: Double,
         maxExponentiation: Int,
         coefficient: Double,
-        minTimePast: TimeInterval
+        minBackoff: TimeInterval
     ) {
         self.base = base
         self.maxExponentiation = maxExponentiation
         self.coefficient = coefficient
-        self.minTimePast = minTimePast
+        self.minBackoff = minBackoff
     }
     
     /// Returns `nil` if can perform immediately,
@@ -34,10 +34,10 @@ actor Backoff {
         if tryCount == 0 {
             /// Even if the last connection was successful, don't try to connect too fast.
             let timePast = now - previousTry
-            if timePast > minTimePast {
+            if timePast > minBackoff {
                 return nil
             } else {
-                let remaining = minTimePast - timePast
+                let remaining = minBackoff - timePast
                 let millis = Int64(remaining * 1_000)
                 return .milliseconds(millis)
             }
@@ -48,7 +48,7 @@ actor Backoff {
             let waitMore = factor - timePast
             if waitMore > 0 {
                 let millis = Int64(waitMore * 1_000) + 1
-                let waitTime = max(millis, Int64(minTimePast * 1_000))
+                let waitTime = max(millis, Int64(minBackoff * 1_000))
                 return .milliseconds(waitTime)
             } else {
                 return nil

@@ -302,7 +302,7 @@ public extension DiscordClient {
     func createMessage(
         channelId: String,
         payload: DiscordChannel.CreateMessage
-    ) async throws -> DiscordClientResponse<Gateway.MessageCreate> {
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = Endpoint.postCreateMessage(channelId: channelId)
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }

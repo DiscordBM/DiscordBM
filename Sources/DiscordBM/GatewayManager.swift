@@ -109,7 +109,7 @@ public actor BotGatewayManager: GatewayManager {
         base: 2,
         maxExponentiation: 7,
         coefficient: 1,
-        minTimePast: 15
+        minBackoff: 15
     )
     
     //MARK: Ping-pong tracking properties
