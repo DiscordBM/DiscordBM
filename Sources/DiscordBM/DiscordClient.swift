@@ -106,8 +106,8 @@ public struct DiscordClientResponse<C> where C: Codable {
     
     public func decode() throws -> C {
         if (200..<300).contains(raw.status.code) {
-            if let body = raw.body,
-               let data = body.getData(at: 0, length: body.readableBytes) {
+            if var body = raw.body,
+               let data = body.readData(length: body.readableBytes) {
                 return try DiscordGlobalConfiguration.decoder.decode(C.self, from: data)
             } else {
                 throw DiscordClientError.emptyBody(raw: raw)

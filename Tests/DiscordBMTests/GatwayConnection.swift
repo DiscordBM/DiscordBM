@@ -7,6 +7,13 @@ class GatewayConnectionTests: XCTestCase {
     
     func testConnect() async throws {
         
+#if swift(<5.7)
+        /// Wait some seconds when in swift 5.6
+        /// Discord doesn't like connecting to the gateway too fast
+        /// so we let swift 5.7 connect first
+        try await Task.sleep(nanoseconds: 10 * 1_000_000_000)
+#endif
+        
         let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         defer {
             try! httpClient.syncShutdown()
