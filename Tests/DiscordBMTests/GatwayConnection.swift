@@ -39,8 +39,10 @@ class GatewayConnectionTests: XCTestCase {
             }
         }
         
-        await bot.connect()
-        wait(for: [expectation], timeout: 5)
+        Task {
+            await bot.connect()
+        }
+        wait(for: [expectation], timeout: 10)
         
         XCTAssertTrue(didHello)
         let ready = try XCTUnwrap(_ready)

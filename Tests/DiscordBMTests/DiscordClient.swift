@@ -25,7 +25,6 @@ class DiscordClientTests: XCTestCase {
         )
         
         XCTAssertEqual(createResponse.raw.status, .ok)
-        
         let message = try createResponse.decode()
         XCTAssertEqual(message.content, text)
         
