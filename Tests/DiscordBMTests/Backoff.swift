@@ -37,9 +37,9 @@ class BackoffTests: XCTestCase {
     }
     
     func testMinPastTime2() async throws {
-        for _ in 0..<50 {
+        for _ in 0..<500 {
             for num in 1...5 {
-                let minBackoff = Double.random(in: 0...5)
+                let minBackoff = Double.random(in: 0...3.5)
                 let base = Double.random(in: 2...5)
                 let coefficient = Double.random(in: 2...5)
                 let backoff = Backoff(
@@ -114,31 +114,33 @@ class BackoffTests: XCTestCase {
     }
     
     func testPreviousTry() async throws {
-        for num in 1...5 {
-            let minBackoff = Double.random(in: 1...5)
-            let base = Double.random(in: 2...5)
-            let coefficient = Double.random(in: 2...5)
-            let backoff = Backoff(
-                base: base,
-                maxExponentiation: 5,
-                coefficient: coefficient,
-                minBackoff: minBackoff
-            )
-            let timePastAfterPreviousTry = Double.random(in: 0.5..<minBackoff)
-            await backoff.test_setPreviousTry(
-                to: Date().timeIntervalSince1970 - timePastAfterPreviousTry
-            )
-            let exponent = num
-            await backoff.test_setTryCount(to: exponent)
-            let _canPerformIn = await backoff.canPerformIn()
-            let canPerformIn = try XCTUnwrap(_canPerformIn)
-            let canPerformDouble = Double(canPerformIn.nanoseconds) / 1_000_000_000
-            /// With the settings above, `canPerformIn` will always exceed `minPastTime`.
-            XCTAssertGreaterThan(canPerformDouble, minBackoff)
-            XCTAssertTolerantIsEqual(
-                canPerformDouble,
-                coefficient * pow(base, Double(exponent)) - timePastAfterPreviousTry
-            )
+        for _ in 0..<500 {
+            for num in 1...5 {
+                let minBackoff = Double.random(in: 1...3.9)
+                let base = Double.random(in: 2...5)
+                let coefficient = Double.random(in: 2...5)
+                let backoff = Backoff(
+                    base: base,
+                    maxExponentiation: 5,
+                    coefficient: coefficient,
+                    minBackoff: minBackoff
+                )
+                let timePastAfterPreviousTry = Double.random(in: 0.5..<minBackoff)
+                await backoff.test_setPreviousTry(
+                    to: Date().timeIntervalSince1970 - timePastAfterPreviousTry
+                )
+                let exponent = num
+                await backoff.test_setTryCount(to: exponent)
+                let _canPerformIn = await backoff.canPerformIn()
+                let canPerformIn = try XCTUnwrap(_canPerformIn)
+                let canPerformDouble = Double(canPerformIn.nanoseconds) / 1_000_000_000
+                /// With the settings above, `canPerformIn` will always exceed `minPastTime`.
+                XCTAssertGreaterThan(canPerformDouble, minBackoff - timePastAfterPreviousTry)
+                XCTAssertTolerantIsEqual(
+                    canPerformDouble,
+                    coefficient * pow(base, Double(exponent)) - timePastAfterPreviousTry
+                )
+            }
         }
     }
     

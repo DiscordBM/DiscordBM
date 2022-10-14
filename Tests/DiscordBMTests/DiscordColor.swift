@@ -20,6 +20,13 @@ class DiscordColorTests: XCTestCase {
         XCTAssertEqual(hex, "#A0B9FF")
     }
     
+    func testInsensitiveHex() throws {
+        try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "#FFFFFF")).value, 16777215)
+        try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "FFFFFF")).value, 16777215)
+        try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "#ffffff")).value, 16777215)
+        try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "ffffff")).value, 16777215)
+    }
+    
     func testLowerBound() throws {
         _ = try XCTUnwrap(DiscordColor(value: 0))
         _ = try XCTUnwrap(DiscordColor(red: 0, green: 0, blue: 0))
@@ -30,12 +37,5 @@ class DiscordColorTests: XCTestCase {
         _ = try XCTUnwrap(DiscordColor(value: 16777215))
         _ = try XCTUnwrap(DiscordColor(red: 255, green: 255, blue: 255))
         _ = try XCTUnwrap(DiscordColor(hex: "#FFFFFF"))
-    }
-    
-    func testInsensitiveHex() throws {
-        try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "#FFFFFF")).value, 16777215)
-        try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "FFFFFF")).value, 16777215)
-        try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "#ffffff")).value, 16777215)
-        try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "ffffff")).value, 16777215)
     }
 }

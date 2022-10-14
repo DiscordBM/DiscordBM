@@ -45,11 +45,12 @@ actor Backoff {
             let effectiveTryCount = min(tryCount, maxExponentiation)
             let factor = coefficient * pow(base, Double(effectiveTryCount))
             let timePast = now - previousTry
-            let waitMore = factor - timePast
-            if waitMore > 0 {
-                let millis = Int64(waitMore * 1_000) + 1
-                let waitTime = max(millis, Int64(minBackoff * 1_000))
-                return .milliseconds(waitTime)
+            let calculatedWait = factor - timePast
+            let minRequiredWait = minBackoff - timePast
+            let toWait = max(calculatedWait, minRequiredWait)
+            if toWait > 0 {
+                let millis = Int64(toWait * 1_000) + 1
+                return .milliseconds(millis)
             } else {
                 return nil
             }
