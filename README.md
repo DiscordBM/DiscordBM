@@ -8,7 +8,7 @@ A Swift library for making Discord bots.
 * Everything async/await. Full integration with all the latest Server-Side Swift packages.
 * Connect to the Discord gateway and receive all events easily.
 * Send requests to the Discord API using library's Discord client.
-* Easily decode Discord's API responses using the hard-typed APIs.
+* hard-typed API. All Gateway events have their own type and all Discord API responses can be decoded easily.
 * Abstractions for easier testability.
 
 ## Showcase
