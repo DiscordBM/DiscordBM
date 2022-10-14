@@ -964,6 +964,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String?
         public var member: Guild.Member?
         public var emoji: PartialEmoji
+        public var burst: Bool?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove

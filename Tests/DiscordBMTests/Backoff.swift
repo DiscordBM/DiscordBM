@@ -4,7 +4,7 @@ import XCTest
 class BackoffTests: XCTestCase {
     
     func testNoWaitTimeForTheFirstTime() async {
-        for _ in 0..<10 {
+        for _ in 0..<50 {
             let backoff = Backoff(
                 base: .random(in: 2...10),
                 maxExponentiation: .random(in: 2...20),
@@ -19,7 +19,7 @@ class BackoffTests: XCTestCase {
     }
     
     func testMinPastTime1() async throws {
-        for _ in 0..<10 {
+        for _ in 0..<50 {
             let minBackoff = Double.random(in: 5...60)
             let backoff = Backoff(
                 base: 2,
