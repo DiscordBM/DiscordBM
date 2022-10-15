@@ -803,6 +803,7 @@ public struct Gateway: Sendable, Codable {
     public struct GuildRoleDelete: Sendable, Codable {
         public var guild_id: String
         public var role_id: String
+        public var version: Int?
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
     }
