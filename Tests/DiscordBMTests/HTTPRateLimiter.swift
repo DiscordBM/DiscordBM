@@ -11,14 +11,7 @@ class HTTPRateLimiterTests: XCTestCase {
     let interactionEndpoint = Endpoint.createInteractionResponse(id: "", token: "")
     
     override func setUp() async throws {
-        /// Renew the rate-limiter
         self.rateLimiter = HTTPRateLimiter(label: "Test_RateLimiter")
-        /// Disable logging
-        DiscordGlobalConfiguration.makeLogger = { label in
-            Logger(label: label) { _ in
-                SwiftLogNoOpLogHandler()
-            }
-        }
     }
     
     func testBucketAllows() async throws {

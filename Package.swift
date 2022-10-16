@@ -34,5 +34,8 @@ let package = Package(
         .testTarget(
             name: "DiscordBMTests",
             dependencies: ["DiscordBM"]),
+        .testTarget(
+            name: "IntegrationTests",
+            dependencies: ["DiscordBM"]),
     ]
 )
