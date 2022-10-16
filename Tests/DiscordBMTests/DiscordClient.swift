@@ -24,7 +24,7 @@ class DiscordClientTests: XCTestCase {
             payload: .init(content: text)
         )
         
-        XCTAssertEqual(createResponse.raw.status, .ok)
+        XCTAssertEqual(createResponse.httpResponse.status, .ok)
         let message = try createResponse.decode()
         XCTAssertEqual(message.content, text)
         

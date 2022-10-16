@@ -34,21 +34,23 @@ public protocol DiscordClient {
 }
 
 public extension DiscordClient {
+    @inlinable
     func send<C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)]
     ) async throws -> DiscordClientResponse<C> {
         let response = try await self.send(to: endpoint, queries: queries)
-        return DiscordClientResponse(raw: response)
+        return DiscordClientResponse(httpResponse: response)
     }
     
+    @inlinable
     func send<E: Encodable, C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         payload: E
     ) async throws -> DiscordClientResponse<C> {
         let response = try await self.send(to: endpoint, queries: queries, payload: payload)
-        return DiscordClientResponse(raw: response)
+        return DiscordClientResponse(httpResponse: response)
     }
 }
 
@@ -98,22 +100,22 @@ public struct DiscordHTTPResponse: Sendable {
 }
 
 public struct DiscordClientResponse<C> where C: Codable {
-    public let raw: DiscordHTTPResponse
+    public let httpResponse: DiscordHTTPResponse
     
-    public init(raw: DiscordHTTPResponse) {
-        self.raw = raw
+    public init(httpResponse: DiscordHTTPResponse) {
+        self.httpResponse = httpResponse
     }
     
     public func decode() throws -> C {
-        if (200..<300).contains(raw.status.code) {
-            if var body = raw.body,
+        if (200..<300).contains(httpResponse.status.code) {
+            if var body = httpResponse.body,
                let data = body.readData(length: body.readableBytes) {
                 return try DiscordGlobalConfiguration.decoder.decode(C.self, from: data)
             } else {
-                throw DiscordClientError.emptyBody(raw: raw)
+                throw DiscordClientError.emptyBody(httpResponse)
             }
         } else {
-            throw DiscordClientError.cantAttemptToDecodeDueToBadStatusCode(raw: raw)
+            throw DiscordClientError.cantAttemptToDecodeDueToBadStatusCode(httpResponse)
         }
     }
 }
@@ -176,33 +178,36 @@ public struct ClientConfiguration {
 
 public enum DiscordClientError: Error {
     case rateLimited(url: String)
-    case cantAttemptToDecodeDueToBadStatusCode(raw: DiscordHTTPResponse)
-    case emptyBody(raw: DiscordHTTPResponse)
+    case cantAttemptToDecodeDueToBadStatusCode(DiscordHTTPResponse)
+    case emptyBody(DiscordHTTPResponse)
     case appIdParameterRequired
     /// Can only send one of those query parameters.
     case queryParametersMutuallyExclusive(queries: [(String, String?)])
     case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)
 }
 
-//MARK: - Private +DiscordClient
-private extension DiscordClient {
+//MARK: - Internal +DiscordClient
+extension DiscordClient {
     
+    @usableFromInline
     func requireAppId(_ providedAppId: String?) throws -> String {
         if let appId = providedAppId ?? self.appId {
             return appId
         } else {
-            /// You have not passed your app id in the init of `DiscordClient`.
+            /// You have not passed your app-id in the init of `DiscordClient`/`GatewayManager`.
             /// You need to pass it in the function parameters.
             throw DiscordClientError.appIdParameterRequired
         }
     }
     
+    @usableFromInline
     func checkMutuallyExclusive(queries: [(String, String?)]) throws {
         guard queries.filter({ $0.1 != nil }).count < 2 else {
             throw DiscordClientError.queryParametersMutuallyExclusive(queries: queries)
         }
     }
     
+    @usableFromInline
     func checkInBounds(
         name: String,
         value: Int?,
@@ -224,18 +229,21 @@ private extension DiscordClient {
 public extension DiscordClient {
     
     /// https://discord.com/developers/docs/topics/gateway#get-gateway
+    @inlinable
     func getGateway() async throws -> DiscordClientResponse<Gateway.Url> {
         let endpoint = Endpoint.getGateway
         return try await self.send(to: endpoint, queries: [])
     }
     
     /// https://discord.com/developers/docs/topics/gateway#get-gateway-bot
+    @inlinable
     func getGatewayBot() async throws -> DiscordClientResponse<Gateway.BotConnectionInfo> {
         let endpoint = Endpoint.getGatewayBot
         return try await self.send(to: endpoint, queries: [])
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
+    @inlinable
     func createInteractionResponse(
         id: String,
         token: String,
@@ -246,6 +254,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
+    @inlinable
     func editInteractionResponse(
         appId: String? = nil,
         token: String,
@@ -259,6 +268,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
+    @inlinable
     func deleteInteractionResponse(
         appId: String? = nil,
         token: String
@@ -271,6 +281,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
+    @inlinable
     func createFollowupInteractionResponse(
         appId: String? = nil,
         token: String,
@@ -284,6 +295,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
+    @inlinable
     func editFollowupInteractionResponse(
         appId: String? = nil,
         id: String,
@@ -299,6 +311,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/channel#create-message
+    @inlinable
     func createMessage(
         channelId: String,
         payload: DiscordChannel.CreateMessage
@@ -308,6 +321,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/channel#edit-message
+    @inlinable
     func editMessage(
         channelId: String,
         messageId: String,
@@ -318,6 +332,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/channel#delete-message
+    @inlinable
     func deleteMessage(
         channelId: String,
         messageId: String
@@ -327,6 +342,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
+    @inlinable
     func createApplicationGlobalCommand(
         appId: String? = nil,
         payload: SlashCommand
@@ -336,6 +352,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/interactions/application-commands#get-global-application-commands
+    @inlinable
     func getApplicationGlobalCommands(
         appId: String? = nil
     ) async throws -> DiscordClientResponse<[SlashCommand]> {
@@ -344,6 +361,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/interactions/application-commands#delete-global-application-command
+    @inlinable
     func deleteApplicationGlobalCommand(
         appId: String? = nil,
         id: String
@@ -356,6 +374,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/guild#get-guild
+    @inlinable
     func getGuild(
         id: String,
         withCounts: Bool? = nil
@@ -368,18 +387,21 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/channel#get-channel
+    @inlinable
     func getChannel(id: String) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = Endpoint.getChannel(id: id)
         return try await self.send(to: endpoint, queries: [])
     }
     
     /// https://discord.com/developers/docs/resources/user#leave-guild
+    @inlinable
     func leaveGuild(id: String) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.leaveGuild(id: id)
         return try await self.send(to: endpoint, queries: [])
     }
     
     /// https://discord.com/developers/docs/resources/guild#create-guild-role
+    @inlinable
     func createGuildRole(
         guildId: String,
         payload: CreateGuildRole
@@ -389,6 +411,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/guild#add-guild-member-role
+    @inlinable
     func addGuildMemberRole(
         guildId: String,
         userId: String,
@@ -403,6 +426,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/guild#remove-guild-member-role
+    @inlinable
     func removeGuildMemberRole(
         guildId: String,
         userId: String,
@@ -417,6 +441,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/topics/gateway#message-reaction-add
+    @inlinable
     func addReaction(
         channelId: String,
         messageId: String,
@@ -432,6 +457,7 @@ public extension DiscordClient {
     
     /// NOTE: `limit`, if provided, must be between `1` and `1_000`.
     /// https://discord.com/developers/docs/resources/guild#search-guild-members
+    @inlinable
     func searchGuildMembers(
         guildId: String,
         query: String,
@@ -449,6 +475,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/guild#get-guild-member
+    @inlinable
     func getGuildMember(
         guildId: String,
         userId: String
@@ -459,6 +486,7 @@ public extension DiscordClient {
     
     /// NOTE: `around`, `before` and `after` are mutually exclusive.
     /// https://discord.com/developers/docs/resources/channel#get-channel-messages
+    @inlinable
     func getChannelMessages(
         channelId: String,
         around: String? = nil,
@@ -484,6 +512,7 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/channel#get-channel-message
+    @inlinable
     func getChannelMessage(
         channelId: String,
         messageId: String
