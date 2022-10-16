@@ -499,7 +499,7 @@ public extension DiscordClient {
             ("before", before),
             ("after", after)
         ])
-        let endpoint = Endpoint.getChannelMessages(id: channelId)
+        let endpoint = Endpoint.getChannelMessages(channelId: channelId)
         return try await self.send(
             to: endpoint,
             queries: [
@@ -517,7 +517,7 @@ public extension DiscordClient {
         channelId: String,
         messageId: String
     ) async throws -> DiscordClientResponse<Gateway.MessageCreate> {
-        let endpoint = Endpoint.getChannelMessage(id: channelId, messageId: messageId)
+        let endpoint = Endpoint.getChannelMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint, queries: [])
     }
 }

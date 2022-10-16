@@ -65,8 +65,8 @@ public enum Endpoint {
     case getGuildMember(id: String, userId: String)
     
     case getChannel(id: String)
-    case getChannelMessages(id: String)
-    case getChannelMessage(id: String, messageId: String)
+    case getChannelMessages(channelId: String)
+    case getChannelMessage(channelId: String, messageId: String)
     
     case leaveGuild(id: String)
     
