@@ -983,6 +983,7 @@ public struct Gateway: Sendable, Codable {
         public var channel_id: String
         public var message_id: String
         public var guild_id: String?
+        public var burst: Bool?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-emoji
