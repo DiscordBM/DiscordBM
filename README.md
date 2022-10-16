@@ -89,13 +89,11 @@ Task {
     await bot.addEventParseFailureHandler { error, text in
         /// Handle the failure using the `error` thrown and the `text` received.
     }
-}
 
-/// Tell the manager to connect to Discord
-bot.connect()
+    /// Tell the manager to connect to Discord
+    await bot.connect()
 
-/// Use `bot.client` to send requests to discord.
-Task {
+    /// Use `bot.client` to send requests to discord.
     try await bot.client.createMessage(
         channelId: CHANNEL_ID,
         payload: .init(content: "Hello Everybody!")
