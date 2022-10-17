@@ -189,7 +189,7 @@ extension DiscordChannel {
             public var party_id: String?
         }
         
-        /// A ``User`` with an extra `member` field.
+        /// A ``DiscordUser`` with an extra `member` field.
         /// https://discord.com/developers/docs/resources/user#user-object-user-structure
         public struct MentionUser: Sendable, Codable {
             public var id: String

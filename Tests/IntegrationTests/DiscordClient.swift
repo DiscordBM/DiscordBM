@@ -18,7 +18,7 @@ class DiscordClientTests: XCTestCase {
             appId: Constants.appId
         )
         
-        let text = "Testing! \(Int.random(in: 0..<1_000_000))"
+        let text = "Testing! \(Date())"
         let createResponse = try await client.createMessage(
             channelId: Constants.testChannel,
             payload: .init(content: text)

@@ -46,7 +46,7 @@ public struct DiscordUser: Sendable, Codable {
     public var avatar_decoration: String?
 }
 
-/// A partial ``User`` object.
+/// A partial ``DiscordUser`` object.
 /// https://discord.com/developers/docs/resources/user#user-object-user-structure
 public struct PartialUser: Sendable, Codable {
     public var id: String

@@ -524,7 +524,7 @@ public struct Gateway: Sendable, Codable {
         public var audio_context_settings: AudioContextSettings?
     }
     
-    /// A ``Channel`` object with a few differences.
+    /// A ``DiscordChannel`` object with a few differences.
     /// https://discord.com/developers/docs/topics/gateway-events#thread-create
     public struct ThreadCreate: Sendable, Codable {
         public var id: String
