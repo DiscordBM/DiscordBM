@@ -57,6 +57,7 @@ public struct Role: Sendable, Codable {
     
     public var id: String
     public var name: String
+    public var description: String?
     public var color: DiscordColor
     public var hoist: Bool
     public var icon: String?
