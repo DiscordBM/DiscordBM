@@ -1,10 +1,9 @@
+import Foundation
 @preconcurrency import AsyncHTTPClient
+import Logging
 import NIOHTTP1
 import NIOConcurrencyHelpers
 import NIOCore
-import struct Foundation.Date
-import struct Foundation.UUID
-import Logging
 
 public protocol DiscordClient {
     

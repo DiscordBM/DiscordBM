@@ -1,5 +1,4 @@
-@testable import DiscordBM
-import NIOPosix
+import DiscordBM
 import AsyncHTTPClient
 import XCTest
 

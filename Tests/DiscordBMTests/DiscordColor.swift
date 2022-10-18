@@ -1,4 +1,4 @@
-@testable import DiscordBM
+import DiscordBM
 import XCTest
 
 class DiscordColorTests: XCTestCase {

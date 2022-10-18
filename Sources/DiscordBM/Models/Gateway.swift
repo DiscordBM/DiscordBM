@@ -1,4 +1,3 @@
-import Foundation
 
 public struct Gateway: Sendable, Codable {
     

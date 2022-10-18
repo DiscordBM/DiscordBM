@@ -1,6 +1,5 @@
 import struct Foundation.Date
 import NIOHTTP1
-import AsyncHTTPClient
 
 private let logger = DiscordGlobalConfiguration.makeLogger("DiscordBM.HTTPRateLimiter")
 
