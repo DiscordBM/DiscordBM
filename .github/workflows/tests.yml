@@ -43,7 +43,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Run tests
         run: |
-          swift test \
+          swift test --filter DiscordBMTests \
             -Xlinker -rpath \
             -Xlinker $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.6/macosx
 
