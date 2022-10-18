@@ -45,7 +45,7 @@ try httpClient.syncShutdown()
 /// Prefer to use `shutdown()` in async contexts:
 /// try await httpClient.shutdown()
 ```
-See the [GatewayConnection tests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/DiscordBMTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
+See the [GatewayConnection tests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
 
 ### Initializing a Gateway Manager With Vapor
 ```swift
