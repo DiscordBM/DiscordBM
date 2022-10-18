@@ -26,33 +26,32 @@ class GatewayConnectionTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "Connected")
         
-        Task {
-            var _ready: Gateway.Ready?
-            var didHello = false
-            
-            await bot.addEventHandler { event in
-                if case let .ready(ready) = event.data {
-                    _ready = ready
-                    expectation.fulfill()
-                } else if event.opcode == .hello {
-                    didHello = true
-                } else if _ready == nil {
-                    expectation.fulfill()
-                }
+        var _ready: Gateway.Ready?
+        var didHello = false
+        
+        await bot.addEventHandler { event in
+            if case let .ready(ready) = event.data {
+                _ready = ready
+                expectation.fulfill()
+            } else if event.opcode == .hello {
+                didHello = true
+            } else if _ready == nil {
+                expectation.fulfill()
             }
-            
-            await bot.connect()
-            
-            XCTAssertTrue(didHello)
-            let ready = try XCTUnwrap(_ready)
-            XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
-            XCTAssertEqual(ready.application.id, Constants.appId)
-            XCTAssertFalse(ready.session_id.isEmpty)
-            XCTAssertEqual(ready.session_type, "normal")
-            XCTAssertEqual(ready.user.id, Constants.appId)
-            XCTAssertEqual(ready.user.bot, true)
         }
         
+        Task {
+            await bot.connect()
+        }
         wait(for: [expectation], timeout: 10)
+        
+        XCTAssertTrue(didHello)
+        let ready = try XCTUnwrap(_ready)
+        XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
+        XCTAssertEqual(ready.application.id, Constants.appId)
+        XCTAssertFalse(ready.session_id.isEmpty)
+        XCTAssertEqual(ready.session_type, "normal")
+        XCTAssertEqual(ready.user.id, Constants.appId)
+        XCTAssertEqual(ready.user.bot, true)
     }
 }
