@@ -72,6 +72,7 @@ public struct Interaction: Sendable, Codable {
     public var locale: DiscordLocale?
     public var guild_locale: DiscordLocale?
     public var app_permissions: StringBitField<Permission>?
+    public var entitlement_sku_ids: [String]?
 }
 
 /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object
