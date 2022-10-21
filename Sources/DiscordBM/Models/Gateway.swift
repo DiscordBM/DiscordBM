@@ -881,7 +881,6 @@ public struct Gateway: Sendable, Codable {
             case embeddedApplication = 2
         }
         
-        public var type: Int? // FIXME: TYPIFY
         public var channel_id: String
         public var code: String
         public var created_at: DiscordTimestamp
@@ -891,6 +890,8 @@ public struct Gateway: Sendable, Codable {
         public var max_uses: Int
         public var target_type: TargetKind?
         public var target_user: DiscordUser?
+        public var type: TargetKind? // FIXME: not sure about the type
+        public var target_user_type: TargetKind? // FIXME: not sure about the type
         public var target_application: PartialApplication?
         public var temporary: Bool
         public var uses: Int
