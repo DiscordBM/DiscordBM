@@ -5,10 +5,10 @@
 A Swift library for making Discord bots.
 
 ## Notable Features
-* Everything async/await. Full integration with all the latest Server-Side Swift packages.
+* Everything with structured concurrency and async/await. Full integration with all the latest Server-Side Swift packages.
 * Connect to the Discord gateway and receive all events easily.
 * Send requests to the Discord API using library's Discord client.
-* hard-typed API. All Gateway events have their own type and all Discord API responses can be decoded easily.
+* hard-typed APIs. All Gateway events have their own type and all Discord API responses can be decoded easily.
 * Abstractions for easier testability.
 
 ## Showcase
@@ -139,7 +139,7 @@ Include `"DiscordBM"` as a dependency for your targets:
 Finally, add `import DiscordBM` to your source code.
 
 ## Warnings
-This library will try to follow the no-breaking-changes-in-minor-versions rule, with exceptions:
+This library will try to follow Semantic Versioning, with exceptions:
 * If Discord has made some changes that need breaking changes in this library, but are not worth a major release and are rather small.
 * When adding enum cases.
 
@@ -147,8 +147,9 @@ This library will try to follow the no-breaking-changes-in-minor-versions rule, 
 * Support more endpoints (Easy to add yourself; PRs appreciated)
 * Attachments support (For now you can provide media links instead, which is usually better anyway)
 * Support gateway payload compression
+* Support voice
 * OAuth-2 support (Not really needed for bots, so not a priority)
 
 ## Contribution & Support
-Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.
+Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.   
 I'm also actively looking for any new info in the Discord API, and will add them to the library as soon as I can.
