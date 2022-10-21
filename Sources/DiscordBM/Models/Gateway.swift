@@ -890,7 +890,7 @@ public struct Gateway: Sendable, Codable {
         public var max_uses: Int
         public var target_type: TargetKind?
         public var target_user: DiscordUser?
-        public var type: TargetKind? // FIXME: not sure about the type
+        public var type: Int? // FIXME: not sure about the type
         public var target_user_type: TargetKind? // FIXME: not sure about the type
         public var target_application: PartialApplication?
         public var temporary: Bool
