@@ -4,6 +4,7 @@ import Logging
 import NIOHTTP1
 import NIOConcurrencyHelpers
 import NIOCore
+import Atomics
 
 public protocol DiscordClient {
     
@@ -53,7 +54,7 @@ public extension DiscordClient {
     }
 }
 
-public struct DiscordHTTPResponse: Sendable {
+public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     let _response: HTTPClient.Response
     
     internal init(_response: HTTPClient.Response) {
@@ -96,6 +97,23 @@ public struct DiscordHTTPResponse: Sendable {
     public var body: ByteBuffer? {
         _response.body
     }
+    
+    public var description: String {
+        var bodyDescription: String {
+            if var body = body {
+                return body.readString(length: body.readableBytes) ?? "nil"
+            } else {
+                return "nil"
+            }
+        }
+        return "DiscordHTTPResponse("
+        + "host: \(host), "
+        + "status: \(status), "
+        + "version: \(version), "
+        + "headers: \(headers), "
+        + "body: \(bodyDescription)"
+        + ")"
+    }
 }
 
 public struct DiscordClientResponse<C> where C: Codable {
@@ -125,21 +143,25 @@ public struct ClientConfiguration {
     public struct CachingBehavior {
         
         /// [ID: TTL]
-        private var storage = [CacheableEndpointIdentity: Double]()
+        @usableFromInline
+        var storage = [CacheableEndpointIdentity: Double]()
         /// This instance's default TTL for all endpoints.
         public var defaultTTL = 5.0
         public var isDisabled = false
         
         /// Caches all cacheable endpoints for 5 seconds,
         /// except for `getGateway` which is cached for an hour.
-        public static let enabled = { () -> CachingBehavior in
+        public static var enabled: CachingBehavior {
             var behavior = CachingBehavior()
             behavior.modifyBehavior(of: .getGateway, ttl: 3600)
             return behavior
-        }()
+        }
         /// Doesn't allow caching at all.
-        public static let disabled = CachingBehavior(isDisabled: true)
+        public static var disabled: CachingBehavior {
+            CachingBehavior(isDisabled: true)
+        }
         
+        @inlinable
         public mutating func modifyBehavior(
             of identity: CacheableEndpointIdentity,
             ttl: Double? = nil
@@ -148,13 +170,47 @@ public struct ClientConfiguration {
             self.storage[identity] = ttl ?? 0
         }
         
+        @inlinable
         func getTTL(for identity: CacheableEndpointIdentity) -> Double? {
             guard !self.isDisabled else { return nil }
             guard let ttl = self.storage[identity] else { return self.defaultTTL }
-            if ttl == 0 {
-                return nil
+            return ttl == 0 ? nil : ttl
+        }
+    }
+    
+    public struct RetryPolicy {
+        /// [StatusCode: TimesToRetry]
+        @usableFromInline
+        var storage = [HTTPResponseStatus: Int]()
+        
+        /// Only retries status code 500, once.
+        @inlinable
+        public static var `default`: RetryPolicy {
+            var policy = RetryPolicy()
+            policy.setRetry(status: .internalServerError, times: 1)
+            return policy
+        }
+        
+        public init() { }
+        
+        @inlinable
+        public mutating func setRetry(status: HTTPResponseStatus, times: Int) {
+            precondition(status.code >= 400, "Only 400+ status codes should be retried")
+            self.storage[status] = times
+        }
+        
+        @inlinable
+        public mutating func setRetry(statuses: HTTPResponseStatus..., times: Int) {
+            for status in statuses {
+                self.setRetry(status: status, times: times)
+            }
+        }
+        
+        func shouldRetry(status: HTTPResponseStatus, retriesSoFar times: Int) -> Bool {
+            if let expectedTimes = self.storage[status] {
+                return expectedTimes > times
             } else {
-                return ttl
+                return false
             }
         }
     }
@@ -163,15 +219,23 @@ public struct ClientConfiguration {
     public var requestTimeout: TimeAmount
     /// Ask `HTTPClient` to log when needed. Defaults to no logging.
     public var enableLoggingForRequests: Bool
+    /// Retries failed requests based on the policy.
+    public var retryPolicy: RetryPolicy?
+    
+    func shouldRetry(status: HTTPResponseStatus, retriesSoFar times: Int) -> Bool {
+        self.retryPolicy?.shouldRetry(status: status, retriesSoFar: times) ?? false
+    }
     
     public init(
         cachingBehavior: CachingBehavior = .disabled,
         requestTimeout: TimeAmount = .seconds(30),
-        enableLoggingForRequests: Bool = false
+        enableLoggingForRequests: Bool = false,
+        retryPolicy: RetryPolicy? = .default
     ) {
         self.cachingBehavior = cachingBehavior
         self.requestTimeout = requestTimeout
         self.enableLoggingForRequests = enableLoggingForRequests
+        self.retryPolicy = retryPolicy
     }
 }
 
@@ -535,6 +599,8 @@ public struct DefaultDiscordClient: DiscordClient {
     private let cache: ClientCache?
     let logger = DiscordGlobalConfiguration.makeLogger("DefaultDiscordClient")
     
+    static let requestIdGenerator = ManagedAtomic(UInt(0))
+    
     /// If you provide no app id, you'll need to pass it to some functions on call site.
     public init(
         httpClient: HTTPClient,
@@ -604,13 +670,19 @@ public struct DefaultDiscordClient: DiscordClient {
               (200..<300).contains(response.status.code),
               let ttl = self.configuration.cachingBehavior.getTTL(for: identity)
         else { return }
-        await cache?.add(
-            response: response,
-            item: .init(
-                identity: identity,
-                queries: queries
-            ), ttl: ttl
-        )
+        if let cache = cache {
+            logger.debug("Saved response in cache", metadata: [
+                "endpointIdentity": .stringConvertible(identity),
+                "queries": .stringConvertible(queries)
+            ])
+            await cache.add(
+                response: response,
+                item: .init(
+                    identity: identity,
+                    queries: queries
+                ), ttl: ttl
+            )
+        }
     }
     
     func execute(_ request: HTTPClient.Request) async throws -> DiscordHTTPResponse {
@@ -625,14 +697,20 @@ public struct DefaultDiscordClient: DiscordClient {
         )
     }
     
-    public func send(
+    func _send(
         to endpoint: Endpoint,
-        queries: [(String, String?)] = []
-    ) async throws -> DiscordHTTPResponse {
-        let identity = CacheableEndpointIdentity(endpoint: endpoint)
+        identity: CacheableEndpointIdentity?,
+        queries: [(String, String?)] = [],
+        requestId: UInt
+    ) async throws -> (DiscordHTTPResponse, cached: Bool) {
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
-            return cached
+            logger.debug("Got cached response", metadata: [
+                "endpoint": .string(endpoint.urlSuffix),
+                "queries": .stringConvertible(queries)
+            ])
+            return (cached, true)
         }
+        
         try await self.checkRateLimitsAllowRequest(to: endpoint)
         var request = try HTTPClient.Request(
             url: endpoint.url + queries.makeForURLQuery(),
@@ -640,22 +718,16 @@ public struct DefaultDiscordClient: DiscordClient {
         )
         request.headers = ["Authorization": "Bot \(token._storage)"]
         
-        let requestLogId: String?
-        if logger.logLevel >= .debug {
-            requestLogId = UUID().uuidString
-        } else {
-            requestLogId = nil
-        }
         logger.debug("Will send a request to Discord", metadata: [
             "url": .stringConvertible(request.url),
             "method": .string(request.method.rawValue),
             "body-bytes": "nil",
-            "request-id": .string(requestLogId ?? "nil")
+            "request-id": .stringConvertible(requestId)
         ])
         let response = try await self.execute(request)
         logger.debug("Received a response from Discord", metadata: [
             "response": .string("\(response._response)"),
-            "request-id": .string(requestLogId ?? "nil")
+            "request-id": .stringConvertible(requestId)
         ])
         
         await self.includeInRateLimits(
@@ -663,23 +735,71 @@ public struct DefaultDiscordClient: DiscordClient {
             headers: response.headers,
             status: response.status
         )
-        await self.saveInCache(
-            response: response,
+        
+        return (response, false)
+    }
+    
+    public func send(
+        to endpoint: Endpoint,
+        queries: [(String, String?)] = []
+    ) async throws -> DiscordHTTPResponse {
+        let identity = CacheableEndpointIdentity(endpoint: endpoint)
+        
+        let requestId = Self.requestIdGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
+        
+        var (response, cached) = try await self._send(
+            to: endpoint,
             identity: identity,
-            queries: queries
+            queries: queries,
+            requestId: requestId
         )
+        
+        var retriesSoFar = 0
+        while configuration.shouldRetry(status: response.status, retriesSoFar: retriesSoFar) {
+            try await Task.sleep(nanoseconds: 200_000_000) /// FIXME: This should be configurable
+            retriesSoFar += 1
+            logger.warning("Will retry a request due to the retry policy", metadata: [
+                "request-id": .stringConvertible(requestId),
+                "retriesSoFar": .stringConvertible(retriesSoFar)
+            ])
+            (response, cached) = try await self._send(
+                to: endpoint,
+                identity: identity,
+                queries: queries,
+                requestId: requestId
+            )
+        }
+        
+        if !cached {
+            await self.saveInCache(
+                response: response,
+                identity: identity,
+                queries: queries
+            )
+        }
+        
         return response
     }
     
-    public func send<E: Encodable>(
+    func _send<E: Encodable>(
         to endpoint: Endpoint,
+        identity: CacheableEndpointIdentity?,
         queries: [(String, String?)] = [],
-        payload: E
-    ) async throws -> DiscordHTTPResponse {
+        payload: E,
+        requestId: UInt
+    ) async throws -> (DiscordHTTPResponse, cached: Bool) {
         let identity = CacheableEndpointIdentity(endpoint: endpoint)
         if let cached = await self.getFromCache(identity: identity, queries: queries) {
-            return cached
+            return (cached, true)
         }
+        if let cached = await self.getFromCache(identity: identity, queries: queries) {
+            logger.debug("Got cached response", metadata: [
+                "endpoint": .string(endpoint.urlSuffix),
+                "queries": .stringConvertible(queries)
+            ])
+            return (cached, true)
+        }
+        
         try await self.checkRateLimitsAllowRequest(to: endpoint)
         let data = try DiscordGlobalConfiguration.encoder.encode(payload)
         var request = try HTTPClient.Request(
@@ -692,22 +812,16 @@ public struct DefaultDiscordClient: DiscordClient {
         ]
         request.body = .bytes(data)
         
-        let requestLogId: String?
-        if logger.logLevel >= .debug {
-            requestLogId = UUID().uuidString
-        } else {
-            requestLogId = nil
-        }
         logger.debug("Will send a request to Discord", metadata: [
             "url": .stringConvertible(request.url),
             "method": .string(request.method.rawValue),
             "body-bytes": .stringConvertible(data),
-            "request-id": .string(requestLogId ?? "nil")
+            "request-id": .stringConvertible(requestId)
         ])
         let response = try await self.execute(request)
         logger.debug("Received a response from Discord", metadata: [
             "response": .string("\(response._response)"),
-            "request-id": .string(requestLogId ?? "nil")
+            "request-id": .stringConvertible(requestId)
         ])
         
         await self.includeInRateLimits(
@@ -715,11 +829,52 @@ public struct DefaultDiscordClient: DiscordClient {
             headers: response.headers,
             status: response.status
         )
-        await self.saveInCache(
-            response: response,
+        
+        return (response, false)
+    }
+    
+    public func send<E: Encodable>(
+        to endpoint: Endpoint,
+        queries: [(String, String?)] = [],
+        payload: E
+    ) async throws -> DiscordHTTPResponse {
+        let identity = CacheableEndpointIdentity(endpoint: endpoint)
+        
+        let requestId = Self.requestIdGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
+        
+        var (response, cached) = try await self._send(
+            to: endpoint,
             identity: identity,
-            queries: queries
+            queries: queries,
+            payload: payload,
+            requestId: requestId
         )
+        
+        var retriesSoFar = 0
+        while configuration.shouldRetry(status: response.status, retriesSoFar: retriesSoFar) {
+            try await Task.sleep(nanoseconds: 200_000_000) /// FIXME: This should be configurable
+            retriesSoFar += 1
+            logger.warning("Will retry a request due to the retry policy", metadata: [
+                "request-id": .stringConvertible(requestId),
+                "retriesSoFar": .stringConvertible(retriesSoFar)
+            ])
+            (response, cached) = try await self._send(
+                to: endpoint,
+                identity: identity,
+                queries: queries,
+                payload: payload,
+                requestId: requestId
+            )
+        }
+        
+        if !cached {
+            await self.saveInCache(
+                response: response,
+                identity: identity,
+                queries: queries
+            )
+        }
+        
         return response
     }
 }
@@ -759,7 +914,7 @@ private actor ClientCache {
         let queries: [(String, String?)]
         
         func hash(into hasher: inout Hasher) {
-            hasher.combine(identity)
+            hasher.combine(identity.rawValue)
             for (key, value) in queries {
                 hasher.combine(key)
                 hasher.combine(value)
@@ -824,3 +979,4 @@ extension DefaultDiscordClient: Sendable { }
 extension DiscordClientResponse: Sendable where C: Sendable { }
 extension ClientConfiguration: Sendable { }
 extension ClientConfiguration.CachingBehavior: Sendable { }
+extension ClientConfiguration.RetryPolicy: Sendable { }

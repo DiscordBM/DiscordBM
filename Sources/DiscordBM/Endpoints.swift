@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable {
+public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, CustomStringConvertible {
     case getGateway
     case getGatewayBot
     case getApplicationGlobalCommands
@@ -10,6 +10,20 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable {
     case getChannel
     case getChannelMessages
     case getChannelMessage
+    
+    public var description: String {
+        switch self {
+        case .getGateway: return "getGateway"
+        case .getGatewayBot: return "getGatewayBot"
+        case .getApplicationGlobalCommands: return "getApplicationGlobalCommands"
+        case .getGuild: return "getGuild"
+        case .searchGuildMembers: return "searchGuildMembers"
+        case .getGuildMember: return "getGuildMember"
+        case .getChannel: return "getChannel"
+        case .getChannelMessages: return "getChannelMessages"
+        case .getChannelMessage: return "getChannelMessage"
+        }
+    }
     
     init? (endpoint: Endpoint) {
         switch endpoint {
