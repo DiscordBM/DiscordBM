@@ -109,7 +109,8 @@ public struct Gateway: Sendable, Codable {
             case voiceServerUpdate(VoiceServerUpdate)
             case webhooksUpdate(WebhooksUpdate)
             case applicationCommandPermissionsUpdate(ApplicationCommandPermissionsUpdate)
-            case autoModerationRule(AutoModerationRule)
+            case autoModerationRuleCreate(AutoModerationRule)
+            case autoModerationRuleUpdate(AutoModerationRule)
             case autoModerationActionExecution(AutoModerationActionExecution)
         }
         
@@ -290,7 +291,9 @@ public struct Gateway: Sendable, Codable {
                 case "APPLICATION_COMMAND_PERMISSIONS_UPDATE":
                     self.data = try .applicationCommandPermissionsUpdate(decodeData())
                 case "AUTO_MODERATION_RULE_CREATE":
-                    self.data = try .autoModerationRule(decodeData())
+                    self.data = try .autoModerationRuleCreate(decodeData())
+                case "AUTO_MODERATION_RULE_UPDATE":
+                    self.data = try .autoModerationRuleUpdate(decodeData())
                 case "AUTO_MODERATION_ACTION_EXECUTION":
                     self.data = try .autoModerationActionExecution(decodeData())
                 default:
