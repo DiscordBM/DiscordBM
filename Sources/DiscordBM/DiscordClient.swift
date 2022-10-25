@@ -178,10 +178,62 @@ public struct ClientConfiguration {
         }
     }
     
+    // TODO: Write Tests
+    // TODO: RetryPolicy to accept exponential backoff.
     public struct RetryPolicy {
+        
+        public indirect enum Backoff {
+            case constant(TimeAmount)
+            /// `multiplyUpToTimes` indicates how many times at maximum this should linearly
+            /// increase the backoff. Does not indicate how many times the retrial will happen.
+            /// Assuming `ax + b` is a linear equation, here `b == base` and `a == coefficient`.
+            case linear(base: TimeAmount, coefficient: TimeAmount, multiplyUpToTimes: Int)
+            /// Based on the `Retry-After` header.
+            ///
+            /// Parameters:
+            /// - `ifNotBiggerThan`: If the `Retry-After` header was not a number bigger than this.
+            /// - `else`: If the `Retry-After` header did not exist.
+            case basedOnTheRetryAfterHeader(ifNotBiggerThan: TimeAmount?, else: Backoff?)
+            
+            public static var `default`: Backoff = .linear(
+                base: .milliseconds(200),
+                coefficient: .milliseconds(500),
+                multiplyUpToTimes: 10
+            )
+            
+            /// Returns the time needed to wait before the next retry, if any.
+            func waitTimeBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> TimeAmount? {
+                switch self {
+                case let .constant(constant):
+                    return constant
+                case let .linear(base, coefficient, multiplyUpToTimes):
+                    let multiplyFactor = min(multiplyUpToTimes, times)
+                    let nanos = Int64(multiplyFactor) * coefficient.nanoseconds + base.nanoseconds
+                    return .nanoseconds(nanos)
+                case let .basedOnTheRetryAfterHeader(ifNotBiggerThan, elseBackoff):
+                    if let retryAfter = headers.first(name: "Retry-After"),
+                       let retrySeconds = Int64(retryAfter) {
+                        let retryNanos = retrySeconds * 1_000_000_000
+                        let ifNotBiggerThan = ifNotBiggerThan?.nanoseconds ?? 0
+                        if retryNanos <= ifNotBiggerThan {
+                            return .nanoseconds(retryNanos)
+                        } else {
+                            return elseBackoff?.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
+                        }
+                    } else {
+                        return elseBackoff?.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
+                    }
+                }
+            }
+        }
+        
         /// [StatusCode: TimesToRetry]
         @usableFromInline
-        var storage = [HTTPResponseStatus: Int]()
+        var storage: [HTTPResponseStatus: Int]
+        
+        /// The backoff configuration, to wait a some amount of time _after_ a failed request.
+        @usableFromInline
+        var backoff: Backoff?
         
         /// Only retries status code 500, once.
         @inlinable
@@ -191,11 +243,14 @@ public struct ClientConfiguration {
             return policy
         }
         
-        public init() { }
+        public init(backoff: Backoff? = .default) {
+            self.storage = [:]
+            self.backoff = backoff
+        }
         
         @inlinable
         public mutating func setRetry(status: HTTPResponseStatus, times: Int) {
-            precondition(status.code >= 400, "Only 400+ status codes should be retried")
+            precondition(status.code >= 400, "Only 400+ status codes should ever be retried")
             self.storage[status] = times
         }
         
@@ -213,17 +268,32 @@ public struct ClientConfiguration {
                 return false
             }
         }
+        
+        /// Returns the time needed to wait before the next retry, if any.
+        func waitTimeBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> TimeAmount? {
+            switch backoff {
+            case let .some(backoff):
+                return backoff.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
+            case .none:
+                return nil
+            }
+        }
     }
     
     public let cachingBehavior: CachingBehavior
     public var requestTimeout: TimeAmount
     /// Ask `HTTPClient` to log when needed. Defaults to no logging.
     public var enableLoggingForRequests: Bool
-    /// Retries failed requests based on the policy.
+    /// Retries failed requests based on this policy.
     public var retryPolicy: RetryPolicy?
     
     func shouldRetry(status: HTTPResponseStatus, retriesSoFar times: Int) -> Bool {
         self.retryPolicy?.shouldRetry(status: status, retriesSoFar: times) ?? false
+    }
+    
+    /// Returns the amount of time that the client should wait before the next retry, if any.
+    func shouldWaitBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> TimeAmount? {
+        self.retryPolicy?.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
     }
     
     public init(
@@ -697,6 +767,30 @@ public struct DefaultDiscordClient: DiscordClient {
         )
     }
     
+    func waitForRetryAndIncreaseRetryCount(
+        retriesSoFar: inout Int,
+        headers: HTTPHeaders,
+        requestId: UInt
+    ) async throws {
+        let retryWait = self.configuration.shouldWaitBeforeRetry(
+            retriesSoFar: retriesSoFar,
+            headers: headers
+        )?.nanoseconds
+        logger.warning("Will soon retry a request", metadata: [
+            "request-id": .stringConvertible(requestId),
+            "retriesWithoutThis": .stringConvertible(retriesSoFar),
+            "waitMillisBeforeRetry": .stringConvertible((retryWait ?? 0) / 1_000_000)
+        ])
+        if let retryWait = retryWait {
+            try await Task.sleep(nanoseconds: UInt64(retryWait))
+        }
+        retriesSoFar += 1
+        logger.debug("Will retry a request right now", metadata: [
+            "request-id": .stringConvertible(requestId),
+            "retriesWithoutThis": .stringConvertible(retriesSoFar)
+        ])
+    }
+    
     func _send(
         to endpoint: Endpoint,
         identity: CacheableEndpointIdentity?,
@@ -756,12 +850,11 @@ public struct DefaultDiscordClient: DiscordClient {
         
         var retriesSoFar = 0
         while configuration.shouldRetry(status: response.status, retriesSoFar: retriesSoFar) {
-            try await Task.sleep(nanoseconds: 200_000_000) /// FIXME: This should be configurable
-            retriesSoFar += 1
-            logger.warning("Will retry a request due to the retry policy", metadata: [
-                "request-id": .stringConvertible(requestId),
-                "retriesSoFar": .stringConvertible(retriesSoFar)
-            ])
+            try await waitForRetryAndIncreaseRetryCount(
+                retriesSoFar: &retriesSoFar,
+                headers: response.headers,
+                requestId: requestId
+            )
             (response, cached) = try await self._send(
                 to: endpoint,
                 identity: identity,
@@ -852,12 +945,11 @@ public struct DefaultDiscordClient: DiscordClient {
         
         var retriesSoFar = 0
         while configuration.shouldRetry(status: response.status, retriesSoFar: retriesSoFar) {
-            try await Task.sleep(nanoseconds: 200_000_000) /// FIXME: This should be configurable
-            retriesSoFar += 1
-            logger.warning("Will retry a request due to the retry policy", metadata: [
-                "request-id": .stringConvertible(requestId),
-                "retriesSoFar": .stringConvertible(retriesSoFar)
-            ])
+            try await waitForRetryAndIncreaseRetryCount(
+                retriesSoFar: &retriesSoFar,
+                headers: response.headers,
+                requestId: requestId
+            )
             (response, cached) = try await self._send(
                 to: endpoint,
                 identity: identity,
@@ -980,3 +1072,4 @@ extension DiscordClientResponse: Sendable where C: Sendable { }
 extension ClientConfiguration: Sendable { }
 extension ClientConfiguration.CachingBehavior: Sendable { }
 extension ClientConfiguration.RetryPolicy: Sendable { }
+extension ClientConfiguration.RetryPolicy.Backoff: Sendable { }
