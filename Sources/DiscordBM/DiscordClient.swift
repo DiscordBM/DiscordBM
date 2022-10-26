@@ -191,9 +191,10 @@ public struct ClientConfiguration {
             /// Based on the `Retry-After` header.
             ///
             /// Parameters:
-            /// - `ifNotBiggerThan`: If the `Retry-After` header was not a number bigger than this.
+            /// - `maxAllowed`: Max allowed amount in `Retry-After`.
+            /// - `retryIfGreater`: Retry or not even if the header time is greater than the `maxAllowed`.
             /// - `else`: If the `Retry-After` header did not exist.
-            case basedOnTheRetryAfterHeader(ifNotBiggerThan: TimeAmount?, else: Backoff?)
+            case basedOnTheRetryAfterHeader(maxAllowed: TimeAmount?, retryIfGreater: Bool, else: Backoff?)
             
             public static var `default`: Backoff = .linear(
                 base: .milliseconds(200),
@@ -210,15 +211,19 @@ public struct ClientConfiguration {
                     let multiplyFactor = min(multiplyUpToTimes, times)
                     let nanos = Int64(multiplyFactor) * coefficient.nanoseconds + base.nanoseconds
                     return .nanoseconds(nanos)
-                case let .basedOnTheRetryAfterHeader(ifNotBiggerThan, elseBackoff):
+                case let .basedOnTheRetryAfterHeader(maxAllowed, retryIfGreater, elseBackoff):
                     if let retryAfter = headers.first(name: "Retry-After"),
-                       let retrySeconds = Int64(retryAfter) {
-                        let retryNanos = retrySeconds * 1_000_000_000
-                        let ifNotBiggerThan = ifNotBiggerThan?.nanoseconds ?? 0
-                        if retryNanos <= ifNotBiggerThan {
+                       let retrySeconds = Double(retryAfter) {
+                        let retryNanos = Int64(retrySeconds * 1_000_000_000)
+                        let maxAllowedNanos = maxAllowed?.nanoseconds ?? 0
+                        if retryNanos <= maxAllowedNanos {
                             return .nanoseconds(retryNanos)
                         } else {
-                            return elseBackoff?.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
+                            if retryIfGreater {
+                                return maxAllowed
+                            } else {
+                                return nil
+                            }
                         }
                     } else {
                         return elseBackoff?.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
