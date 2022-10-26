@@ -10,12 +10,11 @@ class BitFieldTests: XCTestCase {
     /// so we can continue the tests with only one of them.
     func testBitFieldsEqual() {
         for idx in (0..<100) {
-            let unknownValues = (0...(.random(in: 0...10))).map { $0 + 60 }
             let values = (0...idx).map { _ in
                 allCases.randomElement()!
             }
-            let intField = IntBitField<Raw>(Set(values), unknownValues: Set(unknownValues))
-            let stringField = StringBitField<Raw>(Set(values), unknownValues: Set(unknownValues))
+            let intField = IntBitField<Raw>(Set(values))
+            let stringField = StringBitField<Raw>(Set(values))
             XCTAssertEqual(intField.toBitValue(), stringField.toBitValue())
         }
     }
@@ -112,7 +111,7 @@ class BitFieldTests: XCTestCase {
             let field1 = IntBitField<Raw>(bitValue: 999_999_999_999_999)
             let field2 = IntBitField<Raw>([
                 .administrator, .viewAuditLog, .kickMembers, .sendMessagesInThreads, .banMembers, .manageGuild, .manageChannels, .muteMembers, .manageMessages, .manageThreads, .sendMessages, .sendTtsMessages, .useExternalStickers, .manageWebHooks, .deafenMembers, .moderateMembers, .useExternalEmojis, .viewChannel, .prioritySpeaker, .createPrivateThreads, .useApplicationCommands, .createInstantInvite, .createPublicThreads, .embedLinks, .addReactions, .manageEvents, .changeNickname, .stream, .mentionEveryone
-            ], unknownValues: [49, 48, 47, 43, 42])
+            ])
             XCTAssertEqual(field1, field2)
         }
     }
@@ -122,8 +121,6 @@ class BitFieldTests: XCTestCase {
 extension IntBitField: Equatable {
     public static func == (lhs: IntBitField, rhs: IntBitField) -> Bool {
         lhs.values.count == rhs.values.count &&
-        lhs.values.allSatisfy { rhs.values.contains($0) } &&
-        lhs.unknownValues.count == rhs.unknownValues.count &&
-        lhs.unknownValues.allSatisfy { rhs.unknownValues.contains($0) }
+        lhs.values.allSatisfy { rhs.values.contains($0) }
     }
 }

@@ -9,8 +9,24 @@ public enum DiscordGlobalConfiguration {
     /// Function to make loggers with. You can override it with your own logger.
     /// The `String` argument represents the label of the logger.
     public static var makeLogger: (String) -> Logger = { Logger(label: $0) }
+    /// Log about sub-optimal situations during decode.
+    /// For example if a type can't find a representation for a decoded value,
+    /// and has to get rid of that value.
+    /// Does not include decode errors.
+    public static var enableLoggingDuringDecode: Bool = false
     /// Global rate-limit for requests per second. Currently 50 by default.
     public static var globalRateLimit = 50
+}
+
+//MARK: - Internal DiscordGlobalConfiguration
+extension DiscordGlobalConfiguration {
+    static func makeDecodeLogger(_ label: String) -> Logger {
+        if enableLoggingDuringDecode {
+            return DiscordGlobalConfiguration.makeLogger(label)
+        } else {
+            return Logger(label: label, factory: SwiftLogNoOpLogHandler.init)
+        }
+    }
 }
 
 //MARK: - DiscordDecoder

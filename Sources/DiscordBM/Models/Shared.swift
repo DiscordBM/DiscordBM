@@ -273,23 +273,22 @@ extension DiscordTimestamp: @unchecked Sendable { }
 public protocol BitField: ExpressibleByArrayLiteral {
     associatedtype R: RawRepresentable where R: Hashable, R.RawValue == Int
     var values: Set<R> { get set }
-    var unknownValues: Set<Int> { get set }
-    init(_ values: Set<R>, unknownValues: Set<Int>)
+    init(_ values: Set<R>)
 }
 
-private let bitFieldLogger = DiscordGlobalConfiguration.makeLogger("BitField")
+private let bitFieldLogger = DiscordGlobalConfiguration.makeDecodeLogger("BitField")
 
 extension BitField {
     
     public init(arrayLiteral elements: R...) {
-        self.init(Set(elements), unknownValues: [])
+        self.init(Set(elements))
     }
     
     public init(_ elements: [R]) {
-        self.init(Set(elements), unknownValues: [])
+        self.init(Set(elements))
     }
     
-    public init(bitValue: Int) {
+    internal static func fromBitValue(_ bitValue: Int) -> (values: Set<R>, unknownValues: Set<Int>) {
         var bitValue = bitValue
         var values: ContiguousArray<R> = []
         var unknownValues: Set<Int> = []
@@ -306,14 +305,15 @@ extension BitField {
             bitValue -= 1 << intValue
         }
         
-        self.init(
-            Set(values),
-            unknownValues: unknownValues
-        )
+        return (Set(values), unknownValues)
+    }
+    
+    public init(bitValue: Int) {
+        self.init(Self.fromBitValue(bitValue).values)
     }
     
     public func toBitValue() -> Int {
-        (values.map(\.rawValue) + unknownValues)
+        values.map(\.rawValue)
             .map({ 1 << $0 })
             .reduce(into: 0, +=)
     }
@@ -324,18 +324,18 @@ public struct IntBitField<R>: BitField, Codable
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
     public var values: Set<R>
-    public var unknownValues: Set<Int>
     
-    public init(_ values: Set<R>, unknownValues: Set<Int> = []) {
+    public init(_ values: Set<R>) {
         self.values = values
-        self.unknownValues = unknownValues
     }
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let int = try container.decode(Int.self)
-        self.init(bitValue: int)
-        if !self.unknownValues.isEmpty {
+        
+        let unknownValues: Set<Int>
+        (self.values, unknownValues) = Self.fromBitValue(int)
+        if !unknownValues.isEmpty {
             bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
                 "unknownValues": "\(unknownValues)",
                 "values": "\(values.map(\.rawValue))",
@@ -363,11 +363,9 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     }
     
     public var values: Set<R>
-    public var unknownValues: Set<Int>
     
-    public init(_ values: Set<R>, unknownValues: Set<Int> = []) {
+    public init(_ values: Set<R>) {
         self.values = values
-        self.unknownValues = unknownValues
     }
     
     public init(from decoder: Decoder) throws {
@@ -376,8 +374,10 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         guard let int = Int(string) else {
             throw DecodingError.notRepresentingInt
         }
-        self.init(bitValue: int)
-        if !self.unknownValues.isEmpty {
+        
+        let unknownValues: Set<Int>
+        (self.values, unknownValues) = Self.fromBitValue(int)
+        if !unknownValues.isEmpty {
             bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
                 "unknownValues": "\(unknownValues)",
                 "values": "\(values.map(\.rawValue))",
@@ -421,7 +421,7 @@ public struct IntPair: Sendable, Codable {
 
 //MARK: - TolerantDecode
 
-private let tolerantDecodeLogger = DiscordGlobalConfiguration.makeLogger("DecodeTolerable")
+private let tolerantDecodeLogger = DiscordGlobalConfiguration.makeDecodeLogger("DecodeTolerable")
 
 /// An ``Array`` that tolerates decode failure of its elements.
 public struct TolerantDecodeArray<Element>:
