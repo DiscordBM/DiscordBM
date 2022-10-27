@@ -232,7 +232,7 @@ public struct DiscordTimestamp: Codable {
         else {
             throw EncodingError.invalidValue(date, .init(
                 codingPath: container.codingPath,
-                debugDescription: "Programming Error. Could not encode Date to Discord Timestamp."
+                debugDescription: "Programming Error. Could not encode Date to Discord Timestamp. Please report: https://github.com/MahdiBM/DiscordBM/issues"
             ))
         }
         let miliSecond = nanoSecond / 1_000
@@ -288,7 +288,7 @@ extension BitField {
         self.init(Set(elements))
     }
     
-    internal static func fromBitValue(_ bitValue: Int) -> (values: Set<R>, unknownValues: Set<Int>) {
+    internal static func fromBitValue(_ bitValue: Int) -> (values: Set<R>, unknown: Set<Int>) {
         var bitValue = bitValue
         var values: ContiguousArray<R> = []
         var unknownValues: Set<Int> = []
@@ -336,11 +336,11 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         let unknownValues: Set<Int>
         (self.values, unknownValues) = Self.fromBitValue(int)
         if !unknownValues.isEmpty {
-            bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
-                "unknownValues": "\(unknownValues)",
-                "values": "\(values.map(\.rawValue))",
-                "rawType": "\(Swift._typeName(R.self))",
-                "codingPath": "\(decoder.codingPath)"
+            bitFieldLogger.warning("Found bit-field unknown values", metadata: [
+                "unknownValues": .stringConvertible(unknownValues),
+                "values": .stringConvertible(values.map(\.rawValue)),
+                "rawType": .string(Swift._typeName(R.self)),
+                "codingPath": .stringConvertible(decoder.codingPath)
             ])
         }
     }
@@ -359,7 +359,7 @@ public struct StringBitField<R>: BitField, Codable
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
     enum DecodingError: Error {
-        case notRepresentingInt
+        case notRepresentingInt(String)
     }
     
     public var values: Set<R>
@@ -372,17 +372,17 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         let container = try decoder.singleValueContainer()
         let string = try container.decode(String.self)
         guard let int = Int(string) else {
-            throw DecodingError.notRepresentingInt
+            throw DecodingError.notRepresentingInt(string)
         }
         
         let unknownValues: Set<Int>
         (self.values, unknownValues) = Self.fromBitValue(int)
         if !unknownValues.isEmpty {
-            bitFieldLogger.warning("Non-empty bit-field unknown values", metadata: [
-                "unknownValues": "\(unknownValues)",
-                "values": "\(values.map(\.rawValue))",
-                "rawType": "\(Swift._typeName(R.self))",
-                "codingPath": "\(decoder.codingPath)"
+            bitFieldLogger.warning("Found bit-field unknown values", metadata: [
+                "unknownValues": .stringConvertible(unknownValues),
+                "values": .stringConvertible(values.map(\.rawValue)),
+                "rawType": .string(Swift._typeName(R.self)),
+                "codingPath": .stringConvertible(decoder.codingPath)
             ])
         }
     }
@@ -457,11 +457,11 @@ where Element: RawRepresentable,
             }
         }
         if !self.unknownValues.isEmpty {
-            tolerantDecodeLogger.warning("TolerantDecodeArray found unconsidered values.", metadata: [
-                "values": "\(values)",
-                "unknownValues": "\(self.unknownValues)",
-                "codingPath": "\(container.codingPath.map(\.debugDescription))",
-                "type": "\(Swift._typeName(Self.self))"
+            tolerantDecodeLogger.warning("TolerantDecodeArray found unknown values.", metadata: [
+                "values": .stringConvertible(values),
+                "unknownValues": .stringConvertible(self.unknownValues),
+                "codingPath": .stringConvertible(container.codingPath),
+                "type": .stringConvertible(Swift._typeName(Self.self))
             ])
         }
         self.values = Array(values)

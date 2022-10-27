@@ -21,7 +21,7 @@ public struct DefaultDiscordClient: DiscordClient {
     private let cache: ClientCache?
     let logger = DiscordGlobalConfiguration.makeLogger("DefaultDiscordClient")
     
-    static let requestIdGenerator = ManagedAtomic(UInt(0))
+    private static let requestIdGenerator = ManagedAtomic(UInt(0))
     
     /// If you provide no app id, you'll need to pass it to some functions on call site.
     public init(
@@ -119,6 +119,7 @@ public struct DefaultDiscordClient: DiscordClient {
         )
     }
     
+    /// Waits for the next retry if needed, and increases the retry counter.
     func waitForRetryAndIncreaseRetryCount(
         retriesSoFar: inout Int,
         headers: HTTPHeaders,
@@ -143,6 +144,7 @@ public struct DefaultDiscordClient: DiscordClient {
         ])
     }
     
+    /// Sends requests and retries if needed.
     func sendWithRetries(
         endpoint: Endpoint,
         queries: [(String, String?)],
@@ -229,7 +231,7 @@ public struct DefaultDiscordClient: DiscordClient {
             ])
             let response = try await self.execute(request)
             logger.debug("Received a response from Discord", metadata: [
-                "response": .string("\(response._response)"),
+                "response": .stringConvertible(response),
                 "retry": .stringConvertible(retryCounter),
                 "request-id": .stringConvertible(requestId)
             ])
@@ -286,7 +288,7 @@ public struct DefaultDiscordClient: DiscordClient {
             ])
             let response = try await self.execute(request)
             logger.debug("Received a response from Discord", metadata: [
-                "response": .string("\(response._response)"),
+                "response": .stringConvertible(response),
                 "retry": .stringConvertible(retryCounter),
                 "request-id": .stringConvertible(requestId)
             ])
@@ -416,18 +418,25 @@ public struct ClientConfiguration {
             return policy
         }
         
+        /// - Parameters:
+        ///   - shouldRetryConnectionErrors: Whether to retry some `HTTPClient` errors and all
+        ///    `NIOConnectionError` errors. This retry can happen only once for each request.
+        ///   - backoff: The backoff configuration, to wait a some amount of time
+        ///   _after_ a failed request.
         public init(shouldRetryConnectionErrors: Bool = false, backoff: Backoff? = .default) {
             self.storage = [:]
             self.shouldRetryConnectionErrors = shouldRetryConnectionErrors
             self.backoff = backoff
         }
         
+        /// Add a new `status` code to be retired as many times as `times`.
         @inlinable
         public mutating func setRetry(status: HTTPResponseStatus, times: Int) {
             precondition(status.code >= 500, "Only 500+ status codes should ever be retried")
             self.storage[status] = times
         }
         
+        /// Add new `status` codes to be retired as many times as `times`.
         @inlinable
         public mutating func setRetry(statuses: HTTPResponseStatus..., times: Int) {
             for status in statuses {
@@ -435,6 +444,7 @@ public struct ClientConfiguration {
             }
         }
         
+        /// Should retry a request or not.
         func shouldRetry(status: HTTPResponseStatus, retriesSoFar times: Int) -> Bool {
             if let expectedTimes = self.storage[status] {
                 return expectedTimes > times
@@ -497,9 +507,9 @@ private final class ClientCacheStorage {
     static let shared = ClientCacheStorage()
     
     func cache(for token: Secret) -> ClientCache {
-        let token = token._storage
         self.lock.lock()
         defer { self.lock.unlock() }
+        let token = token._storage
         if let cache = self.storage[token] {
             return cache
         } else {
@@ -512,7 +522,7 @@ private final class ClientCacheStorage {
 
 //MARK: - ClientCache
 
-/// This doesn't use the Cache-Control header because I couldn't find a 2xx response with a Cache-Control header returned by Discord.
+/// This doesn't use the `Cache-Control` header because I couldn't find a 2xx response with a `Cache-Control` header returned by Discord.
 private actor ClientCache {
     
     struct CacheableItem: Hashable {

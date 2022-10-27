@@ -548,8 +548,8 @@ extension BotGatewayManager {
         guard tryCount <= 10 else {
             logger.error("Send queue is too busy, will cancel sending a payload", metadata: [
                 "failedTryCount": .stringConvertible(tryCount),
-                "payload": "\(payload)",
-                "opcode": "\(String(describing: opcode))",
+                "payload": .string("\(payload)"),
+                "opcode": .string(String(describing: opcode)),
                 "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
             ])
             return
@@ -580,14 +580,14 @@ extension BotGatewayManager {
                 ws.send(raw: data, opcode: .init(encodedWebSocketOpcode: opcode)!)
             } else {
                 logger.warning("Trying to send through ws when a connection is not established", metadata: [
-                    "payload": "\(payload)",
+                    "payload": .string("\(payload)"),
                     "state": .stringConvertible(self._state.load(ordering: .relaxed)),
                     "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                 ])
             }
         } catch {
             logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
-                "payload": "\(payload)",
+                "payload": .string("\(payload)"),
                 "opcode": .stringConvertible(opcode ?? 255),
                 "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
             ])
