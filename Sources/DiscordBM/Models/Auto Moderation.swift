@@ -27,8 +27,9 @@ public struct AutoModerationRule: Sendable, Codable {
         
         public var keyword_filter: [String]?
         public var presets: [KeywordPreset]?
-        public var allow_list: [String]
+        public var allow_list: [String]?
         public var mention_total_limit: Int?
+        public var regex_patterns: [String]?
     }
     
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object
