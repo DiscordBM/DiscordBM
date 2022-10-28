@@ -153,7 +153,6 @@ extension Interaction {
                 case link = 5
             }
             
-            public var type: Kind = .button
             public var style: Style?
             public var label: String?
             public var emoji: PartialEmoji?
@@ -217,7 +216,6 @@ extension Interaction {
                 case paragraph = 2
             }
             
-            public var type: Kind = .textInput
             public var custom_id: String
             public var style: Style
             public var label: String
