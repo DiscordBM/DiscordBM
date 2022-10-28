@@ -242,11 +242,7 @@ extension Interaction {
             case selectMenu(SelectMenu)
             case textInput(TextInput)
             
-            enum CodingError: Error {
-                case containerIsSupposedToOnlyAppearAtTopLevel
-            }
-            
-            enum CodingKeys: CodingKey {
+            enum CodingKeys: String, CodingKey {
                 case type
             }
             
@@ -282,6 +278,31 @@ extension Interaction {
         }
         
         public var components: [Component]
+        
+        enum CodingError: Error {
+            case unexpectedComponentKind(Kind)
+            case containerIsSupposedToOnlyAppearAtTopLevel
+        }
+        
+        enum CodingKeys: String, CodingKey {
+            case type
+            case components
+        }
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let type = try container.decode(Kind.self, forKey: .type)
+            guard type == .container else {
+                throw CodingError.unexpectedComponentKind(type)
+            }
+            self.components = try container.decode([Component].self, forKey: .components)
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(Kind.container, forKey: .type)
+            try container.encode(self.components, forKey: .components)
+        }
         
         public init(components: [Component]) {
             self.components = components
