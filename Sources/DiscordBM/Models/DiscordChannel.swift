@@ -208,6 +208,8 @@ extension DiscordChannel {
             public var premium_type: DiscordUser.PremiumKind?
             public var public_flags: IntBitField<DiscordUser.Flag>?
             public var avatar_decoration: String?
+            public var bio: String?
+            public var banner_color: DiscordColor?
             public var member: Guild.Member?
         }
         

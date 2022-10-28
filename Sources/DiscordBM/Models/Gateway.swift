@@ -496,8 +496,8 @@ public struct Gateway: Sendable, Codable {
         case online = "online"
         case doNotDisturb = "dnd"
         case afk = "idle"
-        case invisible = "invisible"
         case offline = "offline"
+        case invisible = "invisible"
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#hello-hello-structure
@@ -1002,9 +1002,10 @@ public struct Gateway: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/gateway-events#client-status-object
     public struct ClientStatus: Sendable, Codable {
-        public var desktop: String?
-        public var mobile: String?
-        public var web: String?
+        public var desktop: Status?
+        public var mobile: Status?
+        public var web: Status?
+        public var embedded: Status?
     }
     
     /// Undocumented
