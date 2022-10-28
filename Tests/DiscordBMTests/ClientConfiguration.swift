@@ -18,8 +18,10 @@ class ClientConfigurationTests: XCTestCase {
         }
         
         do {
-            var policy = RetryPolicy()
-            policy.setRetry(status: .badGateway, times: 5)
+            let policy = RetryPolicy(
+                statuses: [.badGateway],
+                maxRetries: 5
+            )
             
             XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 0))
             XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 1))
@@ -38,14 +40,13 @@ class ClientConfigurationTests: XCTestCase {
         
         do {
             var policy = RetryPolicy.default
-            policy.setRetry(status: .badGateway, times: 3)
+            policy.statuses.append(.badGateway)
+            policy.maxRetries = 1
             
             XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 0))
-            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 1))
-            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 2))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 3))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 4))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 5))
+            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 1))
+            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 2))
+            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 10))
             XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 100000))
             
             XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 0))

@@ -358,14 +358,22 @@ public struct ClientConfiguration {
             ///
             /// Parameters:
             /// - `maxAllowed`: Max allowed amount in `Retry-After`.
-            /// - `retryIfGreater`: Retry or not even if the header time is greater than the `maxAllowed`.
+            /// - `retryIfGreater`: Retry or not even if the header time is greater than the `maxAllowed`. If yes, the retry will happen after `maxAllowed` amount of time.
             /// - `else`: If the `Retry-After` header did not exist.
-            case basedOnTheRetryAfterHeader(maxAllowed: TimeAmount?, retryIfGreater: Bool, else: Backoff?)
+            case basedOnTheRetryAfterHeader(
+                maxAllowed: TimeAmount?,
+                retryIfGreater: Bool = false,
+                else: Backoff?
+            )
             
-            public static var `default`: Backoff = .linear(
-                base: .milliseconds(200),
-                coefficient: .milliseconds(500),
-                multiplyUpToTimes: 10
+            public static var `default`: Backoff = .basedOnTheRetryAfterHeader(
+                maxAllowed: .seconds(5),
+                retryIfGreater: false,
+                else: .linear(
+                    base: .milliseconds(200),
+                    coefficient: .milliseconds(500),
+                    multiplyUpToTimes: 10
+                )
             )
             
             /// Returns the time needed to wait before the next retry, if any.
@@ -398,24 +406,29 @@ public struct ClientConfiguration {
             }
         }
         
-        /// [StatusCode: TimesToRetry]
-        @usableFromInline
-        var storage: [HTTPResponseStatus: Int]
+        var _statuses: [HTTPResponseStatus]
+        
+        public var statuses: [HTTPResponseStatus] {
+            get { self._statuses }
+            set {
+                precondition(newValue.allSatisfy({ $0.code >= 400 }), "Should not retry status codes less than 400")
+                self._statuses = newValue
+            }
+        }
+        
+        public var maxRetries: Int
         
         /// Whether to retry some `HTTPClient` errors and all `NIOConnectionError` errors.
         /// This retry can happen only once for each request.
-        var shouldRetryConnectionErrors: Bool
+        public var shouldRetryConnectionErrors: Bool
         
         /// The backoff configuration, to wait a some amount of time _after_ a failed request.
-        @usableFromInline
-        var backoff: Backoff?
+        public var backoff: Backoff?
         
-        /// Only retries status code 500, once.
+        /// Only retries status code 429 and 500 once.
         @inlinable
         public static var `default`: RetryPolicy {
-            var policy = RetryPolicy()
-            policy.setRetry(status: .internalServerError, times: 1)
-            return policy
+            RetryPolicy(statuses: [.tooManyRequests, .internalServerError])
         }
         
         /// - Parameters:
@@ -423,34 +436,23 @@ public struct ClientConfiguration {
         ///    `NIOConnectionError` errors. This retry can happen only once for each request.
         ///   - backoff: The backoff configuration, to wait a some amount of time
         ///   _after_ a failed request.
-        public init(shouldRetryConnectionErrors: Bool = false, backoff: Backoff? = .default) {
-            self.storage = [:]
+        public init(
+            statuses: [HTTPResponseStatus],
+            maxRetries: Int = 1,
+            shouldRetryConnectionErrors: Bool = false,
+            backoff: Backoff? = .default
+        ) {
+            precondition(statuses.allSatisfy({ $0.code >= 400 }), "Should not retry status codes less than 400")
+            self._statuses = []
+            self.maxRetries = maxRetries
             self.shouldRetryConnectionErrors = shouldRetryConnectionErrors
             self.backoff = backoff
-        }
-        
-        /// Add a new `status` code to be retired as many times as `times`.
-        @inlinable
-        public mutating func setRetry(status: HTTPResponseStatus, times: Int) {
-            precondition(status.code >= 500, "Only 500+ status codes should ever be retried")
-            self.storage[status] = times
-        }
-        
-        /// Add new `status` codes to be retired as many times as `times`.
-        @inlinable
-        public mutating func setRetry(statuses: HTTPResponseStatus..., times: Int) {
-            for status in statuses {
-                self.setRetry(status: status, times: times)
-            }
+            self.statuses = statuses
         }
         
         /// Should retry a request or not.
         func shouldRetry(status: HTTPResponseStatus, retriesSoFar times: Int) -> Bool {
-            if let expectedTimes = self.storage[status] {
-                return expectedTimes > times
-            } else {
-                return false
-            }
+            maxRetries > times && self.statuses.contains(status)
         }
         
         /// Returns the time needed to wait before the next retry, if any.
