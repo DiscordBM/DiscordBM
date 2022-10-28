@@ -132,7 +132,7 @@ public struct DefaultDiscordClient: DiscordClient {
         logger.warning("Will soon retry a request", metadata: [
             "request-id": .stringConvertible(requestId),
             "retriesWithoutThis": .stringConvertible(retriesSoFar),
-            "waitMillisBeforeRetry": .stringConvertible((retryWait ?? 0) / 1_000_000)
+            "waitMilliesBeforeRetry": .stringConvertible((retryWait ?? 0) / 1_000_000)
         ])
         if let retryWait = retryWait {
             try await Task.sleep(nanoseconds: UInt64(retryWait))

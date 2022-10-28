@@ -217,6 +217,7 @@ extension Interaction {
                 case paragraph = 2
             }
             
+            public var type: Kind = .textInput
             public var custom_id: String
             public var style: Style
             public var label: String
