@@ -7,30 +7,25 @@ import enum NIOWebSocket.WebSocketErrorCode
 import struct NIOCore.TimeAmount
 
 #if swift(>=5.7)
-public protocol GatewayManager: AnyActor {
-    nonisolated var client: any DiscordClient { get }
-    nonisolated var id: Int { get }
-    nonisolated var state: GatewayState { get }
-    
-    func connect() async
-    func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
-    func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
-    func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
-    func disconnect() async
-}
-#else
-public protocol GatewayManager: AnyObject {
-    nonisolated var client: any DiscordClient { get }
-    nonisolated var id: Int { get }
-    nonisolated var state: GatewayState { get }
-    
-    func connect() async
-    func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
-    func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
-    func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
-    func disconnect() async
-}
+public protocol DiscordActor: AnyActor { }
+#else /// Swift `5.6` doesn't have `AnyActor` apparently.
+public protocol DiscordActor: AnyObject { }
 #endif
+
+public protocol GatewayManager: DiscordActor {
+    /// A client to send requests to Discord.
+    nonisolated var client: any DiscordClient { get }
+    /// This gateway manager's identifier.
+    nonisolated var id: Int { get }
+    /// The current state of the gateway manager.
+    nonisolated var state: GatewayState { get }
+    
+    func connect() async
+    func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
+    func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
+    func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
+    func disconnect() async
+}
 
 public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
     case stopped
@@ -58,9 +53,12 @@ public actor BotGatewayManager: GatewayManager {
         }
     }
     private let eventLoopGroup: any EventLoopGroup
+    /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
+    /// Max frame size we accept to receive through the websocket connection.
     private nonisolated let maxFrameSize: Int
     private static let idGenerator = ManagedAtomic(0)
+    /// This gateway manager's identifier.
     public nonisolated let id = BotGatewayManager.idGenerator
         .wrappingIncrementThenLoad(ordering: .relaxed)
     private let logger: Logger
@@ -74,6 +72,7 @@ public actor BotGatewayManager: GatewayManager {
     
     //MARK: Connection state
     private nonisolated let _state = ManagedAtomic(GatewayState.noConnection)
+    /// The current state of the gateway manager.
     public nonisolated var state: GatewayState {
         self._state.load(ordering: .relaxed)
     }
@@ -88,23 +87,24 @@ public actor BotGatewayManager: GatewayManager {
     
     //MARK: Resume-related current-connection properties
     
-    /// The sequence number for the current payloads sent to us.
+    /// The sequence number for the payloads sent to us.
     private var sequenceNumber: Int? = nil
     /// The ID of the current Discord-related session.
     private var sessionId: String? = nil
-    /// Gateway URL for resuming the connection, so we don't have to make an api call.
+    /// Gateway URL for resuming the connection, so we don't need to make an api call.
     private var resumeGatewayUrl: String? = nil
     
     //MARK: Shard-ing
     private var maxConcurrency: Int? = nil
     private var isFirstConnection = true
     
-    //MARK: Backoff properties
+    //MARK: Backoff
     
     /// Discord cares about the identify payload for rate-limiting and if we send
     /// more than 1000 identifies in a day, Discord will revoke the bot token.
-    /// This does not necessarily prevent your bot token getting revoked,
+    /// This Backoff does not necessarily prevent your bot token getting revoked,
     /// but in the worst case, doesn't let it happen sooner than 8 hours.
+    /// This also helps in other situations, for example when there is a Discord outage.
     private let connectionBackoff = Backoff(
         base: 2,
         maxExponentiation: 7,
@@ -277,15 +277,12 @@ extension BotGatewayManager {
             self.sequenceNumber = sequenceNumber
         }
         
+        /// for `.reconnect`, we will reconnect when we get the close notification
         switch event.opcode {
-        case .reconnect:
-            break // will reconnect when we get the close notification
         case .heartbeat:
             self.sendPing(forConnectionWithId: self.connectionId.load(ordering: .relaxed))
         case .heartbeatAccepted:
             self.lastPongDate = Date()
-        case .invalidSession:
-            break /// handled in event.data
         default:
             break
         }
@@ -304,12 +301,11 @@ extension BotGatewayManager {
             await self.connect()
         case let .hello(hello):
             logger.debug("Received 'hello'")
-            let interval: TimeAmount = .milliseconds(Int64(hello.heartbeat_interval))
             /// Disable websocket-kit automatic pings
             self.ws?.pingInterval = nil
             self.setupPingTask(
                 forConnectionWithId: self.connectionId.load(ordering: .relaxed),
-                every: interval
+                every: .milliseconds(Int64(hello.heartbeat_interval))
             )
             await self.sendResumeOrIdentify()
         case let .ready(payload):
@@ -637,26 +633,4 @@ extension BotGatewayManager {
             ])
         }
     }
-    
-    // Not yet in use due to Xcode 14 availability check problems in CI
-//    private func sleep(for time: TimeAmount) async {
-//        do {
-//            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
-//#if swift(>=5.7)
-//                try await Task.sleep(
-//                    until: .now + .nanoseconds(time.nanoseconds),
-//                    clock: .continuous
-//                )
-//#else
-//                try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
-//#endif
-//            } else {
-//                try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
-//            }
-//        } catch {
-//            logger.warning("Task failed to sleep properly", metadata: [
-//                "error": "\(error)"
-//            ])
-//        }
-//    }
 }

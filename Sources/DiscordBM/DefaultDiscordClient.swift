@@ -411,11 +411,12 @@ public struct ClientConfiguration {
         public var statuses: [HTTPResponseStatus] {
             get { self._statuses }
             set {
-                precondition(newValue.allSatisfy({ $0.code >= 400 }), "Should not retry status codes less than 400")
+                precondition(newValue.allSatisfy({ $0.code >= 400 }), "Status codes less than 400 do not need retrying. This would cause problems")
                 self._statuses = newValue
             }
         }
         
+        /// Max amount of times to retry any eligible requests.
         public var maxRetries: Int
         
         /// Whether to retry some `HTTPClient` errors and all `NIOConnectionError` errors.
@@ -442,7 +443,6 @@ public struct ClientConfiguration {
             shouldRetryConnectionErrors: Bool = false,
             backoff: Backoff? = .default
         ) {
-            precondition(statuses.allSatisfy({ $0.code >= 400 }), "Should not retry status codes less than 400")
             self._statuses = []
             self.maxRetries = maxRetries
             self.shouldRetryConnectionErrors = shouldRetryConnectionErrors
