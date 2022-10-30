@@ -56,7 +56,7 @@ class ClientConfigurationTests: XCTestCase {
     }
     
     func testRetryPolicyConstantBackoff() throws {
-        let backoff = Backoff.constant(.seconds(1))
+        let backoff = Backoff.constant(1)
         let times = [
             backoff.waitTimeBeforeRetry(retriesSoFar: 0, headers: [:]),
             backoff.waitTimeBeforeRetry(retriesSoFar: 1, headers: [:]),
@@ -65,18 +65,14 @@ class ClientConfigurationTests: XCTestCase {
             backoff.waitTimeBeforeRetry(retriesSoFar: .max, headers: [:])
         ]
         for time in times {
-            XCTAssertEqual(time, .seconds(1))
+            XCTAssertEqual(time, 1)
         }
     }
     
     func testRetryPolicyLinearBackoff() throws {
-        let base = TimeAmount.milliseconds(200)
-        let coefficient = TimeAmount.milliseconds(800)
-        let backoff = Backoff.linear(
-            base: base,
-            coefficient: coefficient,
-            multiplyUpToTimes: 3
-        )
+        let base = 0.2
+        let coefficient = 0.8
+        let backoff = Backoff.linear(base: base, coefficient: coefficient, upToTimes: 3)
         
         XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 0, headers: [:]), base)
         XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 1, headers: [:]), base + coefficient)
@@ -88,17 +84,34 @@ class ClientConfigurationTests: XCTestCase {
         XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: .max, headers: [:]), base + 3 * coefficient)
     }
     
-    func testRetryPolicyHeadersBackoffWithElse() throws {
-        let base = TimeAmount.milliseconds(200)
-        let coefficient = TimeAmount.milliseconds(800)
-        let linearBackoff = Backoff.linear(
+    func testRetryPolicyExponentialBackoff() throws {
+        let base = 1.5
+        let coefficient = 0.8
+        let rate = 3.0
+        let backoff = Backoff.exponential(
             base: base,
             coefficient: coefficient,
-            multiplyUpToTimes: 3
+            rate: rate,
+            upToTimes: 4
         )
-        let maxAllowed = TimeAmount.seconds(12)
+        
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 0, headers: [:]), base + coefficient)
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 1, headers: [:]), base + coefficient * rate)
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 2, headers: [:]), base + coefficient * (pow(rate, 2)))
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 3, headers: [:]), base + coefficient * (pow(rate, 3)))
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 4, headers: [:]), base + coefficient * (pow(rate, 4)))
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 5, headers: [:]), base + coefficient * (pow(rate, 4)))
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 10, headers: [:]), base + coefficient * (pow(rate, 4)))
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: .max, headers: [:]), base + coefficient * (pow(rate, 4)))
+    }
+    
+    func testRetryPolicyHeadersBackoffWithElse() throws {
+        let base = 0.2
+        let coefficient = 0.8
+        let linearBackoff = Backoff.linear(base: base, coefficient: coefficient, upToTimes: 3)
+        let maxAllowed = 12.0
         let backoff = Backoff.basedOnTheRetryAfterHeader(
-            maxAllowed: maxAllowed,
+            maxAllowed: 12,
             retryIfGreater: true,
             else: linearBackoff
         )
@@ -106,7 +119,7 @@ class ClientConfigurationTests: XCTestCase {
         /// Headers greater than the max allowed
         do {
             let headers = HTTPHeaders([("Retry-After", "166")])
-            func backoffWait(retriesSoFar: Int, headers: HTTPHeaders) -> TimeAmount? {
+            func backoffWait(retriesSoFar: Int, headers: HTTPHeaders) -> Double? {
                 backoff.waitTimeBeforeRetry(retriesSoFar: retriesSoFar, headers: headers)
             }
             XCTAssertEqual(backoffWait(retriesSoFar: 0, headers: headers), maxAllowed)
@@ -122,10 +135,10 @@ class ClientConfigurationTests: XCTestCase {
         /// Headers smaller than the max allowed
         do {
             let headers = HTTPHeaders([("Retry-After", "8.939")])
-            func backoffWait(retriesSoFar: Int, headers: HTTPHeaders) -> TimeAmount? {
+            func backoffWait(retriesSoFar: Int, headers: HTTPHeaders) -> Double? {
                 backoff.waitTimeBeforeRetry(retriesSoFar: retriesSoFar, headers: headers)
             }
-            let headerTime = TimeAmount.milliseconds(8939)
+            let headerTime = 8.939
             XCTAssertEqual(backoffWait(retriesSoFar: 0, headers: headers), headerTime)
             XCTAssertEqual(backoffWait(retriesSoFar: 1, headers: headers), headerTime)
             XCTAssertEqual(backoffWait(retriesSoFar: 2, headers: headers), headerTime)
@@ -138,7 +151,7 @@ class ClientConfigurationTests: XCTestCase {
         
         /// No headers
         do {
-            func backoffWait(retriesSoFar: Int) -> TimeAmount? {
+            func backoffWait(retriesSoFar: Int) -> Double? {
                 backoff.waitTimeBeforeRetry(retriesSoFar: retriesSoFar, headers: [:])
             }
             XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 0, headers: [:]), base)
@@ -153,7 +166,7 @@ class ClientConfigurationTests: XCTestCase {
     }
     
     func testRetryPolicyHeadersBackoffWithoutElse() throws {
-        let maxAllowed = TimeAmount.seconds(10)
+        let maxAllowed = 10.0
         let backoff = Backoff.basedOnTheRetryAfterHeader(
             maxAllowed: maxAllowed,
             retryIfGreater: false,
@@ -163,7 +176,7 @@ class ClientConfigurationTests: XCTestCase {
         /// Headers greater than the max allowed
         do {
             let headers = HTTPHeaders([("Retry-After", "11.5555")])
-            func backoffWait(retriesSoFar: Int, headers: HTTPHeaders) -> TimeAmount? {
+            func backoffWait(retriesSoFar: Int, headers: HTTPHeaders) -> Double? {
                 backoff.waitTimeBeforeRetry(retriesSoFar: retriesSoFar, headers: headers)
             }
             XCTAssertEqual(backoffWait(retriesSoFar: 0, headers: headers), nil)
@@ -179,10 +192,10 @@ class ClientConfigurationTests: XCTestCase {
         /// Headers smaller than the max allowed
         do {
             let headers = HTTPHeaders([("Retry-After", "1")])
-            func backoffWait(retriesSoFar: Int, headers: HTTPHeaders) -> TimeAmount? {
+            func backoffWait(retriesSoFar: Int, headers: HTTPHeaders) -> Double? {
                 backoff.waitTimeBeforeRetry(retriesSoFar: retriesSoFar, headers: headers)
             }
-            let headerTime = TimeAmount.seconds(1)
+            let headerTime = 1.0
             XCTAssertEqual(backoffWait(retriesSoFar: 0, headers: headers), headerTime)
             XCTAssertEqual(backoffWait(retriesSoFar: 1, headers: headers), headerTime)
             XCTAssertEqual(backoffWait(retriesSoFar: 2, headers: headers), headerTime)
@@ -195,7 +208,7 @@ class ClientConfigurationTests: XCTestCase {
         
         /// No headers
         do {
-            func backoffWait(retriesSoFar: Int) -> TimeAmount? {
+            func backoffWait(retriesSoFar: Int) -> Double? {
                 backoff.waitTimeBeforeRetry(retriesSoFar: retriesSoFar, headers: [:])
             }
             XCTAssertEqual(backoffWait(retriesSoFar: 0), nil)
@@ -208,8 +221,4 @@ class ClientConfigurationTests: XCTestCase {
             XCTAssertEqual(backoffWait(retriesSoFar: .max), nil)
         }
     }
-}
-
-private func * (lhs: Int64, rhs: TimeAmount) -> TimeAmount {
-    .nanoseconds(rhs.nanoseconds * lhs)
 }

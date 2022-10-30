@@ -128,14 +128,14 @@ public struct DefaultDiscordClient: DiscordClient {
         let retryWait = self.configuration.shouldWaitBeforeRetry(
             retriesSoFar: retriesSoFar,
             headers: headers
-        )?.nanoseconds
+        )
         logger.warning("Will soon retry a request", metadata: [
             "request-id": .stringConvertible(requestId),
             "retriesWithoutThis": .stringConvertible(retriesSoFar),
-            "waitMilliesBeforeRetry": .stringConvertible((retryWait ?? 0) / 1_000_000)
+            "waitSecondsBeforeRetry": .stringConvertible(retryWait ?? 0)
         ])
         if let retryWait = retryWait {
-            try await Task.sleep(nanoseconds: UInt64(retryWait))
+            try await Task.sleep(nanoseconds: UInt64(retryWait * 1_000_000_000))
         }
         retriesSoFar += 1
         logger.debug("Will retry a request right now", metadata: [
@@ -345,53 +345,64 @@ public struct ClientConfiguration {
         }
     }
     
-    // TODO: RetryPolicy to accept exponential backoff.
     public struct RetryPolicy {
         
         public indirect enum Backoff {
-            case constant(TimeAmount)
-            /// `multiplyUpToTimes` indicates how many times at maximum this should linearly
-            /// increase the backoff. Does not indicate how many times the retrial will happen.
-            /// Assuming `ax + b` is a linear equation, here `b == base` and `a == coefficient`.
-            case linear(base: TimeAmount, coefficient: TimeAmount, multiplyUpToTimes: Int)
+            /// How many seconds.
+            case constant(Double)
+            /// `upToTimes` indicates how many times at maximum this should linearly increase
+            /// the backoff. Does not indicate how many times the retrial will happen.
+            /// Assuming `backoff = a + bx` is the linear equation, then: `a == base`, `b == coefficient`.
+            /// `base` and `coefficient` are in seconds.
+            case linear(base: Double, coefficient: Double, upToTimes: UInt)
+            /// `upToTimes` indicates how many times at maximum this should linearly increase
+            /// the backoff. Does not indicate how many times the retrial will happen.
+            /// Assuming `backoff = a + b(c^x)` is the exponential equation, then: `a == base`, `b == coefficient`, `c == rate`.
+            /// Make sure to keep `rate` above 1.
+            /// `base` and `rate` are in seconds.
+            case exponential(
+                base: Double,
+                coefficient: Double = 1,
+                rate: Double = 2,
+                upToTimes: UInt
+            )
             /// Based on the `Retry-After` header.
             ///
             /// Parameters:
-            /// - `maxAllowed`: Max allowed amount in `Retry-After`.
-            /// - `retryIfGreater`: Retry or not even if the header time is greater than the `maxAllowed`. If yes, the retry will happen after `maxAllowed` amount of time.
+            /// - `maxAllowed`: Max allowed amount in `Retry-After`. In seconds.
+            /// - `retryIfGreater`: Retry or not even if the header time is greater than
+            ///  `maxAllowed`. If yes, the retry will happen after `maxAllowed` amount of time.
             /// - `else`: If the `Retry-After` header did not exist.
             case basedOnTheRetryAfterHeader(
-                maxAllowed: TimeAmount?,
+                maxAllowed: Double?,
                 retryIfGreater: Bool = false,
                 else: Backoff?
             )
             
             public static var `default`: Backoff = .basedOnTheRetryAfterHeader(
-                maxAllowed: .seconds(5),
+                maxAllowed: 5,
                 retryIfGreater: false,
-                else: .linear(
-                    base: .milliseconds(200),
-                    coefficient: .milliseconds(500),
-                    multiplyUpToTimes: 10
-                )
+                else: .exponential(base: 0.2, coefficient: 0.5, rate: 2, upToTimes: 10)
             )
             
             /// Returns the time needed to wait before the next retry, if any.
-            func waitTimeBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> TimeAmount? {
+            func waitTimeBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> Double? {
                 switch self {
                 case let .constant(constant):
                     return constant
-                case let .linear(base, coefficient, multiplyUpToTimes):
-                    let multiplyFactor = min(multiplyUpToTimes, times)
-                    let nanos = Int64(multiplyFactor) * coefficient.nanoseconds + base.nanoseconds
-                    return .nanoseconds(nanos)
+                case let .linear(base, coefficient, upToTimes):
+                    let multiplyFactor = min(Int(upToTimes), times)
+                    let time = coefficient * Double(multiplyFactor) + base
+                    return time
+                case let .exponential(base, coefficient, rate, upToTimes):
+                    let exponent = min(Int(upToTimes), times)
+                    let time = base + coefficient * pow(rate, Double(exponent))
+                    return time
                 case let .basedOnTheRetryAfterHeader(maxAllowed, retryIfGreater, elseBackoff):
-                    if let retryAfter = headers.first(name: "Retry-After"),
-                       let retrySeconds = Double(retryAfter) {
-                        let retryNanos = Int64(retrySeconds * 1_000_000_000)
-                        let maxAllowedNanos = maxAllowed?.nanoseconds ?? 0
-                        if retryNanos <= maxAllowedNanos {
-                            return .nanoseconds(retryNanos)
+                    if let retryAfterString = headers.first(name: "Retry-After"),
+                       let retryAfter = Double(retryAfterString) {
+                        if retryAfter <= (maxAllowed ?? 0) {
+                            return retryAfter
                         } else {
                             if retryIfGreater {
                                 return maxAllowed
@@ -454,16 +465,6 @@ public struct ClientConfiguration {
         func shouldRetry(status: HTTPResponseStatus, retriesSoFar times: Int) -> Bool {
             maxRetries > times && self.statuses.contains(status)
         }
-        
-        /// Returns the time needed to wait before the next retry, if any.
-        func waitTimeBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> TimeAmount? {
-            switch backoff {
-            case let .some(backoff):
-                return backoff.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
-            case .none:
-                return nil
-            }
-        }
     }
     
     /// The behavior used for caching requests.
@@ -480,8 +481,13 @@ public struct ClientConfiguration {
     }
     
     /// Returns the amount of time that the client should wait before the next retry, if any.
-    func shouldWaitBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> TimeAmount? {
-        self.retryPolicy?.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
+    func shouldWaitBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> Double? {
+        switch self.retryPolicy?.backoff {
+        case let .some(backoff):
+            return backoff.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
+        case .none:
+            return nil
+        }
     }
     
     public init(
