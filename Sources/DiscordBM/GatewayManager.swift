@@ -189,21 +189,18 @@ public actor BotGatewayManager: GatewayManager {
     /// `_state` must be set to an appropriate value before triggering this function.
     public func connect() async {
         logger.debug("Connect method triggered")
-        /// Guard if other connections are in process
-        let state = self._state.load(ordering: .relaxed)
-        guard state == .noConnection || state == .configured else {
-            logger.warning("Gateway state doesn't allow a new connection", metadata: [
-                "state": .stringConvertible(state)
-            ])
-            return
-        }
         /// Guard we're attempting to connect too fast
         if let connectIn = await connectionBackoff.canPerformIn() {
             logger.warning("Cannot try to connect immediately due to backoff", metadata: [
                 "wait-milliseconds": .stringConvertible(connectIn.nanoseconds / 1_000_000)
             ])
             await self.sleep(for: connectIn)
-            await self.connect()
+        }
+        /// Guard if other connections are in process
+        guard [.noConnection, .configured, .stopped].contains(self.state) else {
+            logger.warning("Gateway state doesn't allow a new connection", metadata: [
+                "state": .stringConvertible(state)
+            ])
             return
         }
         self._state.store(.connecting, ordering: .relaxed)
@@ -225,11 +222,10 @@ public actor BotGatewayManager: GatewayManager {
             self.configureWebSocket()
         }.whenFailure { [self] error in
             logger.error("WebSocket error while connecting to Discord", metadata: [
-                "error": "\(error)"
+                "error": .string("\(error)")
             ])
             self._state.store(.noConnection, ordering: .relaxed)
             Task {
-                await self.sleep(for: .seconds(5))
                 await self.connect()
             }
         }
