@@ -20,10 +20,16 @@ public protocol GatewayManager: DiscordActor {
     /// The current state of the gateway manager.
     nonisolated var state: GatewayState { get }
     
+    /// Starts connecting to Discord.
     func connect() async
+    /// Requests members of guilds from discord.
+    /// Refer to the documentation link of ``Gateway.RequestGuildMembers`` for more info.
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
+    /// Adds a handler to be notified of events.
     func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
+    /// Adds a handler to be notified of event parsing failures.
     func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
+    /// Disconnects from Discord.
     func disconnect() async
 }
 
@@ -186,6 +192,7 @@ public actor BotGatewayManager: GatewayManager {
         self.logger = logger
     }
     
+    /// Starts connecting to Discord.
     /// `_state` must be set to an appropriate value before triggering this function.
     public func connect() async {
         logger.debug("Connect method triggered")
@@ -231,22 +238,27 @@ public actor BotGatewayManager: GatewayManager {
         }
     }
     
+    /// Requests members of guilds from discord.
+    /// Refer to the documentation link of ``Gateway.RequestGuildMembers`` for more info.
     public func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) {
-        /// This took a lot of time to figure out, not sure why it needs opcode `0x1`.
+        /// This took a lot of time to figure out, not sure why it needs opcode `1`.
         self.send(payload: .init(
             opcode: .requestGuildMembers,
             data: .requestGuildMembers(payload)
-        ), opcode: 0x1)
+        ), opcode: 1)
     }
     
+    /// Adds a handler to be notified of events.
     public func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) {
         self.onEvents.append(handler)
     }
     
+    /// Adds a handler to be notified of event parsing failures.
     public func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) {
         self.onEventParseFailures.append(handler)
     }
     
+    /// Disconnects from Discord.
     public func disconnect() async {
         logger.debug("Will disconnect", metadata: [
             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
@@ -327,6 +339,8 @@ extension BotGatewayManager {
             logger.trace("Got Discord gateway url from `resumeGatewayUrl`")
             return gatewayUrl
         } else {
+            /// If the bot is using shard-ing, we need to call a different endpoint
+            /// to get some more info than only the gateway url.
             if identifyPayload.shard == nil {
                 if let gatewayUrl = try? await client.getGateway().decode().url {
                     logger.trace("Got Discord gateway url from gateway api call")
@@ -372,11 +386,10 @@ extension BotGatewayManager {
             opcode: Gateway.Opcode.identify.rawValue
         )
         
-        /// Invalidate these temporary info for the next connection, incase this one fails.
-        /// This will be a notice for the next connection to don't try resuming anymore.
+        /// Invalidate `sequenceNumber` info for the next connection, incase this one fails.
+        /// This will be a notice for the next connection to
+        /// not try resuming anymore, if this connection has failed.
         self.sequenceNumber = nil
-        self.resumeGatewayUrl = nil
-        /// Don't invalidate `sessionId` because it'll be needed for the next resumes as well.
         
         logger.debug("Sent resume request to Discord")
     }

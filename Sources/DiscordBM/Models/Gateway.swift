@@ -778,7 +778,7 @@ public struct Gateway: Sendable, Codable {
             public var form_responses: [FormResponse]
             public var application_status: Status
             public var actioned_by_user: DiscordUser
-            public var actioned_at: String /// Seems to be a Snowflake ?!
+            public var actioned_at: String /// Seems to be a snowflake, not a date ?!
         }
         
         public enum Status: String, Sendable, Codable {
