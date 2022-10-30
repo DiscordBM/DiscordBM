@@ -431,11 +431,9 @@ where Element: RawRepresentable,
       Element.RawValue: Codable {
     
     public var values: [Element] = []
-    public var unknownValues: [Element.RawValue] = []
     
-    public init(_ values: [Element], unknownValues: [Element.RawValue] = []) {
+    public init(_ values: [Element]) {
         self.values = values
-        self.unknownValues = unknownValues
     }
     
     public init(arrayLiteral elements: Element...) {
@@ -447,19 +445,23 @@ where Element: RawRepresentable,
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
         
-        var values: ContiguousArray<Element> = []
+        var values: [Element] = []
+        if let count = container.count {
+            values.reserveCapacity(count)
+        }
+        var unknownValues: [Element.RawValue] = []
         while !container.isAtEnd {
             let rawValue = try container.decode(Element.RawValue.self)
             if let value = Element.init(rawValue: rawValue) {
                 values.append(value)
             } else {
-                self.unknownValues.append(rawValue)
+                unknownValues.append(rawValue)
             }
         }
-        if !self.unknownValues.isEmpty {
+        if !unknownValues.isEmpty {
             tolerantDecodeLogger.warning("TolerantDecodeArray found unknown values.", metadata: [
                 "values": .stringConvertible(values),
-                "unknownValues": .stringConvertible(self.unknownValues),
+                "unknownValues": .stringConvertible(unknownValues),
                 "codingPath": .stringConvertible(container.codingPath),
                 "type": .stringConvertible(Swift._typeName(Self.self))
             ])

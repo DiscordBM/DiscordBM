@@ -15,6 +15,7 @@ public struct PartialApplication: Sendable, Codable {
         case unknownFlag20 = 20
         case unknownFlag21 = 21
         case applicationCommandBadge = 23
+        case unknownFlag24 = 24
     }
     
     /// https://discord.com/developers/docs/resources/application#install-params-object

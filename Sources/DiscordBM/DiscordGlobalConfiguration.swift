@@ -10,12 +10,13 @@ public enum DiscordGlobalConfiguration {
     /// The `String` argument represents the label of the logger.
     public static var makeLogger: (String) -> Logger = { Logger(label: $0) }
     /// Log about sub-optimal situations during decode.
-    /// For example if a type can't find a representation for a decoded value,
+    /// For example if a type can't find a representation to decode a value to,
     /// and has to get rid of that value.
     /// Does not include decode errors.
     /// For those interested to keep the library up to date.
-    public static var enableLoggingDuringDecode: Bool = false
-    /// Global rate-limit for requests per second. Currently 50 by default.
+    public static var enableLoggingDuringDecode: Bool = true
+    /// Global rate-limit for requests per second.
+    /// 50 by default, but you can ask Discord for a raise.
     public static var globalRateLimit = 50
 }
 
@@ -24,7 +25,7 @@ extension DiscordGlobalConfiguration {
     static func makeDecodeLogger(_ label: String) -> Logger {
         if enableLoggingDuringDecode {
             var logger = DiscordGlobalConfiguration.makeLogger(label)
-            logger[metadataKey: "explanation"] = "If you're using one of the recent versions of DiscordBM, please report this on https://github.com/MahdiBM/DiscordBM/issues if there are no similar issues, so we can keep DiscordBM up to date for the community"
+            logger[metadataKey: "explanation"] = "If you're using one of the recent versions of DiscordBM, please report this on https://github.com/MahdiBM/DiscordBM/issues if there are no similar issues, so we can keep DiscordBM up to date for the community. You can disable these logs by using `DiscordGlobalConfiguration.enableLoggingDuringDecode = false` on startup"
             return logger
         } else {
             return Logger(label: label, factory: SwiftLogNoOpLogHandler.init)
