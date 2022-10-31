@@ -354,17 +354,23 @@ public struct ClientConfiguration {
             /// the backoff. Does not indicate how many times the retrial will happen.
             /// Assuming `backoff = a + bx` is the linear equation, then: `a == base`, `b == coefficient`.
             /// `base` and `coefficient` are in seconds.
-            case linear(base: Double, coefficient: Double, upToTimes: UInt)
+            /// `upToTimes` starts from `1` and will be compared to the # of the retry.
+            case linear(
+                base: Double = 0,
+                coefficient: Double,
+                upToTimes: UInt = .max
+            )
             /// `upToTimes` indicates how many times at maximum this should linearly increase
             /// the backoff. Does not indicate how many times the retrial will happen.
             /// Assuming `backoff = a + b(c^x)` is the exponential equation, then: `a == base`, `b == coefficient`, `c == rate`.
-            /// Make sure to keep `rate` above 1.
+            /// Make sure to keep `rate` above `1`.
             /// `base` and `rate` are in seconds.
+            /// `upToTimes` starts from `1` and will be compared to the # of the retry.
             case exponential(
-                base: Double,
+                base: Double = 0,
                 coefficient: Double = 1,
                 rate: Double = 2,
-                upToTimes: UInt
+                upToTimes: UInt = .max
             )
             /// Based on the `Retry-After` header.
             ///
@@ -386,15 +392,17 @@ public struct ClientConfiguration {
             )
             
             /// Returns the time needed to wait before the next retry, if any.
-            func waitTimeBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> Double? {
+            func waitTimeBeforeRetry(retriesSoFar: Int, headers: HTTPHeaders) -> Double? {
                 switch self {
                 case let .constant(constant):
                     return constant
                 case let .linear(base, coefficient, upToTimes):
+                    let times = retriesSoFar + 1
                     let multiplyFactor = min(Int(upToTimes), times)
                     let time = coefficient * Double(multiplyFactor) + base
                     return time
                 case let .exponential(base, coefficient, rate, upToTimes):
+                    let times = retriesSoFar + 1
                     let exponent = min(Int(upToTimes), times)
                     let time = base + coefficient * pow(rate, Double(exponent))
                     return time
@@ -411,7 +419,10 @@ public struct ClientConfiguration {
                             }
                         }
                     } else {
-                        return elseBackoff?.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
+                        return elseBackoff?.waitTimeBeforeRetry(
+                            retriesSoFar: retriesSoFar,
+                            headers: headers
+                        )
                     }
                 }
             }

@@ -62,7 +62,7 @@ class ClientConfigurationTests: XCTestCase {
             backoff.waitTimeBeforeRetry(retriesSoFar: 1, headers: [:]),
             backoff.waitTimeBeforeRetry(retriesSoFar: 2, headers: [:]),
             backoff.waitTimeBeforeRetry(retriesSoFar: 10, headers: [:]),
-            backoff.waitTimeBeforeRetry(retriesSoFar: .max, headers: [:])
+            backoff.waitTimeBeforeRetry(retriesSoFar: Int.max - 1, headers: [:])
         ]
         for time in times {
             XCTAssertEqual(time, 1)
@@ -74,14 +74,14 @@ class ClientConfigurationTests: XCTestCase {
         let coefficient = 0.8
         let backoff = Backoff.linear(base: base, coefficient: coefficient, upToTimes: 3)
         
-        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 0, headers: [:]), base)
-        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 1, headers: [:]), base + coefficient)
-        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 2, headers: [:]), base + 2 * coefficient)
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 0, headers: [:]), base + coefficient)
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 1, headers: [:]), base + 2 * coefficient)
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 2, headers: [:]), base + 3 * coefficient)
         XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 3, headers: [:]), base + 3 * coefficient)
         XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 4, headers: [:]), base + 3 * coefficient)
         XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 5, headers: [:]), base + 3 * coefficient)
         XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 10, headers: [:]), base + 3 * coefficient)
-        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: .max, headers: [:]), base + 3 * coefficient)
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: Int.max - 1, headers: [:]), base + 3 * coefficient)
     }
     
     func testRetryPolicyExponentialBackoff() throws {
@@ -95,14 +95,14 @@ class ClientConfigurationTests: XCTestCase {
             upToTimes: 4
         )
         
-        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 0, headers: [:]), base + coefficient)
-        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 1, headers: [:]), base + coefficient * rate)
-        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 2, headers: [:]), base + coefficient * (pow(rate, 2)))
-        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 3, headers: [:]), base + coefficient * (pow(rate, 3)))
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 0, headers: [:]), base + coefficient * rate)
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 1, headers: [:]), base + coefficient * (pow(rate, 2)))
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 2, headers: [:]), base + coefficient * (pow(rate, 3)))
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 3, headers: [:]), base + coefficient * (pow(rate, 4)))
         XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 4, headers: [:]), base + coefficient * (pow(rate, 4)))
         XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 5, headers: [:]), base + coefficient * (pow(rate, 4)))
         XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 10, headers: [:]), base + coefficient * (pow(rate, 4)))
-        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: .max, headers: [:]), base + coefficient * (pow(rate, 4)))
+        XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: Int.max - 1, headers: [:]), base + coefficient * (pow(rate, 4)))
     }
     
     func testRetryPolicyHeadersBackoffWithElse() throws {
@@ -129,7 +129,7 @@ class ClientConfigurationTests: XCTestCase {
             XCTAssertEqual(backoffWait(retriesSoFar: 4, headers: headers), maxAllowed)
             XCTAssertEqual(backoffWait(retriesSoFar: 5, headers: headers), maxAllowed)
             XCTAssertEqual(backoffWait(retriesSoFar: 10, headers: headers), maxAllowed)
-            XCTAssertEqual(backoffWait(retriesSoFar: .max, headers: headers), maxAllowed)
+            XCTAssertEqual(backoffWait(retriesSoFar: Int.max - 1, headers: headers), maxAllowed)
         }
         
         /// Headers smaller than the max allowed
@@ -146,7 +146,7 @@ class ClientConfigurationTests: XCTestCase {
             XCTAssertEqual(backoffWait(retriesSoFar: 4, headers: headers), headerTime)
             XCTAssertEqual(backoffWait(retriesSoFar: 5, headers: headers), headerTime)
             XCTAssertEqual(backoffWait(retriesSoFar: 10, headers: headers), headerTime)
-            XCTAssertEqual(backoffWait(retriesSoFar: .max, headers: headers), headerTime)
+            XCTAssertEqual(backoffWait(retriesSoFar: Int.max - 1, headers: headers), headerTime)
         }
         
         /// No headers
@@ -154,14 +154,14 @@ class ClientConfigurationTests: XCTestCase {
             func backoffWait(retriesSoFar: Int) -> Double? {
                 backoff.waitTimeBeforeRetry(retriesSoFar: retriesSoFar, headers: [:])
             }
-            XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 0, headers: [:]), base)
-            XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 1, headers: [:]), base + coefficient)
-            XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 2, headers: [:]), base + 2 * coefficient)
+            XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 0, headers: [:]), base + coefficient)
+            XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 1, headers: [:]), base + 2 * coefficient)
+            XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 2, headers: [:]), base + 3 * coefficient)
             XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 3, headers: [:]), base + 3 * coefficient)
             XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 4, headers: [:]), base + 3 * coefficient)
             XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 5, headers: [:]), base + 3 * coefficient)
             XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: 10, headers: [:]), base + 3 * coefficient)
-            XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: .max, headers: [:]), base + 3 * coefficient)
+            XCTAssertEqual(backoff.waitTimeBeforeRetry(retriesSoFar: Int.max - 1, headers: [:]), base + 3 * coefficient)
         }
     }
     
@@ -186,7 +186,7 @@ class ClientConfigurationTests: XCTestCase {
             XCTAssertEqual(backoffWait(retriesSoFar: 4, headers: headers), nil)
             XCTAssertEqual(backoffWait(retriesSoFar: 5, headers: headers), nil)
             XCTAssertEqual(backoffWait(retriesSoFar: 10, headers: headers), nil)
-            XCTAssertEqual(backoffWait(retriesSoFar: .max, headers: headers), nil)
+            XCTAssertEqual(backoffWait(retriesSoFar: Int.max - 1, headers: headers), nil)
         }
         
         /// Headers smaller than the max allowed
@@ -203,7 +203,7 @@ class ClientConfigurationTests: XCTestCase {
             XCTAssertEqual(backoffWait(retriesSoFar: 4, headers: headers), headerTime)
             XCTAssertEqual(backoffWait(retriesSoFar: 5, headers: headers), headerTime)
             XCTAssertEqual(backoffWait(retriesSoFar: 10, headers: headers), headerTime)
-            XCTAssertEqual(backoffWait(retriesSoFar: .max, headers: headers), headerTime)
+            XCTAssertEqual(backoffWait(retriesSoFar: Int.max - 1, headers: headers), headerTime)
         }
         
         /// No headers
@@ -218,7 +218,7 @@ class ClientConfigurationTests: XCTestCase {
             XCTAssertEqual(backoffWait(retriesSoFar: 4), nil)
             XCTAssertEqual(backoffWait(retriesSoFar: 5), nil)
             XCTAssertEqual(backoffWait(retriesSoFar: 10), nil)
-            XCTAssertEqual(backoffWait(retriesSoFar: .max), nil)
+            XCTAssertEqual(backoffWait(retriesSoFar: Int.max - 1), nil)
         }
     }
 }
