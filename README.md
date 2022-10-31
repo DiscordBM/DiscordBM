@@ -143,13 +143,6 @@ This library will try to follow Semantic Versioning, with exceptions:
 * If Discord has made some changes that need breaking changes in this library, but are not worth a major release and are rather small.
 * When adding enum cases.
 
-## Wishlist / Not Yet Supported
-* Support more endpoints (Easy to add yourself; PRs appreciated)
-* Attachments support (For now you can provide media links instead, which is usually better anyway)
-* Support gateway payload compression
-* Support voice
-* OAuth-2 support (Not really needed for bots, so not a priority)
-
 ## Contribution & Support
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.   
 I'm also actively looking for any new info in the Discord API, and will add them to the library as soon as I can.
