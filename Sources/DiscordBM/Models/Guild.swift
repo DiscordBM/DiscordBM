@@ -79,6 +79,7 @@ public struct Guild: Sendable, Codable {
         case newThreadPermissions = "NEW_THREAD_PERMISSIONS"
         case autoModeration = "AUTO_MODERATION"
         case enabledDiscoverableBefore = "ENABLED_DISCOVERABLE_BEFORE"
+        case communityExpLargeUngated = "COMMUNITY_EXP_LARGE_UNGATED"
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
