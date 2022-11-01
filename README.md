@@ -1,6 +1,7 @@
 # DiscordBM
 
 [![Build Status](https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg)](https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml)
+[![Minumum Swift Version](https://img.shields.io/badge/swift-5.6-brightgreen.svg)](https://swift.org)
 
 A Swift library for making Discord bots.
 
