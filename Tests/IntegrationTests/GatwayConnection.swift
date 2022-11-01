@@ -15,7 +15,7 @@ class GatewayConnectionTests: XCTestCase {
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             token: Constants.token,
-            appId: Constants.appId,
+            appId: Constants.botId,
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,
@@ -48,10 +48,10 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertTrue(didHello)
         let ready = try XCTUnwrap(_ready)
         XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
-        XCTAssertEqual(ready.application.id, Constants.appId)
+        XCTAssertEqual(ready.application.id, Constants.botId)
         XCTAssertFalse(ready.session_id.isEmpty)
         XCTAssertEqual(ready.session_type, "normal")
-        XCTAssertEqual(ready.user.id, Constants.appId)
+        XCTAssertEqual(ready.user.id, Constants.botId)
         XCTAssertEqual(ready.user.bot, true)
     }
 }

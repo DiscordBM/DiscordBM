@@ -48,6 +48,7 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, Cu
         case .getChannelMessage: self = .getChannelMessage
         case .leaveGuild: return nil
         case .createGuildRole: return nil
+        case .deleteGuildRole: return nil
         case .addGuildMemberRole: return nil
         case .removeGuildMemberRole: return nil
         case .addReaction: return nil
@@ -85,6 +86,7 @@ public enum Endpoint {
     case leaveGuild(id: String)
     
     case createGuildRole(guildId: String)
+    case deleteGuildRole(guildId: String, roleId: String)
     case addGuildMemberRole(guildId: String, userId: String, roleId: String)
     case removeGuildMemberRole(guildId: String, userId: String, roleId: String)
     
@@ -127,13 +129,15 @@ public enum Endpoint {
         case let .getChannel(id):
             return "channels/\(id)"
         case let .getChannelMessages(id):
-            return "/channels/\(id)/messages"
+            return "channels/\(id)/messages"
         case let .getChannelMessage(id, messageId):
-            return "/channels/\(id)/messages/\(messageId)"
+            return "channels/\(id)/messages/\(messageId)"
         case let .leaveGuild(id):
             return "users/@me/guilds/\(id)"
         case let .createGuildRole(guildId):
             return "guilds/\(guildId)/roles"
+        case let .deleteGuildRole(guildId, roleId):
+            return "guilds/\(guildId)/roles/\(roleId)"
         case let .addGuildMemberRole(guildId, userId, roleId):
             return "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .removeGuildMemberRole(guildId, userId, roleId):
@@ -173,6 +177,7 @@ public enum Endpoint {
         case .getChannelMessage: return .GET
         case .leaveGuild: return .DELETE
         case .createGuildRole: return .POST
+        case .deleteGuildRole: return .DELETE
         case .addGuildMemberRole: return .PUT
         case .removeGuildMemberRole: return .DELETE
         case .addReaction: return .PUT
@@ -185,7 +190,7 @@ public enum Endpoint {
         switch self {
         case .createInteractionResponse, .editOriginalInteractionResponse, .deleteOriginalInteractionResponse, .postFollowupGatewayInteractionResponse, .editGatewayInteractionResponseFollowup:
             return false
-        case .getGateway, .getGatewayBot, .postCreateMessage, .patchEditMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .addReaction:
+        case .getGateway, .getGatewayBot, .postCreateMessage, .patchEditMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .addReaction:
             return true
         }
     }
@@ -213,9 +218,10 @@ public enum Endpoint {
         case .getChannelMessage: return 19
         case .leaveGuild: return 20
         case .createGuildRole: return 21
-        case .addGuildMemberRole: return 22
-        case .removeGuildMemberRole: return 23
-        case .addReaction: return 24
+        case .deleteGuildRole: return 22
+        case .addGuildMemberRole: return 23
+        case .removeGuildMemberRole: return 24
+        case .addReaction: return 25
         }
     }
 }

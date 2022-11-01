@@ -29,6 +29,7 @@ public protocol DiscordClient {
     ) async throws -> DiscordClientResponse<C>
 }
 
+//MARK: - Default functions for DiscordClient
 public extension DiscordClient {
     @inlinable
     func send<C: Codable>(
@@ -283,7 +284,7 @@ public extension DiscordClient {
         channelId: String,
         messageId: String,
         payload: DiscordChannel.EditMessage
-    ) async throws -> DiscordHTTPResponse {
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = Endpoint.patchEditMessage(channelId: channelId, messageId: messageId)
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
@@ -365,6 +366,16 @@ public extension DiscordClient {
     ) async throws -> DiscordClientResponse<Role> {
         let endpoint = Endpoint.createGuildRole(guildId: guildId)
         return try await self.send(to: endpoint, queries: [], payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/resources/guild#delete-guild-role
+    @inlinable
+    func deleteGuildRole(
+        guildId: String,
+        roleId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteGuildRole(guildId: guildId, roleId: roleId)
+        return try await self.send(to: endpoint, queries: [])
     }
     
     /// https://discord.com/developers/docs/resources/guild#add-guild-member-role
