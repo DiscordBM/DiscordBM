@@ -112,7 +112,7 @@ public struct Hashes: Sendable, Codable {
 }
 
 /// https://discord.com/developers/docs/reference#locales
-public enum DiscordLocale: String, Sendable, Codable {
+public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecode {
     case danish = "da"
     case german = "de"
     case englishUK = "en-GB"
@@ -418,63 +418,6 @@ public struct IntPair: Sendable, Codable {
         try [first, second].encode(to: encoder)
     }
 }
-
-//MARK: - TolerantDecode
-
-private let tolerantDecodeLogger = DiscordGlobalConfiguration.makeDecodeLogger("DecodeTolerable")
-
-/// An ``Array`` that tolerates decode failure of its elements.
-public struct TolerantDecodeArray<Element>:
-    Codable,
-    ExpressibleByArrayLiteral
-where Element: RawRepresentable,
-      Element.RawValue: Codable {
-    
-    public var values: [Element] = []
-    
-    public init(_ values: [Element]) {
-        self.values = values
-    }
-    
-    public init(arrayLiteral elements: Element...) {
-        self.values = elements
-    }
-    
-    public init() { }
-    
-    public init(from decoder: Decoder) throws {
-        var container = try decoder.unkeyedContainer()
-        
-        var values: [Element] = []
-        if let count = container.count {
-            values.reserveCapacity(count)
-        }
-        var unknownValues: [Element.RawValue] = []
-        while !container.isAtEnd {
-            let rawValue = try container.decode(Element.RawValue.self)
-            if let value = Element.init(rawValue: rawValue) {
-                values.append(value)
-            } else {
-                unknownValues.append(rawValue)
-            }
-        }
-        if !unknownValues.isEmpty {
-            tolerantDecodeLogger.warning("TolerantDecodeArray found unknown values.", metadata: [
-                "values": .stringConvertible(values),
-                "unknownValues": .stringConvertible(unknownValues),
-                "codingPath": .stringConvertible(container.codingPath),
-                "type": .stringConvertible(Swift._typeName(Self.self))
-            ])
-        }
-        self.values = Array(values)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        try self.values.map(\.rawValue).encode(to: encoder)
-    }
-}
-
-extension TolerantDecodeArray: Sendable where Element: Sendable, Element.RawValue: Sendable { }
 
 /// A ``Date`` and ``DiscordTimestamp`` that tolerates decode failures.
 public struct TolerantDecodeDate: Codable {

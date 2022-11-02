@@ -6,7 +6,7 @@ public struct Team: Sendable, Codable {
     public struct Member: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/teams#data-models-membership-state-enum
-        public enum State: Int, Sendable, Codable {
+        public enum State: Int, Sendable, Codable, ToleratesIntDecode {
             case invited = 1
             case accepted = 2
         }

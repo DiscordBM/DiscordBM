@@ -289,34 +289,36 @@ class DiscordClientTests: XCTestCase {
     /// Just here to keep track of un-tested interaction endpoints.
     /// We can't initiate interactions with automations (not officially at least), so can't test.
     func testInteractions() {
-//        createInteractionResponse(
-//            id: String,
-//            token: String,
-//            payload: InteractionResponse
-//        )
-//
-//        editInteractionResponse(
-//            appId: String? = nil,
-//            token: String,
-//            payload: InteractionResponse.CallbackData
-//        )
-//
-//        deleteInteractionResponse(
-//            appId: String? = nil,
-//            token: String
-//        )
-//
-//        createFollowupInteractionResponse(
-//            appId: String? = nil,
-//            token: String,
-//            payload: InteractionResponse
-//        )
-//
-//        editFollowupInteractionResponse(
-//            appId: String? = nil,
-//            id: String,
-//            token: String,
-//            payload: InteractionResponse
-//        )
+        /*
+        createInteractionResponse(
+            id: String,
+            token: String,
+            payload: InteractionResponse
+        )
+         
+        editInteractionResponse(
+            appId: String? = nil,
+            token: String,
+            payload: InteractionResponse.CallbackData
+        )
+         
+        deleteInteractionResponse(
+            appId: String? = nil,
+            token: String
+        )
+         
+        createFollowupInteractionResponse(
+            appId: String? = nil,
+            token: String,
+            payload: InteractionResponse
+        )
+         
+        editFollowupInteractionResponse(
+            appId: String? = nil,
+            id: String,
+            token: String,
+            payload: InteractionResponse
+        )
+        */
     }
 }

@@ -26,7 +26,7 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level
-    public enum VerificationLevel: Int, Sendable, Codable {
+    public enum VerificationLevel: Int, Sendable, Codable, ToleratesIntDecode {
         case none = 0
         case low = 1
         case medium = 2
@@ -35,20 +35,20 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-default-message-notification-level
-    public enum DefaultMessageNotificationLevel: Int, Sendable, Codable {
+    public enum DefaultMessageNotificationLevel: Int, Sendable, Codable, ToleratesIntDecode {
         case allMessages = 0
         case onlyMentions = 1
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-explicit-content-filter-level
-    public enum ExplicitContentFilterLevel: Int, Sendable, Codable {
+    public enum ExplicitContentFilterLevel: Int, Sendable, Codable, ToleratesIntDecode {
         case disabled = 0
         case memberWithoutRoles = 1
         case allMembers = 2
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-features
-    public enum Feature: String, Sendable, Codable {
+    public enum Feature: String, Sendable, Codable, ToleratesStringDecode {
         case animatedBanner = "ANIMATED_BANNER"
         case animatedIcon = "ANIMATED_ICON"
         case banner = "BANNER"
@@ -79,11 +79,12 @@ public struct Guild: Sendable, Codable {
         case newThreadPermissions = "NEW_THREAD_PERMISSIONS"
         case autoModeration = "AUTO_MODERATION"
         case enabledDiscoverableBefore = "ENABLED_DISCOVERABLE_BEFORE"
+        case CommunityExpMedium = "COMMUNITY_EXP_MEDIUM"
         case communityExpLargeUngated = "COMMUNITY_EXP_LARGE_UNGATED"
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
-    public enum MFALevel: Int, Sendable, Codable {
+    public enum MFALevel: Int, Sendable, Codable, ToleratesIntDecode {
         case none = 0
         case elevated = 1
     }
@@ -97,7 +98,7 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier
-    public enum PremiumTier: Int, Sendable, Codable {
+    public enum PremiumTier: Int, Sendable, Codable, ToleratesIntDecode {
         case none = 0
         case tier1 = 1
         case tier2 = 2
@@ -120,7 +121,7 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-nsfw-level
-    public enum NSFWLevel: Int, Sendable, Codable {
+    public enum NSFWLevel: Int, Sendable, Codable, ToleratesIntDecode {
         case `default` = 0
         case explicit = 1
         case safe = 2
@@ -147,7 +148,7 @@ public struct Guild: Sendable, Codable {
     public var explicit_content_filter: ExplicitContentFilterLevel
     public var roles: [Role]
     public var emojis: [PartialEmoji]
-    public var features: TolerantDecodeArray<Feature>
+    public var features: [Feature]
     public var mfa_level: MFALevel
     public var application_id: String?
     public var system_channel_id: String?
@@ -236,7 +237,7 @@ public struct IntegrationApplication: Sendable, Codable {
     public var bot: DiscordUser?
     public var primary_sku_id: String?
     public var cover_image: String?
-    public var scopes: TolerantDecodeArray<OAuth2Scope>?
+    public var scopes: [OAuth2Scope]?
 }
 
 /// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params

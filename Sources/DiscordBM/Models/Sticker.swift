@@ -3,13 +3,13 @@
 public struct Sticker: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types
-    public enum Kind: Int, Sendable, Codable {
+    public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
         case standard = 1
         case guild = 2
     }
     
     /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-format-types
-    public enum FormatKind: Int, Sendable, Codable {
+    public enum FormatKind: Int, Sendable, Codable, ToleratesIntDecode {
         case png = 1
         case apng = 2
         case lottie = 3

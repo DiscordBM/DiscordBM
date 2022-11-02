@@ -3,12 +3,12 @@
 public struct GuildScheduledEvent: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
-    public enum PrivacyLevel: Int, Sendable, Codable {
+    public enum PrivacyLevel: Int, Sendable, Codable, ToleratesIntDecode {
         case guildOnly = 2
     }
     
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
-    public enum Status: Int, Sendable, Codable {
+    public enum Status: Int, Sendable, Codable, ToleratesIntDecode {
         case scheduled = 1
         case active = 2
         case completed = 3
@@ -16,7 +16,7 @@ public struct GuildScheduledEvent: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
-    public enum EntityKind: Int, Sendable, Codable {
+    public enum EntityKind: Int, Sendable, Codable, ToleratesIntDecode {
         case stageInstance = 1
         case voice = 2
         case external = 3

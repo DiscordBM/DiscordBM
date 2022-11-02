@@ -3,7 +3,7 @@
 public struct Interaction: Sendable, Codable {
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
-    public enum Kind: Int, Sendable, Codable {
+    public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
         case ping = 1
         case applicationCommand = 2
         case messageComponent = 3
@@ -28,7 +28,7 @@ public struct Interaction: Sendable, Codable {
         public struct Option: Sendable, Codable {
             
             /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
-            public enum Kind: Int, Sendable, Codable {
+            public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
                 case subCommand = 1
                 case subCommandGroup = 2
                 case string = 3
@@ -79,7 +79,7 @@ public struct Interaction: Sendable, Codable {
 public struct InteractionResponse: Sendable, Codable {
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
-    public enum Kind: Int, Sendable, Codable {
+    public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
         case pong = 1
         case message = 4
         case messageEditWithLoadingState = 5
@@ -134,7 +134,7 @@ extension Interaction {
     public struct ActionRow: Sendable, Codable {
         
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
-        public enum Kind: Int, Sendable, Codable {
+        public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
             case container = 1
             case button = 2
             case selectMenu = 3
@@ -145,7 +145,7 @@ extension Interaction {
         public struct Button: Sendable, Codable {
             
             /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
-            public enum Style: Int, Sendable, Codable {
+            public enum Style: Int, Sendable, Codable, ToleratesIntDecode {
                 case primary = 1
                 case secondary = 2
                 case success = 3
@@ -211,7 +211,7 @@ extension Interaction {
         public struct TextInput: Sendable, Codable {
             
         /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
-            public enum Style: Int, Sendable, Codable {
+            public enum Style: Int, Sendable, Codable, ToleratesIntDecode {
                 case short = 1
                 case paragraph = 2
             }
