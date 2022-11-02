@@ -3,12 +3,12 @@
 public struct AutoModerationRule: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-event-types
-    public enum EventKind: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum EventKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case messageSend = 1
     }
     
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types
-    public enum TriggerKind: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum TriggerKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case keyword = 1
         case spam = 3
         case keywordPreset = 4
@@ -19,7 +19,7 @@ public struct AutoModerationRule: Sendable, Codable {
     public struct TriggerMetadata: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-preset-types
-        public enum KeywordPreset: Int, Sendable, Codable, ToleratesIntDecode {
+        public enum KeywordPreset: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case profanity = 1
             case sexual_content = 2
             case slurs = 3

@@ -26,7 +26,7 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level
-    public enum VerificationLevel: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum VerificationLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case none = 0
         case low = 1
         case medium = 2
@@ -35,20 +35,20 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-default-message-notification-level
-    public enum DefaultMessageNotificationLevel: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum DefaultMessageNotificationLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case allMessages = 0
         case onlyMentions = 1
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-explicit-content-filter-level
-    public enum ExplicitContentFilterLevel: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum ExplicitContentFilterLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case disabled = 0
         case memberWithoutRoles = 1
         case allMembers = 2
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-features
-    public enum Feature: String, Sendable, Codable, ToleratesStringDecode {
+    public enum Feature: String, Sendable, Codable, ToleratesStringDecodeMarker {
         case animatedBanner = "ANIMATED_BANNER"
         case animatedIcon = "ANIMATED_ICON"
         case banner = "BANNER"
@@ -84,7 +84,7 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
-    public enum MFALevel: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum MFALevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case none = 0
         case elevated = 1
     }
@@ -98,7 +98,7 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier
-    public enum PremiumTier: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum PremiumTier: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case none = 0
         case tier1 = 1
         case tier2 = 2
@@ -121,7 +121,7 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-nsfw-level
-    public enum NSFWLevel: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum NSFWLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case `default` = 0
         case explicit = 1
         case safe = 2

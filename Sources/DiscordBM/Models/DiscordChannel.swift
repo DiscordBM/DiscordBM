@@ -4,7 +4,7 @@ import Foundation
 public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-    public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case guildText = 0
         case dm = 1
         case guildVoice = 2
@@ -23,7 +23,7 @@ public struct DiscordChannel: Sendable, Codable {
     public struct Overwrite: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/channel#overwrite-object
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
+        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case role = 0
             case member = 1
         }
@@ -41,7 +41,7 @@ public struct DiscordChannel: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
-    public enum VideoQualityMode: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum VideoQualityMode: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case auto = 1
         case full = 2
     }
@@ -105,7 +105,7 @@ extension DiscordChannel {
         }
         
         /// https://discord.com/developers/docs/resources/channel#message-object-message-types
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
+        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case `default` = 0
             case recipientAdd = 1
             case recipientRemove = 2
@@ -179,7 +179,7 @@ extension DiscordChannel {
         public struct Activity: Sendable, Codable {
             
             /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-types
-            public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
+            public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
                 case join = 1
                 case spectate = 2
                 case listen = 3
@@ -325,7 +325,7 @@ extension DiscordChannel {
     public struct AllowedMentions: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
-        public enum Kind: String, Sendable, Codable, ToleratesStringDecode {
+        public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
             case roles
             case users
             case everyone
@@ -405,7 +405,7 @@ extension DiscordChannel {
 /// https://discord.com/developers/docs/resources/channel#embed-object
 public struct Embed: Sendable, Codable {
     
-    public enum Kind: String, Sendable, Codable, ToleratesStringDecode {
+    public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
         case rich = "rich"
         case image = "image"
         case video = "video"

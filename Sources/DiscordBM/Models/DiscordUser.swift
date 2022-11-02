@@ -3,7 +3,7 @@
 public struct DiscordUser: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/user#user-object-premium-types
-    public enum PremiumKind: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum PremiumKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case none = 0
         case nitroClassic = 1
         case nitro = 2

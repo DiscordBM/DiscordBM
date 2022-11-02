@@ -492,7 +492,7 @@ public struct Gateway: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence-status-types
-    public enum Status: String, Sendable, Codable, ToleratesStringDecode {
+    public enum Status: String, Sendable, Codable, ToleratesStringDecodeMarker {
         case online = "online"
         case doNotDisturb = "dnd"
         case afk = "idle"
@@ -753,7 +753,7 @@ public struct Gateway: Sendable, Codable {
             
             public struct FormResponse: Sendable, Codable {
                 
-                public enum FieldKind: String, Sendable, Codable, ToleratesStringDecode {
+                public enum FieldKind: String, Sendable, Codable, ToleratesStringDecodeMarker {
                     case terms = "TERMS"
                 }
                 
@@ -781,7 +781,7 @@ public struct Gateway: Sendable, Codable {
             public var actioned_at: String /// Seems to be a snowflake, not a date ?!
         }
         
-        public enum Status: String, Sendable, Codable, ToleratesStringDecode {
+        public enum Status: String, Sendable, Codable, ToleratesStringDecodeMarker {
             case approved = "APPROVED"
         }
         
@@ -837,14 +837,14 @@ public struct Gateway: Sendable, Codable {
     public struct Integration: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/guild#integration-object-integration-structure
-        public enum Kind: String, Sendable, Codable, ToleratesStringDecode {
+        public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
             case twitch
             case youtube
             case discord
         }
         
         /// https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors
-        public enum ExpireBehavior: Int, Sendable, Codable, ToleratesIntDecode {
+        public enum ExpireBehavior: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case removeRole = 0
             case kick = 1
         }
@@ -883,7 +883,7 @@ public struct Gateway: Sendable, Codable {
     public struct InviteCreate: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
-        public enum TargetKind: Int, Sendable, Codable, ToleratesIntDecode {
+        public enum TargetKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case stream = 1
             case embeddedApplication = 2
         }
@@ -1048,7 +1048,7 @@ public struct Gateway: Sendable, Codable {
     public struct Activity: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
+        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case game = 0
             case streaming = 1
             case listening = 2

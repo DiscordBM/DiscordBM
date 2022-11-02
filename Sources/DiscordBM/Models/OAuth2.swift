@@ -1,6 +1,6 @@
 
 /// https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes
-public enum OAuth2Scope: String, Sendable, Codable, ToleratesStringDecode {
+public enum OAuth2Scope: String, Sendable, Codable, ToleratesStringDecodeMarker {
     case activitiesRead = "activities.read"
     case activitiesWrite = "activities.write"
     case applicationsBuildsRead = "applications.builds.read"

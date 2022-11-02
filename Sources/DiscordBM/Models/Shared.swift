@@ -112,7 +112,7 @@ public struct Hashes: Sendable, Codable {
 }
 
 /// https://discord.com/developers/docs/reference#locales
-public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecode {
+public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecodeMarker {
     case danish = "da"
     case german = "de"
     case englishUK = "en-GB"

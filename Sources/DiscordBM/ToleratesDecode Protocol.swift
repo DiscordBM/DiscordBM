@@ -6,13 +6,11 @@ import Logging
  If `DiscordGlobalConfiguration.enableLoggingDuringDecode` is enabled, this will log
  the new values that were decoded successfully but the enum didn't have a representation for.
  */
-protocol ToleratesDecode: RawRepresentable where Self: Decodable, Self.RawValue: Decodable { }
-protocol ToleratesStringDecode: ToleratesDecode where Self.RawValue == String { }
-protocol ToleratesIntDecode: ToleratesDecode where Self.RawValue == Int { }
+protocol ToleratesDecode { }
+protocol ToleratesStringDecodeMarker: ToleratesDecode { }
+protocol ToleratesIntDecodeMarker: ToleratesDecode { }
 
-/// We need swift 5.7+ due to the use of the new protocol features.
-#if swift(>=5.7)
-private enum TolerateDecodeKind {
+private enum ToleratesDecodeKind {
     case string
     case int
     case none
@@ -21,8 +19,8 @@ private enum TolerateDecodeKind {
         switch shouldTolerateDecode {
         case true:
             switch D.self {
-            case is any ToleratesStringDecode.Type: self = .string
-            case is any ToleratesIntDecode.Type: self = .int
+            case is any ToleratesStringDecodeMarker.Type: self = .string
+            case is any ToleratesIntDecodeMarker.Type: self = .int
             default: self = .none
             }
         case false: self = .none
@@ -38,7 +36,7 @@ extension KeyedDecodingContainer {
     func decode<D>(_: Array<D>.Type, forKey key: Key) throws -> Array<D>
     where D: Decodable {
         let shouldTolerateDecode = D.self is any ToleratesDecode.Type
-        let toleratesDecodeKind = TolerateDecodeKind(
+        let toleratesDecodeKind = ToleratesDecodeKind(
             type: D.self,
             shouldTolerateDecode: shouldTolerateDecode
         )
@@ -51,33 +49,32 @@ extension KeyedDecodingContainer {
                 elements.append(element)
             } catch {
                 switch toleratesDecodeKind {
-                case .none:
-                    throw error
+                case .none: break
                 case .string:
-                    if let key = try? container.decode(String.self) {
-                        toleratesDecodeLogger.warning("ToleratesDecode found new key", metadata: [
-                            "newKey": .string(key),
+                    if let value = try? container.decode(String.self) {
+                        toleratesDecodeLogger.warning("Found a new enum value", metadata: [
+                            "newKey": .string(value),
                             "decodedSoFar": .stringConvertible(elements),
+                            "totalCount": .stringConvertible(container.count ?? -1),
                             "type": .string(_typeName(D.self))
                         ])
-                    } else {
-                        throw error
+                        continue
                     }
                 case .int:
-                    if let key = try? container.decode(Int.self) {
-                        toleratesDecodeLogger.warning("ToleratesDecode found new key", metadata: [
-                            "newKey": .stringConvertible(key),
+                    if let value = try? container.decode(Int.self) {
+                        toleratesDecodeLogger.warning("Found a new enum value", metadata: [
+                            "newKey": .stringConvertible(value),
                             "decodedSoFar": .stringConvertible(elements),
+                            "totalCount": .stringConvertible(container.count ?? -1),
                             "type": .string(_typeName(D.self))
                         ])
-                    } else {
-                        throw error
+                        continue
                     }
                 }
+                throw error
             }
         }
         
         return elements
     }
 }
-#endif

@@ -55,7 +55,7 @@ public struct PartialApplication: Sendable, Codable {
 public struct SlashCommand: Sendable, Codable {
     
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
-    public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case chatInput = 1
         case user = 2
         case message = 3
@@ -65,7 +65,7 @@ public struct SlashCommand: Sendable, Codable {
     public struct Option: Sendable, Codable {
         
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecode {
+        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case subCommand = 1
             case subCommandGroup = 2
             case string = 3

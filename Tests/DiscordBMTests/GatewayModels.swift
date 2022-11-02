@@ -118,7 +118,6 @@ class GatewayModelsTests: XCTestCase {
         }
     }
     
-#if swift(>=5.7)
     /// Test that collections of raw-representable codable enums
     /// don't fail on decoding unknown values.
     func testNoThrowEnums() throws {
@@ -189,7 +188,6 @@ class GatewayModelsTests: XCTestCase {
             XCTAssertEqual(decoded.permissions.toBitValue(), 15)
         }
     }
-#endif
 }
 
 private struct TestContainer<C: Codable>: Codable {

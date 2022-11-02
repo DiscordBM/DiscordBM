@@ -3,7 +3,7 @@
 public struct StageInstance: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/stage-instance#stage-instance-object-privacy-level
-    public enum PrivacyLevel: Int, Sendable, Codable, ToleratesIntDecode {
+    public enum PrivacyLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case `public` = 1
         case guildOnly = 2
     }
