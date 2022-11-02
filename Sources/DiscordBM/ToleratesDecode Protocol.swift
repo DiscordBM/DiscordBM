@@ -10,6 +10,8 @@ protocol ToleratesDecode: RawRepresentable where Self: Decodable, Self.RawValue:
 protocol ToleratesStringDecode: ToleratesDecode where Self.RawValue == String { }
 protocol ToleratesIntDecode: ToleratesDecode where Self.RawValue == Int { }
 
+/// We need swift 5.7+ due to the use of the new protocol features.
+#if swift(>=5.7)
 private enum TolerateDecodeKind {
     case string
     case int
@@ -78,3 +80,4 @@ extension KeyedDecodingContainer {
         return elements
     }
 }
+#endif
