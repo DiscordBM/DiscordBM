@@ -69,11 +69,11 @@ class SerialQueueTests: XCTestCase {
         XCTAssertEqual(number.load(ordering: .relaxed), 1)
         
         /// 100ms so the number should be 1
-        try! await Task.sleep(nanoseconds: 80_000_000)
+        try! await Task.sleep(nanoseconds: 55_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 1)
         
         /// 150ms so the number should be 2
-        try! await Task.sleep(nanoseconds: 60_000_000)
+        try! await Task.sleep(nanoseconds: 85_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 2)
         
         /// 225ms so the number should be 2
