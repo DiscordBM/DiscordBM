@@ -53,7 +53,7 @@ class SerialQueueTests: XCTestCase {
     }
     
     func testALotOfTriesNeedToWaitInQueue() async {
-        let queue = SerialQueue(waitTime: .milliseconds(150))
+        let queue = SerialQueue(waitTime: .milliseconds(300))
         let number = ManagedAtomic(0)
         
         Task {
@@ -68,56 +68,56 @@ class SerialQueueTests: XCTestCase {
         try! await Task.sleep(nanoseconds: 20_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 1)
         
-        /// 100ms so the number should be 1
-        try! await Task.sleep(nanoseconds: 55_000_000)
+        /// 150ms so the number should be 1
+        try! await Task.sleep(nanoseconds: 130_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 1)
         
-        /// 150ms so the number should be 2
-        try! await Task.sleep(nanoseconds: 85_000_000)
+        /// 300ms so the number should be 2
+        try! await Task.sleep(nanoseconds: 160_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 2)
         
-        /// 225ms so the number should be 2
-        try! await Task.sleep(nanoseconds: 75_000_000)
+        /// 450ms so the number should be 2
+        try! await Task.sleep(nanoseconds: 150_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 2)
         
-        /// 300ms so the number should be 3
-        try! await Task.sleep(nanoseconds: 85_000_000)
+        /// 600ms so the number should be 3
+        try! await Task.sleep(nanoseconds: 160_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 3)
         
-        /// 375ms so the number should be 3
-        try! await Task.sleep(nanoseconds: 75_000_000)
+        /// 750ms so the number should be 3
+        try! await Task.sleep(nanoseconds: 150_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 3)
         
-        /// 450ms so the number should be 4
-        try! await Task.sleep(nanoseconds: 85_000_000)
+        /// 900ms so the number should be 4
+        try! await Task.sleep(nanoseconds: 160_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 4)
         
-        /// 525ms so the number should be 4
-        try! await Task.sleep(nanoseconds: 75_000_000)
+        /// 1050ms so the number should be 4
+        try! await Task.sleep(nanoseconds: 150_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 4)
         
-        /// 600ms so the number should be 5
-        try! await Task.sleep(nanoseconds: 85_000_000)
+        /// 1200ms so the number should be 5
+        try! await Task.sleep(nanoseconds: 160_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 5)
         
-        /// 7000ms so the number should be 5
-        try! await Task.sleep(nanoseconds: 100_000_000)
+        /// 1350ms so the number should be 5
+        try! await Task.sleep(nanoseconds: 150_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 5)
         
-        /// 800ms so the number should be 5
-        try! await Task.sleep(nanoseconds: 100_000_000)
+        /// 1500ms so the number should be 5
+        try! await Task.sleep(nanoseconds: 150_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 5)
         
-        /// 900ms so the number should be 5
-        try! await Task.sleep(nanoseconds: 100_000_000)
+        /// 1650ms so the number should be 5
+        try! await Task.sleep(nanoseconds: 150_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 5)
         
-        /// 1s so the number should be 5
-        try! await Task.sleep(nanoseconds: 100_000_000)
+        /// 1800s so the number should be 5
+        try! await Task.sleep(nanoseconds: 150_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 5)
         
-        /// 2s so the number should be 5
-        try! await Task.sleep(nanoseconds: 1_000_000_000)
+        /// 3s so the number should be 5
+        try! await Task.sleep(nanoseconds: 1_200_000_000)
         XCTAssertEqual(number.load(ordering: .relaxed), 5)
     }
 }
