@@ -363,11 +363,13 @@ public struct ClientConfiguration {
                 else: Backoff?
             )
             
-            public static var `default`: Backoff = .basedOnTheRetryAfterHeader(
-                maxAllowed: 5,
-                retryIfGreater: false,
-                else: .exponential(base: 0.2, coefficient: 0.5, rate: 2, upToTimes: 10)
-            )
+            public static var `default`: Backoff {
+                .basedOnTheRetryAfterHeader(
+                    maxAllowed: 5,
+                    retryIfGreater: false,
+                    else: .exponential(base: 0.2, coefficient: 0.5, rate: 2, upToTimes: 10)
+                )
+            }
             
             /// Returns the time needed to wait before the next retry, if any.
             func waitTimeBeforeRetry(retriesSoFar: Int, headers: HTTPHeaders) -> Double? {

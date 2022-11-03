@@ -57,7 +57,7 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, Cu
 }
 
 /// API Endpoint.
-public enum Endpoint {
+public enum Endpoint: Sendable {
     case getGateway
     case getGatewayBot
     
