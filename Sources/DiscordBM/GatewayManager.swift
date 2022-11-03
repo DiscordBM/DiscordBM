@@ -7,8 +7,10 @@ import enum NIOWebSocket.WebSocketErrorCode
 import struct NIOCore.TimeAmount
 
 #if swift(>=5.7)
+/// If you're seeing the **Cannot find type 'AnyActor' in scope** error,
+/// you need to update to Xcode 14.1. Sorry, this a known Xcode issue.
 public protocol DiscordActor: AnyActor { }
-#else /// Swift `5.6` doesn't have `AnyActor` apparently.
+#else /// Swift `5.6` doesn't have `AnyActor`.
 public protocol DiscordActor: AnyObject { }
 #endif
 
