@@ -477,6 +477,12 @@ public struct ClientConfiguration {
         }
     }
     
+    /// - Parameters:
+    ///   - cachingBehavior: How to cache requests. Caching is disabled by default.
+    ///   - requestTimeout: How many seconds to wait for each request before timing out.
+    ///   - enableLoggingForRequests: Enable AHC request-specific logging.
+    ///    Normal logs are not affected.
+    ///   - retryPolicy: The policy to retry failed requests with.
     public init(
         cachingBehavior: CachingBehavior = .disabled,
         requestTimeout: TimeAmount = .seconds(30),
@@ -548,7 +554,7 @@ private actor ClientCache {
     
     init() {
         Task {
-            await self.setupGarbageCollector()
+            await self.collectGarbage()
         }
     }
     
@@ -571,7 +577,7 @@ private actor ClientCache {
         }
     }
     
-    private func setupGarbageCollector() async {
+    private func collectGarbage() async {
         /// Quit in case of task cancelation.
         guard (try? await Task.sleep(nanoseconds: 60 * 1_000_000_000)) != nil else { return }
         let now = Date().timeIntervalSince1970
@@ -581,7 +587,7 @@ private actor ClientCache {
                 self.storage[item] = nil
             }
         }
-        await setupGarbageCollector()
+        await collectGarbage()
     }
 }
 

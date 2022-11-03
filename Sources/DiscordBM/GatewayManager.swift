@@ -84,7 +84,7 @@ public actor BotGatewayManager: GatewayManager {
     }
     
     //MARK: Send queue
-    private var lastSend = Date.distantPast
+    private var sendQueue = SerialQueue(waitTime: .milliseconds(250))
     
     //MARK: Current connection properties
     
@@ -212,7 +212,7 @@ public actor BotGatewayManager: GatewayManager {
         }
         self._state.store(.connecting, ordering: .relaxed)
         self.connectionId.wrappingIncrement(ordering: .relaxed)
-        self.lastSend = .distantPast
+        await self.sendQueue.reset()
         let gatewayUrl = await getGatewayUrl()
         logger.trace("Will wait for other shards if needed")
         await waitInShardQueueIfNeeded()
@@ -268,7 +268,7 @@ public actor BotGatewayManager: GatewayManager {
         self.closeWebSocket(ws: self.ws)
         self._state.store(.stopped, ordering: .relaxed)
         self.isFirstConnection = true
-        self.lastSend = .distantPast
+        await self.sendQueue.reset()
     }
 }
 
@@ -545,57 +545,35 @@ extension BotGatewayManager {
         connectionId: UInt? = nil,
         tryCount: Int = 0
     ) {
-        if let connectionId = connectionId,
-           self.connectionId.load(ordering: .relaxed) != connectionId {
-            return
-        }
-        /// Can't keep a payload in queue forever, it'll exhaust bot's resources eventually.
-        guard tryCount <= 10 else {
-            logger.error("Send queue is too busy, will cancel sending a payload", metadata: [
-                "failedTryCount": .stringConvertible(tryCount),
-                "payload": .string("\(payload)"),
-                "opcode": .string(String(describing: opcode)),
-                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-            ])
-            return
-        }
-        /// If there has been a send in the last `waitTime`, queue this
-        /// payload to be sent after its been `waitTime` already.
-        let waitTime = 0.25
-        let now = Date().timeIntervalSince1970
-        let past = now - self.lastSend.timeIntervalSince1970
-        guard past > waitTime else {
-            let waitMore = Int64((waitTime - past) * 1_000) + 1
+        self.sendQueue.perform { [self] in
             Task {
-                await self.sleep(for: .milliseconds(waitMore))
-                self.send(
-                    payload: payload,
-                    opcode: opcode,
-                    connectionId: connectionId ?? self.connectionId.load(ordering: .relaxed),
-                    tryCount: tryCount + 1
-                )
+                if let connectionId = connectionId,
+                   self.connectionId.load(ordering: .relaxed) != connectionId {
+                    return
+                }
+                do {
+                    let data = try DiscordGlobalConfiguration.encoder.encode(payload)
+                    let opcode = opcode ?? payload.opcode.rawValue
+                    if let ws = await self.ws {
+                        try await ws.send(
+                            raw: data,
+                            opcode: .init(encodedWebSocketOpcode: opcode)!
+                        )
+                    } else {
+                        logger.warning("Trying to send through ws when a connection is not established", metadata: [
+                            "payload": .string("\(payload)"),
+                            "state": .stringConvertible(self._state.load(ordering: .relaxed)),
+                            "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                        ])
+                    }
+                } catch {
+                    logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
+                        "payload": .string("\(payload)"),
+                        "opcode": .stringConvertible(opcode ?? .max),
+                        "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                    ])
+                }
             }
-            return
-        }
-        do {
-            let data = try DiscordGlobalConfiguration.encoder.encode(payload)
-            let opcode = opcode ?? payload.opcode.rawValue
-            if let ws = self.ws {
-                self.lastSend = Date()
-                ws.send(raw: data, opcode: .init(encodedWebSocketOpcode: opcode)!)
-            } else {
-                logger.warning("Trying to send through ws when a connection is not established", metadata: [
-                    "payload": .string("\(payload)"),
-                    "state": .stringConvertible(self._state.load(ordering: .relaxed)),
-                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-                ])
-            }
-        } catch {
-            logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
-                "payload": .string("\(payload)"),
-                "opcode": .stringConvertible(opcode ?? 255),
-                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-            ])
         }
     }
     
@@ -603,7 +581,7 @@ extension BotGatewayManager {
         self._state.store(.connected, ordering: .relaxed)
         await connectionBackoff.resetTryCount()
         self.unsuccessfulPingsCount = 0
-        self.lastSend = .distantPast
+        await self.sendQueue.reset()
     }
     
     private func waitInShardQueueIfNeeded() async {
