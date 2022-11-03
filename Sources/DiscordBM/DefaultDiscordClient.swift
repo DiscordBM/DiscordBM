@@ -350,21 +350,21 @@ public struct ClientConfiguration {
                 rate: Double = 2,
                 upToTimes: UInt = .max
             )
-            /// Based on the `Retry-After` header.
+            /// Based on the `x-ratelimit-reset-after` or the `Retry-After` header.
             ///
             /// Parameters:
             /// - `maxAllowed`: Max allowed amount in `Retry-After`. In seconds.
             /// - `retryIfGreater`: Retry or not even if the header time is greater than
             ///  `maxAllowed`. If yes, the retry will happen after `maxAllowed` amount of time.
             /// - `else`: If the `Retry-After` header did not exist.
-            case basedOnTheRetryAfterHeader(
+            case basedOnHeaders(
                 maxAllowed: Double?,
                 retryIfGreater: Bool = false,
                 else: Backoff?
             )
             
             public static var `default`: Backoff {
-                .basedOnTheRetryAfterHeader(
+                .basedOnHeaders(
                     maxAllowed: 5,
                     retryIfGreater: false,
                     else: .exponential(base: 0.2, coefficient: 0.5, rate: 2, upToTimes: 10)
@@ -386,9 +386,9 @@ public struct ClientConfiguration {
                     let exponent = min(Int(upToTimes), times)
                     let time = base + coefficient * pow(rate, Double(exponent))
                     return time
-                case let .basedOnTheRetryAfterHeader(maxAllowed, retryIfGreater, elseBackoff):
-                    if let retryAfterString = headers.first(name: "Retry-After"),
-                       let retryAfter = Double(retryAfterString) {
+                case let .basedOnHeaders(maxAllowed, retryIfGreater, elseBackoff):
+                    if let header = headers.resetOrRetryAfterHeaderValue(),
+                       let retryAfter = Double(header) {
                         if retryAfter <= (maxAllowed ?? 0) {
                             return retryAfter
                         } else {
@@ -599,3 +599,10 @@ extension ClientConfiguration: Sendable { }
 extension ClientConfiguration.CachingBehavior: Sendable { }
 extension ClientConfiguration.RetryPolicy: Sendable { }
 extension ClientConfiguration.RetryPolicy.Backoff: Sendable { }
+
+//MARK: +HTTPHeaders
+extension HTTPHeaders {
+    func resetOrRetryAfterHeaderValue() -> String? {
+        self.first(name: "x-ratelimit-reset-after") ?? self.first(name: "retry-after")
+    }
+}

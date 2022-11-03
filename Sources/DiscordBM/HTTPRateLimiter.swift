@@ -10,17 +10,13 @@ actor HTTPRateLimiter {
         private var limit: Int
         private var remaining: Int
         private var reset: Double
-        /// Seconds after the request that the bucket will expire after.
-        /// We use `reset` instead of this, they both do the same thing at the end.
-        private var resetAfter: Double
         
         var description: String {
             "Bucket(" +
             "bucket: \(bucket.debugDescription), " +
             "limit: \(limit), " +
             "remaining: \(remaining), " +
-            "reset: \(reset.debugDescription), " +
-            "resetAfter: \(resetAfter.debugDescription)" +
+            "reset: \(reset.debugDescription)" +
             ")"
         }
         
@@ -31,15 +27,12 @@ actor HTTPRateLimiter {
                   let remainingStr = headers.first(name: "x-ratelimit-remaining"),
                   let remaining = Int(remainingStr),
                   let resetStr = headers.first(name: "x-ratelimit-reset"),
-                  let reset = Double(resetStr),
-                  let resetAfterStr = headers.first(name: "x-ratelimit-reset-after"),
-                  let resetAfter = Double(resetAfterStr)
+                  let reset = Double(resetStr)
             else { return nil }
             self.bucket = bucket
             self.limit = limit
             self.remaining = remaining
             self.reset = reset
-            self.resetAfter = resetAfter
         }
         
         func shouldRequest() -> Bool {

@@ -33,9 +33,11 @@ let package = Package(
         ),
         .testTarget(
             name: "DiscordBMTests",
-            dependencies: ["DiscordBM"]),
+            dependencies: ["DiscordBM"]
+        ),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["DiscordBM"]),
+            dependencies: ["DiscordBM"]
+        ),
     ]
 )

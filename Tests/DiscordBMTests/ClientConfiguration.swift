@@ -110,7 +110,7 @@ class ClientConfigurationTests: XCTestCase {
         let coefficient = 0.8
         let linearBackoff = Backoff.linear(base: base, coefficient: coefficient, upToTimes: 3)
         let maxAllowed = 12.0
-        let backoff = Backoff.basedOnTheRetryAfterHeader(
+        let backoff = Backoff.basedOnHeaders(
             maxAllowed: 12,
             retryIfGreater: true,
             else: linearBackoff
@@ -167,7 +167,7 @@ class ClientConfigurationTests: XCTestCase {
     
     func testRetryPolicyHeadersBackoffWithoutElse() throws {
         let maxAllowed = 10.0
-        let backoff = Backoff.basedOnTheRetryAfterHeader(
+        let backoff = Backoff.basedOnHeaders(
             maxAllowed: maxAllowed,
             retryIfGreater: false,
             else: nil
