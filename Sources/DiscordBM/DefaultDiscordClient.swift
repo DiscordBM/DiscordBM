@@ -154,30 +154,8 @@ public struct DefaultDiscordClient: DiscordClient {
         let identity = CacheableEndpointIdentity(endpoint: endpoint)
         let requestId = Self.requestIdGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
         
-        var (response, cached): (DiscordHTTPResponse, Bool)
         var retriesSoFar = 0
-        
-        do {
-            (response, cached) = try await sendRequest(identity, retriesSoFar, requestId)
-        } catch {
-            guard let policy = configuration.retryPolicy,
-                  policy.shouldRetryConnectionErrors else {
-                throw error
-            }
-            switch error {
-            case let ahcError as HTTPClientError where ahcError == .remoteConnectionClosed:
-                fallthrough
-            case is NIOConnectionError:
-                try await waitForRetryAndIncreaseRetryCount(
-                    retriesSoFar: &retriesSoFar,
-                    headers: [:],
-                    requestId: requestId
-                )
-                (response, cached) = try await sendRequest(identity, retriesSoFar, requestId)
-            default:
-                throw error
-            }
-        }
+        var (response, cached) = try await sendRequest(identity, retriesSoFar, requestId)
         
         while configuration.shouldRetry(status: response.status, retriesSoFar: retriesSoFar) {
             try await waitForRetryAndIncreaseRetryCount(
@@ -428,22 +406,21 @@ public struct ClientConfiguration {
             }
         }
         
-        var _statuses: [HTTPResponseStatus]
+        var _statuses: Set<HTTPResponseStatus>
         
-        public var statuses: [HTTPResponseStatus] {
+        public var statuses: Set<HTTPResponseStatus> {
             get { self._statuses }
             set {
-                precondition(newValue.allSatisfy({ $0.code >= 400 }), "Status codes less than 400 do not need retrying. This would cause problems")
+                precondition(
+                    newValue.allSatisfy({ $0.code >= 400 }),
+                    "Status codes less than 400 don't need retrying. This would cause problems"
+                )
                 self._statuses = newValue
             }
         }
         
         /// Max amount of times to retry any eligible requests.
         public var maxRetries: Int
-        
-        /// Whether to retry some `HTTPClient` errors and all `NIOConnectionError` errors.
-        /// This retry can happen only once for each request.
-        public var shouldRetryConnectionErrors: Bool
         
         /// The backoff configuration, to wait a some amount of time _after_ a failed request.
         public var backoff: Backoff?
@@ -455,20 +432,19 @@ public struct ClientConfiguration {
         }
         
         /// - Parameters:
-        ///   - shouldRetryConnectionErrors: Whether to retry some `HTTPClient` errors and all
-        ///    `NIOConnectionError` errors. This retry can happen only once for each request.
+        ///   - statuses: The statuses to be retried. Only 400+ statuses are allowed.
+        ///   - maxRetries: Maximum times to retry a failed request.
         ///   - backoff: The backoff configuration, to wait a some amount of time
         ///   _after_ a failed request.
         public init(
-            statuses: [HTTPResponseStatus],
+            statuses: Set<HTTPResponseStatus>,
             maxRetries: Int = 1,
-            shouldRetryConnectionErrors: Bool = false,
             backoff: Backoff? = .default
         ) {
-            self._statuses = []
             self.maxRetries = maxRetries
-            self.shouldRetryConnectionErrors = shouldRetryConnectionErrors
             self.backoff = backoff
+            self._statuses = []
+            /// To trigger the checks
             self.statuses = statuses
         }
         

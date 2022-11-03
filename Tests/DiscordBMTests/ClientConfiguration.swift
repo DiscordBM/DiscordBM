@@ -40,7 +40,7 @@ class ClientConfigurationTests: XCTestCase {
         
         do {
             var policy = RetryPolicy.default
-            policy.statuses.append(.badGateway)
+            policy.statuses.insert(.badGateway)
             policy.maxRetries = 1
             
             XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 0))
