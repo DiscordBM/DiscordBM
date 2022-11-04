@@ -1,5 +1,6 @@
 import DiscordBM
 import AsyncHTTPClient
+import Atomics
 import XCTest
 
 class DiscordClientTests: XCTestCase {
@@ -320,5 +321,64 @@ class DiscordClientTests: XCTestCase {
             payload: InteractionResponse
         )
         */
+    }
+    
+    /// Rate-limiting has theoretical tests too, but this tests it in a practical situation.
+    func testRateLimitedInPractice() async throws {
+        let content = "Spamming! \(Date())"
+        let rateLimitedErrors = ManagedAtomic(0)
+        let count = 10
+        let container = Container(targetCounter: count)
+        
+        for _ in 0..<count {
+            Task.detached {
+                do {
+                    _ = try await self.client.createMessage(
+                        channelId: Constants.secondChannelId,
+                        payload: .init(content: content)
+                    ).decode()
+                    await container.increaseCounter()
+                } catch {
+                    await container.increaseCounter()
+                    switch error {
+                    case DiscordClientError.rateLimited:
+                        rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
+                    default:
+                        XCTFail("Received unexpected error: \(error)")
+                    }
+                }
+            }
+        }
+        
+        await container.waitForCounter()
+        
+        XCTAssertGreaterThan(rateLimitedErrors.load(ordering: .relaxed), 0)
+        
+        /// Waiting 5 seconds to make sure the next tests don't get rate-limited
+        try await Task.sleep(nanoseconds: 5_000_000_000)
+    }
+}
+
+private actor Container {
+    private var counter = 0
+    private var targetCounter: Int
+    
+    init(targetCounter: Int) {
+        self.targetCounter = targetCounter
+    }
+    
+    func increaseCounter() {
+        counter += 1
+        if counter == targetCounter {
+            waiter?.resume()
+        }
+    }
+    
+    private var waiter: CheckedContinuation<(), Never>?
+    
+    func waitForCounter() async {
+        await withCheckedContinuation {
+            waiter = $0
+        }
     }
 }

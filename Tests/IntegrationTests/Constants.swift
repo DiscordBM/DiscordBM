@@ -10,4 +10,5 @@ enum Constants {
     static let guildName = "DiscordBM Test Server"
     static let channelId = "1036881951463833612"
     static let channelName = "general"
+    static let secondChannelId = "1038138527877181542"
 }

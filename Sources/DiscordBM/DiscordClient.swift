@@ -111,6 +111,20 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
         + "body: \(bodyDescription)"
         + ")"
     }
+    
+    @inlinable
+    func decode<D: Decodable>(as _: D.Type) throws -> D {
+        if (200..<300).contains(self.status.code) {
+            if var body = self.body,
+               let data = body.readData(length: body.readableBytes) {
+                return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
+            } else {
+                throw DiscordClientError.emptyBody(self)
+            }
+        } else {
+            throw DiscordClientError.cantAttemptToDecodeDueToBadStatusCode(self)
+        }
+    }
 }
 
 public struct DiscordClientResponse<C>: Sendable where C: Codable {
@@ -120,17 +134,9 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
         self.httpResponse = httpResponse
     }
     
+    @inlinable
     public func decode() throws -> C {
-        if (200..<300).contains(httpResponse.status.code) {
-            if var body = httpResponse.body,
-               let data = body.readData(length: body.readableBytes) {
-                return try DiscordGlobalConfiguration.decoder.decode(C.self, from: data)
-            } else {
-                throw DiscordClientError.emptyBody(httpResponse)
-            }
-        } else {
-            throw DiscordClientError.cantAttemptToDecodeDueToBadStatusCode(httpResponse)
-        }
+        try httpResponse.decode(as: C.self)
     }
 }
 
@@ -218,7 +224,7 @@ public extension DiscordClient {
         token: String,
         payload: InteractionResponse.CallbackData
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.editOriginalInteractionResponse(
+        let endpoint = Endpoint.editInteractionResponse(
             appId: try requireAppId(appId),
             token: token
         )
@@ -231,7 +237,7 @@ public extension DiscordClient {
         appId: String? = nil,
         token: String
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteOriginalInteractionResponse(
+        let endpoint = Endpoint.deleteInteractionResponse(
             appId: try requireAppId(appId),
             token: token
         )
@@ -245,7 +251,7 @@ public extension DiscordClient {
         token: String,
         payload: InteractionResponse
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.postFollowupGatewayInteractionResponse(
+        let endpoint = Endpoint.postFollowupInteractionResponse(
             appId: try requireAppId(appId),
             token: token
         )
@@ -260,7 +266,7 @@ public extension DiscordClient {
         token: String,
         payload: InteractionResponse
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.editGatewayInteractionResponseFollowup(
+        let endpoint = Endpoint.editFollowupInteractionResponse(
             appId: try requireAppId(appId),
             id: id,
             token: token

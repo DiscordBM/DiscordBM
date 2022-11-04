@@ -30,10 +30,10 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, Cu
         case .getGateway: self = .getGateway
         case .getGatewayBot: self = .getGatewayBot
         case .createInteractionResponse: return nil
-        case .editOriginalInteractionResponse: return nil
-        case .deleteOriginalInteractionResponse: return nil
-        case .postFollowupGatewayInteractionResponse: return nil
-        case .editGatewayInteractionResponseFollowup: return nil
+        case .editInteractionResponse: return nil
+        case .deleteInteractionResponse: return nil
+        case .postFollowupInteractionResponse: return nil
+        case .editFollowupInteractionResponse: return nil
         case .postCreateMessage: return nil
         case .patchEditMessage: return nil
         case .deleteMessage: return nil
@@ -62,10 +62,10 @@ public enum Endpoint: Sendable {
     case getGatewayBot
     
     case createInteractionResponse(id: String, token: String)
-    case editOriginalInteractionResponse(appId: String, token: String)
-    case deleteOriginalInteractionResponse(appId: String, token: String)
-    case postFollowupGatewayInteractionResponse(appId: String, token: String)
-    case editGatewayInteractionResponseFollowup(appId: String, id: String, token: String)
+    case editInteractionResponse(appId: String, token: String)
+    case deleteInteractionResponse(appId: String, token: String)
+    case postFollowupInteractionResponse(appId: String, token: String)
+    case editFollowupInteractionResponse(appId: String, id: String, token: String)
     
     case postCreateMessage(channelId: String)
     case patchEditMessage(channelId: String, messageId: String)
@@ -100,13 +100,13 @@ public enum Endpoint: Sendable {
             return "gateway/bot"
         case let .createInteractionResponse(id, token):
             return "interactions/\(id)/\(token)/callback"
-        case let .editOriginalInteractionResponse(appId, token):
+        case let .editInteractionResponse(appId, token):
             return "webhooks/\(appId)/\(token)/messages/@original"
-        case let .deleteOriginalInteractionResponse(appId, token):
+        case let .deleteInteractionResponse(appId, token):
             return "webhooks/\(appId)/\(token)/messages/@original"
-        case let .postFollowupGatewayInteractionResponse(appId, token):
+        case let .postFollowupInteractionResponse(appId, token):
             return "webhooks/\(appId)/\(token)"
-        case let .editGatewayInteractionResponseFollowup(appId, id, token):
+        case let .editFollowupInteractionResponse(appId, id, token):
             return "webhooks/\(appId)/\(token)/messages/\(id)"
         case let .postCreateMessage(channelId):
             return "channels/\(channelId)/messages"
@@ -159,10 +159,10 @@ public enum Endpoint: Sendable {
         case .getGateway: return .GET
         case .getGatewayBot: return .GET
         case .createInteractionResponse: return .POST
-        case .editOriginalInteractionResponse: return .PATCH
-        case .deleteOriginalInteractionResponse: return .DELETE
-        case .postFollowupGatewayInteractionResponse: return .POST
-        case .editGatewayInteractionResponseFollowup: return .PATCH
+        case .editInteractionResponse: return .PATCH
+        case .deleteInteractionResponse: return .DELETE
+        case .postFollowupInteractionResponse: return .POST
+        case .editFollowupInteractionResponse: return .PATCH
         case .postCreateMessage: return .POST
         case .patchEditMessage: return .PATCH
         case .deleteMessage: return .DELETE
@@ -188,7 +188,7 @@ public enum Endpoint: Sendable {
     /// Even if the global rate-limit is exceeded, you can still respond to interactions.
     var countsAgainstGlobalRateLimit: Bool {
         switch self {
-        case .createInteractionResponse, .editOriginalInteractionResponse, .deleteOriginalInteractionResponse, .postFollowupGatewayInteractionResponse, .editGatewayInteractionResponseFollowup:
+        case .createInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .editFollowupInteractionResponse:
             return false
         case .getGateway, .getGatewayBot, .postCreateMessage, .patchEditMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .addReaction:
             return true
@@ -200,10 +200,10 @@ public enum Endpoint: Sendable {
         case .getGateway: return 1
         case .getGatewayBot: return 2
         case .createInteractionResponse: return 3
-        case .editOriginalInteractionResponse: return 4
-        case .deleteOriginalInteractionResponse: return 5
-        case .postFollowupGatewayInteractionResponse: return 6
-        case .editGatewayInteractionResponseFollowup: return 7
+        case .editInteractionResponse: return 4
+        case .deleteInteractionResponse: return 5
+        case .postFollowupInteractionResponse: return 6
+        case .editFollowupInteractionResponse: return 7
         case .postCreateMessage: return 8
         case .patchEditMessage: return 9
         case .deleteMessage: return 10
