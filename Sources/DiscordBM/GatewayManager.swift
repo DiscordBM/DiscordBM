@@ -86,7 +86,9 @@ public actor BotGatewayManager: GatewayManager {
     }
     
     //MARK: Send queue
-    private var sendQueue = SerialQueue(waitTime: .milliseconds(250))
+    /// 120 per 60 seconds (1 every 500ms),
+    /// per https://discord.com/developers/docs/topics/gateway#rate-limiting
+    private var sendQueue = SerialQueue(waitTime: .milliseconds(500))
     
     //MARK: Current connection properties
     

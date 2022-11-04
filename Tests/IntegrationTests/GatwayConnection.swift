@@ -1,15 +1,24 @@
 import DiscordBM
 import AsyncHTTPClient
+import Logging
 import XCTest
 
 class GatewayConnectionTests: XCTestCase {
     
-    func testConnect() async throws {
-        
-        let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-        defer {
-            try! httpClient.syncShutdown()
+    var httpClient: HTTPClient!
+    
+    override func setUp() {
+        DiscordGlobalConfiguration.makeLogger = {
+            Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
         }
+        self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+    }
+    
+    override func tearDown() {
+        try! httpClient.syncShutdown()
+    }
+    
+    func testConnect() async throws {
         
         let bot = BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,

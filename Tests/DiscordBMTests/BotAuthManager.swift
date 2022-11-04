@@ -1,14 +1,10 @@
 import DiscordBM
 import XCTest
 
-class AuthManagerTests: XCTestCase {
+class BotAuthManagerTests: XCTestCase {
     
     let clientId = "121232141392410"
-    let clientSecret = "HHBHABHSHJNKanhhhHKNjHHNhwda"
-    lazy var manager = AuthManager(
-        clientId: clientId,
-        clientSecret: clientSecret
-    )
+    lazy var manager = BotAuthManager(clientId: clientId)
     
     func testBotAuthURL() throws {
         do {
