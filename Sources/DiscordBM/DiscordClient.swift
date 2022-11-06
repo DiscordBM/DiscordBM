@@ -27,6 +27,18 @@ public protocol DiscordClient {
         queries: [(String, String?)],
         payload: E
     ) async throws -> DiscordClientResponse<C>
+    
+    func send<E: MultipartEncodable>(
+        to endpoint: Endpoint,
+        queries: [(String, String?)],
+        payload: E
+    ) async throws -> DiscordHTTPResponse
+    
+    func send<E: MultipartEncodable, C: Codable>(
+        to endpoint: Endpoint,
+        queries: [(String, String?)],
+        payload: E
+    ) async throws -> DiscordClientResponse<C>
 }
 
 //MARK: - Default functions for DiscordClient
@@ -47,6 +59,20 @@ public extension DiscordClient {
         payload: E
     ) async throws -> DiscordClientResponse<C> {
         let response = try await self.send(to: endpoint, queries: queries, payload: payload)
+        return DiscordClientResponse(httpResponse: response)
+    }
+    
+    @inlinable
+    func send<E: MultipartEncodable, C: Codable>(
+        to endpoint: Endpoint,
+        queries: [(String, String?)],
+        payload: E
+    ) async throws -> DiscordClientResponse<C> {
+        let response = try await self.send(
+            to: endpoint,
+            queries: queries,
+            payload: payload
+        )
         return DiscordClientResponse(httpResponse: response)
     }
 }

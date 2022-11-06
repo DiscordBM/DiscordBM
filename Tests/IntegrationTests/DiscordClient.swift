@@ -1,6 +1,7 @@
 import DiscordBM
 import AsyncHTTPClient
 import Atomics
+import NIOCore
 import XCTest
 
 class DiscordClientTests: XCTestCase {
@@ -323,6 +324,32 @@ class DiscordClientTests: XCTestCase {
         */
     }
     
+    func testMultipart() async throws {
+        let image = file(atRelativePath: "/Tests/Resources/discord-logo-blue.png")
+        let response = try await self.client.createMessage(
+            channelId: Constants.secondChannelId,
+            payload: .init(
+                content: "Multipart message!",
+                files: [.init(data: ByteBuffer(data: image), filename: "discord-logo.png")],
+                attachments: [.init(id: 0, description: "Test attachment!")]
+            )
+        ).decode()
+        
+        XCTAssertEqual(response.content, "Multipart message!")
+        XCTAssertEqual(response.attachments.count, 1)
+        
+        let attachment = try XCTUnwrap(response.attachments.first)
+        XCTAssertEqual(attachment.filename, "discord-logo.png")
+        XCTAssertEqual(attachment.description, "Test attachment!")
+        XCTAssertEqual(attachment.content_type, "image/png")
+        XCTAssertEqual(attachment.size, 10731)
+        XCTAssertEqual(attachment.height, 240)
+        XCTAssertEqual(attachment.width, 876)
+        XCTAssertFalse(attachment.id.isEmpty)
+        XCTAssertFalse(attachment.url.isEmpty)
+        XCTAssertFalse(attachment.proxy_url.isEmpty)
+    }
+    
     /// Rate-limiting has theoretical tests too, but this tests it in a practical situation.
     func testRateLimitedInPractice() async throws {
         let content = "Spamming! \(Date())"
@@ -330,8 +357,11 @@ class DiscordClientTests: XCTestCase {
         let count = 10
         let container = Container(targetCounter: count)
         
+        let isFirstRequest = ManagedAtomic(false)
         for _ in 0..<count {
             Task.detached {
+                let isFirst = isFirstRequest.load(ordering: .relaxed)
+                isFirstRequest.store(false, ordering: .relaxed)
                 do {
                     _ = try await self.client.createMessage(
                         channelId: Constants.secondChannelId,
@@ -343,6 +373,16 @@ class DiscordClientTests: XCTestCase {
                     switch error {
                     case DiscordClientError.rateLimited:
                         rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
+                    case DiscordClientError.cantAttemptToDecodeDueToBadStatusCode(let response)
+                        where response.status == .tooManyRequests:
+                        /// If its the first request and we're having this error, then
+                        /// it means the last tests have exhausted our rate-limit and
+                        /// it's not this test's fault.
+                        if isFirst {
+                            break
+                        } else {
+                            fallthrough
+                        }
                     default:
                         XCTFail("Received unexpected error: \(error)")
                     }
