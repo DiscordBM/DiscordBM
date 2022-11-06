@@ -253,8 +253,8 @@ extension DiscordChannel {
     /// An attachment object, but for sending.
     /// https://discord.com/developers/docs/resources/channel#attachment-object
     public struct AttachmentSend: Sendable, Codable {
-        /// `id` is the index of this attachment in the `files` you provide.
-        public var id: UInt
+        /// When sending, `id` is the index of this attachment in the `files` you provide.
+        public var id: String
         public var filename: String?
         public var description: String?
         public var content_type: String?
@@ -265,9 +265,9 @@ extension DiscordChannel {
         public var width: Int?
         public var ephemeral: Bool?
         
-        /// `id` is the index of this attachment in the `files` you provide.
-        public init(id: UInt, filename: String? = nil, description: String? = nil, content_type: String? = nil, size: Int? = nil, url: String? = nil, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil, ephemeral: Bool? = nil) {
-            self.id = id
+        /// `index` is the index of this attachment in the `files` you provide.
+        public init(index: UInt, filename: String? = nil, description: String? = nil, content_type: String? = nil, size: Int? = nil, url: String? = nil, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil, ephemeral: Bool? = nil) {
+            self.id = "\(index)"
             self.filename = filename
             self.description = description
             self.content_type = content_type

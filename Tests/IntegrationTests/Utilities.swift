@@ -1,8 +1,8 @@
 import Foundation
 
-func file(atRelativePath relativePath: String) -> Data {
+func resource(name: String) -> Data {
     let fileManager = FileManager.default
-    let path = fileManager.currentDirectoryPath + relativePath
+    let path = fileManager.currentDirectoryPath + "/Tests/Resources/" + name
     if let data = fileManager.contents(atPath: path) {
         return data
     } else {

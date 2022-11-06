@@ -242,7 +242,7 @@ public extension DiscordClient {
         let endpoint = Endpoint.createInteractionResponse(id: id, token: token)
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
-    #warning("it won't work with InteractionResponse i think?!")
+    
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
     @inlinable
     func editInteractionResponse(
