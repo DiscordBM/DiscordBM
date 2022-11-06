@@ -76,7 +76,7 @@ public struct Interaction: Sendable, Codable {
 }
 
 /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object
-public struct InteractionResponse: Sendable, Codable {
+public struct InteractionResponse: Sendable, Codable, MultipartEncodable {
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
@@ -90,17 +90,27 @@ public struct InteractionResponse: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structure
-    public struct CallbackData: Sendable, Codable {
-        
+    public struct CallbackData: Sendable, Codable, MultipartEncodable {
         public var tts: Bool?
         public var content: String?
         public var embeds: [Embed]?
         public var allowedMentions: DiscordChannel.AllowedMentions?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var components: [Interaction.ActionRow]?
-        public var attachments: [DiscordChannel.Message.Attachment]?
+        public var attachments: [DiscordChannel.AttachmentSend]?
+        public var files: [File]?
         
-        public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: DiscordChannel.AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [DiscordChannel.Message.Attachment]? = nil) {
+        enum CodingKeys: String, CodingKey {
+            case tts
+            case content
+            case embeds
+            case allowedMentions
+            case flags
+            case components
+            case attachments
+        }
+        
+        public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: DiscordChannel.AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [DiscordChannel.AttachmentSend]? = nil, files: [File]? = nil) {
             self.tts = tts
             self.content = content
             self.embeds = embeds
@@ -108,11 +118,15 @@ public struct InteractionResponse: Sendable, Codable {
             self.flags = flags.map { .init($0) }
             self.components = components
             self.attachments = attachments
+            self.files = files
         }
     }
     
     public var type: Kind
     public var data: CallbackData?
+    public var files: [File]? {
+        data?.files
+    }
     
     public init(type: Kind, data: CallbackData? = nil) {
         self.type = type

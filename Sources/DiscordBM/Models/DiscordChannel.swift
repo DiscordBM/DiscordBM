@@ -250,6 +250,38 @@ extension DiscordChannel {
 }
 
 extension DiscordChannel {
+    /// An attachment object, but for sending.
+    /// https://discord.com/developers/docs/resources/channel#attachment-object
+    public struct AttachmentSend: Sendable, Codable {
+        /// When sending, `id` is the index of this attachment in the `files` you provide.
+        public var id: String
+        public var filename: String?
+        public var description: String?
+        public var content_type: String?
+        public var size: Int?
+        public var url: String?
+        public var proxy_url: String?
+        public var height: Int?
+        public var width: Int?
+        public var ephemeral: Bool?
+        
+        /// `index` is the index of this attachment in the `files` you provide.
+        public init(index: UInt, filename: String? = nil, description: String? = nil, content_type: String? = nil, size: Int? = nil, url: String? = nil, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil, ephemeral: Bool? = nil) {
+            self.id = "\(index)"
+            self.filename = filename
+            self.description = description
+            self.content_type = content_type
+            self.size = size
+            self.url = url
+            self.proxy_url = proxy_url
+            self.height = height
+            self.width = width
+            self.ephemeral = ephemeral
+        }
+    }
+}
+
+extension DiscordChannel {
     /// Partial ``Channel.Message`` object.
     public struct PartialMessage: Sendable, Codable {
         public var id: String
@@ -347,7 +379,7 @@ extension DiscordChannel {
 
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#create-message-jsonform-params
-    public struct CreateMessage: Sendable, Codable {
+    public struct CreateMessage: Sendable, Codable, MultipartEncodable {
         public var content: String?
         public var tts: Bool?
         public var embeds: [Embed]?
@@ -355,12 +387,23 @@ extension DiscordChannel {
         public var message_reference: DiscordChannel.Message.MessageReference?
         public var components: [Interaction.ActionRow]?
         public var sticker_ids: [String]?
-        public var files: [String]?
-        public var payload_json: String?
-        public var attachments: [Message.Attachment]?
+        public var files: [File]?
+        public var attachments: [AttachmentSend]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         
-        public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Message.Attachment]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
+        enum CodingKeys: String, CodingKey {
+            case content
+            case tts
+            case embeds
+            case allowed_mentions
+            case message_reference
+            case components
+            case sticker_ids
+            case attachments
+            case flags
+        }
+        
+        public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [File]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
             self.content = content
             self.tts = tts
             self.embeds = embeds
@@ -369,7 +412,6 @@ extension DiscordChannel {
             self.components = components
             self.sticker_ids = sticker_ids
             self.files = files
-            self.payload_json = payload_json
             self.attachments = attachments
             self.flags = flags.map { .init($0) }
         }
@@ -378,25 +420,31 @@ extension DiscordChannel {
 
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#edit-message-jsonform-params
-    public struct EditMessage: Sendable, Codable {
-        
+    public struct EditMessage: Sendable, Codable, MultipartEncodable {
         public var content: String?
         public var embeds: [Embed]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var allowed_mentions: AllowedMentions?
         public var components: [Interaction.ActionRow]?
-        public var files: [String]?
-        public var payload_json: String?
-        public var attachments: [Message.Attachment]?
+        public var files: [File]?
+        public var attachments: [AttachmentSend]?
         
-        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [DiscordChannel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [String]? = nil, payload_json: String? = nil, attachments: [Message.Attachment]? = nil) {
+        enum CodingKeys: String, CodingKey {
+            case content
+            case embeds
+            case flags
+            case allowed_mentions
+            case components
+            case attachments
+        }
+        
+        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [DiscordChannel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [File]? = nil, attachments: [AttachmentSend]? = nil) {
             self.content = content
             self.embeds = embeds
             self.flags = flags.map { .init($0) }
             self.allowed_mentions = allowed_mentions
             self.components = components
             self.files = files
-            self.payload_json = payload_json
             self.attachments = attachments
         }
     }
@@ -516,7 +564,7 @@ public struct Embed: Sendable, Codable {
     }
     
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
-    public var contentLength: Int {
+    var contentLength: Int {
         (title?.count ?? 0) +
         (description?.unicodeScalars.count ?? 0) +
         fieldsLength +

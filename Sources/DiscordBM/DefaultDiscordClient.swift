@@ -203,7 +203,6 @@ public struct DefaultDiscordClient: DiscordClient {
             logger.debug("Will send a request to Discord", metadata: [
                 "url": .stringConvertible(request.url),
                 "method": .string(request.method.rawValue),
-                "body-bytes": "nil",
                 "retry": .stringConvertible(retryCounter),
                 "request-id": .stringConvertible(requestId)
             ])
@@ -260,7 +259,71 @@ public struct DefaultDiscordClient: DiscordClient {
             logger.debug("Will send a request to Discord", metadata: [
                 "url": .stringConvertible(request.url),
                 "method": .string(request.method.rawValue),
-                "body-bytes": .stringConvertible(data),
+                "retry": .stringConvertible(retryCounter),
+                "request-id": .stringConvertible(requestId)
+            ])
+            let response = try await self.execute(request)
+            logger.debug("Received a response from Discord", metadata: [
+                "response": .stringConvertible(response),
+                "retry": .stringConvertible(retryCounter),
+                "request-id": .stringConvertible(requestId)
+            ])
+            
+            await self.includeInRateLimits(
+                endpoint: endpoint,
+                headers: response.headers,
+                status: response.status
+            )
+            
+            return (response, false)
+        }
+    }
+    
+    public func send<E: MultipartEncodable>(
+        to endpoint: Endpoint,
+        queries: [(String, String?)],
+        payload: E
+    ) async throws -> DiscordHTTPResponse {
+        try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
+            identity, retryCounter, requestId in
+            
+            let identity = CacheableEndpointIdentity(endpoint: endpoint)
+            if let cached = await self.getFromCache(identity: identity, queries: queries) {
+                return (cached, true)
+            }
+            if let cached = await self.getFromCache(identity: identity, queries: queries) {
+                logger.debug("Got cached response", metadata: [
+                    "endpoint": .string(endpoint.urlSuffix),
+                    "queries": .stringConvertible(queries),
+                    "retry": .stringConvertible(retryCounter)
+                ])
+                return (cached, true)
+            }
+            
+            try await self.checkRateLimitsAllowRequest(to: endpoint)
+            
+            let body: HTTPClient.Body
+            let contentType: String
+            if let multipart = try payload.encodeMultipart() {
+                contentType = "multipart/form-data; boundary=\(MultipartEncodingContainer.boundary)"
+                body = .byteBuffer(multipart)
+            } else {
+                contentType = "application/json"
+                body = .bytes(try DiscordGlobalConfiguration.encoder.encode(payload))
+            }
+            var request = try HTTPClient.Request(
+                url: endpoint.url + queries.makeForURLQuery(),
+                method: endpoint.httpMethod
+            )
+            request.headers = [
+                "Authorization": "Bot \(token._storage)",
+                "Content-Type": contentType
+            ]
+            request.body = body
+            
+            logger.debug("Will send a request to Discord", metadata: [
+                "url": .stringConvertible(request.url),
+                "method": .string(request.method.rawValue),
                 "retry": .stringConvertible(retryCounter),
                 "request-id": .stringConvertible(requestId)
             ])
