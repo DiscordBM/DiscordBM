@@ -81,6 +81,7 @@ public struct Guild: Sendable, Codable {
         case enabledDiscoverableBefore = "ENABLED_DISCOVERABLE_BEFORE"
         case CommunityExpMedium = "COMMUNITY_EXP_MEDIUM"
         case communityExpLargeUngated = "COMMUNITY_EXP_LARGE_UNGATED"
+        case invitesDisabled = "INVITES_DISABLED"
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
