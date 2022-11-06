@@ -1,6 +1,5 @@
 import MultipartKit
 import NIOCore
-import NIOHTTP1
 import Foundation
 
 public protocol MultipartEncodable: Encodable {
