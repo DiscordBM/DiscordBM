@@ -453,6 +453,7 @@ extension DiscordChannel {
 /// https://discord.com/developers/docs/resources/channel#embed-object
 public struct Embed: Sendable, Codable {
     
+    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
     public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
         case rich = "rich"
         case image = "image"
@@ -463,25 +464,60 @@ public struct Embed: Sendable, Codable {
         case autoModerationMessage = "auto_moderation_message"
     }
     
+    public enum DynamicURL: Sendable, Codable {
+        case exact(String)
+        case attachment(name: String)
+        
+        public var asString: String {
+            switch self {
+            case let .exact(exact):
+                return exact
+            case let .attachment(name):
+                return "attachment://\(name)"
+            }
+        }
+        
+        public init(from string: String) {
+            if string.hasPrefix("attachment://") {
+                self = .attachment(name: String(string.dropFirst(13)))
+            } else {
+                self = .exact(string)
+            }
+        }
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            let string = try container.decode(String.self)
+            self = .init(from: string)
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            try container.encode(self.asString)
+        }
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-footer-structure
     public struct Footer: Sendable, Codable {
         public var text: String
-        public var icon_url: String?
+        public var icon_url: DynamicURL?
         public var proxy_icon_url: String?
         
-        public init(text: String, icon_url: String? = nil, proxy_icon_url: String? = nil) {
+        public init(text: String, icon_url: DynamicURL? = nil, proxy_icon_url: String? = nil) {
             self.text = text
             self.icon_url = icon_url
             self.proxy_icon_url = proxy_icon_url
         }
     }
     
+    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-image-structure
     public struct Media: Sendable, Codable {
-        public var url: String
+        public var url: DynamicURL
         public var proxy_url: String?
         public var height: Int?
         public var width: Int?
         
-        public init(url: String, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil) {
+        public init(url: DynamicURL, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil) {
             self.url = url
             self.proxy_url = proxy_url
             self.height = height
@@ -489,6 +525,7 @@ public struct Embed: Sendable, Codable {
         }
     }
     
+    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-provider-structure
     public struct Provider: Sendable, Codable {
         public var name: String?
         public var url: String?
@@ -499,13 +536,14 @@ public struct Embed: Sendable, Codable {
         }
     }
     
+    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-author-structure
     public struct Author: Sendable, Codable {
         public var name: String
         public var url: String?
-        public var icon_url: String?
+        public var icon_url: DynamicURL?
         public var proxy_icon_url: String?
         
-        public init(name: String, url: String? = nil, icon_url: String? = nil, proxy_icon_url: String? = nil) {
+        public init(name: String, url: String? = nil, icon_url: DynamicURL? = nil, proxy_icon_url: String? = nil) {
             self.name = name
             self.url = url
             self.icon_url = icon_url
@@ -513,6 +551,7 @@ public struct Embed: Sendable, Codable {
         }
     }
     
+    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-field-structure
     public struct Field: Sendable, Codable {
         public var name: String
         public var value: String

@@ -68,7 +68,7 @@ public struct Guild: Sendable, Codable {
         case sevenDayThreadArchive = "SEVEN_DAY_THREAD_ARCHIVE"
         case threeDayThreadArchive = "THREE_DAY_THREAD_ARCHIVE"
         case ticketedEventsEnabled = "TICKETED_EVENTS_ENABLED"
-        case vanityUrl = "VANITY_URL"
+        case vanityURL = "VANITY_URL"
         case verified = "VERIFIED"
         case vipRegions = "VIP_REGIONS"
         case welcomeScreenEnabled = "WELCOME_SCREEN_ENABLED"

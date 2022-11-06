@@ -102,7 +102,7 @@ public actor BotGatewayManager: GatewayManager {
     /// The ID of the current Discord-related session.
     private var sessionId: String? = nil
     /// Gateway URL for resuming the connection, so we don't need to make an api call.
-    private var resumeGatewayUrl: String? = nil
+    private var resumeGatewayURL: String? = nil
     
     //MARK: Shard-ing
     private var maxConcurrency: Int? = nil
@@ -217,14 +217,14 @@ public actor BotGatewayManager: GatewayManager {
         self._state.store(.connecting, ordering: .relaxed)
         self.connectionId.wrappingIncrement(ordering: .relaxed)
         await self.sendQueue.reset()
-        let gatewayUrl = await getGatewayUrl()
+        let gatewayURL = await getGatewayURL()
         logger.trace("Will wait for other shards if needed")
         await waitInShardQueueIfNeeded()
         var configuration = WebSocketClient.Configuration()
         configuration.maxFrameSize = self.maxFrameSize
         logger.trace("Will try to connect to Discord through web-socket")
         WebSocket.connect(
-            to: gatewayUrl + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
+            to: gatewayURL + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
             configuration: configuration,
             on: eventLoopGroup
         ) { ws in
@@ -306,7 +306,7 @@ extension BotGatewayManager {
             ])
             if !canResume {
                 self.sequenceNumber = nil
-                self.resumeGatewayUrl = nil
+                self.resumeGatewayURL = nil
                 self.sessionId = nil
             }
             self._state.store(.noConnection, ordering: .relaxed)
@@ -326,7 +326,7 @@ extension BotGatewayManager {
             ])
             await self.onSuccessfulConnection()
             self.sessionId = payload.session_id
-            self.resumeGatewayUrl = payload.resume_gateway_url
+            self.resumeGatewayURL = payload.resume_gateway_url
         case .resumed:
             logger.notice("Received resume notice. The connection is fully established", metadata: [
                 "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
@@ -337,18 +337,18 @@ extension BotGatewayManager {
         }
     }
     
-    private func getGatewayUrl() async -> String {
+    private func getGatewayURL() async -> String {
         logger.debug("Will try to get Discord gateway url")
-        if let gatewayUrl = self.resumeGatewayUrl {
-            logger.trace("Got Discord gateway url from `resumeGatewayUrl`")
-            return gatewayUrl
+        if let gatewayURL = self.resumeGatewayURL {
+            logger.trace("Got Discord gateway url from `resumeGatewayURL`")
+            return gatewayURL
         } else {
             /// If the bot is using shard-ing, we need to call a different endpoint
             /// to get some more info than only the gateway url.
             if identifyPayload.shard == nil {
-                if let gatewayUrl = try? await client.getGateway().decode().url {
+                if let gatewayURL = try? await client.getGateway().decode().url {
                     logger.trace("Got Discord gateway url from gateway api call")
-                    return gatewayUrl
+                    return gatewayURL
                 }
             } else {
                 if let gatewayBot = try? await client.getGatewayBot().decode() {
@@ -359,7 +359,7 @@ extension BotGatewayManager {
             }
             logger.error("Cannot get gateway url to connect to. Will retry in 10 seconds")
             await self.sleep(for: .seconds(10))
-            return await self.getGatewayUrl()
+            return await self.getGatewayURL()
         }
     }
     

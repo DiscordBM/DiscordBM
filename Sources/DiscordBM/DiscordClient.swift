@@ -220,7 +220,7 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/topics/gateway#get-gateway
     @inlinable
-    func getGateway() async throws -> DiscordClientResponse<Gateway.Url> {
+    func getGateway() async throws -> DiscordClientResponse<Gateway.URL> {
         let endpoint = Endpoint.getGateway
         return try await self.send(to: endpoint, queries: [])
     }

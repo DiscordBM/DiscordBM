@@ -357,9 +357,10 @@ class DiscordClientTests: XCTestCase {
                 channelId: Constants.secondChannelId,
                 payload: .init(
                     content: "Multipart message!",
-                    embeds: [
-                        .init(title: "Multipart embed!", image: .init(url: "attachment://discord-logo.png"))
-                    ],
+                    embeds: [.init(
+                        title: "Multipart embed!",
+                        image: .init(url: .attachment(name: "discord-logo.png"))
+                    )],
                     files: [.init(data: image, filename: "discord-logo.png")]
                 )
             ).decode()
@@ -370,7 +371,7 @@ class DiscordClientTests: XCTestCase {
             let image = try XCTUnwrap(response.embeds.first?.image)
             XCTAssertEqual(image.height, 240)
             XCTAssertEqual(image.width, 876)
-            XCTAssertFalse(image.url.isEmpty)
+            XCTAssertFalse(image.url.asString.isEmpty)
             XCTAssertFalse(image.proxy_url?.isEmpty == true)
         }
     }

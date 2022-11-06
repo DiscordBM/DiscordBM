@@ -1239,7 +1239,7 @@ public struct Gateway: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/topics/gateway#get-gateway
-    public struct Url: Sendable, Codable {
+    public struct URL: Sendable, Codable {
         public var url: String
     }
     
