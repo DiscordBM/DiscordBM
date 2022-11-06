@@ -109,6 +109,11 @@ Task {
 /// RunLoop.current.run()
 ```
 
+### Sending Attachments
+Sending media is usually better done by sending the link of that media to Discord, instead of sending the actual file.     
+However, DiscordBM still supports sending the media directly.   
+Take a look at the multipart integration tests [(/Tests/DiscordClientTests.testMultipartPayload())](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/DiscordClient.swift) to see how you can send media in a real-world situation.
+
 ### Finding Your Bot Token
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding Bot Token](/images/bot_token.png)
