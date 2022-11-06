@@ -358,8 +358,8 @@ class DiscordClientTests: XCTestCase {
         let container = Container(targetCounter: count)
         
         let isFirstRequest = ManagedAtomic(false)
-        for _ in 0..<count {
-            Task.detached {
+        Task {
+            for _ in 0..<count {
                 let isFirst = isFirstRequest.load(ordering: .relaxed)
                 isFirstRequest.store(false, ordering: .relaxed)
                 do {
