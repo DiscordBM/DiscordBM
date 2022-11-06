@@ -327,11 +327,11 @@ class DiscordClientTests: XCTestCase {
     func testRateLimitedInPractice() async throws {
         let content = "Spamming! \(Date())"
         let rateLimitedErrors = ManagedAtomic(0)
-        let count = 10
+        let count = 15
         let container = Container(targetCounter: count)
         
-        for _ in 0..<count {
-            Task.detached {
+        Task {
+            for _ in 0..<count {
                 do {
                     _ = try await self.client.createMessage(
                         channelId: Constants.secondChannelId,
@@ -371,6 +371,7 @@ private actor Container {
         counter += 1
         if counter == targetCounter {
             waiter?.resume()
+            waiter = nil
         }
     }
     
@@ -379,6 +380,13 @@ private actor Container {
     func waitForCounter() async {
         await withCheckedContinuation {
             waiter = $0
+        }
+        Task {
+            try await Task.sleep(nanoseconds: 10_000_000_000)
+            if waiter != nil {
+                waiter?.resume()
+                XCTFail("Failed to test in-time")
+            }
         }
     }
 }
