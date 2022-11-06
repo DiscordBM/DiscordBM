@@ -45,7 +45,9 @@ actor SerialQueue {
             do {
                 try await Task.sleep(nanoseconds: UInt64(wait.nanoseconds))
             } catch {
-                logger.warning("Unexpected SerialQueue failure")
+                logger.warning("Unexpected SerialQueue failure", metadata: [
+                    "error": "\(error)"
+                ])
                 return
             }
             self.perform(task)

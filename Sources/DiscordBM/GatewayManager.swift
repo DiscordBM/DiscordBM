@@ -233,7 +233,7 @@ public actor BotGatewayManager: GatewayManager {
             self.configureWebSocket()
         }.whenFailure { [self] error in
             logger.error("WebSocket error while connecting to Discord", metadata: [
-                "error": .string("\(error)")
+                "error": "\(error)"
             ])
             self._state.store(.noConnection, ordering: .relaxed)
             Task {
