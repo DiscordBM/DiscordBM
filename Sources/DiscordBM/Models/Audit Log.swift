@@ -11,6 +11,7 @@ public struct AuditLog: Sendable, Codable {
             case double(Double)
             case bool(Bool)
             case nameIds([NameID])
+            case permissionOverwrites([DiscordChannel.Overwrite])
             case other(Other)
             
             public struct NameID: Sendable, Codable {
@@ -30,9 +31,10 @@ public struct AuditLog: Sendable, Codable {
                 switch self {
                 case let .string(string): return string
                 case let .int(int): return "\(int)"
-                case let .double(double): return String(format: "%.2f", double)
+                case let .double(double): return String(format: "%.3f", double)
                 case let .bool(bool): return "\(bool)"
                 case let .nameIds(nameIds): return "\(nameIds)"
+                case let .permissionOverwrites(overwrites): return "\(overwrites)"
                 case let .other(other): return "\(other)"
                 }
             }
@@ -56,6 +58,8 @@ public struct AuditLog: Sendable, Codable {
                     self = .double(double)
                 } else if let nameIds = try? container.decode([NameID].self) {
                     self = .nameIds(nameIds)
+                } else if let overwrites = try? container.decode([DiscordChannel.Overwrite].self) {
+                    self = .permissionOverwrites(overwrites)
                 } else {
                     DiscordGlobalConfiguration
                         .makeDecodeLogger("DiscordBM.AuditLog.Entry.Mixed")
@@ -80,6 +84,8 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(bool)
                 case let .nameIds(nameIds):
                     try container.encode(nameIds)
+                case let .permissionOverwrites(overwrites):
+                    try container.encode(overwrites)
                 case let .other(other):
                     DiscordGlobalConfiguration
                         .makeLogger("DiscordBM.AuditLog.Entry.Mixed_EncodingError")

@@ -85,6 +85,31 @@ public enum StringOrInt: Sendable, Codable {
     }
 }
 
+public enum IntOrDouble: Sendable, Codable {
+    case int(Int)
+    case double(Double)
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let int = try? container.decode(Int.self) {
+            self = .int(int)
+        } else {
+            let double = try container.decode(Double.self)
+            self = .double(double)
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case let .int(int):
+            try container.encode(int)
+        case let .double(double):
+            try container.encode(double)
+        }
+    }
+}
+
 /// Not sure what exactly it is. Some kind of hash container.
 public struct Hashes: Sendable, Codable {
     
