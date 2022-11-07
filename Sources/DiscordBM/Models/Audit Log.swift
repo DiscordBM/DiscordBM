@@ -8,7 +8,7 @@ public struct AuditLog: Sendable, Codable {
         public var key: String
     }
     
-    public enum EventKind: Int, Sendable, Codable {
+    public enum EventKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case guildUpdate = 1
         case channelCreate = 10
         case channelUpdate = 11
