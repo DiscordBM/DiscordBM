@@ -17,7 +17,7 @@ You can see Vapor community's Penny bot as a showcase of using this library in p
 Penny is available [here](https://github.com/vapor/penny-bot) and you can find `DiscordBM` used in the [PennyBOT](https://github.com/vapor/penny-bot/tree/main/CODE/Sources/PennyBOT) target.
 
 ## How To Use
-> If you're using DiscordBM on macOS Ventura (on either Xcode or VSCode), make sure you have **Xcode 14.1 or above**. Lower Xcode 14 versions have known issues that cause a lot of problems for libraries.    
+> If you're using `DiscordBM` on macOS Ventura (on either Xcode or VSCode), make sure you have **Xcode 14.1 or above**. Lower Xcode 14 versions have known issues that cause a lot of problems for libraries.    
 
 First you need to initialize a `BotGatewayManager` instance, then tell it to connect and start using it:
 
@@ -111,7 +111,7 @@ Task {
 
 ### Sending Attachments
 It's usually better to send a link of your media to Discord, instead of sending the actual file.   
-However, DiscordBM still supports sending files directly.   
+However, `DiscordBM` still supports sending files directly.   
 ```swift
 Task {
     let image: ByteBuffer = ... /// Raw data of anything like an image
