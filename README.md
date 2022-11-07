@@ -111,8 +111,37 @@ Task {
 
 ### Sending Attachments
 Sending media is usually better done by sending the link of that media to Discord, instead of sending the actual file.     
-However, DiscordBM still supports sending the media directly.   
-Take a look at the multipart integration tests [(/Tests/DiscordClientTests.testMultipartPayload())](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/DiscordClient.swift) to see how you can send media in a real-world situation.
+However, DiscordBM still supports sending files directly.   
+```swift
+Task {
+    let image: ByteBuffer = ... /// Raw data of anything like an image
+    
+    /// Example 1
+    try await self.client.createMessage(
+        channelId: CHANNEL_ID,
+        payload: .init(
+            content: "A message with an attachment!",
+            files: [.init(data: image, filename: "pic.png")],
+            attachments: [.init(index: 0, description: "Picture of something secret :)")]
+            ///                 ~~~~~~~^ `0` is the index of the attachment in the `files` array.
+        )
+    )
+    
+    /// Example 2
+    try await self.client.createMessage(
+        channelId: CHANNEL_ID,
+        payload: .init(
+            embeds: [.init(
+                title: "An embed with an attachment!",
+                image: .init(url: .attachment(name: "penguin.png"))
+                ///                          ~~~~~~~^ `penguin.png` is the name of the attachment in the `files` array.   
+            )],
+            files: [.init(data: image, filename: "penguin.png")]
+        )
+     )
+}
+```
+Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/DiscordClient.swift) to see how you can send media in a real-world situation.
 
 ### Finding Your Bot Token
 In [Discord developer portal](https://discord.com/developers/applications):
