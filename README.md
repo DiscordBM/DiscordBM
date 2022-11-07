@@ -1,9 +1,13 @@
-# DiscordBM
+![DiscordBM](https://user-images.githubusercontent.com/54685446/200414610-fd4fc280-a1d9-436f-960b-cb80127ae0e5.png)
 
-[![Build Status](https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg)](https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml)
-[![Minumum Swift Version](https://img.shields.io/badge/swift-5.6-brightgreen.svg)](https://swift.org)
-
-A Swift library for making Discord bots.
+<p align="center">
+	<a href="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml">
+        <img src="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
+    </a>
+    <a href="https://swift.org">
+        <img src="https://img.shields.io/badge/swift-5.6-brightgreen.svg" alt="Minumum Swift Version">
+    </a>
+</p>
 
 ## Notable Features
 * Everything with structured concurrency and async/await. Full integration with all the latest Server-Side Swift packages.
