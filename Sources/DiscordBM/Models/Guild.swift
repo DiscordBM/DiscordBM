@@ -155,15 +155,6 @@ public struct Guild: Sendable, Codable {
     public var system_channel_id: String?
     public var system_channel_flags: IntBitField<SystemChannelFlag>
     public var rules_channel_id: String?
-    public var joined_at: DiscordTimestamp?
-    public var large: Bool?
-    public var unavailable: Bool?
-    public var member_count: Int?
-    public var voice_states: [PartialVoiceState]?
-    public var members: [Member]?
-    public var channels: [DiscordChannel]?
-    public var threads: [DiscordChannel]?
-    public var presences: [Gateway.PartialPresenceUpdate]?
     public var max_presences: Int?
     public var max_members: Int?
     public var vanity_url_code: String?
@@ -179,9 +170,7 @@ public struct Guild: Sendable, Codable {
     public var approximate_presence_count: Int?
     public var welcome_screen: [WelcomeScreen]?
     public var nsfw_level: NSFWLevel
-    public var stage_instances: [StageInstance]?
     public var stickers: [Sticker]?
-    public var guild_scheduled_events: [GuildScheduledEvent]?
     public var premium_progress_bar_enabled: Bool
     public var `lazy`: Bool?
     public var hub_type: String?
@@ -213,6 +202,62 @@ extension Guild {
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }
+}
+
+/// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
+public struct PartialGuild: Sendable, Codable {
+    public var id: String
+    public var name: String?
+    public var icon: String?
+    public var icon_hash: String?
+    public var splash: String?
+    public var discovery_splash: String?
+    public var owner: Bool?
+    public var owner_id: String?
+    public var permissions: StringBitField<Permission>?
+    /// Deprecated
+    public var region: String?
+    public var afk_channel_id: String?
+    public var afk_timeout: Int?
+    public var widget_enabled: Bool?
+    public var widget_channel_id: String?
+    public var verification_level: Guild.VerificationLevel?
+    public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
+    public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
+    public var roles: [Role]?
+    public var emojis: [PartialEmoji]?
+    public var features: [Guild.Feature]?
+    public var mfa_level: Guild.MFALevel?
+    public var application_id: String?
+    public var system_channel_id: String?
+    public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>?
+    public var rules_channel_id: String?
+    public var max_presences: Int?
+    public var max_members: Int?
+    public var vanity_url_code: String?
+    public var description: String?
+    public var banner: String?
+    public var premium_tier: Guild.PremiumTier?
+    public var premium_subscription_count: Int?
+    public var preferred_locale: DiscordLocale?
+    public var public_updates_channel_id: String?
+    public var max_video_channel_users: Int?
+    public var max_stage_video_channel_users: Int?
+    public var approximate_member_count: Int?
+    public var approximate_presence_count: Int?
+    public var welcome_screen: [Guild.WelcomeScreen]?
+    public var nsfw_level: Guild.NSFWLevel?
+    public var stickers: [Sticker]?
+    public var premium_progress_bar_enabled: Bool
+    public var `lazy`: Bool?
+    public var hub_type: String?
+    public var guild_hashes: Hashes?
+    public var nsfw: Bool?
+    public var application_command_counts: [String: Int]?
+    public var embedded_activities: [Gateway.Activity]?
+    public var version: Int?
+    public var guild_id: String?
+    public var hashes: Hashes?
 }
 
 /// https://discord.com/developers/docs/resources/guild#unavailable-guild-object

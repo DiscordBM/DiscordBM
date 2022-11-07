@@ -61,7 +61,7 @@ public struct Gateway: Sendable, Codable {
             case threadSyncList(ThreadListSync)
             case threadMemberUpdate(ThreadMemberUpdate)
             case threadMembersUpdate(ThreadMembersUpdate)
-            case guildCreate(Guild)
+            case guildCreate(GuildCreate)
             case guildUpdate(Guild)
             case guildDelete(UnavailableGuild)
             case guildBanAdd(GuildBan)
@@ -85,8 +85,8 @@ public struct Gateway: Sendable, Codable {
             case guildApplicationCommandIndexUpdate(GuildApplicationCommandIndexUpdate)
             case guildJoinRequestUpdate(GuildJoinRequestUpdate)
             case guildJoinRequestDelete(GuildJoinRequestDelete)
-            case integrationCreate(Integration)
-            case integrationUpdate(Integration)
+            case integrationCreate(IntegrationCreate)
+            case integrationUpdate(IntegrationCreate)
             case integrationDelete(IntegrationDelete)
             case interactionCreate(Interaction)
             case inviteCreate(InviteCreate)
@@ -638,6 +638,76 @@ public struct Gateway: Sendable, Codable {
         public var removed_member_ids: [String]?
     }
     
+    /// A `Guild` object with extra fields.
+    /// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
+    /// https://discord.com/developers/docs/topics/gateway-events#guild-create-guild-create-extra-fields
+    public struct GuildCreate: Sendable, Codable {
+        public var id: String
+        public var name: String
+        public var icon: String?
+        public var icon_hash: String?
+        public var splash: String?
+        public var discovery_splash: String?
+        public var owner: Bool?
+        public var owner_id: String
+        public var permissions: StringBitField<Permission>?
+        /// Deprecated
+        public var region: String?
+        public var afk_channel_id: String?
+        public var afk_timeout: Int
+        public var widget_enabled: Bool?
+        public var widget_channel_id: String?
+        public var verification_level: Guild.VerificationLevel
+        public var default_message_notifications: Guild.DefaultMessageNotificationLevel
+        public var explicit_content_filter: Guild.ExplicitContentFilterLevel
+        public var roles: [Role]
+        public var emojis: [PartialEmoji]
+        public var features: [Guild.Feature]
+        public var mfa_level: Guild.MFALevel
+        public var application_id: String?
+        public var system_channel_id: String?
+        public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>
+        public var rules_channel_id: String?
+        public var max_presences: Int?
+        public var max_members: Int?
+        public var vanity_url_code: String?
+        public var description: String?
+        public var banner: String?
+        public var premium_tier: Guild.PremiumTier
+        public var premium_subscription_count: Int?
+        public var preferred_locale: DiscordLocale
+        public var public_updates_channel_id: String?
+        public var max_video_channel_users: Int?
+        public var max_stage_video_channel_users: Int?
+        public var approximate_member_count: Int?
+        public var approximate_presence_count: Int?
+        public var welcome_screen: [Guild.WelcomeScreen]?
+        public var nsfw_level: Guild.NSFWLevel
+        public var stickers: [Sticker]?
+        public var premium_progress_bar_enabled: Bool
+        public var `lazy`: Bool?
+        public var hub_type: String?
+        public var guild_hashes: Hashes?
+        public var nsfw: Bool
+        public var application_command_counts: [String: Int]?
+        public var embedded_activities: [Gateway.Activity]?
+        public var version: Int?
+        public var guild_id: String?
+        public var hashes: Hashes?
+        /// Extra fields:
+        public var joined_at: DiscordTimestamp
+        public var large: Bool
+        public var unavailable: Bool?
+        public var member_count: Int
+        public var voice_states: [PartialVoiceState]
+        public var members: [Guild.Member]
+        public var channels: [DiscordChannel]
+        public var threads: [DiscordChannel]
+        public var presences: [Gateway.PartialPresenceUpdate]
+        public var guild_scheduled_events: [GuildScheduledEvent]
+        public var stage_instances: [StageInstance]
+    }
+    
     /// https://discord.com/developers/docs/topics/gateway-events#channel-pins-update-channel-pins-update-event-fields
     public struct ChannelPinsUpdate: Sendable, Codable {
         public var guild_id: String?
@@ -834,29 +904,15 @@ public struct Gateway: Sendable, Codable {
     /// An ``Integration`` with an extra `guild_id` field.
     /// https://discord.com/developers/docs/topics/gateway-events#integration-create
     /// https://discord.com/developers/docs/resources/guild#integration-object
-    public struct Integration: Sendable, Codable {
-        
-        /// https://discord.com/developers/docs/resources/guild#integration-object-integration-structure
-        public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
-            case twitch
-            case youtube
-            case discord
-        }
-        
-        /// https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors
-        public enum ExpireBehavior: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case removeRole = 0
-            case kick = 1
-        }
-        
+    public struct IntegrationCreate: Sendable, Codable {
         public var id: String
         public var name: String
-        public var type: Kind
+        public var type: Integration.Kind
         public var enabled: Bool
         public var syncing: Bool?
         public var role_id: String?
         public var enable_emoticons: Bool?
-        public var expire_behavior: ExpireBehavior?
+        public var expire_behavior: Integration.ExpireBehavior?
         public var expire_grace_period: Int?
         public var user: DiscordUser?
         public var account: IntegrationAccount

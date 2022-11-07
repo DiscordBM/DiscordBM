@@ -335,8 +335,8 @@ public extension DiscordClient {
     @inlinable
     func createApplicationGlobalCommand(
         appId: String? = nil,
-        payload: SlashCommand
-    ) async throws -> DiscordClientResponse<SlashCommand> {
+        payload: ApplicationCommand
+    ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = Endpoint.createApplicationGlobalCommand(appId: try requireAppId(appId))
         return try await self.send(to: endpoint, queries: [], payload: payload)
     }
@@ -345,7 +345,7 @@ public extension DiscordClient {
     @inlinable
     func getApplicationGlobalCommands(
         appId: String? = nil
-    ) async throws -> DiscordClientResponse<[SlashCommand]> {
+    ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
         let endpoint = Endpoint.getApplicationGlobalCommands(appId: try requireAppId(appId))
         return try await send(to: endpoint, queries: [])
     }
@@ -518,6 +518,13 @@ public extension DiscordClient {
         messageId: String
     ) async throws -> DiscordClientResponse<Gateway.MessageCreate> {
         let endpoint = Endpoint.getChannelMessage(channelId: channelId, messageId: messageId)
+        return try await self.send(to: endpoint, queries: [])
+    }
+    
+    /// https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
+    @inlinable
+    func getGuildAuditLogs(guildId: String) async throws -> DiscordClientResponse<AuditLog> {
+        let endpoint = Endpoint.getGuildAuditLogs(guildId: guildId)
         return try await self.send(to: endpoint, queries: [])
     }
 }

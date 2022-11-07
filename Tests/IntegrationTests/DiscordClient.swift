@@ -175,7 +175,6 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertEqual(guild.id, Constants.guildId)
         XCTAssertEqual(guild.name, Constants.guildName)
-        XCTAssertEqual(guild.member_count, nil)
         XCTAssertEqual(guild.approximate_member_count, nil)
         XCTAssertEqual(guild.approximate_presence_count, nil)
         
@@ -187,9 +186,21 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertEqual(guildWithCounts.id, Constants.guildId)
         XCTAssertEqual(guildWithCounts.name, Constants.guildName)
-        XCTAssertEqual(guildWithCounts.member_count, nil)
         XCTAssertEqual(guildWithCounts.approximate_member_count, 3)
         XCTAssertNotEqual(guildWithCounts.approximate_presence_count, nil)
+        
+        /// Get guild audit logs
+        let _auditLogs = try await client.getGuildAuditLogs(guildId: Constants.guildId)
+        
+        var body = _auditLogs.httpResponse.body!
+        let data = body.readData(length: body.readableBytes)!
+        print(String(data: data, encoding: .utf8)!)
+        
+        let auditLogs = try _auditLogs.decode()
+        print("----------------------------------------------------------------------")
+        dump(auditLogs, maxDepth: 10)
+        print("----------------------------------------------------------------------")
+        XCTAssertFalse(auditLogs.audit_log_entries.isEmpty)
         
         /// Leave guild
         /// Can't leave guild so will just do a bad-request

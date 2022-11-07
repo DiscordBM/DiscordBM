@@ -50,9 +50,8 @@ public struct PartialApplication: Sendable, Codable {
     public var hook: Bool?
 }
 
-/// Discord docs call Slash Command, Application Command.
-/// https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
-public struct SlashCommand: Sendable, Codable {
+/// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
+public struct ApplicationCommand: Sendable, Codable {
     
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
