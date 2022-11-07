@@ -50,9 +50,8 @@ public struct PartialApplication: Sendable, Codable {
     public var hook: Bool?
 }
 
-/// Discord docs call Slash Command, Application Command.
-/// https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
-public struct SlashCommand: Sendable, Codable {
+/// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
+public struct ApplicationCommand: Sendable, Codable {
     
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
@@ -86,35 +85,12 @@ public struct SlashCommand: Sendable, Codable {
             public var name_localizations: [DiscordLocale: String]?
             public var value: StringIntDoubleBool
             
+            public var name_localized: String?
+            
             public init(name: String, name_localizations: [DiscordLocale : String]? = nil, value: StringIntDoubleBool) {
                 self.name = name
                 self.name_localizations = name_localizations
                 self.value = value
-            }
-        }
-        
-        public enum IntDouble: Sendable, Codable {
-            case int(Int)
-            case double(Double)
-            
-            public init(from decoder: Decoder) throws {
-                let container = try decoder.singleValueContainer()
-                if let int = try? container.decode(Int.self) {
-                    self = .int(int)
-                } else {
-                    let double = try container.decode(Double.self)
-                    self = .double(double)
-                }
-            }
-            
-            public func encode(to encoder: Encoder) throws {
-                var container = encoder.singleValueContainer()
-                switch self {
-                case let .int(int):
-                    try container.encode(int)
-                case let .double(double):
-                    try container.encode(double)
-                }
             }
         }
         
@@ -127,13 +103,16 @@ public struct SlashCommand: Sendable, Codable {
         public var choices: [Choice]?
         public var options: [Option]?
         public var channel_types: [DiscordChannel.Kind]?
-        public var min_value: IntDouble?
-        public var max_value: IntDouble?
+        public var min_value: IntOrDouble?
+        public var max_value: IntOrDouble?
         public var autocomplete: Bool?
+        
         /// Available after decode when user has inputted a value for the option.
         public var value: StringIntDoubleBool?
+        public var name_localized: String?
+        public var description_localized: String?
         
-        public init(type: Kind, name: String, name_localizations: [String : String]? = nil, description: String, description_localizations: [String : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [Option]? = nil, channel_types: [DiscordChannel.Kind]? = nil, min_value: IntDouble? = nil, max_value: IntDouble? = nil, autocomplete: Bool? = nil) {
+        public init(type: Kind, name: String, name_localizations: [String : String]? = nil, description: String, description_localizations: [String : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [Option]? = nil, channel_types: [DiscordChannel.Kind]? = nil, min_value: IntOrDouble? = nil, max_value: IntOrDouble? = nil, autocomplete: Bool? = nil) {
             self.type = type
             self.name = name
             self.name_localizations = name_localizations
@@ -159,6 +138,8 @@ public struct SlashCommand: Sendable, Codable {
     public var type: Kind?
     
     //MARK: Below fields are only returned by Discord, and you don't need to send.
+    public var name_localized: String?
+    public var description_localized: String?
     /// Deprecated
     var default_permission: Bool?
     public var id: String?

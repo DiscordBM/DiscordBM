@@ -179,7 +179,8 @@ public struct DefaultDiscordClient: DiscordClient {
     
     public func send(
         to endpoint: Endpoint,
-        queries: [(String, String?)] = []
+        queries: [(String, String?)] = [],
+        headers: HTTPHeaders
     ) async throws -> DiscordHTTPResponse {
         try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
             identity, retryCounter, requestId in
@@ -198,7 +199,8 @@ public struct DefaultDiscordClient: DiscordClient {
                 url: endpoint.url + queries.makeForURLQuery(),
                 method: endpoint.httpMethod
             )
-            request.headers = ["Authorization": "Bot \(token._storage)"]
+            request.headers = headers
+            request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
             
             logger.debug("Will send a request to Discord", metadata: [
                 "url": .stringConvertible(request.url),
@@ -226,6 +228,7 @@ public struct DefaultDiscordClient: DiscordClient {
     public func send<E: Encodable>(
         to endpoint: Endpoint,
         queries: [(String, String?)] = [],
+        headers: HTTPHeaders,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
@@ -250,10 +253,10 @@ public struct DefaultDiscordClient: DiscordClient {
                 url: endpoint.url + queries.makeForURLQuery(),
                 method: endpoint.httpMethod
             )
-            request.headers = [
-                "Authorization": "Bot \(token._storage)",
-                "Content-Type": "application/json"
-            ]
+            request.headers = headers
+            request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+            request.headers.replaceOrAdd(name: "Content-Type", value: "application/json")
+            
             request.body = .bytes(data)
             
             logger.debug("Will send a request to Discord", metadata: [
@@ -282,6 +285,7 @@ public struct DefaultDiscordClient: DiscordClient {
     public func send<E: MultipartEncodable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
+        headers: HTTPHeaders,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
@@ -315,10 +319,10 @@ public struct DefaultDiscordClient: DiscordClient {
                 url: endpoint.url + queries.makeForURLQuery(),
                 method: endpoint.httpMethod
             )
-            request.headers = [
-                "Authorization": "Bot \(token._storage)",
-                "Content-Type": contentType
-            ]
+            request.headers = headers
+            request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+            request.headers.replaceOrAdd(name: "Content-Type", value: contentType)
+            
             request.body = body
             
             logger.debug("Will send a request to Discord", metadata: [
