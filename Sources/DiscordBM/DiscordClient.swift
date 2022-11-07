@@ -523,8 +523,23 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
     @inlinable
-    func getGuildAuditLogs(guildId: String) async throws -> DiscordClientResponse<AuditLog> {
+    func getGuildAuditLogs(
+        guildId: String,
+        user_id: String? = nil,
+        action_type: AuditLog.Entry.ActionKind? = nil,
+        before: String? = nil,
+        limit: Int? = nil
+    ) async throws -> DiscordClientResponse<AuditLog> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = Endpoint.getGuildAuditLogs(guildId: guildId)
-        return try await self.send(to: endpoint, queries: [])
+        return try await self.send(
+            to: endpoint,
+            queries: [
+                ("user_id", user_id),
+                ("action_type", action_type.map { "\($0.rawValue)" }),
+                ("before", before),
+                ("limit", limit.map { "\($0)" })
+            ]
+        )
     }
 }

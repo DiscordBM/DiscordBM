@@ -99,7 +99,7 @@ public struct AuditLog: Sendable, Codable {
         }
         
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
-        enum ActionKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+        public enum ActionKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case guildUpdate = 1
             case channelCreate = 10
             case channelUpdate = 11
