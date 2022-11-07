@@ -110,7 +110,7 @@ Task {
 ```
 
 ### Sending Attachments
-Sending media is usually better done by sending the link of that media to Discord, instead of sending the actual file.     
+It's usually better to send a link of your media to Discord, instead of sending the actual file.   
 However, DiscordBM still supports sending files directly.   
 ```swift
 Task {
