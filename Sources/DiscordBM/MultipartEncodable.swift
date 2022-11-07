@@ -6,63 +6,21 @@ public protocol MultipartEncodable: Encodable {
     var files: [File]? { get }
 }
 
-struct MultipartEncodingContainer: Encodable {
-    
-    struct JSON: Encodable, MultipartPartConvertible {
-        var buffer: ByteBuffer
-        
-        var multipart: MultipartPart? {
-            MultipartPart(
-                headers: ["Content-Type": "application/json"],
-                body: buffer
-            )
-        }
-        
-        init? (multipart: MultipartPart) {
-            self.buffer = multipart.body
-        }
-        
-        init<E: Encodable>(from encodable: E) throws {
-            let data = try DiscordGlobalConfiguration.encoder.encode(encodable)
-            self.buffer = .init(data: data)
-        }
-        
-        func encode(to encoder: Encoder) throws {
-            var buffer = buffer
-            if let data = buffer.readData(length: buffer.readableBytes) {
-                var container = encoder.singleValueContainer()
-                try container.encode(data)
-            } else {
-                throw EncodingError.invalidValue(buffer, .init(
-                    codingPath: encoder.codingPath,
-                    debugDescription: "Could not encode ByteBuffer"
-                ))
-            }
-        }
-    }
-    
-    static let boundary: String = {
-        let random1 = (0..<4).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
-        let random2 = (0..<4).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
-        return random1 + "discordbm" + random2
-    }()
-    
-    var payload_json: JSON
-    var files: [File]
-}
-
 private let allocator = ByteBufferAllocator()
 
 extension MultipartEncodable {
+    /// Encodes the multipart payload into a buffer.
+    /// Returns `nil` if there are no multipart data to be encoded, and this should be sent as JSON.
+    /// Throws encoding errors.
     func encodeMultipart() throws -> ByteBuffer? {
         guard let files = self.files else { return nil }
         var buffer = allocator.buffer(capacity: 1024)
-        let data = MultipartEncodingContainer(
+        let payload = MultipartEncodingContainer(
             payload_json: try .init(from: self),
             files: files
         )
         try DiscordGlobalConfiguration.multipartEncoder.encode(
-            data,
+            payload,
             boundary: MultipartEncodingContainer.boundary,
             into: &buffer
         )
@@ -70,8 +28,9 @@ extension MultipartEncodable {
     }
 }
 
+/// `File` is _mostly_ copy-pasted from Vapor :)
 
-public struct File: Sendable, Codable, MultipartPartConvertible, Equatable {
+public struct File: Sendable, Encodable, MultipartPartConvertible {
     /// Name of the file, including extension.
     public var filename: String
     
@@ -89,17 +48,8 @@ public struct File: Sendable, Codable, MultipartPartConvertible, Equatable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case data, filename
-    }
-    
-    /// `Decodable` conformance.
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let data = try container.decode(Data.self, forKey: .data)
-        var buffer = ByteBufferAllocator().buffer(capacity: 0)
-        buffer.writeBytes(data)
-        let filename = try container.decode(String.self, forKey: .filename)
-        self.init(data: buffer, filename: filename)
+        case data
+        case filename
     }
     
     /// `Encodable` conformance.
@@ -167,6 +117,51 @@ public struct File: Sendable, Codable, MultipartPartConvertible, Equatable {
         }
         self.data = multipart.body
     }
+}
+
+struct MultipartEncodingContainer: Encodable {
+    
+    struct JSON: Encodable, MultipartPartConvertible {
+        var buffer: ByteBuffer
+        
+        var multipart: MultipartPart? {
+            MultipartPart(
+                headers: ["Content-Type": "application/json"],
+                body: buffer
+            )
+        }
+        
+        init? (multipart: MultipartPart) {
+            self.buffer = multipart.body
+        }
+        
+        init<E: Encodable>(from encodable: E) throws {
+            let data = try DiscordGlobalConfiguration.encoder.encode(encodable)
+            self.buffer = .init(data: data)
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var buffer = buffer
+            if let data = buffer.readData(length: buffer.readableBytes) {
+                var container = encoder.singleValueContainer()
+                try container.encode(data)
+            } else {
+                throw EncodingError.invalidValue(buffer, .init(
+                    codingPath: encoder.codingPath,
+                    debugDescription: "Could not encode ByteBuffer"
+                ))
+            }
+        }
+    }
+    
+    static let boundary: String = {
+        let random1 = (0..<4).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
+        let random2 = (0..<4).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
+        return random1 + "discordbm" + random2
+    }()
+    
+    var payload_json: JSON
+    var files: [File]
 }
 
 private let fileExtensionMediaTypeMapping: [String: (String, String)] = [
