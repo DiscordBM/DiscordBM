@@ -132,7 +132,8 @@ class DiscordClientTests: XCTestCase {
         /// Delete
         let deletionResponse = try await client.deleteMessage(
             channelId: Constants.channelId,
-            messageId: message.id
+            messageId: message.id,
+            reason: "Random reason " + UUID().uuidString
         )
         
         XCTAssertEqual(deletionResponse.status, .noContent)
@@ -192,13 +193,6 @@ class DiscordClientTests: XCTestCase {
         /// Get guild audit logs
         let auditLogs = try await client.getGuildAuditLogs(guildId: Constants.guildId).decode()
         XCTAssertEqual(auditLogs.audit_log_entries.count, 50)
-        
-        /// Get guild audit logs with action type
-        let auditLogsWithActionType = try await client.getGuildAuditLogs(
-            guildId: Constants.guildId,
-            action_type: .messageDelete
-        ).decode()
-        XCTAssertNotEqual(auditLogsWithActionType.audit_log_entries.count, 0)
         
         /// Leave guild
         /// Can't leave guild so will just do a bad-request
@@ -289,12 +283,22 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(memberRoleDeletionResponse.status, .noContent)
         
         /// Delete role
+        let reason = "Random reason " + UUID().uuidString
         let roleDeletionResponse = try await client.deleteGuildRole(
             guildId: Constants.guildId,
-            roleId: role.id
+            roleId: role.id,
+            reason: reason
         )
         
         XCTAssertEqual(roleDeletionResponse.status, .noContent)
+        
+        /// Get guild audit logs with action type
+        let auditLogsWithActionType = try await client.getGuildAuditLogs(
+            guildId: Constants.guildId,
+            action_type: .roleDelete
+        ).decode()
+        let entries = auditLogsWithActionType.audit_log_entries
+        XCTAssertTrue(entries.contains(where: { $0.reason == reason }), "Entries: \(entries)")
     }
     
     /// Just here to keep track of un-tested interaction endpoints.
