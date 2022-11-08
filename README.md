@@ -149,11 +149,11 @@ Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://g
 
 ### Finding Your Bot Token
 In [Discord developer portal](https://discord.com/developers/applications):
-![Finding Bot Token](/images/bot_token.png)
+![Finding Bot Token](https://user-images.githubusercontent.com/54685446/200565393-ea31c2ad-fd3a-44a1-9789-89460ab5d1a9.png)
 
 ### Finding Your App ID
 In [Discord developer portal](https://discord.com/developers/applications):
-![Finding App ID](/images/bot_app_id.png)
+![Finding App ID](https://user-images.githubusercontent.com/54685446/200565475-9893d326-423e-4344-a853-9de2f9ed25b4.png)
 
 ## Testability
 `DiscordBM` comes with tools to make testing your app easier.   
