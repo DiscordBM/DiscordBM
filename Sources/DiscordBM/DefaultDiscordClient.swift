@@ -282,7 +282,7 @@ public struct DefaultDiscordClient: DiscordClient {
         }
     }
     
-    public func send<E: MultipartEncodable>(
+    public func sendMultipart<E: MultipartEncodable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,

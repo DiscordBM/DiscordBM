@@ -32,14 +32,14 @@ public protocol DiscordClient {
         payload: E
     ) async throws -> DiscordClientResponse<C>
     
-    func send<E: MultipartEncodable>(
+    func sendMultipart<E: MultipartEncodable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
         payload: E
     ) async throws -> DiscordHTTPResponse
     
-    func send<E: MultipartEncodable, C: Codable>(
+    func sendMultipart<E: MultipartEncodable, C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
@@ -76,13 +76,13 @@ public extension DiscordClient {
     }
     
     @inlinable
-    func send<E: MultipartEncodable, C: Codable>(
+    func sendMultipart<E: MultipartEncodable, C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
         payload: E
     ) async throws -> DiscordClientResponse<C> {
-        let response = try await self.send(
+        let response = try await self.sendMultipart(
             to: endpoint,
             queries: queries,
             headers: headers,
@@ -255,7 +255,7 @@ public extension DiscordClient {
         payload: InteractionResponse
     ) async throws -> DiscordClientResponse<InteractionResponse.CallbackData> {
         let endpoint = Endpoint.createInteractionResponse(id: id, token: token)
-        return try await self.send(to: endpoint, queries: [], headers: [:], payload: payload)
+        return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
@@ -269,7 +269,7 @@ public extension DiscordClient {
             appId: try requireAppId(appId),
             token: token
         )
-        return try await self.send(to: endpoint, queries: [], headers: [:], payload: payload)
+        return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
@@ -296,7 +296,7 @@ public extension DiscordClient {
             appId: try requireAppId(appId),
             token: token
         )
-        return try await self.send(to: endpoint, queries: [], headers: [:], payload: payload)
+        return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
@@ -312,7 +312,7 @@ public extension DiscordClient {
             id: id,
             token: token
         )
-        return try await self.send(to: endpoint, queries: [], headers: [:], payload: payload)
+        return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
     /// https://discord.com/developers/docs/resources/channel#create-message
@@ -322,7 +322,7 @@ public extension DiscordClient {
         payload: DiscordChannel.CreateMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = Endpoint.postCreateMessage(channelId: channelId)
-        return try await self.send(to: endpoint, queries: [], headers: [:], payload: payload)
+        return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
     /// https://discord.com/developers/docs/resources/channel#edit-message
@@ -333,7 +333,7 @@ public extension DiscordClient {
         payload: DiscordChannel.EditMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = Endpoint.patchEditMessage(channelId: channelId, messageId: messageId)
-        return try await self.send(to: endpoint, queries: [], headers: [:], payload: payload)
+        return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
     /// https://discord.com/developers/docs/resources/channel#delete-message
