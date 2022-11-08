@@ -18,7 +18,7 @@ public struct DefaultDiscordClient: DiscordClient {
     public let token: Secret
     public let appId: String?
     let configuration: ClientConfiguration
-    private let cache: ClientCache?
+    let cache: ClientCache?
     let logger = DiscordGlobalConfiguration.makeLogger("DefaultDiscordClient")
     
     private static let requestIdGenerator = ManagedAtomic(UInt(0))
@@ -378,13 +378,13 @@ public struct ClientConfiguration {
             of identity: CacheableEndpointIdentity,
             ttl: Double? = nil
         ) {
-            guard !self.isDisabled else { return }
+            if self.isDisabled { return }
             self.storage[identity] = ttl ?? 0
         }
         
         @inlinable
         func getTTL(for identity: CacheableEndpointIdentity) -> Double? {
-            guard !self.isDisabled else { return nil }
+            if self.isDisabled { return nil }
             guard let ttl = self.storage[identity] else { return self.defaultTTL }
             return ttl == 0 ? nil : ttl
         }
@@ -592,8 +592,9 @@ private final class ClientCacheStorage {
 
 //MARK: - ClientCache
 
-/// This doesn't use the `Cache-Control` header because I couldn't find a 2xx response with a `Cache-Control` header returned by Discord.
-private actor ClientCache {
+/// This doesn't use the `Cache-Control` header because I couldn't
+/// find a 2xx response with a `Cache-Control` header returned by Discord.
+actor ClientCache {
     
     struct CacheableItem: Hashable {
         let identity: CacheableEndpointIdentity
@@ -617,14 +618,12 @@ private actor ClientCache {
     }
     
     /// [ID: ExpirationTime]
-    private var timeTable = [CacheableItem: Double]()
+    var timeTable = [CacheableItem: Double]()
     /// [ID: Response]
-    private var storage = [CacheableItem: DiscordHTTPResponse]()
+    var storage = [CacheableItem: DiscordHTTPResponse]()
     
     init() {
-        Task {
-            await self.collectGarbage()
-        }
+        Task { await self.collectGarbage() }
     }
     
     func add(response: DiscordHTTPResponse, item: CacheableItem, ttl: Double) {
