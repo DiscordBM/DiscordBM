@@ -68,7 +68,7 @@ public struct File: Sendable, Encodable, MultipartPartConvertible {
     ///     - data: The file's contents.
     ///     - filename: The name of the file, not including path.
     public init(data: String, filename: String) {
-        let buffer = ByteBufferAllocator().buffer(string: data)
+        let buffer = allocator.buffer(string: data)
         self.init(data: buffer, filename: filename)
     }
     
