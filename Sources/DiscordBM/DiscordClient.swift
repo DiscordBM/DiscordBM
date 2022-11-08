@@ -253,9 +253,27 @@ public extension DiscordClient {
         id: String,
         token: String,
         payload: InteractionResponse
-    ) async throws -> DiscordClientResponse<InteractionResponse.CallbackData> {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.createInteractionResponse(id: id, token: token)
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
+    @inlinable
+    func getInteractionResponse(
+        appId: String? = nil,
+        token: String,
+        thread_id: String? = nil
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+        let endpoint = Endpoint.getInteractionResponse(
+            appId: try requireAppId(appId),
+            token: token
+        )
+        return try await self.send(
+            to: endpoint,
+            queries: [("thread_id", thread_id)],
+            headers: [:]
+        )
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
@@ -299,20 +317,55 @@ public extension DiscordClient {
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
+    @inlinable
+    func getFollowupInteractionResponse(
+        appId: String? = nil,
+        token: String,
+        messageId: String,
+        thread_id: String? = nil
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+        let endpoint = Endpoint.getFollowupInteractionResponse(
+            appId: try requireAppId(appId),
+            token: token,
+            messageId: messageId
+        )
+        return try await self.send(
+            to: endpoint,
+            queries: [("thread_id", thread_id)],
+            headers: [:]
+        )
+    }
+    
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
     @inlinable
     func editFollowupInteractionResponse(
         appId: String? = nil,
-        id: String,
         token: String,
+        messageId: String,
         payload: InteractionResponse
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.editFollowupInteractionResponse(
             appId: try requireAppId(appId),
-            id: id,
-            token: token
+            token: token,
+            messageId: messageId
         )
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-followup-message
+    @inlinable
+    func deleteFollowupInteractionResponse(
+        appId: String? = nil,
+        token: String,
+        messageId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteFollowupInteractionResponse(
+            appId: try requireAppId(appId),
+            token: token,
+            messageId: messageId
+        )
+        return try await self.send(to: endpoint, queries: [], headers: [:])
     }
     
     /// https://discord.com/developers/docs/resources/channel#create-message
