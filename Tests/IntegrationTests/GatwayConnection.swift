@@ -1,4 +1,4 @@
-import DiscordBM
+@testable import DiscordBM
 import AsyncHTTPClient
 import Logging
 import XCTest
@@ -62,5 +62,11 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertEqual(ready.session_type, "normal")
         XCTAssertEqual(ready.user.id, Constants.botId)
         XCTAssertEqual(ready.user.bot, true)
+        
+        /// The bot should not disconnect for 10s.
+        /// This is to make sure we don't get invalid-session-ed immediately.
+        try await Task.sleep(nanoseconds: 10_000_000_000)
+        
+        XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
     }
 }

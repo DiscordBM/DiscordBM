@@ -1,12 +1,11 @@
 
-/// For now, only to be able to make bot auth urls dynamically, on demand.
-/// It's an actor because we'll likely need it to be, if we add actual OAuth-2 support.
 private let baseURLs = (
     authorization: "https://discord.com/api/oauth2/authorize",
     token: "https://discord.com/api/oauth2/token",
     tokenRevocation: "https://discord.com/api/oauth2/token/revoke"
 )
 
+/// For now, only to be able to make bot auth urls dynamically, on demand.
 public struct BotAuthManager: Sendable {
     
     let clientId: String
@@ -24,10 +23,10 @@ public struct BotAuthManager: Sendable {
         if withSlashCommands {
             scopes.append(.applicationsCommands)
         }
-        let permissions = StringBitField<Permission>(permissions)
+        let permissions = StringBitField<Permission>(permissions).toBitValue()
         let queries = [
             ("client_id", self.clientId),
-            ("permissions", "\(permissions.toBitValue())"),
+            ("permissions", "\(permissions)"),
             ("scope", scopes.map(\.rawValue).joined(separator: " "))
         ]
         return baseURLs.authorization + queries.makeForURLQuery()

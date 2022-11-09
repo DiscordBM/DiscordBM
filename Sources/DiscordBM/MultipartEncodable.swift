@@ -3,7 +3,7 @@ import NIOCore
 import Foundation
 
 public protocol MultipartEncodable: Encodable {
-    var files: [File]? { get }
+    var files: [RawFile]? { get }
 }
 
 private let allocator = ByteBufferAllocator()
@@ -28,9 +28,9 @@ extension MultipartEncodable {
     }
 }
 
-/// `File` is _mostly_ copy-pasted from Vapor :)
+/// This is _mostly_ copy-pasted from Vapor's `File` :)
 
-public struct File: Sendable, Encodable, MultipartPartConvertible {
+public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
     /// Name of the file, including extension.
     public var filename: String
     
@@ -161,7 +161,7 @@ struct MultipartEncodingContainer: Encodable {
     }()
     
     var payload_json: JSON
-    var files: [File]
+    var files: [RawFile]
 }
 
 private let fileExtensionMediaTypeMapping: [String: (String, String)] = [

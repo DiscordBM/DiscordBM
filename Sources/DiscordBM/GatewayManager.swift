@@ -60,26 +60,26 @@ public actor BotGatewayManager: GatewayManager {
             self.closeWebSocket(ws: oldValue)
         }
     }
-    private let eventLoopGroup: any EventLoopGroup
+    let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
     /// Max frame size we accept to receive through the websocket connection.
-    private nonisolated let maxFrameSize: Int
-    private static let idGenerator = ManagedAtomic(0)
+    nonisolated let maxFrameSize: Int
+    static let idGenerator = ManagedAtomic(0)
     /// This gateway manager's identifier.
     public nonisolated let id = BotGatewayManager.idGenerator
         .wrappingIncrementThenLoad(ordering: .relaxed)
-    private let logger: Logger
+    let logger: Logger
     
     //MARK: Event hooks
-    private var onEvents: [(Gateway.Event) -> ()] = []
-    private var onEventParseFailures: [(Error, String) -> ()] = []
+    var onEvents: [(Gateway.Event) -> ()] = []
+    var onEventParseFailures: [(Error, String) -> ()] = []
     
     //MARK: Connection data
-    private nonisolated let identifyPayload: Gateway.Identify
+    nonisolated let identifyPayload: Gateway.Identify
     
     //MARK: Connection state
-    private nonisolated let _state = ManagedAtomic(GatewayState.noConnection)
+    nonisolated let _state = ManagedAtomic(GatewayState.noConnection)
     /// The current state of the gateway manager.
     public nonisolated var state: GatewayState {
         self._state.load(ordering: .relaxed)
@@ -88,25 +88,25 @@ public actor BotGatewayManager: GatewayManager {
     //MARK: Send queue
     /// 120 per 60 seconds (1 every 500ms),
     /// per https://discord.com/developers/docs/topics/gateway#rate-limiting
-    private var sendQueue = SerialQueue(waitTime: .milliseconds(500))
+    var sendQueue = SerialQueue(waitTime: .milliseconds(500))
     
     //MARK: Current connection properties
     
     /// An ID to keep track of connection changes.
-    private nonisolated let connectionId = ManagedAtomic(UInt(0))
+    nonisolated let connectionId = ManagedAtomic(UInt(0))
     
     //MARK: Resume-related current-connection properties
     
     /// The sequence number for the payloads sent to us.
-    private var sequenceNumber: Int? = nil
+    var sequenceNumber: Int? = nil
     /// The ID of the current Discord-related session.
-    private var sessionId: String? = nil
+    var sessionId: String? = nil
     /// Gateway URL for resuming the connection, so we don't need to make an api call.
-    private var resumeGatewayURL: String? = nil
+    var resumeGatewayURL: String? = nil
     
     //MARK: Shard-ing
-    private var maxConcurrency: Int? = nil
-    private var isFirstConnection = true
+    var maxConcurrency: Int? = nil
+    var isFirstConnection = true
     
     //MARK: Backoff
     
@@ -115,7 +115,7 @@ public actor BotGatewayManager: GatewayManager {
     /// This Backoff does not necessarily prevent your bot token getting revoked,
     /// but in the worst case, doesn't let it happen sooner than 8 hours.
     /// This also helps in other situations, for example when there is a Discord outage.
-    private let connectionBackoff = Backoff(
+    let connectionBackoff = Backoff(
         base: 2,
         maxExponentiation: 7,
         coefficient: 1,
@@ -123,8 +123,8 @@ public actor BotGatewayManager: GatewayManager {
     )
     
     //MARK: Ping-pong tracking properties
-    private var unsuccessfulPingsCount = 0
-    private var lastPongDate = Date()
+    var unsuccessfulPingsCount = 0
+    var lastPongDate = Date()
     
     public init(
         eventLoopGroup: EventLoopGroup,

@@ -76,7 +76,12 @@ public struct DefaultDiscordClient: DiscordClient {
         identity: CacheableEndpointIdentity?,
         queries: [(String, String?)]
     ) async -> DiscordHTTPResponse? {
-        guard let identity = identity else { return nil }
+        /// Since the `ClientCache` is shared and another `DiscordClient` could have
+        /// had added a response to it, at least make sure that this
+        /// `DiscordClient` should be using any caching at all for the endpoint.
+        guard let identity = identity,
+              self.configuration.cachingBehavior.getTTL(for: identity) != nil
+        else { return nil }
         return await cache?.get(item: .init(
             identity: identity,
             queries: queries
@@ -357,29 +362,36 @@ public struct ClientConfiguration {
         /// [ID: TTL]
         @usableFromInline
         var storage = [CacheableEndpointIdentity: Double]()
-        /// This instance's default TTL for all endpoints.
-        public var defaultTTL = 5.0
-        public var isDisabled = false
+        /// This instance's default TTL (Time-To-Live) for all endpoints.
+        @usableFromInline
+        var defaultTTL: Double?
+        @usableFromInline
+        var isDisabled: Bool
+        
+        /// Uses the TTL in the `endpoints`. If not available, falls back to `defaultTTL`.
+        /// Setting TTL to `0` in endpoints, disables caching for that endpoint.
+        public static func custom(
+            defaultTTL: Double? = 5,
+            endpoints: [CacheableEndpointIdentity: Double]
+        ) -> CachingBehavior {
+            CachingBehavior(storage: endpoints, defaultTTL: defaultTTL, isDisabled: false)
+        }
         
         /// Caches all cacheable endpoints for 5 seconds,
         /// except for `getGateway` which is cached for an hour.
         public static var enabled: CachingBehavior {
-            var behavior = CachingBehavior()
-            behavior.modifyBehavior(of: .getGateway, ttl: 3600)
-            return behavior
+            CachingBehavior.enabled(defaultTTL: 5)
         }
+        
+        /// Caches all cacheable endpoints for the entered seconds,
+        /// except for `getGateway` which is cached for an hour.
+        public static func enabled(defaultTTL: Double) -> CachingBehavior {
+            CachingBehavior.custom(defaultTTL: defaultTTL, endpoints: [.getGateway: 3600])
+        }
+        
         /// Doesn't allow caching at all.
         public static var disabled: CachingBehavior {
             CachingBehavior(isDisabled: true)
-        }
-        
-        @inlinable
-        public mutating func modifyBehavior(
-            of identity: CacheableEndpointIdentity,
-            ttl: Double? = nil
-        ) {
-            if self.isDisabled { return }
-            self.storage[identity] = ttl ?? 0
         }
         
         @inlinable
@@ -524,6 +536,7 @@ public struct ClientConfiguration {
     }
     
     /// The behavior used for caching requests.
+    /// Due to how it works, you shouldn't use `CachingBehavior`s with different TTLs for the same bot-token.
     public let cachingBehavior: CachingBehavior
     /// How much for the `HTTPClient` to wait for a connection before failing.
     public var requestTimeout: TimeAmount

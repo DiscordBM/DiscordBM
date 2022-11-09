@@ -1,4 +1,4 @@
-import DiscordBM
+@testable import DiscordBM
 import AsyncHTTPClient
 import Atomics
 import NIOCore
@@ -409,8 +409,7 @@ class DiscordClientTests: XCTestCase {
     func testCachingInPractice() async throws {
         /// Caching enabled
         do {
-            var cachingBehavior = ClientConfiguration.CachingBehavior.enabled
-            cachingBehavior.defaultTTL = 2
+            let cachingBehavior = ClientConfiguration.CachingBehavior.enabled(defaultTTL: 2)
             let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
             let cacheClient: any DiscordClient = DefaultDiscordClient(
                 httpClient: httpClient,
@@ -447,52 +446,12 @@ class DiscordClientTests: XCTestCase {
         /// This is to make sure the last test doesn't have impact on the next tests.
         try await Task.sleep(nanoseconds: 2_000_000_000)
         
-        /// Caching disabled, but with exception
-        /// Due to the `isDisabled` property in `CachingBehavior`,
-        /// the exception should not work and caching should appear as disabled.
-        do {
-            var cachingBehavior = ClientConfiguration.CachingBehavior.disabled
-            cachingBehavior.modifyBehavior(of: .getApplicationGlobalCommands, ttl: 2)
-            let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
-            let cacheClient: any DiscordClient = DefaultDiscordClient(
-                httpClient: httpClient,
-                token: Constants.token,
-                appId: Constants.botId,
-                configuration: configuration
-            )
-            
-            /// We create a command, fetch the commands count, then delete the command
-            /// and fetch the command count again.
-            /// Since we are using caching, the first command count and the second command count
-            /// must be the same (although it's wrong)
-            let commandName = "test-command"
-            let commandDesc = "Testing!"
-            let command = try await cacheClient.createApplicationGlobalCommand(
-                payload: .init(name: commandName, description: commandDesc)
-            ).decode()
-            
-            XCTAssertEqual(command.name, commandName)
-            XCTAssertEqual(command.description, commandDesc)
-            
-            let commandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
-            
-            let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(id: command.id!)
-            
-            XCTAssertEqual(deletionResponse.status, .noContent)
-            
-            let newCommandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
-            
-            XCTAssertEqual(commandsCount, newCommandsCount + 1)
-        }
-        
-        /// Because `ClientCache`s are shared even across different `DefaultDiscordClient`s.
-        /// This is to make sure the last test doesn't have impact on the next tests.
-        try await Task.sleep(nanoseconds: 2_000_000_000)
-        
         /// Caching enabled, but with exception, so disabled
         do {
-            var cachingBehavior = ClientConfiguration.CachingBehavior.enabled
-            cachingBehavior.modifyBehavior(of: .getApplicationGlobalCommands, ttl: nil)
+            let cachingBehavior = ClientConfiguration.CachingBehavior.custom(
+                defaultTTL: 2,
+                endpoints: [.getApplicationGlobalCommands: 0]
+            )
             let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
             let cacheClient: any DiscordClient = DefaultDiscordClient(
                 httpClient: httpClient,
