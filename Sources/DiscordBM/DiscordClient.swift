@@ -374,7 +374,7 @@ public extension DiscordClient {
         channelId: String,
         payload: DiscordChannel.CreateMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        let endpoint = Endpoint.postCreateMessage(channelId: channelId)
+        let endpoint = Endpoint.createMessage(channelId: channelId)
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
@@ -385,7 +385,7 @@ public extension DiscordClient {
         messageId: String,
         payload: DiscordChannel.EditMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        let endpoint = Endpoint.patchEditMessage(channelId: channelId, messageId: messageId)
+        let endpoint = Endpoint.editMessage(channelId: channelId, messageId: messageId)
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
@@ -644,6 +644,19 @@ public extension DiscordClient {
                 ("limit", limit.map { "\($0)" })
             ],
             headers: [:]
+        )
+    }
+    
+    /// You can use this function to create a new or retrieve an existing DM channel.
+    /// https://discord.com/developers/docs/resources/user#create-dm
+    @inlinable
+    func createDM(recipient_id: String) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = Endpoint.createDM
+        return try await self.send(
+            to: endpoint,
+            queries: [],
+            headers: [:],
+            payload: RequestBody.CreateDM(recipient_id: recipient_id)
         )
     }
 }

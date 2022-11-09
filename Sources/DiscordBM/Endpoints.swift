@@ -43,8 +43,8 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, Cu
         case .getFollowupInteractionResponse: self = .getFollowupInteractionResponse
         case .editFollowupInteractionResponse: return nil
         case .deleteFollowupInteractionResponse: return nil
-        case .postCreateMessage: return nil
-        case .patchEditMessage: return nil
+        case .createMessage: return nil
+        case .editMessage: return nil
         case .deleteMessage: return nil
         case .createApplicationGlobalCommand: return nil
         case .getApplicationGlobalCommands: self = .getApplicationGlobalCommands
@@ -62,6 +62,7 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, Cu
         case .removeGuildMemberRole: return nil
         case .getGuildAuditLogs: self = .getGuildAuditLogs
         case .addReaction: return nil
+        case .createDM: return nil
         }
     }
 }
@@ -80,8 +81,8 @@ public enum Endpoint: Sendable {
     case editFollowupInteractionResponse(appId: String, token: String, messageId: String)
     case deleteFollowupInteractionResponse(appId: String, token: String, messageId: String)
     
-    case postCreateMessage(channelId: String)
-    case patchEditMessage(channelId: String, messageId: String)
+    case createMessage(channelId: String)
+    case editMessage(channelId: String, messageId: String)
     case deleteMessage(channelId: String, messageId: String)
     
     case createApplicationGlobalCommand(appId: String)
@@ -106,6 +107,8 @@ public enum Endpoint: Sendable {
     
     case addReaction(channelId: String, messageId: String, emoji: String)
     
+    case createDM
+    
     var urlSuffix: String {
         switch self {
         case .getGateway:
@@ -128,9 +131,9 @@ public enum Endpoint: Sendable {
             return "webhooks/\(appId)/\(token)/messages/\(messageId)"
         case let .deleteFollowupInteractionResponse(appId, token, messageId):
             return "webhooks/\(appId)/\(token)/messages/\(messageId)"
-        case let .postCreateMessage(channelId):
+        case let .createMessage(channelId):
             return "channels/\(channelId)/messages"
-        case let .patchEditMessage(channelId, messageId):
+        case let .editMessage(channelId, messageId):
             return "channels/\(channelId)/messages/\(messageId)"
         case let .deleteMessage(channelId, messageId):
             return "channels/\(channelId)/messages/\(messageId)"
@@ -166,6 +169,8 @@ public enum Endpoint: Sendable {
             return "guilds/\(guildId)/audit-logs"
         case let .addReaction(channelId, messageId, emoji):
             return "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/@me"
+        case .createDM:
+            return "users/@me/channels"
         }
     }
     
@@ -188,8 +193,8 @@ public enum Endpoint: Sendable {
         case .getFollowupInteractionResponse: return .GET
         case .editFollowupInteractionResponse: return .PATCH
         case .deleteFollowupInteractionResponse: return .DELETE
-        case .postCreateMessage: return .POST
-        case .patchEditMessage: return .PATCH
+        case .createMessage: return .POST
+        case .editMessage: return .PATCH
         case .deleteMessage: return .DELETE
         case .createApplicationGlobalCommand: return .POST
         case .getApplicationGlobalCommands: return .GET
@@ -207,6 +212,7 @@ public enum Endpoint: Sendable {
         case .removeGuildMemberRole: return .DELETE
         case .getGuildAuditLogs: return .GET
         case .addReaction: return .PUT
+        case .createDM: return .POST
         }
     }
     
@@ -216,7 +222,7 @@ public enum Endpoint: Sendable {
         switch self {
         case .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse:
             return false
-        case .getGateway, .getGatewayBot, .postCreateMessage, .patchEditMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction:
+        case .getGateway, .getGatewayBot, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM:
             return true
         }
     }
@@ -233,8 +239,8 @@ public enum Endpoint: Sendable {
         case .getFollowupInteractionResponse: return 8
         case .editFollowupInteractionResponse: return 9
         case .deleteFollowupInteractionResponse: return 10
-        case .postCreateMessage: return 11
-        case .patchEditMessage: return 12
+        case .createMessage: return 11
+        case .editMessage: return 12
         case .deleteMessage: return 13
         case .createApplicationGlobalCommand: return 14
         case .getApplicationGlobalCommands: return 15
@@ -252,6 +258,7 @@ public enum Endpoint: Sendable {
         case .removeGuildMemberRole: return 26
         case .getGuildAuditLogs: return 28
         case .addReaction: return 29
+        case .createDM: return 30
         }
     }
 }

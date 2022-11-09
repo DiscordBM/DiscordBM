@@ -306,6 +306,25 @@ class DiscordClientTests: XCTestCase {
         XCTAssertTrue(entries.contains(where: { $0.reason == reason }), "Entries: \(entries)")
     }
     
+    func testDMs() async throws {
+        /// Create DM
+        let response = try await self.client.createDM(recipient_id: Constants.personalId).decode()
+        
+        XCTAssertEqual(response.type, .dm)
+        let recipient = try XCTUnwrap(response.recipients?.first)
+        XCTAssertEqual(recipient.id, Constants.personalId)
+        
+        /// Send a message to the DM channel
+        let text = "Testing! \(Date())"
+        let message = try await client.createMessage(
+            channelId: response.id,
+            payload: .init(content: text)
+        ).decode()
+        
+        XCTAssertEqual(message.content, text)
+        XCTAssertEqual(message.channel_id, response.id)
+    }
+    
     func testMultipartPayload() async throws {
         let image = ByteBuffer(data: resource(name: "discord-logo-blue.png"))
         
