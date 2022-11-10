@@ -100,7 +100,7 @@ Task {
     /// Tell the manager to connect to Discord
     await bot.connect()
 
-    /// Use `bot.client` to send requests to discord.
+    /// Use `bot.client` to send requests to Discord.
     try await bot.client.createMessage(
         channelId: CHANNEL_ID,
         payload: .init(content: "Hello Everybody!")
@@ -121,7 +121,7 @@ Task {
     let image: ByteBuffer = ... /// Raw data of anything like an image
     
     /// Example 1
-    try await self.client.createMessage(
+    try await bot.client.createMessage(
         channelId: CHANNEL_ID,
         payload: .init(
             content: "A message with an attachment!",
@@ -132,7 +132,7 @@ Task {
     )
     
     /// Example 2
-    try await self.client.createMessage(
+    try await bot.client.createMessage(
         channelId: CHANNEL_ID,
         payload: .init(
             embeds: [.init(
