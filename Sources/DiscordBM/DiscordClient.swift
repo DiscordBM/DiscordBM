@@ -154,14 +154,14 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     }
     
     @inlinable
-    func guardIsSuccessfulResponse() throws {
+    public func guardIsSuccessfulResponse() throws {
         guard (200..<300).contains(self.status.code) else {
             throw DiscordClientError.badStatusCode(self)
         }
     }
     
     @inlinable
-    func decode<D: Decodable>(as _: D.Type) throws -> D {
+    public func decode<D: Decodable>(as _: D.Type) throws -> D {
         try guardIsSuccessfulResponse()
         if var body = self.body,
            let data = body.readData(length: body.readableBytes) {
