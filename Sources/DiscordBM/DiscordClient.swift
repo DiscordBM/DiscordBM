@@ -161,7 +161,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     }
     
     @inlinable
-    public func decode<D: Decodable>(as _: D.Type) throws -> D {
+    public func decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
         try guardIsSuccessfulResponse()
         if var body = self.body,
            let data = body.readData(length: body.readableBytes) {
@@ -177,6 +177,11 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
     
     public init(httpResponse: DiscordHTTPResponse) {
         self.httpResponse = httpResponse
+    }
+    
+    @inlinable
+    public func guardIsSuccessfulResponse() throws {
+        try self.httpResponse.guardIsSuccessfulResponse()
     }
     
     @inlinable
