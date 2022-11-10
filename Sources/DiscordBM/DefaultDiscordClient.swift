@@ -506,10 +506,10 @@ public struct ClientConfiguration {
         /// The backoff configuration, to wait a some amount of time _after_ a failed request.
         public var backoff: Backoff?
         
-        /// Only retries status code 429 and 500 once.
+        /// Only retries status code 429, 500 and 502 once.
         @inlinable
         public static var `default`: RetryPolicy {
-            RetryPolicy(statuses: [.tooManyRequests, .internalServerError])
+            RetryPolicy(statuses: [.tooManyRequests, .internalServerError, .badGateway])
         }
         
         /// - Parameters:
