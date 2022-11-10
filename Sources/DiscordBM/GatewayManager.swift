@@ -289,12 +289,13 @@ extension BotGatewayManager {
             self.sequenceNumber = sequenceNumber
         }
         
-        /// for `.reconnect`, we will reconnect when we get the close notification
         switch event.opcode {
         case .heartbeat:
             self.sendPing(forConnectionWithId: self.connectionId.load(ordering: .relaxed))
         case .heartbeatAccepted:
             self.lastPongDate = Date()
+        case .reconnect:
+            logger.warning("Discord sent a reconnect request. Will reconnect when we get the close notification")
         default:
             break
         }
@@ -456,7 +457,7 @@ extension BotGatewayManager {
                         )
                     ]
                 )
-                if self.canTryReconnect(ws: ws) {
+                if self.canTryReconnect(code: ws.closeCode) {
                     self._state.store(.noConnection, ordering: .relaxed)
                     await self.connect()
                 } else {
@@ -489,8 +490,8 @@ extension BotGatewayManager {
         return (code, description)
     }
     
-    private nonisolated func canTryReconnect(ws: WebSocket) -> Bool {
-        switch ws.closeCode {
+    private nonisolated func canTryReconnect(code: WebSocketErrorCode?) -> Bool {
+        switch code {
         case let .unknown(codeNumber):
             guard let discordCode = Gateway.CloseCode(rawValue: codeNumber) else { return true }
             return discordCode.canTryReconnect
