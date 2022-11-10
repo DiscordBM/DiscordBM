@@ -340,7 +340,8 @@ extension BotGatewayManager {
     
     private func getGatewayURL() async -> String {
         logger.debug("Will try to get Discord gateway url")
-        if let gatewayURL = self.resumeGatewayURL {
+        if self.sequenceNumber != nil, /// If can resume at all
+           let gatewayURL = self.resumeGatewayURL {
             logger.trace("Got Discord gateway url from `resumeGatewayURL`")
             return gatewayURL
         } else {
