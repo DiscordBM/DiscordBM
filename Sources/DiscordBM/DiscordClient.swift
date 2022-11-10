@@ -154,16 +154,20 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     }
     
     @inlinable
+    func guardIsSuccessfulResponse() throws {
+        guard (200..<300).contains(self.status.code) else {
+            throw DiscordClientError.badStatusCode(self)
+        }
+    }
+    
+    @inlinable
     func decode<D: Decodable>(as _: D.Type) throws -> D {
-        if (200..<300).contains(self.status.code) {
-            if var body = self.body,
-               let data = body.readData(length: body.readableBytes) {
-                return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
-            } else {
-                throw DiscordClientError.emptyBody(self)
-            }
+        try guardIsSuccessfulResponse()
+        if var body = self.body,
+           let data = body.readData(length: body.readableBytes) {
+            return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
         } else {
-            throw DiscordClientError.cantAttemptToDecodeDueToBadStatusCode(self)
+            throw DiscordClientError.emptyBody(self)
         }
     }
 }
@@ -183,7 +187,7 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
 
 public enum DiscordClientError: Error {
     case rateLimited(url: String)
-    case cantAttemptToDecodeDueToBadStatusCode(DiscordHTTPResponse)
+    case badStatusCode(DiscordHTTPResponse)
     case emptyBody(DiscordHTTPResponse)
     case appIdParameterRequired
     /// Can only send one of those query parameters.

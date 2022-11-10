@@ -400,7 +400,7 @@ class DiscordClientTests: XCTestCase {
                     switch error {
                     case DiscordClientError.rateLimited:
                         rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
-                    case DiscordClientError.cantAttemptToDecodeDueToBadStatusCode(let response)
+                    case DiscordClientError.badStatusCode(let response)
                         where response.status == .tooManyRequests:
                         /// If its the first request and we're having this error, then
                         /// it means the last tests have exhausted our rate-limit and

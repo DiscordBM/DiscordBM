@@ -40,14 +40,14 @@ class ClientConfigurationTests: XCTestCase {
         
         do {
             var policy = RetryPolicy.default
-            policy.statuses.insert(.badGateway)
+            policy.statuses.insert(.serviceUnavailable)
             policy.maxRetries = 1
             
-            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 0))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 1))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 2))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 10))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 100000))
+            XCTAssertTrue(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 0))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 1))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 2))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 10))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 100000))
             
             XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 0))
             XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 1))
