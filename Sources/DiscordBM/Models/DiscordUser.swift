@@ -26,6 +26,7 @@ public struct DiscordUser: Sendable, Codable {
         case certifiedModerator = 18
         case botHttpInteractions = 19
         case unknownValue20 = 20
+        case activeDeveloper = 22
     }
     
     public var id: String
