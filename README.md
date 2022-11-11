@@ -1,4 +1,4 @@
-![DiscordBM](https://user-images.githubusercontent.com/54685446/200414610-fd4fc280-a1d9-436f-960b-cb80127ae0e5.png)
+![DiscordBM](https://user-images.githubusercontent.com/54685446/201329617-9fd91ab0-35c2-42c2-8963-47b68c6a490a.png)
 
 <p align="center">
 	<a href="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml">
