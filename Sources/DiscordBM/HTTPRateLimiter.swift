@@ -1,7 +1,7 @@
 import struct Foundation.Date
 import NIOHTTP1
 
-private let logger = DiscordGlobalConfiguration.makeLogger("DiscordBM.HTTPRateLimiter")
+private let logger = DiscordGlobalConfiguration.makeLogger("DBM.HTTPRateLimiter")
 
 actor HTTPRateLimiter {
     

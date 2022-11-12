@@ -155,8 +155,8 @@ struct MultipartEncodingContainer: Encodable {
     }
     
     static let boundary: String = {
-        let random1 = (0..<4).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
-        let random2 = (0..<4).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
+        let random1 = (0..<5).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
+        let random2 = (0..<5).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
         return random1 + "discordbm" + random2
     }()
     

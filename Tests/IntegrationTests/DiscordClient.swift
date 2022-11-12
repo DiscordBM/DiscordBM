@@ -96,7 +96,7 @@ class DiscordClientTests: XCTestCase {
             channelId: Constants.channelId
         ).decode()
         
-        XCTAssertEqual(allMessages.count, 3)
+        XCTAssertGreaterThan(allMessages.count, 2)
         XCTAssertEqual(allMessages[0].id, edited.id)
         XCTAssertEqual(allMessages[1].content, "And this is another test message :\\)")
         XCTAssertEqual(allMessages[2].content, "Hello! This is a test message!")
@@ -326,14 +326,14 @@ class DiscordClientTests: XCTestCase {
     }
     
     func testMultipartPayload() async throws {
-        let image = ByteBuffer(data: resource(name: "discord-logo-blue.png"))
+        let image = ByteBuffer(data: resource(name: "discordbm-logo.png"))
         
         do {
             let response = try await self.client.createMessage(
                 channelId: Constants.secondChannelId,
                 payload: .init(
                     content: "Multipart message!",
-                    files: [.init(data: image, filename: "discord-logo.png")],
+                    files: [.init(data: image, filename: "discordbm.png")],
                     attachments: [.init(index: 0, description: "Test attachment!")]
                 )
             ).decode()
@@ -342,12 +342,12 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(response.attachments.count, 1)
             
             let attachment = try XCTUnwrap(response.attachments.first)
-            XCTAssertEqual(attachment.filename, "discord-logo.png")
+            XCTAssertEqual(attachment.filename, "discordbm.png")
             XCTAssertEqual(attachment.description, "Test attachment!")
             XCTAssertEqual(attachment.content_type, "image/png")
-            XCTAssertEqual(attachment.size, 10731)
-            XCTAssertEqual(attachment.height, 240)
-            XCTAssertEqual(attachment.width, 876)
+            XCTAssertEqual(attachment.size, 21013)
+            XCTAssertEqual(attachment.height, 210)
+            XCTAssertEqual(attachment.width, 1200)
             XCTAssertFalse(attachment.id.isEmpty)
             XCTAssertFalse(attachment.url.isEmpty)
             XCTAssertFalse(attachment.proxy_url.isEmpty)
@@ -360,9 +360,9 @@ class DiscordClientTests: XCTestCase {
                     content: "Multipart message!",
                     embeds: [.init(
                         title: "Multipart embed!",
-                        image: .init(url: .attachment(name: "discord-logo.png"))
+                        image: .init(url: .attachment(name: "discordbm.png"))
                     )],
-                    files: [.init(data: image, filename: "discord-logo.png")]
+                    files: [.init(data: image, filename: "discordbm.png")]
                 )
             ).decode()
             
@@ -370,8 +370,8 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(response.attachments.count, 0)
             
             let image = try XCTUnwrap(response.embeds.first?.image)
-            XCTAssertEqual(image.height, 240)
-            XCTAssertEqual(image.width, 876)
+            XCTAssertEqual(image.height, 210)
+            XCTAssertEqual(image.width, 1200)
             XCTAssertFalse(image.url.asString.isEmpty)
             XCTAssertFalse(image.proxy_url?.isEmpty == true)
         }
@@ -381,7 +381,7 @@ class DiscordClientTests: XCTestCase {
     func testRateLimitedInPractice() async throws {
         let content = "Spamming! \(Date())"
         let rateLimitedErrors = ManagedAtomic(0)
-        let count = 15
+        let count = 50
         let container = Container(targetCounter: count)
         
         let isFirstRequest = ManagedAtomic(false)

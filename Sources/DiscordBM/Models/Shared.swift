@@ -301,7 +301,7 @@ public protocol BitField: ExpressibleByArrayLiteral {
     init(_ values: Set<R>)
 }
 
-private let bitFieldLogger = DiscordGlobalConfiguration.makeDecodeLogger("DiscordBM_BitField")
+private let bitFieldLogger = DiscordGlobalConfiguration.makeDecodeLogger("DBM.BitField")
 
 extension BitField {
     
