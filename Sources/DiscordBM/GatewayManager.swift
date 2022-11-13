@@ -295,7 +295,7 @@ extension BotGatewayManager {
         case .heartbeatAccepted:
             self.lastPongDate = Date()
         case .reconnect:
-            logger.notice("Discord sent a reconnect request. Will reconnect when we get the close notification")
+            logger.notice("Received reconnect request. Will reconnect after connection closure")
         default:
             break
         }
