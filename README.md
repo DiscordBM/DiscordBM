@@ -191,8 +191,6 @@ These exceptions should not be a big deal depending on your code style, but can 
   * This is so `DiscordBM` can continue to add new parameters to public initializers/functions in minor versions.
   * If you care about code breakage, you can't write code like `value.map(SomeDiscordBMType.init)`.   
     Luckily, not many people do or need this anyway.
-* If Discord has made some changes that need breaking changes in this library, but are not worth a major release and are rather small.   
-  * Discord shouldn't and wouldn't do this in the first place, but I don't take responsibility for their actions.
 
 ## Contribution & Support
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.   
