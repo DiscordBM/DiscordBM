@@ -413,6 +413,20 @@ extension DiscordChannel {
             case flags
         }
         
+        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [File]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
+            self.content = content
+            self.nonce = nonce
+            self.tts = tts
+            self.embeds = embeds
+            self.allowed_mentions = allowed_mentions
+            self.message_reference = message_reference
+            self.components = components
+            self.sticker_ids = sticker_ids
+            self.files = files
+            self.attachments = attachments
+            self.flags = flags.map { .init($0) }
+        }
+        
         public func validate() throws {
             try validateAtLeastOneIsNotEmpty(
                 content?.isEmpty,
@@ -444,26 +458,12 @@ extension DiscordChannel {
                 try attachment.validate()
             }
         }
-        
-        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [File]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
-            self.content = content
-            self.nonce = nonce
-            self.tts = tts
-            self.embeds = embeds
-            self.allowed_mentions = allowed_mentions
-            self.message_reference = message_reference
-            self.components = components
-            self.sticker_ids = sticker_ids
-            self.files = files
-            self.attachments = attachments
-            self.flags = flags.map { .init($0) }
-        }
     }
 }
 
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#edit-message-jsonform-params
-    public struct EditMessage: Sendable, Codable, MultipartEncodable {
+    public struct EditMessage: Sendable, Codable, MultipartEncodable, Validatable {
         public var content: String?
         public var embeds: [Embed]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
@@ -489,6 +489,28 @@ extension DiscordChannel {
             self.components = components
             self.files = files
             self.attachments = attachments
+        }
+        
+        public func validate() throws {
+            try validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
+            try validateCombinedCharacterCountDoesNotExceed(
+                embeds?.reduce(into: 0, { $0 += $1.contentLength }),
+                max: 6_000,
+                names: "embeds"
+            )
+            try validateOnlyContains(
+                flags?.values,
+                name: "flags",
+                reason: "Can only contain 'suppressEmbeds'",
+                where: { $0 == .suppressEmbeds }
+            )
+            try allowed_mentions?.validate()
+            for attachment in attachments ?? [] {
+                try attachment.validate()
+            }
+            for embed in embeds ?? [] {
+                try embed.validate()
+            }
         }
     }
 }

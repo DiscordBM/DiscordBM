@@ -287,12 +287,17 @@ public struct IntegrationApplication: Sendable, Codable {
 }
 
 /// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
-public struct CreateGuildRole: Sendable, Codable {
+public struct CreateGuildRole: Sendable, Codable, Validatable {
+    
+    public struct ImageData: Sendable, Codable {
+        
+    }
+    
     public var name: String?
     public var permissions: StringBitField<Permission>?
     public var color: DiscordColor?
     public var hoist: Bool?
-//    public var icon: ImageData? not supported
+    public var icon: ImageData?
     public var unicode_emoji: String?
     public var mentionable: Bool?
     
@@ -303,5 +308,9 @@ public struct CreateGuildRole: Sendable, Codable {
         self.hoist = hoist
         self.unicode_emoji = unicode_emoji
         self.mentionable = mentionable
+    }
+    
+    public func validate() throws {
+        try validateCharacterCountDoesNotExceed(name, max: 1_000, name: "name")
     }
 }
