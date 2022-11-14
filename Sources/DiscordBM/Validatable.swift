@@ -73,10 +73,14 @@ extension Validatable {
         name: String,
         reason: String
     ) throws {
-        throw ValidationError.hasPrecondition(
-            name: name,
-            reason: reason
-        )
+        if condition {
+            if !allowedIf {
+                throw ValidationError.hasPrecondition(
+                    name: name,
+                    reason: reason
+                )
+            }
+        }
     }
     
     @inlinable

@@ -161,13 +161,13 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
     public func validate() throws {
         try validateHasPrecondition(
             condition: options?.isEmpty == false,
-            allowedIf: type == .chatInput,
+            allowedIf: (type ?? .chatInput) == .chatInput,
             name: "options",
             reason: "'options' is only allowed if 'type' is 'chatInput'"
         )
         try validateHasPrecondition(
             condition: !description.isEmpty || description_localizations?.isEmpty == false,
-            allowedIf: type == .chatInput,
+            allowedIf: (type ?? .chatInput) == .chatInput,
             name: "description+description_localizations",
             reason: "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput'"
         )
