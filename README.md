@@ -119,7 +119,8 @@ It's usually better to send a link of your media to Discord, instead of sending 
 However, `DiscordBM` still supports sending files directly.   
 ```swift
 Task {
-    let image: ByteBuffer = ... /// Raw data of anything like an image
+    /// Raw data of anything like an image
+    let image: ByteBuffer = ...
     
     /// Example 1
     try await bot.client.createMessage(
