@@ -13,7 +13,7 @@
 * Everything with structured concurrency and async/await. Full integration with all the latest Server-Side Swift packages.
 * Connect to the Discord gateway and receive all events easily.
 * Send requests to the Discord API using library's Discord client.
-* hard-typed APIs. All Gateway events have their own type and all Discord API responses can be decoded easily.
+* Hard-typed APIs. All Gateway events have their own type and all Discord API responses can be decoded easily.
 * Abstractions for easier testability.
 
 ## Showcase
@@ -79,7 +79,8 @@ let bot = BotGatewayManager(
 ```swift
 import DiscordBM
 
-let bot: BotGatewayManager = ... /// Make an instance like above
+/// Make an instance like above
+let bot: BotGatewayManager = ...
 
 /// Add event handlers
 Task {
@@ -181,7 +182,7 @@ Finally, add `import DiscordBM` to your source code.
 
 ## Versioning
 This library will try to follow Semantic Versioning 2.0.0, with exceptions.     
-These exceptions should not be a big deal depending on your code style, but can result in some slight source breakage.       
+These exceptions should not be a big deal depending on your code style, but can result in some slight code breakage.       
 * Adding enum cases.
   * This is so `DiscordBM` can continue to add new cases to public enums in minor versions.
   * If you care about code breakage, you can't use exhaustive switch statements.   
