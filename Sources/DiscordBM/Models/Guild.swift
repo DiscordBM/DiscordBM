@@ -362,11 +362,12 @@ public struct CreateGuildRole: Sendable, Codable, Validatable {
     public var unicode_emoji: String?
     public var mentionable: Bool?
     
-    public init(name: String? = nil, permissions: [Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
+    public init(name: String? = nil, permissions: [Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, icon: ImageData? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
         self.name = name
         self.permissions = permissions.map { .init($0) }
         self.color = color
         self.hoist = hoist
+        self.icon = icon
         self.unicode_emoji = unicode_emoji
         self.mentionable = mentionable
     }
