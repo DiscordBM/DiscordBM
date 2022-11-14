@@ -76,7 +76,7 @@ public struct Interaction: Sendable, Codable {
 }
 
 /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object
-public struct InteractionResponse: Sendable, Codable, MultipartEncodable {
+public struct InteractionResponse: Sendable, Codable, MultipartEncodable, Validatable {
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
@@ -97,7 +97,7 @@ public struct InteractionResponse: Sendable, Codable, MultipartEncodable {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structure
-    public struct CallbackData: Sendable, Codable, MultipartEncodable {
+    public struct CallbackData: Sendable, Codable, MultipartEncodable, Validatable {
         public var tts: Bool?
         public var content: String?
         public var embeds: [Embed]?
@@ -127,6 +127,23 @@ public struct InteractionResponse: Sendable, Codable, MultipartEncodable {
             self.attachments = attachments
             self.files = files
         }
+        
+        public func validate() throws {
+            try validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
+            for embed in embeds ?? [] {
+                try embed.validate()
+            }
+            try allowedMentions?.validate()
+            try validateOnlyContains(
+                flags?.values,
+                name: "flags",
+                reason: "Can only contain 'suppressEmbeds'",
+                where: { $0 == .suppressEmbeds }
+            )
+            for attachment in attachments ?? [] {
+                try attachment.validate()
+            }
+        }
     }
     
     public var type: Kind
@@ -138,6 +155,10 @@ public struct InteractionResponse: Sendable, Codable, MultipartEncodable {
     public init(type: Kind, data: CallbackData? = nil) {
         self.type = type
         self.data = data
+    }
+    
+    public func validate() throws {
+        try data?.validate()
     }
 }
 
