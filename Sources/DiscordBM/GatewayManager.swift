@@ -295,7 +295,7 @@ extension BotGatewayManager {
         case .heartbeatAccepted:
             self.lastPongDate = Date()
         case .reconnect:
-            logger.notice("Received reconnect request. Will reconnect after connection closure")
+            logger.debug("Received reconnect request. Will reconnect after connection closure")
         default:
             break
         }
