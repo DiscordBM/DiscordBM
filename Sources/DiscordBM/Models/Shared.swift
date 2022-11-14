@@ -301,7 +301,7 @@ public protocol BitField: ExpressibleByArrayLiteral {
     init(_ values: Set<R>)
 }
 
-private let bitFieldLogger = DiscordGlobalConfiguration.makeDecodeLogger("BitField")
+private let bitFieldLogger = DiscordGlobalConfiguration.makeDecodeLogger("DBM.BitField")
 
 extension BitField {
     
@@ -317,19 +317,19 @@ extension BitField {
         var bitValue = bitValue
         var values: ContiguousArray<R> = []
         var unknownValues: Set<Int> = []
-        while bitValue > 0 {
-            let halfUp = (bitValue / 2) + 1
-            let log = log2(Double(halfUp))
-            let intValue = Int(log.rounded(.up))
-            
-            if let newValue = R(rawValue: intValue) {
-                values.append(newValue)
-            } else {
-                unknownValues.insert(intValue)
+        guard bitValue > 0 else { return ([], []) }
+        var counter = 0
+        while bitValue != 0 {
+            if (bitValue & 1) == 1 {
+                if let newValue = R(rawValue: counter) {
+                    values.append(newValue)
+                } else {
+                    unknownValues.insert(counter)
+                }
             }
-            bitValue -= 1 << intValue
+            bitValue = bitValue >> 1
+            counter += 1
         }
-        
         return (Set(values), unknownValues)
     }
     

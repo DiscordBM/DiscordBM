@@ -1,4 +1,4 @@
-import DiscordBM
+@testable import DiscordBM
 import AsyncHTTPClient
 import Atomics
 import NIOCore
@@ -21,6 +21,10 @@ class DiscordClientTests: XCTestCase {
     override func tearDown() {
         try! self.httpClient.syncShutdown()
     }
+    
+    /// Just here so you know.
+    /// We can't initiate interactions with automations (not officially at least), so can't test.
+    func testInteractions() { }
     
     func testGateway() async throws {
         /// Get from "gateway"
@@ -92,7 +96,7 @@ class DiscordClientTests: XCTestCase {
             channelId: Constants.channelId
         ).decode()
         
-        XCTAssertEqual(allMessages.count, 3)
+        XCTAssertGreaterThan(allMessages.count, 2)
         XCTAssertEqual(allMessages[0].id, edited.id)
         XCTAssertEqual(allMessages[1].content, "And this is another test message :\\)")
         XCTAssertEqual(allMessages[2].content, "Hello! This is a test message!")
@@ -297,55 +301,39 @@ class DiscordClientTests: XCTestCase {
             guildId: Constants.guildId,
             action_type: .roleDelete
         ).decode()
+        
         let entries = auditLogsWithActionType.audit_log_entries
         XCTAssertTrue(entries.contains(where: { $0.reason == reason }), "Entries: \(entries)")
     }
     
-    /// Just here to keep track of un-tested interaction endpoints.
-    /// We can't initiate interactions with automations (not officially at least), so can't test.
-    func testInteractions() {
-        /*
-        createInteractionResponse(
-            id: String,
-            token: String,
-            payload: InteractionResponse
-        )
-         
-        editInteractionResponse(
-            appId: String? = nil,
-            token: String,
-            payload: InteractionResponse.CallbackData
-        )
-         
-        deleteInteractionResponse(
-            appId: String? = nil,
-            token: String
-        )
-         
-        createFollowupInteractionResponse(
-            appId: String? = nil,
-            token: String,
-            payload: InteractionResponse
-        )
-         
-        editFollowupInteractionResponse(
-            appId: String? = nil,
-            id: String,
-            token: String,
-            payload: InteractionResponse
-        )
-        */
+    func testDMs() async throws {
+        /// Create DM
+        let response = try await self.client.createDM(recipient_id: Constants.personalId).decode()
+        
+        XCTAssertEqual(response.type, .dm)
+        let recipient = try XCTUnwrap(response.recipients?.first)
+        XCTAssertEqual(recipient.id, Constants.personalId)
+        
+        /// Send a message to the DM channel
+        let text = "Testing! \(Date())"
+        let message = try await client.createMessage(
+            channelId: response.id,
+            payload: .init(content: text)
+        ).decode()
+        
+        XCTAssertEqual(message.content, text)
+        XCTAssertEqual(message.channel_id, response.id)
     }
     
     func testMultipartPayload() async throws {
-        let image = ByteBuffer(data: resource(name: "discord-logo-blue.png"))
+        let image = ByteBuffer(data: resource(name: "discordbm-logo.png"))
         
         do {
             let response = try await self.client.createMessage(
                 channelId: Constants.secondChannelId,
                 payload: .init(
                     content: "Multipart message!",
-                    files: [.init(data: image, filename: "discord-logo.png")],
+                    files: [.init(data: image, filename: "discordbm.png")],
                     attachments: [.init(index: 0, description: "Test attachment!")]
                 )
             ).decode()
@@ -354,12 +342,12 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(response.attachments.count, 1)
             
             let attachment = try XCTUnwrap(response.attachments.first)
-            XCTAssertEqual(attachment.filename, "discord-logo.png")
+            XCTAssertEqual(attachment.filename, "discordbm.png")
             XCTAssertEqual(attachment.description, "Test attachment!")
             XCTAssertEqual(attachment.content_type, "image/png")
-            XCTAssertEqual(attachment.size, 10731)
-            XCTAssertEqual(attachment.height, 240)
-            XCTAssertEqual(attachment.width, 876)
+            XCTAssertEqual(attachment.size, 21013)
+            XCTAssertEqual(attachment.height, 210)
+            XCTAssertEqual(attachment.width, 1200)
             XCTAssertFalse(attachment.id.isEmpty)
             XCTAssertFalse(attachment.url.isEmpty)
             XCTAssertFalse(attachment.proxy_url.isEmpty)
@@ -372,9 +360,9 @@ class DiscordClientTests: XCTestCase {
                     content: "Multipart message!",
                     embeds: [.init(
                         title: "Multipart embed!",
-                        image: .init(url: .attachment(name: "discord-logo.png"))
+                        image: .init(url: .attachment(name: "discordbm.png"))
                     )],
-                    files: [.init(data: image, filename: "discord-logo.png")]
+                    files: [.init(data: image, filename: "discordbm.png")]
                 )
             ).decode()
             
@@ -382,8 +370,8 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(response.attachments.count, 0)
             
             let image = try XCTUnwrap(response.embeds.first?.image)
-            XCTAssertEqual(image.height, 240)
-            XCTAssertEqual(image.width, 876)
+            XCTAssertEqual(image.height, 210)
+            XCTAssertEqual(image.width, 1200)
             XCTAssertFalse(image.url.asString.isEmpty)
             XCTAssertFalse(image.proxy_url?.isEmpty == true)
         }
@@ -393,7 +381,7 @@ class DiscordClientTests: XCTestCase {
     func testRateLimitedInPractice() async throws {
         let content = "Spamming! \(Date())"
         let rateLimitedErrors = ManagedAtomic(0)
-        let count = 15
+        let count = 50
         let container = Container(targetCounter: count)
         
         let isFirstRequest = ManagedAtomic(false)
@@ -412,7 +400,7 @@ class DiscordClientTests: XCTestCase {
                     switch error {
                     case DiscordClientError.rateLimited:
                         rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
-                    case DiscordClientError.cantAttemptToDecodeDueToBadStatusCode(let response)
+                    case DiscordClientError.badStatusCode(let response)
                         where response.status == .tooManyRequests:
                         /// If its the first request and we're having this error, then
                         /// it means the last tests have exhausted our rate-limit and
@@ -435,6 +423,119 @@ class DiscordClientTests: XCTestCase {
         
         /// Waiting 5 seconds to make sure the next tests don't get rate-limited
         try await Task.sleep(nanoseconds: 5_000_000_000)
+    }
+    
+    func testCachingInPractice() async throws {
+        /// Caching enabled
+        do {
+            let cachingBehavior = ClientConfiguration.CachingBehavior.enabled(defaultTTL: 2)
+            let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
+            let cacheClient: any DiscordClient = DefaultDiscordClient(
+                httpClient: httpClient,
+                token: Constants.token,
+                appId: Constants.botId,
+                configuration: configuration
+            )
+            
+            /// We create a command, fetch the commands count, then delete the command
+            /// and fetch the command count again.
+            /// Since we are using caching, the first command count and the second command count
+            /// must be the same (although it's wrong)
+            let commandName = "test-command"
+            let commandDesc = "Testing!"
+            let command = try await cacheClient.createApplicationGlobalCommand(
+                payload: .init(name: commandName, description: commandDesc)
+            ).decode()
+            
+            XCTAssertEqual(command.name, commandName)
+            XCTAssertEqual(command.description, commandDesc)
+            
+            let commandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            
+            let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(id: command.id!)
+            
+            XCTAssertEqual(deletionResponse.status, .noContent)
+            
+            let newCommandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            
+            XCTAssertEqual(commandsCount, newCommandsCount)
+        }
+        
+        /// Because `ClientCache`s are shared even across different `DefaultDiscordClient`s.
+        /// This is to make sure the last test doesn't have impact on the next tests.
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        /// Caching enabled, but with exception, so disabled
+        do {
+            let cachingBehavior = ClientConfiguration.CachingBehavior.custom(
+                defaultTTL: 2,
+                endpoints: [.getApplicationGlobalCommands: 0]
+            )
+            let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
+            let cacheClient: any DiscordClient = DefaultDiscordClient(
+                httpClient: httpClient,
+                token: Constants.token,
+                appId: Constants.botId,
+                configuration: configuration
+            )
+            
+            /// We create a command, fetch the commands count, then delete the command
+            /// and fetch the command count again.
+            /// Since we are using caching, the first command count and the second command count
+            /// must NOT be the same.
+            let commandName = "test-command"
+            let commandDesc = "Testing!"
+            let command = try await cacheClient.createApplicationGlobalCommand(
+                payload: .init(name: commandName, description: commandDesc)
+            ).decode()
+            
+            XCTAssertEqual(command.name, commandName)
+            XCTAssertEqual(command.description, commandDesc)
+            
+            let commandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            
+            let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(id: command.id!)
+            
+            XCTAssertEqual(deletionResponse.status, .noContent)
+            
+            let newCommandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            
+            XCTAssertEqual(commandsCount, newCommandsCount + 1)
+        }
+        
+        /// Caching disabled
+        do {
+            let configuration = ClientConfiguration(cachingBehavior: .disabled)
+            let cacheClient: any DiscordClient = DefaultDiscordClient(
+                httpClient: httpClient,
+                token: Constants.token,
+                appId: Constants.botId,
+                configuration: configuration
+            )
+            
+            /// We create a command, fetch the commands count, then delete the command
+            /// and fetch the command count again.
+            /// Since we are using caching, the first command count and the second command count
+            /// must NOT be the same.
+            let commandName = "test-command"
+            let commandDesc = "Testing!"
+            let command = try await cacheClient.createApplicationGlobalCommand(
+                payload: .init(name: commandName, description: commandDesc)
+            ).decode()
+            
+            XCTAssertEqual(command.name, commandName)
+            XCTAssertEqual(command.description, commandDesc)
+            
+            let commandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            
+            let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(id: command.id!)
+            
+            XCTAssertEqual(deletionResponse.status, .noContent)
+            
+            let newCommandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            
+            XCTAssertEqual(commandsCount, newCommandsCount + 1)
+        }
     }
 }
 

@@ -397,7 +397,7 @@ extension DiscordChannel {
         public var message_reference: DiscordChannel.Message.MessageReference?
         public var components: [Interaction.ActionRow]?
         public var sticker_ids: [String]?
-        public var files: [File]?
+        public var files: [RawFile]?
         public var attachments: [AttachmentSend]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         
@@ -413,7 +413,7 @@ extension DiscordChannel {
             case flags
         }
         
-        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [File]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
+        public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
             self.content = content
             self.nonce = nonce
             self.tts = tts
@@ -469,7 +469,7 @@ extension DiscordChannel {
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var allowed_mentions: AllowedMentions?
         public var components: [Interaction.ActionRow]?
-        public var files: [File]?
+        public var files: [RawFile]?
         public var attachments: [AttachmentSend]?
         
         enum CodingKeys: String, CodingKey {
@@ -481,7 +481,7 @@ extension DiscordChannel {
             case attachments
         }
         
-        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [DiscordChannel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [File]? = nil, attachments: [AttachmentSend]? = nil) {
+        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [DiscordChannel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [AttachmentSend]? = nil) {
             self.content = content
             self.embeds = embeds
             self.flags = flags.map { .init($0) }

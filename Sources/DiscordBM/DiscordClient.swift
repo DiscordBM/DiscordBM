@@ -154,16 +154,20 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     }
     
     @inlinable
-    func decode<D: Decodable>(as _: D.Type) throws -> D {
-        if (200..<300).contains(self.status.code) {
-            if var body = self.body,
-               let data = body.readData(length: body.readableBytes) {
-                return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
-            } else {
-                throw DiscordClientError.emptyBody(self)
-            }
+    public func guardIsSuccessfulResponse() throws {
+        guard (200..<300).contains(self.status.code) else {
+            throw DiscordClientError.badStatusCode(self)
+        }
+    }
+    
+    @inlinable
+    public func decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
+        try guardIsSuccessfulResponse()
+        if var body = self.body,
+           let data = body.readData(length: body.readableBytes) {
+            return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
         } else {
-            throw DiscordClientError.cantAttemptToDecodeDueToBadStatusCode(self)
+            throw DiscordClientError.emptyBody(self)
         }
     }
 }
@@ -176,6 +180,11 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
     }
     
     @inlinable
+    public func guardIsSuccessfulResponse() throws {
+        try self.httpResponse.guardIsSuccessfulResponse()
+    }
+    
+    @inlinable
     public func decode() throws -> C {
         try httpResponse.decode(as: C.self)
     }
@@ -183,7 +192,7 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
 
 public enum DiscordClientError: Error {
     case rateLimited(url: String)
-    case cantAttemptToDecodeDueToBadStatusCode(DiscordHTTPResponse)
+    case badStatusCode(DiscordHTTPResponse)
     case emptyBody(DiscordHTTPResponse)
     case appIdParameterRequired
     /// Can only send one of those query parameters.
@@ -253,9 +262,27 @@ public extension DiscordClient {
         id: String,
         token: String,
         payload: InteractionResponse
-    ) async throws -> DiscordClientResponse<InteractionResponse.CallbackData> {
+    ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.createInteractionResponse(id: id, token: token)
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
+    @inlinable
+    func getInteractionResponse(
+        appId: String? = nil,
+        token: String,
+        thread_id: String? = nil
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+        let endpoint = Endpoint.getInteractionResponse(
+            appId: try requireAppId(appId),
+            token: token
+        )
+        return try await self.send(
+            to: endpoint,
+            queries: [("thread_id", thread_id)],
+            headers: [:]
+        )
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
@@ -299,20 +326,55 @@ public extension DiscordClient {
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
+    @inlinable
+    func getFollowupInteractionResponse(
+        appId: String? = nil,
+        token: String,
+        messageId: String,
+        thread_id: String? = nil
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+        let endpoint = Endpoint.getFollowupInteractionResponse(
+            appId: try requireAppId(appId),
+            token: token,
+            messageId: messageId
+        )
+        return try await self.send(
+            to: endpoint,
+            queries: [("thread_id", thread_id)],
+            headers: [:]
+        )
+    }
+    
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
     @inlinable
     func editFollowupInteractionResponse(
         appId: String? = nil,
-        id: String,
         token: String,
+        messageId: String,
         payload: InteractionResponse
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.editFollowupInteractionResponse(
             appId: try requireAppId(appId),
-            id: id,
-            token: token
+            token: token,
+            messageId: messageId
         )
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-followup-message
+    @inlinable
+    func deleteFollowupInteractionResponse(
+        appId: String? = nil,
+        token: String,
+        messageId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteFollowupInteractionResponse(
+            appId: try requireAppId(appId),
+            token: token,
+            messageId: messageId
+        )
+        return try await self.send(to: endpoint, queries: [], headers: [:])
     }
     
     /// https://discord.com/developers/docs/resources/channel#create-message
@@ -321,7 +383,7 @@ public extension DiscordClient {
         channelId: String,
         payload: DiscordChannel.CreateMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        let endpoint = Endpoint.postCreateMessage(channelId: channelId)
+        let endpoint = Endpoint.createMessage(channelId: channelId)
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
@@ -332,7 +394,7 @@ public extension DiscordClient {
         messageId: String,
         payload: DiscordChannel.EditMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        let endpoint = Endpoint.patchEditMessage(channelId: channelId, messageId: messageId)
+        let endpoint = Endpoint.editMessage(channelId: channelId, messageId: messageId)
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
     }
     
@@ -591,6 +653,19 @@ public extension DiscordClient {
                 ("limit", limit.map { "\($0)" })
             ],
             headers: [:]
+        )
+    }
+    
+    /// You can use this function to create a new or retrieve an existing DM channel.
+    /// https://discord.com/developers/docs/resources/user#create-dm
+    @inlinable
+    func createDM(recipient_id: String) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = Endpoint.createDM
+        return try await self.send(
+            to: endpoint,
+            queries: [],
+            headers: [:],
+            payload: RequestBody.CreateDM(recipient_id: recipient_id)
         )
     }
 }

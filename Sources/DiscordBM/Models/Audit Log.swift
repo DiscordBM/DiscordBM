@@ -62,7 +62,7 @@ public struct AuditLog: Sendable, Codable {
                     self = .permissionOverwrites(overwrites)
                 } else {
                     DiscordGlobalConfiguration
-                        .makeDecodeLogger("DiscordBM.AuditLog.Entry.Mixed")
+                        .makeDecodeLogger("DBM.AuditLog.Entry.Mixed")
                         .warning("Can't decode a value", metadata: [
                             "codingPath": .stringConvertible(container.codingPath),
                             "container": "\(container)"
@@ -88,7 +88,7 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(overwrites)
                 case let .other(other):
                     DiscordGlobalConfiguration
-                        .makeLogger("DiscordBM.AuditLog.Entry.Mixed_EncodingError")
+                        .makeLogger("DBM.AuditLog.Entry.Mixed_EncodingError")
                         .error(
                             "'DiscordBM.AuditLog.Entry.Mixed' can't be encoded",
                             metadata: ["container": "\(other.container)"]

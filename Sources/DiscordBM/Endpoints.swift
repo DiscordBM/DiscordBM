@@ -3,6 +3,8 @@ import NIOHTTP1
 public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, CustomStringConvertible {
     case getGateway
     case getGatewayBot
+    case getInteractionResponse
+    case getFollowupInteractionResponse
     case getApplicationGlobalCommands
     case getGuild
     case searchGuildMembers
@@ -16,6 +18,8 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, Cu
         switch self {
         case .getGateway: return "getGateway"
         case .getGatewayBot: return "getGatewayBot"
+        case .getInteractionResponse: return "getInteractionResponse"
+        case .getFollowupInteractionResponse: return "getFollowupInteractionResponse"
         case .getApplicationGlobalCommands: return "getApplicationGlobalCommands"
         case .getGuild: return "getGuild"
         case .searchGuildMembers: return "searchGuildMembers"
@@ -32,12 +36,15 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, Cu
         case .getGateway: self = .getGateway
         case .getGatewayBot: self = .getGatewayBot
         case .createInteractionResponse: return nil
+        case .getInteractionResponse: self = .getInteractionResponse
         case .editInteractionResponse: return nil
         case .deleteInteractionResponse: return nil
         case .postFollowupInteractionResponse: return nil
+        case .getFollowupInteractionResponse: self = .getFollowupInteractionResponse
         case .editFollowupInteractionResponse: return nil
-        case .postCreateMessage: return nil
-        case .patchEditMessage: return nil
+        case .deleteFollowupInteractionResponse: return nil
+        case .createMessage: return nil
+        case .editMessage: return nil
         case .deleteMessage: return nil
         case .createApplicationGlobalCommand: return nil
         case .getApplicationGlobalCommands: self = .getApplicationGlobalCommands
@@ -55,6 +62,7 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, Cu
         case .removeGuildMemberRole: return nil
         case .getGuildAuditLogs: self = .getGuildAuditLogs
         case .addReaction: return nil
+        case .createDM: return nil
         }
     }
 }
@@ -65,13 +73,16 @@ public enum Endpoint: Sendable {
     case getGatewayBot
     
     case createInteractionResponse(id: String, token: String)
+    case getInteractionResponse(appId: String, token: String)
     case editInteractionResponse(appId: String, token: String)
     case deleteInteractionResponse(appId: String, token: String)
     case postFollowupInteractionResponse(appId: String, token: String)
-    case editFollowupInteractionResponse(appId: String, id: String, token: String)
+    case getFollowupInteractionResponse(appId: String, token: String, messageId: String)
+    case editFollowupInteractionResponse(appId: String, token: String, messageId: String)
+    case deleteFollowupInteractionResponse(appId: String, token: String, messageId: String)
     
-    case postCreateMessage(channelId: String)
-    case patchEditMessage(channelId: String, messageId: String)
+    case createMessage(channelId: String)
+    case editMessage(channelId: String, messageId: String)
     case deleteMessage(channelId: String, messageId: String)
     
     case createApplicationGlobalCommand(appId: String)
@@ -96,6 +107,8 @@ public enum Endpoint: Sendable {
     
     case addReaction(channelId: String, messageId: String, emoji: String)
     
+    case createDM
+    
     var urlSuffix: String {
         switch self {
         case .getGateway:
@@ -104,17 +117,23 @@ public enum Endpoint: Sendable {
             return "gateway/bot"
         case let .createInteractionResponse(id, token):
             return "interactions/\(id)/\(token)/callback"
+        case let .getInteractionResponse(appId, token):
+            return "webhooks/\(appId)/\(token)/messages/@original"
         case let .editInteractionResponse(appId, token):
             return "webhooks/\(appId)/\(token)/messages/@original"
         case let .deleteInteractionResponse(appId, token):
             return "webhooks/\(appId)/\(token)/messages/@original"
         case let .postFollowupInteractionResponse(appId, token):
             return "webhooks/\(appId)/\(token)"
-        case let .editFollowupInteractionResponse(appId, id, token):
-            return "webhooks/\(appId)/\(token)/messages/\(id)"
-        case let .postCreateMessage(channelId):
+        case let .getFollowupInteractionResponse(appId, token, messageId):
+            return "webhooks/\(appId)/\(token)/messages/\(messageId)"
+        case let .editFollowupInteractionResponse(appId, token, messageId):
+            return "webhooks/\(appId)/\(token)/messages/\(messageId)"
+        case let .deleteFollowupInteractionResponse(appId, token, messageId):
+            return "webhooks/\(appId)/\(token)/messages/\(messageId)"
+        case let .createMessage(channelId):
             return "channels/\(channelId)/messages"
-        case let .patchEditMessage(channelId, messageId):
+        case let .editMessage(channelId, messageId):
             return "channels/\(channelId)/messages/\(messageId)"
         case let .deleteMessage(channelId, messageId):
             return "channels/\(channelId)/messages/\(messageId)"
@@ -150,6 +169,8 @@ public enum Endpoint: Sendable {
             return "guilds/\(guildId)/audit-logs"
         case let .addReaction(channelId, messageId, emoji):
             return "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/@me"
+        case .createDM:
+            return "users/@me/channels"
         }
     }
     
@@ -165,12 +186,15 @@ public enum Endpoint: Sendable {
         case .getGateway: return .GET
         case .getGatewayBot: return .GET
         case .createInteractionResponse: return .POST
+        case .getInteractionResponse: return .GET
         case .editInteractionResponse: return .PATCH
         case .deleteInteractionResponse: return .DELETE
         case .postFollowupInteractionResponse: return .POST
+        case .getFollowupInteractionResponse: return .GET
         case .editFollowupInteractionResponse: return .PATCH
-        case .postCreateMessage: return .POST
-        case .patchEditMessage: return .PATCH
+        case .deleteFollowupInteractionResponse: return .DELETE
+        case .createMessage: return .POST
+        case .editMessage: return .PATCH
         case .deleteMessage: return .DELETE
         case .createApplicationGlobalCommand: return .POST
         case .getApplicationGlobalCommands: return .GET
@@ -188,6 +212,7 @@ public enum Endpoint: Sendable {
         case .removeGuildMemberRole: return .DELETE
         case .getGuildAuditLogs: return .GET
         case .addReaction: return .PUT
+        case .createDM: return .POST
         }
     }
     
@@ -195,9 +220,9 @@ public enum Endpoint: Sendable {
     /// Even if the global rate-limit is exceeded, you can still respond to interactions.
     var countsAgainstGlobalRateLimit: Bool {
         switch self {
-        case .createInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .editFollowupInteractionResponse:
+        case .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse:
             return false
-        case .getGateway, .getGatewayBot, .postCreateMessage, .patchEditMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction:
+        case .getGateway, .getGatewayBot, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM:
             return true
         }
     }
@@ -207,29 +232,33 @@ public enum Endpoint: Sendable {
         case .getGateway: return 1
         case .getGatewayBot: return 2
         case .createInteractionResponse: return 3
-        case .editInteractionResponse: return 4
-        case .deleteInteractionResponse: return 5
-        case .postFollowupInteractionResponse: return 6
-        case .editFollowupInteractionResponse: return 7
-        case .postCreateMessage: return 8
-        case .patchEditMessage: return 9
-        case .deleteMessage: return 10
-        case .createApplicationGlobalCommand: return 11
-        case .getApplicationGlobalCommands: return 12
-        case .deleteApplicationGlobalCommand: return 13
-        case .getGuild: return 14
-        case .searchGuildMembers: return 15
-        case .getGuildMember: return 16
-        case .getChannel: return 17
-        case .getChannelMessages: return 18
-        case .getChannelMessage: return 19
-        case .leaveGuild: return 20
-        case .createGuildRole: return 21
-        case .deleteGuildRole: return 22
-        case .addGuildMemberRole: return 23
-        case .removeGuildMemberRole: return 24
-        case .getGuildAuditLogs: return 25
-        case .addReaction: return 26
+        case .getInteractionResponse: return 4
+        case .editInteractionResponse: return 5
+        case .deleteInteractionResponse: return 6
+        case .postFollowupInteractionResponse: return 7
+        case .getFollowupInteractionResponse: return 8
+        case .editFollowupInteractionResponse: return 9
+        case .deleteFollowupInteractionResponse: return 10
+        case .createMessage: return 11
+        case .editMessage: return 12
+        case .deleteMessage: return 13
+        case .createApplicationGlobalCommand: return 14
+        case .getApplicationGlobalCommands: return 15
+        case .deleteApplicationGlobalCommand: return 16
+        case .getGuild: return 17
+        case .searchGuildMembers: return 18
+        case .getGuildMember: return 19
+        case .getChannel: return 20
+        case .getChannelMessages: return 21
+        case .getChannelMessage: return 22
+        case .leaveGuild: return 23
+        case .createGuildRole: return 24
+        case .deleteGuildRole: return 25
+        case .addGuildMemberRole: return 26
+        case .removeGuildMemberRole: return 26
+        case .getGuildAuditLogs: return 28
+        case .addReaction: return 29
+        case .createDM: return 30
         }
     }
 }

@@ -30,7 +30,7 @@ class SerialQueueTests: XCTestCase {
             }
         }
         
-        try! await Task.sleep(nanoseconds: 2_100_000_000)
+        try! await Task.sleep(nanoseconds: 2_250_000_000)
         
         let times = await container.times
         

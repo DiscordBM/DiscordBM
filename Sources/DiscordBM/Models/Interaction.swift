@@ -105,7 +105,7 @@ public struct InteractionResponse: Sendable, Codable, MultipartEncodable, Valida
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var components: [Interaction.ActionRow]?
         public var attachments: [DiscordChannel.AttachmentSend]?
-        public var files: [File]?
+        public var files: [RawFile]?
         
         enum CodingKeys: String, CodingKey {
             case tts
@@ -117,7 +117,7 @@ public struct InteractionResponse: Sendable, Codable, MultipartEncodable, Valida
             case attachments
         }
         
-        public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: DiscordChannel.AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [DiscordChannel.AttachmentSend]? = nil, files: [File]? = nil) {
+        public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: DiscordChannel.AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [DiscordChannel.AttachmentSend]? = nil, files: [RawFile]? = nil) {
             self.tts = tts
             self.content = content
             self.embeds = embeds
@@ -148,7 +148,7 @@ public struct InteractionResponse: Sendable, Codable, MultipartEncodable, Valida
     
     public var type: Kind
     public var data: CallbackData?
-    public var files: [File]? {
+    public var files: [RawFile]? {
         data?.files
     }
     

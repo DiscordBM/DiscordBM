@@ -40,14 +40,14 @@ class ClientConfigurationTests: XCTestCase {
         
         do {
             var policy = RetryPolicy.default
-            policy.statuses.insert(.badGateway)
+            policy.statuses.insert(.serviceUnavailable)
             policy.maxRetries = 1
             
-            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 0))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 1))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 2))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 10))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 100000))
+            XCTAssertTrue(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 0))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 1))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 2))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 10))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 100000))
             
             XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 0))
             XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 1))
@@ -220,5 +220,124 @@ class ClientConfigurationTests: XCTestCase {
             XCTAssertEqual(backoffWait(retriesSoFar: 10), nil)
             XCTAssertEqual(backoffWait(retriesSoFar: Int.max - 1), nil)
         }
+    }
+    
+    func testCacheClient() async throws {
+        
+        /// Basic caching
+        do {
+            let cache = ClientCache()
+            let response = DiscordHTTPResponse(
+                host: "something.else",
+                status: .ok,
+                version: .http2,
+                headers: [:],
+                body: .init(string: "body right here :)")
+            )
+            let item = ClientCache.CacheableItem(identity: .getChannel, queries: [])
+            await cache.add(response: response, item: item, ttl: 5)
+            let fromCache = await cache.get(item: item)
+            XCTAssertEqual(response, fromCache)
+        }
+        
+        /// Caching with queries
+        do {
+            let cache = ClientCache()
+            let response = DiscordHTTPResponse(
+                host: "something.else",
+                status: .ok,
+                version: .http2,
+                headers: [:],
+                body: .init(string: "body right here :)")
+            )
+            let item = ClientCache.CacheableItem(
+                identity: .getChannel,
+                queries: [("name", "mahdi"), ("age", "99"), ("height", nil)]
+            )
+            await cache.add(response: response, item: item, ttl: 5)
+            let fromCache = await cache.get(item: item)
+            XCTAssertEqual(response, fromCache)
+        }
+        
+        /// No cached available
+        do {
+            let cache = ClientCache()
+            let response = DiscordHTTPResponse(
+                host: "something.else",
+                status: .ok,
+                version: .http2,
+                headers: [:],
+                body: .init(string: "body right here :)")
+            )
+            let item = ClientCache.CacheableItem(identity: .getChannel, queries: [])
+            await cache.add(response: response, item: item, ttl: 5)
+            let fromCache = await cache.get(item: .init(identity: .getGuildAuditLogs, queries: []))
+            XCTAssertNil(fromCache)
+        }
+        
+        /// No cached available because queries different
+        do {
+            let cache = ClientCache()
+            let response = DiscordHTTPResponse(
+                host: "something.else",
+                status: .ok,
+                version: .http2,
+                headers: [:],
+                body: .init(string: "body right here :)")
+            )
+            let item = ClientCache.CacheableItem(identity: .getChannel, queries: [("name", "mahdi")])
+            await cache.add(response: response, item: item, ttl: 5)
+            let fromCache = await cache.get(item: .init(identity: .getChannel, queries: []))
+            XCTAssertNil(fromCache)
+        }
+        
+        /// No cached available because queries different
+        do {
+            let cache = ClientCache()
+            let response = DiscordHTTPResponse(
+                host: "something.else",
+                status: .ok,
+                version: .http2,
+                headers: [:],
+                body: .init(string: "body right here :)")
+            )
+            let item = ClientCache.CacheableItem(identity: .getChannel, queries: [])
+            await cache.add(response: response, item: item, ttl: 5)
+            let fromCache = await cache.get(
+                item: .init(
+                    identity: .getChannel,
+                    queries: [("name", "mahdi")]
+                )
+            )
+            XCTAssertNil(fromCache)
+        }
+        
+        /// No cached available because ttl
+        do {
+            let cache = ClientCache()
+            let response = DiscordHTTPResponse(
+                host: "something.else",
+                status: .ok,
+                version: .http2,
+                headers: [:],
+                body: .init(string: "body right here :)")
+            )
+            let item = ClientCache.CacheableItem(identity: .getChannel, queries: [])
+            await cache.add(response: response, item: item, ttl: 1.5)
+            try await Task.sleep(nanoseconds: 1_500_000_000)
+            let fromCache = await cache.get(item: item)
+            XCTAssertNil(fromCache)
+        }
+    }
+}
+
+// MARK: - DiscordHTTPResponse + Equatable
+extension DiscordHTTPResponse: Equatable {
+    public static func == (lhs: DiscordHTTPResponse, rhs: DiscordHTTPResponse) -> Bool {
+        lhs.host == rhs.host &&
+        lhs.status == rhs.status &&
+        lhs.version == rhs.version &&
+        lhs.headers == rhs.headers &&
+        lhs.body == rhs.body
     }
 }

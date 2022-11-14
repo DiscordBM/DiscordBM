@@ -1,11 +1,11 @@
-![DiscordBM](https://user-images.githubusercontent.com/54685446/200414610-fd4fc280-a1d9-436f-960b-cb80127ae0e5.png)
+![DiscordBM](https://user-images.githubusercontent.com/54685446/201329617-9fd91ab0-35c2-42c2-8963-47b68c6a490a.png)
 
 <p align="center">
 	<a href="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml">
         <img src="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
     </a>
     <a href="https://swift.org">
-        <img src="https://img.shields.io/badge/swift-5.6-brightgreen.svg" alt="Minumum Swift Version">
+        <img src="https://img.shields.io/badge/swift-5.6-brightgreen.svg" alt="Minimum Swift Version">
     </a>
 </p>
 
@@ -13,7 +13,7 @@
 * Everything with structured concurrency and async/await. Full integration with all the latest Server-Side Swift packages.
 * Connect to the Discord gateway and receive all events easily.
 * Send requests to the Discord API using library's Discord client.
-* hard-typed APIs. All Gateway events have their own type and all Discord API responses can be decoded easily.
+* Hard-typed APIs. All Gateway events have their own type and all Discord API responses can be decoded easily.
 * Abstractions for easier testability.
 
 ## Showcase
@@ -79,7 +79,8 @@ let bot = BotGatewayManager(
 ```swift
 import DiscordBM
 
-let bot: BotGatewayManager = ... /// Make an instance like above
+/// Make an instance like above
+let bot: BotGatewayManager = ...
 
 /// Add event handlers
 Task {
@@ -100,7 +101,7 @@ Task {
     /// Tell the manager to connect to Discord
     await bot.connect()
 
-    /// Use `bot.client` to send requests to discord.
+    /// Use `bot.client` to send requests to Discord.
     try await bot.client.createMessage(
         channelId: CHANNEL_ID,
         payload: .init(content: "Hello Everybody!")
@@ -118,10 +119,11 @@ It's usually better to send a link of your media to Discord, instead of sending 
 However, `DiscordBM` still supports sending files directly.   
 ```swift
 Task {
-    let image: ByteBuffer = ... /// Raw data of anything like an image
+    /// Raw data of anything like an image
+    let image: ByteBuffer = ...
     
     /// Example 1
-    try await self.client.createMessage(
+    try await bot.client.createMessage(
         channelId: CHANNEL_ID,
         payload: .init(
             content: "A message with an attachment!",
@@ -132,7 +134,7 @@ Task {
     )
     
     /// Example 2
-    try await self.client.createMessage(
+    try await bot.client.createMessage(
         channelId: CHANNEL_ID,
         payload: .init(
             embeds: [.init(
@@ -179,10 +181,18 @@ Include `"DiscordBM"` as a dependency for your targets:
 
 Finally, add `import DiscordBM` to your source code.
 
-## Warnings
-This library will try to follow Semantic Versioning, with exceptions:
-* If Discord has made some changes that need breaking changes in this library, but are not worth a major release and are rather small.
-* When adding enum cases.
+## Versioning
+This library will try to follow Semantic Versioning 2.0.0, with exceptions.     
+These exceptions should not be a big deal depending on your code style, but can result in some slight code breakage.       
+* Adding enum cases.
+  * This is so `DiscordBM` can continue to add new cases to public enums in minor versions.
+  * If you care about code breakage, you can't use exhaustive switch statements.   
+    Either include `default:` in your switch statements, or use `if let`/`if case let`.
+  * See [this](https://forums.swift.org/t/extensible-enumerations-for-non-resilient-libraries/35900) for more info.
+* Passing initializers/functions as arguments.
+  * This is so `DiscordBM` can continue to add new parameters to public initializers/functions in minor versions.
+  * If you care about code breakage, you can't write code like `value.map(SomeDiscordBMType.init)`.   
+    Luckily, not many people do or need this anyway.
 
 ## Contribution & Support
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.   

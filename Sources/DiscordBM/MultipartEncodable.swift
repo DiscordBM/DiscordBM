@@ -3,7 +3,7 @@ import NIOCore
 import Foundation
 
 public protocol MultipartEncodable: Encodable {
-    var files: [File]? { get }
+    var files: [RawFile]? { get }
 }
 
 private let allocator = ByteBufferAllocator()
@@ -28,9 +28,9 @@ extension MultipartEncodable {
     }
 }
 
-/// `File` is _mostly_ copy-pasted from Vapor :)
+/// This is _mostly_ copy-pasted from Vapor's `File` :)
 
-public struct File: Sendable, Encodable, MultipartPartConvertible {
+public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
     /// Name of the file, including extension.
     public var filename: String
     
@@ -68,7 +68,7 @@ public struct File: Sendable, Encodable, MultipartPartConvertible {
     ///     - data: The file's contents.
     ///     - filename: The name of the file, not including path.
     public init(data: String, filename: String) {
-        let buffer = ByteBufferAllocator().buffer(string: data)
+        let buffer = allocator.buffer(string: data)
         self.init(data: buffer, filename: filename)
     }
     
@@ -155,13 +155,13 @@ struct MultipartEncodingContainer: Encodable {
     }
     
     static let boundary: String = {
-        let random1 = (0..<4).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
-        let random2 = (0..<4).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
+        let random1 = (0..<5).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
+        let random2 = (0..<5).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
         return random1 + "discordbm" + random2
     }()
     
     var payload_json: JSON
-    var files: [File]
+    var files: [RawFile]
 }
 
 private let fileExtensionMediaTypeMapping: [String: (String, String)] = [
