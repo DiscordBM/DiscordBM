@@ -9,6 +9,8 @@ public enum ValidationError: Error {
     case tooManyCharacters(name: String, max: Int)
     case tooManyElements(name: String, max: Int)
     case containsProhibitedValues(name: String, reason: String, valuesRepresentation: String)
+    case hasPrecondition(name: String, reason: String)
+    case cantBeEmpty(name: String)
 }
 
 extension Validatable {
@@ -61,6 +63,26 @@ extension Validatable {
                 reason: reason,
                 valuesRepresentation: String(describing: values)
             )
+        }
+    }
+    
+    @inlinable
+    func validateHasPrecondition(
+        condition: Bool,
+        allowedIf: Bool,
+        name: String,
+        reason: String
+    ) throws {
+        throw ValidationError.hasPrecondition(
+            name: name,
+            reason: reason
+        )
+    }
+    
+    @inlinable
+    func validateAssertIsNotEmpty(_ condition: Bool, name: String) throws {
+        if !condition {
+            throw ValidationError.cantBeEmpty(name: name)
         }
     }
 }

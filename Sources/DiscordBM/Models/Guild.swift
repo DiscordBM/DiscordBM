@@ -1,3 +1,4 @@
+import Foundation
 
 /// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
 public struct Guild: Sendable, Codable {
@@ -290,7 +291,67 @@ public struct IntegrationApplication: Sendable, Codable {
 public struct CreateGuildRole: Sendable, Codable, Validatable {
     
     public struct ImageData: Sendable, Codable {
+        public var file: RawFile
         
+        public init(from decoder: Decoder) throws {
+            let string = try String(from: decoder)
+            var filename: String?
+            guard string.hasPrefix("data:") else {
+                throw DecodingError.dataCorrupted(.init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "'\(string)' does not start with 'data:'"
+                ))
+            }
+            guard let semicolon = string.firstIndex(of: ";") else {
+                throw DecodingError.dataCorrupted(.init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "'\(string)' does not contain ';'"
+                ))
+            }
+            let type = string[string.startIndex..<semicolon].dropFirst(5)
+            let typeComps = type.split(separator: "/", maxSplits: 1)
+            if typeComps.count == 2,
+               let ext = fileExtensionMediaTypeMapping.first(
+                where: { $1.0 == typeComps[0] && $1.1 == typeComps[1] }
+               )?.key {
+                filename = "unknown.\(ext)"
+            }
+            guard string[semicolon...].hasPrefix(";base64,") else {
+                throw DecodingError.dataCorrupted(.init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "'\(string)' does not contain 'base64,'"
+                ))
+            }
+            let encodedString = string[semicolon...].dropFirst(8)
+            guard let data = Data(base64Encoded: String(encodedString)) else {
+                throw DecodingError.dataCorrupted(.init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "'\(string)' does not valid data"
+                ))
+            }
+            self.file = .init(data: .init(data: data), filename: filename ?? "unknown")
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            guard let type = file.type else {
+                throw EncodingError.invalidValue(file, .init(
+                    codingPath: encoder.codingPath,
+                    debugDescription: "Can't find the file type. Please provide the file extension in the 'filename'. For example, use 'penguin.png' instead of 'penguin'"
+                ))
+            }
+            var buffer = file.data
+            let data = buffer.readData(length: buffer.readableBytes)
+            guard let encoded = data?.base64EncodedString() else {
+                throw EncodingError.invalidValue(
+                    data ?? Data(), .init(
+                        codingPath: encoder.codingPath,
+                        debugDescription: "Can't base64 encode the data"
+                    )
+                )
+            }
+            var container = encoder.singleValueContainer()
+            try container.encode("data:\(type);base64,\(encoded)")
+        }
     }
     
     public var name: String?

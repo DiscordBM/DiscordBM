@@ -47,6 +47,15 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
         }
     }
     
+    public var type: String? {
+        if let ext = self.extension,
+           let (type, subType) = fileExtensionMediaTypeMapping[ext] {
+            return "\(type)/\(subType)"
+        } else {
+            return nil
+        }
+    }
+    
     enum CodingKeys: String, CodingKey {
         case data
         case filename
@@ -86,9 +95,8 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
     
     public var multipart: MultipartPart? {
         var part = MultipartPart(headers: [:], body: .init(self.data.readableBytesView))
-        if let ext = self.extension,
-           let (type, subType) = fileExtensionMediaTypeMapping[ext] {
-            part.headers.add(name: "Content-Type", value: "\(type)/\(subType)")
+        if let type = type {
+            part.headers.add(name: "Content-Type", value: type)
         }
         part.headers.add(name: "Content-Disposition", value: #"form-data; filename="\#(self.filename)""#)
         return part
@@ -164,7 +172,7 @@ struct MultipartEncodingContainer: Encodable {
     var files: [RawFile]
 }
 
-private let fileExtensionMediaTypeMapping: [String: (String, String)] = [
+let fileExtensionMediaTypeMapping: [String: (String, String)] = [
     "ez": ("application", "andrew-inset"),
     "anx": ("application", "annodex"),
     "atom": ("application", "atom+xml"),

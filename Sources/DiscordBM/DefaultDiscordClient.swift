@@ -240,7 +240,7 @@ public struct DefaultDiscordClient: DiscordClient {
             try payload.validate()
         }
         
-        try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
+        return try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
             identity, retryCounter, requestId in
             
             let identity = CacheableEndpointIdentity(endpoint: endpoint)
@@ -301,7 +301,7 @@ public struct DefaultDiscordClient: DiscordClient {
             try payload.validate()
         }
         
-        try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
+        return try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
             identity, retryCounter, requestId in
             
             let identity = CacheableEndpointIdentity(endpoint: endpoint)
