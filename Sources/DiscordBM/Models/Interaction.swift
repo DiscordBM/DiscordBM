@@ -80,12 +80,19 @@ public struct InteractionResponse: Sendable, Codable, MultipartEncodable {
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+        /// For ping-pong.
         case pong = 1
-        case message = 4
-        case messageEditWithLoadingState = 5
-        case messageEditNoLoadingState = 6
-        case componentEditMessage = 7
-        case autoCompleteResult = 8
+        /// Normal response.
+        case channelMessageWithSource = 4
+        /// Accepts a message to answer later. Shows a loading indicator.
+        case deferredChannelMessageWithSource = 5
+        /// Accepts a message to answer later. Doesn't show any loading indicators.
+        case deferredUpdateMessage = 6
+        /// Edit a message.
+        case updateMessage = 7
+        /// Auto-complete result for slash commands.
+        case applicationCommandAutoCompleteResult = 8
+        /// A modal.
         case modal = 9
     }
     

@@ -18,28 +18,28 @@ public protocol DiscordClient {
         headers: HTTPHeaders
     ) async throws -> DiscordClientResponse<C>
     
-    func send<E: Encodable>(
+    func send<E: Encodable & Validatable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
         payload: E
     ) async throws -> DiscordHTTPResponse
     
-    func send<E: Encodable, C: Codable>(
+    func send<E: Encodable & Validatable, C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
         payload: E
     ) async throws -> DiscordClientResponse<C>
     
-    func sendMultipart<E: MultipartEncodable>(
+    func sendMultipart<E: MultipartEncodable & Validatable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
         payload: E
     ) async throws -> DiscordHTTPResponse
     
-    func sendMultipart<E: MultipartEncodable, C: Codable>(
+    func sendMultipart<E: MultipartEncodable & Validatable, C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
@@ -60,7 +60,7 @@ public extension DiscordClient {
     }
     
     @inlinable
-    func send<E: Encodable, C: Codable>(
+    func send<E: Encodable & Validatable, C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
@@ -76,7 +76,7 @@ public extension DiscordClient {
     }
     
     @inlinable
-    func sendMultipart<E: MultipartEncodable, C: Codable>(
+    func sendMultipart<E: MultipartEncodable & Validatable, C: Codable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,

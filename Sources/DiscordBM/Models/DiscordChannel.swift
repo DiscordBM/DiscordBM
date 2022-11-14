@@ -252,7 +252,7 @@ extension DiscordChannel {
 extension DiscordChannel {
     /// An attachment object, but for sending.
     /// https://discord.com/developers/docs/resources/channel#attachment-object
-    public struct AttachmentSend: Sendable, Codable {
+    public struct AttachmentSend: Sendable, Codable, Validatable {
         /// When sending, `id` is the index of this attachment in the `files` you provide.
         public var id: String
         public var filename: String?
@@ -277,6 +277,10 @@ extension DiscordChannel {
             self.height = height
             self.width = width
             self.ephemeral = ephemeral
+        }
+        
+        public func validate() throws {
+            try validateCharacterCountDoesNotExceed(description, max: 1_024, name: "description")
         }
     }
 }
@@ -354,7 +358,7 @@ public struct PartialChannel: Sendable, Codable {
 
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
-    public struct AllowedMentions: Sendable, Codable {
+    public struct AllowedMentions: Sendable, Codable, Validatable {
         
         /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
         public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
@@ -374,13 +378,19 @@ extension DiscordChannel {
             self.users = users
             self.replied_user = replied_user
         }
+        
+        public func validate() throws {
+            try validateElementCountDoesNotExceed(roles, max: 100, name: "roles")
+            try validateElementCountDoesNotExceed(users, max: 100, name: "users")
+        }
     }
 }
 
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#create-message-jsonform-params
-    public struct CreateMessage: Sendable, Codable, MultipartEncodable {
+    public struct CreateMessage: Sendable, Codable, MultipartEncodable, Validatable {
         public var content: String?
+        public var nonce: StringOrInt?
         public var tts: Bool?
         public var embeds: [Embed]?
         public var allowed_mentions: AllowedMentions?
@@ -403,8 +413,41 @@ extension DiscordChannel {
             case flags
         }
         
-        public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [File]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
+        public func validate() throws {
+            try validateAtLeastOneIsNotEmpty(
+                content?.isEmpty,
+                embeds?.isEmpty,
+                sticker_ids?.isEmpty,
+                components?.isEmpty,
+                files?.isEmpty,
+                names: "content", "embeds", "sticker_ids", "components", "files"
+            )
+            try validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
+            try validateCharacterCountDoesNotExceed(nonce?.asString, max: 25, name: "nonce")
+            try validateElementCountDoesNotExceed(sticker_ids, max: 3, name: "sticker_ids")
+            try validateOnlyContains(
+                flags?.values,
+                name: "flags",
+                reason: "Can only contain 'suppressEmbeds'",
+                where: { $0 == .suppressEmbeds }
+            )
+            for embed in embeds ?? [] {
+                try embed.validate()
+            }
+            try validateCombinedCharacterCountDoesNotExceed(
+                embeds?.reduce(into: 0, { $0 += $1.contentLength }),
+                max: 6_000,
+                names: "embeds"
+            )
+            try allowed_mentions?.validate()
+            for attachment in attachments ?? [] {
+                try attachment.validate()
+            }
+        }
+        
+        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [File]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
             self.content = content
+            self.nonce = nonce
             self.tts = tts
             self.embeds = embeds
             self.allowed_mentions = allowed_mentions
@@ -451,7 +494,7 @@ extension DiscordChannel {
 }
 
 /// https://discord.com/developers/docs/resources/channel#embed-object
-public struct Embed: Sendable, Codable {
+public struct Embed: Sendable, Codable, Validatable {
     
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
     public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
@@ -596,18 +639,27 @@ public struct Embed: Sendable, Codable {
         self.reference_id = reference_id
     }
     
-    private var fieldsLength: Int {
-        fields?.reduce(into: 0) {
-            $0 = $1.name.unicodeScalars.count + $1.value.unicodeScalars.count
-        } ?? 0
-    }
-    
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
     var contentLength: Int {
-        (title?.count ?? 0) +
+        let fields = fields?.reduce(into: 0) {
+            $0 = $1.name.unicodeScalars.count + $1.value.unicodeScalars.count
+        } ?? 0
+        return (title?.unicodeScalars.count ?? 0) +
         (description?.unicodeScalars.count ?? 0) +
-        fieldsLength +
+        fields +
         (footer?.text.unicodeScalars.count ?? 0) +
         (author?.name.unicodeScalars.count ?? 0)
+    }
+    
+    public func validate() throws {
+        try validateCharacterCountDoesNotExceed(title, max: 256, name: "title")
+        try validateCharacterCountDoesNotExceed(description, max: 4_096, name: "description")
+        try validateElementCountDoesNotExceed(fields, max: 25, name: "fields")
+        try validateCharacterCountDoesNotExceed(footer?.text, max: 2_048, name: "footer.text")
+        try validateCharacterCountDoesNotExceed(author?.name, max: 256, name: "author.name")
+        for field in fields ?? [] {
+            try validateCharacterCountDoesNotExceed(field.name, max: 256, name: "field.name")
+            try validateCharacterCountDoesNotExceed(field.value, max: 1_024, name: "field.value")
+        }
     }
 }
