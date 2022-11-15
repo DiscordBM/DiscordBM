@@ -261,7 +261,7 @@ public extension DiscordClient {
     func createInteractionResponse(
         id: String,
         token: String,
-        payload: InteractionResponse
+        payload: RequestBody.InteractionResponse
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.createInteractionResponse(id: id, token: token)
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
@@ -290,7 +290,7 @@ public extension DiscordClient {
     func editInteractionResponse(
         appId: String? = nil,
         token: String,
-        payload: InteractionResponse.CallbackData
+        payload: RequestBody.InteractionResponse.CallbackData
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.editInteractionResponse(
             appId: try requireAppId(appId),
@@ -317,7 +317,7 @@ public extension DiscordClient {
     func createFollowupInteractionResponse(
         appId: String? = nil,
         token: String,
-        payload: InteractionResponse
+        payload: RequestBody.InteractionResponse
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.postFollowupInteractionResponse(
             appId: try requireAppId(appId),
@@ -352,7 +352,7 @@ public extension DiscordClient {
         appId: String? = nil,
         token: String,
         messageId: String,
-        payload: InteractionResponse
+        payload: RequestBody.InteractionResponse
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.editFollowupInteractionResponse(
             appId: try requireAppId(appId),
@@ -381,7 +381,7 @@ public extension DiscordClient {
     @inlinable
     func createMessage(
         channelId: String,
-        payload: DiscordChannel.CreateMessage
+        payload: RequestBody.CreateMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = Endpoint.createMessage(channelId: channelId)
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
@@ -392,7 +392,7 @@ public extension DiscordClient {
     func editMessage(
         channelId: String,
         messageId: String,
-        payload: DiscordChannel.EditMessage
+        payload: RequestBody.EditMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = Endpoint.editMessage(channelId: channelId, messageId: messageId)
         return try await self.sendMultipart(to: endpoint, queries: [], headers: [:], payload: payload)
@@ -483,7 +483,7 @@ public extension DiscordClient {
     func createGuildRole(
         guildId: String,
         reason: String? = nil,
-        payload: CreateGuildRole
+        payload: RequestBody.CreateGuildRole
     ) async throws -> DiscordClientResponse<Role> {
         let endpoint = Endpoint.createGuildRole(guildId: guildId)
         return try await self.send(

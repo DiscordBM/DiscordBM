@@ -159,6 +159,8 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
     }
     
     public func validate() throws {
+        try validateAssertIsNotEmpty(!name.isEmpty, name: "name")
+        try validateAssertIsNotEmpty(!description.isEmpty, name: "description")
         try validateHasPrecondition(
             condition: options?.isEmpty == false,
             allowedIf: (type ?? .chatInput) == .chatInput,
@@ -172,14 +174,12 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
             reason: "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput'"
         )
         try validateElementCountDoesNotExceed(options, max: 25, name: "options")
-        try validateAssertIsNotEmpty(!name.isEmpty, name: "name")
         try validateCharacterCountDoesNotExceed(name, max: 32, name: "name")
+        try validateCharacterCountDoesNotExceed(description, max: 32, name: "description")
         for (_, value) in name_localizations ?? [:] {
             try validateAssertIsNotEmpty(!value.isEmpty, name: "name_localizations.name")
             try validateCharacterCountDoesNotExceed(value, max: 32, name: "name_localizations.name")
         }
-        try validateAssertIsNotEmpty(!description.isEmpty, name: "description")
-        try validateCharacterCountDoesNotExceed(description, max: 32, name: "description")
         for (_, value) in description_localizations ?? [:] {
             try validateAssertIsNotEmpty(!value.isEmpty, name: "description_localizations.name")
             try validateCharacterCountDoesNotExceed(value, max: 32, name: "description_localizations.name")
