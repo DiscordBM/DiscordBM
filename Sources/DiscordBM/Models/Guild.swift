@@ -285,23 +285,3 @@ public struct IntegrationApplication: Sendable, Codable {
     public var cover_image: String?
     public var scopes: [OAuth2Scope]?
 }
-
-/// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
-public struct CreateGuildRole: Sendable, Codable {
-    public var name: String?
-    public var permissions: StringBitField<Permission>?
-    public var color: DiscordColor?
-    public var hoist: Bool?
-//    public var icon: ImageData? not supported
-    public var unicode_emoji: String?
-    public var mentionable: Bool?
-    
-    public init(name: String? = nil, permissions: [Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
-        self.name = name
-        self.permissions = permissions.map { .init($0) }
-        self.color = color
-        self.hoist = hoist
-        self.unicode_emoji = unicode_emoji
-        self.mentionable = mentionable
-    }
-}

@@ -252,7 +252,7 @@ extension DiscordChannel {
 extension DiscordChannel {
     /// An attachment object, but for sending.
     /// https://discord.com/developers/docs/resources/channel#attachment-object
-    public struct AttachmentSend: Sendable, Codable {
+    public struct AttachmentSend: Sendable, Codable, Validatable {
         /// When sending, `id` is the index of this attachment in the `files` you provide.
         public var id: String
         public var filename: String?
@@ -277,6 +277,10 @@ extension DiscordChannel {
             self.height = height
             self.width = width
             self.ephemeral = ephemeral
+        }
+        
+        public func validate() throws {
+            try validateCharacterCountDoesNotExceed(description, max: 1_024, name: "description")
         }
     }
 }
@@ -354,7 +358,7 @@ public struct PartialChannel: Sendable, Codable {
 
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
-    public struct AllowedMentions: Sendable, Codable {
+    public struct AllowedMentions: Sendable, Codable, Validatable {
         
         /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
         public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
@@ -374,84 +378,16 @@ extension DiscordChannel {
             self.users = users
             self.replied_user = replied_user
         }
-    }
-}
-
-extension DiscordChannel {
-    /// https://discord.com/developers/docs/resources/channel#create-message-jsonform-params
-    public struct CreateMessage: Sendable, Codable, MultipartEncodable {
-        public var content: String?
-        public var tts: Bool?
-        public var embeds: [Embed]?
-        public var allowed_mentions: AllowedMentions?
-        public var message_reference: DiscordChannel.Message.MessageReference?
-        public var components: [Interaction.ActionRow]?
-        public var sticker_ids: [String]?
-        public var files: [RawFile]?
-        public var attachments: [AttachmentSend]?
-        public var flags: IntBitField<DiscordChannel.Message.Flag>?
         
-        enum CodingKeys: String, CodingKey {
-            case content
-            case tts
-            case embeds
-            case allowed_mentions
-            case message_reference
-            case components
-            case sticker_ids
-            case attachments
-            case flags
-        }
-        
-        public init(content: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
-            self.content = content
-            self.tts = tts
-            self.embeds = embeds
-            self.allowed_mentions = allowed_mentions
-            self.message_reference = message_reference
-            self.components = components
-            self.sticker_ids = sticker_ids
-            self.files = files
-            self.attachments = attachments
-            self.flags = flags.map { .init($0) }
-        }
-    }
-}
-
-extension DiscordChannel {
-    /// https://discord.com/developers/docs/resources/channel#edit-message-jsonform-params
-    public struct EditMessage: Sendable, Codable, MultipartEncodable {
-        public var content: String?
-        public var embeds: [Embed]?
-        public var flags: IntBitField<DiscordChannel.Message.Flag>?
-        public var allowed_mentions: AllowedMentions?
-        public var components: [Interaction.ActionRow]?
-        public var files: [RawFile]?
-        public var attachments: [AttachmentSend]?
-        
-        enum CodingKeys: String, CodingKey {
-            case content
-            case embeds
-            case flags
-            case allowed_mentions
-            case components
-            case attachments
-        }
-        
-        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [DiscordChannel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [AttachmentSend]? = nil) {
-            self.content = content
-            self.embeds = embeds
-            self.flags = flags.map { .init($0) }
-            self.allowed_mentions = allowed_mentions
-            self.components = components
-            self.files = files
-            self.attachments = attachments
+        public func validate() throws {
+            try validateElementCountDoesNotExceed(roles, max: 100, name: "roles")
+            try validateElementCountDoesNotExceed(users, max: 100, name: "users")
         }
     }
 }
 
 /// https://discord.com/developers/docs/resources/channel#embed-object
-public struct Embed: Sendable, Codable {
+public struct Embed: Sendable, Codable, Validatable {
     
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
     public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
@@ -596,18 +532,27 @@ public struct Embed: Sendable, Codable {
         self.reference_id = reference_id
     }
     
-    private var fieldsLength: Int {
-        fields?.reduce(into: 0) {
-            $0 = $1.name.unicodeScalars.count + $1.value.unicodeScalars.count
-        } ?? 0
-    }
-    
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
     var contentLength: Int {
-        (title?.count ?? 0) +
+        let fields = fields?.reduce(into: 0) {
+            $0 = $1.name.unicodeScalars.count + $1.value.unicodeScalars.count
+        } ?? 0
+        return (title?.unicodeScalars.count ?? 0) +
         (description?.unicodeScalars.count ?? 0) +
-        fieldsLength +
+        fields +
         (footer?.text.unicodeScalars.count ?? 0) +
         (author?.name.unicodeScalars.count ?? 0)
+    }
+    
+    public func validate() throws {
+        try validateElementCountDoesNotExceed(fields, max: 25, name: "fields")
+        try validateCharacterCountDoesNotExceed(title, max: 256, name: "title")
+        try validateCharacterCountDoesNotExceed(description, max: 4_096, name: "description")
+        try validateCharacterCountDoesNotExceed(footer?.text, max: 2_048, name: "footer.text")
+        try validateCharacterCountDoesNotExceed(author?.name, max: 256, name: "author.name")
+        for field in fields ?? [] {
+            try validateCharacterCountDoesNotExceed(field.name, max: 256, name: "field.name")
+            try validateCharacterCountDoesNotExceed(field.value, max: 1_024, name: "field.value")
+        }
     }
 }

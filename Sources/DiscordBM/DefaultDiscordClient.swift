@@ -230,13 +230,17 @@ public struct DefaultDiscordClient: DiscordClient {
         }
     }
     
-    public func send<E: Encodable>(
+    public func send<E: Encodable & Validatable>(
         to endpoint: Endpoint,
         queries: [(String, String?)] = [],
         headers: HTTPHeaders,
         payload: E
     ) async throws -> DiscordHTTPResponse {
-        try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
+        if DiscordGlobalConfiguration.performClientValidations {
+            try payload.validate()
+        }
+        
+        return try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
             identity, retryCounter, requestId in
             
             let identity = CacheableEndpointIdentity(endpoint: endpoint)
@@ -287,13 +291,17 @@ public struct DefaultDiscordClient: DiscordClient {
         }
     }
     
-    public func sendMultipart<E: MultipartEncodable>(
+    public func sendMultipart<E: MultipartEncodable & Validatable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
         payload: E
     ) async throws -> DiscordHTTPResponse {
-        try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
+        if DiscordGlobalConfiguration.performClientValidations {
+            try payload.validate()
+        }
+        
+        return try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
             identity, retryCounter, requestId in
             
             let identity = CacheableEndpointIdentity(endpoint: endpoint)

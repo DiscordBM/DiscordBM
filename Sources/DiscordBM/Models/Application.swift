@@ -51,7 +51,7 @@ public struct PartialApplication: Sendable, Codable {
 }
 
 /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
-public struct ApplicationCommand: Sendable, Codable {
+public struct ApplicationCommand: Sendable, Codable, Validatable {
     
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
@@ -156,5 +156,33 @@ public struct ApplicationCommand: Sendable, Codable {
         self.dm_permission = dm_permission
         self.default_member_permissions = default_member_permissions.map { .init($0) }
         self.type = type
+    }
+    
+    public func validate() throws {
+        try validateAssertIsNotEmpty(!name.isEmpty, name: "name")
+        try validateAssertIsNotEmpty(!description.isEmpty, name: "description")
+        try validateHasPrecondition(
+            condition: options?.isEmpty == false,
+            allowedIf: (type ?? .chatInput) == .chatInput,
+            name: "options",
+            reason: "'options' is only allowed if 'type' is 'chatInput'"
+        )
+        try validateHasPrecondition(
+            condition: !description.isEmpty || description_localizations?.isEmpty == false,
+            allowedIf: (type ?? .chatInput) == .chatInput,
+            name: "description+description_localizations",
+            reason: "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput'"
+        )
+        try validateElementCountDoesNotExceed(options, max: 25, name: "options")
+        try validateCharacterCountDoesNotExceed(name, max: 32, name: "name")
+        try validateCharacterCountDoesNotExceed(description, max: 32, name: "description")
+        for (_, value) in name_localizations ?? [:] {
+            try validateAssertIsNotEmpty(!value.isEmpty, name: "name_localizations.name")
+            try validateCharacterCountDoesNotExceed(value, max: 32, name: "name_localizations.name")
+        }
+        for (_, value) in description_localizations ?? [:] {
+            try validateAssertIsNotEmpty(!value.isEmpty, name: "description_localizations.name")
+            try validateCharacterCountDoesNotExceed(value, max: 32, name: "description_localizations.name")
+        }
     }
 }

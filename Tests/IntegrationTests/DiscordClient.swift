@@ -250,7 +250,7 @@ class DiscordClientTests: XCTestCase {
         }
         
         /// Create new role
-        let rolePayload = CreateGuildRole(
+        let rolePayload = RequestBody.CreateGuildRole(
             name: "test_role",
             permissions: [.addReactions, .attachFiles, .banMembers, .changeNickname],
             color: .init(red: 100, green: 100, blue: 100)!,
