@@ -17,10 +17,10 @@ extension Validatable {
     
     @inlinable
     func validateAtLeastOneIsNotEmpty(
-        _ values: Bool?...,
+        _ isEmpties: Bool?...,
         names: String...
     ) throws {
-        guard values.contains(false) else {
+        guard isEmpties.contains(where: { $0 == false || $0 == nil }) else {
             throw ValidationError.atLeastOneFieldIsRequired(names: names)
         }
     }
@@ -39,7 +39,7 @@ extension Validatable {
         names: String...
     ) throws {
         guard count ?? 0 <= max else {
-            throw ValidationError.tooManyCharacters(name: names.joined(separator: "="), max: max)
+            throw ValidationError.tooManyCharacters(name: names.joined(separator: "+"), max: max)
         }
     }
     
@@ -61,7 +61,7 @@ extension Validatable {
             throw ValidationError.containsProhibitedValues(
                 name: name,
                 reason: reason,
-                valuesRepresentation: String(describing: values)
+                valuesRepresentation: "\(values!)"
             )
         }
     }
@@ -84,8 +84,8 @@ extension Validatable {
     }
     
     @inlinable
-    func validateAssertIsNotEmpty(_ condition: Bool, name: String) throws {
-        if !condition {
+    func validateAssertIsNotEmpty(_ isNotEmpty: Bool, name: String) throws {
+        if !isNotEmpty {
             throw ValidationError.cantBeEmpty(name: name)
         }
     }
