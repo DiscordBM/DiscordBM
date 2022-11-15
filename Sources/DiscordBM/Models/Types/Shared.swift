@@ -596,3 +596,11 @@ public final class DereferenceBox<C>: Codable, CustomStringConvertible where C: 
 }
 
 extension DereferenceBox: Sendable where C: Sendable { }
+
+extension Calendar {
+    static let utc: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .init(identifier: "UTC")!
+        return calendar
+    }()
+}
