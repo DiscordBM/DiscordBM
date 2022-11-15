@@ -107,20 +107,41 @@ public enum RequestBody {
         public struct ImageData: Sendable, Codable {
             public var file: RawFile
             
+            public init(file: RawFile) {
+                self.file = file
+            }
+            
             public init(from decoder: Decoder) throws {
                 let string = try String(from: decoder)
-                var filename: String?
-                guard string.hasPrefix("data:") else {
+                guard let file = ImageData.decodeFromString(string) else {
                     throw DecodingError.dataCorrupted(.init(
                         codingPath: decoder.codingPath,
-                        debugDescription: "'\(string)' does not start with 'data:'"
+                        debugDescription: "'\(string)' can't be decoded into a file"
                     ))
                 }
+                self.file = file
+            }
+            
+            public func encode(to encoder: Encoder) throws {
+                guard let string = self.encodeToString() else {
+                    throw EncodingError.invalidValue(
+                        file, .init(
+                            codingPath: encoder.codingPath,
+                            debugDescription: "Can't base64 encode the file"
+                        )
+                    )
+                }
+                var container = encoder.singleValueContainer()
+                try container.encode(string)
+            }
+            
+            static func decodeFromString(_ string: String) -> RawFile? {
+                var filename: String?
+                guard string.hasPrefix("data:") else {
+                    return nil
+                }
                 guard let semicolon = string.firstIndex(of: ";") else {
-                    throw DecodingError.dataCorrupted(.init(
-                        codingPath: decoder.codingPath,
-                        debugDescription: "'\(string)' does not contain ';'"
-                    ))
+                    return nil
                 }
                 let type = string[string.startIndex..<semicolon].dropFirst(5)
                 let typeComps = type.split(separator: "/", maxSplits: 1)
@@ -131,40 +152,25 @@ public enum RequestBody {
                     filename = "unknown.\(ext)"
                 }
                 guard string[semicolon...].hasPrefix(";base64,") else {
-                    throw DecodingError.dataCorrupted(.init(
-                        codingPath: decoder.codingPath,
-                        debugDescription: "'\(string)' does not contain 'base64,'"
-                    ))
+                    return nil
                 }
                 let encodedString = string[semicolon...].dropFirst(8)
                 guard let data = Data(base64Encoded: String(encodedString)) else {
-                    throw DecodingError.dataCorrupted(.init(
-                        codingPath: decoder.codingPath,
-                        debugDescription: "'\(string)' does not valid data"
-                    ))
+                    return nil
                 }
-                self.file = .init(data: .init(data: data), filename: filename ?? "unknown")
+                return .init(data: .init(data: data), filename: filename ?? "unknown")
             }
             
-            public func encode(to encoder: Encoder) throws {
+            func encodeToString() -> String? {
                 guard let type = file.type else {
-                    throw EncodingError.invalidValue(file, .init(
-                        codingPath: encoder.codingPath,
-                        debugDescription: "Can't find the file type. Please provide the file extension in the 'filename'. For example, use 'penguin.png' instead of 'penguin'"
-                    ))
+                    return nil
                 }
                 var buffer = file.data
                 let data = buffer.readData(length: buffer.readableBytes)
                 guard let encoded = data?.base64EncodedString() else {
-                    throw EncodingError.invalidValue(
-                        data ?? Data(), .init(
-                            codingPath: encoder.codingPath,
-                            debugDescription: "Can't base64 encode the data"
-                        )
-                    )
+                    return nil
                 }
-                var container = encoder.singleValueContainer()
-                try container.encode("data:\(type);base64,\(encoded)")
+                return "data:\(type);base64,\(encoded)"
             }
         }
         
