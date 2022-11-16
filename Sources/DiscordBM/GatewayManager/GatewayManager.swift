@@ -1,4 +1,5 @@
 import Atomics
+import struct NIOCore.ByteBuffer
 
 #if swift(>=5.7)
 /// If you're seeing the **Cannot find type 'AnyActor' in scope** error,
@@ -24,7 +25,7 @@ public protocol GatewayManager: DiscordActor {
     /// Adds a handler to be notified of events.
     func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
     /// Adds a handler to be notified of event parsing failures.
-    func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
+    func addEventParseFailureHandler(_ handler: @escaping (Error, ByteBuffer) -> Void) async
     /// Disconnects from Discord.
     func disconnect() async
 }

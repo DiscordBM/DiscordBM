@@ -162,14 +162,9 @@ public enum RequestBody {
             }
             
             func encodeToString() -> String? {
-                guard let type = file.type else {
-                    return nil
-                }
-                var buffer = file.data
-                let data = buffer.readData(length: buffer.readableBytes)
-                guard let encoded = data?.base64EncodedString() else {
-                    return nil
-                }
+                guard let type = file.type else { return nil }
+                let data = Data(buffer: file.data, byteTransferStrategy: .noCopy)
+                let encoded = data.base64EncodedString()
                 return "data:\(type);base64,\(encoded)"
             }
         }

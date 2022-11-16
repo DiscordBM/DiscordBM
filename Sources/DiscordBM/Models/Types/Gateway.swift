@@ -436,24 +436,25 @@ public struct Gateway: Sendable, Codable {
         
         public var token: Secret
         public var properties = ConnectionProperties()
+        /// DiscordBM supports the better `Transport Compression`, but not `Payload Compression`.
+        /// Setting this to `true` will only cause problems.
+        /// Instead, use the `compression` parameter in the `BotGatewayManager` initializer.
         public var compress: Bool?
         public var large_threshold: Int?
         public var shard: IntPair?
         public var presence: Presence?
         public var intents: IntBitField<Intent>
         
-        public init(token: Secret, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
+        public init(token: Secret, large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
             self.token = token
-            self.compress = compress
             self.large_threshold = large_threshold
             self.shard = shard
             self.presence = presence
             self.intents = .init(intents)
         }
         
-        public init(token: String, compress: Bool? = nil, large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
+        public init(token: String, large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
             self.token = Secret(token)
-            self.compress = compress
             self.large_threshold = large_threshold
             self.shard = shard
             self.presence = presence

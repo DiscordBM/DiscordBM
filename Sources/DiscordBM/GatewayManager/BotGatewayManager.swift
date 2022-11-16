@@ -26,7 +26,7 @@ public actor BotGatewayManager: GatewayManager {
     
     //MARK: Event hooks
     var onEvents: [(Gateway.Event) -> ()] = []
-    var onEventParseFailures: [(Error, String) -> ()] = []
+    var onEventParseFailures: [(Error, ByteBuffer) -> ()] = []
     
     //MARK: Connection data
     nonisolated let identifyPayload: Gateway.Identify
@@ -39,6 +39,7 @@ public actor BotGatewayManager: GatewayManager {
     }
     
     //MARK: Send queue
+    
     /// 120 per 60 seconds (1 every 500ms),
     /// per https://discord.com/developers/docs/topics/gateway#rate-limiting
     var sendQueue = SerialQueue(waitTime: .milliseconds(500))
@@ -61,6 +62,9 @@ public actor BotGatewayManager: GatewayManager {
     var maxConcurrency: Int? = nil
     var isFirstConnection = true
     
+    //MARK: Compression
+    let compression: Bool
+    
     //MARK: Backoff
     
     /// Discord cares about the identify payload for rate-limiting and if we send
@@ -79,28 +83,49 @@ public actor BotGatewayManager: GatewayManager {
     var unsuccessfulPingsCount = 0
     var lastPongDate = Date()
     
+    /// - Parameters:
+    ///   - eventLoopGroup: An `EventLoopGroup`.
+    ///   - httpClient: A `HTTPClient`.
+    ///   - client: A `DiscordClient` to use.
+    ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
+    ///   - compression: Enables transport compression for less network bandwidth usage
+    ///    but more CPU load.
+    ///   - appId: Your Discord application id.
+    ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
         client: any DiscordClient,
         maxFrameSize: Int =  1 << 31,
+        compression: Bool = false,
         appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
+        self.compression = compression
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
     }
     
+    /// - Parameters:
+    ///   - eventLoopGroup: An `EventLoopGroup`.
+    ///   - httpClient: A `HTTPClient`.
+    ///   - clientConfiguration: Configuration of the `DiscordClient`.
+    ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
+    ///   - compression: Enables transport compression for less network bandwidth usage
+    ///    but more CPU load.
+    ///   - appId: Your Discord application id.
+    ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
+        compression: Bool = false,
         appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
@@ -112,17 +137,31 @@ public actor BotGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
+        self.compression = compression
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
     }
     
+    /// - Parameters:
+    ///   - eventLoopGroup: An `EventLoopGroup`.
+    ///   - httpClient: A `HTTPClient`.
+    ///   - clientConfiguration: Configuration of the `DiscordClient`.
+    ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
+    ///   - compression: Enables transport compression for less network bandwidth usage
+    ///    but more CPU load.
+    ///   - token: Your Discord bot-token.
+    ///   - appId: Your Discord application id.
+    ///   - shard: What shard this Manager is representing, incase you use shard-ing at all.
+    ///   - presence: The initial presence of the bot.
+    ///   - intents: The Discord intents you want to receive messages for.
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
+        compression: Bool = false,
         token: String,
         appId: String? = nil,
         shard: IntPair? = nil,
@@ -138,6 +177,7 @@ public actor BotGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
+        self.compression = compression
         self.identifyPayload = .init(
             token: token,
             shard: shard,
@@ -171,13 +211,22 @@ public actor BotGatewayManager: GatewayManager {
         self.connectionId.wrappingIncrement(ordering: .relaxed)
         await self.sendQueue.reset()
         let gatewayURL = await getGatewayURL()
+        var urlSuffix = "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json"
+        if compression {
+            urlSuffix += "&compress=zlib-stream"
+        }
         logger.trace("Will wait for other shards if needed")
         await waitInShardQueueIfNeeded()
-        var configuration = WebSocketClient.Configuration()
-        configuration.maxFrameSize = self.maxFrameSize
+        let configuration = WebSocketClient.Configuration(
+            maxFrameSize: self.maxFrameSize,
+            compression: .init(
+                algorithm: .deflate,
+                decompressionLimit: .size(maxFrameSize)
+            )
+        )
         logger.trace("Will try to connect to Discord through web-socket")
         WebSocket.connect(
-            to: gatewayURL + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
+            to: gatewayURL + urlSuffix,
             configuration: configuration,
             on: eventLoopGroup
         ) { ws in
@@ -211,7 +260,7 @@ public actor BotGatewayManager: GatewayManager {
     }
     
     /// Adds a handler to be notified of event parsing failures.
-    public func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) {
+    public func addEventParseFailureHandler(_ handler: @escaping (Error, ByteBuffer) -> Void) {
         self.onEventParseFailures.append(handler)
     }
     
@@ -363,10 +412,10 @@ extension BotGatewayManager {
     }
     
     private func setupOnText(forConnectionWithId connectionId: UInt) {
-        self.ws?.onText { _, text in
-            self.logger.debug("Got text from websocket \(text)")
+        self.ws?.onTextBuffer { _, buffer in
+            self.logger.debug("Got text from websocket \(String(buffer: buffer))")
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-            let data = Data(text.utf8)
+            let data = Data(buffer: buffer)
             do {
                 let event = try DiscordGlobalConfiguration.decoder.decode(
                     Gateway.Event.self,
@@ -382,7 +431,7 @@ extension BotGatewayManager {
             } catch {
                 self.logger.debug("Failed to decode event. Error: \(error)")
                 for onEventParseFailure in self.onEventParseFailures {
-                    onEventParseFailure(error, text)
+                    onEventParseFailure(error, buffer)
                 }
             }
         }

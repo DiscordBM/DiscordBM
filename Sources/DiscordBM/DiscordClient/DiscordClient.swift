@@ -164,7 +164,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     public func decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
         try guardIsSuccessfulResponse()
         if var body = self.body,
-           let data = body.readData(length: body.readableBytes) {
+           let data = body.readData(length: body.readableBytes, byteTransferStrategy: .noCopy) {
             return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
         } else {
             throw DiscordClientError.emptyBody(self)

@@ -149,16 +149,9 @@ struct MultipartEncodingContainer: Encodable {
         }
         
         func encode(to encoder: Encoder) throws {
-            var buffer = buffer
-            if let data = buffer.readData(length: buffer.readableBytes) {
-                var container = encoder.singleValueContainer()
-                try container.encode(data)
-            } else {
-                throw EncodingError.invalidValue(buffer, .init(
-                    codingPath: encoder.codingPath,
-                    debugDescription: "Could not encode ByteBuffer"
-                ))
-            }
+            let data = Data(buffer: buffer, byteTransferStrategy: .noCopy)
+            var container = encoder.singleValueContainer()
+            try container.encode(data)
         }
     }
     
