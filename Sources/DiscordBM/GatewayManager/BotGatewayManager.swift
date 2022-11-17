@@ -412,27 +412,37 @@ extension BotGatewayManager {
     }
     
     private func setupOnText(forConnectionWithId connectionId: UInt) {
-        self.ws?.onTextBuffer { _, buffer in
-            self.logger.debug("Got text from websocket \(String(buffer: buffer))")
-            guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-            let data = Data(buffer: buffer)
-            do {
-                let event = try DiscordGlobalConfiguration.decoder.decode(
-                    Gateway.Event.self,
-                    from: data
-                )
-                self.logger.debug("Decoded event: \(event)")
-                Task {
-                    await self.processEvent(event)
-                }
-                for onEvent in self.onEvents {
-                    onEvent(event)
-                }
-            } catch {
-                self.logger.debug("Failed to decode event. Error: \(error)")
-                for onEventParseFailure in self.onEventParseFailures {
-                    onEventParseFailure(error, buffer)
-                }
+        if compression {
+            self.ws?.onBinary { _, buffer in
+                self.processBinaryData(buffer, forConnectionWithId: connectionId)
+            }
+        } else {
+            self.ws?.onTextBuffer { _, buffer in
+                self.processBinaryData(buffer, forConnectionWithId: connectionId)
+            }
+        }
+    }
+    
+    private func processBinaryData(_ buffer: ByteBuffer, forConnectionWithId connectionId: UInt) {
+        self.logger.debug("Got text from websocket \(String(buffer: buffer))")
+        guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
+        let data = Data(buffer: buffer)
+        do {
+            let event = try DiscordGlobalConfiguration.decoder.decode(
+                Gateway.Event.self,
+                from: data
+            )
+            self.logger.debug("Decoded event: \(event)")
+            Task {
+                await self.processEvent(event)
+            }
+            for onEvent in self.onEvents {
+                onEvent(event)
+            }
+        } catch {
+            self.logger.debug("Failed to decode event. Error: \(error)")
+            for onEventParseFailure in self.onEventParseFailures {
+                onEventParseFailure(error, buffer)
             }
         }
     }
