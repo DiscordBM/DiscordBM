@@ -212,18 +212,16 @@ public actor BotGatewayManager: GatewayManager {
         await self.sendQueue.reset()
         let gatewayURL = await getGatewayURL()
         var urlSuffix = "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json"
-        if compression {
-            urlSuffix += "&compress=zlib-stream"
-        }
         logger.trace("Will wait for other shards if needed")
         await waitInShardQueueIfNeeded()
-        let configuration = WebSocketClient.Configuration(
-            maxFrameSize: self.maxFrameSize,
-            compression: .init(
+        var configuration = WebSocketClient.Configuration(maxFrameSize: self.maxFrameSize)
+        if compression {
+            urlSuffix += "&compress=zlib-stream"
+            configuration.decompression = .init(
                 algorithm: .deflate,
-                decompressionLimit: .size(maxFrameSize)
+                limit: .size(maxFrameSize)
             )
-        )
+        }
         logger.trace("Will try to connect to Discord through web-socket")
         WebSocket.connect(
             to: gatewayURL + urlSuffix,
