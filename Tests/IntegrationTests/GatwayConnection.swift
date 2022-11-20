@@ -70,6 +70,13 @@ class GatewayConnectionTests: XCTestCase {
         try await Task.sleep(nanoseconds: 10_000_000_000)
         
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
+        
+        await bot.disconnect()
+        
+        /// Make sure it is disconnected
+        try await Task.sleep(nanoseconds: 10_000_000_000)
+        XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
+        XCTAssertEqual(bot.state, .stopped)
     }
     
     func testConnectWithCompression() async throws {
