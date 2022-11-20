@@ -558,15 +558,15 @@ private actor Container {
     private var waiter: CheckedContinuation<(), Never>?
     
     func waitForCounter() async {
-        await withCheckedContinuation {
-            waiter = $0
-        }
         Task {
             try await Task.sleep(nanoseconds: 10_000_000_000)
             if waiter != nil {
                 waiter?.resume()
                 XCTFail("Failed to test in-time")
             }
+        }
+        await withCheckedContinuation {
+            waiter = $0
         }
     }
 }
