@@ -94,8 +94,8 @@ Task {
     }
     
     /// If you care about library parsing failures, handle them here
-    await bot.addEventParseFailureHandler { error, text in
-        /// Handle the failure using the `error` thrown and the `text` received.
+    await bot.addEventParseFailureHandler { error, buffer in
+        /// Handle the failure using the `Error` thrown and the `ByteBuffer` received.
     }
 
     /// Tell the manager to connect to Discord
