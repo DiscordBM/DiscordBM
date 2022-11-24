@@ -10,7 +10,8 @@ private let allocator = ByteBufferAllocator()
 
 extension MultipartEncodable {
     /// Encodes the multipart payload into a buffer.
-    /// Returns `nil` if there are no multipart data to be encoded, and this should be sent as JSON.
+    /// Returns `nil` if there are no multipart data to be encoded,
+    /// in which case this should be sent as JSON.
     /// Throws encoding errors.
     func encodeMultipart() throws -> ByteBuffer? {
         guard let files = self.files else { return nil }
@@ -28,7 +29,7 @@ extension MultipartEncodable {
     }
 }
 
-/// This is _mostly_ copy-pasted from Vapor's `File` :)
+/// `RawFile` is _mostly_ copy-pasted from Vapor's `File` :)
 
 public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
     /// Name of the file, including extension.
