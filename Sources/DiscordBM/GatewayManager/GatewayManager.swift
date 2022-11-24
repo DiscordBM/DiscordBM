@@ -19,7 +19,7 @@ public protocol GatewayManager: DiscordActor {
     
     /// Starts connecting to Discord.
     func connect() async
-    /// Requests members of guilds from discord.
+    /// Requests guild members from Discord.
     /// Refer to the documentation link of ``Gateway.RequestGuildMembers`` for more info.
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
     /// Adds a handler to be notified of events.

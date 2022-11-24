@@ -242,7 +242,7 @@ public actor BotGatewayManager: GatewayManager {
         }
     }
     
-    /// Requests members of guilds from discord.
+    /// Requests guild members from Discord.
     /// Refer to the documentation link of ``Gateway.RequestGuildMembers`` for more info.
     public func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) {
         /// This took a lot of time to figure out, not sure why it needs opcode `1`.
