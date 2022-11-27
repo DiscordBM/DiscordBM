@@ -58,6 +58,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var bitrate: Int?
     public var user_limit: Int?
     public var rate_limit_per_user: Int?
+    public var default_forum_layout: Int?
     public var recipients: [DiscordUser]?
     public var icon: String?
     public var owner_id: String?
