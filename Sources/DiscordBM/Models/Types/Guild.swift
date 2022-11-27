@@ -156,6 +156,7 @@ public struct Guild: Sendable, Codable {
     public var system_channel_id: String?
     public var system_channel_flags: IntBitField<SystemChannelFlag>
     public var rules_channel_id: String?
+    public var safety_alerts_channel_id: String?
     public var max_presences: Int?
     public var max_members: Int?
     public var vanity_url_code: String?
@@ -233,6 +234,7 @@ public struct PartialGuild: Sendable, Codable {
     public var system_channel_id: String?
     public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>?
     public var rules_channel_id: String?
+    public var safety_alerts_channel_id: String?
     public var max_presences: Int?
     public var max_members: Int?
     public var vanity_url_code: String?
