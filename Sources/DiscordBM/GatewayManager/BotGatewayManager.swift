@@ -567,25 +567,39 @@ extension BotGatewayManager {
                    self.connectionId.load(ordering: .relaxed) != connectionId {
                     return
                 }
+                
+                let opcode = opcode ?? payload.opcode.rawValue
+                
+                let data: Data
                 do {
-                    let data = try DiscordGlobalConfiguration.encoder.encode(payload)
-                    let opcode = opcode ?? payload.opcode.rawValue
-                    if let ws = await self.ws {
+                    data = try DiscordGlobalConfiguration.encoder.encode(payload)
+                } catch {
+                    logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
+                        "payload": .string("\(payload)"),
+                        "opcode": .stringConvertible(opcode),
+                        "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                    ])
+                    return
+                }
+                
+                if let ws = await self.ws {
+                    do {
                         try await ws.send(
                             raw: data,
                             opcode: .init(encodedWebSocketOpcode: opcode)!
                         )
-                    } else {
-                        logger.warning("Trying to send through ws when a connection is not established", metadata: [
+                    } catch {
+                        logger.error("Could not send payload through websocket", metadata: [
+                            "error": "\(error)",
                             "payload": .string("\(payload)"),
-                            "state": .stringConvertible(self._state.load(ordering: .relaxed)),
+                            "opcode": .stringConvertible(opcode),
                             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                         ])
                     }
-                } catch {
-                    logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
+                } else {
+                    logger.warning("Trying to send through ws when a connection is not established", metadata: [
                         "payload": .string("\(payload)"),
-                        "opcode": .stringConvertible(opcode ?? .max),
+                        "state": .stringConvertible(self._state.load(ordering: .relaxed)),
                         "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                     ])
                 }
