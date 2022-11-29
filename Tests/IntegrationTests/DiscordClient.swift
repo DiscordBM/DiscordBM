@@ -481,8 +481,8 @@ class DiscordClientTests: XCTestCase {
             
             /// We create a command, fetch the commands count, then delete the command
             /// and fetch the command count again.
-            /// Since we are using caching, the first command count and the second command count
-            /// must NOT be the same.
+            /// Since we are not using caching for this endpoint, the first command count and
+            /// the second command count must NOT be the same.
             let commandName = "test-command"
             let commandDesc = "Testing!"
             let command = try await cacheClient.createApplicationGlobalCommand(
@@ -515,8 +515,8 @@ class DiscordClientTests: XCTestCase {
             
             /// We create a command, fetch the commands count, then delete the command
             /// and fetch the command count again.
-            /// Since we are using caching, the first command count and the second command count
-            /// must NOT be the same.
+            /// Since we are not using caching, the first command count and the second
+            /// command count must NOT be the same.
             let commandName = "test-command"
             let commandDesc = "Testing!"
             let command = try await cacheClient.createApplicationGlobalCommand(
