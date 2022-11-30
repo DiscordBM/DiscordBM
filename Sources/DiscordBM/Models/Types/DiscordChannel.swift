@@ -36,7 +36,9 @@ public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
     public enum Flag: Int, Sendable {
+        case unknownValue0 = 0
         case pinned = 1
+        case unknownValue2 = 2
         case requireTag = 4
     }
     
