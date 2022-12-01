@@ -119,7 +119,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 deadline: .now() + configuration.requestTimeout,
                 logger: configuration.enableLoggingForRequests
                 ? DiscordGlobalConfiguration.makeLogger("DBM+HTTPClient")
-                : Logger(label: "DBM-no-op-logger", factory: { _ in SwiftLogNoOpLogHandler() })
+                : Logger(label: "DBM-no-op-logger", factory: SwiftLogNoOpLogHandler.init)
             ).get()
         )
     }
