@@ -9,7 +9,7 @@ class GatewayConnectionTests: XCTestCase {
     
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
-            Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
+            Logger(label: $0) { _ in SwiftLogNoOpLogHandler() }
         }
         self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
     }
