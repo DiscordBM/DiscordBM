@@ -6,20 +6,20 @@ public enum DiscordUtils {
     
     /// https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
     public enum TimestampStyle: String {
-        /// e.g. `16:20`
+        /// `16:20`
         case shortTime = "t"
-        /// e.g. `16:20:30`
+        /// `16:20:30`
         case longTime = "T"
-        /// e.g. `20/04/2021`
+        /// `20/04/2021`
         case shortDate = "d"
-        /// e.g. `20 April 2021`
+        /// `20 April 2021`
         case longDate = "D"
         /// Discord's default.
-        /// e.g. `20 April 2021 16:20`
+        /// `20 April 2021 16:20`
         case shortDateTime = "f"
-        /// e.g. `Tuesday, 20 April 2021 16:20`
+        /// `Tuesday, 20 April 2021 16:20`
         case longDateTime = "F"
-        /// e.g. `2 months ago`
+        /// `2 months ago` / `in 2 months`
         case relativeTime = "R"
     }
     
@@ -72,21 +72,21 @@ public enum DiscordUtils {
         "<a:\(name):\(id)>"
     }
     
-    /// When used in a Discord message, shows up as a localized time.
+    /// When used in a Discord message, shows up as a **localized** time.
     /// See ``TimestampStyle`` for examples.
     @inlinable
     public static func timestamp(date: Date, style: TimestampStyle? = nil) -> String {
         timestamp(unixTimestamp: Int(date.timeIntervalSince1970), style: style)
     }
     
-    /// When used in a Discord message, shows up as a localized time.
+    /// When used in a Discord message, shows up as a **localized** time.
     /// See ``TimestampStyle`` for examples.
     @inlinable
     public static func timestamp(unixTimestamp: Double, style: TimestampStyle? = nil) -> String {
         timestamp(unixTimestamp: Int(unixTimestamp), style: style)
     }
     
-    /// When used in a Discord message, shows up as a localized time.
+    /// When used in a Discord message, shows up as a **localized** time.
     /// See ``TimestampStyle`` for examples.
     @inlinable
     public static func timestamp(unixTimestamp: Int, style: TimestampStyle? = nil) -> String {
