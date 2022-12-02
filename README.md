@@ -53,7 +53,8 @@ let bot = BotGatewayManager(
         status: .online,
         afk: false
     ),
-    intents: [.guildMessages, .messageContent] /// Add all the intents you want
+    /// Add all the intents you want
+    intents: [.guildMessages, .messageContent]
 )
 ```
 See the [GatewayConnection tests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
@@ -78,7 +79,8 @@ let bot = BotGatewayManager(
         status: .online,
         afk: false
     ),
-    intents: [.guildMessages, .messageContent] /// Add all the intents you want
+    /// Add all the intents you want
+    intents: [.guildMessages, .messageContent]
 )
 ```
 
