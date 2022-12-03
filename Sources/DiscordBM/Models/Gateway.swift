@@ -564,7 +564,7 @@ public struct Gateway: Sendable, Codable {
         public var flags: IntBitField<DiscordChannel.Flag>?
         public var newly_created: Bool?
         public var thread_member: ThreadMember?
-        public var available_tags: [String]?
+        public var available_tags: [DiscordChannel.ForumTag]?
         public var template: String?
         public var member_ids_preview: [String]?
         public var version: Int?

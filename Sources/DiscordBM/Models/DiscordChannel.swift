@@ -45,6 +45,14 @@ public struct DiscordChannel: Sendable, Codable {
         case auto = 1
         case full = 2
     }
+    /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
+    public struct ForumTag: Sendable, Codable {
+        public var id: String?
+        public var name: String
+        public var moderated: Bool?
+        public var emoji_id: String?
+        public var emoji_name: String?
+    }
     
     public var id: String
     public var type: Kind
@@ -77,7 +85,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var default_sort_order: Int?
     public var permissions: StringBitField<Permission>?
     public var flags: IntBitField<Flag>?
-    public var available_tags: [String]?
+    public var available_tags: [ForumTag]?
     public var template: String?
     public var member_ids_preview: [String]?
     public var version: Int?
