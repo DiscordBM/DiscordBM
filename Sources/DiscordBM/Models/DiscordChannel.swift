@@ -74,7 +74,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var default_auto_archive_duration: Int?
     public var default_thread_rate_limit_per_user: Int?
     public var default_reaction_emoji: String?
-    public var default_sort_order: String?
+    public var default_sort_order: Int?
     public var permissions: StringBitField<Permission>?
     public var flags: IntBitField<Flag>?
     public var available_tags: [String]?

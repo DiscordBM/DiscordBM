@@ -559,7 +559,7 @@ public struct Gateway: Sendable, Codable {
         public var member: ThreadMember?
         public var default_auto_archive_duration: Int?
         public var default_reaction_emoji: String?
-        public var default_sort_order: String?
+        public var default_sort_order: Int?
         public var permissions: StringBitField<Permission>?
         public var flags: IntBitField<DiscordChannel.Flag>?
         public var newly_created: Bool?
