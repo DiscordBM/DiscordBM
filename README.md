@@ -21,17 +21,27 @@ You can see Vapor community's Penny bot as a showcase of using this library in p
 Penny is available [here](https://github.com/vapor/penny-bot) and you can find `DiscordBM` used in the [PennyBOT](https://github.com/vapor/penny-bot/tree/main/CODE/Sources/PennyBOT) target.
 
 ## How To Use
+  
 > If you're using `DiscordBM` on macOS Ventura (on either Xcode or VSCode), make sure you have **Xcode 14.1 or above**. Lower Xcode 14 versions have known issues that cause a lot of problems for libraries.    
 
 First you need to initialize a `BotGatewayManager` instance, then tell it to connect and start using it:
 
 ### Initializing a Gateway Manager On Your Own
+
 Make sure you've added [AsyncHTTPClient](https://github.com/swift-server/async-http-client) to your dependancies.
 ```swift
 import DiscordBM
 import AsyncHTTPClient
 
 let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+defer {
+    /// it's important to shutdown the httpClient _after all requests are done_, even if one failed
+    /// libraries like Vapor take care of this on their own if you use the shared http client
+    /// You might need to move the shutdown call to somewhere more appropriate, based on your app:
+    /// try httpClient.syncShutdown()
+    /// Prefer to use `shutdown()` in async contexts:
+    /// try await httpClient.shutdown()
+}
 let bot = BotGatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,
@@ -43,18 +53,16 @@ let bot = BotGatewayManager(
         status: .online,
         afk: false
     ),
-    intents: [.guildMessages, .messageContent] /// Add all the intents you want
+    /// Add all the intents you want
+    intents: [.guildMessages, .messageContent]
 )
-
-/// it's important to shutdown the httpClient _after all requests are done_, even if one failed
-/// libraries like Vapor take care of this on their own if you use the shared http client
-try httpClient.syncShutdown()
-/// Prefer to use `shutdown()` in async contexts:
-/// try await httpClient.shutdown()
 ```
 See the [GatewayConnection tests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
 
 ### Initializing a Gateway Manager With Vapor
+<details>
+  <summary> Click to expand </summary>
+  
 ```swift
 import DiscordBM
 import Vapor
@@ -71,9 +79,12 @@ let bot = BotGatewayManager(
         status: .online,
         afk: false
     ),
-    intents: [.guildMessages, .messageContent] /// Add all the intents you want
+    /// Add all the intents you want
+    intents: [.guildMessages, .messageContent]
 )
 ```
+
+</details>
 
 ### Using The Gateway Manager
 ```swift
@@ -115,6 +126,9 @@ Task {
 ```
 
 ### Sending Attachments
+<details>
+  <summary> Click to expand </summary>
+  
 It's usually better to send a link of your media to Discord, instead of sending the actual file.   
 However, `DiscordBM` still supports sending files directly.   
 ```swift
@@ -149,18 +163,35 @@ Task {
 ```
 Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/DiscordClient.swift) to see how you can send media in a real-world situation.
 
+</details>
+
 ### Finding Your Bot Token
+<details>
+  <summary> Click to expand </summary>
+  
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding Bot Token](https://user-images.githubusercontent.com/54685446/200565393-ea31c2ad-fd3a-44a1-9789-89460ab5d1a9.png)
 
+</details>
+
 ### Finding Your App ID
+<details>
+  <summary> Click to expand </summary>
+  
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding App ID](https://user-images.githubusercontent.com/54685446/200565475-9893d326-423e-4344-a853-9de2f9ed25b4.png)
 
+</details>
+
 ## Testability
+<details>
+  <summary> Click to expand </summary>
+
 `DiscordBM` comes with tools to make testing your app easier.   
 * You can type-erase your `BotGatewayManager`s using the `GatewayManager` protocol so you can override your gateway manager with a mocked implementation in tests.   
 * You can also do the same for `DefaultDiscordClient` and type-erase it using the `DiscordClient` protocol so you can provide a mocked implementation when testing.
+
+</details>
 
 ## How To Add DiscordBM To Your Project
 
