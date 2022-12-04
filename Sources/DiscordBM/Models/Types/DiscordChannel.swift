@@ -47,14 +47,6 @@ public struct DiscordChannel: Sendable, Codable {
         case auto = 1
         case full = 2
     }
-    /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
-    public struct ForumTag: Sendable, Codable {
-        public var id: String?
-        public var name: String
-        public var moderated: Bool?
-        public var emoji_id: String?
-        public var emoji_name: String?
-    }
     
     /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
     public struct ForumTag: Sendable, Codable {
