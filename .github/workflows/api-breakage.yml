@@ -16,5 +16,10 @@ jobs:
     steps:
       - name: Check out package
         uses: actions/checkout@v3
-      - name: Run tests
-        run: swift package diagnose-api-breaking-changes api-breakage-gh-actions
+        with:
+          fetch-depth: 0
+    # https://github.com/actions/checkout/issues/766
+      - name: Mark the workspace as safe
+        run: git config --global --add safe.directory ${GITHUB_WORKSPACE}
+      - name: Run API-breakage diagnosis
+        run: swift package diagnose-api-breaking-changes main
