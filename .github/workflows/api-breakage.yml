@@ -1,8 +1,5 @@
 name: api-breakage
-on: 
-  push:
-    branches: 
-      - "main"
+on:
   pull_request:
     branches: 
       - "*"
@@ -22,4 +19,4 @@ jobs:
       - name: Mark the workspace as safe
         run: git config --global --add safe.directory ${GITHUB_WORKSPACE}
       - name: Run API-breakage diagnosis
-        run: swift package diagnose-api-breaking-changes main
+        run: swift package diagnose-api-breaking-changes origin/main
