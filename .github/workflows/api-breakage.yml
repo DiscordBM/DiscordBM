@@ -1,0 +1,20 @@
+name: api-breakage
+on: 
+  push:
+    branches: 
+      - "main"
+  pull_request:
+    branches: 
+      - "*"
+
+jobs:
+  api-breakage:
+    strategy:
+      fail-fast: false
+    container: swift:5.7-jammy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out package
+        uses: actions/checkout@v3
+      - name: Run tests
+        run: swift package diagnose-api-breaking-changes
