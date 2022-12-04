@@ -51,7 +51,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
     public struct ForumTag: Sendable, Codable {
         public var id: String?
-        public var name: String
+        public var name: String?
         public var moderated: Bool?
         public var emoji_id: String?
         public var emoji_name: String?
@@ -85,7 +85,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var member: ThreadMember?
     public var default_auto_archive_duration: Int?
     public var default_thread_rate_limit_per_user: Int?
-    public var default_reaction_emoji: String?
+    public var default_reaction_emoji: ForumTag?
     public var default_sort_order: Int?
     public var permissions: StringBitField<Permission>?
     public var flags: IntBitField<Flag>?

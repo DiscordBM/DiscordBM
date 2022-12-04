@@ -560,7 +560,7 @@ public struct Gateway: Sendable, Codable {
         public var thread_metadata: ThreadMetadata
         public var member: ThreadMember?
         public var default_auto_archive_duration: Int?
-        public var default_reaction_emoji: String?
+        public var default_reaction_emoji: DiscordChannel.ForumTag?
         public var default_sort_order: Int?
         public var permissions: StringBitField<Permission>?
         public var flags: IntBitField<DiscordChannel.Flag>?
@@ -1078,7 +1078,7 @@ public struct Gateway: Sendable, Codable {
         public var session_id: String?
         public var emoji: PartialEmoji?
         public var platform: String?
-        public var timestamps: [DiscordTimestamp]?
+        public var timestamps: Activity.Timestamps?
         public var application_id: String?
     }
     
