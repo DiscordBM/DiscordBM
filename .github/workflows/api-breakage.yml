@@ -17,4 +17,4 @@ jobs:
       - name: Check out package
         uses: actions/checkout@v3
       - name: Run tests
-        run: swift package diagnose-api-breaking-changes
+        run: swift package diagnose-api-breaking-changes main
