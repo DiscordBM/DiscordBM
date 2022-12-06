@@ -1,7 +1,7 @@
 import Logging
 
 /**
- A hack to make sure internal decoding of enums that conform to `String` or `Int`
+ A hack to make sure internal decoding of array of enums that conform to `String` or `Int`
  don't fail just because Discord has added a new value which the enums don't contain yet.
  If `DiscordGlobalConfiguration.enableLoggingDuringDecode` is enabled, this will log
  the new values that were decoded successfully but the enum didn't have a representation for.
