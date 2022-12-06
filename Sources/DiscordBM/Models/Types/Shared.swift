@@ -1,4 +1,8 @@
+#if os(macOS) /// Xcode toolchains don't usually throw preconcurrency warnings.
 import Foundation
+#else
+@preconcurrency import Foundation
+#endif
 
 /// To dynamically decode/encode String or Int or Double or Bool.
 public enum StringIntDoubleBool: Sendable, Codable {
@@ -13,13 +17,6 @@ public enum StringIntDoubleBool: Sendable, Codable {
         case .int(let int): return "\(int)"
         case .double(let double): return String(format: "%.2f", double)
         case .bool(let bool): return "\(bool)"
-        }
-    }
-    
-    public var boolValue: Bool? {
-        switch self {
-        case .bool(let bool): return bool
-        default: return nil
         }
     }
     

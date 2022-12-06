@@ -3,7 +3,6 @@ import NIOHTTP1
 import NIOCore
 
 public protocol DiscordClient {
-    
     var appId: String? { get }
     
     func send(
@@ -12,12 +11,6 @@ public protocol DiscordClient {
         headers: HTTPHeaders
     ) async throws -> DiscordHTTPResponse
     
-    func send<C: Codable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders
-    ) async throws -> DiscordClientResponse<C>
-    
     func send<E: Encodable & Validatable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
@@ -25,26 +18,12 @@ public protocol DiscordClient {
         payload: E
     ) async throws -> DiscordHTTPResponse
     
-    func send<E: Encodable & Validatable, C: Codable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        payload: E
-    ) async throws -> DiscordClientResponse<C>
-    
     func sendMultipart<E: MultipartEncodable & Validatable>(
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
         payload: E
     ) async throws -> DiscordHTTPResponse
-    
-    func sendMultipart<E: MultipartEncodable & Validatable, C: Codable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        payload: E
-    ) async throws -> DiscordClientResponse<C>
 }
 
 //MARK: - Default functions for DiscordClient

@@ -421,8 +421,8 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertGreaterThan(rateLimitedErrors.load(ordering: .relaxed), 0)
         
-        /// Waiting 5 seconds to make sure the next tests don't get rate-limited
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        /// Waiting 10 seconds to make sure the next tests don't get rate-limited
+        try await Task.sleep(nanoseconds: 10_000_000_000)
     }
     
     func testCachingInPractice() async throws {
