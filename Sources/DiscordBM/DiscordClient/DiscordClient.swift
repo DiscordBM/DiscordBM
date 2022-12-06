@@ -170,12 +170,18 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
 }
 
 public enum DiscordClientError: Error {
+    /// You have exhausted your rate-limits.
     case rateLimited(url: String)
+    /// Discord responded with a non-2xx status code.
     case badStatusCode(DiscordHTTPResponse)
+    /// The body of the response was empty.
     case emptyBody(DiscordHTTPResponse)
+    /// You need to provide an `appId`.
+    /// Either via the function arguments or the DiscordClient initializer.
     case appIdParameterRequired
-    /// Can only send one of those query parameters.
-    case queryParametersMutuallyExclusive(queries: [(String, String?)])
+    /// Can only send one of these query parameters.
+    case queryParametersMutuallyExclusive(queries: [(String, String)])
+    /// Query parameter is out of the accepted bounds.
     case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)
 }
 
@@ -188,15 +194,19 @@ extension DiscordClient {
             return appId
         } else {
             /// You have not passed your app-id in the init of `DiscordClient`/`GatewayManager`.
-            /// You need to pass it in the function parameters.
+            /// You need to pass it in the function parameters at least.
             throw DiscordClientError.appIdParameterRequired
         }
     }
     
     @usableFromInline
     func checkMutuallyExclusive(queries: [(String, String?)]) throws {
-        guard queries.filter({ $0.1 != nil }).count < 2 else {
-            throw DiscordClientError.queryParametersMutuallyExclusive(queries: queries)
+        let notNil = queries.filter { $0.1 != nil }
+        guard notNil.count < 2 else {
+            throw DiscordClientError.queryParametersMutuallyExclusive(
+                /// Force-unwrap is safe.
+                queries: notNil.map { ($0, $1!) }
+            )
         }
     }
     

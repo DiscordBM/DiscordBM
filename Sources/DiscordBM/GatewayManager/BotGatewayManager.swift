@@ -8,11 +8,7 @@ import struct NIOCore.TimeAmount
 
 public actor BotGatewayManager: GatewayManager {
     
-    private weak var ws: WebSocket? {
-        didSet {
-            self.closeWebSocket(ws: oldValue)
-        }
-    }
+    private weak var ws: WebSocket?
     let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
@@ -70,7 +66,7 @@ public actor BotGatewayManager: GatewayManager {
     /// Discord cares about the identify payload for rate-limiting and if we send
     /// more than 1000 identifies in a day, Discord will revoke the bot token.
     /// This Backoff does not necessarily prevent your bot token getting revoked,
-    /// but in the worst case, doesn't let it happen sooner than 8 hours.
+    /// but in the worst case, doesn't let it happen sooner than ~8 hours.
     /// This also helps in other situations, for example when there is a Discord outage.
     let connectionBackoff = Backoff(
         base: 2,
@@ -202,13 +198,12 @@ public actor BotGatewayManager: GatewayManager {
         }
         /// Guard if other connections are in process
         guard [.noConnection, .configured, .stopped].contains(self.state) else {
-            logger.warning("Gateway state doesn't allow a new connection", metadata: [
+            logger.error("Gateway state doesn't allow a new connection", metadata: [
                 "state": .stringConvertible(state)
             ])
             return
         }
         self._state.store(.connecting, ordering: .relaxed)
-        self.connectionId.wrappingIncrement(ordering: .relaxed)
         await self.sendQueue.reset()
         let gatewayURL = await getGatewayURL()
         var urlSuffix = "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json"
@@ -219,7 +214,7 @@ public actor BotGatewayManager: GatewayManager {
             urlSuffix += "&compress=zlib-stream"
             configuration.decompression = .init(
                 algorithm: .deflate,
-                limit: .size(maxFrameSize)
+                limit: .size(self.maxFrameSize)
             )
         }
         logger.trace("Will try to connect to Discord through web-socket")
@@ -229,6 +224,7 @@ public actor BotGatewayManager: GatewayManager {
             on: eventLoopGroup
         ) { ws in
             self.logger.debug("Connected to Discord through web-socket. Will configure")
+            self.closeWebSocket(ws: self.ws)
             self.ws = ws
             self.configureWebSocket()
         }.whenFailure { [self] error in
@@ -236,9 +232,7 @@ public actor BotGatewayManager: GatewayManager {
                 "error": "\(error)"
             ])
             self._state.store(.noConnection, ordering: .relaxed)
-            Task {
-                await self.connect()
-            }
+            Task { await self.connect() }
         }
     }
     
@@ -278,7 +272,7 @@ public actor BotGatewayManager: GatewayManager {
 
 extension BotGatewayManager {
     private func configureWebSocket() {
-        let connId = self.connectionId.load(ordering: .relaxed)
+        let connId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
         self.setupOnText(forConnectionWithId: connId)
         self.setupOnClose(forConnectionWithId: connId)
         self._state.store(.configured, ordering: .relaxed)
@@ -431,9 +425,7 @@ extension BotGatewayManager {
                 from: data
             )
             self.logger.debug("Decoded event: \(event)")
-            Task {
-                await self.processEvent(event)
-            }
+            Task { await self.processEvent(event) }
             for onEvent in self.onEvents {
                 onEvent(event)
             }
@@ -518,7 +510,7 @@ extension BotGatewayManager {
             await self.sleep(for: interval)
             guard self.connectionId.load(ordering: .relaxed) == connectionId else {
                 self.logger.trace("Canceled a ping task with connection id: \(connectionId)")
-                return // cancel
+                return /// cancel
             }
             self.logger.debug("Will send automatic ping for connection id: \(connectionId)")
             self.sendPing(forConnectionWithId: connectionId)
