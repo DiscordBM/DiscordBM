@@ -135,6 +135,7 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
     public var options: [Option]?
     public var dm_permission: Bool?
     public var default_member_permissions: StringBitField<Permission>?
+    public var nsfw: Bool?
     public var type: Kind?
     
     //MARK: Below fields are only returned by Discord, and you don't need to send.
@@ -147,7 +148,7 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
     public var guild_id: String?
     public var version: String?
     
-    public init(name: String, name_localizations: [DiscordLocale: String]? = nil, description: String, description_localizations: [DiscordLocale: String]? = nil, options: [Option]? = nil, dm_permission: Bool? = nil, default_member_permissions: [Permission]? = nil, type: Kind? = nil) {
+    public init(name: String, name_localizations: [DiscordLocale: String]? = nil, description: String, description_localizations: [DiscordLocale: String]? = nil, options: [Option]? = nil, dm_permission: Bool? = nil, default_member_permissions: [Permission]? = nil, nsfw: Bool? = nil, type: Kind? = nil) {
         self.name = name
         self.name_localizations = name_localizations
         self.description = description
@@ -155,6 +156,7 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
         self.options = options
         self.dm_permission = dm_permission
         self.default_member_permissions = default_member_permissions.map { .init($0) }
+        self.nsfw = nsfw
         self.type = type
     }
     
