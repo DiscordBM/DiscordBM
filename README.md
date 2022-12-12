@@ -88,8 +88,6 @@ let bot = BotGatewayManager(
 
 ### Using The Gateway Manager
 ```swift
-import DiscordBM
-
 /// Make an instance like above
 let bot: BotGatewayManager = ...
 
@@ -99,17 +97,18 @@ Task {
         switch event.data {
         case let .messageCreate(message):
             print("GOT MESSAGE!", message)
-            /// Switch over other cases you have intents for and you care about.
+            /// Switch over other cases you have intents for and you care about
         default: break
         }
     }
     
     /// If you care about library parsing failures, handle them here
     await bot.addEventParseFailureHandler { error, buffer in
-        /// Handle the failure using the `Error` thrown and the `ByteBuffer` received.
+        /// Handle the failure using the `Error` thrown and the `ByteBuffer` received
     }
 
-    /// Tell the manager to connect to Discord
+    /// Tell the manager to connect to Discord.
+    /// FYI, This will return _before_ the connection is fully established
     await bot.connect()
 
     /// Use `bot.client` to send requests to Discord.
@@ -218,7 +217,7 @@ These exceptions should not be a big deal depending on your code style, but migh
 * Adding enum cases.
   * This is so `DiscordBM` can continue to add new cases to public enums in minor versions.
   * If you care about code breakage, you can't use exhaustive switch statements.   
-    Either include `default:` in your switch statements, or use `if let`/`if case let`.
+    Either include `default:` in your switch statements, or use `if case`/`if case let`.
   * See [this](https://forums.swift.org/t/extensible-enumerations-for-non-resilient-libraries/35900) for more info.
 * Passing initializers/functions as arguments, or directly using their signatures somehow else.
   * This is so `DiscordBM` can continue to add new parameters to public initializers/functions in minor versions.   
