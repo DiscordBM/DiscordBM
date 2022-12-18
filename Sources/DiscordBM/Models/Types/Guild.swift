@@ -18,11 +18,6 @@ public struct Guild: Sendable, Codable {
         public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
-        
-        public func hasRole(withId id: String, guildId: String) -> Bool {
-            /// guildId == id <-> role == @everyone
-            guildId == id || self.roles.contains(where: { $0 == id })
-        }
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level

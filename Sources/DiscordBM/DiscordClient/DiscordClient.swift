@@ -1,6 +1,7 @@
 @preconcurrency import AsyncHTTPClient
 import NIOHTTP1
 import NIOCore
+import Foundation
 
 public protocol DiscordClient {
     var appId: String? { get }
@@ -116,19 +117,12 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     }
     
     public var description: String {
-        var bodyDescription: String {
-            if var body = body {
-                return body.readString(length: body.readableBytes) ?? "nil"
-            } else {
-                return "nil"
-            }
-        }
-        return "DiscordHTTPResponse("
+        "DiscordHTTPResponse("
         + "host: \(host), "
         + "status: \(status), "
         + "version: \(version), "
         + "headers: \(headers), "
-        + "body: \(bodyDescription)"
+        + "body: \(body.map({ String(buffer: $0) }) ?? "nil")"
         + ")"
     }
     
@@ -142,8 +136,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     @inlinable
     public func decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
         try guardIsSuccessfulResponse()
-        if var body = self.body,
-           let data = body.readData(length: body.readableBytes, byteTransferStrategy: .noCopy) {
+        if let data = body.map({ Data(buffer: $0) }) {
             return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
         } else {
             throw DiscordClientError.emptyBody(self)

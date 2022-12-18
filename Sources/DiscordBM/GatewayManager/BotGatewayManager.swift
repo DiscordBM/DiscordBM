@@ -14,6 +14,7 @@ public actor BotGatewayManager: GatewayManager {
     public nonisolated let client: any DiscordClient
     /// Max frame size we accept to receive through the websocket connection.
     nonisolated let maxFrameSize: Int
+    /// Generator of `BotGatewayManager` ids.
     static let idGenerator = ManagedAtomic(0)
     /// This gateway manager's identifier.
     public nonisolated let id = BotGatewayManager.idGenerator

@@ -499,7 +499,10 @@ class DiscordClientTests: XCTestCase {
             
             XCTAssertEqual(deletionResponse.status, .noContent)
             
-            let newCommandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            let newCommandsCount = try await cacheClient
+                .getApplicationGlobalCommands()
+                .decode()
+                .count
             
             XCTAssertEqual(commandsCount, newCommandsCount + 1)
         }
@@ -531,7 +534,7 @@ class DiscordClientTests: XCTestCase {
             
             /// I think the command-addition takes effect a second or so later, so we need to
             /// wait a second before we try to delete the command, otherwise Discord might
-            /// think the command doesn't exist and returns 404.
+            /// think the command doesn't exist and return 404.
             try await Task.sleep(nanoseconds: 1_000_000_000)
             
             let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(
@@ -540,7 +543,10 @@ class DiscordClientTests: XCTestCase {
             
             XCTAssertEqual(deletionResponse.status, .noContent)
             
-            let newCommandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            let newCommandsCount = try await cacheClient
+                .getApplicationGlobalCommands()
+                .decode()
+                .count
             
             XCTAssertEqual(commandsCount, newCommandsCount + 1)
         }
