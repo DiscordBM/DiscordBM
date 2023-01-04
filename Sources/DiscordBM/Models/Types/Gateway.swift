@@ -1057,6 +1057,7 @@ public struct Gateway: Sendable, Codable {
         public var channel_id: String
         public var guild_id: String?
         public var message_id: String
+        public var burst: Bool?
         public var emoji: PartialEmoji
     }
     
