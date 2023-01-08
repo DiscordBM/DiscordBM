@@ -1081,6 +1081,11 @@ public struct Gateway: Sendable, Codable {
         public var platform: String?
         public var timestamps: Activity.Timestamps?
         public var application_id: String?
+        public var assets: Activity.Assets?
+        public var party: Activity.Party?
+        public var details: String?
+        public var sync_id: String?
+        public var flags: IntBitField<Activity.Flag>?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#presence-update-presence-update-event-fields
