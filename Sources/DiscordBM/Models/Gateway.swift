@@ -85,6 +85,7 @@ public struct Gateway: Sendable, Codable {
             case guildApplicationCommandIndexUpdate(GuildApplicationCommandIndexUpdate)
             case guildJoinRequestUpdate(GuildJoinRequestUpdate)
             case guildJoinRequestDelete(GuildJoinRequestDelete)
+            case guildAuditLogEntryCreate(AuditLog.Entry)
             case integrationCreate(IntegrationCreate)
             case integrationUpdate(IntegrationCreate)
             case integrationDelete(IntegrationDelete)
@@ -242,6 +243,8 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .guildJoinRequestUpdate(decodeData())
                 case "GUILD_JOIN_REQUEST_DELETE":
                     self.data = try .guildJoinRequestDelete(decodeData())
+                case "GUILD_AUDIT_LOG_ENTRY_CREATE":
+                    self.data = try .guildAuditLogEntryCreate(decodeData())
                 case "INTEGRATION_CREATE":
                     self.data = try .integrationCreate(decodeData())
                 case "INTEGRATION_UPDATE":

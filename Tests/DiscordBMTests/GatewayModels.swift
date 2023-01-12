@@ -117,6 +117,45 @@ class GatewayModelsTests: XCTestCase {
             XCTAssertTrue(message.attachments.isEmpty)
             XCTAssertEqual(message.guild_id, "439103874612675485")
         }
+        
+        do {
+            let text = """
+            {
+                "t": "GUILD_AUDIT_LOG_ENTRY_CREATE",
+                "s": 1806139,
+                "op": 0,
+                "d": {
+                    "user_id": "159985870458322944",
+                    "target_id": "981723329457164289",
+                    "id": "1063214083664511006",
+                    "changes": [
+                        {
+                            "old_value": "Online Members: 24",
+                            "new_value": "Online Members: 25",
+                            "key": "name"
+                        }
+                    ],
+                    "action_type": 11,
+                    "guild_id": "964554609010040873"
+                }
+            }
+            """
+            let decoded = try JSONDecoder().decode(Gateway.Event.self, from: Data(text.utf8))
+            XCTAssertEqual(decoded.opcode, .dispatch)
+            XCTAssertEqual(decoded.sequenceNumber, 1806139)
+            XCTAssertEqual(decoded.type, "GUILD_AUDIT_LOG_ENTRY_CREATE")
+            guard case let .guildAuditLogEntryCreate(auditLog) = decoded.data else {
+                XCTFail("Unexpected data: \(String(describing: decoded.data))")
+                return
+            }
+            XCTAssertEqual(auditLog.changes?.count, 1)
+            XCTAssertEqual(auditLog.user_id, "159985870458322944")
+            XCTAssertEqual(auditLog.id, "1063214083664511006")
+            if case .channelUpdate = auditLog.action { } else {
+                XCTFail("Unexpected action: \(String(describing: auditLog.action))")
+            }
+            XCTAssertEqual(auditLog.reason, nil)
+        }
     }
     
     /// Test that collections of raw-representable codable enums
