@@ -213,10 +213,7 @@ public actor BotGatewayManager: GatewayManager {
         var configuration = WebSocketClient.Configuration(maxFrameSize: self.maxFrameSize)
         if compression {
             urlSuffix += "&compress=zlib-stream"
-            configuration.decompression = .init(
-                algorithm: .deflate,
-                limit: .size(self.maxFrameSize)
-            )
+            configuration.decompression = .enabled
         }
         logger.trace("Will try to connect to Discord through web-socket")
         WebSocket.connect(
