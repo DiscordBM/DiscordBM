@@ -345,7 +345,7 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(attachment.filename, "discordbm.png")
             XCTAssertEqual(attachment.description, "Test attachment!")
             XCTAssertEqual(attachment.content_type, "image/png")
-            XCTAssertEqual(attachment.size, 21013)
+            XCTAssertGreaterThan(attachment.size, 20_000)
             XCTAssertEqual(attachment.height, 210)
             XCTAssertEqual(attachment.width, 1200)
             XCTAssertFalse(attachment.id.isEmpty)

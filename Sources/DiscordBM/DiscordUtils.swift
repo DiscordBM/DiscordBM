@@ -94,10 +94,12 @@ public enum DiscordUtils {
         return "<t:\(unixTimestamp)\(style)>"
     }
     
+    /// The kind of channel for escaping characters.
     public enum ChannelKind {
         case text
     }
     
+    /// Escapes the special characters in the text, for the specified channel type.
     public static func escapingSpecialCharacters(
         _ text: String,
         forChannelType: ChannelKind
