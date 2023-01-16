@@ -92,4 +92,21 @@ class DiscordUtilsTests: XCTestCase {
             XCTAssertEqual(string3, string1)
         }
     }
+    
+    func testEscapingSpecialCharacters() throws {
+        let text = #"""
+        *Hello!*
+        __***How are you?***__
+        > _I'm fine thank you!_
+        > ~Not really :\(~
+        """#
+        let expected = #"""
+        \*Hello!\*
+        \_\_\*\*\*How are you?\*\*\*\_\_
+        \> \_I'm fine thank you!\_
+        \> \~Not really :\\(\~
+        """#
+        let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
+        XCTAssertEqual(escaped, expected)
+    }
 }

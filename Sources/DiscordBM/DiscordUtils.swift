@@ -93,4 +93,20 @@ public enum DiscordUtils {
         let style = style.map { ":\($0.rawValue)" } ?? ""
         return "<t:\(unixTimestamp)\(style)>"
     }
+    
+    public enum ChannelKind {
+        case text
+    }
+    
+    public static func escapingSpecialCharacters(
+        _ text: String,
+        forChannelType: ChannelKind
+    ) -> String {
+        text
+            .replacingOccurrences(of: #"\"#, with: #"\\"#)
+            .replacingOccurrences(of: #"*"#, with: #"\*"#)
+            .replacingOccurrences(of: #"_"#, with: #"\_"#)
+            .replacingOccurrences(of: #">"#, with: #"\>"#)
+            .replacingOccurrences(of: #"~"#, with: #"\~"#)
+    }
 }
