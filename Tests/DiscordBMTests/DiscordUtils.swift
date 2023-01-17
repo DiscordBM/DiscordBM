@@ -99,12 +99,14 @@ class DiscordUtilsTests: XCTestCase {
         __***How are you?***__
         > _I'm fine thank you!_
         > ~Not really :\(~
+        || Just Kidding! || LOL | HEHE
         """#
         let expected = #"""
         \*Hello!\*
         \_\_\*\*\*How are you?\*\*\*\_\_
         \> \_I'm fine thank you!\_
         \> \~Not really :\\(\~
+        \|\| Just Kidding! \|\| LOL \| HEHE
         """#
         let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
         XCTAssertEqual(escaped, expected)
