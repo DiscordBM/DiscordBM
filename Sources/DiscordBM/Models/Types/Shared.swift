@@ -336,7 +336,7 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
         self.values = elements
     }
     
-    public func encode(into encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         let container = _DiscordLocaleCodableContainer<C>(self.values)
         try container.encode(to: encoder)
     }
@@ -771,3 +771,10 @@ public final class DereferenceBox<C>: Codable, CustomStringConvertible where C: 
 
 extension DereferenceBox: Sendable where C: Sendable { }
 
+private extension Calendar {
+    static let utc: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .init(identifier: "UTC")!
+        return calendar
+    }()
+}

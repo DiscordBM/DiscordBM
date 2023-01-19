@@ -18,11 +18,6 @@ public struct Guild: Sendable, Codable {
         public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
-        
-        public func hasRole(withId id: String, guildId: String) -> Bool {
-            /// guildId == id <-> role == @everyone
-            guildId == id || self.roles.contains(where: { $0 == id })
-        }
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level
@@ -82,6 +77,7 @@ public struct Guild: Sendable, Codable {
         case CommunityExpMedium = "COMMUNITY_EXP_MEDIUM"
         case communityExpLargeUngated = "COMMUNITY_EXP_LARGE_UNGATED"
         case invitesDisabled = "INVITES_DISABLED"
+        case applicationCommandPermissionsV2 = "APPLICATION_COMMAND_PERMISSIONS_V2"
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
@@ -155,6 +151,7 @@ public struct Guild: Sendable, Codable {
     public var system_channel_id: String?
     public var system_channel_flags: IntBitField<SystemChannelFlag>
     public var rules_channel_id: String?
+    public var safety_alerts_channel_id: String?
     public var max_presences: Int?
     public var max_members: Int?
     public var vanity_url_code: String?
@@ -232,6 +229,7 @@ public struct PartialGuild: Sendable, Codable {
     public var system_channel_id: String?
     public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>?
     public var rules_channel_id: String?
+    public var safety_alerts_channel_id: String?
     public var max_presences: Int?
     public var max_members: Int?
     public var vanity_url_code: String?

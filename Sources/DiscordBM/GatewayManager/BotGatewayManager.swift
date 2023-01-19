@@ -6,65 +6,15 @@ import Logging
 import enum NIOWebSocket.WebSocketErrorCode
 import struct NIOCore.TimeAmount
 
-#if swift(>=5.7)
-/// If you're seeing the **Cannot find type 'AnyActor' in scope** error,
-/// you need to update to Xcode 14.1. Sorry, this a known Xcode issue.
-public protocol DiscordActor: AnyActor { }
-#else /// Swift `5.6` doesn't have `AnyActor`.
-public protocol DiscordActor: AnyObject { }
-#endif
-
-public protocol GatewayManager: DiscordActor {
-    /// A client to send requests to Discord.
-    nonisolated var client: any DiscordClient { get }
-    /// This gateway manager's identifier.
-    nonisolated var id: Int { get }
-    /// The current state of the gateway manager.
-    nonisolated var state: GatewayState { get }
-    
-    /// Starts connecting to Discord.
-    func connect() async
-    /// Requests members of guilds from discord.
-    /// Refer to the documentation link of ``Gateway.RequestGuildMembers`` for more info.
-    func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
-    /// Adds a handler to be notified of events.
-    func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
-    /// Adds a handler to be notified of event parsing failures.
-    func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) async
-    /// Disconnects from Discord.
-    func disconnect() async
-}
-
-public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
-    case stopped
-    case noConnection
-    case connecting
-    case configured
-    case connected
-    
-    public var description: String {
-        switch self {
-        case .stopped: return "stopped"
-        case .noConnection: return "noConnection"
-        case .connecting: return "connecting"
-        case .configured: return "configured"
-        case .connected: return "connected"
-        }
-    }
-}
-
 public actor BotGatewayManager: GatewayManager {
     
-    private weak var ws: WebSocket? {
-        didSet {
-            self.closeWebSocket(ws: oldValue)
-        }
-    }
+    private weak var ws: WebSocket?
     let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
     /// Max frame size we accept to receive through the websocket connection.
     nonisolated let maxFrameSize: Int
+    /// Generator of `BotGatewayManager` ids.
     static let idGenerator = ManagedAtomic(0)
     /// This gateway manager's identifier.
     public nonisolated let id = BotGatewayManager.idGenerator
@@ -73,7 +23,7 @@ public actor BotGatewayManager: GatewayManager {
     
     //MARK: Event hooks
     var onEvents: [(Gateway.Event) -> ()] = []
-    var onEventParseFailures: [(Error, String) -> ()] = []
+    var onEventParseFailures: [(Error, ByteBuffer) -> ()] = []
     
     //MARK: Connection data
     nonisolated let identifyPayload: Gateway.Identify
@@ -86,6 +36,7 @@ public actor BotGatewayManager: GatewayManager {
     }
     
     //MARK: Send queue
+    
     /// 120 per 60 seconds (1 every 500ms),
     /// per https://discord.com/developers/docs/topics/gateway#rate-limiting
     var sendQueue = SerialQueue(waitTime: .milliseconds(500))
@@ -108,12 +59,15 @@ public actor BotGatewayManager: GatewayManager {
     var maxConcurrency: Int? = nil
     var isFirstConnection = true
     
+    //MARK: Compression
+    let compression: Bool
+    
     //MARK: Backoff
     
     /// Discord cares about the identify payload for rate-limiting and if we send
     /// more than 1000 identifies in a day, Discord will revoke the bot token.
     /// This Backoff does not necessarily prevent your bot token getting revoked,
-    /// but in the worst case, doesn't let it happen sooner than 8 hours.
+    /// but in the worst case, doesn't let it happen sooner than ~8 hours.
     /// This also helps in other situations, for example when there is a Discord outage.
     let connectionBackoff = Backoff(
         base: 2,
@@ -126,28 +80,49 @@ public actor BotGatewayManager: GatewayManager {
     var unsuccessfulPingsCount = 0
     var lastPongDate = Date()
     
+    /// - Parameters:
+    ///   - eventLoopGroup: An `EventLoopGroup`.
+    ///   - httpClient: A `HTTPClient`.
+    ///   - client: A `DiscordClient` to use.
+    ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
+    ///   - compression: Enables transport compression for less network bandwidth usage
+    ///    but more CPU load.
+    ///   - appId: Your Discord application id.
+    ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
         client: any DiscordClient,
         maxFrameSize: Int =  1 << 31,
+        compression: Bool = false,
         appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
+        self.compression = compression
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
     }
     
+    /// - Parameters:
+    ///   - eventLoopGroup: An `EventLoopGroup`.
+    ///   - httpClient: A `HTTPClient`.
+    ///   - clientConfiguration: Configuration of the `DiscordClient`.
+    ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
+    ///   - compression: Enables transport compression for less network bandwidth usage
+    ///    but more CPU load.
+    ///   - appId: Your Discord application id.
+    ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
+        compression: Bool = false,
         appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
@@ -159,17 +134,31 @@ public actor BotGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
+        self.compression = compression
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
     }
     
+    /// - Parameters:
+    ///   - eventLoopGroup: An `EventLoopGroup`.
+    ///   - httpClient: A `HTTPClient`.
+    ///   - clientConfiguration: Configuration of the `DiscordClient`.
+    ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
+    ///   - compression: Enables transport compression for less network bandwidth usage
+    ///    but more CPU load.
+    ///   - token: Your Discord bot-token.
+    ///   - appId: Your Discord application id.
+    ///   - shard: What shard this Manager is representing, incase you use shard-ing at all.
+    ///   - presence: The initial presence of the bot.
+    ///   - intents: The Discord intents you want to receive messages for.
     public init(
         eventLoopGroup: EventLoopGroup,
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
+        compression: Bool = false,
         token: String,
         appId: String? = nil,
         shard: IntPair? = nil,
@@ -185,6 +174,7 @@ public actor BotGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
+        self.compression = compression
         self.identifyPayload = .init(
             token: token,
             shard: shard,
@@ -209,26 +199,30 @@ public actor BotGatewayManager: GatewayManager {
         }
         /// Guard if other connections are in process
         guard [.noConnection, .configured, .stopped].contains(self.state) else {
-            logger.warning("Gateway state doesn't allow a new connection", metadata: [
+            logger.error("Gateway state doesn't allow a new connection", metadata: [
                 "state": .stringConvertible(state)
             ])
             return
         }
         self._state.store(.connecting, ordering: .relaxed)
-        self.connectionId.wrappingIncrement(ordering: .relaxed)
         await self.sendQueue.reset()
         let gatewayURL = await getGatewayURL()
+        var urlSuffix = "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json"
         logger.trace("Will wait for other shards if needed")
         await waitInShardQueueIfNeeded()
-        var configuration = WebSocketClient.Configuration()
-        configuration.maxFrameSize = self.maxFrameSize
+        var configuration = WebSocketClient.Configuration(maxFrameSize: self.maxFrameSize)
+        if compression {
+            urlSuffix += "&compress=zlib-stream"
+            configuration.decompression = .enabled
+        }
         logger.trace("Will try to connect to Discord through web-socket")
         WebSocket.connect(
-            to: gatewayURL + "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json",
+            to: gatewayURL + urlSuffix,
             configuration: configuration,
             on: eventLoopGroup
         ) { ws in
             self.logger.debug("Connected to Discord through web-socket. Will configure")
+            self.closeWebSocket(ws: self.ws)
             self.ws = ws
             self.configureWebSocket()
         }.whenFailure { [self] error in
@@ -236,13 +230,11 @@ public actor BotGatewayManager: GatewayManager {
                 "error": "\(error)"
             ])
             self._state.store(.noConnection, ordering: .relaxed)
-            Task {
-                await self.connect()
-            }
+            Task { await self.connect() }
         }
     }
     
-    /// Requests members of guilds from discord.
+    /// Requests guild members from Discord.
     /// Refer to the documentation link of ``Gateway.RequestGuildMembers`` for more info.
     public func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) {
         /// This took a lot of time to figure out, not sure why it needs opcode `1`.
@@ -258,7 +250,7 @@ public actor BotGatewayManager: GatewayManager {
     }
     
     /// Adds a handler to be notified of event parsing failures.
-    public func addEventParseFailureHandler(_ handler: @escaping (Error, String) -> Void) {
+    public func addEventParseFailureHandler(_ handler: @escaping (Error, ByteBuffer) -> Void) {
         self.onEventParseFailures.append(handler)
     }
     
@@ -278,7 +270,7 @@ public actor BotGatewayManager: GatewayManager {
 
 extension BotGatewayManager {
     private func configureWebSocket() {
-        let connId = self.connectionId.load(ordering: .relaxed)
+        let connId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
         self.setupOnText(forConnectionWithId: connId)
         self.setupOnClose(forConnectionWithId: connId)
         self._state.store(.configured, ordering: .relaxed)
@@ -410,27 +402,35 @@ extension BotGatewayManager {
     }
     
     private func setupOnText(forConnectionWithId connectionId: UInt) {
-        self.ws?.onText { _, text in
-            self.logger.debug("Got text from websocket \(text)")
-            guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-            let data = Data(text.utf8)
-            do {
-                let event = try DiscordGlobalConfiguration.decoder.decode(
-                    Gateway.Event.self,
-                    from: data
-                )
-                self.logger.debug("Decoded event: \(event)")
-                Task {
-                    await self.processEvent(event)
-                }
-                for onEvent in self.onEvents {
-                    onEvent(event)
-                }
-            } catch {
-                self.logger.debug("Failed to decode event. Error: \(error)")
-                for onEventParseFailure in self.onEventParseFailures {
-                    onEventParseFailure(error, text)
-                }
+        if compression {
+            self.ws?.onBinary { _, buffer in
+                self.processBinaryData(buffer, forConnectionWithId: connectionId)
+            }
+        } else {
+            self.ws?.onTextBuffer { _, buffer in
+                self.processBinaryData(buffer, forConnectionWithId: connectionId)
+            }
+        }
+    }
+    
+    private func processBinaryData(_ buffer: ByteBuffer, forConnectionWithId connectionId: UInt) {
+        self.logger.debug("Got text from websocket \(String(buffer: buffer))")
+        guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
+        let data = Data(buffer: buffer)
+        do {
+            let event = try DiscordGlobalConfiguration.decoder.decode(
+                Gateway.Event.self,
+                from: data
+            )
+            self.logger.debug("Decoded event: \(event)")
+            Task { await self.processEvent(event) }
+            for onEvent in self.onEvents {
+                onEvent(event)
+            }
+        } catch {
+            self.logger.debug("Failed to decode event. Error: \(error)")
+            for onEventParseFailure in self.onEventParseFailures {
+                onEventParseFailure(error, buffer)
             }
         }
     }
@@ -508,7 +508,7 @@ extension BotGatewayManager {
             await self.sleep(for: interval)
             guard self.connectionId.load(ordering: .relaxed) == connectionId else {
                 self.logger.trace("Canceled a ping task with connection id: \(connectionId)")
-                return // cancel
+                return /// cancel
             }
             self.logger.debug("Will send automatic ping for connection id: \(connectionId)")
             self.sendPing(forConnectionWithId: connectionId)
@@ -557,25 +557,39 @@ extension BotGatewayManager {
                    self.connectionId.load(ordering: .relaxed) != connectionId {
                     return
                 }
+                
+                let opcode = opcode ?? payload.opcode.rawValue
+                
+                let data: Data
                 do {
-                    let data = try DiscordGlobalConfiguration.encoder.encode(payload)
-                    let opcode = opcode ?? payload.opcode.rawValue
-                    if let ws = await self.ws {
+                    data = try DiscordGlobalConfiguration.encoder.encode(payload)
+                } catch {
+                    logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
+                        "payload": .string("\(payload)"),
+                        "opcode": .stringConvertible(opcode),
+                        "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                    ])
+                    return
+                }
+                
+                if let ws = await self.ws {
+                    do {
                         try await ws.send(
                             raw: data,
                             opcode: .init(encodedWebSocketOpcode: opcode)!
                         )
-                    } else {
-                        logger.warning("Trying to send through ws when a connection is not established", metadata: [
+                    } catch {
+                        logger.error("Could not send payload through websocket", metadata: [
+                            "error": "\(error)",
                             "payload": .string("\(payload)"),
-                            "state": .stringConvertible(self._state.load(ordering: .relaxed)),
+                            "opcode": .stringConvertible(opcode),
                             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                         ])
                     }
-                } catch {
-                    logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
+                } else {
+                    logger.warning("Trying to send through ws when a connection is not established", metadata: [
                         "payload": .string("\(payload)"),
-                        "opcode": .stringConvertible(opcode ?? .max),
+                        "state": .stringConvertible(self._state.load(ordering: .relaxed)),
                         "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                     ])
                 }

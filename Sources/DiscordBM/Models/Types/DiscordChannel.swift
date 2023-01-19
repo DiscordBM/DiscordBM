@@ -36,7 +36,9 @@ public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
     public enum Flag: Int, Sendable {
+        case unknownValue0 = 0
         case pinned = 1
+        case unknownValue2 = 2
         case requireTag = 4
     }
     
@@ -45,6 +47,7 @@ public struct DiscordChannel: Sendable, Codable {
         case auto = 1
         case full = 2
     }
+    
     /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
     public struct ForumTag: Sendable, Codable {
         public var id: String?
@@ -66,6 +69,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var bitrate: Int?
     public var user_limit: Int?
     public var rate_limit_per_user: Int?
+    public var default_forum_layout: Int?
     public var recipients: [DiscordUser]?
     public var icon: String?
     public var owner_id: String?

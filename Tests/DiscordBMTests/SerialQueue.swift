@@ -38,7 +38,8 @@ class SerialQueueTests: XCTestCase {
             XCTAssertGreaterThan(time, Double(idx) * 2)
             if idx != 0 {
                 let passedBetweenTimes = times[idx] - times[idx - 1]
-                XCTAssertGreaterThan(passedBetweenTimes, 2)
+                /// 1.99 since it might not be accurate to the exact 2 second.
+                XCTAssertGreaterThan(passedBetweenTimes, 1.99)
             }
         }
     }
@@ -63,7 +64,8 @@ class SerialQueueTests: XCTestCase {
             XCTAssertGreaterThan(time, Double(idx) * 0.1)
             if idx != 0 {
                 let passedBetweenTimes = times[idx] - times[idx - 1]
-                XCTAssertGreaterThan(passedBetweenTimes, 0.1)
+                /// 0.098 since it might not be accurate to the exact 0.1 second.
+                XCTAssertGreaterThan(passedBetweenTimes, 0.098)
             }
         }
     }

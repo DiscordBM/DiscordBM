@@ -428,6 +428,7 @@ class DiscordClientTests: XCTestCase {
         await container.waitForCounter()
         
         XCTAssertGreaterThan(rateLimitedErrors.load(ordering: .relaxed), 0)
+        XCTAssertLessThan(rateLimitedErrors.load(ordering: .relaxed), count)
         
         /// Waiting 10 seconds to make sure the next tests don't get rate-limited
         try await Task.sleep(nanoseconds: 10_000_000_000)
@@ -489,8 +490,8 @@ class DiscordClientTests: XCTestCase {
             
             /// We create a command, fetch the commands count, then delete the command
             /// and fetch the command count again.
-            /// Since we are using caching, the first command count and the second command count
-            /// must NOT be the same.
+            /// Since we are not using caching for this endpoint, the first command count and
+            /// the second command count must NOT be the same.
             let commandName = "test-command"
             let commandDesc = "Testing!"
             let command = try await cacheClient.createApplicationGlobalCommand(
@@ -506,7 +507,10 @@ class DiscordClientTests: XCTestCase {
             
             XCTAssertEqual(deletionResponse.status, .noContent)
             
-            let newCommandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            let newCommandsCount = try await cacheClient
+                .getApplicationGlobalCommands()
+                .decode()
+                .count
             
             XCTAssertEqual(commandsCount, newCommandsCount + 1)
         }
@@ -523,8 +527,8 @@ class DiscordClientTests: XCTestCase {
             
             /// We create a command, fetch the commands count, then delete the command
             /// and fetch the command count again.
-            /// Since we are using caching, the first command count and the second command count
-            /// must NOT be the same.
+            /// Since we are not using caching, the first command count and the second
+            /// command count must NOT be the same.
             let commandName = "test-command"
             let commandDesc = "Testing!"
             let command = try await cacheClient.createApplicationGlobalCommand(
@@ -536,11 +540,21 @@ class DiscordClientTests: XCTestCase {
             
             let commandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
             
-            let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(id: command.id!)
+            /// I think the command-addition takes effect a second or so later, so we need to
+            /// wait a second before we try to delete the command, otherwise Discord might
+            /// think the command doesn't exist and return 404.
+            try await Task.sleep(nanoseconds: 1_000_000_000)
+            
+            let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(
+                id: command.id!
+            )
             
             XCTAssertEqual(deletionResponse.status, .noContent)
             
-            let newCommandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            let newCommandsCount = try await cacheClient
+                .getApplicationGlobalCommands()
+                .decode()
+                .count
             
             XCTAssertEqual(commandsCount, newCommandsCount + 1)
         }
@@ -566,15 +580,15 @@ private actor Container {
     private var waiter: CheckedContinuation<(), Never>?
     
     func waitForCounter() async {
-        await withCheckedContinuation {
-            waiter = $0
-        }
         Task {
             try await Task.sleep(nanoseconds: 10_000_000_000)
             if waiter != nil {
                 waiter?.resume()
                 XCTFail("Failed to test in-time")
             }
+        }
+        await withCheckedContinuation {
+            waiter = $0
         }
     }
 }

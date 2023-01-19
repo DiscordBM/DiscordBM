@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CaseIterable, CustomStringConvertible {
+public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
     case getGateway
     case getGatewayBot
     case getInteractionResponse
@@ -255,7 +255,7 @@ public enum Endpoint: Sendable {
         case .createGuildRole: return 24
         case .deleteGuildRole: return 25
         case .addGuildMemberRole: return 26
-        case .removeGuildMemberRole: return 26
+        case .removeGuildMemberRole: return 27
         case .getGuildAuditLogs: return 28
         case .addReaction: return 29
         case .createDM: return 30
