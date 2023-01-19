@@ -177,7 +177,7 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
         )
         try validateElementCountDoesNotExceed(options, max: 25, name: "options")
         try validateCharacterCountDoesNotExceed(name, max: 32, name: "name")
-        try validateCharacterCountDoesNotExceed(description, max: 32, name: "description")
+        try validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
         for (_, value) in name_localizations ?? [:] {
             try validateAssertIsNotEmpty(!value.isEmpty, name: "name_localizations.name")
             try validateCharacterCountDoesNotExceed(value, max: 32, name: "name_localizations.name")
