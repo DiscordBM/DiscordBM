@@ -336,7 +336,7 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
         self.values = elements
     }
     
-    public func encode(into encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         let container = _DiscordLocaleCodableContainer<C>(self.values)
         try container.encode(to: encoder)
     }
