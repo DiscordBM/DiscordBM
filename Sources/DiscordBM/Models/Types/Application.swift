@@ -92,13 +92,43 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
                 self.name_localizations = name_localizations
                 self.value = value
             }
+            
+            public init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.name = try container.decode(String.self, forKey: .name)
+                let nameContainer = try container.decodeIfPresent(
+                    DiscordLocaleCodableContainer.self,
+                    forKey: .name_localizations
+                )
+                self.name_localizations = nameContainer?.toDictionary()
+                self.value = try container.decode(StringIntDoubleBool.self, forKey: .value)
+                self.name_localized = try container.decodeIfPresent(String.self, forKey: .name_localized)
+            }
+            
+            public enum CodingKeys: CodingKey {
+                case name
+                case name_localizations
+                case value
+                case name_localized
+            }
+            
+            public func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(self.name, forKey: .name)
+                if let name_localizations = name_localizations {
+                    let nameContainer = DiscordLocaleCodableContainer(name_localizations)
+                    try container.encode(nameContainer, forKey: .name_localizations)
+                }
+                try container.encode(self.value, forKey: .value)
+                try container.encodeIfPresent(self.name_localized, forKey: .name_localized)
+            }
         }
         
         public var type: Kind
         public var name: String
-        public var name_localizations: [String: String]?
+        public var name_localizations: [DiscordLocale: String]?
         public var description: String
-        public var description_localizations: [String: String]?
+        public var description_localizations: [DiscordLocale: String]?
         public var required: Bool?
         public var choices: [Choice]?
         public var options: [Option]?
@@ -112,7 +142,7 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
         public var name_localized: String?
         public var description_localized: String?
         
-        public init(type: Kind, name: String, name_localizations: [String : String]? = nil, description: String, description_localizations: [String : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [Option]? = nil, channel_types: [DiscordChannel.Kind]? = nil, min_value: IntOrDouble? = nil, max_value: IntOrDouble? = nil, autocomplete: Bool? = nil) {
+        public init(type: Kind, name: String, name_localizations: [DiscordLocale : String]? = nil, description: String, description_localizations: [DiscordLocale : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [Option]? = nil, channel_types: [DiscordChannel.Kind]? = nil, min_value: IntOrDouble? = nil, max_value: IntOrDouble? = nil, autocomplete: Bool? = nil) {
             self.type = type
             self.name = name
             self.name_localizations = name_localizations
@@ -125,6 +155,73 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
             self.min_value = min_value
             self.max_value = max_value
             self.autocomplete = autocomplete
+        }
+        
+        enum CodingKeys: CodingKey {
+            case type
+            case name
+            case name_localizations
+            case description
+            case description_localizations
+            case required
+            case choices
+            case options
+            case channel_types
+            case min_value
+            case max_value
+            case autocomplete
+            case value
+            case name_localized
+            case description_localized
+        }
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            self.type = try container.decode(Kind.self, forKey: .type)
+            self.name = try container.decode(String.self, forKey: .name)
+            let nameContainer = try container.decodeIfPresent(
+                DiscordLocaleCodableContainer.self,
+                forKey: .name_localizations
+            )
+            self.name_localizations = nameContainer?.toDictionary()
+            self.description = try container.decode(String.self, forKey: .description)
+            let descriptionContainer = try container.decodeIfPresent(
+                DiscordLocaleCodableContainer.self,
+                forKey: .description_localizations
+            )
+            self.description_localizations = descriptionContainer?.toDictionary()
+            self.required = try container.decodeIfPresent(Bool.self, forKey: .required)
+            self.choices = try container.decodeIfPresent([Choice].self, forKey: .choices)
+            self.options = try container.decodeIfPresent([Option].self, forKey: .options)
+            self.channel_types = try container.decodeIfPresent([DiscordChannel.Kind].self, forKey: .channel_types)
+            self.min_value = try container.decodeIfPresent(IntOrDouble.self, forKey: .min_value)
+            self.max_value = try container.decodeIfPresent(IntOrDouble.self, forKey: .max_value)
+            self.autocomplete = try container.decodeIfPresent(Bool.self, forKey: .autocomplete)
+            self.value = try container.decodeIfPresent(StringIntDoubleBool.self, forKey: .value)
+            self.name_localized = try container.decodeIfPresent(String.self, forKey: .name_localized)
+            self.description_localized = try container.decodeIfPresent(String.self, forKey: .description_localized)
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(self.type, forKey: .type)
+            try container.encode(self.name, forKey: .name)
+            if let name_localizations = name_localizations {
+                let nameContainer = DiscordLocaleCodableContainer(name_localizations)
+                try container.encode(nameContainer, forKey: .name_localizations)
+            }
+            try container.encode(self.description, forKey: .description)
+            if let description_localizations = description_localizations {
+                let descriptionContainer = DiscordLocaleCodableContainer(description_localizations)
+                try container.encode(descriptionContainer, forKey: .description_localizations)
+            }
+            try container.encode(self.required, forKey: .required)
+            try container.encode(self.choices, forKey: .choices)
+            try container.encode(self.options, forKey: .options)
+            try container.encode(self.channel_types, forKey: .channel_types)
+            try container.encode(self.min_value, forKey: .min_value)
+            try container.encode(self.max_value, forKey: .max_value)
+            try container.encode(self.autocomplete, forKey: .autocomplete)
         }
     }
     
@@ -158,6 +255,72 @@ public struct ApplicationCommand: Sendable, Codable, Validatable {
         self.default_member_permissions = default_member_permissions.map { .init($0) }
         self.nsfw = nsfw
         self.type = type
+    }
+    
+    enum CodingKeys: CodingKey {
+        case name
+        case name_localizations
+        case description
+        case description_localizations
+        case options
+        case dm_permission
+        case default_member_permissions
+        case nsfw
+        case type
+        case name_localized
+        case description_localized
+        case default_permission
+        case id
+        case application_id
+        case guild_id
+        case version
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.name = try container.decode(String.self, forKey: .name)
+        let nameContainer = try container.decodeIfPresent(
+            DiscordLocaleCodableContainer.self,
+            forKey: .name_localizations
+        )
+        self.name_localizations = nameContainer?.toDictionary()
+        self.description = try container.decode(String.self, forKey: .description)
+        let descriptionContainer = try container.decodeIfPresent(
+            DiscordLocaleCodableContainer.self,
+            forKey: .description_localizations
+        )
+        self.description_localizations = descriptionContainer?.toDictionary()
+        self.options = try container.decodeIfPresent([Option].self, forKey: .options)
+        self.dm_permission = try container.decodeIfPresent(Bool.self, forKey: .dm_permission)
+        self.default_member_permissions = try container.decodeIfPresent(StringBitField<Permission>.self, forKey: .default_member_permissions)
+        self.nsfw = try container.decodeIfPresent(Bool.self, forKey: .nsfw)
+        self.type = try container.decodeIfPresent(Kind.self, forKey: .type)
+        self.name_localized = try container.decodeIfPresent(String.self, forKey: .name_localized)
+        self.description_localized = try container.decodeIfPresent(String.self, forKey: .description_localized)
+        self.default_permission = try container.decodeIfPresent(Bool.self, forKey: .default_permission)
+        self.id = try container.decodeIfPresent(String.self, forKey: .id)
+        self.application_id = try container.decodeIfPresent(String.self, forKey: .application_id)
+        self.guild_id = try container.decodeIfPresent(String.self, forKey: .guild_id)
+        self.version = try container.decodeIfPresent(String.self, forKey: .version)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.name, forKey: .name)
+        if let name_localizations = name_localizations {
+            let nameContainer = DiscordLocaleCodableContainer(name_localizations)
+            try container.encode(nameContainer, forKey: .name_localizations)
+        }
+        try container.encode(self.description, forKey: .description)
+        if let description_localizations = description_localizations {
+            let descriptionContainer = DiscordLocaleCodableContainer(description_localizations)
+            try container.encode(descriptionContainer, forKey: .description_localizations)
+        }
+        try container.encodeIfPresent(self.options, forKey: .options)
+        try container.encodeIfPresent(self.dm_permission, forKey: .dm_permission)
+        try container.encodeIfPresent(self.default_member_permissions, forKey: .default_member_permissions)
+        try container.encodeIfPresent(self.nsfw, forKey: .nsfw)
+        try container.encodeIfPresent(self.type, forKey: .type)
     }
     
     public func validate() throws {
