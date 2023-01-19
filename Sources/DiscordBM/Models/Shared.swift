@@ -167,6 +167,8 @@ public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecodeMarke
     case korean = "ko"
 }
 
+/// A container to decode/encode `[DiscordLocale: String]`,
+/// because Discord doesn't like how Codable decode/encodes `[DiscordLocale: String]`.
 struct DiscordLocaleCodableContainer: Codable {
     var danish: String?
     var german: String?
