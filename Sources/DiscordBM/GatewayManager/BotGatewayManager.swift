@@ -1,5 +1,5 @@
 import Foundation
-import WebSocketKit
+import WebSocketKitFork
 import AsyncHTTPClient
 import Atomics
 import Logging

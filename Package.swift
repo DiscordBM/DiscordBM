@@ -34,12 +34,12 @@ let package = Package(
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 .product(name: "Atomics", package: "swift-atomics"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
-                "WebSocketKit"
+                "WebSocketKitFork"
             ]
         ),
         /// `WebSocketKit` will be replaced as soon as changes are final and merged in
         /// Vapor's `WebSocketKit`. This is just a copy-paste of that library.
-        .target(name: "WebSocketKit", dependencies: [
+        .target(name: "WebSocketKitFork", dependencies: [
             "CZlib",
             .product(name: "NIO", package: "swift-nio"),
             .product(name: "NIOCore", package: "swift-nio"),
