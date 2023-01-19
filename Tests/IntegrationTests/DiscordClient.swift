@@ -161,6 +161,7 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertEqual(command.name, commandName)
         XCTAssertEqual(command.description, commandDesc)
+        XCTAssertEqual(command.description_localizations?.count, 2)
         
         /// Get all
         let allCommands = try await client.getApplicationGlobalCommands().decode()
