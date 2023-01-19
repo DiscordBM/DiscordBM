@@ -149,7 +149,14 @@ class DiscordClientTests: XCTestCase {
         let commandDesc = "Testing!"
         let command = try await client.createApplicationGlobalCommand(
             appId: Constants.botId,
-            payload: .init(name: commandName, description: commandDesc)
+            payload: .init(
+                name: commandName,
+                description: commandDesc,
+                description_localizations: [
+                    .spanish: "ES_\(commandDesc)",
+                    .german: "DE_\(commandDesc)"
+                ]
+            )
         ).decode()
         
         XCTAssertEqual(command.name, commandName)
