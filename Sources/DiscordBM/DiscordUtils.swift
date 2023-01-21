@@ -112,4 +112,16 @@ public enum DiscordUtils {
             .replacingOccurrences(of: #"~"#, with: #"\~"#)
             .replacingOccurrences(of: #"|"#, with: #"\|"#)
     }
+    
+    public static func extractWebhookIdAndToken(
+        webhookUrl: String
+    ) -> (id: String, token: String)? {
+        let split = webhookUrl
+            .split(separator: "/")
+            .filter({ !$0.isEmpty })
+        guard split.count > 5 else { return nil }
+        let id = String(split[split.count - 2])
+        let token = String(split.last!)
+        return (id, token)
+    }
 }

@@ -185,7 +185,8 @@ public struct DefaultDiscordClient: DiscordClient {
     public func send(
         to endpoint: Endpoint,
         queries: [(String, String?)] = [],
-        headers: HTTPHeaders
+        headers: HTTPHeaders,
+        includeAuthorization: Bool
     ) async throws -> DiscordHTTPResponse {
         try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
             identity, retryCounter, requestId in
@@ -205,7 +206,9 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: endpoint.httpMethod
             )
             request.headers = headers
-            request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+            if includeAuthorization {
+                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+            }
             
             logger.debug("Will send a request to Discord", metadata: [
                 "url": .stringConvertible(request.url),
@@ -234,6 +237,7 @@ public struct DefaultDiscordClient: DiscordClient {
         to endpoint: Endpoint,
         queries: [(String, String?)] = [],
         headers: HTTPHeaders,
+        includeAuthorization: Bool,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         if DiscordGlobalConfiguration.performClientValidations {
@@ -263,7 +267,9 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: endpoint.httpMethod
             )
             request.headers = headers
-            request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+            if includeAuthorization {
+                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+            }
             request.headers.replaceOrAdd(name: "Content-Type", value: "application/json")
             
             request.body = .bytes(data)
@@ -295,6 +301,7 @@ public struct DefaultDiscordClient: DiscordClient {
         to endpoint: Endpoint,
         queries: [(String, String?)],
         headers: HTTPHeaders,
+        includeAuthorization: Bool,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         if DiscordGlobalConfiguration.performClientValidations {
@@ -333,7 +340,9 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: endpoint.httpMethod
             )
             request.headers = headers
-            request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+            if includeAuthorization {
+                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+            }
             request.headers.replaceOrAdd(name: "Content-Type", value: contentType)
             
             request.body = body

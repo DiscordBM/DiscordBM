@@ -333,12 +333,40 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(message.channel_id, response.id)
     }
     
+    func testWebhooks() async throws {
+        let noContentResponse = try await self.client.executeWebhook(
+            address: .url(Constants.webhookUrl),
+            payload: .init(content: "Testing! \(Date())")
+        )
+        XCTAssertEqual(noContentResponse.status, .noContent)
+        
+        let text = "Testing! \(Date())"
+        let response = try await self.client.executeWebhookWithResponse(
+            address: .url(Constants.webhookUrl),
+            payload: .init(content: text)
+        ).decode()
+        
+        XCTAssertEqual(response.channel_id, Constants.webhooksChannelId)
+        XCTAssertEqual(response.content, text)
+        
+        let text2 = "Testing! \(Date())"
+        let threadId = "1066278441256751114"
+        let threadResponse = try await self.client.executeWebhookWithResponse(
+            address: .url(Constants.webhookUrl),
+            threadId: threadId,
+            payload: .init(content: text2)
+        ).decode()
+        
+        XCTAssertEqual(threadResponse.channel_id, threadId)
+        XCTAssertEqual(threadResponse.content, text2)
+    }
+    
     func testMultipartPayload() async throws {
         let image = ByteBuffer(data: resource(name: "discordbm-logo.png"))
         
         do {
             let response = try await self.client.createMessage(
-                channelId: Constants.secondChannelId,
+                channelId: Constants.spamChannelId,
                 payload: .init(
                     content: "Multipart message!",
                     files: [.init(data: image, filename: "discordbm.png")],
@@ -363,7 +391,7 @@ class DiscordClientTests: XCTestCase {
         
         do {
             let response = try await self.client.createMessage(
-                channelId: Constants.secondChannelId,
+                channelId: Constants.spamChannelId,
                 payload: .init(
                     content: "Multipart message!",
                     embeds: [.init(
@@ -399,7 +427,7 @@ class DiscordClientTests: XCTestCase {
                 isFirstRequest.store(false, ordering: .relaxed)
                 do {
                     _ = try await self.client.createMessage(
-                        channelId: Constants.secondChannelId,
+                        channelId: Constants.spamChannelId,
                         payload: .init(content: content)
                     ).decode()
                     await container.increaseCounter()

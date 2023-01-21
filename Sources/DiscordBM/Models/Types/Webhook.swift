@@ -22,3 +22,31 @@ public struct Webhook: Sendable, Codable {
     public var source_channel: PartialChannel?
     public var url: String?
 }
+
+/// The address of a Webhook.
+public enum WebhookAddress: Hashable {
+    /// Example: https://discord.com/api/webhooks/1066284436045439037/dSs4nFhjpxcOh6HWD_5QJaq
+    case url(String)
+    /// For example if webhook url is https://discord.com/api/webhooks/1066284436045439037/dSs4nFhjpxcOh6HWD_5QJaq ,
+    /// Then id is `1066284436045439037` and token is `dSs4nFhjpxcOh6HWD_5QJaq`.
+    case deconstructed(id: String, token: String)
+    
+    @usableFromInline
+    func toIdAndToken() -> (id: String, token: String)? {
+        switch self {
+        case let .url(url):
+            return DiscordUtils.extractWebhookIdAndToken(webhookUrl: url)
+        case let .deconstructed(id, token):
+            return (id, token)
+        }
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        if let (id, token) = self.toIdAndToken() {
+            hasher.combine(id)
+            hasher.combine(token)
+        } else {
+            hasher.combine(0)
+        }
+    }
+}

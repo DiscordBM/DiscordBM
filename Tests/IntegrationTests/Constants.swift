@@ -10,5 +10,7 @@ enum Constants {
     static let guildName = "DiscordBM Test Server"
     static let channelId = "1036881951463833612"
     static let channelName = "general"
-    static let secondChannelId = "1038138527877181542"
+    static let spamChannelId = "1038138527877181542"
+    static let webhooksChannelId = "1066277056641503232"
+    static let webhookUrl = ProcessInfo.processInfo.environment["WEBHOOK_URL"]!
 }

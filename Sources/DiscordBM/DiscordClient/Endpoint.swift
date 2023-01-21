@@ -63,6 +63,7 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
         case .getGuildAuditLogs: self = .getGuildAuditLogs
         case .addReaction: return nil
         case .createDM: return nil
+        case .executeWebhook: return nil
         }
     }
 }
@@ -108,6 +109,8 @@ public enum Endpoint: Sendable {
     case addReaction(channelId: String, messageId: String, emoji: String)
     
     case createDM
+    
+    case executeWebhook(id: String, token: String)
     
     var urlSuffix: String {
         switch self {
@@ -171,6 +174,8 @@ public enum Endpoint: Sendable {
             return "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/@me"
         case .createDM:
             return "users/@me/channels"
+        case let .executeWebhook(id, token):
+            return "webhooks/\(id)/\(token)"
         }
     }
     
@@ -213,6 +218,7 @@ public enum Endpoint: Sendable {
         case .getGuildAuditLogs: return .GET
         case .addReaction: return .PUT
         case .createDM: return .POST
+        case .executeWebhook: return .POST
         }
     }
     
@@ -222,7 +228,7 @@ public enum Endpoint: Sendable {
         switch self {
         case .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse:
             return false
-        case .getGateway, .getGatewayBot, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM:
+        case .getGateway, .getGatewayBot, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM, .executeWebhook:
             return true
         }
     }
@@ -259,6 +265,7 @@ public enum Endpoint: Sendable {
         case .getGuildAuditLogs: return 28
         case .addReaction: return 29
         case .createDM: return 30
+        case .executeWebhook: return 31
         }
     }
 }
