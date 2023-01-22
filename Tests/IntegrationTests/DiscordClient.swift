@@ -353,7 +353,6 @@ class DiscordClientTests: XCTestCase {
             )
         ).decode()
         
-        
         XCTAssertEqual(response.channel_id, Constants.webhooksChannelId)
         XCTAssertEqual(response.content, text)
         XCTAssertEqual(response.embeds.first?.title, "Hey")

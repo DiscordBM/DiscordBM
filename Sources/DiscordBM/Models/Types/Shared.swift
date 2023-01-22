@@ -635,9 +635,11 @@ public struct TolerantDecodeDate: Codable {
         }
     }
     
+    private static let formatter = ISO8601DateFormatter()
+    
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode(self.date.ISO8601Format())
+        try container.encode(Self.formatter.string(from: self.date))
     }
 }
 
