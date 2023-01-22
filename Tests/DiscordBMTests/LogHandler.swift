@@ -28,7 +28,7 @@ class LoggerHandlerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 roleIds: [
-                    .critical: "33333333",
+                    .trace: "33333333",
                     .notice: "22222222"
                 ],
                 disabledInDebug: false
@@ -50,7 +50,7 @@ class LoggerHandlerTests: XCTestCase {
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
-        XCTAssertEqual(payload.content, "<@&33333333> <@&22222222>")
+        XCTAssertEqual(payload.content, "<@&22222222> <@&33333333>")
         
         let embeds = try XCTUnwrap(payload.embeds)
         XCTAssertEqual(embeds.count, 3)
@@ -297,7 +297,7 @@ class LoggerHandlerTests: XCTestCase {
             let embeds = try XCTUnwrap(payload.embeds)
             XCTAssertEqual(embeds.count, 1)
             
-            let embed = embeds[0]
+            let embed = try XCTUnwrap(embeds.first)
             XCTAssertEqual(embed.title, "Alive!")
             let timestamp = try XCTUnwrap(embed.timestamp?.date.timeIntervalSince1970)
             let range = (start-0.5)...(start+0.5)
@@ -312,7 +312,7 @@ class LoggerHandlerTests: XCTestCase {
             let embeds = try XCTUnwrap(payload.embeds)
             XCTAssertEqual(embeds.count, 1)
             
-            let embed = embeds[0]
+            let embed = try XCTUnwrap(embeds.first)
             XCTAssertEqual(embed.title, "Testing!")
             let timestamp = try XCTUnwrap(embed.timestamp?.date.timeIntervalSince1970)
             let estimate = start + 2
@@ -328,7 +328,7 @@ class LoggerHandlerTests: XCTestCase {
             let embeds = try XCTUnwrap(payload.embeds)
             XCTAssertEqual(embeds.count, 1)
             
-            let embed = embeds[0]
+            let embed = try XCTUnwrap(embeds.first)
             XCTAssertEqual(embed.title, "Alive!")
             let timestamp = try XCTUnwrap(embed.timestamp?.date.timeIntervalSince1970)
             let estimate = start + 7

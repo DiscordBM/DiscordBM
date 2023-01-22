@@ -250,9 +250,12 @@ public actor DiscordLogManager {
     }
     
     private func sendLogs(_ logs: [Log], address: Address) async throws {
-        let logLevels = Set(logs.compactMap(\.level))
+        var logLevels = Set(logs.compactMap(\.level))
             .sorted(by: >)
             .compactMap({ configuration.roles[$0] })
+        logLevels = Set(logLevels).sorted {
+            logLevels.firstIndex(of: $0)! > logLevels.firstIndex(of: $1)!
+        }
         let wantsAliveNoticeMention = logs.contains(where: \.isFirstAliveNotice)
         let aliveNoticeMention = wantsAliveNoticeMention ?
         (configuration.aliveNotice.map({ "\($0.initialNoticeRole) " }) ?? "") : ""
