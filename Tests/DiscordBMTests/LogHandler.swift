@@ -186,7 +186,7 @@ class LogHandlerTests: XCTestCase {
             logger.log(level: .error, "Testing! \(idx)")
         }
         
-        let logs = await DiscordLogManager.shared.tests_getLogs()
+        let logs = await DiscordLogManager.shared._tests_getLogs()
         let all = try XCTUnwrap(logs[address])
         
         XCTAssertEqual(all.count, 100)

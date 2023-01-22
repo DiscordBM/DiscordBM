@@ -29,13 +29,13 @@ public struct DiscordLogHandler: LogHandler {
         label: String,
         metadata: Logger.Metadata = [:],
         metadataProvider: Logger.MetadataProvider? = nil,
-        logLevel: Logger.Level = .info,
+        logLevel: Logger.Level? = nil,
         address: Address? = nil
     ) {
         self.label = label
         self.metadata = metadata
         self.metadataProvider = metadataProvider
-        self.logLevel = logLevel
+        self.logLevel = logLevel ?? DiscordLogManager.shared.configuration.defaultLogLevel ?? .info
         switch address {
         case .some(let address):
             self.address = address
@@ -67,6 +67,7 @@ public struct DiscordLogHandler: LogHandler {
                 DiscordLogHandler(
                     label: label,
                     metadataProvider: metadataProvider,
+                    logLevel: level,
                     address: address
                 )
             ])
@@ -100,6 +101,7 @@ public struct DiscordLogHandler: LogHandler {
                 DiscordLogHandler(
                     label: label,
                     metadataProvider: metadataProvider,
+                    logLevel: level,
                     address: address
                 )
             ])
@@ -115,6 +117,7 @@ public struct DiscordLogHandler: LogHandler {
                 DiscordLogHandler(
                     label: label,
                     metadataProvider: metadataProvider,
+                    logLevel: level,
                     address: address
                 )
             ])
