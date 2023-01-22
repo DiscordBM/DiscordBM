@@ -57,8 +57,8 @@ public struct DiscordLogHandler: LogHandler {
         address: Address? = nil,
         stdoutLogHandler: LogHandler? = nil
     ) -> Logger {
-        guard let stdoutLogHandler = stdoutLogHandler
-                ?? DiscordLogManager.shared.configuration.defaultStdoutLogHandler else {
+        let config = DiscordLogManager.shared.configuration
+        guard let stdoutLogHandler = stdoutLogHandler ?? config.makeDefaultLogHandler?(label) else {
             fatalError("Must either pass 'stdoutLogHandler', or set the 'defaultStdoutLogHandler' in 'DiscordLogManager.Configuration'")
         }
         return Logger(label: label) { label in
@@ -90,8 +90,8 @@ public struct DiscordLogHandler: LogHandler {
         address: Address? = nil,
         stdoutLogHandler: LogHandler? = nil
     ) {
-        guard let stdoutLogHandler = stdoutLogHandler
-                ?? DiscordLogManager.shared.configuration.defaultStdoutLogHandler else {
+        let config = DiscordLogManager.shared.configuration
+        guard let stdoutLogHandler = stdoutLogHandler ?? config.makeDefaultLogHandler?(label) else {
             fatalError("Must either pass 'stdoutLogHandler', or set the 'defaultStdoutLogHandler' in 'DiscordLogManager.Configuration'")
         }
 #if DEBUG

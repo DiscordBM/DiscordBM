@@ -28,7 +28,7 @@ class LogHandlerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 defaultAddress: .webhook(.url(webhookUrl)),
-                defaultStdoutLogHandler: SwiftLogNoOpLogHandler(),
+                makeDefaultLogHandler: SwiftLogNoOpLogHandler.init,
                 defaultLogLevel: .trace,
                 roleIds: [
                     .trace: "33333333",
@@ -105,7 +105,7 @@ class LogHandlerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 defaultAddress: nil,
-                defaultStdoutLogHandler: nil,
+                makeDefaultLogHandler: nil,
                 excludeMetadata: [.trace],
                 disabledInDebug: false
             )
@@ -138,7 +138,7 @@ class LogHandlerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 defaultAddress: nil,
-                defaultStdoutLogHandler: nil,
+                makeDefaultLogHandler: nil,
                 disabledLogLevels: [.debug],
                 disabledInDebug: false
             )
@@ -172,7 +172,7 @@ class LogHandlerTests: XCTestCase {
             configuration: .init(
                 frequency: .seconds(10),
                 defaultAddress: nil,
-                defaultStdoutLogHandler: nil,
+                makeDefaultLogHandler: nil,
                 disabledInDebug: false,
                 maxStoredLogsCount: 100
             )
@@ -207,7 +207,7 @@ class LogHandlerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 defaultAddress: nil,
-                defaultStdoutLogHandler: nil,
+                makeDefaultLogHandler: nil,
                 disabledInDebug: true
             )
         )
@@ -231,7 +231,7 @@ class LogHandlerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 defaultAddress: nil,
-                defaultStdoutLogHandler: nil,
+                makeDefaultLogHandler: nil,
                 extraMetadata: [.info],
                 disabledInDebug: false
             )
@@ -274,7 +274,7 @@ class LogHandlerTests: XCTestCase {
             configuration: .init(
                 frequency: .zero,
                 defaultAddress: nil,
-                defaultStdoutLogHandler: nil,
+                makeDefaultLogHandler: nil,
                 aliveNotice: .init(
                     address: .webhook(.url(webhookUrl)),
                     interval: .seconds(6),
@@ -367,7 +367,7 @@ class LogHandlerTests: XCTestCase {
             configuration: .init(
                 frequency: .seconds(5),
                 defaultAddress: nil,
-                defaultStdoutLogHandler: nil,
+                makeDefaultLogHandler: nil,
                 disabledInDebug: false
             )
         )
@@ -457,7 +457,7 @@ class LogHandlerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 defaultAddress: .webhook(.url(webhookUrl)),
-                defaultStdoutLogHandler: SwiftLogNoOpLogHandler(),
+                makeDefaultLogHandler: SwiftLogNoOpLogHandler.init,
                 disabledInDebug: false
             )
         )

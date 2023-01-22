@@ -21,6 +21,7 @@ public actor DiscordLogManager {
             ///   - address: The address to send the logs to.
             ///   - interval: The interval after which to send an alive notice.
             ///   - message: The message to accompany the notice.
+            ///   - color: The color of the embed of alive notices.
             ///   - initialNoticeRoleId: The role to be mentioned on the first alive notice.
             ///   Useful to be notified of app-boots when you update your app or when it crashes.
             public init(
@@ -40,7 +41,7 @@ public actor DiscordLogManager {
         
         let frequency: TimeAmount
         let defaultAddress: Address?
-        let defaultStdoutLogHandler: LogHandler?
+        let makeDefaultLogHandler: ((String) -> LogHandler)?
         let defaultLogLevel: Logger.Level?
         let aliveNotice: AliveNotice?
         let roles: [Logger.Level: String]
@@ -54,7 +55,7 @@ public actor DiscordLogManager {
         /// - Parameters:
         ///   - frequency: The frequency of the log-sendings. e.g. if its set to 30s, logs will only be sent once-in-30s. Should not be lower than 10s, because of Discord rate-limits.
         ///   - defaultAddress: The default `address` that `DiscordLogHandler` will use.
-        ///   - defaultStdoutLogHandler: The default `stdoutLogHandler` that `DiscordLogHandler` will use.
+        ///   - makeDefaultLogHandler: Makes the default `stdoutLogHandler` that `DiscordLogHandler` will use.
         ///   - defaultLogLevel: The default `logLevel` that `DiscordLogHandler` will use.
         ///   - aliveNotice: Configuration for sending "I am alive" messages every once in a while. Note that alive notices are delayed until it's been `interval`-time past last message.
         ///   - fallbackLogHandler: The log handler to use when `DiscordLogger` errors. You should use a log handler that logs to stdout.
@@ -70,7 +71,7 @@ public actor DiscordLogManager {
             /// Avoiding `= nil` to encourage setting it.
             defaultAddress: Address?,
             /// Avoiding `= nil` to encourage setting it.
-            defaultStdoutLogHandler: LogHandler?,
+            makeDefaultLogHandler: ((String) -> LogHandler)?,
             defaultLogLevel: Logger.Level? = nil,
             aliveNotice: AliveNotice? = nil,
             fallbackLogHandler: LogHandler? = nil,
@@ -92,7 +93,7 @@ public actor DiscordLogManager {
         ) {
             self.frequency = frequency
             self.defaultAddress = defaultAddress
-            self.defaultStdoutLogHandler = defaultStdoutLogHandler
+            self.makeDefaultLogHandler = makeDefaultLogHandler
             self.defaultLogLevel = defaultLogLevel
             self.aliveNotice = aliveNotice
             self.roles = roleIds.mapValues {
@@ -341,7 +342,7 @@ public actor DiscordLogManager {
         function: String = #function,
         line: UInt = #line
     ) {
-        self.configuration.defaultStdoutLogHandler?.log(
+        self.configuration.makeDefaultLogHandler?("DiscordLogManager").log(
             level: .warning,
             message: message,
             metadata: metadata,
