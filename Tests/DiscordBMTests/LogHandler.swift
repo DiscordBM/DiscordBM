@@ -21,6 +21,7 @@ class LogHandlerTests: XCTestCase {
     /// * Log-level-roles work.
     /// * Logger only mentions a log's level role once.
     /// * Setting log-level works.
+    /// * Tests passing defaults using the configuration.
     func testWorks() async throws {
         DiscordLogManager.shared = DiscordLogManager(
             client: self.client,
@@ -28,6 +29,7 @@ class LogHandlerTests: XCTestCase {
                 frequency: .milliseconds(100),
                 defaultAddress: .webhook(.url(webhookUrl)),
                 defaultStdoutLogHandler: SwiftLogNoOpLogHandler(),
+                defaultLogLevel: .trace,
                 roleIds: [
                     .trace: "33333333",
                     .notice: "22222222"
@@ -35,7 +37,7 @@ class LogHandlerTests: XCTestCase {
                 disabledInDebug: false
             )
         )
-        let logger = DiscordLogHandler.multiplexLogger(label: "test", level: .trace)
+        let logger = DiscordLogHandler.multiplexLogger(label: "test")
         logger.log(level: .trace, "Testing!")
         /// To make sure logs arrive in order.
         try await Task.sleep(nanoseconds: 10_000_000)
@@ -44,7 +46,7 @@ class LogHandlerTests: XCTestCase {
         try await Task.sleep(nanoseconds: 10_000_000)
         logger.log(level: .notice, "Testing! 3", metadata: ["1": "2"])
         
-        let expectation = expectation(description: "log")
+        let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
         wait(for: [expectation], timeout: 2)
         
@@ -116,7 +118,7 @@ class LogHandlerTests: XCTestCase {
         )
         logger.log(level: .trace, "Testing!", metadata: ["a": "b"])
         
-        let expectation = expectation(description: "log")
+        let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
         wait(for: [expectation], timeout: 2)
         
@@ -150,7 +152,7 @@ class LogHandlerTests: XCTestCase {
         logger.log(level: .debug, "Testing!")
         logger.log(level: .info, "Testing! 2")
         
-        let expectation = expectation(description: "log")
+        let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
         wait(for: [expectation], timeout: 2)
         
@@ -242,7 +244,7 @@ class LogHandlerTests: XCTestCase {
         )
         logger.log(level: .info, "Testing!")
         
-        let expectation = expectation(description: "log")
+        let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
         wait(for: [expectation], timeout: 2)
         
@@ -299,7 +301,7 @@ class LogHandlerTests: XCTestCase {
         
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        let expectation = expectation(description: "log")
+        let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
         wait(for: [expectation], timeout: 10)
         
@@ -392,7 +394,7 @@ class LogHandlerTests: XCTestCase {
             
             logger.log(level: .critical, "Testing! 3")
             
-            let expectation = expectation(description: "log-1")
+            let expectation = XCTestExpectation(description: "log-1")
             self.client.expectation = expectation
             wait(for: [expectation], timeout: 3)
             
@@ -428,7 +430,7 @@ class LogHandlerTests: XCTestCase {
             
             logger.log(level: .debug, "Testing! 7")
             
-            let expectation = expectation(description: "log-2")
+            let expectation = XCTestExpectation(description: "log-2")
             self.client.expectation = expectation
             wait(for: [expectation], timeout: 3)
             
@@ -465,7 +467,7 @@ class LogHandlerTests: XCTestCase {
         
         logger.log(level: .error, "Testing!")
         
-        let expectation = expectation(description: "log")
+        let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
         wait(for: [expectation], timeout: 2)
         
@@ -507,7 +509,7 @@ class LogHandlerTests: XCTestCase {
 //            logger.log(level: .info, "Testing!")
 //        }
 //
-//        let expectation = expectation(description: "log")
+//        let expectation = XCTestExpectation(description: "log")
 //        self.client.expectation = expectation
 //        await waitForExpectations(timeout: 2)
 //
