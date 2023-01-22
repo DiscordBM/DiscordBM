@@ -154,10 +154,10 @@ public struct DiscordLogHandler: LogHandler {
                 .merging(self.metadataProvider?.get() ?? [:], uniquingKeysWith: { a, _ in a })
             if config.extraMetadata.contains(logLevel) {
                 allMetadata.merge([
-                    "_source": .string(source),
-                    "_file": .string(file),
-                    "_function": .string(function),
-                    "_line": .stringConvertible(line),
+                    #"\_source"#: .string(source),
+                    #"\_file"#: .string(file),
+                    #"\_function"#: .string(function),
+                    #"\_line"#: .stringConvertible(line),
                 ], uniquingKeysWith: { a, _ in a })
             }
         }
