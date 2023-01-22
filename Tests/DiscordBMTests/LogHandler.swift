@@ -183,6 +183,8 @@ class LogHandlerTests: XCTestCase {
             stdoutLogHandler: SwiftLogNoOpLogHandler()
         )
         for idx in (0..<150) {
+            /// To keep the order.
+            try await Task.sleep(nanoseconds: 10_000_000)
             logger.log(level: .error, "Testing! \(idx)")
         }
         
