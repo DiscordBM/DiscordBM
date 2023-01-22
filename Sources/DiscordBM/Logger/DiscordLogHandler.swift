@@ -41,7 +41,7 @@ public struct DiscordLogHandler: LogHandler {
             self.address = address
         case .none:
             guard let defaultAddress = DiscordLogManager.shared.configuration.defaultAddress else {
-                fatalError("Must either pass 'address', or set the 'defaultAddress' in 'DiscordLogManager.Configuration'")
+                fatalError("Must either pass 'address', or set 'DiscordLogManager.Configuration.defaultAddress'")
             }
             self.address = defaultAddress
         }
@@ -59,7 +59,7 @@ public struct DiscordLogHandler: LogHandler {
     ) -> Logger {
         let config = DiscordLogManager.shared.configuration
         guard let stdoutLogHandler = stdoutLogHandler ?? config.makeDefaultLogHandler?(label) else {
-            fatalError("Must either pass 'stdoutLogHandler', or set the 'defaultStdoutLogHandler' in 'DiscordLogManager.Configuration'")
+            fatalError("Must either pass 'stdoutLogHandler', or set 'DiscordLogManager.Configuration.makeDefaultLogHandler'")
         }
         return Logger(label: label) { label in
             var handler = MultiplexLogHandler([
@@ -92,7 +92,7 @@ public struct DiscordLogHandler: LogHandler {
     ) {
         let config = DiscordLogManager.shared.configuration
         guard let stdoutLogHandler = stdoutLogHandler ?? config.makeDefaultLogHandler?(label) else {
-            fatalError("Must either pass 'stdoutLogHandler', or set the 'defaultStdoutLogHandler' in 'DiscordLogManager.Configuration'")
+            fatalError("Must either pass 'stdoutLogHandler', or set 'DiscordLogManager.Configuration.makeDefaultLogHandler'")
         }
 #if DEBUG
         return LoggingSystem.bootstrapInternal({ label, metadataProvider in
@@ -154,10 +154,10 @@ public struct DiscordLogHandler: LogHandler {
                 .merging(self.metadataProvider?.get() ?? [:], uniquingKeysWith: { a, _ in a })
             if config.extraMetadata.contains(logLevel) {
                 allMetadata.merge([
-                    #"\_source"#: .string(source),
-                    #"\_file"#: .string(file),
-                    #"\_function"#: .string(function),
-                    #"\_line"#: .stringConvertible(line),
+                    "_source": .string(source),
+                    "_file": .string(file),
+                    "_function": .string(function),
+                    "_line": .stringConvertible(line),
                 ], uniquingKeysWith: { a, _ in a })
             }
         }

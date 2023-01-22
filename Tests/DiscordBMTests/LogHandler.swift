@@ -258,13 +258,13 @@ class LogHandlerTests: XCTestCase {
         XCTAssertEqual(embed.title, "Testing!")
         let fields = try XCTUnwrap(embed.fields)
         XCTAssertEqual(fields.count, 4)
-        XCTAssertEqual(fields[0].name, "_source")
+        XCTAssertEqual(fields[0].name, #"\_source"#)
         XCTAssertEqual(fields[0].value, "DiscordBMTests")
-        XCTAssertEqual(fields[1].name, "_line")
+        XCTAssertEqual(fields[1].name, #"\_line"#)
         XCTAssertGreaterThan(Int(fields[1].value) ?? 0, 200)
-        XCTAssertEqual(fields[2].name, "_function")
+        XCTAssertEqual(fields[2].name, #"\_function"#)
         XCTAssertEqual(fields[2].value, "testExtraMetadata()")
-        XCTAssertEqual(fields[3].name, "_file")
+        XCTAssertEqual(fields[3].name, #"\_file"#)
         XCTAssertEqual(fields[3].value, "DiscordBMTests/LogHandler.swift")
     }
     
