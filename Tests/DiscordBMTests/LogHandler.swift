@@ -285,6 +285,8 @@ class LoggerHandlerTests: XCTestCase {
         do {
             let anyPayload = payloads[0]
             let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+            XCTAssertEqual(payload.content, "<@&99999999> ")
+            
             let embeds = try XCTUnwrap(payload.embeds)
             XCTAssertEqual(embeds.count, 1)
             
@@ -298,6 +300,8 @@ class LoggerHandlerTests: XCTestCase {
         do {
             let anyPayload = payloads[1]
             let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+            XCTAssertEqual(payload.content, "")
+            
             let embeds = try XCTUnwrap(payload.embeds)
             XCTAssertEqual(embeds.count, 1)
             
@@ -312,6 +316,8 @@ class LoggerHandlerTests: XCTestCase {
         do {
             let anyPayload = payloads[2]
             let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+            XCTAssertEqual(payload.content, "")
+            
             let embeds = try XCTUnwrap(payload.embeds)
             XCTAssertEqual(embeds.count, 1)
             
@@ -413,6 +419,39 @@ class LoggerHandlerTests: XCTestCase {
                 XCTAssertTrue(title.hasSuffix("\(idx + 4)"))
             }
         }
+    }
+    
+    func testBootstrap() async throws {
+        DiscordLogManager.shared = DiscordLogManager(
+            client: FakeDiscordClient(),
+            configuration: .init(
+                frequency: .seconds(5),
+                disabledInDebug: false
+            )
+        )
+        DiscordLogHandler.bootstrap(
+            label: "test",
+            level: .error,
+            address: .webhook(.url(webhookUrl)),
+            stdoutLogHandler:  SwiftLogNoOpLogHandler()
+        )
+        
+        let logger = Logger(label: "test2")
+        
+        logger.log(level: .error, "Testing!")
+        
+        let expectation = expectation(description: "log")
+        FakeDiscordClient.expectation = expectation
+        await waitForExpectations(timeout: 2)
+        
+        let anyPayload = FakeDiscordClient.payloads.first
+        let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+        
+        let embeds = try XCTUnwrap(payload.embeds)
+        XCTAssertEqual(embeds.count, 1)
+        
+        let embed = embeds[0]
+        XCTAssertEqual(embed.title, "Testing!")
     }
 }
 
