@@ -288,7 +288,7 @@ class LoggerHandlerTests: XCTestCase {
         
         let payloads = self.client.payloads
         if payloads.count != 3 {
-            XCTFail("Expected 3 payloads, but found \(payloads.count)")
+            XCTFail("Expected 3 payloads, but found \(payloads)")
             return
         }
         
