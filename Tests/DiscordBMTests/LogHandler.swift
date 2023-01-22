@@ -40,10 +40,10 @@ class LogHandlerTests: XCTestCase {
         let logger = DiscordLogHandler.multiplexLogger(label: "test")
         logger.log(level: .trace, "Testing!")
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 10_000_000)
+        try await Task.sleep(nanoseconds: 100_000_000)
         logger.log(level: .notice, "Testing! 2")
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 10_000_000)
+        try await Task.sleep(nanoseconds: 100_000_000)
         logger.log(level: .notice, "Testing! 3", metadata: ["1": "2"])
         
         let expectation = XCTestExpectation(description: "log")
@@ -186,7 +186,7 @@ class LogHandlerTests: XCTestCase {
         )
         for idx in (0..<150) {
             /// To keep the order.
-            try await Task.sleep(nanoseconds: 10_000_000)
+            try await Task.sleep(nanoseconds: 50_000_000)
             logger.log(level: .error, "Testing! \(idx)")
         }
         
