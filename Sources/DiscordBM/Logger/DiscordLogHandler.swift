@@ -152,7 +152,7 @@ public struct DiscordLogHandler: LogHandler {
             allMetadata = (metadata ?? [:])
                 .merging(self.metadata, uniquingKeysWith: { a, _ in a })
                 .merging(self.metadataProvider?.get() ?? [:], uniquingKeysWith: { a, _ in a })
-            if config.extraMetadata.contains(logLevel) {
+            if config.extraMetadata.contains(level) {
                 allMetadata.merge([
                     "_source": .string(source),
                     "_file": .string(file),

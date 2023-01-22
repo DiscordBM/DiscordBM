@@ -225,7 +225,7 @@ class LogHandlerTests: XCTestCase {
         XCTAssertEqual(self.client.payloads.count, 0)
     }
     
-    func testExtraMetadata() async throws {
+    func testExtraMetadata_noticeLevel() async throws {
         DiscordLogManager.shared = DiscordLogManager(
             client: self.client,
             configuration: .init(
@@ -263,7 +263,53 @@ class LogHandlerTests: XCTestCase {
         XCTAssertEqual(fields[1].name, #"\_line"#)
         XCTAssertGreaterThan(Int(fields[1].value) ?? 0, 200)
         XCTAssertEqual(fields[2].name, #"\_function"#)
-        XCTAssertEqual(fields[2].value, "testExtraMetadata()")
+        XCTAssertEqual(fields[2].value, #"testExtraMetadata\_noticeLevel()"#)
+        XCTAssertEqual(fields[3].name, #"\_file"#)
+        XCTAssertEqual(fields[3].value, "DiscordBMTests/LogHandler.swift")
+    }
+    
+    func testExtraMetadata_warningLevel() async throws {
+        DiscordLogManager.shared = DiscordLogManager(
+            client: self.client,
+            configuration: .init(
+                frequency: .milliseconds(100),
+                defaultAddress: nil,
+                makeDefaultLogHandler: nil,
+                extraMetadata: [.warning],
+                disabledInDebug: false
+            )
+        )
+        let logger = DiscordLogHandler.multiplexLogger(
+            label: "test",
+            level: .notice,
+            address: .webhook(.url(webhookUrl)),
+            stdoutLogHandler: SwiftLogNoOpLogHandler()
+        )
+        logger.log(level: .warning, "Testing!")
+        
+        let expectation = XCTestExpectation(description: "log")
+        self.client.expectation = expectation
+        wait(for: [expectation], timeout: 2)
+        
+        let anyPayload = self.client.payloads.first
+        let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+        
+        let embeds = try XCTUnwrap(payload.embeds)
+        XCTAssertEqual(embeds.count, 1)
+        
+        let embed = try XCTUnwrap(embeds.first)
+        XCTAssertEqual(embed.title, "Testing!")
+        let fields = try XCTUnwrap(embed.fields)
+        if fields.count != 4 {
+            XCTFail("Expected 4 fields but found \(fields.count): \(fields)")
+            return
+        }
+        XCTAssertEqual(fields[0].name, #"\_source"#)
+        XCTAssertEqual(fields[0].value, "DiscordBMTests")
+        XCTAssertEqual(fields[1].name, #"\_line"#)
+        XCTAssertGreaterThan(Int(fields[1].value) ?? 0, 200)
+        XCTAssertEqual(fields[2].name, #"\_function"#)
+        XCTAssertEqual(fields[2].value, #"testExtraMetadata\_warningLevel()"#)
         XCTAssertEqual(fields[3].name, #"\_file"#)
         XCTAssertEqual(fields[3].value, "DiscordBMTests/LogHandler.swift")
     }
