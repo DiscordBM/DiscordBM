@@ -254,7 +254,7 @@ public actor DiscordLogManager {
             .sorted(by: >)
             .compactMap({ configuration.roles[$0] })
         logLevels = Set(logLevels).sorted {
-            logLevels.firstIndex(of: $0)! > logLevels.firstIndex(of: $1)!
+            logLevels.firstIndex(of: $0)! < logLevels.firstIndex(of: $1)!
         }
         let wantsAliveNoticeMention = logs.contains(where: \.isFirstAliveNotice)
         let aliveNoticeMention = wantsAliveNoticeMention ?

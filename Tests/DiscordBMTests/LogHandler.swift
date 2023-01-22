@@ -61,7 +61,7 @@ class LoggerHandlerTests: XCTestCase {
             let now = Date().timeIntervalSince1970
             let timestamp = embed.timestamp?.date.timeIntervalSince1970 ?? 0
             XCTAssertTrue(((now-2)...(now+2)).contains(timestamp))
-            XCTAssertEqual(embed.color?.value, DiscordColor.purple.value)
+            XCTAssertEqual(embed.color?.value, DiscordColor.brown.value)
             XCTAssertEqual(embed.footer?.text, "test")
             XCTAssertEqual(embed.fields?.count, 0)
         }
