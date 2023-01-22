@@ -341,13 +341,23 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(noContentResponse.status, .noContent)
         
         let text = "Testing! \(Date())"
+        let date = Date()
         let response = try await self.client.executeWebhookWithResponse(
             address: .url(Constants.webhookUrl),
-            payload: .init(content: text)
+            payload: .init(
+                content: text,
+                embeds: [.init(
+                    title: "Hey",
+                    timestamp: date
+                )]
+            )
         ).decode()
+        
         
         XCTAssertEqual(response.channel_id, Constants.webhooksChannelId)
         XCTAssertEqual(response.content, text)
+        XCTAssertEqual(response.embeds.first?.title, "Hey")
+        XCTAssertEqual(response.embeds.first?.timestamp?.date, date)
         
         let text2 = "Testing! \(Date())"
         let threadId = "1066278441256751114"
@@ -396,6 +406,7 @@ class DiscordClientTests: XCTestCase {
                     content: "Multipart message!",
                     embeds: [.init(
                         title: "Multipart embed!",
+                        timestamp: Date(),
                         image: .init(url: .attachment(name: "discordbm.png"))
                     )],
                     files: [.init(data: image, filename: "discordbm.png")]
