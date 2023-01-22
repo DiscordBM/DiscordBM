@@ -40,10 +40,8 @@ public actor DiscordLogManager {
         }
         
         let frequency: TimeAmount
-        let defaultAddress: Address?
-        let makeDefaultLogHandler: ((String) -> LogHandler)?
-        let defaultLogLevel: Logger.Level?
         let aliveNotice: AliveNotice?
+        let fallbackLogger: Logger?
         let roles: [Logger.Level: String]
         let colors: [Logger.Level: DiscordColor]
         let excludeMetadata: Set<Logger.Level>
@@ -54,11 +52,10 @@ public actor DiscordLogManager {
         
         /// - Parameters:
         ///   - frequency: The frequency of the log-sendings. e.g. if its set to 30s, logs will only be sent once-in-30s. Should not be lower than 10s, because of Discord rate-limits.
-        ///   - defaultAddress: The default `address` that `DiscordLogHandler` will use.
-        ///   - makeDefaultLogHandler: Makes the default `stdoutLogHandler` that `DiscordLogHandler` will use.
-        ///   - defaultLogLevel: The default `logLevel` that `DiscordLogHandler` will use.
         ///   - aliveNotice: Configuration for sending "I am alive" messages every once in a while. Note that alive notices are delayed until it's been `interval`-time past last message.
-        ///   - fallbackLogHandler: The log handler to use when `DiscordLogger` errors. You should use a log handler that logs to stdout.
+        ///   - fallbackLogger: The logger to use when `DiscordLogger` errors. You should use a log handler that logs to stdout.
+        ///   **SHOULD NOT** use a logger that uses `DiscordLogger`.
+        ///   e.g. `Logger(label: "Fallback", factory: StreamLogHandler.standardOutput(label:))`
         ///   - roleIds: Id of roles to be mentioned for each log-level.
         ///   - colors: Color of the embeds to be used for each log-level.
         ///   - excludeMetadata: Excludes all metadata for these log-levels.
@@ -68,13 +65,8 @@ public actor DiscordLogManager {
         ///   - maxStoredLogsCount: If there are more logs than this count, the log manager will start removing the oldest un-sent logs to prevent memory leaks.
         public init(
             frequency: TimeAmount = .seconds(30),
-            /// Avoiding `= nil` to encourage setting it.
-            defaultAddress: Address?,
-            /// Avoiding `= nil` to encourage setting it.
-            makeDefaultLogHandler: ((String) -> LogHandler)?,
-            defaultLogLevel: Logger.Level? = nil,
+            fallbackLogger: Logger?,
             aliveNotice: AliveNotice? = nil,
-            fallbackLogHandler: LogHandler? = nil,
             roleIds: [Logger.Level: String] = [:],
             colors: [Logger.Level: DiscordColor] = [
                 .critical: .purple,
@@ -92,9 +84,7 @@ public actor DiscordLogManager {
             maxStoredLogsCount: Int = 1_000
         ) {
             self.frequency = frequency
-            self.defaultAddress = defaultAddress
-            self.makeDefaultLogHandler = makeDefaultLogHandler
-            self.defaultLogLevel = defaultLogLevel
+            self.fallbackLogger = fallbackLogger
             self.aliveNotice = aliveNotice
             self.roles = roleIds.mapValues {
                 DiscordUtils.roleMention(id: $0)
@@ -342,9 +332,9 @@ public actor DiscordLogManager {
         function: String = #function,
         line: UInt = #line
     ) {
-        self.configuration.makeDefaultLogHandler?("DiscordLogManager").log(
+        self.configuration.fallbackLogger?.log(
             level: .warning,
-            message: message,
+            message,
             metadata: metadata,
             source: "DiscordBM",
             file: #filePath,

@@ -29,41 +29,27 @@ public struct DiscordLogHandler: LogHandler {
         label: String,
         metadata: Logger.Metadata = [:],
         metadataProvider: Logger.MetadataProvider? = nil,
-        logLevel: Logger.Level? = nil,
-        address: Address? = nil
+        logLevel: Logger.Level = .info,
+        address: Address
     ) {
         self.label = label
         self.metadata = metadata
         self.metadataProvider = metadataProvider
-        self.logLevel = logLevel ?? DiscordLogManager.shared.configuration.defaultLogLevel ?? .info
-        switch address {
-        case .some(let address):
-            self.address = address
-        case .none:
-            guard let defaultAddress = DiscordLogManager.shared.configuration.defaultAddress else {
-                fatalError("Must either pass 'address', or set 'DiscordLogManager.Configuration.defaultAddress'")
-            }
-            self.address = defaultAddress
-        }
+        self.logLevel = logLevel
+        self.address = address
     }
     
-    /// Get a logger that logs to both the stdout and to Discord.
-    /// Must set the `address` if you haven't passed the `defaultAddress` to `DiscordLogManager.Configuration`.
-    /// Must set the `stdoutLogHandler` if you haven't passed the `defaultStdoutLogHandler` to `DiscordLogManager.Configuration`.
+    /// Make a logger that logs to both the stdout and to Discord.
     public static func multiplexLogger(
         label: String,
-        level: Logger.Level? = nil,
+        level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
-        address: Address? = nil,
-        stdoutLogHandler: LogHandler? = nil
+        address: Address,
+        makeStdoutLogHandler: (String, Logger.MetadataProvider?) -> LogHandler
     ) -> Logger {
-        let config = DiscordLogManager.shared.configuration
-        guard let stdoutLogHandler = stdoutLogHandler ?? config.makeDefaultLogHandler?(label) else {
-            fatalError("Must either pass 'stdoutLogHandler', or set 'DiscordLogManager.Configuration.makeDefaultLogHandler'")
-        }
-        return Logger(label: label) { label in
+        Logger(label: label) { label in
             var handler = MultiplexLogHandler([
-                stdoutLogHandler,
+                makeStdoutLogHandler(label, metadataProvider),
                 DiscordLogHandler(
                     label: label,
                     metadataProvider: metadataProvider,
@@ -71,33 +57,27 @@ public struct DiscordLogHandler: LogHandler {
                     address: address
                 )
             ])
-            if let level = level ?? DiscordLogManager.shared.configuration.defaultLogLevel {
-                handler.logLevel = level
-            }
+            handler.logLevel = level
             return handler
         }
     }
     
-    /// Bootstrap the logging system to use `DiscordLogHandler`.
-    /// Must set the `address` if you haven't passed the `defaultAddress` to `DiscordLogManager.Configuration`.
-    /// Must set the `stdoutLogHandler` if you haven't passed the `defaultStdoutLogHandler` to `DiscordLogManager.Configuration`.
+    /// Bootstraps the logging system to use `DiscordLogHandler`.
+    /// After calling this function, all your `Logger`s will start using `DiscordLogHandler`.
+    ///
     /// - NOTE: Be careful because `LoggingSystem.bootstrap` can only be called once.
-    /// If you use libraries like Vapor, you would want to remove the line where you call `LoggingSystem.bootstrap` and replacing it with this function.
+    /// If you use libraries like Vapor, you would want to remove such lines where you call `LoggingSystem...` and replacing it with this function.
     public static func bootstrap(
         label: String,
-        level: Logger.Level? = nil,
+        level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
-        address: Address? = nil,
-        stdoutLogHandler: LogHandler? = nil
+        address: Address,
+        makeStdoutLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
     ) {
-        let config = DiscordLogManager.shared.configuration
-        guard let stdoutLogHandler = stdoutLogHandler ?? config.makeDefaultLogHandler?(label) else {
-            fatalError("Must either pass 'stdoutLogHandler', or set 'DiscordLogManager.Configuration.makeDefaultLogHandler'")
-        }
 #if DEBUG
-        return LoggingSystem.bootstrapInternal({ label, metadataProvider in
+        LoggingSystem.bootstrapInternal({ label, metadataProvider in
             var handler = MultiplexLogHandler([
-                stdoutLogHandler,
+                makeStdoutLogHandler(label, metadataProvider),
                 DiscordLogHandler(
                     label: label,
                     metadataProvider: metadataProvider,
@@ -105,15 +85,13 @@ public struct DiscordLogHandler: LogHandler {
                     address: address
                 )
             ])
-            if let level = level ?? DiscordLogManager.shared.configuration.defaultLogLevel {
-                handler.logLevel = level
-            }
+            handler.logLevel = level
             return handler
         }, metadataProvider: metadataProvider)
 #else
-        return LoggingSystem.bootstrap({ label, metadataProvider in
+        LoggingSystem.bootstrap({ label, metadataProvider in
             var handler = MultiplexLogHandler([
-                stdoutLogHandler,
+                makeStdoutLogHandler(label, metadataProvider),
                 DiscordLogHandler(
                     label: label,
                     metadataProvider: metadataProvider,
@@ -121,9 +99,7 @@ public struct DiscordLogHandler: LogHandler {
                     address: address
                 )
             ])
-            if let level = level {
-                handler.logLevel = level
-            }
+            handler.logLevel = level
             return handler
         }, metadataProvider: metadataProvider)
 #endif
@@ -143,6 +119,10 @@ public struct DiscordLogHandler: LogHandler {
         function: String,
         line: UInt
     ) {
+        // FIXME: Delete this line when swift-log is updated with the fix, and pin swift-log.
+        // https://github.com/apple/swift-log/pull/252
+        if line == 180 && source == "Logging" && function == "metadataProvider" { return }
+        
         let config = logManager.configuration
         
         if config.disabledLogLevels.contains(level) { return }

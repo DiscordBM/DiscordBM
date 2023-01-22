@@ -27,9 +27,7 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .seconds(1),
-                defaultAddress: .webhook(.url(webhookUrl)),
-                makeDefaultLogHandler: SwiftLogNoOpLogHandler.init,
-                defaultLogLevel: .trace,
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 roleIds: [
                     .trace: "33333333",
                     .notice: "22222222"
@@ -37,7 +35,12 @@ class LogHandlerTests: XCTestCase {
                 disabledInDebug: false
             )
         )
-        let logger = DiscordLogHandler.multiplexLogger(label: "test")
+        let logger = DiscordLogHandler.multiplexLogger(
+            label: "test",
+            level: .trace,
+            address: .webhook(.url(webhookUrl)),
+            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+        )
         logger.log(level: .trace, "Testing!")
         /// To make sure logs arrive in order.
         try await Task.sleep(nanoseconds: 100_000_000)
@@ -104,8 +107,7 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                defaultAddress: nil,
-                makeDefaultLogHandler: nil,
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 excludeMetadata: [.trace],
                 disabledInDebug: false
             )
@@ -114,7 +116,7 @@ class LogHandlerTests: XCTestCase {
             label: "test",
             level: .trace,
             address: .webhook(.url(webhookUrl)),
-            stdoutLogHandler: SwiftLogNoOpLogHandler()
+            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .trace, "Testing!", metadata: ["a": "b"])
         
@@ -137,8 +139,7 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                defaultAddress: nil,
-                makeDefaultLogHandler: nil,
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 disabledLogLevels: [.debug],
                 disabledInDebug: false
             )
@@ -147,7 +148,7 @@ class LogHandlerTests: XCTestCase {
             label: "test",
             level: .debug,
             address: .webhook(.url(webhookUrl)),
-            stdoutLogHandler: SwiftLogNoOpLogHandler()
+            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .debug, "Testing!")
         logger.log(level: .info, "Testing! 2")
@@ -171,8 +172,7 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .seconds(10),
-                defaultAddress: nil,
-                makeDefaultLogHandler: nil,
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 disabledInDebug: false,
                 maxStoredLogsCount: 100
             )
@@ -182,7 +182,7 @@ class LogHandlerTests: XCTestCase {
             label: "test",
             level: .error,
             address: address,
-            stdoutLogHandler: SwiftLogNoOpLogHandler()
+            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         for idx in (0..<150) {
             /// To keep the order.
@@ -206,8 +206,7 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                defaultAddress: nil,
-                makeDefaultLogHandler: nil,
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 disabledInDebug: true
             )
         )
@@ -216,7 +215,7 @@ class LogHandlerTests: XCTestCase {
             label: "test",
             level: .info,
             address: address,
-            stdoutLogHandler: SwiftLogNoOpLogHandler()
+            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .info, "Testing!")
         
@@ -230,8 +229,7 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                defaultAddress: nil,
-                makeDefaultLogHandler: nil,
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 extraMetadata: [.info],
                 disabledInDebug: false
             )
@@ -240,7 +238,7 @@ class LogHandlerTests: XCTestCase {
             label: "test",
             level: .info,
             address: .webhook(.url(webhookUrl)),
-            stdoutLogHandler: SwiftLogNoOpLogHandler()
+            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .info, "Testing!")
         
@@ -273,8 +271,7 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                defaultAddress: nil,
-                makeDefaultLogHandler: nil,
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 extraMetadata: [.warning],
                 disabledInDebug: false
             )
@@ -283,7 +280,7 @@ class LogHandlerTests: XCTestCase {
             label: "test",
             level: .notice,
             address: .webhook(.url(webhookUrl)),
-            stdoutLogHandler: SwiftLogNoOpLogHandler()
+            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .warning, "Testing!")
         
@@ -319,8 +316,7 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .zero,
-                defaultAddress: nil,
-                makeDefaultLogHandler: nil,
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 aliveNotice: .init(
                     address: .webhook(.url(webhookUrl)),
                     interval: .seconds(6),
@@ -338,7 +334,7 @@ class LogHandlerTests: XCTestCase {
             label: "test",
             level: .debug,
             address: .webhook(.url(webhookUrl)),
-            stdoutLogHandler: SwiftLogNoOpLogHandler()
+            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         
         try await Task.sleep(nanoseconds: 4_000_000_000)
@@ -412,8 +408,7 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .seconds(5),
-                defaultAddress: nil,
-                makeDefaultLogHandler: nil,
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 disabledInDebug: false
             )
         )
@@ -422,7 +417,7 @@ class LogHandlerTests: XCTestCase {
             label: "test",
             level: .debug,
             address: .webhook(.url(webhookUrl)),
-            stdoutLogHandler: SwiftLogNoOpLogHandler()
+            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         
         do {
@@ -502,12 +497,16 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                defaultAddress: .webhook(.url(webhookUrl)),
-                makeDefaultLogHandler: SwiftLogNoOpLogHandler.init,
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 disabledInDebug: false
             )
         )
-        DiscordLogHandler.bootstrap(label: "test", level: .error)
+        DiscordLogHandler.bootstrap(
+            label: "test",
+            level: .error,
+            address: .webhook(.url(webhookUrl)),
+            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+        )
         
         let logger = Logger(label: "test2")
         
@@ -546,7 +545,7 @@ class LogHandlerTests: XCTestCase {
 //            label: "test",
 //            metadataProvider: simpleTraceIDMetadataProvider,
 //            address: .webhook(.url(webhookUrl)),
-//            stdoutLogHandler: SwiftLogNoOpLogHandler()
+//            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
 //        )
 //
 //        let logger = Logger(label: "test")
