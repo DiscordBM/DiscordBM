@@ -71,7 +71,7 @@ public struct DiscordLogHandler: LogHandler {
                     address: address
                 )
             ])
-            if let level = level {
+            if let level = level ?? DiscordLogManager.shared.configuration.defaultLogLevel {
                 handler.logLevel = level
             }
             return handler
@@ -82,7 +82,7 @@ public struct DiscordLogHandler: LogHandler {
     /// Must set the `address` if you haven't passed the `defaultAddress` to `DiscordLogManager.Configuration`.
     /// Must set the `stdoutLogHandler` if you haven't passed the `defaultStdoutLogHandler` to `DiscordLogManager.Configuration`.
     /// - NOTE: Be careful because `LoggingSystem.bootstrap` can only be called once.
-    /// If you use libraries like Vapor, they already call the method once.
+    /// If you use libraries like Vapor, you would want to remove the line where you call `LoggingSystem.bootstrap` and replacing it with this function.
     public static func bootstrap(
         label: String,
         level: Logger.Level? = nil,
@@ -105,7 +105,7 @@ public struct DiscordLogHandler: LogHandler {
                     address: address
                 )
             ])
-            if let level = level {
+            if let level = level ?? DiscordLogManager.shared.configuration.defaultLogLevel {
                 handler.logLevel = level
             }
             return handler
