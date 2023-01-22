@@ -3,7 +3,7 @@
 import NIOHTTP1
 import XCTest
 
-class LoggerHandlerTests: XCTestCase {
+class LogHandlerTests: XCTestCase {
     
     let webhookUrl = "https://discord.com/api/webhooks/1066287437724266536/dSmCyqTEGP1lBnpWJAVU-CgQy4s3GRXpzKIeHs0ApHm62FngQZPn7kgaOyaiZe6E5wl_"
     private var client: FakeDiscordClient!
@@ -281,14 +281,14 @@ class LoggerHandlerTests: XCTestCase {
         logger.log(level: .debug, "Testing!")
         
         try await Task.sleep(nanoseconds: 1_000_000_000)
-        
-        let expectation = expectation(description: "log")
+
+        let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        await waitForExpectations(timeout: 10)
+        wait(for: [expectation], timeout: 10)
         
         let payloads = self.client.payloads
         if payloads.count != 3 {
-            XCTFail("Expected 3 payloads, but found \(payloads)")
+            XCTFail("Expected 3 payloads, but found \(payloads.count): \(payloads)")
             return
         }
         
