@@ -74,7 +74,7 @@ public actor DiscordLogManager {
                 .notice: .green,
                 .info: .blue,
             ],
-            excludeMetadata: Set<Logger.Level> = [],
+            excludeMetadata: Set<Logger.Level> = [.trace],
             extraMetadata: Set<Logger.Level> = [],
             disabledLogLevels: Set<Logger.Level> = [],
             disabledInDebug: Bool = true,

@@ -1,4 +1,8 @@
+#if DEBUG
+@testable import Logging
+#else
 import Logging
+#endif
 import Foundation
 
 public struct DiscordLogHandler: LogHandler {
@@ -43,7 +47,7 @@ public struct DiscordLogHandler: LogHandler {
         address: Address,
         stdoutLogHandler: LogHandler
     ) -> Logger {
-        return Logger(label: label) { label in
+        Logger(label: label) { label in
             var handler = MultiplexLogHandler([
                 stdoutLogHandler,
                 DiscordLogHandler(
@@ -69,6 +73,22 @@ public struct DiscordLogHandler: LogHandler {
         address: Address,
         stdoutLogHandler: LogHandler
     ) {
+#if DEBUG
+        LoggingSystem.bootstrapInternal({ label, metadataProvider in
+            var handler = MultiplexLogHandler([
+                stdoutLogHandler,
+                DiscordLogHandler(
+                    label: label,
+                    metadataProvider: metadataProvider,
+                    address: address
+                )
+            ])
+            if let level = level {
+                handler.logLevel = level
+            }
+            return handler
+        }, metadataProvider: metadataProvider)
+#else
         LoggingSystem.bootstrap({ label, metadataProvider in
             var handler = MultiplexLogHandler([
                 stdoutLogHandler,
@@ -83,6 +103,7 @@ public struct DiscordLogHandler: LogHandler {
             }
             return handler
         }, metadataProvider: metadataProvider)
+#endif
     }
     
     public subscript(metadataKey key: String) -> Logger.Metadata.Value? {
