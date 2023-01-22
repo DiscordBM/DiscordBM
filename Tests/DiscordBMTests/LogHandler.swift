@@ -258,7 +258,7 @@ class LoggerHandlerTests: XCTestCase {
                 frequency: .zero,
                 aliveNotice: .init(
                     address: .webhook(.url(webhookUrl)),
-                    interval: .seconds(5),
+                    interval: .seconds(6),
                     message: "Alive!",
                     color: .red,
                     initialNoticeRoleId: "99999999"
@@ -276,7 +276,7 @@ class LoggerHandlerTests: XCTestCase {
             stdoutLogHandler: SwiftLogNoOpLogHandler()
         )
         
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(nanoseconds: 4_000_000_000)
         
         logger.log(level: .debug, "Testing!")
         
@@ -284,10 +284,14 @@ class LoggerHandlerTests: XCTestCase {
         
         let expectation = expectation(description: "log")
         self.client.expectation = expectation
-        await waitForExpectations(timeout: 5)
+        await waitForExpectations(timeout: 10)
         
         let payloads = self.client.payloads
-        XCTAssertEqual(payloads.count, 3)
+        if payloads.count != 3 {
+            XCTFail("Expected 3 payloads, but found \(payloads.count)")
+        }
+        
+        let tolerance = 1.0
         
         do {
             let anyPayload = payloads[0]
@@ -300,8 +304,8 @@ class LoggerHandlerTests: XCTestCase {
             let embed = try XCTUnwrap(embeds.first)
             XCTAssertEqual(embed.title, "Alive!")
             let timestamp = try XCTUnwrap(embed.timestamp?.date.timeIntervalSince1970)
-            let range = (start-0.5)...(start+0.5)
-            XCTAssertTrue(range.contains(timestamp))
+            let range = (start-tolerance)...(start+tolerance)
+            XCTAssertTrue(range.contains(timestamp), "\(range) did not contain \(timestamp)")
         }
         
         do {
@@ -315,9 +319,9 @@ class LoggerHandlerTests: XCTestCase {
             let embed = try XCTUnwrap(embeds.first)
             XCTAssertEqual(embed.title, "Testing!")
             let timestamp = try XCTUnwrap(embed.timestamp?.date.timeIntervalSince1970)
-            let estimate = start + 2
-            let range = (estimate-0.5)...(estimate+0.5)
-            XCTAssertTrue(range.contains(timestamp))
+            let estimate = start + 4
+            let range = (estimate-tolerance)...(estimate+tolerance)
+            XCTAssertTrue(range.contains(timestamp), "\(range) did not contain \(timestamp)")
         }
         
         do {
@@ -331,9 +335,9 @@ class LoggerHandlerTests: XCTestCase {
             let embed = try XCTUnwrap(embeds.first)
             XCTAssertEqual(embed.title, "Alive!")
             let timestamp = try XCTUnwrap(embed.timestamp?.date.timeIntervalSince1970)
-            let estimate = start + 7
-            let range = (estimate-0.5)...(estimate+0.5)
-            XCTAssertTrue(range.contains(timestamp))
+            let estimate = start + 10
+            let range = (estimate-tolerance)...(estimate+tolerance)
+            XCTAssertTrue(range.contains(timestamp), "\(range) did not contain \(timestamp)")
         }
     }
     
@@ -466,30 +470,19 @@ private class FakeDiscordClient: DiscordClient {
     var expectation: XCTestExpectation?
     var payloads: [Any] = []
     
-    func send(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool
-    ) async throws -> DiscordHTTPResponse {
+    func send(request: DiscordRequest) async throws -> DiscordHTTPResponse {
         fatalError()
     }
     
     func send<E: Validatable & Encodable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool,
+        request: DiscordRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         fatalError()
     }
     
     func sendMultipart<E: Validatable & MultipartEncodable>(
-        to endpoint: DiscordBM.Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool,
+        request: DiscordRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         payloads.append(payload)

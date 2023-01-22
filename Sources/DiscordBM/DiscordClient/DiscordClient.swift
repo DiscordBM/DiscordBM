@@ -6,26 +6,15 @@ import Foundation
 public protocol DiscordClient {
     var appId: String? { get }
     
-    func send(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool
-    ) async throws -> DiscordHTTPResponse
+    func send(request: DiscordRequest) async throws -> DiscordHTTPResponse
     
     func send<E: Encodable & Validatable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool,
+        request: DiscordRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse
     
     func sendMultipart<E: MultipartEncodable & Validatable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool,
+        request: DiscordRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse
 }
@@ -33,54 +22,26 @@ public protocol DiscordClient {
 //MARK: - Default functions for DiscordClient
 public extension DiscordClient {
     @inlinable
-    func send<C: Codable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool
-    ) async throws -> DiscordClientResponse<C> {
-        let response = try await self.send(
-            to: endpoint,
-            queries: queries,
-            headers: headers,
-            includeAuthorization: includeAuthorization
-        )
+    func send<C: Codable>(request: DiscordRequest) async throws -> DiscordClientResponse<C> {
+        let response = try await self.send(request: request)
         return DiscordClientResponse(httpResponse: response)
     }
     
     @inlinable
     func send<E: Encodable & Validatable, C: Codable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool,
+        request: DiscordRequest,
         payload: E
     ) async throws -> DiscordClientResponse<C> {
-        let response = try await self.send(
-            to: endpoint,
-            queries: queries,
-            headers: headers,
-            includeAuthorization: includeAuthorization,
-            payload: payload
-        )
+        let response = try await self.send(request: request, payload: payload)
         return DiscordClientResponse(httpResponse: response)
     }
     
     @inlinable
     func sendMultipart<E: MultipartEncodable & Validatable, C: Codable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool,
+        request: DiscordRequest,
         payload: E
     ) async throws -> DiscordClientResponse<C> {
-        let response = try await self.sendMultipart(
-            to: endpoint,
-            queries: queries,
-            headers: headers,
-            includeAuthorization: includeAuthorization,
-            payload: payload
-        )
+        let response = try await self.sendMultipart(request: request, payload: payload)
         return DiscordClientResponse(httpResponse: response)
     }
 }
@@ -243,24 +204,14 @@ public extension DiscordClient {
     @inlinable
     func getGateway() async throws -> DiscordClientResponse<Gateway.URL> {
         let endpoint = Endpoint.getGateway
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true
-        )
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/topics/gateway#get-gateway-bot
     @inlinable
     func getGatewayBot() async throws -> DiscordClientResponse<Gateway.BotConnectionInfo> {
         let endpoint = Endpoint.getGatewayBot
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true
-        )
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
@@ -271,13 +222,7 @@ public extension DiscordClient {
         payload: RequestBody.InteractionResponse
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.createInteractionResponse(id: id, token: token)
-        return try await self.sendMultipart(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true,
-            payload: payload
-        )
+        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
@@ -291,12 +236,10 @@ public extension DiscordClient {
             appId: try requireAppId(appId),
             token: token
         )
-        return try await self.send(
+        return try await self.send(request: .init(
             to: endpoint,
-            queries: [("thread_id", thread_id)],
-            headers: [:],
-            includeAuthorization: true
-        )
+            queries: [("thread_id", thread_id)]
+        ))
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
@@ -310,13 +253,7 @@ public extension DiscordClient {
             appId: try requireAppId(appId),
             token: token
         )
-        return try await self.sendMultipart(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true,
-            payload: payload
-        )
+        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
@@ -329,12 +266,7 @@ public extension DiscordClient {
             appId: try requireAppId(appId),
             token: token
         )
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true
-        )
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
@@ -348,13 +280,7 @@ public extension DiscordClient {
             appId: try requireAppId(appId),
             token: token
         )
-        return try await self.sendMultipart(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true,
-            payload: payload
-        )
+        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
@@ -370,12 +296,10 @@ public extension DiscordClient {
             token: token,
             messageId: messageId
         )
-        return try await self.send(
+        return try await self.send(request: .init(
             to: endpoint,
-            queries: [("thread_id", thread_id)],
-            headers: [:],
-            includeAuthorization: true
-        )
+            queries: [("thread_id", thread_id)]
+        ))
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
@@ -391,13 +315,7 @@ public extension DiscordClient {
             token: token,
             messageId: messageId
         )
-        return try await self.sendMultipart(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true,
-            payload: payload
-        )
+        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-followup-message
@@ -412,12 +330,7 @@ public extension DiscordClient {
             token: token,
             messageId: messageId
         )
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true
-        )
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/channel#create-message
@@ -427,13 +340,7 @@ public extension DiscordClient {
         payload: RequestBody.CreateMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = Endpoint.createMessage(channelId: channelId)
-        return try await self.sendMultipart(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true,
-            payload: payload
-        )
+        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
     /// https://discord.com/developers/docs/resources/channel#edit-message
@@ -444,13 +351,7 @@ public extension DiscordClient {
         payload: RequestBody.EditMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = Endpoint.editMessage(channelId: channelId, messageId: messageId)
-        return try await self.sendMultipart(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true,
-            payload: payload
-        )
+        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
     /// https://discord.com/developers/docs/resources/channel#delete-message
@@ -461,12 +362,10 @@ public extension DiscordClient {
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.deleteMessage(channelId: channelId, messageId: messageId)
-        return try await self.send(
+        return try await self.send(request: .init(
             to: endpoint,
-            queries: [],
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:],
-            includeAuthorization: true
-        )
+            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+        ))
     }
     
     /// https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
@@ -476,13 +375,7 @@ public extension DiscordClient {
         payload: ApplicationCommand
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = Endpoint.createApplicationGlobalCommand(appId: try requireAppId(appId))
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true,
-            payload: payload
-        )
+        return try await self.send(request: .init(to: endpoint), payload: payload)
     }
     
     /// https://discord.com/developers/docs/interactions/application-commands#get-global-application-commands
@@ -492,12 +385,10 @@ public extension DiscordClient {
         with_localizations: Bool? = nil
     ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
         let endpoint = Endpoint.getApplicationGlobalCommands(appId: try requireAppId(appId))
-        return try await send(
+        return try await send(request: .init(
             to: endpoint,
-            queries: [("with_localizations", with_localizations.map { "\($0)" })],
-            headers: [:],
-            includeAuthorization: true
-        )
+            queries: [("with_localizations", with_localizations.map { "\($0)" })]
+        ))
     }
     
     /// https://discord.com/developers/docs/interactions/application-commands#delete-global-application-command
@@ -510,12 +401,7 @@ public extension DiscordClient {
             appId: try requireAppId(appId),
             id: id
         )
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true
-        )
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/guild#get-guild
@@ -525,36 +411,24 @@ public extension DiscordClient {
         withCounts: Bool? = nil
     ) async throws -> DiscordClientResponse<Guild> {
         let endpoint = Endpoint.getGuild(id: id)
-        return try await self.send(
+        return try await self.send(request: .init(
             to: endpoint,
-            queries: [("with_counts", withCounts?.description)],
-            headers: [:],
-            includeAuthorization: true
-        )
+            queries: [("with_counts", withCounts?.description)]
+        ))
     }
     
     /// https://discord.com/developers/docs/resources/channel#get-channel
     @inlinable
     func getChannel(id: String) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = Endpoint.getChannel(id: id)
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true
-        )
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/user#leave-guild
     @inlinable
     func leaveGuild(id: String) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.leaveGuild(id: id)
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true
-        )
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/guild#create-guild-role
@@ -566,10 +440,10 @@ public extension DiscordClient {
     ) async throws -> DiscordClientResponse<Role> {
         let endpoint = Endpoint.createGuildRole(guildId: guildId)
         return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:],
-            includeAuthorization: true,
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
             payload: payload
         )
     }
@@ -582,12 +456,10 @@ public extension DiscordClient {
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.deleteGuildRole(guildId: guildId, roleId: roleId)
-        return try await self.send(
+        return try await self.send(request: .init(
             to: endpoint,
-            queries: [],
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:],
-            includeAuthorization: true
-        )
+            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+        ))
     }
     
     /// https://discord.com/developers/docs/resources/guild#add-guild-member-role
@@ -603,12 +475,10 @@ public extension DiscordClient {
             userId: userId,
             roleId: roleId
         )
-        return try await self.send(
+        return try await self.send(request: .init(
             to: endpoint,
-            queries: [],
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:],
-            includeAuthorization: true
-        )
+            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+        ))
     }
     
     /// https://discord.com/developers/docs/resources/guild#remove-guild-member-role
@@ -624,12 +494,10 @@ public extension DiscordClient {
             userId: userId,
             roleId: roleId
         )
-        return try await self.send(
+        return try await self.send(request: .init(
             to: endpoint,
-            queries: [],
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:],
-            includeAuthorization: true
-        )
+            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+        ))
     }
     
     /// https://discord.com/developers/docs/resources/channel#create-reaction
@@ -644,12 +512,7 @@ public extension DiscordClient {
             messageId: messageId,
             emoji: emoji
         )
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true
-        )
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// NOTE: `limit`, if provided, must be between `1` and `1_000`.
@@ -662,15 +525,13 @@ public extension DiscordClient {
     ) async throws -> DiscordClientResponse<[Guild.Member]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = Endpoint.searchGuildMembers(id: guildId)
-        return try await self.send(
+        return try await self.send(request: .init(
             to: endpoint,
             queries: [
                 ("query", query),
                 ("limit", limit?.description)
-            ],
-            headers: [:],
-            includeAuthorization: true
-        )
+            ]
+        ))
     }
     
     /// https://discord.com/developers/docs/resources/guild#get-guild-member
@@ -680,12 +541,7 @@ public extension DiscordClient {
         userId: String
     ) async throws -> DiscordClientResponse<Guild.Member> {
         let endpoint = Endpoint.getGuildMember(id: guildId, userId: userId)
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true
-        )
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// NOTE: `around`, `before` and `after` are mutually exclusive.
@@ -704,17 +560,15 @@ public extension DiscordClient {
             ("after", after)
         ])
         let endpoint = Endpoint.getChannelMessages(channelId: channelId)
-        return try await self.send(
+        return try await self.send(request: .init(
             to: endpoint,
             queries: [
                 ("around", around),
                 ("before", before),
                 ("after", after),
                 ("limit", limit.map({ "\($0)" }))
-            ],
-            headers: [:],
-            includeAuthorization: true
-        )
+            ]
+        ))
     }
     
     /// https://discord.com/developers/docs/resources/channel#get-channel-message
@@ -724,12 +578,7 @@ public extension DiscordClient {
         messageId: String
     ) async throws -> DiscordClientResponse<Gateway.MessageCreate> {
         let endpoint = Endpoint.getChannelMessage(channelId: channelId, messageId: messageId)
-        return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true
-        )
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// NOTE: `limit`, if provided, must be between `1` and `1_000`.
@@ -744,17 +593,15 @@ public extension DiscordClient {
     ) async throws -> DiscordClientResponse<AuditLog> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = Endpoint.getGuildAuditLogs(guildId: guildId)
-        return try await self.send(
+        return try await self.send(request: .init(
             to: endpoint,
             queries: [
                 ("user_id", user_id),
                 ("action_type", action_type.map { "\($0.rawValue)" }),
                 ("before", before),
                 ("limit", limit.map { "\($0)" })
-            ],
-            headers: [:],
-            includeAuthorization: true
-        )
+            ]
+        ))
     }
     
     /// You can use this function to create a new **or** retrieve an existing DM channel.
@@ -763,10 +610,7 @@ public extension DiscordClient {
     func createDM(recipient_id: String) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = Endpoint.createDM
         return try await self.send(
-            to: endpoint,
-            queries: [],
-            headers: [:],
-            includeAuthorization: true,
+            request: .init(to: endpoint),
             payload: RequestBody.CreateDM(recipient_id: recipient_id)
         )
     }
@@ -783,10 +627,10 @@ public extension DiscordClient {
         }
         let endpoint = Endpoint.executeWebhook(id: id, token: token)
         return try await self.sendMultipart(
-            to: endpoint,
-            queries: [("thread_id", threadId)],
-            headers: [:],
-            includeAuthorization: false,
+            request: .init(
+                to: endpoint,
+                queries: [("thread_id", threadId)]
+            ),
             payload: payload
         )
     }
@@ -803,13 +647,13 @@ public extension DiscordClient {
         }
         let endpoint = Endpoint.executeWebhook(id: id, token: token)
         return try await self.sendMultipart(
-            to: endpoint,
-            queries: [
-                ("wait", "true"),
-                ("thread_id", threadId)
-            ],
-            headers: [:],
-            includeAuthorization: false,
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("wait", "true"),
+                    ("thread_id", threadId)
+                ]
+            ),
             payload: payload
         )
     }

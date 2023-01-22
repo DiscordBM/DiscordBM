@@ -151,12 +151,11 @@ public struct DefaultDiscordClient: DiscordClient {
     
     /// Sends requests and retries if needed.
     func sendWithRetries(
-        endpoint: Endpoint,
-        queries: [(String, String?)],
+        request req: DiscordRequest,
         sendRequest: (CacheableEndpointIdentity?, Int, UInt) async throws -> (DiscordHTTPResponse, Bool)
     ) async throws -> DiscordHTTPResponse {
         
-        let identity = CacheableEndpointIdentity(endpoint: endpoint)
+        let identity = CacheableEndpointIdentity(endpoint: req.endpoint)
         let requestId = Self.requestIdGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
         
         var retriesSoFar = 0
@@ -175,38 +174,33 @@ public struct DefaultDiscordClient: DiscordClient {
             await self.saveInCache(
                 response: response,
                 identity: identity,
-                queries: queries
+                queries: req.queries
             )
         }
         
         return response
     }
     
-    public func send(
-        to endpoint: Endpoint,
-        queries: [(String, String?)] = [],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool
-    ) async throws -> DiscordHTTPResponse {
-        try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
+    public func send(request req: DiscordRequest) async throws -> DiscordHTTPResponse {
+        try await self.sendWithRetries(request: req) {
             identity, retryCounter, requestId in
             
-            if let cached = await self.getFromCache(identity: identity, queries: queries) {
+            if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 logger.debug("Got cached response", metadata: [
-                    "endpoint": .string(endpoint.urlSuffix),
-                    "queries": .stringConvertible(queries),
+                    "endpoint": .string(req.endpoint.urlSuffix),
+                    "queries": .stringConvertible(req.queries),
                     "retry": .stringConvertible(retryCounter)
                 ])
                 return (cached, true)
             }
             
-            try await self.checkRateLimitsAllowRequest(to: endpoint)
+            try await self.checkRateLimitsAllowRequest(to: req.endpoint)
             var request = try HTTPClient.Request(
-                url: endpoint.url + queries.makeForURLQuery(),
-                method: endpoint.httpMethod
+                url: req.endpoint.url + req.queries.makeForURLQuery(),
+                method: req.endpoint.httpMethod
             )
-            request.headers = headers
-            if includeAuthorization {
+            request.headers = req.headers
+            if req.includeAuthorization {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
             }
             
@@ -224,7 +218,7 @@ public struct DefaultDiscordClient: DiscordClient {
             ])
             
             await self.includeInRateLimits(
-                endpoint: endpoint,
+                endpoint: req.endpoint,
                 headers: response.headers,
                 status: response.status
             )
@@ -234,40 +228,37 @@ public struct DefaultDiscordClient: DiscordClient {
     }
     
     public func send<E: Encodable & Validatable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)] = [],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool,
+        request req: DiscordRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         if DiscordGlobalConfiguration.performClientValidations {
             try payload.validate()
         }
         
-        return try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
+        return try await self.sendWithRetries(request: req) {
             identity, retryCounter, requestId in
             
-            let identity = CacheableEndpointIdentity(endpoint: endpoint)
-            if let cached = await self.getFromCache(identity: identity, queries: queries) {
+            let identity = CacheableEndpointIdentity(endpoint: req.endpoint)
+            if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 return (cached, true)
             }
-            if let cached = await self.getFromCache(identity: identity, queries: queries) {
+            if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 logger.debug("Got cached response", metadata: [
-                    "endpoint": .string(endpoint.urlSuffix),
-                    "queries": .stringConvertible(queries),
+                    "endpoint": .string(req.endpoint.urlSuffix),
+                    "queries": .stringConvertible(req.queries),
                     "retry": .stringConvertible(retryCounter)
                 ])
                 return (cached, true)
             }
             
-            try await self.checkRateLimitsAllowRequest(to: endpoint)
+            try await self.checkRateLimitsAllowRequest(to: req.endpoint)
             let data = try DiscordGlobalConfiguration.encoder.encode(payload)
             var request = try HTTPClient.Request(
-                url: endpoint.url + queries.makeForURLQuery(),
-                method: endpoint.httpMethod
+                url: req.endpoint.url + req.queries.makeForURLQuery(),
+                method: req.endpoint.httpMethod
             )
-            request.headers = headers
-            if includeAuthorization {
+            request.headers = req.headers
+            if req.includeAuthorization {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
             }
             request.headers.replaceOrAdd(name: "Content-Type", value: "application/json")
@@ -288,7 +279,7 @@ public struct DefaultDiscordClient: DiscordClient {
             ])
             
             await self.includeInRateLimits(
-                endpoint: endpoint,
+                endpoint: req.endpoint,
                 headers: response.headers,
                 status: response.status
             )
@@ -298,33 +289,30 @@ public struct DefaultDiscordClient: DiscordClient {
     }
     
     public func sendMultipart<E: MultipartEncodable & Validatable>(
-        to endpoint: Endpoint,
-        queries: [(String, String?)],
-        headers: HTTPHeaders,
-        includeAuthorization: Bool,
+        request req: DiscordRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         if DiscordGlobalConfiguration.performClientValidations {
             try payload.validate()
         }
         
-        return try await self.sendWithRetries(endpoint: endpoint, queries: queries) {
+        return try await self.sendWithRetries(request: req) {
             identity, retryCounter, requestId in
             
-            let identity = CacheableEndpointIdentity(endpoint: endpoint)
-            if let cached = await self.getFromCache(identity: identity, queries: queries) {
+            let identity = CacheableEndpointIdentity(endpoint: req.endpoint)
+            if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 return (cached, true)
             }
-            if let cached = await self.getFromCache(identity: identity, queries: queries) {
+            if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 logger.debug("Got cached response", metadata: [
-                    "endpoint": .string(endpoint.urlSuffix),
-                    "queries": .stringConvertible(queries),
+                    "endpoint": .string(req.endpoint.urlSuffix),
+                    "queries": .stringConvertible(req.queries),
                     "retry": .stringConvertible(retryCounter)
                 ])
                 return (cached, true)
             }
             
-            try await self.checkRateLimitsAllowRequest(to: endpoint)
+            try await self.checkRateLimitsAllowRequest(to: req.endpoint)
             
             let body: HTTPClient.Body
             let contentType: String
@@ -336,11 +324,11 @@ public struct DefaultDiscordClient: DiscordClient {
                 body = .bytes(try DiscordGlobalConfiguration.encoder.encode(payload))
             }
             var request = try HTTPClient.Request(
-                url: endpoint.url + queries.makeForURLQuery(),
-                method: endpoint.httpMethod
+                url: req.endpoint.url + req.queries.makeForURLQuery(),
+                method: req.endpoint.httpMethod
             )
-            request.headers = headers
-            if includeAuthorization {
+            request.headers = req.headers
+            if req.includeAuthorization {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
             }
             request.headers.replaceOrAdd(name: "Content-Type", value: contentType)
@@ -361,7 +349,7 @@ public struct DefaultDiscordClient: DiscordClient {
             ])
             
             await self.includeInRateLimits(
-                endpoint: endpoint,
+                endpoint: req.endpoint,
                 headers: response.headers,
                 status: response.status
             )
