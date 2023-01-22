@@ -163,23 +163,24 @@ public struct DiscordLogHandler: LogHandler {
         }
         
         let embed = Embed(
-            title: maxCounted("\(message)"),
+            title: prepare("\(message)"),
             timestamp: Date(),
             color: config.colors[level],
-            footer: .init(text: maxCounted(self.label).notEmpty(or: "no_label")),
+            footer: .init(text: prepare(self.label).notEmpty(or: "no_label")),
             fields: Array(allMetadata.sorted(by: { $0.key > $1.key }).compactMap {
                 key, value -> Embed.Field? in
                 let value = "\(value)"
                 if key.isEmpty || value.isEmpty { return nil }
-                return .init(name: maxCounted(key), value: maxCounted(value))
+                return .init(name: prepare(key), value: prepare(value))
             }.maxCount(25))
         )
         
         Task { await logManager.include(address: address, embed: embed, level: level) }
     }
     
-    private func maxCounted(_ string: String) -> String {
-        String(string.unicodeScalars.maxCount(250))
+    private func prepare(_ text: String) -> String {
+        let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
+        return String(escaped.unicodeScalars.maxCount(250))
     }
 }
 
