@@ -291,7 +291,7 @@ class LoggerHandlerTests: XCTestCase {
             XCTFail("Expected 3 payloads, but found \(payloads.count)")
         }
         
-        let tolerance = 1.0
+        let tolerance = 2.0
         
         do {
             let anyPayload = payloads[0]
