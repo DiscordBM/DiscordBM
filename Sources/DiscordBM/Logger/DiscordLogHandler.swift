@@ -23,7 +23,12 @@ public struct DiscordLogHandler: LogHandler {
     /// The address to send the logs to.
     let address: Address
     /// `logManager` does the actual heavy-lifting and communicates with Discord.
-    var logManager: DiscordLogManager { .shared }
+    var logManager: DiscordLogManager {
+        guard let shared = DiscordLogManager.shared else {
+            fatalError("Need to configure the log-manager using 'DiscordLogManager.shared = DiscordLogManager(...)'")
+        }
+        return shared
+    }
     
     init(
         label: String,

@@ -41,19 +41,26 @@ class LogHandlerTests: XCTestCase {
             stdoutLogHandler: SwiftLogNoOpLogHandler()
         )
         logger.log(level: .trace, "Testing!")
+        /// To make sure logs arrive in order.
+        try await Task.sleep(nanoseconds: 10_000_000)
         logger.log(level: .notice, "Testing! 2")
+        /// To make sure logs arrive in order.
+        try await Task.sleep(nanoseconds: 10_000_000)
         logger.log(level: .notice, "Testing! 3", metadata: ["1": "2"])
         
         let expectation = expectation(description: "log")
         self.client.expectation = expectation
-        await waitForExpectations(timeout: 2)
+        wait(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
         XCTAssertEqual(payload.content, "<@&22222222> <@&33333333>")
         
         let embeds = try XCTUnwrap(payload.embeds)
-        XCTAssertEqual(embeds.count, 3)
+        if embeds.count != 3 {
+            XCTFail("Expected 3 embeds, but found \(embeds.count): \(embeds)")
+            return
+        }
         
         do {
             let embed = embeds[0]
@@ -88,7 +95,7 @@ class LogHandlerTests: XCTestCase {
             let fields = try XCTUnwrap(embed.fields)
             XCTAssertEqual(fields.count, 1)
             
-            let field = fields[0]
+            let field = try XCTUnwrap(fields.first)
             XCTAssertEqual(field.name, "1")
             XCTAssertEqual(field.value, "2")
         }
@@ -113,7 +120,7 @@ class LogHandlerTests: XCTestCase {
         
         let expectation = expectation(description: "log")
         self.client.expectation = expectation
-        await waitForExpectations(timeout: 2)
+        wait(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -145,7 +152,7 @@ class LogHandlerTests: XCTestCase {
         
         let expectation = expectation(description: "log")
         self.client.expectation = expectation
-        await waitForExpectations(timeout: 2)
+        wait(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -229,7 +236,7 @@ class LogHandlerTests: XCTestCase {
         
         let expectation = expectation(description: "log")
         self.client.expectation = expectation
-        await waitForExpectations(timeout: 2)
+        wait(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -282,7 +289,7 @@ class LogHandlerTests: XCTestCase {
         
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        let expectation = XCTestExpectation(description: "log")
+        let expectation = expectation(description: "log")
         self.client.expectation = expectation
         wait(for: [expectation], timeout: 10)
         
@@ -375,7 +382,7 @@ class LogHandlerTests: XCTestCase {
             
             let expectation = expectation(description: "log-1")
             self.client.expectation = expectation
-            await waitForExpectations(timeout: 3)
+            wait(for: [expectation], timeout: 3)
             
             let payloads = self.client.payloads
             /// Due to the `frequency`, we only should have 1 payload, which contains 4 embeds.
@@ -411,7 +418,7 @@ class LogHandlerTests: XCTestCase {
             
             let expectation = expectation(description: "log-2")
             self.client.expectation = expectation
-            await waitForExpectations(timeout: 3)
+            wait(for: [expectation], timeout: 3)
             
             let payloads = self.client.payloads
             /// Due to the `frequency`, we only should have 1 payload, which contains 4 embeds.
@@ -451,7 +458,7 @@ class LogHandlerTests: XCTestCase {
         
         let expectation = expectation(description: "log")
         self.client.expectation = expectation
-        await waitForExpectations(timeout: 2)
+        wait(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -459,9 +466,51 @@ class LogHandlerTests: XCTestCase {
         let embeds = try XCTUnwrap(payload.embeds)
         XCTAssertEqual(embeds.count, 1)
         
-        let embed = embeds[0]
+        let embed = try XCTUnwrap(embeds.first)
         XCTAssertEqual(embed.title, "Testing!")
     }
+    
+    /// Swift-Log needs to update `MultiplexLogHandler` to support metadata-providers first.
+//    func testMetadataProviders() async throws {
+//        DiscordLogManager.shared = DiscordLogManager(
+//            client: self.client,
+//            configuration: .init(
+//                frequency: .milliseconds(100),
+//                disabledInDebug: false
+//            )
+//        )
+//        let simpleTraceIDMetadataProvider = Logger.MetadataProvider {
+//            guard let traceID = TraceNamespace.simpleTraceID else {
+//                return [:]
+//            }
+//            return ["simple-trace-id": .string(traceID)]
+//        }
+//        DiscordLogHandler.bootstrap(
+//            label: "test",
+//            metadataProvider: simpleTraceIDMetadataProvider,
+//            address: .webhook(.url(webhookUrl)),
+//            stdoutLogHandler: SwiftLogNoOpLogHandler()
+//        )
+//
+//        let logger = Logger(label: "test")
+//
+//        TraceNamespace.$simpleTraceID.withValue("1234-5678") {
+//            logger.log(level: .info, "Testing!")
+//        }
+//
+//        let expectation = expectation(description: "log")
+//        self.client.expectation = expectation
+//        await waitForExpectations(timeout: 2)
+//
+//        let anyPayload = self.client.payloads.first
+//        let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+//
+//        let embeds = try XCTUnwrap(payload.embeds)
+//        XCTAssertEqual(embeds.count, 1)
+//
+//        let embed = embeds[0]
+//        XCTAssertEqual(embed.title, "Testing!")
+//    }
 }
 
 private class FakeDiscordClient: DiscordClient {
@@ -491,4 +540,8 @@ private class FakeDiscordClient: DiscordClient {
         expectation = nil
         return DiscordHTTPResponse(host: "discord.com", status: .ok, version: .http1_1)
     }
+}
+
+private enum TraceNamespace {
+    @TaskLocal static var simpleTraceID: String?
 }

@@ -35,7 +35,7 @@ class GatewayConnectionTests: XCTestCase {
             intents: [.guilds, .guildBans, .guildEmojisAndStickers, .guildIntegrations, .guildWebhooks, .guildInvites, .guildVoiceStates, .guildMessages, .guildMessageReactions, .guildMessageTyping, .directMessages, .directMessageReactions, .directMessageTyping, .guildScheduledEvents, .autoModerationConfiguration, .autoModerationExecution, .guildMessages, .guildPresences, .messageContent]
         )
         
-        let expectation = XCTestExpectation(description: "Connected")
+        let expectation = expectation(description: "Connected")
         
         var _ready: Gateway.Ready?
         var didHello = false
@@ -95,7 +95,7 @@ class GatewayConnectionTests: XCTestCase {
             intents: [.guilds, .guildBans, .guildEmojisAndStickers, .guildIntegrations, .guildWebhooks, .guildInvites, .guildVoiceStates, .guildMessages, .guildMessageReactions, .guildMessageTyping, .directMessages, .directMessageReactions, .directMessageTyping, .guildScheduledEvents, .autoModerationConfiguration, .autoModerationExecution, .guildMessages, .guildPresences, .messageContent]
         )
         
-        let expectation = XCTestExpectation(description: "Connected")
+        let expectation = expectation(description: "Connected")
         
         var _ready: Gateway.Ready?
         var didHello = false
