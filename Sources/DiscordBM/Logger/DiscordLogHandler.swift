@@ -23,36 +23,45 @@ public struct DiscordLogHandler: LogHandler {
     /// The address to send the logs to.
     let address: Address
     /// `logManager` does the actual heavy-lifting and communicates with Discord.
-    var logManager: DiscordLogManager {
-        guard let shared = DiscordLogManager.shared else {
-            fatalError("Need to configure the log-manager using 'DiscordLogManager.shared = DiscordLogManager(...)'")
-        }
-        return shared
-    }
+    var logManager: DiscordLogManager { .shared }
     
     init(
         label: String,
         metadata: Logger.Metadata = [:],
         metadataProvider: Logger.MetadataProvider? = nil,
         logLevel: Logger.Level = .info,
-        address: Address
+        address: Address? = nil
     ) {
         self.label = label
         self.metadata = metadata
         self.metadataProvider = metadataProvider
         self.logLevel = logLevel
-        self.address = address
+        switch address {
+        case .some(let address):
+            self.address = address
+        case .none:
+            guard let defaultAddress = DiscordLogManager.shared.configuration.defaultAddress else {
+                fatalError("Must either pass 'address', or set the 'defaultAddress' in 'DiscordLogManager.Configuration'")
+            }
+            self.address = defaultAddress
+        }
     }
     
     /// Get a logger that logs to both the stdout and to Discord.
+    /// Must set the `address` if you haven't passed the `defaultAddress` to `DiscordLogManager.Configuration`.
+    /// Must set the `stdoutLogHandler` if you haven't passed the `defaultStdoutLogHandler` to `DiscordLogManager.Configuration`.
     public static func multiplexLogger(
         label: String,
         level: Logger.Level? = nil,
         metadataProvider: Logger.MetadataProvider? = nil,
-        address: Address,
-        stdoutLogHandler: LogHandler
+        address: Address? = nil,
+        stdoutLogHandler: LogHandler? = nil
     ) -> Logger {
-        Logger(label: label) { label in
+        guard let stdoutLogHandler = stdoutLogHandler
+                ?? DiscordLogManager.shared.configuration.defaultStdoutLogHandler else {
+            fatalError("Must either pass 'stdoutLogHandler', or set the 'defaultStdoutLogHandler' in 'DiscordLogManager.Configuration'")
+        }
+        return Logger(label: label) { label in
             var handler = MultiplexLogHandler([
                 stdoutLogHandler,
                 DiscordLogHandler(
@@ -69,17 +78,23 @@ public struct DiscordLogHandler: LogHandler {
     }
     
     /// Bootstrap the logging system to use `DiscordLogHandler`.
+    /// Must set the `address` if you haven't passed the `defaultAddress` to `DiscordLogManager.Configuration`.
+    /// Must set the `stdoutLogHandler` if you haven't passed the `defaultStdoutLogHandler` to `DiscordLogManager.Configuration`.
     /// - NOTE: Be careful because `LoggingSystem.bootstrap` can only be called once.
     /// If you use libraries like Vapor, they already call the method once.
     public static func bootstrap(
         label: String,
         level: Logger.Level? = nil,
         metadataProvider: Logger.MetadataProvider? = nil,
-        address: Address,
-        stdoutLogHandler: LogHandler
+        address: Address? = nil,
+        stdoutLogHandler: LogHandler? = nil
     ) {
+        guard let stdoutLogHandler = stdoutLogHandler
+                ?? DiscordLogManager.shared.configuration.defaultStdoutLogHandler else {
+            fatalError("Must either pass 'stdoutLogHandler', or set the 'defaultStdoutLogHandler' in 'DiscordLogManager.Configuration'")
+        }
 #if DEBUG
-        LoggingSystem.bootstrapInternal({ label, metadataProvider in
+        return LoggingSystem.bootstrapInternal({ label, metadataProvider in
             var handler = MultiplexLogHandler([
                 stdoutLogHandler,
                 DiscordLogHandler(
@@ -94,7 +109,7 @@ public struct DiscordLogHandler: LogHandler {
             return handler
         }, metadataProvider: metadataProvider)
 #else
-        LoggingSystem.bootstrap({ label, metadataProvider in
+        return LoggingSystem.bootstrap({ label, metadataProvider in
             var handler = MultiplexLogHandler([
                 stdoutLogHandler,
                 DiscordLogHandler(

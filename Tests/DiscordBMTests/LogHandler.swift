@@ -10,7 +10,6 @@ class LogHandlerTests: XCTestCase {
     
     override func setUp() {
         client = FakeDiscordClient()
-        DiscordLogManager.shared = nil
         LoggingSystem.bootstrapInternal({ StreamLogHandler.standardOutput(label: $0) })
     }
     
@@ -27,6 +26,8 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
+                defaultAddress: .webhook(.url(webhookUrl)),
+                defaultStdoutLogHandler: SwiftLogNoOpLogHandler(),
                 roleIds: [
                     .trace: "33333333",
                     .notice: "22222222"
@@ -34,12 +35,7 @@ class LogHandlerTests: XCTestCase {
                 disabledInDebug: false
             )
         )
-        let logger = DiscordLogHandler.multiplexLogger(
-            label: "test",
-            level: .trace,
-            address: .webhook(.url(webhookUrl)),
-            stdoutLogHandler: SwiftLogNoOpLogHandler()
-        )
+        let logger = DiscordLogHandler.multiplexLogger(label: "test", level: .trace)
         logger.log(level: .trace, "Testing!")
         /// To make sure logs arrive in order.
         try await Task.sleep(nanoseconds: 10_000_000)
@@ -106,6 +102,8 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
+                defaultAddress: nil,
+                defaultStdoutLogHandler: nil,
                 excludeMetadata: [.trace],
                 disabledInDebug: false
             )
@@ -137,6 +135,8 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
+                defaultAddress: nil,
+                defaultStdoutLogHandler: nil,
                 disabledLogLevels: [.debug],
                 disabledInDebug: false
             )
@@ -168,7 +168,9 @@ class LogHandlerTests: XCTestCase {
         DiscordLogManager.shared = DiscordLogManager(
             client: self.client,
             configuration: .init(
-                frequency: .milliseconds(100),
+                frequency: .seconds(10),
+                defaultAddress: nil,
+                defaultStdoutLogHandler: nil,
                 disabledInDebug: false,
                 maxStoredLogsCount: 100
             )
@@ -184,7 +186,7 @@ class LogHandlerTests: XCTestCase {
             logger.log(level: .error, "Testing! \(idx)")
         }
         
-        let logs = await DiscordLogManager.shared!.tests_getLogs()
+        let logs = await DiscordLogManager.shared.tests_getLogs()
         let all = try XCTUnwrap(logs[address])
         
         XCTAssertEqual(all.count, 100)
@@ -200,6 +202,8 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
+                defaultAddress: nil,
+                defaultStdoutLogHandler: nil,
                 disabledInDebug: true
             )
         )
@@ -222,6 +226,8 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
+                defaultAddress: nil,
+                defaultStdoutLogHandler: nil,
                 extraMetadata: [.info],
                 disabledInDebug: false
             )
@@ -263,6 +269,8 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .zero,
+                defaultAddress: nil,
+                defaultStdoutLogHandler: nil,
                 aliveNotice: .init(
                     address: .webhook(.url(webhookUrl)),
                     interval: .seconds(6),
@@ -299,7 +307,7 @@ class LogHandlerTests: XCTestCase {
             return
         }
         
-        let tolerance = 2.0
+        let tolerance = 1.0
         
         do {
             let anyPayload = payloads[0]
@@ -354,6 +362,8 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .seconds(5),
+                defaultAddress: nil,
+                defaultStdoutLogHandler: nil,
                 disabledInDebug: false
             )
         )
@@ -442,15 +452,12 @@ class LogHandlerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
+                defaultAddress: .webhook(.url(webhookUrl)),
+                defaultStdoutLogHandler: SwiftLogNoOpLogHandler(),
                 disabledInDebug: false
             )
         )
-        DiscordLogHandler.bootstrap(
-            label: "test",
-            level: .error,
-            address: .webhook(.url(webhookUrl)),
-            stdoutLogHandler:  SwiftLogNoOpLogHandler()
-        )
+        DiscordLogHandler.bootstrap(label: "test", level: .error)
         
         let logger = Logger(label: "test2")
         

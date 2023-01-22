@@ -39,8 +39,9 @@ public actor DiscordLogManager {
         }
         
         let frequency: TimeAmount
+        let defaultAddress: Address?
+        let defaultStdoutLogHandler: LogHandler?
         let aliveNotice: AliveNotice?
-        let fallbackLogHandler: LogHandler?
         let roles: [Logger.Level: String]
         let colors: [Logger.Level: DiscordColor]
         let excludeMetadata: Set<Logger.Level>
@@ -51,6 +52,7 @@ public actor DiscordLogManager {
         
         /// - Parameters:
         ///   - frequency: The frequency of the log-sendings. e.g. if its set to 30s, logs will only be sent once-in-30s. Should not be lower than 10s, because of Discord rate-limits.
+        ///   - defaultAddress: The default address that `DiscordLogHandler` will use.
         ///   - aliveNotice: Configuration for sending "I am alive" messages every once in a while. Note that alive notices are delayed until it's been `interval`-time past last message.
         ///   - fallbackLogHandler: The log handler to use when `DiscordLogger` errors. You should use a log handler that logs to stdout.
         ///   - roleIds: Id of roles to be mentioned for each log-level.
@@ -62,6 +64,8 @@ public actor DiscordLogManager {
         ///   - maxStoredLogsCount: If there are more logs than this count, the log manager will start removing the oldest un-sent logs to prevent memory leaks.
         public init(
             frequency: TimeAmount = .seconds(30),
+            defaultAddress: Address?, /// Avoiding `= nil` to encourage setting it.
+            defaultStdoutLogHandler: LogHandler?, /// Avoiding `= nil` to encourage setting it.
             aliveNotice: AliveNotice? = nil,
             fallbackLogHandler: LogHandler? = nil,
             roleIds: [Logger.Level: String] = [:],
@@ -81,8 +85,9 @@ public actor DiscordLogManager {
             maxStoredLogsCount: Int = 1_000
         ) {
             self.frequency = frequency
+            self.defaultAddress = defaultAddress
+            self.defaultStdoutLogHandler = defaultStdoutLogHandler
             self.aliveNotice = aliveNotice
-            self.fallbackLogHandler = fallbackLogHandler
             self.roles = roleIds.mapValues {
                 DiscordUtils.roleMention(id: $0)
             }
@@ -119,14 +124,23 @@ public actor DiscordLogManager {
     
     public init(
         client: any DiscordClient,
-        configuration: Configuration = Configuration()
+        configuration: Configuration
     ) {
         self.client = client
         self.configuration = configuration
         Task { await self.startAliveNotices() }
     }
     
-    public static var shared: DiscordLogManager!
+    private static var _shared: DiscordLogManager?
+    public static var shared: DiscordLogManager {
+        get {
+            guard let shared = DiscordLogManager._shared else {
+                fatalError("Need to configure the log-manager using 'DiscordLogManager.shared = DiscordLogManager(...)'")
+            }
+            return shared
+        }
+        set(newValue) { self._shared = newValue }
+    }
     
     func include(address: Address, embed: Embed, level: Logger.Level) {
         self.include(address: address, embed: embed, level: level, isFirstAliveNotice: false)
@@ -320,7 +334,7 @@ public actor DiscordLogManager {
         function: String = #function,
         line: UInt = #line
     ) {
-        self.configuration.fallbackLogHandler?.log(
+        self.configuration.defaultStdoutLogHandler?.log(
             level: .warning,
             message: message,
             metadata: metadata,
