@@ -26,7 +26,7 @@ class LogHandlerTests: XCTestCase {
         DiscordLogManager.shared = DiscordLogManager(
             client: self.client,
             configuration: .init(
-                frequency: .milliseconds(100),
+                frequency: .seconds(1),
                 defaultAddress: .webhook(.url(webhookUrl)),
                 makeDefaultLogHandler: SwiftLogNoOpLogHandler.init,
                 defaultLogLevel: .trace,
