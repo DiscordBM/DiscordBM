@@ -25,7 +25,7 @@ public actor DiscordLogManager {
             ///   Useful to be notified of app-boots when you update your app or when it crashes.
             public init(
                 address: Address,
-                interval: TimeAmount,
+                interval: TimeAmount = .hours(1),
                 message: String = "Alive Notice!",
                 color: DiscordColor = .blue,
                 initialNoticeRoleId: String
@@ -38,32 +38,25 @@ public actor DiscordLogManager {
             }
         }
         
-        public enum ExtraMetadata {
-            case source
-            case file
-            case function
-            case line
-        }
-        
         let frequency: TimeAmount
         let aliveNotice: AliveNotice?
         let fallbackLogHandler: LogHandler?
         let roles: [Logger.Level: String]
         let colors: [Logger.Level: DiscordColor]
         let excludeMetadata: Set<Logger.Level>
-        let extraMetadata: [Logger.Level: Set<ExtraMetadata>]
+        let extraMetadata: Set<Logger.Level>
         let disabledLogLevels: Set<Logger.Level>
         let disabledInDebug: Bool
         let maxStoredLogsCount: Int
         
         /// - Parameters:
         ///   - frequency: The frequency of the log-sendings. e.g. if its set to 30s, logs will only be sent once-in-30s. Should not be lower than 10s, because of Discord rate-limits.
-        ///   - aliveNotice: Configuration for sending "I am alive" messages every once in a while.
+        ///   - aliveNotice: Configuration for sending "I am alive" messages every once in a while. Note that alive notices are delayed until it's been `interval`-time past last message.
         ///   - fallbackLogHandler: The log handler to use when `DiscordLogger` errors. You should use a log handler that logs to stdout.
         ///   - roleIds: Id of roles to be mentioned for each log-level.
         ///   - colors: Color of the embeds to be used for each log-level.
         ///   - excludeMetadata: Excludes all metadata for these log-levels.
-        ///   - extraMetadata: Extra metadata to be logged.
+        ///   - extraMetadata: Will log `source`, `file`, `function` and `line` as well.
         ///   - disabledLogLevels: `Logger.Level`s to never be logged.
         ///   - disabledInDebug: Whether or not to disable logging in DEBUG.
         ///   - maxStoredLogsCount: If there are more logs than this count, the log manager will start removing the oldest un-sent logs to prevent memory leaks.
@@ -82,7 +75,7 @@ public actor DiscordLogManager {
                 .info: .blue,
             ],
             excludeMetadata: Set<Logger.Level> = [],
-            extraMetadata: [Logger.Level: Set<ExtraMetadata>] = [:],
+            extraMetadata: Set<Logger.Level> = [],
             disabledLogLevels: Set<Logger.Level> = [],
             disabledInDebug: Bool = true,
             maxStoredLogsCount: Int = 1_000
@@ -102,7 +95,7 @@ public actor DiscordLogManager {
         }
     }
     
-    private struct Log: CustomStringConvertible {
+    struct Log: CustomStringConvertible {
         let embed: Embed
         let level: Logger.Level?
         let isFirstAliveNotice: Bool
@@ -121,10 +114,8 @@ public actor DiscordLogManager {
     
     private var logs: [Address: [Log]] = [:]
     private var sendLogsTasks: [Address: Task<Void, Never>] = [:]
-    private var lastSend = Date.distantPast
     
     private var aliveNoticeTask: Task<Void, Never>?
-    private var isFirstAliveNotice = ManagedAtomic(true)
     
     public init(
         client: any DiscordClient,
@@ -132,7 +123,7 @@ public actor DiscordLogManager {
     ) {
         self.client = client
         self.configuration = configuration
-        Task { await self.setUpAliveNotices() }
+        Task { await self.startAliveNotices() }
     }
     
     public static var shared: DiscordLogManager!
@@ -167,6 +158,16 @@ public actor DiscordLogManager {
         }
     }
     
+    private func startAliveNotices() {
+#if DEBUG
+        if configuration.disabledInDebug { return }
+#endif
+        if let aliveNotice = configuration.aliveNotice {
+            self.sendAliveNotice(config: aliveNotice, isFirstNotice: true)
+        }
+        self.setUpAliveNotices()
+    }
+    
     private func setUpAliveNotices() {
 #if DEBUG
         if configuration.disabledInDebug { return }
@@ -175,22 +176,27 @@ public actor DiscordLogManager {
             let nanos = UInt64(aliveNotice.interval.nanoseconds)
             
             @Sendable func send() async throws {
-                await self.include(
-                    address: aliveNotice.address,
-                    embed: .init(
-                        title: aliveNotice.message,
-                        color: aliveNotice.color
-                    ),
-                    level: nil,
-                    isFirstAliveNotice: isFirstAliveNotice.exchange(false, ordering: .relaxed)
-                )
                 try await Task.sleep(nanoseconds: nanos)
+                await sendAliveNotice(config: aliveNotice, isFirstNotice: false)
                 try await send()
             }
             
             aliveNoticeTask?.cancel()
             aliveNoticeTask = Task { try? await send() }
         }
+    }
+    
+    private func sendAliveNotice(config: Configuration.AliveNotice, isFirstNotice: Bool) {
+        self.include(
+            address: config.address,
+            embed: .init(
+                title: config.message,
+                timestamp: Date(),
+                color: config.color
+            ),
+            level: nil,
+            isFirstAliveNotice: isFirstNotice
+        )
     }
     
     private func setUpSendLogsTask(address: Address) {
@@ -260,6 +266,8 @@ public actor DiscordLogManager {
         case .webhook(let address):
             try await sendLogsToWebhook(content: mentions, embeds: embeds, address: address)
         }
+        
+        self.setUpAliveNotices()
     }
     
     private func sendLogsToChannel(
@@ -319,4 +327,10 @@ public actor DiscordLogManager {
             line: line
         )
     }
+    
+#if DEBUG
+    func tests_getLogs() -> [Address: [Log]] {
+        self.logs
+    }
+#endif
 }

@@ -96,8 +96,8 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
         host: String,
         status: HTTPResponseStatus,
         version: HTTPVersion,
-        headers: HTTPHeaders,
-        body: ByteBuffer?
+        headers: HTTPHeaders = [:],
+        body: ByteBuffer? = nil
     ) {
         self._response = .init(
             host: host,
@@ -782,7 +782,7 @@ public extension DiscordClient {
             throw DiscordClientError.badWebhookAddress(address)
         }
         let endpoint = Endpoint.executeWebhook(id: id, token: token)
-        return try await self.send(
+        return try await self.sendMultipart(
             to: endpoint,
             queries: [("thread_id", threadId)],
             headers: [:],
@@ -802,7 +802,7 @@ public extension DiscordClient {
             throw DiscordClientError.badWebhookAddress(address)
         }
         let endpoint = Endpoint.executeWebhook(id: id, token: token)
-        return try await self.send(
+        return try await self.sendMultipart(
             to: endpoint,
             queries: [
                 ("wait", "true"),

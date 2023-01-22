@@ -21,16 +21,68 @@ public struct DiscordLogHandler: LogHandler {
     /// `logManager` does the actual heavy-lifting and communicates with Discord.
     var logManager: DiscordLogManager { .shared }
     
-    public init(
+    init(
         label: String,
         metadata: Logger.Metadata = [:],
+        metadataProvider: Logger.MetadataProvider? = nil,
         logLevel: Logger.Level = .info,
         address: Address
     ) {
         self.label = label
         self.metadata = metadata
+        self.metadataProvider = metadataProvider
         self.logLevel = logLevel
         self.address = address
+    }
+    
+    /// Get a logger that logs to both the stdout and to Discord.
+    public static func multiplexLogger(
+        label: String,
+        level: Logger.Level? = nil,
+        metadataProvider: Logger.MetadataProvider? = nil,
+        address: Address,
+        stdoutLogHandler: LogHandler
+    ) -> Logger {
+        return Logger(label: label) { label in
+            var handler = MultiplexLogHandler([
+                stdoutLogHandler,
+                DiscordLogHandler(
+                    label: label,
+                    metadataProvider: metadataProvider,
+                    address: address
+                )
+            ])
+            if let level = level {
+                handler.logLevel = level
+            }
+            return handler
+        }
+    }
+    
+    /// Bootstrap the logging system to use `DiscordLogHandler`.
+    /// - NOTE: Be careful because `LoggingSystem.bootstrap` can only be called once.
+    /// If you use libraries like Vapor, they already call the method once.
+    public static func bootstrap(
+        label: String,
+        level: Logger.Level? = nil,
+        metadataProvider: Logger.MetadataProvider? = nil,
+        address: Address,
+        stdoutLogHandler: LogHandler
+    ) {
+        LoggingSystem.bootstrap({ label, metadataProvider in
+            var handler = MultiplexLogHandler([
+                stdoutLogHandler,
+                DiscordLogHandler(
+                    label: label,
+                    metadataProvider: metadataProvider,
+                    address: address
+                )
+            ])
+            if let level = level {
+                handler.logLevel = level
+            }
+            return handler
+        }, metadataProvider: metadataProvider)
     }
     
     public subscript(metadataKey key: String) -> Logger.Metadata.Value? {
@@ -53,25 +105,16 @@ public struct DiscordLogHandler: LogHandler {
         
         var allMetadata: Logger.Metadata = [:]
         if !config.excludeMetadata.contains(level) {
-            if !config.excludeMetadata.contains(level) {
-                allMetadata = (metadata ?? [:])
-                    .merging(self.metadata, uniquingKeysWith: { (a, _) in a })
-                    .merging(self.metadataProvider?.get() ?? [:], uniquingKeysWith: { (a, _) in a })
-            }
-            if let extraMetadata = config.extraMetadata[logLevel], !extraMetadata.isEmpty {
-                allMetadata.reserveCapacity(allMetadata.count + extraMetadata.count)
-                for extra in config.extraMetadata[logLevel] ?? [] {
-                    switch extra {
-                    case .source:
-                        allMetadata["_source"] = .string(source)
-                    case .file:
-                        allMetadata["_file"] = .string(file)
-                    case .function:
-                        allMetadata["_function"] = .string(function)
-                    case .line:
-                        allMetadata["_line"] = .stringConvertible(line)
-                    }
-                }
+            allMetadata = (metadata ?? [:])
+                .merging(self.metadata, uniquingKeysWith: { a, _ in a })
+                .merging(self.metadataProvider?.get() ?? [:], uniquingKeysWith: { a, _ in a })
+            if config.extraMetadata.contains(logLevel) {
+                allMetadata.merge([
+                    "_source": .string(source),
+                    "_file": .string(file),
+                    "_function": .string(function),
+                    "_line": .stringConvertible(line),
+                ], uniquingKeysWith: { a, _ in a })
             }
         }
         
@@ -80,11 +123,12 @@ public struct DiscordLogHandler: LogHandler {
             timestamp: Date(),
             color: config.colors[level],
             footer: .init(text: maxCounted(self.label).notEmpty(or: "no_label")),
-            fields: allMetadata.maxCount(25).compactMap { key, value -> Embed.Field? in
+            fields: Array(allMetadata.sorted(by: { $0.key > $1.key }).compactMap {
+                key, value -> Embed.Field? in
                 let value = "\(value)"
                 if key.isEmpty || value.isEmpty { return nil }
                 return .init(name: maxCounted(key), value: maxCounted(value))
-            }
+            }.maxCount(25))
         )
         
         Task { await logManager.include(address: address, embed: embed, level: level) }

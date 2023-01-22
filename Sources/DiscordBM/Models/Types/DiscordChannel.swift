@@ -532,7 +532,7 @@ public struct Embed: Sendable, Codable, Validatable {
         self.type = type
         self.description = description
         self.url = url
-        self.timestamp = timestamp == nil ? nil : .init(date: timestamp!)
+        self.timestamp = timestamp.map { .init(date: $0) }
         self.color = color
         self.footer = footer
         self.image = image
