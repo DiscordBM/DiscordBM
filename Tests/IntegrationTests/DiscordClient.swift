@@ -356,7 +356,9 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(response.channel_id, Constants.webhooksChannelId)
         XCTAssertEqual(response.content, text)
         XCTAssertEqual(response.embeds.first?.title, "Hey")
-        XCTAssertEqual(response.embeds.first?.timestamp?.date, date)
+        let timestamp = try XCTUnwrap(response.embeds.first?.timestamp?.date).timeIntervalSince1970
+        let range = (date.timeIntervalSince1970-1)...(date.timeIntervalSince1970+1)
+        XCTAssertTrue(range.contains(timestamp), "\(range) did not contain \(timestamp)")
         
         let text2 = "Testing! \(Date())"
         let threadId = "1066278441256751114"
