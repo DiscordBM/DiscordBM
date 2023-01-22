@@ -30,7 +30,8 @@ class LogHandlerTests: XCTestCase {
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 roleIds: [
                     .trace: "33333333",
-                    .notice: "22222222"
+                    .notice: "22222222",
+                    .warning: "22222222",
                 ],
                 disabledInDebug: false
             )
@@ -48,6 +49,9 @@ class LogHandlerTests: XCTestCase {
         /// To make sure logs arrive in order.
         try await Task.sleep(nanoseconds: 100_000_000)
         logger.log(level: .notice, "Testing! 3", metadata: ["1": "2"])
+        /// To make sure logs arrive in order.
+        try await Task.sleep(nanoseconds: 100_000_000)
+        logger.log(level: .warning, "Testing! 4")
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
@@ -58,8 +62,8 @@ class LogHandlerTests: XCTestCase {
         XCTAssertEqual(payload.content, "<@&22222222> <@&33333333>")
         
         let embeds = try XCTUnwrap(payload.embeds)
-        if embeds.count != 3 {
-            XCTFail("Expected 3 embeds, but found \(embeds.count): \(embeds)")
+        if embeds.count != 4 {
+            XCTFail("Expected 4 embeds, but found \(embeds.count): \(embeds)")
             return
         }
         
@@ -99,6 +103,16 @@ class LogHandlerTests: XCTestCase {
             let field = try XCTUnwrap(fields.first)
             XCTAssertEqual(field.name, "1")
             XCTAssertEqual(field.value, "2")
+        }
+        
+        do {
+            let embed = embeds[3]
+            XCTAssertEqual(embed.title, "Testing! 4")
+            let now = Date().timeIntervalSince1970
+            let timestamp = embed.timestamp?.date.timeIntervalSince1970 ?? 0
+            XCTAssertTrue(((now-2)...(now+2)).contains(timestamp))
+            XCTAssertEqual(embed.color?.value, DiscordColor.orange.value)
+            XCTAssertEqual(embed.footer?.text, "test")
         }
     }
     
