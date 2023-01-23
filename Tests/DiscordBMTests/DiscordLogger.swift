@@ -278,7 +278,7 @@ class DiscordLoggerTests: XCTestCase {
         XCTAssertEqual(fields[2].name, #"\_function"#)
         XCTAssertEqual(fields[2].value, #"testExtraMetadata\_noticeLevel()"#)
         XCTAssertEqual(fields[3].name, #"\_file"#)
-        XCTAssertEqual(fields[3].value, "DiscordBMTests/LogHandler.swift")
+        XCTAssertEqual(fields[3].value, "DiscordBMTests/DiscordLogger.swift")
     }
 
     func testExtraMetadata_warningLevel() async throws {
@@ -323,7 +323,7 @@ class DiscordLoggerTests: XCTestCase {
         XCTAssertEqual(fields[2].name, #"\_function"#)
         XCTAssertEqual(fields[2].value, #"testExtraMetadata\_warningLevel()"#)
         XCTAssertEqual(fields[3].name, #"\_file"#)
-        XCTAssertEqual(fields[3].value, "DiscordBMTests/LogHandler.swift")
+        XCTAssertEqual(fields[3].value, "DiscordBMTests/DiscordLogger.swift")
     }
 
     func testAliveNotices() async throws {
