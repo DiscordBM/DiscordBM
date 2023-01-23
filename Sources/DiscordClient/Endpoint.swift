@@ -113,77 +113,91 @@ public enum Endpoint: Sendable {
     case executeWebhook(id: String, token: String)
     
     var urlSuffix: String {
+        let suffix: String
         switch self {
         case .getGateway:
-            return "gateway"
+            suffix = "gateway"
         case .getGatewayBot:
-            return "gateway/bot"
+            suffix = "gateway/bot"
         case let .createInteractionResponse(id, token):
-            return "interactions/\(id)/\(token)/callback"
+            suffix = "interactions/\(id)/\(token)/callback"
         case let .getInteractionResponse(appId, token):
-            return "webhooks/\(appId)/\(token)/messages/@original"
+            suffix = "webhooks/\(appId)/\(token)/messages/@original"
         case let .editInteractionResponse(appId, token):
-            return "webhooks/\(appId)/\(token)/messages/@original"
+            suffix = "webhooks/\(appId)/\(token)/messages/@original"
         case let .deleteInteractionResponse(appId, token):
-            return "webhooks/\(appId)/\(token)/messages/@original"
+            suffix = "webhooks/\(appId)/\(token)/messages/@original"
         case let .postFollowupInteractionResponse(appId, token):
-            return "webhooks/\(appId)/\(token)"
+            suffix = "webhooks/\(appId)/\(token)"
         case let .getFollowupInteractionResponse(appId, token, messageId):
-            return "webhooks/\(appId)/\(token)/messages/\(messageId)"
+            suffix = "webhooks/\(appId)/\(token)/messages/\(messageId)"
         case let .editFollowupInteractionResponse(appId, token, messageId):
-            return "webhooks/\(appId)/\(token)/messages/\(messageId)"
+            suffix = "webhooks/\(appId)/\(token)/messages/\(messageId)"
         case let .deleteFollowupInteractionResponse(appId, token, messageId):
-            return "webhooks/\(appId)/\(token)/messages/\(messageId)"
+            suffix = "webhooks/\(appId)/\(token)/messages/\(messageId)"
         case let .createMessage(channelId):
-            return "channels/\(channelId)/messages"
+            suffix = "channels/\(channelId)/messages"
         case let .editMessage(channelId, messageId):
-            return "channels/\(channelId)/messages/\(messageId)"
+            suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .deleteMessage(channelId, messageId):
-            return "channels/\(channelId)/messages/\(messageId)"
+            suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .createApplicationGlobalCommand(appId):
-            return "applications/\(appId)/commands"
+            suffix = "applications/\(appId)/commands"
         case let .getApplicationGlobalCommands(appId):
-            return "applications/\(appId)/commands"
+            suffix = "applications/\(appId)/commands"
         case let .deleteApplicationGlobalCommand(appId, id):
-            return "applications/\(appId)/commands/\(id)"
+            suffix = "applications/\(appId)/commands/\(id)"
         case let .getGuild(id):
-            return "guilds/\(id)"
+            suffix = "guilds/\(id)"
         case let .searchGuildMembers(id):
-            return "guilds/\(id)/members/search"
+            suffix = "guilds/\(id)/members/search"
         case let .getGuildMember(id, userId):
-            return "guilds/\(id)/members/\(userId)"
+            suffix = "guilds/\(id)/members/\(userId)"
         case let .getChannel(id):
-            return "channels/\(id)"
+            suffix = "channels/\(id)"
         case let .getChannelMessages(id):
-            return "channels/\(id)/messages"
+            suffix = "channels/\(id)/messages"
         case let .getChannelMessage(id, messageId):
-            return "channels/\(id)/messages/\(messageId)"
+            suffix = "channels/\(id)/messages/\(messageId)"
         case let .leaveGuild(id):
-            return "users/@me/guilds/\(id)"
+            suffix = "users/@me/guilds/\(id)"
         case let .createGuildRole(guildId):
-            return "guilds/\(guildId)/roles"
+            suffix = "guilds/\(guildId)/roles"
         case let .deleteGuildRole(guildId, roleId):
-            return "guilds/\(guildId)/roles/\(roleId)"
+            suffix = "guilds/\(guildId)/roles/\(roleId)"
         case let .addGuildMemberRole(guildId, userId, roleId):
-            return "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
+            suffix = "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .removeGuildMemberRole(guildId, userId, roleId):
-            return "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
+            suffix = "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .getGuildAuditLogs(guildId):
-            return "guilds/\(guildId)/audit-logs"
+            suffix = "guilds/\(guildId)/audit-logs"
         case let .addReaction(channelId, messageId, emoji):
-            return "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/@me"
+            suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/@me"
         case .createDM:
-            return "users/@me/channels"
+            suffix = "users/@me/channels"
         case let .executeWebhook(id, token):
-            return "webhooks/\(id)/\(token)"
+            suffix = "webhooks/\(id)/\(token)"
+        }
+        return suffix.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? suffix
+    }
+    
+    /// Doesn't expose secret url path parameters.
+    var urlSuffixDescription: String {
+        switch self {
+        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM:
+            return self.urlSuffix
+        case .executeWebhook(let id, let token):
+            return "webhooks/\(id.hash)/\(token.hash)"
         }
     }
     
     var url: String {
-        let suffix = urlSuffix.addingPercentEncoding(
-            withAllowedCharacters: .urlPathAllowed
-        ) ?? urlSuffix
-        return "https://discord.com/api/v\(DiscordGlobalConfiguration.apiVersion)/" + suffix
+        "https://discord.com/api/v\(DiscordGlobalConfiguration.apiVersion)/" + urlSuffix
+    }
+    
+    /// Doesn't expose secret url path parameters.
+    var urlDescription: String {
+        "https://discord.com/api/v\(DiscordGlobalConfiguration.apiVersion)/" + urlSuffixDescription
     }
     
     var httpMethod: HTTPMethod {
@@ -230,6 +244,15 @@ public enum Endpoint: Sendable {
             return false
         case .getGateway, .getGatewayBot, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM, .executeWebhook:
             return true
+        }
+    }
+    
+    var requiresAuthorizationHeader: Bool {
+        switch self {
+        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM:
+            return true
+        case .executeWebhook:
+            return false
         }
     }
     

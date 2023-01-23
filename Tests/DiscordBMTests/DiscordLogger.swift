@@ -590,19 +590,19 @@ private class FakeDiscordClient: DiscordClient {
     var expectation: XCTestExpectation?
     var payloads: [Any] = []
     
-    func send(request: DiscordRequest) async throws -> DiscordHTTPResponse {
+    func send(request: DiscordHTTPRequest) async throws -> DiscordHTTPResponse {
         fatalError()
     }
     
     func send<E: Validatable & Encodable>(
-        request: DiscordRequest,
+        request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         fatalError()
     }
     
     func sendMultipart<E: Validatable & MultipartEncodable>(
-        request: DiscordRequest,
+        request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         payloads.append(payload)

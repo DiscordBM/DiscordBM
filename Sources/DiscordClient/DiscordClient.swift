@@ -6,15 +6,15 @@ import Foundation
 public protocol DiscordClient {
     var appId: String? { get }
     
-    func send(request: DiscordRequest) async throws -> DiscordHTTPResponse
+    func send(request: DiscordHTTPRequest) async throws -> DiscordHTTPResponse
     
     func send<E: Encodable & Validatable>(
-        request: DiscordRequest,
+        request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse
     
     func sendMultipart<E: MultipartEncodable & Validatable>(
-        request: DiscordRequest,
+        request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse
 }
@@ -22,14 +22,14 @@ public protocol DiscordClient {
 //MARK: - Default functions for DiscordClient
 public extension DiscordClient {
     @inlinable
-    func send<C: Codable>(request: DiscordRequest) async throws -> DiscordClientResponse<C> {
+    func send<C: Codable>(request: DiscordHTTPRequest) async throws -> DiscordClientResponse<C> {
         let response = try await self.send(request: request)
         return DiscordClientResponse(httpResponse: response)
     }
     
     @inlinable
     func send<E: Encodable & Validatable, C: Codable>(
-        request: DiscordRequest,
+        request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordClientResponse<C> {
         let response = try await self.send(request: request, payload: payload)
@@ -38,7 +38,7 @@ public extension DiscordClient {
     
     @inlinable
     func sendMultipart<E: MultipartEncodable & Validatable, C: Codable>(
-        request: DiscordRequest,
+        request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordClientResponse<C> {
         let response = try await self.sendMultipart(request: request, payload: payload)

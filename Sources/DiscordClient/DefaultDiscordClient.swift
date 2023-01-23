@@ -60,7 +60,7 @@ public struct DefaultDiscordClient: DiscordClient {
     
     func checkRateLimitsAllowRequest(to endpoint: Endpoint) async throws {
         if await !rateLimiter.shouldRequest(to: endpoint) {
-            throw DiscordClientError.rateLimited(url: "\(endpoint.url)")
+            throw DiscordClientError.rateLimited(url: "\(endpoint.urlDescription)")
         }
     }
     
@@ -151,7 +151,7 @@ public struct DefaultDiscordClient: DiscordClient {
     
     /// Sends requests and retries if needed.
     func sendWithRetries(
-        request req: DiscordRequest,
+        request req: DiscordHTTPRequest,
         sendRequest: (CacheableEndpointIdentity?, Int, UInt) async throws -> (DiscordHTTPResponse, Bool)
     ) async throws -> DiscordHTTPResponse {
         
@@ -181,13 +181,13 @@ public struct DefaultDiscordClient: DiscordClient {
         return response
     }
     
-    public func send(request req: DiscordRequest) async throws -> DiscordHTTPResponse {
+    public func send(request req: DiscordHTTPRequest) async throws -> DiscordHTTPResponse {
         try await self.sendWithRetries(request: req) {
             identity, retryCounter, requestId in
             
             if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 logger.debug("Got cached response", metadata: [
-                    "endpoint": .string(req.endpoint.urlSuffix),
+                    "endpoint": .string(req.endpoint.urlSuffixDescription),
                     "queries": .stringConvertible(req.queries),
                     "retry": .stringConvertible(retryCounter)
                 ])
@@ -200,12 +200,14 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: req.endpoint.httpMethod
             )
             request.headers = req.headers
-            if req.includeAuthorization {
+            if req.endpoint.requiresAuthorizationHeader {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
             }
             
             logger.debug("Will send a request to Discord", metadata: [
-                "url": .stringConvertible(request.url),
+                "url": .stringConvertible(
+                    req.endpoint.urlDescription + req.queries.makeForURLQuery()
+                ),
                 "method": .string(request.method.rawValue),
                 "retry": .stringConvertible(retryCounter),
                 "request-id": .stringConvertible(requestId)
@@ -228,7 +230,7 @@ public struct DefaultDiscordClient: DiscordClient {
     }
     
     public func send<E: Encodable & Validatable>(
-        request req: DiscordRequest,
+        request req: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         if DiscordGlobalConfiguration.performClientValidations {
@@ -244,7 +246,7 @@ public struct DefaultDiscordClient: DiscordClient {
             }
             if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 logger.debug("Got cached response", metadata: [
-                    "endpoint": .string(req.endpoint.urlSuffix),
+                    "endpoint": .string(req.endpoint.urlSuffixDescription),
                     "queries": .stringConvertible(req.queries),
                     "retry": .stringConvertible(retryCounter)
                 ])
@@ -258,7 +260,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: req.endpoint.httpMethod
             )
             request.headers = req.headers
-            if req.includeAuthorization {
+            if req.endpoint.requiresAuthorizationHeader {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
             }
             request.headers.replaceOrAdd(name: "Content-Type", value: "application/json")
@@ -266,7 +268,9 @@ public struct DefaultDiscordClient: DiscordClient {
             request.body = .bytes(data)
             
             logger.debug("Will send a request to Discord", metadata: [
-                "url": .stringConvertible(request.url),
+                "url": .stringConvertible(
+                    req.endpoint.urlDescription + req.queries.makeForURLQuery()
+                ),
                 "method": .string(request.method.rawValue),
                 "retry": .stringConvertible(retryCounter),
                 "request-id": .stringConvertible(requestId)
@@ -289,7 +293,7 @@ public struct DefaultDiscordClient: DiscordClient {
     }
     
     public func sendMultipart<E: MultipartEncodable & Validatable>(
-        request req: DiscordRequest,
+        request req: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         if DiscordGlobalConfiguration.performClientValidations {
@@ -305,7 +309,7 @@ public struct DefaultDiscordClient: DiscordClient {
             }
             if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 logger.debug("Got cached response", metadata: [
-                    "endpoint": .string(req.endpoint.urlSuffix),
+                    "endpoint": .string(req.endpoint.urlSuffixDescription),
                     "queries": .stringConvertible(req.queries),
                     "retry": .stringConvertible(retryCounter)
                 ])
@@ -328,7 +332,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: req.endpoint.httpMethod
             )
             request.headers = req.headers
-            if req.includeAuthorization {
+            if req.endpoint.requiresAuthorizationHeader {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
             }
             request.headers.replaceOrAdd(name: "Content-Type", value: contentType)
@@ -336,7 +340,9 @@ public struct DefaultDiscordClient: DiscordClient {
             request.body = body
             
             logger.debug("Will send a request to Discord", metadata: [
-                "url": .stringConvertible(request.url),
+                "url": .stringConvertible(
+                    req.endpoint.urlDescription + req.queries.makeForURLQuery()
+                ),
                 "method": .string(request.method.rawValue),
                 "retry": .stringConvertible(retryCounter),
                 "request-id": .stringConvertible(requestId)
