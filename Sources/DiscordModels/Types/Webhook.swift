@@ -46,10 +46,22 @@ public enum WebhookAddress: Hashable {
         let split = webhookUrl
             .split(separator: "/")
             .filter({ !$0.isEmpty })
-        guard split.count > 5 else { return nil }
         let id = String(split[split.count - 2])
         let token = String(split.last!)
         return (id, token)
+    }
+    
+    public static func == (lhs: WebhookAddress, rhs: WebhookAddress) -> Bool {
+        switch lhs.deconstruct() {
+        case .none: return false
+        case let .some(lhs):
+            switch rhs.deconstruct() {
+            case .none: return false
+            case let .some(rhs):
+                return lhs.id == rhs.id &&
+                lhs.token == rhs.token
+            }
+        }
     }
     
     public func hash(into hasher: inout Hasher) {
