@@ -188,7 +188,7 @@ Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://g
 
 `DiscordBM` comes with a `LogHandler` which can send all your logs to Discord:
 ```swift
-import DiscordBM
+import DiscordLogger
 import Logging
 
 /// Configure the Discord Logging Manager.
@@ -248,6 +248,11 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
         disabledLogLevels: [.debug, .trace]
     )
 )
+```
+If you want to only use Discord logger and don't use the rest of `DiscordBM`, you can specify `DiscordLogger` as your dependency:
+```swift
+/// In `Package.swift`:
+.product(name: "DiscordLogger", package: "DiscordBM"),
 ```
 
 </details>
