@@ -233,16 +233,16 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
             interval: .hours(1),
             message: "I'm Alive! :)",
             color: .blue,
-            initialNoticeRoleId: "970723029262942248"
+            initialNoticeMention: .user("970723029262942248")
         ),
         roleIds: [
-            .critical: "970723029262942248",
-            .error: "970723101044244510",
-            .warning: "970723134149918800",
-            .trace: "970723180706668584",
-            .debug: "970723199761383484",
-            .notice: "970723218551865384",
-            .info: "970723238097330237",
+            .critical: .role("970723029262942248"),
+            .error: .role("970723101044244510"),
+            .warning: .role("970723134149918800"),
+            .trace: .role("970723180706668584"),
+            .debug: .role("970723199761383484"),
+            .notice: .role("970723218551865384"),
+            .info: .role("970723238097330237"),
         ],
         extraMetadata: [.warning, .error, .critical],
         disabledLogLevels: [.debug, .trace]

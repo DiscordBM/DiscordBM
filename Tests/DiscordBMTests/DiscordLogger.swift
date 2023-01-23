@@ -29,10 +29,10 @@ class DiscordLoggerTests: XCTestCase {
             configuration: .init(
                 frequency: .seconds(1),
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
-                roleIds: [
-                    .trace: "33333333",
-                    .notice: "22222222",
-                    .warning: "22222222",
+                mentions: [
+                    .trace: .role("33333333"),
+                    .notice: .user("22222222"),
+                    .warning: .user("22222222"),
                 ],
                 disabledInDebug: false
             )
@@ -60,7 +60,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
-        XCTAssertEqual(payload.content, "<@&22222222> <@&33333333>")
+        XCTAssertEqual(payload.content, "<@22222222> <@&33333333>")
         
         let embeds = try XCTUnwrap(payload.embeds)
         if embeds.count != 4 {
@@ -337,7 +337,7 @@ class DiscordLoggerTests: XCTestCase {
                     interval: .seconds(6),
                     message: "Alive!",
                     color: .red,
-                    initialNoticeRoleId: "99999999"
+                    initialNoticeMention: .role("99999999")
                 ),
                 disabledInDebug: false
             )

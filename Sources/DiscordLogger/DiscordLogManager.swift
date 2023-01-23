@@ -16,34 +16,49 @@ public actor DiscordLogManager {
             let interval: TimeAmount
             let message: String
             let color: DiscordColor
-            let initialNoticeRole: String
+            let initialNoticeMention: String
             
             /// - Parameters:
             ///   - address: The address to send the logs to.
             ///   - interval: The interval after which to send an alive notice.
             ///   - message: The message to accompany the notice.
             ///   - color: The color of the embed of alive notices.
-            ///   - initialNoticeRoleId: The role to be mentioned on the first alive notice.
+            ///   - initialNoticeMention: The user/role to be mentioned on the first alive notice.
             ///   Useful to be notified of app-boots when you update your app or when it crashes.
             public init(
                 address: Address,
                 interval: TimeAmount = .hours(1),
                 message: String = "Alive Notice!",
                 color: DiscordColor = .blue,
-                initialNoticeRoleId: String
+                initialNoticeMention: Mention
             ) {
                 self.address = address
                 self.interval = interval
                 self.message = message
                 self.color = color
-                self.initialNoticeRole = DiscordUtils.roleMention(id: initialNoticeRoleId)
+                self.initialNoticeMention = initialNoticeMention.toMentionString()
+            }
+        }
+        
+        /// ID of a user or a role to be mentioned.
+        public enum Mention {
+            case user(String)
+            case role(String)
+            
+            func toMentionString() -> String {
+                switch self {
+                case let .user(id):
+                    return DiscordUtils.userMention(id: id)
+                case let .role(id):
+                    return DiscordUtils.roleMention(id: id)
+                }
             }
         }
         
         let frequency: TimeAmount
         let aliveNotice: AliveNotice?
         let fallbackLogger: Logger?
-        let roles: [Logger.Level: String]
+        let mentions: [Logger.Level: String]
         let colors: [Logger.Level: DiscordColor]
         let excludeMetadata: Set<Logger.Level>
         let extraMetadata: Set<Logger.Level>
@@ -57,7 +72,7 @@ public actor DiscordLogManager {
         ///   - fallbackLogger: The logger to use when `DiscordLogger` errors. You should use a log handler that logs to stdout.
         ///   **SHOULD NOT** use a logger that uses `DiscordLogger`.
         ///   e.g. `Logger(label: "Fallback", factory: StreamLogHandler.standardOutput(label:))`
-        ///   - roleIds: Id of roles to be mentioned for each log-level.
+        ///   - mentions: ID of users/roles to be mentioned for each log-level.
         ///   - colors: Color of the embeds to be used for each log-level.
         ///   - excludeMetadata: Excludes all metadata for these log-levels.
         ///   - extraMetadata: Will log `source`, `file`, `function` and `line` as well.
@@ -68,7 +83,7 @@ public actor DiscordLogManager {
             frequency: TimeAmount = .seconds(20),
             fallbackLogger: Logger?,
             aliveNotice: AliveNotice? = nil,
-            roleIds: [Logger.Level: String] = [:],
+            mentions: [Logger.Level: Mention] = [:],
             colors: [Logger.Level: DiscordColor] = [
                 .critical: .purple,
                 .error: .red,
@@ -87,9 +102,7 @@ public actor DiscordLogManager {
             self.frequency = frequency
             self.fallbackLogger = fallbackLogger
             self.aliveNotice = aliveNotice
-            self.roles = roleIds.mapValues {
-                DiscordUtils.roleMention(id: $0)
-            }
+            self.mentions = mentions.mapValues { $0.toMentionString() }
             self.colors = colors
             self.excludeMetadata = excludeMetadata
             self.extraMetadata = extraMetadata
@@ -252,13 +265,13 @@ public actor DiscordLogManager {
     private func sendLogs(_ logs: [Log], address: Address) async throws {
         var logLevels = Set(logs.compactMap(\.level))
             .sorted(by: >)
-            .compactMap({ configuration.roles[$0] })
+            .compactMap({ configuration.mentions[$0] })
         logLevels = Set(logLevels).sorted {
             logLevels.firstIndex(of: $0)! < logLevels.firstIndex(of: $1)!
         }
         let wantsAliveNoticeMention = logs.contains(where: \.isFirstAliveNotice)
         let aliveNoticeMention = wantsAliveNoticeMention ?
-        (configuration.aliveNotice.map({ "\($0.initialNoticeRole) " }) ?? "") : ""
+        (configuration.aliveNotice.map({ "\($0.initialNoticeMention) " }) ?? "") : ""
         let mentions = aliveNoticeMention + logLevels.joined(separator: " ")
         
         let embeds = logs.map(\.embed)
