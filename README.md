@@ -196,7 +196,7 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
     client: DefaultDiscordClient(
         httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS,
         token: YOUR_BOT_TOKEN,
-	appId: nil
+        appId: nil
     ),
     configuration: .init(fallbackLogger: Logger(
         label: "DiscordBMFallback",
@@ -207,7 +207,7 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
 /// Bootstrap the `LoggingSystem`. After this, all your `Logger`s will automagically start using `DiscordLogHandler`.
 LoggingSystem.bootstrapWithDiscordLogger(
     /// The address to send the logs to. You can easily create a webhook using any Discord client app you're using.
-    address: .webhook(.url(WEBHOOK_URL)),
+    address: try .webhook(.url(WEBHOOK_URL)),
     makeStdoutLogHandler: StreamLogHandler.standardOutput(label:metadataProvider:)
 )
 /// Make sure you haven't called `LoggingSystem.bootstrap` anywhere else, because you can only call it once.
@@ -229,7 +229,7 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
             factory: StreamLogHandler.standardOutput(label:metadataProvider:)
         ),
         aliveNotice: .init(
-            address: .webhook(.url(WEBHOOK_URL)),
+            address: try .webhook(.url(WEBHOOK_URL)),
             interval: .hours(1),
             message: "I'm Alive! :)",
             color: .blue,

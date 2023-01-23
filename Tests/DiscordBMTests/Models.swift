@@ -251,23 +251,13 @@ class ModelsTests: XCTestCase {
         let expectedId = "1066287437724266536"
         let expectedToken = "dSmCyqTEGP1lBnpWJAVU-CgQy4s3GRXpzKIeHs0ApHm62FngQZPn7kgaOyaiZe6E5wl_"
         
-        let (id1, token1) = try XCTUnwrap(
-            WebhookAddress.url(webhookUrl).deconstruct()
-        )
-        XCTAssertEqual(id1, expectedId)
-        XCTAssertEqual(token1, expectedToken)
+        let address1 = try WebhookAddress.url(webhookUrl)
+        XCTAssertEqual(address1.id, expectedId)
+        XCTAssertEqual(address1.token, expectedToken)
         
-        let (id2, token2) = try XCTUnwrap(
-            WebhookAddress.url(webhookUrl + "/").deconstruct()
-        )
-        XCTAssertEqual(id2, expectedId)
-        XCTAssertEqual(token2, expectedToken)
-        
-        let (id3, token3) = try XCTUnwrap(
-            WebhookAddress.url(webhookUrl).deconstruct()
-        )
-        XCTAssertEqual(id3, expectedId)
-        XCTAssertEqual(token3, expectedToken)
+        let address2 = try WebhookAddress.url(webhookUrl + "/")
+        XCTAssertEqual(address2.id, expectedId)
+        XCTAssertEqual(address2.token, expectedToken)
     }
 }
 

@@ -24,52 +24,36 @@ public struct Webhook: Sendable, Codable {
 }
 
 /// The address of a Webhook.
-public enum WebhookAddress: Hashable {
-    /// Example: https://discord.com/api/webhooks/1066284436045439037/dSs4nFhjpxcOh6HWD_5QJaq
-    case url(String)
+public struct WebhookAddress: Hashable {
+    
+    public enum Error: Swift.Error {
+        case invalidUrl(String)
+    }
+    
+    public var id: String
+    public var token: String
+    
     /// For example if webhook url is https://discord.com/api/webhooks/1066284436045439037/dSs4nFhjpxcOh6HWD_5QJaq ,
     /// Then id is `1066284436045439037` and token is `dSs4nFhjpxcOh6HWD_5QJaq`.
-    case deconstructed(id: String, token: String)
+    public static func deconstructed(id: String, token: String) -> WebhookAddress {
+        WebhookAddress(id: id, token: token)
+    }
     
-    @inlinable
-    public func deconstruct() -> (id: String, token: String)? {
-        switch self {
-        case let .url(url):
-            return extractWebhookUrlIdAndToken(webhookUrl: url)
-        case let .deconstructed(id, token):
-            return (id, token)
+    /// Example: https://discord.com/api/webhooks/1066284436045439037/dSs4nFhjpxcOh6HWD_5QJaq
+    public static func url(_ url: String) throws -> WebhookAddress {
+        guard let (id, token) = extractWebhookUrlIdAndToken(url) else {
+            throw Error.invalidUrl(url)
         }
+        return WebhookAddress(id: id, token: token)
     }
     
     @usableFromInline
-    func extractWebhookUrlIdAndToken(webhookUrl: String) -> (id: String, token: String)? {
-        let split = webhookUrl
+    static func extractWebhookUrlIdAndToken(_ url: String) -> (id: String, token: String)? {
+        let split = url
             .split(separator: "/")
             .filter({ !$0.isEmpty })
         let id = String(split[split.count - 2])
         let token = String(split.last!)
         return (id, token)
-    }
-    
-    public static func == (lhs: WebhookAddress, rhs: WebhookAddress) -> Bool {
-        switch lhs.deconstruct() {
-        case .none: return false
-        case let .some(lhs):
-            switch rhs.deconstruct() {
-            case .none: return false
-            case let .some(rhs):
-                return lhs.id == rhs.id &&
-                lhs.token == rhs.token
-            }
-        }
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        if let (id, token) = self.deconstruct() {
-            hasher.combine(id)
-            hasher.combine(token)
-        } else {
-            hasher.combine(0)
-        }
     }
 }

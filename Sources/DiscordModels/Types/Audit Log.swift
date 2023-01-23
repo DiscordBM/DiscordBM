@@ -284,7 +284,7 @@ public struct AuditLog: Sendable, Codable {
                 
                 public enum Kind: Sendable {
                     case role(name: String)
-                    case member(permission: Bool)
+                    case member(permission: Bool?)
                 }
                 
                 public var id: String
@@ -306,7 +306,10 @@ public struct AuditLog: Sendable, Codable {
                         let roleName = try container.decode(String.self, forKey: .role_name)
                         self.type = .role(name: roleName)
                     case "1":
-                        let permission = try container.decode(Bool.self, forKey: .permission)
+                        let permission = try container.decodeIfPresent(
+                            Bool.self,
+                            forKey: .permission
+                        )
                         self.type = .member(permission: permission)
                     default:
                         throw DecodingError.keyNotFound(CodingKeys.type, .init(

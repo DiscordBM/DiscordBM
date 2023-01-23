@@ -141,8 +141,6 @@ public enum DiscordClientError: Error {
     case rateLimited(url: String)
     /// Discord responded with a non-2xx status code.
     case badStatusCode(DiscordHTTPResponse)
-    /// The wehbook url was not valid.
-    case badWebhookAddress(WebhookAddress)
     /// The body of the response was empty.
     case emptyBody(DiscordHTTPResponse)
     /// You need to provide an `appId`.
@@ -622,10 +620,7 @@ public extension DiscordClient {
         threadId: String? = nil,
         payload: RequestBody.ExecuteWebhook
     ) async throws -> DiscordHTTPResponse {
-        guard let (id, token) = address.deconstruct() else {
-            throw DiscordClientError.badWebhookAddress(address)
-        }
-        let endpoint = Endpoint.executeWebhook(id: id, token: token)
+        let endpoint = Endpoint.executeWebhook(id: address.id, token: address.token)
         return try await self.sendMultipart(
             request: .init(
                 to: endpoint,
@@ -642,10 +637,7 @@ public extension DiscordClient {
         threadId: String? = nil,
         payload: RequestBody.ExecuteWebhook
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        guard let (id, token) = address.deconstruct() else {
-            throw DiscordClientError.badWebhookAddress(address)
-        }
-        let endpoint = Endpoint.executeWebhook(id: id, token: token)
+        let endpoint = Endpoint.executeWebhook(id: address.id, token: address.token)
         return try await self.sendMultipart(
             request: .init(
                 to: endpoint,

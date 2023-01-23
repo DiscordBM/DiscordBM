@@ -39,7 +39,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: .webhook(.url(webhookUrl)),
+            address: try .webhook(.url(webhookUrl)),
             level: .trace,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -129,7 +129,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: .webhook(.url(webhookUrl)),
+            address: try .webhook(.url(webhookUrl)),
             level: .trace,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -161,7 +161,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: .webhook(.url(webhookUrl)),
+            address: try .webhook(.url(webhookUrl)),
             level: .debug,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -192,7 +192,7 @@ class DiscordLoggerTests: XCTestCase {
                 maxStoredLogsCount: 100
             )
         )
-        let address = DiscordLogHandler.Address.webhook(.url(webhookUrl))
+        let address = try DiscordLogHandler.Address.webhook(.url(webhookUrl))
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
             address: address,
@@ -225,7 +225,7 @@ class DiscordLoggerTests: XCTestCase {
                 disabledInDebug: true
             )
         )
-        let address = DiscordLogHandler.Address.webhook(.url(webhookUrl))
+        let address = try DiscordLogHandler.Address.webhook(.url(webhookUrl))
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
             address: address,
@@ -251,7 +251,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: .webhook(.url(webhookUrl)),
+            address: try .webhook(.url(webhookUrl)),
             level: .info,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -293,7 +293,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: .webhook(.url(webhookUrl)),
+            address: try .webhook(.url(webhookUrl)),
             level: .notice,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -333,7 +333,7 @@ class DiscordLoggerTests: XCTestCase {
                 frequency: .zero,
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 aliveNotice: .init(
-                    address: .webhook(.url(webhookUrl)),
+                    address: try .webhook(.url(webhookUrl)),
                     interval: .seconds(6),
                     message: "Alive!",
                     color: .red,
@@ -347,7 +347,7 @@ class DiscordLoggerTests: XCTestCase {
 
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: .webhook(.url(webhookUrl)),
+            address: try .webhook(.url(webhookUrl)),
             level: .debug,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -430,7 +430,7 @@ class DiscordLoggerTests: XCTestCase {
 
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: .webhook(.url(webhookUrl)),
+            address: try .webhook(.url(webhookUrl)),
             level: .debug,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -517,7 +517,7 @@ class DiscordLoggerTests: XCTestCase {
             )
         )
         LoggingSystem.bootstrapWithDiscordLogger(
-            address: .webhook(.url(webhookUrl)),
+            address: try .webhook(.url(webhookUrl)),
             level: .error,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
