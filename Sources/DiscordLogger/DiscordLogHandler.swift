@@ -3,6 +3,8 @@
 #else
 import Logging
 #endif
+import DiscordModels
+import DiscordUtils
 import Foundation
 
 public struct DiscordLogHandler: LogHandler {

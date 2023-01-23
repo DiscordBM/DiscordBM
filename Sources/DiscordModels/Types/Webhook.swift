@@ -31,18 +31,29 @@ public enum WebhookAddress: Hashable {
     /// Then id is `1066284436045439037` and token is `dSs4nFhjpxcOh6HWD_5QJaq`.
     case deconstructed(id: String, token: String)
     
-    @usableFromInline
-    func toIdAndToken() -> (id: String, token: String)? {
+    @inlinable
+    public func deconstruct() -> (id: String, token: String)? {
         switch self {
         case let .url(url):
-            return DiscordUtils.extractWebhookIdAndToken(webhookUrl: url)
+            return extractWebhookUrlIdAndToken(webhookUrl: url)
         case let .deconstructed(id, token):
             return (id, token)
         }
     }
     
+    @usableFromInline
+    func extractWebhookUrlIdAndToken(webhookUrl: String) -> (id: String, token: String)? {
+        let split = webhookUrl
+            .split(separator: "/")
+            .filter({ !$0.isEmpty })
+        guard split.count > 5 else { return nil }
+        let id = String(split[split.count - 2])
+        let token = String(split.last!)
+        return (id, token)
+    }
+    
     public func hash(into hasher: inout Hasher) {
-        if let (id, token) = self.toIdAndToken() {
+        if let (id, token) = self.deconstruct() {
             hasher.combine(id)
             hasher.combine(token)
         } else {

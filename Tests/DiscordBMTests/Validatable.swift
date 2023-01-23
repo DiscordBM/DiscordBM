@@ -1,4 +1,4 @@
-@testable import DiscordBM
+@testable import DiscordModels
 import XCTest
 
 class ValidatableTests: XCTestCase, Validatable {

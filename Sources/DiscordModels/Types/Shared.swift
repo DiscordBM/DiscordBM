@@ -726,7 +726,7 @@ public struct Secret:
     CustomStringConvertible,
     CustomDebugStringConvertible {
     
-    internal var _storage: String
+    public var _storage: String
     
     public init(stringLiteral value: String) {
         self._storage = value

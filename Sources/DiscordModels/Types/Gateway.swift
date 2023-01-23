@@ -493,6 +493,12 @@ public struct Gateway: Sendable, Codable {
         public var token: Secret
         public var session_id: String
         public var seq: Int
+        
+        public init(token: Secret, session_id: String, sequence: Int) {
+            self.token = token
+            self.session_id = session_id
+            self.seq = sequence
+        }
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence-status-types

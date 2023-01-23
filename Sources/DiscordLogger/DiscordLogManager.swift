@@ -1,6 +1,7 @@
+import DiscordClient
+import DiscordUtils
 import NIOCore
 import Logging
-import Atomics
 import Foundation
 
 /// The manager of sending logs to Discord.

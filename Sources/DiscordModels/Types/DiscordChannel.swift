@@ -545,7 +545,7 @@ public struct Embed: Sendable, Codable, Validatable {
     }
     
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
-    var contentLength: Int {
+    public var contentLength: Int {
         let fields = fields?.reduce(into: 0) {
             $0 = $1.name.unicodeScalars.count + $1.value.unicodeScalars.count
         } ?? 0

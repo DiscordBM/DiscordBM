@@ -1,4 +1,4 @@
-@testable import DiscordBM
+@testable import DiscordGateway
 import XCTest
 
 class BackoffTests: XCTestCase {

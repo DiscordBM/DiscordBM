@@ -622,7 +622,7 @@ public extension DiscordClient {
         threadId: String? = nil,
         payload: RequestBody.ExecuteWebhook
     ) async throws -> DiscordHTTPResponse {
-        guard let (id, token) = address.toIdAndToken() else {
+        guard let (id, token) = address.deconstruct() else {
             throw DiscordClientError.badWebhookAddress(address)
         }
         let endpoint = Endpoint.executeWebhook(id: id, token: token)
@@ -642,7 +642,7 @@ public extension DiscordClient {
         threadId: String? = nil,
         payload: RequestBody.ExecuteWebhook
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        guard let (id, token) = address.toIdAndToken() else {
+        guard let (id, token) = address.deconstruct() else {
             throw DiscordClientError.badWebhookAddress(address)
         }
         let endpoint = Endpoint.executeWebhook(id: id, token: token)

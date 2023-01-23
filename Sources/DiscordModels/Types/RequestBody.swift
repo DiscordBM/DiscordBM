@@ -1,4 +1,5 @@
 import Foundation
+import NIOFoundationCompat
 
 public enum RequestBody {
     
@@ -6,7 +7,7 @@ public enum RequestBody {
         public var recipient_id: String
         
         @inlinable
-        init(recipient_id: String) {
+        public init(recipient_id: String) {
             self.recipient_id = recipient_id
         }
         

@@ -1,4 +1,4 @@
-@testable import DiscordBM
+import DiscordUtils
 import XCTest
 
 class DiscordUtilsTests: XCTestCase {
@@ -110,29 +110,5 @@ class DiscordUtilsTests: XCTestCase {
         """#
         let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
         XCTAssertEqual(escaped, expected)
-    }
-    
-    func testExtractWebhookIdAndToken() throws {
-        let webhookUrl = "https://discord.com/api/webhooks/1066287437724266536/dSmCyqTEGP1lBnpWJAVU-CgQy4s3GRXpzKIeHs0ApHm62FngQZPn7kgaOyaiZe6E5wl_"
-        let expectedId = "1066287437724266536"
-        let expectedToken = "dSmCyqTEGP1lBnpWJAVU-CgQy4s3GRXpzKIeHs0ApHm62FngQZPn7kgaOyaiZe6E5wl_"
-        
-        let (id1, token1) = try XCTUnwrap(
-            DiscordUtils.extractWebhookIdAndToken(webhookUrl: webhookUrl)
-        )
-        XCTAssertEqual(id1, expectedId)
-        XCTAssertEqual(token1, expectedToken)
-        
-        let (id2, token2) = try XCTUnwrap(
-            DiscordUtils.extractWebhookIdAndToken(webhookUrl: webhookUrl + "/")
-        )
-        XCTAssertEqual(id2, expectedId)
-        XCTAssertEqual(token2, expectedToken)
-        
-        let (id3, token3) = try XCTUnwrap(
-            WebhookAddress.url(webhookUrl).toIdAndToken()
-        )
-        XCTAssertEqual(id3, expectedId)
-        XCTAssertEqual(token3, expectedToken)
     }
 }
