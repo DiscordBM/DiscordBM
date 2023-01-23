@@ -164,9 +164,7 @@ public actor DiscordLogManager {
         
         let count = logs[address]!.count
         if count > configuration.maxStoredLogsCount {
-            logs[address]! = Array(logs[address]!.dropFirst(
-                count - configuration.maxStoredLogsCount
-            ))
+            logs[address]!.removeFirst()
         }
     }
     
