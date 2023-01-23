@@ -147,7 +147,7 @@ public struct DiscordLogHandler: LogHandler {
             title: prepare("\(message)"),
             timestamp: Date(),
             color: config.colors[level],
-            footer: .init(text: prepare(self.label).notEmpty(or: "no_label")),
+            footer: .init(text: prepare(self.label)),
             fields: Array(allMetadata.sorted(by: { $0.key > $1.key }).compactMap {
                 key, value -> Embed.Field? in
                 let value = "\(value)"
@@ -170,11 +170,5 @@ private extension Collection {
         let delta = (self.count - count)
         let dropCount = delta > 0 ? delta : 0
         return self.dropLast(Int(dropCount))
-    }
-}
-
-private extension String {
-    func notEmpty(or alternative: String) -> String {
-        self.isEmpty ? alternative : self
     }
 }
