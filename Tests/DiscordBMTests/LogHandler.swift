@@ -516,7 +516,6 @@ class LogHandlerTests: XCTestCase {
             )
         )
         DiscordLogHandler.bootstrap(
-            label: "test",
             level: .error,
             address: .webhook(.url(webhookUrl)),
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }

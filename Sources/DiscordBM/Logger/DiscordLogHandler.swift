@@ -68,7 +68,6 @@ public struct DiscordLogHandler: LogHandler {
     /// - NOTE: Be careful because `LoggingSystem.bootstrap` can only be called once.
     /// If you use libraries like Vapor, you would want to remove such lines where you call `LoggingSystem...` and replacing it with this function.
     public static func bootstrap(
-        label: String,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
         address: Address,
