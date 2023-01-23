@@ -13,7 +13,12 @@ let package = Package(
     products: [
         .library(
             name: "DiscordBM",
-            targets: ["DiscordBM"]),
+            targets: ["DiscordBM"]
+        ),
+        .library(
+            name: "DiscordLogger",
+            targets: ["DiscordLogger"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.42.0"),
