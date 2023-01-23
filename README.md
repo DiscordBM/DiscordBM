@@ -235,7 +235,7 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
             color: .blue,
             initialNoticeMention: .user("970723029262942248")
         ),
-        roleIds: [
+        mentions: [
             .critical: .role("970723029262942248"),
             .error: .role("970723101044244510"),
             .warning: .role("970723134149918800"),
