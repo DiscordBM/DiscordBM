@@ -8,6 +8,26 @@ public struct DiscordLogHandler: LogHandler {
     public enum Address: Hashable {
         case channel(id: String)
         case webhook(WebhookAddress)
+        
+        /// Turns webhook urls to webhook deconstructed addresses
+        /// so it doesn't need to be done before sending a log, each time.
+        func simplifiedAddress() -> Address {
+            switch self {
+            case .channel:
+                return self
+            case .webhook(let address):
+                switch address {
+                case .deconstructed:
+                    return self
+                case .url:
+                    if let (id, token) = address.deconstruct() {
+                        return .webhook(.deconstructed(id: id, token: token))
+                    } else {
+                        return self
+                    }
+                }
+            }
+        }
     }
     
     /// The label of this log handler.
@@ -30,7 +50,7 @@ public struct DiscordLogHandler: LogHandler {
         metadataProvider: Logger.MetadataProvider? = nil
     ) {
         self.label = label
-        self.address = address
+        self.address = address.simplifiedAddress()
         self.logLevel = level
         self.metadata = [:]
         self.metadataProvider = metadataProvider

@@ -32,7 +32,7 @@ public actor DiscordLogManager {
                 color: DiscordColor = .blue,
                 initialNoticeMention: Mention
             ) {
-                self.address = address
+                self.address = address.simplifiedAddress()
                 self.interval = interval
                 self.message = message
                 self.color = color
