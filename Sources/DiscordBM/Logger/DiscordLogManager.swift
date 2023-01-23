@@ -64,7 +64,7 @@ public actor DiscordLogManager {
         ///   - disabledInDebug: Whether or not to disable logging in DEBUG.
         ///   - maxStoredLogsCount: If there are more logs than this count, the log manager will start removing the oldest un-sent logs to prevent memory leaks.
         public init(
-            frequency: TimeAmount = .seconds(30),
+            frequency: TimeAmount = .seconds(20),
             fallbackLogger: Logger?,
             aliveNotice: AliveNotice? = nil,
             roleIds: [Logger.Level: String] = [:],
