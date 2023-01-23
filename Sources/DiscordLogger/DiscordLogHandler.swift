@@ -25,7 +25,7 @@ public struct DiscordLogHandler: LogHandler {
     /// The address to send the logs to.
     let address: Address
     /// `logManager` does the actual heavy-lifting and communicates with Discord.
-    var logManager: DiscordLogManager { .shared }
+    var logManager: DiscordLogManager { DiscordGlobalConfiguration.logManager }
     
     init(
         label: String,

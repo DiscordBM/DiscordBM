@@ -130,17 +130,6 @@ public actor DiscordLogManager {
         Task { await self.startAliveNotices() }
     }
     
-    private static var _shared: DiscordLogManager?
-    public static var shared: DiscordLogManager {
-        get {
-            guard let shared = DiscordLogManager._shared else {
-                fatalError("Need to configure the log-manager using 'DiscordLogManager.shared = DiscordLogManager(...)'")
-            }
-            return shared
-        }
-        set(newValue) { self._shared = newValue }
-    }
-    
     func include(address: Address, embed: Embed, level: Logger.Level) {
         self.include(address: address, embed: embed, level: level, isFirstAliveNotice: false)
     }
