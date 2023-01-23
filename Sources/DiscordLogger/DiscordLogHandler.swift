@@ -1,8 +1,4 @@
-#if DEBUG
-@testable import Logging
-#else
 import Logging
-#endif
 import DiscordModels
 import DiscordUtils
 import Foundation
@@ -16,37 +12,36 @@ public struct DiscordLogHandler: LogHandler {
     
     /// The label of this log handler.
     public let label: String
+    /// The address to send the logs to.
+    let address: Address
     /// See `LogHandler.metadata`.
     public var metadata: Logger.Metadata
     /// See `LogHandler.metadataProvider`.
     public var metadataProvider: Logger.MetadataProvider?
     /// See `LogHandler.logLevel`.
     public var logLevel: Logger.Level
-    /// The address to send the logs to.
-    let address: Address
     /// `logManager` does the actual heavy-lifting and communicates with Discord.
     var logManager: DiscordLogManager { DiscordGlobalConfiguration.logManager }
     
     init(
         label: String,
-        metadata: Logger.Metadata = [:],
-        metadataProvider: Logger.MetadataProvider? = nil,
-        logLevel: Logger.Level = .info,
-        address: Address
+        address: Address,
+        level: Logger.Level = .info,
+        metadataProvider: Logger.MetadataProvider? = nil
     ) {
         self.label = label
-        self.metadata = metadata
-        self.metadataProvider = metadataProvider
-        self.logLevel = logLevel
         self.address = address
+        self.logLevel = level
+        self.metadata = [:]
+        self.metadataProvider = metadataProvider
     }
     
     /// Make a logger that logs to both the stdout and to Discord.
     public static func multiplexLogger(
         label: String,
+        address: Address,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
-        address: Address,
         makeStdoutLogHandler: (String, Logger.MetadataProvider?) -> LogHandler
     ) -> Logger {
         Logger(label: label) { label in
@@ -54,56 +49,14 @@ public struct DiscordLogHandler: LogHandler {
                 makeStdoutLogHandler(label, metadataProvider),
                 DiscordLogHandler(
                     label: label,
-                    metadataProvider: metadataProvider,
-                    logLevel: level,
-                    address: address
+                    address: address,
+                    level: level,
+                    metadataProvider: metadataProvider
                 )
             ])
             handler.logLevel = level
             return handler
         }
-    }
-    
-    /// Bootstraps the logging system to use `DiscordLogHandler`.
-    /// After calling this function, all your `Logger`s will start using `DiscordLogHandler`.
-    ///
-    /// - NOTE: Be careful because `LoggingSystem.bootstrap` can only be called once.
-    /// If you use libraries like Vapor, you would want to remove such lines where you call `LoggingSystem...` and replacing it with this function.
-    public static func bootstrap(
-        level: Logger.Level = .info,
-        metadataProvider: Logger.MetadataProvider? = nil,
-        address: Address,
-        makeStdoutLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
-    ) {
-#if DEBUG
-        LoggingSystem.bootstrapInternal({ label, metadataProvider in
-            var handler = MultiplexLogHandler([
-                makeStdoutLogHandler(label, metadataProvider),
-                DiscordLogHandler(
-                    label: label,
-                    metadataProvider: metadataProvider,
-                    logLevel: level,
-                    address: address
-                )
-            ])
-            handler.logLevel = level
-            return handler
-        }, metadataProvider: metadataProvider)
-#else
-        LoggingSystem.bootstrap({ label, metadataProvider in
-            var handler = MultiplexLogHandler([
-                makeStdoutLogHandler(label, metadataProvider),
-                DiscordLogHandler(
-                    label: label,
-                    metadataProvider: metadataProvider,
-                    logLevel: level,
-                    address: address
-                )
-            ])
-            handler.logLevel = level
-            return handler
-        }, metadataProvider: metadataProvider)
-#endif
     }
     
     public subscript(metadataKey key: String) -> Logger.Metadata.Value? {

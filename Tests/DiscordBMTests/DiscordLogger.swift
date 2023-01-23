@@ -39,8 +39,8 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            level: .trace,
             address: .webhook(.url(webhookUrl)),
+            level: .trace,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .trace, "Testing!")
@@ -129,8 +129,8 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            level: .trace,
             address: .webhook(.url(webhookUrl)),
+            level: .trace,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .trace, "Testing!", metadata: ["a": "b"])
@@ -161,8 +161,8 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            level: .debug,
             address: .webhook(.url(webhookUrl)),
+            level: .debug,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .debug, "Testing!")
@@ -195,8 +195,8 @@ class DiscordLoggerTests: XCTestCase {
         let address = DiscordLogHandler.Address.webhook(.url(webhookUrl))
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            level: .error,
             address: address,
+            level: .error,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         for idx in (0..<150) {
@@ -228,8 +228,8 @@ class DiscordLoggerTests: XCTestCase {
         let address = DiscordLogHandler.Address.webhook(.url(webhookUrl))
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            level: .info,
             address: address,
+            level: .info,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .info, "Testing!")
@@ -251,8 +251,8 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            level: .info,
             address: .webhook(.url(webhookUrl)),
+            level: .info,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .info, "Testing!")
@@ -293,8 +293,8 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            level: .notice,
             address: .webhook(.url(webhookUrl)),
+            level: .notice,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .warning, "Testing!")
@@ -347,8 +347,8 @@ class DiscordLoggerTests: XCTestCase {
 
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            level: .debug,
             address: .webhook(.url(webhookUrl)),
+            level: .debug,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
 
@@ -430,8 +430,8 @@ class DiscordLoggerTests: XCTestCase {
 
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            level: .debug,
             address: .webhook(.url(webhookUrl)),
+            level: .debug,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
 
@@ -516,9 +516,9 @@ class DiscordLoggerTests: XCTestCase {
                 disabledInDebug: false
             )
         )
-        DiscordLogHandler.bootstrap(
-            level: .error,
+        LoggingSystem.bootstrapWithDiscordLogger(
             address: .webhook(.url(webhookUrl)),
+            level: .error,
             makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
 

@@ -57,7 +57,7 @@ public actor DiscordLogManager {
         
         let frequency: TimeAmount
         let aliveNotice: AliveNotice?
-        let fallbackLogger: Logger?
+        let fallbackLogger: Logger
         let mentions: [Logger.Level: String]
         let colors: [Logger.Level: DiscordColor]
         let excludeMetadata: Set<Logger.Level>
@@ -81,7 +81,7 @@ public actor DiscordLogManager {
         ///   - maxStoredLogsCount: If there are more logs than this count, the log manager will start removing the oldest un-sent logs to prevent memory leaks.
         public init(
             frequency: TimeAmount = .seconds(20),
-            fallbackLogger: Logger?,
+            fallbackLogger: Logger,
             aliveNotice: AliveNotice? = nil,
             mentions: [Logger.Level: Mention] = [:],
             colors: [Logger.Level: DiscordColor] = [
@@ -333,7 +333,7 @@ public actor DiscordLogManager {
         function: String = #function,
         line: UInt = #line
     ) {
-        self.configuration.fallbackLogger?.log(
+        self.configuration.fallbackLogger.log(
             level: .warning,
             message,
             metadata: metadata,
