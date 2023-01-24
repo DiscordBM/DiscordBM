@@ -16,8 +16,21 @@ private let toleratesDecodeLogger = DiscordGlobalConfiguration
 
 // MARK: - +KeyedDecodingContainer
 extension KeyedDecodingContainer {
-    func decode<D>(_: Array<D>.Type, forKey key: Key) throws -> Array<D> where D: Decodable {
-        
+    public func decode<D>(
+        _: Array<D>.Type,
+        forKey key: Key
+    ) throws -> Array<D> where D: Decodable {
+        if D.self is any _ToleratesDecode.Type {
+            return try smartPath(Array<D>.self, forKey: key)
+        } else {
+            return try foundationPath(Array<D>.self, forKey: key)
+        }
+    }
+    
+    func smartPath<D>(
+        _: Array<D>.Type,
+        forKey key: Key
+    ) throws -> Array<D> where D: Decodable {
         var elements = Array<D>()
         var container = try self.nestedUnkeyedContainer(forKey: key)
         /// Knowing that the internal decodes of this library don't really fail that much,
@@ -32,35 +45,46 @@ extension KeyedDecodingContainer {
                 elements.append(element)
             } catch {
                 switch D.self {
-                case is any _ToleratesDecode.Type:
-                    switch D.self {
-                    case is any ToleratesStringDecodeMarker.Type:
-                        if let value = try? container.decode(String.self) {
-                            toleratesDecodeLogger.warning("Found a new enum value", metadata: [
-                                "newKey": .string(value),
-                                "decodedSoFar": .stringConvertible(elements),
-                                "totalCount": .stringConvertible(container.count ?? -1),
-                                "type": .string(_typeName(D.self))
-                            ])
-                            continue
-                        }
-                    case is any ToleratesIntDecodeMarker.Type:
-                        if let value = try? container.decode(Int.self) {
-                            toleratesDecodeLogger.warning("Found a new enum value", metadata: [
-                                "newKey": .stringConvertible(value),
-                                "decodedSoFar": .stringConvertible(elements),
-                                "totalCount": .stringConvertible(container.count ?? -1),
-                                "type": .string(_typeName(D.self))
-                            ])
-                            continue
-                        }
-                    default:
-                        toleratesDecodeLogger.warning("Unhandled marker protocol that conforms to '_ToleratesDecode'. This is a programming error", metadata: ["type": .string(_typeName(D.self))])
+                case is any ToleratesStringDecodeMarker.Type:
+                    if let value = try? container.decode(String.self) {
+                        toleratesDecodeLogger.warning("Found a new enum value", metadata: [
+                            "newKey": .string(value),
+                            "decodedSoFar": .stringConvertible(elements),
+                            "totalCount": .stringConvertible(container.count ?? -1),
+                            "type": .string(_typeName(D.self))
+                        ])
+                        continue
                     }
-                default: break
+                case is any ToleratesIntDecodeMarker.Type:
+                    if let value = try? container.decode(Int.self) {
+                        toleratesDecodeLogger.warning("Found a new enum value", metadata: [
+                            "newKey": .stringConvertible(value),
+                            "decodedSoFar": .stringConvertible(elements),
+                            "totalCount": .stringConvertible(container.count ?? -1),
+                            "type": .string(_typeName(D.self))
+                        ])
+                        continue
+                    }
+                default:
+                    toleratesDecodeLogger.warning("Unhandled marker protocol that conforms to '_ToleratesDecode'. This is a programming error", metadata: ["type": .string(_typeName(D.self))])
                 }
                 throw error
             }
+        }
+        
+        return elements
+    }
+    
+    func foundationPath<D>(
+        _: Array<D>.Type,
+        forKey key: Key
+    ) throws -> Array<D> where D: Decodable {
+        var elements = Array<D>()
+        var container = try self.nestedUnkeyedContainer(forKey: key)
+        
+        while !container.isAtEnd {
+            let element = try container.decode(D.self)
+            elements.append(element)
         }
         
         return elements
