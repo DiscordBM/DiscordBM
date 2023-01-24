@@ -540,7 +540,6 @@ class DiscordLoggerTests: XCTestCase {
         XCTAssertEqual(embed.title, "Testing!")
     }
     
-    /// Swift-Log needs to update `MultiplexLogHandler` to support metadata-providers first.
     func testMetadataProviders() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
