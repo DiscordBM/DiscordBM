@@ -72,11 +72,7 @@ public struct DiscordLogHandler: LogHandler {
         file: String,
         function: String,
         line: UInt
-    ) {
-        // FIXME: Delete this line when swift-log is updated with the fix, and pin swift-log.
-        // https://github.com/apple/swift-log/pull/252
-        if line == 180 && source == "Logging" && function == "metadataProvider" { return }
-        
+    ) { 
         let config = logManager.configuration
         
         if config.disabledLogLevels.contains(level) { return }
