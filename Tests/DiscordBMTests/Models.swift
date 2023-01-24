@@ -1,8 +1,8 @@
-@testable import DiscordBM
+@testable import DiscordModels
 import NIOCore
 import XCTest
 
-class GatewayModelsTests: XCTestCase {
+class ModelsTests: XCTestCase {
     
     func testEventDecode() throws {
         
@@ -244,6 +244,20 @@ class GatewayModelsTests: XCTestCase {
             XCTAssertEqual(file?.data, data)
             XCTAssertEqual(file?.extension, "png")
         }
+    }
+    
+    func testWebhookAddress() throws {
+        let webhookUrl = "https://discord.com/api/webhooks/1066287437724266536/dSmCyqTEGP1lBnpWJAVU-CgQy4s3GRXpzKIeHs0ApHm62FngQZPn7kgaOyaiZe6E5wl_"
+        let expectedId = "1066287437724266536"
+        let expectedToken = "dSmCyqTEGP1lBnpWJAVU-CgQy4s3GRXpzKIeHs0ApHm62FngQZPn7kgaOyaiZe6E5wl_"
+        
+        let address1 = try WebhookAddress.url(webhookUrl)
+        XCTAssertEqual(address1.id, expectedId)
+        XCTAssertEqual(address1.token, expectedToken)
+        
+        let address2 = try WebhookAddress.url(webhookUrl + "/")
+        XCTAssertEqual(address2.id, expectedId)
+        XCTAssertEqual(address2.token, expectedToken)
     }
 }
 

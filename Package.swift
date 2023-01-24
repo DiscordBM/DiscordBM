@@ -13,11 +13,16 @@ let package = Package(
     products: [
         .library(
             name: "DiscordBM",
-            targets: ["DiscordBM"]),
+            targets: ["DiscordBM"]
+        ),
+        .library(
+            name: "DiscordLogger",
+            targets: ["DiscordLogger"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.42.0"),
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.4.4"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.5.1"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.6.4"),
         .package(url: "https://github.com/apple/swift-atomics.git", from: "1.0.0"),
         .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.2"),
@@ -34,7 +39,59 @@ let package = Package(
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 .product(name: "Atomics", package: "swift-atomics"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
-                "WebSocketKitFork"
+                "DiscordAuth",
+                "DiscordClient",
+                "DiscordCore",
+                "DiscordGateway",
+                "DiscordLogger",
+                "DiscordModels",
+                "DiscordUtils",
+            ]
+        ),
+        .target(
+            name: "DiscordClient",
+            dependencies: [
+                .product(name: "AsyncHTTPClient", package: "async-http-client"),
+                "DiscordModels",
+            ]
+        ),
+        .target(
+            name: "DiscordCore",
+            dependencies: [
+                .product(name: "Logging", package: "swift-log"),
+                .product(name: "MultipartKit", package: "multipart-kit"),
+            ]
+        ),
+        .target(
+            name: "DiscordGateway",
+            dependencies: [
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "AsyncHTTPClient", package: "async-http-client"),
+                "WebSocketKitFork",
+                "DiscordClient",
+            ]
+        ),
+        .target(
+            name: "DiscordLogger",
+            dependencies: [
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "Logging", package: "swift-log"),
+                "DiscordClient",
+                "DiscordUtils",
+            ]
+        ),
+        .target(
+            name: "DiscordModels",
+            dependencies: [
+                .product(name: "MultipartKit", package: "multipart-kit"),
+                "DiscordCore"
+            ]
+        ),
+        .target(name: "DiscordUtils"),
+        .target(
+            name: "DiscordAuth",
+            dependencies: [
+                "DiscordModels"
             ]
         ),
         /// `WebSocketKit` will be replaced as soon as changes are final and merged in

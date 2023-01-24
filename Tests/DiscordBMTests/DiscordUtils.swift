@@ -1,4 +1,4 @@
-import DiscordBM
+import DiscordUtils
 import XCTest
 
 class DiscordUtilsTests: XCTestCase {

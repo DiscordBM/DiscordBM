@@ -635,9 +635,11 @@ public struct TolerantDecodeDate: Codable {
         }
     }
     
+    private static let formatter = ISO8601DateFormatter()
+    
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode(self.date)
+        try container.encode(Self.formatter.string(from: self.date))
     }
 }
 
@@ -652,6 +654,14 @@ public struct DiscordColor: Sendable, Codable, ExpressibleByIntegerLiteral {
     
     public let value: Int
     
+    public static let purple = DiscordColor(_unsafeValue: 7414159)
+    public static let red = DiscordColor(_unsafeValue: 16711680)
+    public static let orange = DiscordColor(_unsafeValue: 16753920)
+    public static let brown = DiscordColor(_unsafeValue: 12756051)
+    public static let yellow = DiscordColor(_unsafeValue: 16770610)
+    public static let green = DiscordColor(_unsafeValue: 65280)
+    public static let blue = DiscordColor(_unsafeValue: 255)
+    
     public var asRGB: (red: Int, green: Int, blue: Int) {
         let red = value >> 16
         let green = (value & 0x00FF00) >> 8
@@ -661,6 +671,10 @@ public struct DiscordColor: Sendable, Codable, ExpressibleByIntegerLiteral {
     
     public var asHex: String {
         "#" + String(self.value, radix: 16, uppercase: true)
+    }
+    
+    init(_unsafeValue value: Int) {
+        self.value = value
     }
     
     public init(integerLiteral value: Int) {
@@ -712,7 +726,7 @@ public struct Secret:
     CustomStringConvertible,
     CustomDebugStringConvertible {
     
-    internal var _storage: String
+    public var _storage: String
     
     public init(stringLiteral value: String) {
         self._storage = value

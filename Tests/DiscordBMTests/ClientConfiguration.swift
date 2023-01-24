@@ -1,4 +1,4 @@
-@testable import DiscordBM
+@testable import DiscordClient
 import XCTest
 import struct NIOCore.TimeAmount
 import struct NIOHTTP1.HTTPHeaders

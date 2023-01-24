@@ -376,7 +376,7 @@ extension BotGatewayManager {
             data: .resume(.init(
                 token: identifyPayload.token,
                 session_id: sessionId,
-                seq: sequenceNumber
+                sequence: sequenceNumber
             ))
         )
         self.send(

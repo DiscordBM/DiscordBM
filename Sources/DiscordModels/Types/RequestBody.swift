@@ -1,4 +1,5 @@
 import Foundation
+import NIOFoundationCompat
 
 public enum RequestBody {
     
@@ -6,7 +7,7 @@ public enum RequestBody {
         public var recipient_id: String
         
         @inlinable
-        init(recipient_id: String) {
+        public init(recipient_id: String) {
             self.recipient_id = recipient_id
         }
         
@@ -296,6 +297,75 @@ public enum RequestBody {
         
         public func validate() throws {
             try validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
+            try validateCombinedCharacterCountDoesNotExceed(
+                embeds?.reduce(into: 0, { $0 += $1.contentLength }),
+                max: 6_000,
+                names: "embeds"
+            )
+            try validateOnlyContains(
+                flags?.values,
+                name: "flags",
+                reason: "Can only contain 'suppressEmbeds'",
+                where: { $0 == .suppressEmbeds }
+            )
+            try allowed_mentions?.validate()
+            for attachment in attachments ?? [] {
+                try attachment.validate()
+            }
+            for embed in embeds ?? [] {
+                try embed.validate()
+            }
+        }
+    }
+    
+    /// https://discord.com/developers/docs/resources/webhook#execute-webhook-jsonform-params
+    public struct ExecuteWebhook: Sendable, Codable, MultipartEncodable, Validatable {
+        public var content: String?
+        public var username: String?
+        public var avatar_url: String?
+        public var tts: Bool?
+        public var embeds: [Embed]?
+        public var allowed_mentions: DiscordChannel.AllowedMentions?
+        public var components: [Interaction.ActionRow]?
+        public var files: [RawFile]?
+        public var attachments: [DiscordChannel.AttachmentSend]?
+        public var flags: IntBitField<DiscordChannel.Message.Flag>?
+        public var thread_name: String?
+        
+        enum CodingKeys: CodingKey {
+            case content
+            case username
+            case avatar_url
+            case tts
+            case embeds
+            case allowed_mentions
+            case components
+            case attachments
+            case flags
+            case thread_name
+        }
+        
+        public init(content: String? = nil, username: String? = nil, avatar_url: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: DiscordChannel.AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [DiscordChannel.AttachmentSend]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, thread_name: String? = nil) {
+            self.content = content
+            self.username = username
+            self.avatar_url = avatar_url
+            self.tts = tts
+            self.embeds = embeds
+            self.allowed_mentions = allowed_mentions
+            self.components = components
+            self.files = files
+            self.attachments = attachments
+            self.flags = flags
+            self.thread_name = thread_name
+        }
+        
+        public func validate() throws {
+            try validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
+            try validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
+            try validateAtLeastOneIsNotEmpty(
+                content?.isEmpty, components?.isEmpty, files?.isEmpty, embeds?.isEmpty,
+                names: "content", "components", "files", "embeds"
+            )
             try validateCombinedCharacterCountDoesNotExceed(
                 embeds?.reduce(into: 0, { $0 += $1.contentLength }),
                 max: 6_000,

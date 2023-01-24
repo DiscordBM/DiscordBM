@@ -124,6 +124,24 @@ Task {
 /// RunLoop.current.run()
 ```
 
+### Finding Your Bot Token
+<details>
+  <summary> Click to expand </summary>
+  
+In [Discord developer portal](https://discord.com/developers/applications):
+![Finding Bot Token](https://user-images.githubusercontent.com/54685446/200565393-ea31c2ad-fd3a-44a1-9789-89460ab5d1a9.png)
+
+</details>
+
+### Finding Your App ID
+<details>
+  <summary> Click to expand </summary>
+  
+In [Discord developer portal](https://discord.com/developers/applications):
+![Finding App ID](https://user-images.githubusercontent.com/54685446/200565475-9893d326-423e-4344-a853-9de2f9ed25b4.png)
+
+</details>
+
 ### Sending Attachments
 <details>
   <summary> Click to expand </summary>
@@ -164,21 +182,78 @@ Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://g
 
 </details>
 
-### Finding Your Bot Token
+### Discord Logger
 <details>
   <summary> Click to expand </summary>
-  
-In [Discord developer portal](https://discord.com/developers/applications):
-![Finding Bot Token](https://user-images.githubusercontent.com/54685446/200565393-ea31c2ad-fd3a-44a1-9789-89460ab5d1a9.png)
 
-</details>
+`DiscordBM` comes with a `LogHandler` which can send all your logs to Discord:
+```swift
+import DiscordLogger
+import Logging
 
-### Finding Your App ID
-<details>
-  <summary> Click to expand </summary>
-  
-In [Discord developer portal](https://discord.com/developers/applications):
-![Finding App ID](https://user-images.githubusercontent.com/54685446/200565475-9893d326-423e-4344-a853-9de2f9ed25b4.png)
+/// Configure the Discord Logging Manager.
+DiscordGlobalConfiguration.logManager = DiscordLogManager(
+    client: DefaultDiscordClient(
+        httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS,
+        token: YOUR_BOT_TOKEN,
+        appId: nil
+    ),
+    configuration: .init(fallbackLogger: Logger(
+        label: "DiscordBMFallback",
+        factory: StreamLogHandler.standardOutput(label:metadataProvider:)
+    ))
+)
+
+/// Bootstrap the `LoggingSystem`. After this, all your `Logger`s will automagically start using `DiscordLogHandler`.
+LoggingSystem.bootstrapWithDiscordLogger(
+    /// The address to send the logs to. You can easily create a webhook using any Discord client app you're using.
+    address: try .webhook(.url(WEBHOOK_URL)),
+    makeStdoutLogHandler: StreamLogHandler.standardOutput(label:metadataProvider:)
+)
+/// Make sure you haven't called `LoggingSystem.bootstrap` anywhere else, because you can only call it once.
+/// For example Vapor's templates use `LoggingSystem.bootstrap` on boot, and you need to remove that.
+```
+`DiscordLogManager` comes with a ton of useful configuration options.   
+Here is an example of a decently-configured `DiscordLogManager`:   
+Read `DiscordLogManager.Configuration.init` documentation for full info.
+
+```swift
+DiscordGlobalConfiguration.logManager = DiscordLogManager(
+    client: DefaultDiscordClient(
+        httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS,
+        token: YOUR_BOT_TOKEN,
+        appId: nil
+    ), configuration: .init(
+        fallbackLogger: Logger(
+            label: "DiscordBMFallback",
+            factory: StreamLogHandler.standardOutput(label:metadataProvider:)
+        ),
+        aliveNotice: .init(
+            address: try .webhook(.url(WEBHOOK_URL)),
+            interval: .hours(1),
+            message: "I'm Alive! :)",
+            color: .blue,
+            initialNoticeMention: .user("970723029262942248")
+        ),
+        mentions: [
+            .critical: .role("970723029262942248"),
+            .error: .role("970723101044244510"),
+            .warning: .role("970723134149918800"),
+            .trace: .role("970723180706668584"),
+            .debug: .role("970723199761383484"),
+            .notice: .role("970723218551865384"),
+            .info: .role("970723238097330237"),
+        ],
+        extraMetadata: [.warning, .error, .critical],
+        disabledLogLevels: [.debug, .trace]
+    )
+)
+```
+If you want to only use Discord logger and don't use the rest of `DiscordBM`, you can specify `DiscordLogger` as your dependency:
+```swift
+/// In `Package.swift`:
+.product(name: "DiscordLogger", package: "DiscordBM"),
+```
 
 </details>
 

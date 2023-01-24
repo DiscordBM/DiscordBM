@@ -532,7 +532,7 @@ public struct Embed: Sendable, Codable, Validatable {
         self.type = type
         self.description = description
         self.url = url
-        self.timestamp = timestamp == nil ? nil : .init(date: timestamp!)
+        self.timestamp = timestamp.map { .init(date: $0) }
         self.color = color
         self.footer = footer
         self.image = image
@@ -545,7 +545,7 @@ public struct Embed: Sendable, Codable, Validatable {
     }
     
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
-    var contentLength: Int {
+    public var contentLength: Int {
         let fields = fields?.reduce(into: 0) {
             $0 = $1.name.unicodeScalars.count + $1.value.unicodeScalars.count
         } ?? 0

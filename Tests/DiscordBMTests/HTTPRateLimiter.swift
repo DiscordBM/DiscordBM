@@ -1,4 +1,4 @@
-@testable import DiscordBM
+@testable import DiscordClient
 import NIOHTTP1
 import Logging
 import XCTest
