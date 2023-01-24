@@ -1,4 +1,3 @@
-import DiscordModels
 
 private let baseURLs = (
     authorization: "https://discord.com/api/oauth2/authorize",

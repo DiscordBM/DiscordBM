@@ -22,7 +22,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.42.0"),
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.5.1"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.6.4"),
         .package(url: "https://github.com/apple/swift-atomics.git", from: "1.0.0"),
         .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.2"),
