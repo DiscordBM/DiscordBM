@@ -49,9 +49,12 @@ public struct WebhookAddress: Hashable {
     
     @usableFromInline
     static func extractWebhookUrlIdAndToken(_ url: String) -> (id: String, token: String)? {
-        let split = url
+        guard let split = url
+            .components(separatedBy: "api/webhooks/")
+            .last?
             .split(separator: "/")
             .filter({ !$0.isEmpty })
+        else { return nil }
         let id = String(split[split.count - 2])
         let token = String(split.last!)
         return (id, token)

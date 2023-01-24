@@ -1,8 +1,4 @@
-#if DEBUG
-@testable import Logging
-#else
 import Logging
-#endif
 import DiscordModels
 
 extension LoggingSystem {
@@ -10,28 +6,13 @@ extension LoggingSystem {
     /// After calling this function, all your `Logger`s will start using `DiscordLogHandler`.
     ///
     /// - NOTE: Be careful because `LoggingSystem.bootstrap` can only be called once.
-    /// If you use libraries like Vapor, you would want to remove such lines where you call `LoggingSystem...` and replacing it with this function.
+    /// If you use libraries like Vapor, you would want to remove such lines where you call `LoggingSystem...` and replace it with this function.
     public static func bootstrapWithDiscordLogger(
         address: DiscordLogHandler.Address,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
         makeStdoutLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
     ) {
-#if DEBUG
-        LoggingSystem.bootstrapInternal({ label, metadataProvider in
-            var handler = MultiplexLogHandler([
-                makeStdoutLogHandler(label, metadataProvider),
-                DiscordLogHandler(
-                    label: label,
-                    address: address,
-                    level: level,
-                    metadataProvider: metadataProvider
-                )
-            ])
-            handler.logLevel = level
-            return handler
-        }, metadataProvider: metadataProvider)
-#else
         LoggingSystem.bootstrap({ label, metadataProvider in
             var handler = MultiplexLogHandler([
                 makeStdoutLogHandler(label, metadataProvider),
@@ -45,6 +26,5 @@ extension LoggingSystem {
             handler.logLevel = level
             return handler
         }, metadataProvider: metadataProvider)
-#endif
     }
 }
