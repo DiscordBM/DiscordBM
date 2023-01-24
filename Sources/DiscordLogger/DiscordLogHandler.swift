@@ -36,17 +36,19 @@ public struct DiscordLogHandler: LogHandler {
         self.metadataProvider = metadataProvider
     }
     
-    /// Make a logger that logs to both the stdout and to Discord.
+    /// Make a logger that logs to both the a main place like stdout and also to Discord.
     public static func multiplexLogger(
         label: String,
         address: Address,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
-        makeStdoutLogHandler: (String, Logger.MetadataProvider?) -> LogHandler
+        makeMainLogHandler: (String, Logger.MetadataProvider?) -> LogHandler
     ) -> Logger {
         Logger(label: label) { label in
-            var handler = MultiplexLogHandler([
-                makeStdoutLogHandler(label, metadataProvider),
+            var otherHandler = makeMainLogHandler(label, metadataProvider)
+            otherHandler.logLevel = level
+            let handler = MultiplexLogHandler([
+                otherHandler,
                 DiscordLogHandler(
                     label: label,
                     address: address,
@@ -54,7 +56,6 @@ public struct DiscordLogHandler: LogHandler {
                     metadataProvider: metadataProvider
                 )
             ])
-            handler.logLevel = level
             return handler
         }
     }
@@ -118,6 +119,6 @@ private extension Collection {
     func maxCount(_ count: Int) -> Self.SubSequence {
         let delta = (self.count - count)
         let dropCount = delta > 0 ? delta : 0
-        return self.dropLast(Int(dropCount))
+        return self.dropLast(dropCount)
     }
 }

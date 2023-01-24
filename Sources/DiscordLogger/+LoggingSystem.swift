@@ -11,11 +11,13 @@ extension LoggingSystem {
         address: DiscordLogHandler.Address,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
-        makeStdoutLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
+        makeMainLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
     ) {
         LoggingSystem.bootstrap({ label, metadataProvider in
-            var handler = MultiplexLogHandler([
-                makeStdoutLogHandler(label, metadataProvider),
+            var otherHandler = makeMainLogHandler(label, metadataProvider)
+            otherHandler.logLevel = level
+            let handler = MultiplexLogHandler([
+                otherHandler,
                 DiscordLogHandler(
                     label: label,
                     address: address,
@@ -23,7 +25,6 @@ extension LoggingSystem {
                     metadataProvider: metadataProvider
                 )
             ])
-            handler.logLevel = level
             return handler
         }, metadataProvider: metadataProvider)
     }

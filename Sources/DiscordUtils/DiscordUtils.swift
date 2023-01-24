@@ -100,6 +100,7 @@ public enum DiscordUtils {
     }
     
     /// Escapes the special characters in the text, for the specified channel type.
+    @inlinable
     public static func escapingSpecialCharacters(
         _ text: String,
         forChannelType: ChannelKind

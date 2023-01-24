@@ -41,7 +41,7 @@ class DiscordLoggerTests: XCTestCase {
             label: "test",
             address: try .webhook(.url(webhookUrl)),
             level: .trace,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .trace, "Testing!")
         /// To make sure logs arrive in order.
@@ -131,7 +131,7 @@ class DiscordLoggerTests: XCTestCase {
             label: "test",
             address: try .webhook(.url(webhookUrl)),
             level: .trace,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .trace, "Testing!", metadata: ["a": "b"])
         
@@ -163,7 +163,7 @@ class DiscordLoggerTests: XCTestCase {
             label: "test",
             address: try .webhook(.url(webhookUrl)),
             level: .debug,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .debug, "Testing!")
         logger.log(level: .info, "Testing! 2")
@@ -197,7 +197,7 @@ class DiscordLoggerTests: XCTestCase {
             label: "test",
             address: address,
             level: .error,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         for idx in (0..<150) {
             /// To keep the order.
@@ -230,7 +230,7 @@ class DiscordLoggerTests: XCTestCase {
             label: "test",
             address: address,
             level: .info,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .info, "Testing!")
         
@@ -253,7 +253,7 @@ class DiscordLoggerTests: XCTestCase {
             label: "test",
             address: try .webhook(.url(webhookUrl)),
             level: .info,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .info, "Testing!")
         
@@ -295,7 +295,7 @@ class DiscordLoggerTests: XCTestCase {
             label: "test",
             address: try .webhook(.url(webhookUrl)),
             level: .notice,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .warning, "Testing!")
         
@@ -349,7 +349,7 @@ class DiscordLoggerTests: XCTestCase {
             label: "test",
             address: try .webhook(.url(webhookUrl)),
             level: .debug,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         
         try await Task.sleep(nanoseconds: 4_000_000_000)
@@ -432,7 +432,7 @@ class DiscordLoggerTests: XCTestCase {
             label: "test",
             address: try .webhook(.url(webhookUrl)),
             level: .debug,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         
         do {
@@ -519,7 +519,7 @@ class DiscordLoggerTests: XCTestCase {
         LoggingSystem.internalBootstrapWithDiscordLogger(
             address: try .webhook(.url(webhookUrl)),
             level: .error,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         
         let logger = Logger(label: "test2")
@@ -558,7 +558,7 @@ class DiscordLoggerTests: XCTestCase {
         LoggingSystem.internalBootstrapWithDiscordLogger(
             address: try .webhook(.url(webhookUrl)),
             metadataProvider: simpleTraceIDMetadataProvider,
-            makeStdoutLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         
         let logger = Logger(label: "test")
@@ -627,11 +627,13 @@ private extension LoggingSystem {
         address: DiscordLogHandler.Address,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
-        makeStdoutLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
+        makeMainLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
     ) {
         LoggingSystem.bootstrapInternal({ label, metadataProvider in
-            var handler = MultiplexLogHandler([
-                makeStdoutLogHandler(label, metadataProvider),
+            var otherHandler = makeMainLogHandler(label, metadataProvider)
+            otherHandler.logLevel = level
+            let handler = MultiplexLogHandler([
+                otherHandler,
                 DiscordLogHandler(
                     label: label,
                     address: address,
@@ -639,7 +641,6 @@ private extension LoggingSystem {
                     metadataProvider: metadataProvider
                 )
             ])
-            handler.logLevel = level
             return handler
         }, metadataProvider: metadataProvider)
     }
