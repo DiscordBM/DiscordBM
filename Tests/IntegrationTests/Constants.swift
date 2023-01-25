@@ -13,5 +13,4 @@ enum Constants {
     static let spamChannelId = "1038138527877181542"
     static let webhooksChannelId = "1066277056641503232"
     static let webhooks2ChannelId = "1067783166074564658"
-    static let webhookUrl = ProcessInfo.processInfo.environment["WEBHOOK_URL"]!
 }

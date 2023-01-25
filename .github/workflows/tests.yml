@@ -55,7 +55,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-      WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
     steps:
       - name: Check out package
         uses: actions/checkout@v3
