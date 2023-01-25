@@ -1,4 +1,8 @@
+#if DEBUG
+@testable import Logging
+#else
 import Logging
+#endif
 import DiscordModels
 
 extension LoggingSystem {
@@ -13,6 +17,22 @@ extension LoggingSystem {
         metadataProvider: Logger.MetadataProvider? = nil,
         makeMainLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
     ) {
+#if DEBUG
+        LoggingSystem.bootstrapInternal({ label, metadataProvider in
+            var otherHandler = makeMainLogHandler(label, metadataProvider)
+            otherHandler.logLevel = level
+            let handler = MultiplexLogHandler([
+                otherHandler,
+                DiscordLogHandler(
+                    label: label,
+                    address: address,
+                    level: level,
+                    metadataProvider: metadataProvider
+                )
+            ])
+            return handler
+        }, metadataProvider: metadataProvider)
+#else
         LoggingSystem.bootstrap({ label, metadataProvider in
             var otherHandler = makeMainLogHandler(label, metadataProvider)
             otherHandler.logLevel = level
@@ -27,5 +47,6 @@ extension LoggingSystem {
             ])
             return handler
         }, metadataProvider: metadataProvider)
+#endif
     }
 }

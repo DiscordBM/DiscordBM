@@ -516,7 +516,7 @@ class DiscordLoggerTests: XCTestCase {
                 disabledInDebug: false
             )
         )
-        LoggingSystem.internalBootstrapWithDiscordLogger(
+        LoggingSystem.bootstrapWithDiscordLogger(
             address: try .webhook(.url(webhookUrl)),
             level: .error,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
@@ -555,7 +555,7 @@ class DiscordLoggerTests: XCTestCase {
             }
             return ["simple-trace-id": .string(traceID)]
         }
-        LoggingSystem.internalBootstrapWithDiscordLogger(
+        LoggingSystem.bootstrapWithDiscordLogger(
             address: try .webhook(.url(webhookUrl)),
             metadataProvider: simpleTraceIDMetadataProvider,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
@@ -620,28 +620,4 @@ private class FakeDiscordClient: DiscordClient {
 
 private enum TraceNamespace {
     @TaskLocal static var simpleTraceID: String?
-}
-
-private extension LoggingSystem {
-    static func internalBootstrapWithDiscordLogger(
-        address: DiscordLogHandler.Address,
-        level: Logger.Level = .info,
-        metadataProvider: Logger.MetadataProvider? = nil,
-        makeMainLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
-    ) {
-        LoggingSystem.bootstrapInternal({ label, metadataProvider in
-            var otherHandler = makeMainLogHandler(label, metadataProvider)
-            otherHandler.logLevel = level
-            let handler = MultiplexLogHandler([
-                otherHandler,
-                DiscordLogHandler(
-                    label: label,
-                    address: address,
-                    level: level,
-                    metadataProvider: metadataProvider
-                )
-            ])
-            return handler
-        }, metadataProvider: metadataProvider)
-    }
 }

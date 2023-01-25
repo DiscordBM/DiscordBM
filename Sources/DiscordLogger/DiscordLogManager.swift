@@ -338,7 +338,7 @@ public actor DiscordLogManager {
             message,
             metadata: metadata,
             source: "DiscordBM",
-            file: #filePath,
+            file: #fileID,
             function: function,
             line: line
         )
