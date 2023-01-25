@@ -334,42 +334,194 @@ class DiscordClientTests: XCTestCase {
     }
     
     func testWebhooks() async throws {
+        let image1 = ByteBuffer(data: resource(name: "discordbm-logo.png"))
+        let image2 = ByteBuffer(data: resource(name: "1kb.png"))
+        
+        let webhookName1 = "TestWebhook1"
+        
+        let webhook1 = try await self.client.createWebhook(
+            channelId: Constants.webhooksChannelId,
+            payload: .init(
+                name: webhookName1,
+                avatar: .init(file: .init(data: image1, filename: "DiscordBM.png"))
+            )
+        ).decode()
+        
+        XCTAssertTrue(webhook1.token?.isEmpty == false)
+        XCTAssertTrue(webhook1.id.isEmpty == false)
+        XCTAssertTrue(webhook1.avatar?.isEmpty == false)
+        XCTAssertEqual(webhook1.name, webhookName1)
+        XCTAssertEqual(webhook1.guild_id, Constants.guildId)
+        XCTAssertEqual(webhook1.channel_id, Constants.webhooksChannelId)
+        
+        let webhookName2 = "TestWebhook2"
+        
+        let webhook2 = try await self.client.createWebhook(
+            channelId: Constants.webhooksChannelId,
+            payload: .init(name: webhookName2)
+        ).decode()
+        
+        XCTAssertTrue(webhook2.token?.isEmpty == false)
+        XCTAssertTrue(webhook2.id.isEmpty == false)
+        XCTAssertNil(webhook2.avatar)
+        XCTAssertEqual(webhook2.name, webhookName2)
+        XCTAssertEqual(webhook2.guild_id, Constants.guildId)
+        XCTAssertEqual(webhook2.channel_id, Constants.webhooksChannelId)
+        
+        let webhook1Token = try XCTUnwrap(webhook1.token)
+        let webhook2Token = try XCTUnwrap(webhook2.token)
+        
+        let getWebhook1 = try await self.client.getWebhook(id: webhook1.id).decode()
+        XCTAssertEqual(getWebhook1.id, webhook1.id)
+        XCTAssertEqual(getWebhook1.token, webhook1.token)
+        
+        let getWebhook2 = try await self.client.getWebhook(
+            address: .deconstructed(id: webhook2.id, token: webhook2Token)
+        ).decode()
+        XCTAssertEqual(getWebhook2.id, webhook2.id)
+        XCTAssertEqual(getWebhook2.token, webhook2.token)
+        
+        let channelWebhooks = try await self.client.getChannelWebhooks(
+            channelId: Constants.webhooksChannelId
+        ).decode()
+        
+        XCTAssertEqual(channelWebhooks.count, 2)
+        
+        let channelWebhook1 = try XCTUnwrap(channelWebhooks.first)
+        
+        XCTAssertEqual(channelWebhook1.token, webhook1.token)
+        XCTAssertEqual(channelWebhook1.id, webhook1.id)
+        
+        let channelWebhook2 = try XCTUnwrap(channelWebhooks.last)
+        
+        XCTAssertEqual(channelWebhook2.token, webhook2.token)
+        XCTAssertEqual(channelWebhook2.id, webhook2.id)
+        
+        let guildWebhooks = try await self.client.getGuildWebhooks(
+            guildId: Constants.guildId
+        ).decode()
+        
+        XCTAssertEqual(guildWebhooks.count, 2)
+        
+        let guildWebhook1 = try XCTUnwrap(guildWebhooks.first)
+        
+        XCTAssertEqual(guildWebhook1.token, webhook1.token)
+        XCTAssertEqual(guildWebhook1.id, webhook1.id)
+        
+        let guildWebhook2 = try XCTUnwrap(guildWebhooks.last)
+        
+        XCTAssertEqual(guildWebhook2.token, webhook2.token)
+        XCTAssertEqual(guildWebhook2.id, webhook2.id)
+        
+        let webhookNewName1 = "WebhookTestNew1"
+        let modify1 = try await self.client.modifyWebhook(
+            id: webhook1.id,
+            payload: .init(
+                name: webhookNewName1,
+                avatar: .init(file: .init(data: image2, filename: "1kb.png")),
+                channel_id: Constants.webhooks2ChannelId
+            )
+        ).decode()
+        
+        XCTAssertEqual(modify1.token, webhook1.token)
+        XCTAssertEqual(modify1.id, webhook1.id)
+        XCTAssertTrue(modify1.avatar?.isEmpty == false)
+        XCTAssertNotEqual(modify1.avatar, webhook1.avatar)
+        XCTAssertEqual(modify1.name, webhookNewName1)
+        XCTAssertEqual(modify1.guild_id, Constants.guildId)
+        XCTAssertEqual(modify1.channel_id, Constants.webhooks2ChannelId)
+        
+        let webhookNewName2 = "WebhookTestNew2"
+        let modify2 = try await self.client.modifyWebhook(
+            address: .deconstructed(id: webhook2.id, token: webhook2Token),
+            payload: .init(name: webhookNewName2)
+        ).decode()
+        
+        XCTAssertEqual(modify2.token, webhook2.token)
+        XCTAssertEqual(modify2.id, webhook2.id)
+        XCTAssertNil(modify2.avatar)
+        XCTAssertEqual(modify2.name, webhookNewName2)
+        XCTAssertEqual(modify2.guild_id, Constants.guildId)
+        XCTAssertEqual(modify2.channel_id, Constants.webhooksChannelId)
+        
         let noContentResponse = try await self.client.executeWebhook(
-            address: .url(Constants.webhookUrl),
+            address: .deconstructed(id: webhook1.id, token: webhook1Token),
             payload: .init(content: "Testing! \(Date())")
         )
         XCTAssertEqual(noContentResponse.status, .noContent)
         
         let text = "Testing! \(Date())"
         let date = Date()
-        let response = try await self.client.executeWebhookWithResponse(
-            address: .url(Constants.webhookUrl),
+        let message = try await self.client.executeWebhookWithResponse(
+            address: .deconstructed(id: webhook1.id, token: webhook1Token),
             payload: .init(
                 content: text,
-                embeds: [.init(
-                    title: "Hey",
-                    timestamp: date
-                )]
+                embeds: [.init(title: "Hey", timestamp: date)]
             )
         ).decode()
         
-        XCTAssertEqual(response.channel_id, Constants.webhooksChannelId)
-        XCTAssertEqual(response.content, text)
-        XCTAssertEqual(response.embeds.first?.title, "Hey")
-        let timestamp = try XCTUnwrap(response.embeds.first?.timestamp?.date).timeIntervalSince1970
+        XCTAssertEqual(message.channel_id, Constants.webhooks2ChannelId)
+        XCTAssertEqual(message.content, text)
+        XCTAssertEqual(message.embeds.first?.title, "Hey")
+        let timestamp = try XCTUnwrap(message.embeds.first?.timestamp?.date).timeIntervalSince1970
         let range = (date.timeIntervalSince1970-1)...(date.timeIntervalSince1970+1)
         XCTAssertTrue(range.contains(timestamp), "\(range) did not contain \(timestamp)")
         
         let text2 = "Testing! \(Date())"
         let threadId = "1066278441256751114"
-        let threadResponse = try await self.client.executeWebhookWithResponse(
-            address: .url(Constants.webhookUrl),
+        let threadMessage = try await self.client.executeWebhookWithResponse(
+            address: .deconstructed(id: webhook2.id, token: webhook2Token),
             threadId: threadId,
             payload: .init(content: text2)
         ).decode()
         
-        XCTAssertEqual(threadResponse.channel_id, threadId)
-        XCTAssertEqual(threadResponse.content, text2)
+        XCTAssertEqual(threadMessage.channel_id, threadId)
+        XCTAssertEqual(threadMessage.content, text2)
+        
+        let getMessage = try await self.client.getWebhookMessage(
+            address: .deconstructed(id: webhook1.id, token: webhook1Token),
+            messageId: message.id
+        ).decode()
+        
+        XCTAssertEqual(getMessage.id, message.id)
+        XCTAssertEqual(getMessage.content, message.content)
+        XCTAssertEqual(getMessage.embeds.map(\.title), message.embeds.map(\.title))
+        
+        let newText = "Testing Edit! \(Date())"
+        let editThreadMessage = try await self.client.editWebhookMessage(
+            address: .deconstructed(id: webhook2.id, token: webhook2Token),
+            messageId: threadMessage.id,
+            threadId: threadId,
+            payload: .init(content: newText)
+        ).decode()
+        
+        XCTAssertEqual(editThreadMessage.content, newText)
+        XCTAssertEqual(editThreadMessage.id, threadMessage.id)
+        
+        let getThreadMessage = try await self.client.getWebhookMessage(
+            address: .deconstructed(id: webhook2.id, token: webhook2Token),
+            messageId: threadMessage.id,
+            threadId: threadId
+        ).decode()
+        
+        XCTAssertEqual(getThreadMessage.id, threadMessage.id)
+        XCTAssertEqual(getThreadMessage.content, editThreadMessage.content)
+        
+        let deleteThreadMessage = try await self.client.deleteWebhookMessage(
+            address: .deconstructed(id: webhook2.id, token: webhook2Token),
+            messageId: threadMessage.id,
+            threadId: threadId
+        )
+        XCTAssertNoThrow(try deleteThreadMessage.guardIsSuccessfulResponse())
+        
+        let delete1 = try await self.client.deleteWebhook(id: webhook1.id, reason: "Testing! 1")
+        XCTAssertNoThrow(try delete1.guardIsSuccessfulResponse())
+        
+        let delete2 = try await self.client.deleteWebhook(
+            address: .deconstructed(id: webhook2.id, token: webhook2Token),
+            reason: "Testing! 2"
+        )
+        XCTAssertNoThrow(try delete2.guardIsSuccessfulResponse())
     }
     
     func testMultipartPayload() async throws {

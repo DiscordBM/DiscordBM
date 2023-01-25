@@ -54,6 +54,26 @@ class ValidatableTests: XCTestCase, Validatable {
         }
     }
     
+    func testValidateCharacterCountInRange() throws {
+        try validateCharacterCountInRange(nil, min: 0, max: 0, name: "a")
+        try validateCharacterCountInRange(nil, min: 0, max: 12, name: "a")
+        try validateCharacterCountInRange("", min: 0, max: 0, name: "a")
+        try validateCharacterCountInRange("abcde", min: 5, max: 5, name: "a")
+        try validateCharacterCountInRange("🇯🇵", min: 1, max: 2, name: "emoji")
+        XCTAssertThrowsError(
+            try validateCharacterCountInRange("🇯🇵", min: 3, max: 4, name: "emoji")
+        ) { error in
+            let error = error as! ValidationError
+            XCTAssertEqual(error, .invalidCharactersCount(name: "emoji", min: 3, max: 4))
+        }
+        XCTAssertThrowsError(
+            try validateCharacterCountInRange("abdcefghijk", min: 20, max: 40, name: "a")
+        ) { error in
+            let error = error as! ValidationError
+            XCTAssertEqual(error, .invalidCharactersCount(name: "a", min: 20, max: 40))
+        }
+    }
+    
     func testValidateCombinedCharacterCountDoesNotExceed() throws {
         try validateCombinedCharacterCountDoesNotExceed(nil, max: 0, names: "a")
         try validateCombinedCharacterCountDoesNotExceed(nil, max: 1, names: "a")

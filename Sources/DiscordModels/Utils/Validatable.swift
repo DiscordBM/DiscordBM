@@ -9,6 +9,8 @@ public enum ValidationError: Error {
     case atLeastOneFieldIsRequired(names: [String])
     /// Too many characters in the target (likely a String). Need to shorten it.
     case tooManyCharacters(name: String, max: Int)
+    /// Count of characters in the target (likely a String) is not acceptable.
+    case invalidCharactersCount(name: String, min: Int, max: Int)
     /// Too many elements in the target (likely an Array). Need to shorten it.
     case tooManyElements(name: String, max: Int)
     /// At least one of the values you are trying to send is prohibited. Remove them.
@@ -35,6 +37,14 @@ extension Validatable {
     func validateCharacterCountDoesNotExceed(_ value: String?, max: Int, name: String) throws {
         guard value?.unicodeScalars.count ?? 0 <= max else {
             throw ValidationError.tooManyCharacters(name: name, max: max)
+        }
+    }
+    
+    @inlinable
+    func validateCharacterCountInRange(_ value: String?, min: Int, max: Int, name: String) throws {
+        let count = value?.unicodeScalars.count ?? 0
+        guard min <= count, count <= max else {
+            throw ValidationError.invalidCharactersCount(name: name, min: min, max: max)
         }
     }
     

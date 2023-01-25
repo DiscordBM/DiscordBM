@@ -321,7 +321,7 @@ extension BotGatewayManager {
             self.sessionId = payload.session_id
             self.resumeGatewayURL = payload.resume_gateway_url
         case .resumed:
-            logger.notice("Received resume notice. The connection is fully established", metadata: [
+            logger.debug("Received resume notice. The connection is fully established", metadata: [
                 "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
             ])
             await self.onSuccessfulConnection()
@@ -449,7 +449,7 @@ extension BotGatewayManager {
                 self.logger.log(
                     /// If its `nil` or `.goingAway`, then it's likely just a resume notice.
                     /// Otherwise it might be an error.
-                    level: (code == nil || code == .goingAway) ? .notice : .error,
+                    level: (code == nil || code == .goingAway) ? .debug : .error,
                     "Received connection close notification. Will try to reconnect",
                     metadata: [
                         "code": .string(codeDesc),

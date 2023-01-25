@@ -102,74 +102,73 @@ public enum RequestBody {
         }
     }
     
-    /// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
-    public struct CreateGuildRole: Sendable, Codable, Validatable {
+    public struct ImageData: Sendable, Codable {
+        public var file: RawFile
         
-        public struct ImageData: Sendable, Codable {
-            public var file: RawFile
-            
-            public init(file: RawFile) {
-                self.file = file
-            }
-            
-            public init(from decoder: Decoder) throws {
-                let string = try String(from: decoder)
-                guard let file = ImageData.decodeFromString(string) else {
-                    throw DecodingError.dataCorrupted(.init(
-                        codingPath: decoder.codingPath,
-                        debugDescription: "'\(string)' can't be decoded into a file"
-                    ))
-                }
-                self.file = file
-            }
-            
-            public func encode(to encoder: Encoder) throws {
-                guard let string = self.encodeToString() else {
-                    throw EncodingError.invalidValue(
-                        file, .init(
-                            codingPath: encoder.codingPath,
-                            debugDescription: "Can't base64 encode the file"
-                        )
-                    )
-                }
-                var container = encoder.singleValueContainer()
-                try container.encode(string)
-            }
-            
-            static func decodeFromString(_ string: String) -> RawFile? {
-                var filename: String?
-                guard string.hasPrefix("data:") else {
-                    return nil
-                }
-                guard let semicolon = string.firstIndex(of: ";") else {
-                    return nil
-                }
-                let type = string[string.startIndex..<semicolon].dropFirst(5)
-                let typeComps = type.split(separator: "/", maxSplits: 1)
-                if typeComps.count == 2,
-                   let ext = fileExtensionMediaTypeMapping.first(
-                    where: { $1.0 == typeComps[0] && $1.1 == typeComps[1] }
-                   )?.key {
-                    filename = "unknown.\(ext)"
-                }
-                guard string[semicolon...].hasPrefix(";base64,") else {
-                    return nil
-                }
-                let encodedString = string[semicolon...].dropFirst(8)
-                guard let data = Data(base64Encoded: String(encodedString)) else {
-                    return nil
-                }
-                return .init(data: .init(data: data), filename: filename ?? "unknown")
-            }
-            
-            func encodeToString() -> String? {
-                guard let type = file.type else { return nil }
-                let data = Data(buffer: file.data, byteTransferStrategy: .noCopy)
-                let encoded = data.base64EncodedString()
-                return "data:\(type);base64,\(encoded)"
-            }
+        public init(file: RawFile) {
+            self.file = file
         }
         
+        public init(from decoder: Decoder) throws {
+            let string = try String(from: decoder)
+            guard let file = ImageData.decodeFromString(string) else {
+                throw DecodingError.dataCorrupted(.init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "'\(string)' can't be decoded into a file"
+                ))
+            }
+            self.file = file
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            guard let string = self.encodeToString() else {
+                throw EncodingError.invalidValue(
+                    file, .init(
+                        codingPath: encoder.codingPath,
+                        debugDescription: "Can't base64 encode the file"
+                    )
+                )
+            }
+            var container = encoder.singleValueContainer()
+            try container.encode(string)
+        }
+        
+        static func decodeFromString(_ string: String) -> RawFile? {
+            var filename: String?
+            guard string.hasPrefix("data:") else {
+                return nil
+            }
+            guard let semicolon = string.firstIndex(of: ";") else {
+                return nil
+            }
+            let type = string[string.startIndex..<semicolon].dropFirst(5)
+            let typeComps = type.split(separator: "/", maxSplits: 1)
+            if typeComps.count == 2,
+               let ext = fileExtensionMediaTypeMapping.first(
+                where: { $1.0 == typeComps[0] && $1.1 == typeComps[1] }
+               )?.key {
+                filename = "unknown.\(ext)"
+            }
+            guard string[semicolon...].hasPrefix(";base64,") else {
+                return nil
+            }
+            let encodedString = string[semicolon...].dropFirst(8)
+            guard let data = Data(base64Encoded: String(encodedString)) else {
+                return nil
+            }
+            return .init(data: .init(data: data), filename: filename ?? "unknown")
+        }
+        
+        func encodeToString() -> String? {
+            guard let type = file.type else { return nil }
+            let data = Data(buffer: file.data, byteTransferStrategy: .noCopy)
+            let encoded = data.base64EncodedString()
+            return "data:\(type);base64,\(encoded)"
+        }
+    }
+    
+    /// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
+    public struct CreateGuildRole: Sendable, Codable, Validatable {
         public var name: String?
         public var permissions: StringBitField<Permission>?
         public var color: DiscordColor?
@@ -376,6 +375,92 @@ public enum RequestBody {
                 name: "flags",
                 reason: "Can only contain 'suppressEmbeds'",
                 where: { $0 == .suppressEmbeds }
+            )
+            try allowed_mentions?.validate()
+            for attachment in attachments ?? [] {
+                try attachment.validate()
+            }
+            for embed in embeds ?? [] {
+                try embed.validate()
+            }
+        }
+    }
+    
+    /// https://discord.com/developers/docs/resources/webhook#create-webhook-json-params
+    public struct CreateWebhook: Sendable, Codable, Validatable {
+        public var name: String
+        public var avatar: ImageData?
+        
+        public init(name: String, avatar: ImageData? = nil) {
+            self.name = name
+            self.avatar = avatar
+        }
+        
+        public func validate() throws {
+            try validateCharacterCountInRange(name, min: 1, max: 80, name: "name")
+        }
+    }
+    
+    /// https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
+    public struct ModifyWebhook: Sendable, Codable, Validatable {
+        public var name: String?
+        public var avatar: ImageData?
+        
+        public init(name: String? = nil, avatar: ImageData? = nil) {
+            self.name = name
+            self.avatar = avatar
+        }
+        
+        public func validate() throws { }
+    }
+    
+    /// https://discord.com/developers/docs/resources/webhook#modify-webhook-json-params
+    public struct ModifyGuildWebhook: Sendable, Codable, Validatable {
+        public var name: String?
+        public var avatar: ImageData?
+        public var channel_id: String?
+        
+        public init(name: String, avatar: ImageData? = nil, channel_id: String? = nil) {
+            self.name = name
+            self.avatar = avatar
+            self.channel_id = channel_id
+        }
+        
+        public func validate() throws { }
+    }
+    
+    /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message-jsonform-params
+    public struct EditWebhookMessage: Sendable, Codable, MultipartEncodable, Validatable {
+        public var content: String?
+        public var embeds: [Embed]?
+        public var allowed_mentions: DiscordChannel.AllowedMentions?
+        public var components: [Interaction.ActionRow]?
+        public var files: [RawFile]?
+        public var attachments: [DiscordChannel.AttachmentSend]?
+        
+        enum CodingKeys: String, CodingKey {
+            case content
+            case embeds
+            case allowed_mentions
+            case components
+            case attachments
+        }
+        
+        public init(content: String? = nil, embeds: [Embed]? = nil, allowed_mentions: DiscordChannel.AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [DiscordChannel.AttachmentSend]? = nil) {
+            self.content = content
+            self.embeds = embeds
+            self.allowed_mentions = allowed_mentions
+            self.components = components
+            self.files = files
+            self.attachments = attachments
+        }
+        
+        public func validate() throws {
+            try validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
+            try validateCombinedCharacterCountDoesNotExceed(
+                embeds?.reduce(into: 0, { $0 += $1.contentLength }),
+                max: 6_000,
+                names: "embeds"
             )
             try allowed_mentions?.validate()
             for attachment in attachments ?? [] {

@@ -613,6 +613,107 @@ public extension DiscordClient {
         )
     }
     
+    /// https://discord.com/developers/docs/resources/webhook#create-webhook
+    func createWebhook(
+        channelId: String,
+        reason: String? = nil,
+        payload: RequestBody.CreateWebhook
+    ) async throws -> DiscordClientResponse<Webhook> {
+        let endpoint = Endpoint.createWebhook(channelId: channelId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+    
+    /// https://discord.com/developers/docs/resources/webhook#get-channel-webhooks
+    func getChannelWebhooks(channelId: String) async throws -> DiscordClientResponse<[Webhook]> {
+        let endpoint = Endpoint.getChannelWebhooks(channelId: channelId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
+    func getGuildWebhooks(guildId: String) async throws -> DiscordClientResponse<[Webhook]> {
+        let endpoint = Endpoint.getGuildWebhooks(guildId: guildId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// Requires authentication using an authorized bot-token.
+    /// https://discord.com/developers/docs/resources/webhook#get-webhook
+    func getWebhook(id: String) async throws -> DiscordClientResponse<Webhook> {
+        let endpoint = Endpoint.getWebhook1(id: id)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// Doesn't require authentication using bot-token.
+    /// https://discord.com/developers/docs/resources/webhook#get-webhook-with-token
+    func getWebhook(address: WebhookAddress) async throws -> DiscordClientResponse<Webhook> {
+        let endpoint = Endpoint.getWebhook2(id: address.id, token: address.token)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// Requires authentication using an authorized bot-token.
+    /// https://discord.com/developers/docs/resources/webhook#modify-webhook
+    func modifyWebhook(
+        id: String,
+        reason: String? = nil,
+        payload: RequestBody.ModifyGuildWebhook
+    ) async throws -> DiscordClientResponse<Webhook> {
+        let endpoint = Endpoint.modifyWebhook1(id: id)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+    
+    /// Doesn't require authentication using bot-token.
+    /// https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
+    func modifyWebhook(
+        address: WebhookAddress,
+        reason: String? = nil,
+        payload: RequestBody.ModifyWebhook
+    ) async throws -> DiscordClientResponse<Webhook> {
+        let endpoint = Endpoint.modifyWebhook2(id: address.id, token: address.token)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+    
+    /// Requires authentication using an authorized bot-token.
+    /// https://discord.com/developers/docs/resources/webhook#delete-webhook
+    func deleteWebhook(id: String, reason: String? = nil) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteWebhook1(id: id)
+        return try await self.send(request: .init(
+            to: endpoint,
+            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+        ))
+    }
+    
+    /// Doesn't require authentication using bot-token.
+    /// https://discord.com/developers/docs/resources/webhook#delete-webhook-with-token
+    func deleteWebhook(
+        address: WebhookAddress,
+        reason: String? = nil
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteWebhook2(id: address.id, token: address.token)
+        return try await self.send(request: .init(
+            to: endpoint,
+            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+        ))
+    }
+    
+    /// - Parameters:
+    ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#execute-webhook
     @inlinable
     func executeWebhook(
@@ -630,6 +731,8 @@ public extension DiscordClient {
         )
     }
     
+    /// - Parameters:
+    ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#execute-webhook
     @inlinable
     func executeWebhookWithResponse(
@@ -648,5 +751,67 @@ public extension DiscordClient {
             ),
             payload: payload
         )
+    }
+    
+    /// - Parameters:
+    ///   - threadId: Required if the message is in a thread.
+    /// https://discord.com/developers/docs/resources/webhook#get-webhook-message
+    func getWebhookMessage(
+        address: WebhookAddress,
+        messageId: String,
+        threadId: String? = nil
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+        let endpoint = Endpoint.getWebhookMessage(
+            id: address.id,
+            token: address.token,
+            messageId: messageId
+        )
+        return try await self.send(request: .init(
+            to: endpoint,
+            queries: [("thread_id", threadId)]
+        ))
+    }
+    
+    /// - Parameters:
+    ///   - threadId: Required if the message is in a thread.
+    /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message
+    func editWebhookMessage(
+        address: WebhookAddress,
+        messageId: String,
+        threadId: String? = nil,
+        payload: RequestBody.EditWebhookMessage
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+        let endpoint = Endpoint.editWebhookMessage(
+            id: address.id,
+            token: address.token,
+            messageId: messageId
+        )
+        return try await self.sendMultipart(
+            request: .init(
+                to: endpoint,
+                queries: [("thread_id", threadId)]
+            ),
+            payload: payload
+        )
+    }
+    
+    
+    /// - Parameters:
+    ///   - threadId: Required if the message is in a thread.
+    /// https://discord.com/developers/docs/resources/webhook#delete-webhook-message
+    func deleteWebhookMessage(
+        address: WebhookAddress,
+        messageId: String,
+        threadId: String? = nil
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteWebhookMessage(
+            id: address.id,
+            token: address.token,
+            messageId: messageId
+        )
+        return try await self.send(request: .init(
+            to: endpoint,
+            queries: [("thread_id", threadId)]
+        ))
     }
 }
