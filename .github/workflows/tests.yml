@@ -15,6 +15,7 @@ jobs:
         container:
           - swift:5.6-focal
           - swift:5.7-jammy
+          - swiftlang/swift:nightly-5.8-jammy
           - swiftlang/swift:nightly-main-jammy
     container: ${{ matrix.container }}
     runs-on: ubuntu-latest
