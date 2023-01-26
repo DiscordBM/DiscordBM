@@ -13,21 +13,21 @@ public actor DiscordLogManager {
         
         public struct AliveNotice {
             let address: Address
-            let interval: TimeAmount
+            let interval: TimeAmount?
             let message: String
             let color: DiscordColor
             let initialNoticeMention: String
             
             /// - Parameters:
             ///   - address: The address to send the logs to.
-            ///   - interval: The interval after which to send an alive notice.
+            ///   - interval: The interval after which to send an alive notice. If set to nil, log-manager will only send 1 alive notice on startup.
             ///   - message: The message to accompany the notice.
             ///   - color: The color of the embed of alive notices.
             ///   - initialNoticeMention: The user/role to be mentioned on the first alive notice.
             ///   Useful to be notified of app-boots when you update your app or when it crashes.
             public init(
                 address: Address,
-                interval: TimeAmount = .hours(1),
+                interval: TimeAmount?,
                 message: String = "Alive Notice!",
                 color: DiscordColor = .blue,
                 initialNoticeMention: Mention
@@ -192,8 +192,9 @@ public actor DiscordLogManager {
 #if DEBUG
         if configuration.disabledInDebug { return }
 #endif
-        if let aliveNotice = configuration.aliveNotice {
-            let nanos = UInt64(aliveNotice.interval.nanoseconds)
+        if let aliveNotice = configuration.aliveNotice,
+           let interval = aliveNotice.interval {
+            let nanos = UInt64(interval.nanoseconds)
             
             @Sendable func send() async throws {
                 try await Task.sleep(nanoseconds: nanos)
