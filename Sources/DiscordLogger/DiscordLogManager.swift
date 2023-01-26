@@ -44,6 +44,11 @@ public actor DiscordLogManager {
         public enum Mention {
             case user(String)
             case role(String)
+            case combined([Mention])
+            
+            public static func combined(_ mentions: Mention...) -> Mention {
+                .combined(mentions)
+            }
             
             func toMentionString() -> String {
                 switch self {
@@ -51,6 +56,8 @@ public actor DiscordLogManager {
                     return DiscordUtils.userMention(id: id)
                 case let .role(id):
                     return DiscordUtils.roleMention(id: id)
+                case let .combined(mentions):
+                    return mentions.map { $0.toMentionString() }.joined(separator: " ")
                 }
             }
         }

@@ -446,10 +446,9 @@ extension BotGatewayManager {
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             Task {
                 let (code, codeDesc) = self.getCloseCodeAndDescription(of: ws)
+                let isDebugLevelCode = [.goingAway, nil, .unexpectedServerError].contains(code)
                 self.logger.log(
-                    /// If its `nil` or `.goingAway`, then it's likely just a resume notice.
-                    /// Otherwise it might be an error.
-                    level: (code == nil || code == .goingAway) ? .debug : .error,
+                    level: isDebugLevelCode ? .debug : .warning,
                     "Received connection close notification. Will try to reconnect",
                     metadata: [
                         "code": .string(codeDesc),
