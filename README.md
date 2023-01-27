@@ -34,14 +34,7 @@ import DiscordBM
 import AsyncHTTPClient
 
 let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-defer {
-    /// it's important to shutdown the httpClient _after all requests are done_, even if one failed
-    /// libraries like Vapor take care of this on their own if you use the shared http client
-    /// You might need to move the shutdown call to somewhere more appropriate, based on your app:
-    /// try httpClient.syncShutdown()
-    /// Prefer to use `shutdown()` in async contexts:
-    /// try await httpClient.shutdown()
-}
+
 let bot = BotGatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,

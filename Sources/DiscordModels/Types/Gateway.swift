@@ -1098,8 +1098,10 @@ public struct Gateway: Sendable, Codable {
             self.application_id = partialMessage.application_id
             self.message_reference = partialMessage.message_reference
             self.flags = partialMessage.flags
-            if let referenced_message = partialMessage.referenced_message {
-                self.referenced_message?.value.update(with: referenced_message.value)
+            if let referenced_message = partialMessage.referenced_message,
+               var value = self.referenced_message?.value {
+                value.update(with: referenced_message.value)
+                self.referenced_message = .init(value: value)
             }
             self.interaction = partialMessage.interaction
             self.thread = partialMessage.thread
