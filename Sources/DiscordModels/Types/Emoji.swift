@@ -11,10 +11,8 @@ public struct PartialEmoji: Sendable, Codable {
     public var animated: Bool?
     public var available: Bool?
     public var version: Int?
-    public var guild_hashes: Hashes?
-    public var hashes: Hashes?
     
-    public init(id: String? = nil, name: String? = nil, roles: [String]? = nil, user: DiscordUser? = nil, require_colons: Bool? = nil, managed: Bool? = nil, animated: Bool? = nil, available: Bool? = nil, version: Int? = nil, guild_hashes: Hashes? = nil, hashes: Hashes? = nil) {
+    public init(id: String? = nil, name: String? = nil, roles: [String]? = nil, user: DiscordUser? = nil, require_colons: Bool? = nil, managed: Bool? = nil, animated: Bool? = nil, available: Bool? = nil, version: Int? = nil) {
         self.id = id
         self.name = name
         self.roles = roles
@@ -24,7 +22,5 @@ public struct PartialEmoji: Sendable, Codable {
         self.animated = animated
         self.available = available
         self.version = version
-        self.guild_hashes = guild_hashes
-        self.hashes = hashes
     }
 }

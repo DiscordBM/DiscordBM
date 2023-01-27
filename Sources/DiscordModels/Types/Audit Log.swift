@@ -636,7 +636,7 @@ public struct AuditLog: Sendable, Codable {
     public var auto_moderation_rules: [AutoModerationRule]
     public var guild_scheduled_events: [GuildScheduledEvent]
     public var integrations: [PartialIntegration]
-    public var threads: [Gateway.ThreadCreate]
+    public var threads: [DiscordChannel]
     public var users: [DiscordUser]
     public var webhooks: [Webhook]
 }

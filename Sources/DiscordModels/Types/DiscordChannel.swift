@@ -82,7 +82,6 @@ public struct DiscordChannel: Sendable, Codable {
     public var total_message_sent: Int?
     public var member_count: Int?
     public var thread_metadata: ThreadMetadata?
-    public var member: ThreadMember?
     public var default_auto_archive_duration: Int?
     public var default_thread_rate_limit_per_user: Int?
     public var default_reaction_emoji: ForumTag?
@@ -93,8 +92,9 @@ public struct DiscordChannel: Sendable, Codable {
     public var template: String?
     public var member_ids_preview: [String]?
     public var version: Int?
-    public var guild_hashes: Hashes?
-    public var hashes: Hashes?
+    /// Thread-only:
+    public var member: ThreadMember?
+    public var newly_created: Bool?
 }
 
 extension DiscordChannel {
@@ -347,15 +347,21 @@ public struct ThreadMetadata: Sendable, Codable {
 
 /// https://discord.com/developers/docs/resources/channel#thread-member-object-thread-member-structure
 public struct ThreadMember: Sendable, Codable {
-    public var id: String
+    public var id: String?
     public var user_id: String?
     public var join_timestamp: DiscordTimestamp
     /// FIXME:
     /// The field is documented but doesn't say what exactly it is.
     /// Discord says: "any user-thread settings, currently only used for notifications".
     public var flags: Int
-    public var mute_config: String?
-    public var muted: Bool?
+    public var member: Guild.Member?
+    
+    public init(threadMemberUpdate: Gateway.ThreadMemberUpdate) {
+        self.id = threadMemberUpdate.id
+        self.user_id = threadMemberUpdate.user_id
+        self.join_timestamp = threadMemberUpdate.join_timestamp
+        self.flags = threadMemberUpdate.flags
+    }
 }
 
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure

@@ -30,8 +30,6 @@ public struct Integration: Sendable, Codable {
     public var subscriber_count: Int?
     public var revoked: Bool?
     public var application: IntegrationApplication?
-    public var guild_hashes: Hashes?
-    public var hashes: Hashes?
     public var scopes: [OAuth2Scope]?
 }
 
@@ -52,7 +50,5 @@ public struct PartialIntegration: Sendable, Codable {
     public var subscriber_count: Int?
     public var revoked: Bool?
     public var application: IntegrationApplication?
-    public var guild_hashes: Hashes?
-    public var hashes: Hashes?
     public var scopes: [OAuth2Scope]?
 }

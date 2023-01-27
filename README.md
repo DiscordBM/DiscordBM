@@ -301,4 +301,3 @@ These exceptions should not be a big deal depending on your code style, but migh
 
 ## Contribution & Support
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.   
-I'm also actively looking for any new info in the Discord API, and will add them to the library as soon as I can.

@@ -69,6 +69,4 @@ public struct Role: Sendable, Codable {
     public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
     public var tags: Tags?
     public var version: Int?
-    public var guild_hashes: Hashes?
-    public var hashes: Hashes?
 }

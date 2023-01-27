@@ -233,7 +233,7 @@ public struct DefaultDiscordClient: DiscordClient {
         request req: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
-        if DiscordGlobalConfiguration.performClientValidations {
+        if DiscordGlobalConfiguration.performClientSideValidations {
             try payload.validate()
         }
         
@@ -296,7 +296,7 @@ public struct DefaultDiscordClient: DiscordClient {
         request req: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
-        if DiscordGlobalConfiguration.performClientValidations {
+        if DiscordGlobalConfiguration.performClientSideValidations {
             try payload.validate()
         }
         

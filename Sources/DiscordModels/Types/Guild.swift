@@ -18,6 +18,23 @@ public struct Guild: Sendable, Codable {
         public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
+        
+        public init(guildMemberAdd: Gateway.GuildMemberAdd) {
+            self.roles = guildMemberAdd.roles
+            self.hoisted_role = guildMemberAdd.hoisted_role
+            self.user = guildMemberAdd.user
+            self.nick = guildMemberAdd.nick
+            self.avatar = guildMemberAdd.avatar
+            self.joined_at = guildMemberAdd.joined_at
+            self.premium_since = guildMemberAdd.premium_since
+            self.deaf = guildMemberAdd.deaf
+            self.mute = guildMemberAdd.mute
+            self.pending = guildMemberAdd.pending
+            self.is_pending = guildMemberAdd.is_pending
+            self.flags = guildMemberAdd.flags
+            self.permissions = guildMemberAdd.permissions
+            self.communication_disabled_until = guildMemberAdd.communication_disabled_until
+        }
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level
@@ -171,13 +188,11 @@ public struct Guild: Sendable, Codable {
     public var premium_progress_bar_enabled: Bool
     public var `lazy`: Bool?
     public var hub_type: String?
-    public var guild_hashes: Hashes?
     public var nsfw: Bool
     public var application_command_counts: [String: Int]?
     public var embedded_activities: [Gateway.Activity]?
     public var version: Int?
     public var guild_id: String?
-    public var hashes: Hashes?
 }
 
 extension Guild {
@@ -249,13 +264,11 @@ public struct PartialGuild: Sendable, Codable {
     public var premium_progress_bar_enabled: Bool
     public var `lazy`: Bool?
     public var hub_type: String?
-    public var guild_hashes: Hashes?
     public var nsfw: Bool?
     public var application_command_counts: [String: Int]?
     public var embedded_activities: [Gateway.Activity]?
     public var version: Int?
     public var guild_id: String?
-    public var hashes: Hashes?
 }
 
 /// https://discord.com/developers/docs/resources/guild#unavailable-guild-object
