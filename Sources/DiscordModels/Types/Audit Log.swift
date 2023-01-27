@@ -600,7 +600,6 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(moderationInfo, forKey: .options)
                 case let .autoModerationUserCommunicationDisabled(moderationInfo):
                     try container.encode(moderationInfo, forKey: .options)
-                    
                 }
             }
         }

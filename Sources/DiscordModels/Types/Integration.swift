@@ -31,6 +31,25 @@ public struct Integration: Sendable, Codable {
     public var revoked: Bool?
     public var application: IntegrationApplication?
     public var scopes: [OAuth2Scope]?
+    
+    public init(integrationCreate: Gateway.IntegrationCreate) {
+        self.id = integrationCreate.id
+        self.name = integrationCreate.name
+        self.type = integrationCreate.type
+        self.enabled = integrationCreate.enabled
+        self.syncing = integrationCreate.syncing
+        self.role_id = integrationCreate.role_id
+        self.enable_emoticons = integrationCreate.enable_emoticons
+        self.expire_behavior = integrationCreate.expire_behavior
+        self.expire_grace_period = integrationCreate.expire_grace_period
+        self.user = integrationCreate.user
+        self.account = integrationCreate.account
+        self.synced_at = integrationCreate.synced_at
+        self.subscriber_count = integrationCreate.subscriber_count
+        self.revoked = integrationCreate.revoked
+        self.application = integrationCreate.application
+        self.scopes = integrationCreate.scopes
+    }
 }
 
 /// https://discord.com/developers/docs/resources/guild#integration-object

@@ -738,7 +738,7 @@ public struct Secret:
 
 /// A class so we can use the same type recursively in itself.
 public final class DereferenceBox<C>: Codable, CustomStringConvertible where C: Codable {
-    public let value: C
+    public var value: C
     
     public init(value: C) {
         self.value = value

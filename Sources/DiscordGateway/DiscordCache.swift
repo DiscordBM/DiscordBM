@@ -1,8 +1,20 @@
 import DiscordModels
 
-actor DiscordCache {
+/// Caches Gateway events.
+public actor DiscordCache {
     
-    let intents: Set<Gateway.Intent>?
+    public struct InviteID: Hashable {
+        public var guildId: String?
+        public var channelId: String
+        
+        public init(guildId: String? = nil, channelId: String) {
+            self.guildId = guildId
+            self.channelId = channelId
+        }
+    }
+    
+    /// The intents for which the events will cached. `nil` if all events should be cached.
+    public let intents: Set<Gateway.Intent>?
     /// `[GuildID: Guild]`
     public var guilds: [String: Gateway.GuildCreate] = [:]
     /// Non-guild channels
@@ -10,7 +22,20 @@ actor DiscordCache {
     /// `[TargetID]: [AuditLog.Entry]]`
     /// A target id of `""` is used for entries that don't have a `target_id`.
     public var auditLogs: [String: [AuditLog.Entry]] = [:]
+    /// `[GuildID: [Integration]]`
+    public var integrations: [String: [Integration]] = [:]
+    /// `[GuildID: [Gateway.InviteCreate]]`
+    public var invites: [InviteID: [Gateway.InviteCreate]] = [:]
+    /// `[ChannelID: [Gateway.InviteCreate]]`
+    public var messages: [String: [Gateway.MessageCreate]] = [:]
+    /// `[GuildID: [AutoModerationRule]]`
+    public var autoModerationRules: [String: [AutoModerationRule]] = [:]
+    /// `[GuildID: [AutoModerationActionExecution]]`
+    public var autoModerationExecutions: [String: [AutoModerationActionExecution]] = [:]
     
+    /// - Parameters:
+    ///   - intents: The intents for which the events will cached.
+    ///    `nil` if all events should be cached.
     init(gatewayManager: any GatewayManager, intents: Set<Gateway.Intent>?) async {
         self.intents = intents
         await gatewayManager.addEventHandler(handleEvent)
@@ -63,8 +88,7 @@ actor DiscordCache {
             if let guildId = channel.guild_id {
                 if let existingIndex = self.guilds[guildId]?.threads
                     .firstIndex(where: { $0.id == channel.id }) {
-                    self.guilds[guildId]?.threads.remove(at: existingIndex)
-                    self.guilds[guildId]?.threads.insert(channel, at: existingIndex)
+                    self.guilds[guildId]?.threads[existingIndex] = channel
                 }
             } else {
                 self.channels[channel.id] = channel
@@ -111,9 +135,7 @@ actor DiscordCache {
                 .firstIndex(where: { $0.user?.id == ban.user.id }) {
                 self.guilds[ban.guild_id]?.members.remove(at: idx)
             }
-        case .guildBanRemove:
-            /// Nothing to do?
-            break
+        case .guildBanRemove: break /// Nothing to do?
         case let .guildEmojisUpdate(update):
             for emoji in update.emojis {
                 if let idx = self.guilds[update.guild_id]?.emojis
@@ -135,9 +157,7 @@ actor DiscordCache {
                     self.guilds[update.guild_id]?.stickers?.append(sticker)
                 }
             }
-        case .guildIntegrationsUpdate:
-            /// Nothing to do?
-            break
+        case .guildIntegrationsUpdate: break /// Nothing to do?
         case let .guildMemberAdd(member):
             self.guilds[member.guild_id]?.members.append(.init(guildMemberAdd: member))
         case let .guildMemberRemove(member):
@@ -217,31 +237,134 @@ actor DiscordCache {
             break
         case let .guildAuditLogEntryCreate(log):
             self.auditLogs[log.target_id ?? "", default: []].append(log)
-//        case .integrationCreate(_):
-//        case .integrationUpdate(_):
-//        case .integrationDelete(_):
-//        case .inviteCreate(_):
-//        case .inviteDelete(_):
-//        case .messageCreate(_):
-//        case .messageUpdate(_):
-//        case .messageDelete(_):
-//        case .messageDeleteBulk(_):
-//        case .messageReactionAdd(_):
-//        case .messageReactionRemove(_):
-//        case .messageReactionRemoveAll(_):
-//        case .messageReactionRemoveEmoji(_):
-//        case .presenceUpdate(_):
-//        case .stageInstanceCreate(_):
-//        case .stageInstanceDelete(_):
-//        case .stageInstanceUpdate(_):
-//        case .typingStart(_):
-//        case .voiceStateUpdate(_):
-//        case .webhooksUpdate(_):
-//        case .autoModerationRuleCreate(_):
-//        case .autoModerationRuleUpdate(_):
-//        case .autoModerationRuleDelete(_):
-//        case .autoModerationActionExecution(_):
-        default: break; #warning("remove")
+        case let .integrationCreate(integration):
+            self.integrations[integration.guild_id, default: []].append(
+                .init(integrationCreate: integration)
+            )
+        case let .integrationUpdate(integration):
+            if let idx = self.integrations[integration.guild_id]?
+                .firstIndex(where: { $0.id == integration.id }) {
+                self.integrations[integration.guild_id]?.remove(at: idx)
+            }
+            self.integrations[integration.guild_id, default: []].append(
+                .init(integrationCreate: integration)
+            )
+        case let .integrationDelete(integration):
+            if let idx = self.integrations[integration.guild_id]?
+                .firstIndex(where: { $0.id == integration.id }) {
+                self.integrations[integration.guild_id]?.remove(at: idx)
+            }
+        case let .inviteCreate(invite):
+            let id = InviteID(guildId: invite.guild_id, channelId: invite.channel_id)
+            self.invites[id, default: []].append(invite)
+        case let .inviteDelete(invite):
+            let id = InviteID(guildId: invite.guild_id, channelId: invite.channel_id)
+            self.invites.removeValue(forKey: id)
+        case let .messageCreate(message):
+            self.messages[message.channel_id, default: []].append(message)
+        case let .messageUpdate(message):
+            if let idx = self.messages[message.channel_id]?
+                .firstIndex(where: { $0.id == message.id }) {
+                self.messages[message.channel_id]?.remove(at: idx)
+            }
+            if let idx = self.messages[message.channel_id]?
+                .firstIndex(where: { $0.id == message.id }) {
+                self.messages[message.channel_id]?[idx].update(with: message)
+            }
+        case let .messageDelete(message):
+            if let idx = self.messages[message.channel_id]?
+                .firstIndex(where: { $0.id == message.id }) {
+                self.messages[message.channel_id]?.remove(at: idx)
+            }
+        case let .messageDeleteBulk(bulkDelete):
+            self.messages[bulkDelete.channel_id]?.removeAll {
+                bulkDelete.ids.contains($0.id)
+            }
+        case let .messageReactionAdd(reaction):
+            if let idx = self.messages[reaction.channel_id]?
+                .firstIndex(where: { $0.id == reaction.message_id }) {
+                if let index = self.messages[reaction.channel_id]?[idx].reactions?
+                    .firstIndex(where: { $0.emoji == reaction.emoji }) {
+                    self.messages[reaction.channel_id]![idx].reactions![index].count += 1
+                } else {
+                    self.messages[reaction.channel_id]![idx].reactions?.append(.init(
+                        count: 1,
+                        me: false,
+                        emoji: reaction.emoji
+                    ))
+                }
+            }
+        case let .messageReactionRemove(reaction):
+            if let idx = self.messages[reaction.channel_id]?
+                .firstIndex(where: { $0.id == reaction.message_id }) {
+                if let index = self.messages[reaction.channel_id]?[idx].reactions?
+                    .firstIndex(where: { $0.emoji == reaction.emoji }) {
+                    if self.messages[reaction.channel_id]![idx].reactions![index].count == 1 {
+                        self.messages[reaction.channel_id]?[idx].reactions?.remove(at: index)
+                    } else {
+                        self.messages[reaction.channel_id]![idx].reactions![index].count -= 1
+                    }
+                }
+            }
+        case let .messageReactionRemoveAll(reaction):
+            if let idx = self.messages[reaction.channel_id]?
+                .firstIndex(where: { $0.id == reaction.message_id }) {
+                self.messages[reaction.channel_id]?[idx].reactions = []
+            }
+        case let .messageReactionRemoveEmoji(reaction):
+            if let idx = self.messages[reaction.channel_id]?
+                .firstIndex(where: { $0.id == reaction.message_id }) {
+                if let index = self.messages[reaction.channel_id]?[idx].reactions?
+                    .firstIndex(where: { $0.emoji == reaction.emoji }) {
+                    self.messages[reaction.channel_id]?[idx].reactions?.remove(at: index)
+                }
+            }
+        case let .presenceUpdate(presence):
+            if let idx = self.guilds[presence.guild_id]?.presences
+                .firstIndex(where: { $0.user?.id == presence.user.id }) {
+                self.guilds[presence.guild_id]?.presences[idx].update(with: presence)
+            } else {
+                self.guilds[presence.guild_id]?.presences.append(.init(presenceUpdate: presence))
+            }
+        case let .stageInstanceCreate(stage):
+            self.guilds[stage.guild_id]?.stage_instances.append(stage)
+        case let .stageInstanceDelete(stage):
+            if let idx = self.guilds[stage.guild_id]?.stage_instances
+                .firstIndex(where: { $0.id == stage.id }) {
+                self.guilds[stage.guild_id]?.stage_instances.remove(at: idx)
+            }
+        case let .stageInstanceUpdate(stage):
+            if let idx = self.guilds[stage.guild_id]?.stage_instances
+                .firstIndex(where: { $0.id == stage.id }) {
+                self.guilds[stage.guild_id]?.stage_instances[idx] = stage
+            } else {
+                self.guilds[stage.guild_id]?.stage_instances.append(stage)
+            }
+        case .typingStart: break /// Nothing to do?
+        case let .voiceStateUpdate(state):
+            if let idx = self.guilds[state.guild_id]?.voice_states
+                .firstIndex(where: { $0.session_id == state.session_id }) {
+                self.guilds[state.guild_id]?.voice_states[idx] = .init(voiceState: state)
+            } else {
+                self.guilds[state.guild_id]?.voice_states.append(.init(voiceState: state))
+            }
+        case .webhooksUpdate: break /// Nothing to do?
+        case let .autoModerationRuleCreate(autoMod):
+            self.autoModerationRules[autoMod.guild_id, default: []].append(autoMod)
+        case let .autoModerationRuleUpdate(autoMod):
+            if let idx = self.autoModerationRules[autoMod.guild_id]?
+                .firstIndex(where: { $0.id == autoMod.id }) {
+                self.autoModerationRules[autoMod.guild_id]![idx] = autoMod
+            } else {
+                self.autoModerationRules[autoMod.guild_id, default: []].append(autoMod)
+            }
+        case let .autoModerationRuleDelete(autoMod):
+            if let idx = self.autoModerationRules[autoMod.guild_id]?
+                .firstIndex(where: { $0.id == autoMod.id }) {
+                self.autoModerationRules[autoMod.guild_id]?.remove(at: idx)
+            }
+        case let .autoModerationActionExecution(execution):
+            self.autoModerationExecutions[execution.guild_id, default: []].append(execution)
         }
     }
     
@@ -258,4 +381,8 @@ actor DiscordCache {
             return false
         }
     }
+}
+
+private func == (lhs: PartialEmoji, rhs: PartialEmoji) -> Bool {
+    lhs.id == rhs.id && lhs.name == rhs.name
 }

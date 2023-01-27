@@ -406,7 +406,7 @@ public struct Gateway: Sendable, Codable {
             case let .resume(payload):
                 try container.encode(payload, forKey: .data)
             case let .requestGuildMembers(payload):
-              try container.encode(payload, forKey: .data)
+                try container.encode(payload, forKey: .data)
             default:
                 throw EncodingError.notSupposedToBeSent(
                     message: "'\(self)' data is supposed to never be sent."
@@ -650,7 +650,7 @@ public struct Gateway: Sendable, Codable {
                 public var client_status: ClientStatus
                 public var game: Game?
             }
-
+            
             public var id: String
             public var user_id: String?
             public var join_timestamp: DiscordTimestamp
@@ -1003,12 +1003,9 @@ public struct Gateway: Sendable, Codable {
         public var max_uses: Int
         public var target_type: TargetKind?
         public var target_user: DiscordUser?
-        public var type: Int? // FIXME: not sure about the type
-        public var target_user_type: TargetKind? // FIXME: not sure about the type
         public var target_application: PartialApplication?
         public var temporary: Bool
         public var uses: Int
-        public var expires_at: DiscordTimestamp?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#invite-delete
@@ -1042,7 +1039,7 @@ public struct Gateway: Sendable, Codable {
         public var pinned: Bool
         public var webhook_id: String?
         public var type: DiscordChannel.Message.Kind
-        public var activity: Activity?
+        public var activity: DiscordChannel.Message.Activity?
         public var application: PartialApplication?
         public var application_id: String?
         public var message_reference: DiscordChannel.Message.MessageReference?
@@ -1054,6 +1051,67 @@ public struct Gateway: Sendable, Codable {
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
+        
+        public mutating func update(with partialMessage: DiscordChannel.PartialMessage) {
+            self.id = partialMessage.id
+            self.channel_id = partialMessage.channel_id
+            self.author = partialMessage.author
+            if let content = partialMessage.content {
+                self.content = content
+            }
+            if let timestamp = partialMessage.timestamp {
+                self.timestamp = timestamp
+            }
+            self.edited_timestamp = partialMessage.edited_timestamp
+            if let tts = partialMessage.tts {
+                self.tts = tts
+            }
+            if let mention_everyone = partialMessage.mention_everyone {
+                self.mention_everyone = mention_everyone
+            }
+            if let mentions = partialMessage.mentions {
+                self.mentions = mentions
+            }
+            if let mention_roles = partialMessage.mention_roles {
+                self.mention_roles = mention_roles
+            }
+            self.mention_channels = partialMessage.mention_channels
+            if let attachments = partialMessage.attachments {
+                self.attachments = attachments
+            }
+            if let embeds = partialMessage.embeds {
+                self.embeds = embeds
+            }
+            self.reactions = partialMessage.reactions
+            self.nonce = partialMessage.nonce
+            if let pinned = partialMessage.pinned {
+                self.pinned = pinned
+            }
+            self.webhook_id = partialMessage.webhook_id
+            if let type = partialMessage.type {
+                self.type = type
+            }
+            if let activity = partialMessage.activity {
+                self.activity = activity
+            }
+            self.application = partialMessage.application
+            self.application_id = partialMessage.application_id
+            self.message_reference = partialMessage.message_reference
+            self.flags = partialMessage.flags
+            if let referenced_message = partialMessage.referenced_message {
+                self.referenced_message?.value.update(with: referenced_message.value)
+            }
+            self.interaction = partialMessage.interaction
+            self.thread = partialMessage.thread
+            self.components = partialMessage.components
+            self.sticker_items = partialMessage.sticker_items
+            self.stickers = partialMessage.stickers
+            self.position = partialMessage.position
+            if let member = partialMessage.member {
+                self.member = member
+            }
+            self.guild_id = partialMessage.guild_id
+        }
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-delete
@@ -1154,6 +1212,23 @@ public struct Gateway: Sendable, Codable {
         public var activities: [Activity]?
         public var client_status: ClientStatus
         public var game: Game?
+        
+        public mutating func update(with presenceUpdate: Gateway.PresenceUpdate) {
+            self.guild_id = presenceUpdate.guild_id
+            self.status = presenceUpdate.status
+            self.activities = presenceUpdate.activities
+            self.client_status = presenceUpdate.client_status
+            self.game = presenceUpdate.game
+        }
+        
+        public init(presenceUpdate: Gateway.PresenceUpdate) {
+            self.user = presenceUpdate.user
+            self.guild_id = presenceUpdate.guild_id
+            self.status = presenceUpdate.status
+            self.activities = presenceUpdate.activities
+            self.client_status = presenceUpdate.client_status
+            self.game = presenceUpdate.game
+        }
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#activity-object

@@ -185,6 +185,12 @@ extension DiscordChannel {
             public var count: Int
             public var me: Bool
             public var emoji: PartialEmoji
+            
+            public init(count: Int, me: Bool, emoji: PartialEmoji) {
+                self.count = count
+                self.me = me
+                self.emoji = emoji
+            }
         }
         
         /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-structure
@@ -330,7 +336,7 @@ extension DiscordChannel {
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
-        public var member: Guild.Member?
+        public var member: Guild.PartialMember?
         public var guild_id: String?
     }
 }
