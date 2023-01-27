@@ -567,20 +567,20 @@ public struct Gateway: Sendable, Codable {
         public var total_message_sent: Int?
         public var member_count: Int?
         public var thread_metadata: ThreadMetadata
-        public var member: ThreadMember?
         public var default_auto_archive_duration: Int?
         public var default_reaction_emoji: DiscordChannel.ForumTag?
         public var default_sort_order: Int?
         public var permissions: StringBitField<Permission>?
         public var flags: IntBitField<DiscordChannel.Flag>?
-        public var newly_created: Bool?
-        public var thread_member: ThreadMember?
         public var available_tags: [DiscordChannel.ForumTag]?
         public var template: String?
         public var member_ids_preview: [String]?
         public var version: Int?
         public var guild_hashes: Hashes?
         public var hashes: Hashes?
+        /// Extra Fields:
+        public var member: ThreadMember?
+        public var newly_created: Bool?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#thread-delete
