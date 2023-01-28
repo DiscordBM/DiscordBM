@@ -232,9 +232,6 @@ public actor DiscordCache {
                     self.guilds[user.guild_id]!.guild_scheduled_events[idx].user_count! -= 1
                 }
             }
-        case .threadMembersUpdate, .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
-            /// FIXME: unhandled
-            break
         case let .guildAuditLogEntryCreate(log):
             self.auditLogs[log.target_id ?? "", default: []].append(log)
         case let .integrationCreate(integration):
@@ -365,14 +362,17 @@ public actor DiscordCache {
             }
         case let .autoModerationActionExecution(execution):
             self.autoModerationExecutions[execution.guild_id, default: []].append(execution)
+        case .threadMembersUpdate, .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
+            /// FIXME: unhandled
+            break
         }
     }
     
     private func intentsAllowCaching(event: Gateway.Event) -> Bool {
+        guard let intents = intents else { return true }
         guard let correspondingIntents = event.data?.correspondingIntents else {
             return false
         }
-        guard let intents = intents else { return true }
         if correspondingIntents.isEmpty {
             return true
         } else if correspondingIntents.contains(where: { intents.contains($0) }) {
