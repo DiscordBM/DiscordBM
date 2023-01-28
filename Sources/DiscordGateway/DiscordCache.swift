@@ -32,6 +32,10 @@ public actor DiscordCache {
     public var autoModerationRules: [String: [AutoModerationRule]] = [:]
     /// `[GuildID: [AutoModerationActionExecution]]`
     public var autoModerationExecutions: [String: [AutoModerationActionExecution]] = [:]
+    /// `[CommandID (or ApplicationID): GuildApplicationCommandPermissions]`
+    public var applicationCommandPermissions: [String: GuildApplicationCommandPermissions] = [:]
+    /// The current bot user.
+    public var botUser: DiscordUser?
     
     /// - Parameters:
     ///   - intents: The intents for which the events will cached.
@@ -338,6 +342,8 @@ public actor DiscordCache {
                 self.guilds[stage.guild_id]?.stage_instances.append(stage)
             }
         case .typingStart: break /// Nothing to do?
+        case let .userUpdate(user):
+            self.botUser = user
         case let .voiceStateUpdate(state):
             if let idx = self.guilds[state.guild_id]?.voice_states
                 .firstIndex(where: { $0.session_id == state.session_id }) {
@@ -345,6 +351,7 @@ public actor DiscordCache {
             } else {
                 self.guilds[state.guild_id]?.voice_states.append(.init(voiceState: state))
             }
+        case .voiceServerUpdate: break /// Nothing to do?
         case .webhooksUpdate: break /// Nothing to do?
         case let .autoModerationRuleCreate(autoMod):
             self.autoModerationRules[autoMod.guild_id, default: []].append(autoMod)
@@ -362,9 +369,30 @@ public actor DiscordCache {
             }
         case let .autoModerationActionExecution(execution):
             self.autoModerationExecutions[execution.guild_id, default: []].append(execution)
-        case .threadMembersUpdate, .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
-            /// FIXME: unhandled
-            break
+        case let .threadMembersUpdate(update):
+            if let idx = self.guilds[update.guild_id]?.threads
+                .firstIndex(where: { $0.id == update.id }) {
+                self.guilds[update.guild_id]!.threads[idx].member_count = update.member_count
+                if self.guilds[update.guild_id]!.threads[idx].threadMembers == nil {
+                    if let added = update.added_members {
+                        self.guilds[update.guild_id]!.threads[idx].threadMembers?
+                            .append(contentsOf: added)
+                    }
+                } else {
+                    if let removed = update.removed_member_ids {
+                        self.guilds[update.guild_id]!.threads[idx].threadMembers?.removeAll {
+                            guard let id = $0.member.user?.id ?? $0.user_id else { return false }
+                            return removed.contains(id)
+                        }
+                    }
+                    if let added = update.added_members {
+                        self.guilds[update.guild_id]!.threads[idx].threadMembers?
+                            .append(contentsOf: added)
+                    }
+                }
+            }
+        case let .applicationCommandPermissionsUpdate(update):
+            self.applicationCommandPermissions[update.id] = update
         }
     }
     

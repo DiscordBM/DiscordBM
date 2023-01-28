@@ -131,7 +131,7 @@ public struct Gateway: Sendable, Codable {
             
             case webhooksUpdate(WebhooksUpdate)
             
-            case applicationCommandPermissionsUpdate(ApplicationCommandPermissionsUpdate)
+            case applicationCommandPermissionsUpdate(GuildApplicationCommandPermissions)
             
             case autoModerationRuleCreate(AutoModerationRule)
             case autoModerationRuleUpdate(AutoModerationRule)
@@ -1409,22 +1409,6 @@ public struct Gateway: Sendable, Codable {
     public struct WebhooksUpdate: Sendable, Codable {
         public var guild_id: String
         public var channel_id: String
-    }
-    
-    /// Undocumented
-    public struct ApplicationCommandPermissionsUpdate: Sendable, Codable {
-        
-        /// Undocumented
-        public struct UpdatePermission: Sendable, Codable {
-            public var type: Permission // Undocumented
-            public var permission: Bool
-            public var id: String
-        }
-        
-        public var permissions: [UpdatePermission]
-        public var id: String
-        public var guild_id: String
-        public var application_id: String
     }
     
     /// https://discord.com/developers/docs/topics/gateway#get-gateway
