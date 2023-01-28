@@ -39,7 +39,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: try .webhook(.url(webhookUrl)),
+            address: try .url(webhookUrl),
             level: .trace,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -129,7 +129,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: try .webhook(.url(webhookUrl)),
+            address: try .url(webhookUrl),
             level: .trace,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -161,7 +161,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: try .webhook(.url(webhookUrl)),
+            address: try .url(webhookUrl),
             level: .debug,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -192,7 +192,7 @@ class DiscordLoggerTests: XCTestCase {
                 maxStoredLogsCount: 100
             )
         )
-        let address = try DiscordLogHandler.Address.webhook(.url(webhookUrl))
+        let address = try WebhookAddress.url(webhookUrl)
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
             address: address,
@@ -225,7 +225,7 @@ class DiscordLoggerTests: XCTestCase {
                 disabledInDebug: true
             )
         )
-        let address = try DiscordLogHandler.Address.webhook(.url(webhookUrl))
+        let address = try WebhookAddress.url(webhookUrl)
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
             address: address,
@@ -251,7 +251,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: try .webhook(.url(webhookUrl)),
+            address: try .url(webhookUrl),
             level: .info,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -293,7 +293,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: try .webhook(.url(webhookUrl)),
+            address: try .url(webhookUrl),
             level: .notice,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -333,7 +333,7 @@ class DiscordLoggerTests: XCTestCase {
                 frequency: .zero,
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 aliveNotice: .init(
-                    address: try .webhook(.url(webhookUrl)),
+                    address: try .url(webhookUrl),
                     interval: .seconds(6),
                     message: "Alive!",
                     color: .red,
@@ -347,7 +347,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: try .webhook(.url(webhookUrl)),
+            address: try .url(webhookUrl),
             level: .debug,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -430,7 +430,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let logger = DiscordLogHandler.multiplexLogger(
             label: "test",
-            address: try .webhook(.url(webhookUrl)),
+            address: try .url(webhookUrl),
             level: .debug,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -517,7 +517,7 @@ class DiscordLoggerTests: XCTestCase {
             )
         )
         LoggingSystem.bootstrapWithDiscordLogger(
-            address: try .webhook(.url(webhookUrl)),
+            address: try .url(webhookUrl),
             level: .error,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
@@ -556,7 +556,7 @@ class DiscordLoggerTests: XCTestCase {
             return ["simple-trace-id": .string(traceID)]
         }
         LoggingSystem.bootstrapWithDiscordLogger(
-            address: try .webhook(.url(webhookUrl)),
+            address: try .url(webhookUrl),
             metadataProvider: simpleTraceIDMetadataProvider,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
