@@ -818,10 +818,9 @@ public struct Gateway: Sendable, Codable {
         public var joined_at: DiscordTimestamp
         public var premium_since: DiscordTimestamp?
         public var deaf: Bool?
-        public var mute: Bool
+        public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
-        public var flags: IntBitField<DiscordUser.Flag> // FIXME not sure about `User.Flag`
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }

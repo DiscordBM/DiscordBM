@@ -12,7 +12,7 @@ public struct Guild: Sendable, Codable {
         public var joined_at: DiscordTimestamp
         public var premium_since: DiscordTimestamp?
         public var deaf: Bool?
-        public var mute: Bool
+        public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
         public var permissions: StringBitField<Permission>?
