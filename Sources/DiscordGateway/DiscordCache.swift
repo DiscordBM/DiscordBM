@@ -51,6 +51,8 @@ public actor DiscordCache {
         public var applicationCommandPermissions: [String: GuildApplicationCommandPermissions] = [:]
         /// The current bot user.
         public var botUser: DiscordUser?
+        
+        public init() { }
     }
     
     /// The gateway manager that this `DiscordCache` instance caches from.
