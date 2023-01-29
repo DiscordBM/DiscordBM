@@ -184,7 +184,7 @@ public struct Gateway: Sendable, Codable {
         }
         
         enum GatewayDecodingError: Error {
-            case unhandledDispatchEvent
+            case unhandledDispatchEvent(type: String?)
         }
         
         enum CodingKeys: String, CodingKey {
@@ -364,7 +364,7 @@ public struct Gateway: Sendable, Codable {
                 case "AUTO_MODERATION_ACTION_EXECUTION":
                     self.data = try .autoModerationActionExecution(decodeData())
                 default:
-                    throw GatewayDecodingError.unhandledDispatchEvent
+                    throw GatewayDecodingError.unhandledDispatchEvent(type: self.type)
                 }
             }
         }
