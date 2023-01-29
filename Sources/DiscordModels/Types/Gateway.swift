@@ -530,7 +530,7 @@ public struct Gateway: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
-    public enum Intent: Int, Sendable {
+    public enum Intent: Int, Sendable, Codable {
         case guilds = 0
         case guildMembers = 1
         case guildModeration = 2

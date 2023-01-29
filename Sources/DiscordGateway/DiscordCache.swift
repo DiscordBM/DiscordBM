@@ -1,47 +1,86 @@
 import DiscordModels
 
 /// Caches Gateway events.
+@dynamicMemberLookup
 public actor DiscordCache {
     
-    public struct InviteID: Sendable, Hashable {
-        public var guildId: String?
-        public var channelId: String
+    public struct RequestMembersConfiguration: Sendable, Codable {
+        public let requestPresences: Bool
         
-        public init(guildId: String? = nil, channelId: String) {
-            self.guildId = guildId
-            self.channelId = channelId
+        /// Requests members but doesn't request member presences.
+        public static var enabled: RequestMembersConfiguration {
+            .init(requestPresences: false)
+        }
+        
+        /// Requests member presences as well.
+        public static var enabledWithPresence: RequestMembersConfiguration {
+            .init(requestPresences: true)
         }
     }
     
+    public struct Storage: Sendable, Codable {
+        
+        public struct InviteID: Sendable, Codable, Hashable {
+            public var guildId: String?
+            public var channelId: String
+            
+            public init(guildId: String? = nil, channelId: String) {
+                self.guildId = guildId
+                self.channelId = channelId
+            }
+        }
+        
+        /// `[GuildID: Guild]`
+        public var guilds: [String: Gateway.GuildCreate] = [:]
+        /// Non-guild channels
+        public var channels: [String: DiscordChannel] = [:]
+        /// `[TargetID]: [AuditLog.Entry]]`
+        /// A target id of `""` is used for entries that don't have a `target_id`.
+        public var auditLogs: [String: [AuditLog.Entry]] = [:]
+        /// `[GuildID: [Integration]]`
+        public var integrations: [String: [Integration]] = [:]
+        /// `[GuildID: [Gateway.InviteCreate]]`
+        public var invites: [InviteID: [Gateway.InviteCreate]] = [:]
+        /// `[ChannelID: [Gateway.InviteCreate]]`
+        public var messages: [String: [Gateway.MessageCreate]] = [:]
+        /// `[GuildID: [AutoModerationRule]]`
+        public var autoModerationRules: [String: [AutoModerationRule]] = [:]
+        /// `[GuildID: [AutoModerationActionExecution]]`
+        public var autoModerationExecutions: [String: [AutoModerationActionExecution]] = [:]
+        /// `[CommandID (or ApplicationID): GuildApplicationCommandPermissions]`
+        public var applicationCommandPermissions: [String: GuildApplicationCommandPermissions] = [:]
+        /// The current bot user.
+        public var botUser: DiscordUser?
+    }
+    
+    /// The gateway manager that this `DiscordCache` instance caches from.
+    let gatewayManager: any GatewayManager
     /// The intents for which the events will cached. `nil` if all events should be cached.
-    public let intents: Set<Gateway.Intent>?
-    /// `[GuildID: Guild]`
-    public var guilds: [String: Gateway.GuildCreate] = [:]
-    /// Non-guild channels
-    public var channels: [String: DiscordChannel] = [:]
-    /// `[TargetID]: [AuditLog.Entry]]`
-    /// A target id of `""` is used for entries that don't have a `target_id`.
-    public var auditLogs: [String: [AuditLog.Entry]] = [:]
-    /// `[GuildID: [Integration]]`
-    public var integrations: [String: [Integration]] = [:]
-    /// `[GuildID: [Gateway.InviteCreate]]`
-    public var invites: [InviteID: [Gateway.InviteCreate]] = [:]
-    /// `[ChannelID: [Gateway.InviteCreate]]`
-    public var messages: [String: [Gateway.MessageCreate]] = [:]
-    /// `[GuildID: [AutoModerationRule]]`
-    public var autoModerationRules: [String: [AutoModerationRule]] = [:]
-    /// `[GuildID: [AutoModerationActionExecution]]`
-    public var autoModerationExecutions: [String: [AutoModerationActionExecution]] = [:]
-    /// `[CommandID (or ApplicationID): GuildApplicationCommandPermissions]`
-    public var applicationCommandPermissions: [String: GuildApplicationCommandPermissions] = [:]
-    /// The current bot user.
-    public var botUser: DiscordUser?
+    let intents: Set<Gateway.Intent>?
+    /// When a guild has too many members, Discord won't send all the members in
+    /// `.guildCreate` event, and you need to manually request them if you want.
+    let requestMembersConfiguration: RequestMembersConfiguration?
+    
+    public var storage: Storage
+    
+    public subscript<T>(dynamicMember path: WritableKeyPath<Storage, T>) -> T {
+        get { self.storage[keyPath: path] }
+        set { self.storage[keyPath: path] = newValue }
+    }
     
     /// - Parameters:
     ///   - intents: The intents for which the events will cached.
     ///    `nil` if all events should be cached.
-    init(gatewayManager: any GatewayManager, intents: Set<Gateway.Intent>?) async {
+    init(
+        gatewayManager: any GatewayManager,
+        intents: Set<Gateway.Intent>?,
+        requestAllMembers: RequestMembersConfiguration,
+        storage: Storage = Storage()
+    ) async {
+        self.gatewayManager = gatewayManager
         self.intents = intents
+        self.requestMembersConfiguration = requestAllMembers
+        self.storage = storage
         await gatewayManager.addEventHandler(handleEvent)
     }
     
@@ -52,6 +91,18 @@ public actor DiscordCache {
             break
         case let .guildCreate(guildCreate):
             self.guilds[guildCreate.id] = guildCreate
+            if let config = requestMembersConfiguration {
+                Task {
+                    await gatewayManager.requestGuildMembersChunk(payload: .init(
+                        guild_id: guildCreate.id,
+                        query: "",
+                        limit: 0,
+                        presences: config.requestPresences,
+                        user_ids: nil,
+                        nonce: nil
+                    ))
+                }
+            }
         case let .guildUpdate(guild):
             self.guilds[guild.id]?.update(with: guild)
         case let .guildDelete(guildDelete):
@@ -176,8 +227,17 @@ public actor DiscordCache {
             }
             self.guilds[member.guild_id]?.members.append(.init(guildMemberAdd: member))
         case let .guildMembersChunk(chunk):
+            let userIds = chunk.members.compactMap(\.user?.id)
+            self.guilds[chunk.guild_id]?.members.removeAll {
+                guard let id = $0.user?.id else { return false }
+                return userIds.contains(id)
+            }
             self.guilds[chunk.guild_id]?.members.append(contentsOf: chunk.members)
             if let presences = chunk.presences {
+                self.guilds[chunk.guild_id]?.presences.removeAll {
+                    guard let id = $0.user?.id else { return false }
+                    return userIds.contains(id)
+                }
                 self.guilds[chunk.guild_id]?.presences.append(contentsOf: presences)
             }
         case let .guildRoleCreate(role):
@@ -256,10 +316,10 @@ public actor DiscordCache {
                 self.integrations[integration.guild_id]?.remove(at: idx)
             }
         case let .inviteCreate(invite):
-            let id = InviteID(guildId: invite.guild_id, channelId: invite.channel_id)
+            let id = Storage.InviteID(guildId: invite.guild_id, channelId: invite.channel_id)
             self.invites[id, default: []].append(invite)
         case let .inviteDelete(invite):
-            let id = InviteID(guildId: invite.guild_id, channelId: invite.channel_id)
+            let id = Storage.InviteID(guildId: invite.guild_id, channelId: invite.channel_id)
             self.invites.removeValue(forKey: id)
         case let .messageCreate(message):
             self.messages[message.channel_id, default: []].append(message)
