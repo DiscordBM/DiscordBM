@@ -2,7 +2,7 @@
 /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state-gateway-voice-state-update-structure
 public struct VoiceState: Sendable, Codable {
     public var guild_id: String
-    public var channel_id: String
+    public var channel_id: String?
     public var user_id: String
     public var member: Guild.Member?
     public var session_id: String
@@ -18,7 +18,7 @@ public struct VoiceState: Sendable, Codable {
 
 /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state-gateway-voice-state-update-structure
 public struct PartialVoiceState: Sendable, Codable {
-    public var channel_id: String
+    public var channel_id: String?
     public var user_id: String
     public var member: Guild.Member?
     public var session_id: String
