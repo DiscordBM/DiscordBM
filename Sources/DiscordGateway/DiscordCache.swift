@@ -71,7 +71,7 @@ public actor DiscordCache {
     /// - Parameters:
     ///   - intents: The intents for which the events will cached.
     ///    `nil` if all events should be cached.
-    init(
+    public init(
         gatewayManager: any GatewayManager,
         intents: Set<Gateway.Intent>?,
         requestAllMembers: RequestMembersConfiguration,
@@ -84,7 +84,7 @@ public actor DiscordCache {
         await gatewayManager.addEventHandler(handleEvent)
     }
     
-    func handleEvent(_ event: Gateway.Event) {
+    private func handleEvent(_ event: Gateway.Event) {
         guard intentsAllowCaching(event: event) else { return }
         switch event.data {
         case .none, .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .interactionCreate:
