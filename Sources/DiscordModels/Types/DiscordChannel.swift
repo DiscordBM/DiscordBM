@@ -34,6 +34,19 @@ public struct DiscordChannel: Sendable, Codable {
         public var deny: StringBitField<Permission>
     }
     
+    /// https://discord.com/developers/docs/resources/channel#channel-object-sort-order-types
+    public enum SortOrder: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+        case latestActivity = 0
+        case creationDate = 1
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types
+    public enum ForumLayout: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+        case notSet = 0
+        case listView = 1
+        case galleryView = 2
+    }
+    
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
     public enum Flag: Int, Sendable {
         case unknownValue0 = 0
@@ -69,7 +82,6 @@ public struct DiscordChannel: Sendable, Codable {
     public var bitrate: Int?
     public var user_limit: Int?
     public var rate_limit_per_user: Int?
-    public var default_forum_layout: Int?
     public var recipients: [DiscordUser]?
     public var icon: String?
     public var owner_id: String?
@@ -86,6 +98,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var default_thread_rate_limit_per_user: Int?
     public var default_reaction_emoji: ForumTag?
     public var default_sort_order: Int?
+    public var default_forum_layout: ForumLayout?
     public var permissions: StringBitField<Permission>?
     public var flags: IntBitField<Flag>?
     public var available_tags: [ForumTag]?

@@ -201,6 +201,27 @@ public actor DiscordCache {
                     threadMemberUpdate: threadMember
                 )
             }
+        case let .threadMembersUpdate(update):
+            if let idx = self.guilds[update.guild_id]?.threads
+                .firstIndex(where: { $0.id == update.id }) {
+                self.guilds[update.guild_id]!.threads[idx].member_count = update.member_count
+                if self.guilds[update.guild_id]!.threads[idx].threadMembers == nil {
+                    if let added = update.added_members {
+                        self.guilds[update.guild_id]!.threads[idx].threadMembers = added
+                    }
+                } else {
+                    if let removed = update.removed_member_ids {
+                        self.guilds[update.guild_id]!.threads[idx].threadMembers?.removeAll {
+                            guard let id = $0.member.user?.id ?? $0.user_id else { return false }
+                            return removed.contains(id)
+                        }
+                    }
+                    if let added = update.added_members {
+                        self.guilds[update.guild_id]!.threads[idx].threadMembers?
+                            .append(contentsOf: added)
+                    }
+                }
+            }
         case let .guildBanAdd(ban):
             if let idx = self.guilds[ban.guild_id]?.members
                 .firstIndex(where: { $0.user?.id == ban.user.id }) {
@@ -432,28 +453,6 @@ public actor DiscordCache {
             }
         case let .autoModerationActionExecution(execution):
             self.autoModerationExecutions[execution.guild_id, default: []].append(execution)
-        case let .threadMembersUpdate(update):
-            if let idx = self.guilds[update.guild_id]?.threads
-                .firstIndex(where: { $0.id == update.id }) {
-                self.guilds[update.guild_id]!.threads[idx].member_count = update.member_count
-                if self.guilds[update.guild_id]!.threads[idx].threadMembers == nil {
-                    if let added = update.added_members {
-                        self.guilds[update.guild_id]!.threads[idx].threadMembers?
-                            .append(contentsOf: added)
-                    }
-                } else {
-                    if let removed = update.removed_member_ids {
-                        self.guilds[update.guild_id]!.threads[idx].threadMembers?.removeAll {
-                            guard let id = $0.member.user?.id ?? $0.user_id else { return false }
-                            return removed.contains(id)
-                        }
-                    }
-                    if let added = update.added_members {
-                        self.guilds[update.guild_id]!.threads[idx].threadMembers?
-                            .append(contentsOf: added)
-                    }
-                }
-            }
         case let .applicationCommandPermissionsUpdate(update):
             self.applicationCommandPermissions[update.id] = update
         }

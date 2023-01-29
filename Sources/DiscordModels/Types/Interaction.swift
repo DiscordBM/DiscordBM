@@ -90,10 +90,14 @@ extension Interaction {
         
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
         public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case container = 1
+            case actionRow = 1
             case button = 2
-            case selectMenu = 3
+            case stringSelect = 3
             case textInput = 4
+            case userSelect = 5
+            case roleSelect = 6
+            case mentionableSelect = 7
+            case channelSelect = 8
         }
         
         /// https://discord.com/developers/docs/interactions/message-components#button-object-button-structure
@@ -194,8 +198,12 @@ extension Interaction {
         
         public enum Component: Sendable, Codable {
             case button(Button)
-            case selectMenu(SelectMenu)
+            case stringSelect(SelectMenu)
             case textInput(TextInput)
+            case userSelect(SelectMenu)
+            case roleSelect(SelectMenu)
+            case mentionableSelect(SelectMenu)
+            case channelSelect(SelectMenu)
             
             enum CodingKeys: String, CodingKey {
                 case type
@@ -205,12 +213,12 @@ extension Interaction {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
                 let type = try container.decode(Kind.self, forKey: .type)
                 switch type {
-                case .container:
-                    throw CodingError.containerIsSupposedToOnlyAppearAtTopLevel
+                case .actionRow:
+                    throw CodingError.actionRowIsSupposedToOnlyAppearAtTopLevel
                 case .button:
                     self = try .button(.init(from: decoder))
-                case .selectMenu:
-                    self = try .selectMenu(.init(from: decoder))
+                case .stringSelect, .userSelect, .roleSelect, .mentionableSelect, .channelSelect:
+                    self = try .stringSelect(.init(from: decoder))
                 case .textInput:
                     self = try .textInput(.init(from: decoder))
                 }
@@ -222,12 +230,24 @@ extension Interaction {
                 case let .button(button):
                     try container.encode(Kind.button, forKey: .type)
                     try button.encode(to: encoder)
-                case let .selectMenu(selectMenu):
-                    try container.encode(Kind.selectMenu, forKey: .type)
+                case let .stringSelect(selectMenu):
+                    try container.encode(Kind.stringSelect, forKey: .type)
                     try selectMenu.encode(to: encoder)
                 case let .textInput(textInput):
                     try container.encode(Kind.textInput, forKey: .type)
                     try textInput.encode(to: encoder)
+                case let .userSelect(selectMenu):
+                    try container.encode(Kind.userSelect, forKey: .type)
+                    try selectMenu.encode(to: encoder)
+                case let .roleSelect(selectMenu):
+                    try container.encode(Kind.roleSelect, forKey: .type)
+                    try selectMenu.encode(to: encoder)
+                case let .mentionableSelect(selectMenu):
+                    try container.encode(Kind.mentionableSelect, forKey: .type)
+                    try selectMenu.encode(to: encoder)
+                case let .channelSelect(selectMenu):
+                    try container.encode(Kind.channelSelect, forKey: .type)
+                    try selectMenu.encode(to: encoder)
                 }
             }
         }
@@ -236,7 +256,7 @@ extension Interaction {
         
         enum CodingError: Error {
             case unexpectedComponentKind(Kind)
-            case containerIsSupposedToOnlyAppearAtTopLevel
+            case actionRowIsSupposedToOnlyAppearAtTopLevel
         }
         
         enum CodingKeys: String, CodingKey {
@@ -247,7 +267,7 @@ extension Interaction {
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let type = try container.decode(Kind.self, forKey: .type)
-            guard type == .container else {
+            guard type == .actionRow else {
                 throw CodingError.unexpectedComponentKind(type)
             }
             self.components = try container.decode([Component].self, forKey: .components)
@@ -255,7 +275,7 @@ extension Interaction {
         
         public func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(Kind.container, forKey: .type)
+            try container.encode(Kind.actionRow, forKey: .type)
             try container.encode(self.components, forKey: .components)
         }
         
