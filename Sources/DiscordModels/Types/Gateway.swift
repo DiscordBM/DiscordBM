@@ -183,7 +183,7 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
-        enum GatewayDecodingError: Error {
+        public enum GatewayDecodingError: Error {
             case unhandledDispatchEvent(type: String?)
         }
         
