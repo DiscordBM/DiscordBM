@@ -3,7 +3,7 @@ import DiscordModels
 /// Caches Gateway events.
 public actor DiscordCache {
     
-    public struct InviteID: Hashable {
+    public struct InviteID: Sendable, Hashable {
         public var guildId: String?
         public var channelId: String
         
