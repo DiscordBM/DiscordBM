@@ -444,7 +444,7 @@ public struct ClientConfiguration {
             ///
             /// Parameters:
             /// - `maxAllowed`: Max allowed amount in `Retry-After`. In seconds.
-            /// - `retryIfGreater`: Retry or not even if the header time is greater than
+            /// - `retryIfGreater`: Retry or not, even if the header time is greater than
             ///  `maxAllowed`. If yes, the retry will happen after `maxAllowed` amount of time.
             /// - `else`: If the `Retry-After` header did not exist.
             case basedOnHeaders(
@@ -455,7 +455,7 @@ public struct ClientConfiguration {
             
             public static var `default`: Backoff {
                 .basedOnHeaders(
-                    maxAllowed: 5,
+                    maxAllowed: 10,
                     retryIfGreater: false,
                     else: .exponential(base: 0.2, coefficient: 0.5, rate: 2, upToTimes: 10)
                 )
