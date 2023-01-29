@@ -11,11 +11,10 @@ public struct Guild: Sendable, Codable {
         public var hoisted_role: String?
         public var joined_at: DiscordTimestamp
         public var premium_since: DiscordTimestamp?
-        public var deaf: Bool
+        public var deaf: Bool?
         public var mute: Bool
         public var pending: Bool?
         public var is_pending: Bool?
-        public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
         
@@ -31,7 +30,6 @@ public struct Guild: Sendable, Codable {
             self.mute = guildMemberAdd.mute
             self.pending = guildMemberAdd.pending
             self.is_pending = guildMemberAdd.is_pending
-            self.flags = guildMemberAdd.flags
             self.permissions = guildMemberAdd.permissions
             self.communication_disabled_until = guildMemberAdd.communication_disabled_until
         }
@@ -210,7 +208,6 @@ extension Guild {
         public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
-        public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }

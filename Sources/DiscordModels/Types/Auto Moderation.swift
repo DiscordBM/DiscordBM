@@ -113,9 +113,7 @@ public struct AutoModerationRule: Sendable, Codable {
     public var exempt_channels: [String]
 }
 
-/// Undocumented. The search section gives a link nevertheless, which means this probably will soon
-/// be added to the documentation. Might already have been added when you're reading this.
-/// https://discord.com/developers/docs/topics/gateway#auto-moderation-action-execution
+/// https://discord.com/developers/docs/topics/gateway-events#auto-moderation-action-execution-auto-moderation-action-execution-event-fields
 public struct AutoModerationActionExecution: Sendable, Codable {
     public var guild_id: String
     public var action: AutoModerationRule.Action

@@ -581,26 +581,13 @@ public struct Gateway: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/gateway-events#ready-ready-event-fields
     public struct Ready: Sendable, Codable {
-        
-        /// Undocumented
-        public struct AudioContextSettings: Sendable, Codable { }
-        
         public var v: Int
         public var user: DiscordUser
         public var guilds: [UnavailableGuild]
         public var session_id: String
+        public var resume_gateway_url: String?
         public var shard: IntPair?
         public var application: PartialApplication
-        public var presences: [PresenceUpdate]
-        public var geo_ordered_rtc_regions: [String]
-        public var guild_join_requests: [String] // Undocumented
-        public var private_channels: [DiscordChannel]
-        public var user_settings: [String: String] // Undocumented
-        public var relationships: [String] // Undocumented
-        public var session_type: String?
-        public var auth_session_id_hash: String?
-        public var resume_gateway_url: String?
-        public var audio_context_settings: AudioContextSettings?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#thread-delete
@@ -648,7 +635,6 @@ public struct Gateway: Sendable, Codable {
                 public var status: Status
                 public var activities: [Activity]
                 public var client_status: ClientStatus
-                public var game: Game?
             }
             
             public var id: String
@@ -831,7 +817,7 @@ public struct Gateway: Sendable, Codable {
         public var avatar: String?
         public var joined_at: DiscordTimestamp
         public var premium_since: DiscordTimestamp?
-        public var deaf: Bool
+        public var deaf: Bool?
         public var mute: Bool
         public var pending: Bool?
         public var is_pending: Bool?
@@ -876,57 +862,6 @@ public struct Gateway: Sendable, Codable {
         }
     }
     
-    /// Undocumented
-    public struct GuildJoinRequestUpdate: Sendable, Codable {
-        
-        public struct Request: Sendable, Codable {
-            
-            public struct FormResponse: Sendable, Codable {
-                
-                public enum FieldKind: String, Sendable, Codable, ToleratesStringDecodeMarker {
-                    case terms = "TERMS"
-                }
-                
-                public struct Automation: Sendable, Codable { }
-                
-                public var values: [String]
-                public var response: Bool
-                public var required: Bool
-                public var label: String
-                public var field_type: FieldKind
-                public var description: String?
-                public var automations: [Automation]?
-            }
-            
-            public var user_id: String
-            public var user: DiscordUser
-            public var rejection_reason: String?
-            public var last_seen: DiscordTimestamp
-            public var created_at: DiscordTimestamp
-            public var id: String
-            public var guild_id: String
-            public var form_responses: [FormResponse]
-            public var application_status: Status
-            public var actioned_by_user: DiscordUser
-            public var actioned_at: String /// Seems to be a snowflake, not a date ?!
-        }
-        
-        public enum Status: String, Sendable, Codable, ToleratesStringDecodeMarker {
-            case approved = "APPROVED"
-        }
-        
-        public var request: Request
-        public var status: Status
-        public var guild_id: String
-    }
-    
-    /// Undocumented
-    public struct GuildJoinRequestDelete: Sendable, Codable {
-        public var id: String
-        public var guild_id: String
-        public var user_id: String
-    }
-    
     /// https://discord.com/developers/docs/topics/gateway-events#guild-role-create-guild-role-create-event-fields
     public struct GuildRole: Sendable, Codable {
         public var guild_id: String
@@ -946,12 +881,6 @@ public struct Gateway: Sendable, Codable {
     public struct GuildScheduledEventUser: Sendable, Codable {
         public var guild_scheduled_event_id: String
         public var user_id: String
-        public var guild_id: String
-    }
-    
-    /// Undocumented
-    public struct GuildApplicationCommandIndexUpdate: Sendable, Codable {
-        public var application_command_counts: [String: Int]
         public var guild_id: String
     }
     
@@ -1176,25 +1105,6 @@ public struct Gateway: Sendable, Codable {
         public var embedded: Status?
     }
     
-    /// Undocumented
-    public struct Game: Sendable, Codable {
-        public var type: Int // Undocumented
-        public var state: String?
-        public var name: String
-        public var created_at: TolerantDecodeDate
-        public var id: String
-        public var session_id: String?
-        public var emoji: PartialEmoji?
-        public var platform: String?
-        public var timestamps: Activity.Timestamps?
-        public var application_id: String?
-        public var assets: Activity.Assets?
-        public var party: Activity.Party?
-        public var details: String?
-        public var sync_id: String?
-        public var flags: IntBitField<Activity.Flag>?
-    }
-    
     /// https://discord.com/developers/docs/topics/gateway-events#presence-update-presence-update-event-fields
     public struct PresenceUpdate: Sendable, Codable {
         public var user: PartialUser
@@ -1202,7 +1112,6 @@ public struct Gateway: Sendable, Codable {
         public var status: Status
         public var activities: [Activity]
         public var client_status: ClientStatus
-        public var game: Game?
     }
     
     /// Partial ``PresenceUpdate`` object.
@@ -1213,14 +1122,12 @@ public struct Gateway: Sendable, Codable {
         public var status: Status?
         public var activities: [Activity]?
         public var client_status: ClientStatus
-        public var game: Game?
         
         public mutating func update(with presenceUpdate: Gateway.PresenceUpdate) {
             self.guild_id = presenceUpdate.guild_id
             self.status = presenceUpdate.status
             self.activities = presenceUpdate.activities
             self.client_status = presenceUpdate.client_status
-            self.game = presenceUpdate.game
         }
         
         public init(presenceUpdate: Gateway.PresenceUpdate) {
@@ -1229,7 +1136,6 @@ public struct Gateway: Sendable, Codable {
             self.status = presenceUpdate.status
             self.activities = presenceUpdate.activities
             self.client_status = presenceUpdate.client_status
-            self.game = presenceUpdate.game
         }
     }
     

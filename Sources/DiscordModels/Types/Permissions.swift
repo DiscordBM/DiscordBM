@@ -66,7 +66,6 @@ public struct Role: Sendable, Codable {
     public var permissions: StringBitField<Permission>
     public var managed: Bool
     public var mentionable: Bool
-    public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
     public var tags: Tags?
     public var version: Int?
 }
