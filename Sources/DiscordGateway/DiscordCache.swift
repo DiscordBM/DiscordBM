@@ -57,12 +57,12 @@ public actor DiscordCache {
     
     /// The gateway manager that this `DiscordCache` instance caches from.
     let gatewayManager: any GatewayManager
-    /// The intents for which the events will cached. `nil` if all events should be cached.
+    /// The intents for which the events should be cached. `nil` if all events should be cached.
     let intents: Set<Gateway.Intent>?
     /// When a guild has too many members, Discord won't send all the members in
     /// `.guildCreate` event, and you need to manually request them if you want.
     let requestMembersConfiguration: RequestMembersConfiguration?
-    
+    /// The storage of cached stuff.
     public var storage: Storage
     
     public subscript<T>(dynamicMember path: WritableKeyPath<Storage, T>) -> T {
@@ -73,6 +73,12 @@ public actor DiscordCache {
     /// - Parameters:
     ///   - intents: The intents for which the events will cached.
     ///    `nil` if all events should be cached.
+    
+    /// - Parameters:
+    ///   - gatewayManager: The gateway manager that this `DiscordCache` instance caches from.
+    ///   - intents: The intents for which the events should be cached. `nil` if all events should be cached.
+    ///   - requestAllMembers: When a guild has too many members, Discord won't send all the members in the `.guildCreate` event, and you need to manually request them if you want.
+    ///   - storage: The storage of cached stuff. You usually don't need to provide this parameter.
     public init(
         gatewayManager: any GatewayManager,
         intents: Set<Gateway.Intent>?,
@@ -111,6 +117,10 @@ public actor DiscordCache {
             self.guilds.removeValue(forKey: guildDelete.id)
         case let .channelCreate(channel), let .channelUpdate(channel):
             if let guildId = channel.guild_id {
+                if let index = self.guilds[guildId]?.channels
+                    .firstIndex(where: { $0.id == channel.id }) {
+                    self.guilds[guildId]?.channels.remove(at: index)
+                }
                 self.guilds[guildId]?.channels.append(channel)
             } else {
                 self.channels[channel.id] = channel
@@ -137,6 +147,10 @@ public actor DiscordCache {
             }
         case let .threadCreate(channel):
             if let guildId = channel.guild_id {
+                if let existingIndex = self.guilds[guildId]?.threads
+                    .firstIndex(where: { $0.id == channel.id }) {
+                    self.guilds[guildId]?.threads[existingIndex] = channel
+                }
                 self.guilds[guildId]?.threads.append(channel)
             } else {
                 self.channels[channel.id] = channel
@@ -162,7 +176,7 @@ public actor DiscordCache {
         case let .threadSyncList(syncList):
             var guild: Gateway.GuildCreate? {
                 get { self.guilds[syncList.guild_id] }
-                set { self.guilds[syncList.guild_id]  = newValue}
+                set { self.guilds[syncList.guild_id] = newValue}
             }
             /// Remove unavailable threads
             let allParents = Set(syncList.threads.compactMap(\.parent_id))
@@ -215,19 +229,17 @@ public actor DiscordCache {
                 }
             }
         case .guildIntegrationsUpdate: break /// Nothing to do?
-        case let .guildMemberAdd(member):
+        case let .guildMemberAdd(member), let .guildMemberUpdate(member):
+            if let idx = self.guilds[member.guild_id]?.members
+                .firstIndex(where: { $0.user?.id == member.user.id }) {
+                self.guilds[member.guild_id]?.members.remove(at: idx)
+            }
             self.guilds[member.guild_id]?.members.append(.init(guildMemberAdd: member))
         case let .guildMemberRemove(member):
             if let idx = self.guilds[member.guild_id]?.members
                 .firstIndex(where: { $0.user?.id == member.user.id }) {
                 self.guilds[member.guild_id]?.members.remove(at: idx)
             }
-        case let .guildMemberUpdate(member):
-            if let idx = self.guilds[member.guild_id]?.members
-                .firstIndex(where: { $0.user?.id == member.user.id }) {
-                self.guilds[member.guild_id]?.members.remove(at: idx)
-            }
-            self.guilds[member.guild_id]?.members.append(.init(guildMemberAdd: member))
         case let .guildMembersChunk(chunk):
             let userIds = chunk.members.compactMap(\.user?.id)
             self.guilds[chunk.guild_id]?.members.removeAll {
@@ -242,9 +254,7 @@ public actor DiscordCache {
                 }
                 self.guilds[chunk.guild_id]?.presences.append(contentsOf: presences)
             }
-        case let .guildRoleCreate(role):
-            self.guilds[role.guild_id]?.roles.append(role.role)
-        case let .guildRoleUpdate(role):
+        case let .guildRoleCreate(role), let .guildRoleUpdate(role):
             if let idx = self.guilds[role.guild_id]?.roles
                 .firstIndex(where: { $0.id == role.role.id }) {
                 self.guilds[role.guild_id]?.roles.remove(at: idx)
@@ -255,9 +265,7 @@ public actor DiscordCache {
                 .firstIndex(where: { $0.id == role.role_id }) {
                 self.guilds[role.guild_id]?.roles.remove(at: idx)
             }
-        case let .guildScheduledEventCreate(event):
-            self.guilds[event.guild_id]?.guild_scheduled_events.append(event)
-        case let .guildScheduledEventUpdate(event):
+        case let .guildScheduledEventCreate(event), let .guildScheduledEventUpdate(event):
             if let idx = self.guilds[event.guild_id]?.guild_scheduled_events
                 .firstIndex(where: { $0.id == event.id }) {
                 self.guilds[event.guild_id]?.guild_scheduled_events.remove(at: idx)
@@ -269,42 +277,39 @@ public actor DiscordCache {
                 self.guilds[event.guild_id]?.guild_scheduled_events.remove(at: idx)
             }
         case let .guildScheduledEventUserAdd(user):
-            if let idx = self.guilds[user.guild_id]?.guild_scheduled_events
-                .firstIndex(where: { $0.id == user.guild_scheduled_event_id }) {
-                if self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_ids == nil {
-                    self.guilds[user.guild_id]?.guild_scheduled_events[idx]
-                        .user_ids = [user.user_id]
-                } else {
-                    self.guilds[user.guild_id]?.guild_scheduled_events[idx]
-                        .user_ids?.append(user.user_id)
-                }
-                if self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_count == nil {
-                    self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_count = 1
-                } else {
-                    self.guilds[user.guild_id]!.guild_scheduled_events[idx].user_count! += 1
-                }
+            guard let idx = self.guilds[user.guild_id]?.guild_scheduled_events
+                .firstIndex(where: { $0.id == user.guild_scheduled_event_id })
+            else { break }
+            if self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_ids == nil {
+                self.guilds[user.guild_id]?.guild_scheduled_events[idx]
+                    .user_ids = [user.user_id]
+            } else {
+                
+                self.guilds[user.guild_id]?.guild_scheduled_events[idx]
+                    .user_ids?.append(user.user_id)
+            }
+            if self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_count == nil {
+                self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_count = 1
+            } else {
+                self.guilds[user.guild_id]!.guild_scheduled_events[idx].user_count! += 1
             }
         case let .guildScheduledEventUserRemove(user):
-            if let idx = self.guilds[user.guild_id]?.guild_scheduled_events
-                .firstIndex(where: { $0.id == user.guild_scheduled_event_id }) {
-                if let idx = self.guilds[user.guild_id]?.guild_scheduled_events[idx]
-                    .user_ids?.firstIndex(where: { $0 == user.user_id }) {
-                    self.guilds[user.guild_id]?.guild_scheduled_events[idx]
-                        .user_ids?.remove(at: idx)
-                }
-                if self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_count == nil {
-                    self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_count = 0
-                } else {
-                    self.guilds[user.guild_id]!.guild_scheduled_events[idx].user_count! -= 1
-                }
+            guard let idx = self.guilds[user.guild_id]?.guild_scheduled_events
+                .firstIndex(where: { $0.id == user.guild_scheduled_event_id })
+            else { break }
+            if let idx = self.guilds[user.guild_id]?.guild_scheduled_events[idx]
+                .user_ids?.firstIndex(where: { $0 == user.user_id }) {
+                self.guilds[user.guild_id]?.guild_scheduled_events[idx]
+                    .user_ids?.remove(at: idx)
+            }
+            if self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_count == nil {
+                self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_count = 0
+            } else {
+                self.guilds[user.guild_id]!.guild_scheduled_events[idx].user_count! -= 1
             }
         case let .guildAuditLogEntryCreate(log):
             self.auditLogs[log.target_id ?? "", default: []].append(log)
-        case let .integrationCreate(integration):
-            self.integrations[integration.guild_id, default: []].append(
-                .init(integrationCreate: integration)
-            )
-        case let .integrationUpdate(integration):
+        case let .integrationCreate(integration), let .integrationUpdate(integration):
             if let idx = self.integrations[integration.guild_id]?
                 .firstIndex(where: { $0.id == integration.id }) {
                 self.integrations[integration.guild_id]?.remove(at: idx)
@@ -389,19 +394,17 @@ public actor DiscordCache {
             } else {
                 self.guilds[presence.guild_id]?.presences.append(.init(presenceUpdate: presence))
             }
-        case let .stageInstanceCreate(stage):
-            self.guilds[stage.guild_id]?.stage_instances.append(stage)
-        case let .stageInstanceDelete(stage):
-            if let idx = self.guilds[stage.guild_id]?.stage_instances
-                .firstIndex(where: { $0.id == stage.id }) {
-                self.guilds[stage.guild_id]?.stage_instances.remove(at: idx)
-            }
-        case let .stageInstanceUpdate(stage):
+        case let .stageInstanceCreate(stage), let .stageInstanceUpdate(stage):
             if let idx = self.guilds[stage.guild_id]?.stage_instances
                 .firstIndex(where: { $0.id == stage.id }) {
                 self.guilds[stage.guild_id]?.stage_instances[idx] = stage
             } else {
                 self.guilds[stage.guild_id]?.stage_instances.append(stage)
+            }
+        case let .stageInstanceDelete(stage):
+            if let idx = self.guilds[stage.guild_id]?.stage_instances
+                .firstIndex(where: { $0.id == stage.id }) {
+                self.guilds[stage.guild_id]?.stage_instances.remove(at: idx)
             }
         case .typingStart: break /// Nothing to do?
         case let .userUpdate(user):
@@ -415,9 +418,7 @@ public actor DiscordCache {
             }
         case .voiceServerUpdate: break /// Nothing to do?
         case .webhooksUpdate: break /// Nothing to do?
-        case let .autoModerationRuleCreate(autoMod):
-            self.autoModerationRules[autoMod.guild_id, default: []].append(autoMod)
-        case let .autoModerationRuleUpdate(autoMod):
+        case let .autoModerationRuleCreate(autoMod), let .autoModerationRuleUpdate(autoMod):
             if let idx = self.autoModerationRules[autoMod.guild_id]?
                 .firstIndex(where: { $0.id == autoMod.id }) {
                 self.autoModerationRules[autoMod.guild_id]![idx] = autoMod
