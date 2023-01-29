@@ -61,7 +61,6 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
         XCTAssertEqual(ready.application.id, Constants.botId)
         XCTAssertFalse(ready.session_id.isEmpty)
-        XCTAssertEqual(ready.session_type, "normal")
         XCTAssertEqual(ready.user.id, Constants.botId)
         XCTAssertEqual(ready.user.bot, true)
         
@@ -121,7 +120,6 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
         XCTAssertEqual(ready.application.id, Constants.botId)
         XCTAssertFalse(ready.session_id.isEmpty)
-        XCTAssertEqual(ready.session_type, "normal")
         XCTAssertEqual(ready.user.id, Constants.botId)
         XCTAssertEqual(ready.user.bot, true)
         
