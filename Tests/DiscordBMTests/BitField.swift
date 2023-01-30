@@ -4,7 +4,7 @@ import XCTest
 class BitFieldTests: XCTestCase {
     
     typealias Raw = Permission
-    let allCases: [Raw] = [.createInstantInvite, .kickMembers, .banMembers, .administrator, .manageChannels, .manageGuild, .addReactions, .viewAuditLog, .prioritySpeaker, .stream, .viewChannel, .sendMessages, .sendTtsMessages, .manageMessages, .embedLinks, .attachFiles, .readMessageHistory, .mentionEveryone, .useExternalEmojis, .viewGuildInsights, .connect, .speak, .muteMembers, .deafenMembers, .moveMembers, .useVAD, .changeNickname, .manageNicknames, .manageRoles, .manageWebHooks, .manageEmojisAndStickers, .useApplicationCommands, .requestToSpeak, .manageEvents, .manageThreads, .createPublicThreads, .createPrivateThreads, .useExternalStickers, .sendMessagesInThreads, .useEmbeddedActivities, .moderateMembers, .unknownValue41]
+    let allCases: [Raw] = [.createInstantInvite, .kickMembers, .banMembers, .administrator, .manageChannels, .manageGuild, .addReactions, .viewAuditLog, .prioritySpeaker, .stream, .viewChannel, .sendMessages, .sendTtsMessages, .manageMessages, .embedLinks, .attachFiles, .readMessageHistory, .mentionEveryone, .useExternalEmojis, .viewGuildInsights, .connect, .speak, .muteMembers, .deafenMembers, .moveMembers, .useVAD, .changeNickname, .manageNicknames, .manageRoles, .manageWebhooks, .manageEmojisAndStickers, .useApplicationCommands, .requestToSpeak, .manageEvents, .manageThreads, .createPublicThreads, .createPrivateThreads, .useExternalStickers, .sendMessagesInThreads, .useEmbeddedActivities, .moderateMembers, .unknownValue41]
     
     /// To make sure `IntBitField` and `StringBitField` have similar behavior,
     /// so we can continue the tests with only one of them.
@@ -110,7 +110,7 @@ class BitFieldTests: XCTestCase {
         do {
             let field1 = IntBitField<Raw>(bitValue: 999_999_999_999_999)
             let field2 = IntBitField<Raw>([
-                .administrator, .viewAuditLog, .kickMembers, .sendMessagesInThreads, .banMembers, .manageGuild, .manageChannels, .muteMembers, .manageMessages, .manageThreads, .sendMessages, .sendTtsMessages, .useExternalStickers, .manageWebHooks, .deafenMembers, .moderateMembers, .useExternalEmojis, .viewChannel, .prioritySpeaker, .createPrivateThreads, .useApplicationCommands, .createInstantInvite, .createPublicThreads, .embedLinks, .addReactions, .manageEvents, .changeNickname, .stream, .mentionEveryone
+                .administrator, .viewAuditLog, .kickMembers, .sendMessagesInThreads, .banMembers, .manageGuild, .manageChannels, .muteMembers, .manageMessages, .manageThreads, .sendMessages, .sendTtsMessages, .useExternalStickers, .manageWebhooks, .deafenMembers, .moderateMembers, .useExternalEmojis, .viewChannel, .prioritySpeaker, .createPrivateThreads, .useApplicationCommands, .createInstantInvite, .createPublicThreads, .embedLinks, .addReactions, .manageEvents, .changeNickname, .stream, .mentionEveryone
             ])
             XCTAssertEqual(field1, field2)
         }

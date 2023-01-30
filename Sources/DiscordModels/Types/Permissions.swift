@@ -30,7 +30,7 @@ public enum Permission: Int, Sendable, Hashable, Codable {
     case changeNickname = 26
     case manageNicknames = 27
     case manageRoles = 28
-    case manageWebHooks = 29
+    case manageWebhooks = 29
     case manageEmojisAndStickers = 30
     case useApplicationCommands = 31
     case requestToSpeak = 32

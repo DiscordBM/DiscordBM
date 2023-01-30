@@ -1,11 +1,6 @@
 
 extension Gateway.GuildCreate {
     
-    public enum PermissionError: Error {
-        case memberNotFound(userId: String, guildId: String)
-        case channelNotFound(channelId: String, guildId: String)
-    }
-    
     /// Whether or not a member has a permission in a guild and channel.
     /// - NOTE: You should request all guild member from gateway before calling this function.
     /// `GatewayManager` has a `requestGuildMembersChunk(payload:)` function, for that.
@@ -15,9 +10,13 @@ extension Gateway.GuildCreate {
         userId: String,
         channelId: String,
         permissions perms: [Permission]
-    ) throws -> Bool {
-        let channel = try self.requireChannel(channelId: channelId)
-        let member = try self.requireMember(userId: userId)
+    ) -> Bool {
+        guard let channel = self.channels.first(where: { $0.id == channelId }),
+              let member = self.members.first(where: { $0.user?.id == userId })
+        else {
+            /// Don't even have access to the channel or the member.
+            return false
+        }
         
         /// Guild owner has all permissions.
         if self.owner_id == userId { return true }
@@ -144,11 +143,11 @@ extension Gateway.GuildCreate {
     }
     
     /// Member has permission in guild. Doesn't check for channel overwrites.
-    public func memberHasGuildPermission(
-        userId: String,
-        perm: Permission
-    ) throws -> Bool {
-        let member = try requireMember(userId: userId)
+    public func memberHasGuildPermission(userId: String, permission perm: Permission) -> Bool {
+        guard let member = self.members.first(where: { $0.user?.id == userId }) else {
+            /// Don't even have access to the member.
+            return false
+        }
         
         /// Guild owner has all permissions.
         if self.owner_id == userId { return true }
@@ -186,19 +185,5 @@ extension Gateway.GuildCreate {
         } else {
             return false
         }
-    }
-    
-    private func requireMember(userId: String) throws -> Guild.Member {
-        guard let member = self.members.first(where: { $0.user?.id == userId }) else {
-            throw PermissionError.memberNotFound(userId: userId, guildId: self.id)
-        }
-        return member
-    }
-    
-    private func requireChannel(channelId: String) throws -> DiscordChannel {
-        guard let channel = self.channels.first(where: { $0.id == channelId }) else {
-            throw PermissionError.channelNotFound(channelId: channelId, guildId: self.id)
-        }
-        return channel
     }
 }
