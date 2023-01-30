@@ -77,16 +77,15 @@ extension Gateway.GuildCreate {
         return true
     }
     
-    /// Discouraged to use. Use `memberHasPermissions(userId:channelId:permissions:)` instead.
+    /// Use `memberHasPermissions(userId:channelId:permissions:)` instead.
     /// This only checks if the user actually has the permission itself.
     /// Doesn't guarantee the member has the abilities related to the permission _in practice_.
-    public func _memberHasPermission(
+    private func _memberHasPermission(
         userId: String,
         member: Guild.Member,
         channel: DiscordChannel,
         permission perm: Permission
     ) -> Bool {
-        
         var memberOverwriteDenies = false
         var roleOverwriteAllows = false
         var roleOverwriteDenies = false
@@ -127,6 +126,40 @@ extension Gateway.GuildCreate {
         if roleOverwriteDenies { return false }
         if everyoneIsAllowed { return true }
         if everyoneIsDenied { return false }
+        
+        /// Member has any roles that allow.
+        for role in roles where member.roles.contains(role.id) {
+            if role.permissions.values.contains(perm) {
+                return true
+            }
+        }
+        
+        /// `@everyone` role allows.
+        if let everyoneRole = self.roles.first(where: { $0.id == self.id }),
+           everyoneRole.permissions.values.contains(perm) {
+            return true
+        }
+        
+        return false
+    }
+    
+    /// Member has permission in guild. Doesn't check for channel overwrites.
+    public func memberHasGuildPermission(
+        userId: String,
+        perm: Permission
+    ) throws -> Bool {
+        let member = try requireMember(userId: userId)
+        
+        /// Guild owner has all permissions.
+        if self.owner_id == userId { return true }
+        
+        /// `administrator` perm is like the guild owner.
+        if self.roles.contains(where: { role in
+            role.permissions.values.contains(.administrator) &&
+            self.memberHasRole(member: member, roleId: role.id)
+        }) {
+            return true
+        }
         
         /// Member has any roles that allow.
         for role in roles where member.roles.contains(role.id) {
