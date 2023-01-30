@@ -30,6 +30,9 @@ extension Gateway.GuildCreate {
             return true
         }
         
+        /// We've already checked for it.
+        if perms.contains(.administrator) { return false }
+        
         func hasPerm(_ perm: Permission) -> Bool {
             _memberHasPermission(
                 userId: userId,
@@ -44,7 +47,7 @@ extension Gateway.GuildCreate {
             if !hasPerm(perm) { return false }
         }
         
-        /// Some permission require other permission first.
+        /// Some permission require other permissions first.
         /// These are the ones that Discord has documented.
         let requireSendMessages: [Permission] = [
             .mentionEveryone,
@@ -52,17 +55,9 @@ extension Gateway.GuildCreate {
             .attachFiles,
             .embedLinks
         ]
-        var needToCheckForSendMessagesPerm = false
-        for perm in perms {
-            if requireSendMessages.contains(perm) {
-                needToCheckForSendMessagesPerm = true
-                break
-            }
-        }
-        
         /// If perms already contains `sendMessage`, then we've already checked for it.
-        if needToCheckForSendMessagesPerm,
-           !perms.contains(.sendMessages) {
+        if !perms.contains(.sendMessages),
+           perms.contains(where: { requireSendMessages.contains($0) }) {
             if !hasPerm(.sendMessages) { return false }
         }
         
@@ -76,7 +71,6 @@ extension Gateway.GuildCreate {
         /// If perms already contains `connect`, then we've already checked for it.
         if [.guildVoice, .guildStageVoice].contains(channel.type),
            !perms.contains(.connect) {
-            /// Member must have `viewChannel` permission for anything else to begin with.
             if !hasPerm(.connect) { return false }
         }
         
@@ -84,6 +78,8 @@ extension Gateway.GuildCreate {
     }
     
     /// Discouraged to use. Use `memberHasPermissions(userId:channelId:permissions:)` instead.
+    /// This only checks if the user actually has the permission itself.
+    /// Doesn't guarantee the member has the abilities related to the permission _in practice_.
     public func _memberHasPermission(
         userId: String,
         member: Guild.Member,
