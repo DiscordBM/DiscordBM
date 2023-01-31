@@ -186,11 +186,7 @@ import Logging
 
 /// Configure the Discord Logging Manager.
 DiscordGlobalConfiguration.logManager = DiscordLogManager(
-    client: DefaultDiscordClient(
-        httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS,
-        token: YOUR_BOT_TOKEN,
-        appId: nil
-    ),
+    httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS,
     configuration: .init(fallbackLogger: Logger(
         label: "DiscordBMFallback",
         factory: StreamLogHandler.standardOutput(label:metadataProvider:)
@@ -199,8 +195,8 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
 
 /// Bootstrap the `LoggingSystem`. After this, all your `Logger`s will automagically start using `DiscordLogHandler`.
 LoggingSystem.bootstrapWithDiscordLogger(
-    /// The address to send the logs to. You can easily create a webhook using any Discord client app you're using.
-    address: try .webhook(.url(WEBHOOK_URL)),
+    /// The address to send the logs to. You can easily create a webhook using Discord client apps.
+    address: try .url(WEBHOOK_URL),
     makeMainLogHandler: StreamLogHandler.standardOutput(label:metadataProvider:)
 )
 /// Make sure you haven't called `LoggingSystem.bootstrap` anywhere else, because you can only call it once.
@@ -212,17 +208,14 @@ Read `DiscordLogManager.Configuration.init` documentation for full info.
 
 ```swift
 DiscordGlobalConfiguration.logManager = DiscordLogManager(
-    client: DefaultDiscordClient(
-        httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS,
-        token: YOUR_BOT_TOKEN,
-        appId: nil
-    ), configuration: .init(
+    httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS,
+    configuration: .init(
         fallbackLogger: Logger(
             label: "DiscordBMFallback",
             factory: StreamLogHandler.standardOutput(label:metadataProvider:)
         ),
         aliveNotice: .init(
-            address: try .webhook(.url(WEBHOOK_URL)),
+            address: try .url(WEBHOOK_URL),
             interval: .hours(1),
             message: "I'm Alive! :)",
             color: .blue,

@@ -1,5 +1,6 @@
 import DiscordClient
 import DiscordUtils
+import AsyncHTTPClient
 import NIOCore
 import Logging
 import Foundation
@@ -7,12 +8,10 @@ import Foundation
 /// The manager of sending logs to Discord.
 public actor DiscordLogManager {
     
-    public typealias Address = DiscordLogHandler.Address
-    
     public struct Configuration {
         
         public struct AliveNotice {
-            let address: Address
+            let address: WebhookAddress
             let interval: TimeAmount?
             let message: String
             let color: DiscordColor
@@ -26,7 +25,7 @@ public actor DiscordLogManager {
             ///   - initialNoticeMention: The user/role to be mentioned on the first alive notice.
             ///   Useful to be notified of app-boots when you update your app or when it crashes.
             public init(
-                address: Address,
+                address: WebhookAddress,
                 interval: TimeAmount?,
                 message: String = "Alive Notice!",
                 color: DiscordColor = .blue,
@@ -136,10 +135,21 @@ public actor DiscordLogManager {
     nonisolated let client: any DiscordClient
     nonisolated let configuration: Configuration
     
-    private var logs: [Address: [Log]] = [:]
-    private var sendLogsTasks: [Address: Task<Void, Never>] = [:]
+    private var logs: [WebhookAddress: [Log]] = [:]
+    private var sendLogsTasks: [WebhookAddress: Task<Void, Never>] = [:]
     
     private var aliveNoticeTask: Task<Void, Never>?
+    
+    public init(
+        httpClient: HTTPClient,
+        configuration: Configuration
+    ) {
+        /// Will only ever send requests to a webhook endpoint
+        /// which doesn't need/use neither `token` nor `appId`.
+        self.client = DefaultDiscordClient(httpClient: httpClient, token: "", appId: nil)
+        self.configuration = configuration
+        Task { await self.startAliveNotices() }
+    }
     
     public init(
         client: any DiscordClient,
@@ -150,12 +160,12 @@ public actor DiscordLogManager {
         Task { await self.startAliveNotices() }
     }
     
-    func include(address: Address, embed: Embed, level: Logger.Level) {
+    func include(address: WebhookAddress, embed: Embed, level: Logger.Level) {
         self.include(address: address, embed: embed, level: level, isFirstAliveNotice: false)
     }
     
     private func include(
-        address: Address,
+        address: WebhookAddress,
         embed: Embed,
         level: Logger.Level?,
         isFirstAliveNotice: Bool
@@ -220,7 +230,7 @@ public actor DiscordLogManager {
         )
     }
     
-    private func setUpSendLogsTask(address: Address) {
+    private func setUpSendLogsTask(address: WebhookAddress) {
 #if DEBUG
         if configuration.disabledInDebug { return }
 #endif
@@ -236,7 +246,7 @@ public actor DiscordLogManager {
         sendLogsTasks[address] = Task { try? await send() }
     }
     
-    private func performLogSend(address: Address) async throws {
+    private func performLogSend(address: WebhookAddress) async throws {
         let logs = getMaxAmountOfLogsAndFlush(address: address)
         try await sendLogs(logs, address: address)
         if self.logs[address]?.isEmpty != false {
@@ -244,7 +254,7 @@ public actor DiscordLogManager {
         }
     }
     
-    private func getMaxAmountOfLogsAndFlush(address: Address) -> [Log] {
+    private func getMaxAmountOfLogsAndFlush(address: WebhookAddress) -> [Log] {
         var goodLogs = [Log]()
         goodLogs.reserveCapacity(min(self.logs.count, 10))
         
@@ -270,7 +280,7 @@ public actor DiscordLogManager {
         return goodLogs
     }
     
-    private func sendLogs(_ logs: [Log], address: Address) async throws {
+    private func sendLogs(_ logs: [Log], address: WebhookAddress) async throws {
         var logLevels = Set(logs.compactMap(\.level))
             .sorted(by: >)
             .compactMap({ configuration.mentions[$0] })
@@ -282,14 +292,11 @@ public actor DiscordLogManager {
         (configuration.aliveNotice.map({ "\($0.initialNoticeMention) " }) ?? "") : ""
         let mentions = aliveNoticeMention + logLevels.joined(separator: " ")
         
-        let embeds = logs.map(\.embed)
-        
-        switch address {
-        case .channel(let id):
-            try await sendLogsToChannel(content: mentions, embeds: embeds, id: id)
-        case .webhook(let address):
-            try await sendLogsToWebhook(content: mentions, embeds: embeds, address: address)
-        }
+        try await sendLogsToWebhook(
+            content: mentions,
+            embeds: logs.map(\.embed),
+            address: address
+        )
         
         self.setUpAliveNotices()
     }
@@ -353,7 +360,7 @@ public actor DiscordLogManager {
     }
     
 #if DEBUG
-    func _tests_getLogs() -> [Address: [Log]] {
+    func _tests_getLogs() -> [WebhookAddress: [Log]] {
         self.logs
     }
 #endif

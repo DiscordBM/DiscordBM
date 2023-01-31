@@ -5,15 +5,10 @@ import Foundation
 
 public struct DiscordLogHandler: LogHandler {
     
-    public enum Address: Hashable {
-        case channel(id: String)
-        case webhook(WebhookAddress)
-    }
-    
     /// The label of this log handler.
     public let label: String
     /// The address to send the logs to.
-    let address: Address
+    let address: WebhookAddress
     /// See `LogHandler.metadata`.
     public var metadata: Logger.Metadata
     /// See `LogHandler.metadataProvider`.
@@ -25,7 +20,7 @@ public struct DiscordLogHandler: LogHandler {
     
     init(
         label: String,
-        address: Address,
+        address: WebhookAddress,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil
     ) {
@@ -39,7 +34,7 @@ public struct DiscordLogHandler: LogHandler {
     /// Make a logger that logs to both the a main place like stdout and also to Discord.
     public static func multiplexLogger(
         label: String,
-        address: Address,
+        address: WebhookAddress,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
         makeMainLogHandler: (String, Logger.MetadataProvider?) -> LogHandler

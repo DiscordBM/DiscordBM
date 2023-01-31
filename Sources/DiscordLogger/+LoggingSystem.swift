@@ -12,7 +12,7 @@ extension LoggingSystem {
     /// - NOTE: Be careful because `LoggingSystem.bootstrap` can only be called once.
     /// If you use libraries like Vapor, you would want to remove such lines where you call `LoggingSystem...` and replace it with this function.
     public static func bootstrapWithDiscordLogger(
-        address: DiscordLogHandler.Address,
+        address: WebhookAddress,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
         makeMainLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
