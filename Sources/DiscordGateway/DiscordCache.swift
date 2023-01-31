@@ -82,7 +82,7 @@ public actor DiscordCache {
     public init(
         gatewayManager: any GatewayManager,
         intents: Set<Gateway.Intent>?,
-        requestAllMembers: RequestMembersConfiguration,
+        requestAllMembers: RequestMembersConfiguration?,
         storage: Storage = Storage()
     ) async {
         self.gatewayManager = gatewayManager
