@@ -13,4 +13,8 @@ enum Constants {
     static let spamChannelId = "1038138527877181542"
     static let webhooksChannelId = "1066277056641503232"
     static let webhooks2ChannelId = "1067783166074564658"
+    static let perm1ChannelId = "1069609693573554207"
+    static let perm2ChannelId = "1069614568466305135"
+    static let perm3ChannelId = "1069615830851145798"
+    static let secondAccountId = "966330655069843457"
 }

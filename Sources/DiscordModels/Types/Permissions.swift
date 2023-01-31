@@ -30,7 +30,7 @@ public enum Permission: Int, Sendable, Hashable, Codable {
     case changeNickname = 26
     case manageNicknames = 27
     case manageRoles = 28
-    case manageWebHooks = 29
+    case manageWebhooks = 29
     case manageEmojisAndStickers = 30
     case useApplicationCommands = 31
     case requestToSpeak = 32
@@ -66,9 +66,6 @@ public struct Role: Sendable, Codable {
     public var permissions: StringBitField<Permission>
     public var managed: Bool
     public var mentionable: Bool
-    public var flags: IntBitField<DiscordUser.Flag>? // Undocumented
     public var tags: Tags?
     public var version: Int?
-    public var guild_hashes: Hashes?
-    public var hashes: Hashes?
 }

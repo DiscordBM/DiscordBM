@@ -34,6 +34,19 @@ public struct DiscordChannel: Sendable, Codable {
         public var deny: StringBitField<Permission>
     }
     
+    /// https://discord.com/developers/docs/resources/channel#channel-object-sort-order-types
+    public enum SortOrder: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+        case latestActivity = 0
+        case creationDate = 1
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types
+    public enum ForumLayout: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+        case notSet = 0
+        case listView = 1
+        case galleryView = 2
+    }
+    
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
     public enum Flag: Int, Sendable {
         case unknownValue0 = 0
@@ -69,7 +82,6 @@ public struct DiscordChannel: Sendable, Codable {
     public var bitrate: Int?
     public var user_limit: Int?
     public var rate_limit_per_user: Int?
-    public var default_forum_layout: Int?
     public var recipients: [DiscordUser]?
     public var icon: String?
     public var owner_id: String?
@@ -86,14 +98,18 @@ public struct DiscordChannel: Sendable, Codable {
     public var default_thread_rate_limit_per_user: Int?
     public var default_reaction_emoji: ForumTag?
     public var default_sort_order: Int?
+    public var default_forum_layout: ForumLayout?
     public var permissions: StringBitField<Permission>?
     public var flags: IntBitField<Flag>?
     public var available_tags: [ForumTag]?
     public var template: String?
     public var member_ids_preview: [String]?
     public var version: Int?
-    public var guild_hashes: Hashes?
-    public var hashes: Hashes?
+    /// Thread-only:
+    public var member: ThreadMember?
+    public var newly_created: Bool?
+    /// Only for `threadMembersUpdate` Gateway event.
+    public var threadMembers: [Gateway.ThreadMembersUpdate.ThreadMember]?
 }
 
 extension DiscordChannel {
@@ -184,6 +200,12 @@ extension DiscordChannel {
             public var count: Int
             public var me: Bool
             public var emoji: PartialEmoji
+            
+            public init(count: Int, me: Bool, emoji: PartialEmoji) {
+                self.count = count
+                self.me = me
+                self.emoji = emoji
+            }
         }
         
         /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-structure
@@ -329,7 +351,7 @@ extension DiscordChannel {
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
-        public var member: Guild.Member?
+        public var member: Guild.PartialMember?
         public var guild_id: String?
     }
 }
@@ -354,6 +376,13 @@ public struct ThreadMember: Sendable, Codable {
     /// Discord says: "any user-thread settings, currently only used for notifications".
     public var flags: Int
     public var member: Guild.Member?
+    
+    public init(threadMemberUpdate: Gateway.ThreadMemberUpdate) {
+        self.id = threadMemberUpdate.id
+        self.user_id = threadMemberUpdate.user_id
+        self.join_timestamp = threadMemberUpdate.join_timestamp
+        self.flags = threadMemberUpdate.flags
+    }
 }
 
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure

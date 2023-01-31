@@ -107,32 +107,6 @@ public enum IntOrDouble: Sendable, Codable {
     }
 }
 
-/// Not sure what exactly it is. Some kind of hash container.
-public struct Hashes: Sendable, Codable {
-    
-    public struct Item: Sendable, Codable {
-        public var omitted: Bool?
-        public var hash: String
-        
-        public init(omitted: Bool, hash: String) {
-            self.omitted = omitted
-            self.hash = hash
-        }
-    }
-    
-    public var version: Int
-    public var roles: Item
-    public var metadata: Item
-    public var channels: Item
-    
-    public init(version: Int, roles: Item, metadata: Item, channels: Item) {
-        self.version = version
-        self.roles = roles
-        self.metadata = metadata
-        self.channels = channels
-    }
-}
-
 /// https://discord.com/developers/docs/reference#locales
 public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecodeMarker {
     case danish = "da"

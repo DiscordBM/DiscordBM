@@ -96,7 +96,6 @@ class DiscordModelsTests: XCTestCase {
             XCTAssertEqual(member.nick, nil)
             XCTAssertEqual(member.mute, false)
             XCTAssertEqual(member.joined_at?.date.timeIntervalSince1970, 1587168604.414)
-            XCTAssertEqual(member.flags, [])
             XCTAssertEqual(member.deaf, false)
             XCTAssertEqual(member.communication_disabled_until?.date, nil)
             XCTAssertEqual(member.avatar, nil)

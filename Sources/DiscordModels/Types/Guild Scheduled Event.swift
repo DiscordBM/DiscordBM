@@ -44,4 +44,6 @@ public struct GuildScheduledEvent: Sendable, Codable {
     public var user_count: Int?
     public var image: String?
     public var sku_ids: [String]?
+    /// Only for Gateway `guildScheduledEventUserAdd` events.
+    public var user_ids: [String]?
 }

@@ -25,11 +25,11 @@ public struct AutoModerationRule: Sendable, Codable {
             case slurs = 3
         }
         
-        public var keyword_filter: [String]?
+        public var keyword_filter: [String]
         public var presets: [KeywordPreset]?
-        public var allow_list: [String]?
-        public var mention_total_limit: Int?
-        public var regex_patterns: [String]?
+        public var allow_list: [String]
+        public var mention_total_limit: Int
+        public var regex_patterns: [String]
     }
     
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object
@@ -113,9 +113,7 @@ public struct AutoModerationRule: Sendable, Codable {
     public var exempt_channels: [String]
 }
 
-/// Undocumented. The search section gives a link nevertheless, which means this probably will soon
-/// be added to the documentation. Might already have been added when you're reading this.
-/// https://discord.com/developers/docs/topics/gateway#auto-moderation-action-execution
+/// https://discord.com/developers/docs/topics/gateway-events#auto-moderation-action-execution-auto-moderation-action-execution-event-fields
 public struct AutoModerationActionExecution: Sendable, Codable {
     public var guild_id: String
     public var action: AutoModerationRule.Action

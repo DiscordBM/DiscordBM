@@ -51,72 +51,140 @@ public struct Gateway: Sendable, Codable {
             case resumed
             /// https://discord.com/developers/docs/topics/gateway-events#invalid-session
             case invalidSession(canResume: Bool)
+            
             case channelCreate(DiscordChannel)
             case channelUpdate(DiscordChannel)
             case channelDelete(DiscordChannel)
             case channelPinsUpdate(ChannelPinsUpdate)
-            case threadCreate(ThreadCreate)
+            
+            case threadCreate(DiscordChannel)
             case threadUpdate(DiscordChannel)
             case threadDelete(ThreadDelete)
+            
             case threadSyncList(ThreadListSync)
             case threadMemberUpdate(ThreadMemberUpdate)
             case threadMembersUpdate(ThreadMembersUpdate)
+            
             case guildCreate(GuildCreate)
             case guildUpdate(Guild)
             case guildDelete(UnavailableGuild)
+            
             case guildBanAdd(GuildBan)
             case guildBanRemove(GuildBan)
+            
             case guildEmojisUpdate(GuildEmojisUpdate)
             case guildStickersUpdate(GuildStickersUpdate)
             case guildIntegrationsUpdate(GuildIntegrationsUpdate)
+            
             case guildMemberAdd(GuildMemberAdd)
             case guildMemberRemove(GuildMemberRemove)
-            case guildMemberUpdate(GuildMemberUpdate)
+            case guildMemberUpdate(GuildMemberAdd)
+            
             case guildMembersChunk(GuildMembersChunk)
             case requestGuildMembers(RequestGuildMembers)
+            
             case guildRoleCreate(GuildRole)
             case guildRoleUpdate(GuildRole)
             case guildRoleDelete(GuildRoleDelete)
+            
             case guildScheduledEventCreate(GuildScheduledEvent)
             case guildScheduledEventUpdate(GuildScheduledEvent)
             case guildScheduledEventDelete(GuildScheduledEvent)
+            
             case guildScheduledEventUserAdd(GuildScheduledEventUser)
             case guildScheduledEventUserRemove(GuildScheduledEventUser)
-            case guildApplicationCommandIndexUpdate(GuildApplicationCommandIndexUpdate)
-            case guildJoinRequestUpdate(GuildJoinRequestUpdate)
-            case guildJoinRequestDelete(GuildJoinRequestDelete)
+            
             case guildAuditLogEntryCreate(AuditLog.Entry)
+            
             case integrationCreate(IntegrationCreate)
             case integrationUpdate(IntegrationCreate)
             case integrationDelete(IntegrationDelete)
+            
             case interactionCreate(Interaction)
+            
             case inviteCreate(InviteCreate)
             case inviteDelete(InviteDelete)
+            
             case messageCreate(MessageCreate)
             case messageUpdate(DiscordChannel.PartialMessage)
             case messageDelete(MessageDelete)
             case messageDeleteBulk(MessageDeleteBulk)
+            
             case messageReactionAdd(MessageReactionAdd)
             case messageReactionRemove(MessageReactionRemove)
             case messageReactionRemoveAll(MessageReactionRemoveAll)
             case messageReactionRemoveEmoji(MessageReactionRemoveEmoji)
+            
             case presenceUpdate(PresenceUpdate)
+            
             case stageInstanceCreate(StageInstance)
             case stageInstanceDelete(StageInstance)
             case stageInstanceUpdate(StageInstance)
+            
             case typingStart(TypingStart)
+            
             case userUpdate(DiscordUser)
+            
             case voiceStateUpdate(VoiceState)
+            
             case voiceServerUpdate(VoiceServerUpdate)
+            
             case webhooksUpdate(WebhooksUpdate)
-            case applicationCommandPermissionsUpdate(ApplicationCommandPermissionsUpdate)
+            
+            case applicationCommandPermissionsUpdate(GuildApplicationCommandPermissions)
+            
             case autoModerationRuleCreate(AutoModerationRule)
             case autoModerationRuleUpdate(AutoModerationRule)
+            case autoModerationRuleDelete(AutoModerationRule)
+            
             case autoModerationActionExecution(AutoModerationActionExecution)
+            
+            public var correspondingIntents: [Intent] {
+                switch self {
+                case .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .interactionCreate, .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
+                    return []
+                case .guildCreate, .guildUpdate, .guildDelete, .guildMembersChunk, .guildRoleCreate, .guildRoleUpdate, .guildRoleDelete, .channelCreate, .channelUpdate, .channelDelete, .threadCreate, .threadUpdate, .threadDelete, .threadSyncList, .threadMemberUpdate, .stageInstanceCreate, .stageInstanceDelete, .stageInstanceUpdate:
+                    return [.guilds]
+                case .channelPinsUpdate:
+                    return [.guilds, .directMessages]
+                case .threadMembersUpdate:
+                    return [.guilds, .guildMembers]
+                case .guildMemberAdd, .guildMemberRemove, .guildMemberUpdate:
+                    return [.guildMembers]
+                case .guildBanAdd, .guildBanRemove, .guildAuditLogEntryCreate:
+                    return [.guildModeration]
+                case .guildEmojisUpdate, .guildStickersUpdate:
+                    return [.guildEmojisAndStickers]
+                case .guildIntegrationsUpdate, .integrationCreate, .integrationUpdate, .integrationDelete:
+                    return [.guildIntegrations]
+                case .webhooksUpdate:
+                    return [.guildWebhooks]
+                case .inviteCreate, .inviteDelete:
+                    return [.guildInvites]
+                case .voiceStateUpdate:
+                    return [.guildVoiceStates]
+                case .presenceUpdate:
+                    return [.guildPresences]
+                case .messageCreate, .messageUpdate, .messageDelete:
+                    return [.guildMessages, .directMessages]
+                case .messageDeleteBulk:
+                    return [.guildMessages]
+                case .messageReactionAdd, .messageReactionRemove, .messageReactionRemoveAll, .messageReactionRemoveEmoji:
+                    return [.guildMessageReactions]
+                case .typingStart:
+                    return [.guildMessageTyping]
+                case .guildScheduledEventCreate, .guildScheduledEventUpdate, .guildScheduledEventDelete, .guildScheduledEventUserAdd, .guildScheduledEventUserRemove:
+                    return [.guildScheduledEvents]
+                case .autoModerationRuleCreate, .autoModerationRuleUpdate, .autoModerationRuleDelete:
+                    return [.autoModerationConfiguration]
+                case .autoModerationActionExecution:
+                    return [.autoModerationExecution]
+                }
+            }
         }
         
-        enum GatewayDecodingError: Error {
-            case unhandledDispatchEvent
+        public enum GatewayDecodingError: Error {
+            case unhandledDispatchEvent(type: String?)
         }
         
         enum CodingKeys: String, CodingKey {
@@ -237,12 +305,6 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .guildScheduledEventUserAdd(decodeData())
                 case "GUILD_SCHEDULED_EVENT_USER_REMOVE":
                     self.data = try .guildScheduledEventUserRemove(decodeData())
-                case "GUILD_APPLICATION_COMMAND_INDEX_UPDATE":
-                    self.data = try .guildApplicationCommandIndexUpdate(decodeData())
-                case "GUILD_JOIN_REQUEST_UPDATE":
-                    self.data = try .guildJoinRequestUpdate(decodeData())
-                case "GUILD_JOIN_REQUEST_DELETE":
-                    self.data = try .guildJoinRequestDelete(decodeData())
                 case "GUILD_AUDIT_LOG_ENTRY_CREATE":
                     self.data = try .guildAuditLogEntryCreate(decodeData())
                 case "INTEGRATION_CREATE":
@@ -297,10 +359,12 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .autoModerationRuleCreate(decodeData())
                 case "AUTO_MODERATION_RULE_UPDATE":
                     self.data = try .autoModerationRuleUpdate(decodeData())
+                case "AUTO_MODERATION_RULE_DELETE":
+                    self.data = try .autoModerationRuleDelete(decodeData())
                 case "AUTO_MODERATION_ACTION_EXECUTION":
                     self.data = try .autoModerationActionExecution(decodeData())
                 default:
-                    throw GatewayDecodingError.unhandledDispatchEvent
+                    throw GatewayDecodingError.unhandledDispatchEvent(type: self.type)
                 }
             }
         }
@@ -342,7 +406,7 @@ public struct Gateway: Sendable, Codable {
             case let .resume(payload):
                 try container.encode(payload, forKey: .data)
             case let .requestGuildMembers(payload):
-              try container.encode(payload, forKey: .data)
+                try container.encode(payload, forKey: .data)
             default:
                 throw EncodingError.notSupposedToBeSent(
                     message: "'\(self)' data is supposed to never be sent."
@@ -466,10 +530,10 @@ public struct Gateway: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
-    public enum Intent: Int, Sendable {
+    public enum Intent: Int, Sendable, Codable {
         case guilds = 0
         case guildMembers = 1
-        case guildBans = 2
+        case guildModeration = 2
         case guildEmojisAndStickers = 3
         case guildIntegrations = 4
         case guildWebhooks = 5
@@ -517,70 +581,13 @@ public struct Gateway: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/gateway-events#ready-ready-event-fields
     public struct Ready: Sendable, Codable {
-        
-        /// Undocumented
-        public struct AudioContextSettings: Sendable, Codable { }
-        
         public var v: Int
         public var user: DiscordUser
         public var guilds: [UnavailableGuild]
         public var session_id: String
+        public var resume_gateway_url: String?
         public var shard: IntPair?
         public var application: PartialApplication
-        public var presences: [PresenceUpdate]
-        public var geo_ordered_rtc_regions: [String]
-        public var guild_join_requests: [String] // Undocumented
-        public var private_channels: [DiscordChannel]
-        public var user_settings: [String: String] // Undocumented
-        public var relationships: [String] // Undocumented
-        public var session_type: String?
-        public var auth_session_id_hash: String?
-        public var resume_gateway_url: String?
-        public var audio_context_settings: AudioContextSettings?
-    }
-    
-    /// A ``DiscordChannel`` object with a few differences.
-    /// https://discord.com/developers/docs/topics/gateway-events#thread-create
-    public struct ThreadCreate: Sendable, Codable {
-        public var id: String
-        public var type: DiscordChannel.Kind
-        public var guild_id: String?
-        public var position: Int?
-        public var permission_overwrites: [DiscordChannel.Overwrite]?
-        public var name: String?
-        public var topic: String?
-        public var nsfw: Bool?
-        public var last_message_id: String?
-        public var bitrate: Int?
-        public var user_limit: Int?
-        public var rate_limit_per_user: Int?
-        public var default_forum_layout: Int?
-        public var recipients: [DiscordUser]?
-        public var icon: String?
-        public var owner_id: String?
-        public var application_id: String?
-        public var parent_id: String?
-        public var last_pin_timestamp: DiscordTimestamp?
-        public var rtc_region: String?
-        public var video_quality_mode: Int?
-        public var message_count: Int?
-        public var total_message_sent: Int?
-        public var member_count: Int?
-        public var thread_metadata: ThreadMetadata
-        public var default_auto_archive_duration: Int?
-        public var default_reaction_emoji: DiscordChannel.ForumTag?
-        public var default_sort_order: Int?
-        public var permissions: StringBitField<Permission>?
-        public var flags: IntBitField<DiscordChannel.Flag>?
-        public var available_tags: [DiscordChannel.ForumTag]?
-        public var template: String?
-        public var member_ids_preview: [String]?
-        public var version: Int?
-        public var guild_hashes: Hashes?
-        public var hashes: Hashes?
-        /// Extra Fields:
-        public var member: ThreadMember?
-        public var newly_created: Bool?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#thread-delete
@@ -628,9 +635,8 @@ public struct Gateway: Sendable, Codable {
                 public var status: Status
                 public var activities: [Activity]
                 public var client_status: ClientStatus
-                public var game: Game?
             }
-
+            
             public var id: String
             public var user_id: String?
             public var join_timestamp: DiscordTimestamp
@@ -699,13 +705,11 @@ public struct Gateway: Sendable, Codable {
         public var premium_progress_bar_enabled: Bool
         public var `lazy`: Bool?
         public var hub_type: String?
-        public var guild_hashes: Hashes?
         public var nsfw: Bool
         public var application_command_counts: [String: Int]?
         public var embedded_activities: [Gateway.Activity]?
         public var version: Int?
         public var guild_id: String?
-        public var hashes: Hashes?
         /// Extra fields:
         public var joined_at: DiscordTimestamp
         public var large: Bool
@@ -718,6 +722,58 @@ public struct Gateway: Sendable, Codable {
         public var presences: [Gateway.PartialPresenceUpdate]
         public var guild_scheduled_events: [GuildScheduledEvent]
         public var stage_instances: [StageInstance]
+        
+        public mutating func update(with new: Guild) {
+            self.id = new.id
+            self.name = new.name
+            self.icon = new.icon
+            self.icon_hash = new.icon_hash
+            self.splash = new.splash
+            self.discovery_splash = new.discovery_splash
+            self.owner = new.owner
+            self.owner_id = new.owner_id
+            self.permissions = new.permissions
+            self.region = new.region
+            self.afk_channel_id = new.afk_channel_id
+            self.afk_timeout = new.afk_timeout
+            self.widget_enabled = new.widget_enabled
+            self.widget_channel_id = new.widget_channel_id
+            self.verification_level = new.verification_level
+            self.default_message_notifications = new.default_message_notifications
+            self.explicit_content_filter = new.explicit_content_filter
+            self.roles = new.roles
+            self.emojis = new.emojis
+            self.features = new.features
+            self.mfa_level = new.mfa_level
+            self.application_id = new.application_id
+            self.system_channel_id = new.system_channel_id
+            self.system_channel_flags = new.system_channel_flags
+            self.rules_channel_id = new.rules_channel_id
+            self.max_presences = new.max_presences
+            self.max_members = new.max_members
+            self.vanity_url_code = new.vanity_url_code
+            self.description = new.description
+            self.banner = new.banner
+            self.premium_tier = new.premium_tier
+            self.premium_subscription_count = new.premium_subscription_count
+            self.preferred_locale = new.preferred_locale
+            self.public_updates_channel_id = new.public_updates_channel_id
+            self.max_video_channel_users = new.max_video_channel_users
+            self.max_stage_video_channel_users = new.max_stage_video_channel_users
+            self.approximate_member_count = new.approximate_member_count
+            self.approximate_presence_count = new.approximate_presence_count
+            self.welcome_screen = new.welcome_screen
+            self.nsfw_level = new.nsfw_level
+            self.stickers = new.stickers
+            self.premium_progress_bar_enabled = new.premium_progress_bar_enabled
+            self.`lazy` = new.`lazy`
+            self.hub_type = new.hub_type
+            self.nsfw = new.nsfw
+            self.application_command_counts = new.application_command_counts
+            self.embedded_activities = new.embedded_activities
+            self.version = new.version
+            self.guild_id = new.guild_id
+        }
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#channel-pins-update-channel-pins-update-event-fields
@@ -737,16 +793,12 @@ public struct Gateway: Sendable, Codable {
     public struct GuildEmojisUpdate: Sendable, Codable {
         public var guild_id: String
         public var emojis: [PartialEmoji]
-        public var hashes: Hashes?
-        public var guild_hashes: Hashes?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#guild-stickers-update-guild-stickers-update-event-fields
     public struct GuildStickersUpdate: Sendable, Codable {
         public var guild_id: String
         public var stickers: [Sticker]
-        public var hashes: Hashes?
-        public var guild_hashes: Hashes?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#guild-integrations-update-guild-integrations-update-event-fields
@@ -754,7 +806,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String
     }
     
-    /// A ``GuildMember`` with an extra `guild_id` field.
+    /// A ``Guild.Member`` with an extra `guild_id` field.
     /// https://discord.com/developers/docs/resources/guild#guild-member-object
     public struct GuildMemberAdd: Sendable, Codable {
         public var guild_id: String
@@ -765,11 +817,10 @@ public struct Gateway: Sendable, Codable {
         public var avatar: String?
         public var joined_at: DiscordTimestamp
         public var premium_since: DiscordTimestamp?
-        public var deaf: Bool
-        public var mute: Bool
+        public var deaf: Bool?
+        public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
-        public var flags: IntBitField<DiscordUser.Flag> // FIXME not sure about `User.Flag`
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }
@@ -778,24 +829,6 @@ public struct Gateway: Sendable, Codable {
     public struct GuildMemberRemove: Sendable, Codable {
         public var guild_id: String
         public var user: DiscordUser
-    }
-    
-    /// https://discord.com/developers/docs/topics/gateway-events#guild-member-update-guild-member-update-event-fields
-    public struct GuildMemberUpdate: Sendable, Codable {
-        public var guild_id: String
-        public var roles: [String]
-        public var hoisted_role: String?
-        public var user: DiscordUser
-        public var nick: String?
-        public var avatar: String?
-        public var joined_at: DiscordTimestamp?
-        public var premium_since: DiscordTimestamp?
-        public var deaf: Bool?
-        public var mute: Bool?
-        public var flags: IntBitField<DiscordUser.Flag>? // FIXME not sure about `User.Flag`
-        public var pending: Bool?
-        public var is_pending: Bool?
-        public var communication_disabled_until: DiscordTimestamp?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#guild-members-chunk
@@ -828,63 +861,10 @@ public struct Gateway: Sendable, Codable {
         }
     }
     
-    /// Undocumented
-    public struct GuildJoinRequestUpdate: Sendable, Codable {
-        
-        public struct Request: Sendable, Codable {
-            
-            public struct FormResponse: Sendable, Codable {
-                
-                public enum FieldKind: String, Sendable, Codable, ToleratesStringDecodeMarker {
-                    case terms = "TERMS"
-                }
-                
-                public struct Automation: Sendable, Codable { }
-                
-                public var values: [String]
-                public var response: Bool
-                public var required: Bool
-                public var label: String
-                public var field_type: FieldKind
-                public var description: String?
-                public var automations: [Automation]?
-            }
-            
-            public var user_id: String
-            public var user: DiscordUser
-            public var rejection_reason: String?
-            public var last_seen: DiscordTimestamp
-            public var created_at: DiscordTimestamp
-            public var id: String
-            public var guild_id: String
-            public var form_responses: [FormResponse]
-            public var application_status: Status
-            public var actioned_by_user: DiscordUser
-            public var actioned_at: String /// Seems to be a snowflake, not a date ?!
-        }
-        
-        public enum Status: String, Sendable, Codable, ToleratesStringDecodeMarker {
-            case approved = "APPROVED"
-        }
-        
-        public var request: Request
-        public var status: Status
-        public var guild_id: String
-    }
-    
-    /// Undocumented
-    public struct GuildJoinRequestDelete: Sendable, Codable {
-        public var id: String
-        public var guild_id: String
-        public var user_id: String
-    }
-    
     /// https://discord.com/developers/docs/topics/gateway-events#guild-role-create-guild-role-create-event-fields
     public struct GuildRole: Sendable, Codable {
         public var guild_id: String
         public var role: Role
-        public var guild_hashes: Hashes?
-        public var hashes: Hashes?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#guild-role-delete
@@ -892,8 +872,6 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String
         public var role_id: String
         public var version: Int?
-        public var guild_hashes: Hashes?
-        public var hashes: Hashes?
     }
     
     /// Not the same as what Discord calls `Guild Scheduled Event User`.
@@ -902,14 +880,6 @@ public struct Gateway: Sendable, Codable {
     public struct GuildScheduledEventUser: Sendable, Codable {
         public var guild_scheduled_event_id: String
         public var user_id: String
-        public var guild_id: String
-    }
-    
-    /// Undocumented
-    public struct GuildApplicationCommandIndexUpdate: Sendable, Codable {
-        public var hashes: Hashes
-        public var guild_hashes: Hashes
-        public var application_command_counts: [String: Int]
         public var guild_id: String
     }
     
@@ -933,8 +903,6 @@ public struct Gateway: Sendable, Codable {
         public var revoked: Bool?
         public var application: IntegrationApplication?
         public var guild_id: String
-        public var guild_hashes: Hashes?
-        public var hashes: Hashes?
         public var scopes: [OAuth2Scope]?
     }
     
@@ -943,8 +911,6 @@ public struct Gateway: Sendable, Codable {
         public var id: String
         public var guild_id: String
         public var application_id: String?
-        public var hashes: Hashes?
-        public var guild_hashes: Hashes?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#invite-create-invite-create-event-fields
@@ -965,12 +931,9 @@ public struct Gateway: Sendable, Codable {
         public var max_uses: Int
         public var target_type: TargetKind?
         public var target_user: DiscordUser?
-        public var type: Int? // FIXME: not sure about the type
-        public var target_user_type: TargetKind? // FIXME: not sure about the type
         public var target_application: PartialApplication?
         public var temporary: Bool
         public var uses: Int
-        public var expires_at: DiscordTimestamp?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#invite-delete
@@ -1004,7 +967,7 @@ public struct Gateway: Sendable, Codable {
         public var pinned: Bool
         public var webhook_id: String?
         public var type: DiscordChannel.Message.Kind
-        public var activity: Activity?
+        public var activity: DiscordChannel.Message.Activity?
         public var application: PartialApplication?
         public var application_id: String?
         public var message_reference: DiscordChannel.Message.MessageReference?
@@ -1016,6 +979,69 @@ public struct Gateway: Sendable, Codable {
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
+        
+        public mutating func update(with partialMessage: DiscordChannel.PartialMessage) {
+            self.id = partialMessage.id
+            self.channel_id = partialMessage.channel_id
+            self.author = partialMessage.author
+            if let content = partialMessage.content {
+                self.content = content
+            }
+            if let timestamp = partialMessage.timestamp {
+                self.timestamp = timestamp
+            }
+            self.edited_timestamp = partialMessage.edited_timestamp
+            if let tts = partialMessage.tts {
+                self.tts = tts
+            }
+            if let mention_everyone = partialMessage.mention_everyone {
+                self.mention_everyone = mention_everyone
+            }
+            if let mentions = partialMessage.mentions {
+                self.mentions = mentions
+            }
+            if let mention_roles = partialMessage.mention_roles {
+                self.mention_roles = mention_roles
+            }
+            self.mention_channels = partialMessage.mention_channels
+            if let attachments = partialMessage.attachments {
+                self.attachments = attachments
+            }
+            if let embeds = partialMessage.embeds {
+                self.embeds = embeds
+            }
+            self.reactions = partialMessage.reactions
+            self.nonce = partialMessage.nonce
+            if let pinned = partialMessage.pinned {
+                self.pinned = pinned
+            }
+            self.webhook_id = partialMessage.webhook_id
+            if let type = partialMessage.type {
+                self.type = type
+            }
+            if let activity = partialMessage.activity {
+                self.activity = activity
+            }
+            self.application = partialMessage.application
+            self.application_id = partialMessage.application_id
+            self.message_reference = partialMessage.message_reference
+            self.flags = partialMessage.flags
+            if let referenced_message = partialMessage.referenced_message,
+               var value = self.referenced_message?.value {
+                value.update(with: referenced_message.value)
+                self.referenced_message = .init(value: value)
+            }
+            self.interaction = partialMessage.interaction
+            self.thread = partialMessage.thread
+            self.components = partialMessage.components
+            self.sticker_items = partialMessage.sticker_items
+            self.stickers = partialMessage.stickers
+            self.position = partialMessage.position
+            if let member = partialMessage.member {
+                self.member = member
+            }
+            self.guild_id = partialMessage.guild_id
+        }
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-delete
@@ -1078,25 +1104,6 @@ public struct Gateway: Sendable, Codable {
         public var embedded: Status?
     }
     
-    /// Undocumented
-    public struct Game: Sendable, Codable {
-        public var type: Int // Undocumented
-        public var state: String?
-        public var name: String
-        public var created_at: TolerantDecodeDate
-        public var id: String
-        public var session_id: String?
-        public var emoji: PartialEmoji?
-        public var platform: String?
-        public var timestamps: Activity.Timestamps?
-        public var application_id: String?
-        public var assets: Activity.Assets?
-        public var party: Activity.Party?
-        public var details: String?
-        public var sync_id: String?
-        public var flags: IntBitField<Activity.Flag>?
-    }
-    
     /// https://discord.com/developers/docs/topics/gateway-events#presence-update-presence-update-event-fields
     public struct PresenceUpdate: Sendable, Codable {
         public var user: PartialUser
@@ -1104,7 +1111,6 @@ public struct Gateway: Sendable, Codable {
         public var status: Status
         public var activities: [Activity]
         public var client_status: ClientStatus
-        public var game: Game?
     }
     
     /// Partial ``PresenceUpdate`` object.
@@ -1115,7 +1121,21 @@ public struct Gateway: Sendable, Codable {
         public var status: Status?
         public var activities: [Activity]?
         public var client_status: ClientStatus
-        public var game: Game?
+        
+        public mutating func update(with presenceUpdate: Gateway.PresenceUpdate) {
+            self.guild_id = presenceUpdate.guild_id
+            self.status = presenceUpdate.status
+            self.activities = presenceUpdate.activities
+            self.client_status = presenceUpdate.client_status
+        }
+        
+        public init(presenceUpdate: Gateway.PresenceUpdate) {
+            self.user = presenceUpdate.user
+            self.guild_id = presenceUpdate.guild_id
+            self.status = presenceUpdate.status
+            self.activities = presenceUpdate.activities
+            self.client_status = presenceUpdate.client_status
+        }
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#activity-object
@@ -1294,22 +1314,6 @@ public struct Gateway: Sendable, Codable {
     public struct WebhooksUpdate: Sendable, Codable {
         public var guild_id: String
         public var channel_id: String
-    }
-    
-    /// Undocumented
-    public struct ApplicationCommandPermissionsUpdate: Sendable, Codable {
-        
-        /// Undocumented
-        public struct UpdatePermission: Sendable, Codable {
-            public var type: Permission // Undocumented
-            public var permission: Bool
-            public var id: String
-        }
-        
-        public var permissions: [UpdatePermission]
-        public var id: String
-        public var guild_id: String
-        public var application_id: String
     }
     
     /// https://discord.com/developers/docs/topics/gateway#get-gateway
