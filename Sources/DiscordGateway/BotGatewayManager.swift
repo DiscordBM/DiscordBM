@@ -67,7 +67,7 @@ public actor BotGatewayManager: GatewayManager {
     /// Discord cares about the identify payload for rate-limiting and if we send
     /// more than 1000 identifies in a day, Discord will revoke the bot token.
     /// This Backoff does not necessarily prevent your bot token getting revoked,
-    /// but in the worst case, doesn't let it happen sooner than ~8 hours.
+    /// but in the worst case, doesn't let it happen sooner than ~6 hours.
     /// This also helps in other situations, for example when there is a Discord outage.
     let connectionBackoff = Backoff(
         base: 2,
@@ -85,8 +85,7 @@ public actor BotGatewayManager: GatewayManager {
     ///   - httpClient: A `HTTPClient`.
     ///   - client: A `DiscordClient` to use.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
-    ///   - compression: Enables transport compression for less network bandwidth usage
-    ///    but more CPU load.
+    ///   - compression: Enables transport compression for less network bandwidth usage.
     ///   - appId: Your Discord application id.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
@@ -94,7 +93,7 @@ public actor BotGatewayManager: GatewayManager {
         httpClient: HTTPClient,
         client: any DiscordClient,
         maxFrameSize: Int =  1 << 31,
-        compression: Bool = false,
+        compression: Bool = true,
         appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
@@ -122,7 +121,7 @@ public actor BotGatewayManager: GatewayManager {
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
-        compression: Bool = false,
+        compression: Bool = true,
         appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
@@ -158,7 +157,7 @@ public actor BotGatewayManager: GatewayManager {
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
-        compression: Bool = false,
+        compression: Bool = true,
         token: String,
         appId: String? = nil,
         shard: IntPair? = nil,
