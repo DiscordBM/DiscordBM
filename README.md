@@ -269,6 +269,7 @@ print("Guild name is:", aGuild.name)
 ```
   
 </details>
+
 ## Testability
 <details>
   <summary> Click to expand </summary>
