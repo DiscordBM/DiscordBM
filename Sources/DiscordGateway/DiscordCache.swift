@@ -52,7 +52,29 @@ public actor DiscordCache {
         /// The current bot user.
         public var botUser: DiscordUser?
         
-        public init() { }
+        public init(
+            guilds: [String: Gateway.GuildCreate] = [:],
+            channels: [String: DiscordChannel] = [:],
+            auditLogs: [String: [AuditLog.Entry]] = [:],
+            integrations: [String: [Integration]] = [:],
+            invites: [InviteID: [Gateway.InviteCreate]] = [:],
+            messages: [String: [Gateway.MessageCreate]] = [:],
+            autoModerationRules: [String: [AutoModerationRule]] = [:],
+            autoModerationExecutions: [String: [AutoModerationActionExecution]] = [:],
+            applicationCommandPermissions: [String: GuildApplicationCommandPermissions] = [:],
+            botUser: DiscordUser? = nil
+        ) {
+            self.guilds = guilds
+            self.channels = channels
+            self.auditLogs = auditLogs
+            self.integrations = integrations
+            self.invites = invites
+            self.messages = messages
+            self.autoModerationRules = autoModerationRules
+            self.autoModerationExecutions = autoModerationExecutions
+            self.applicationCommandPermissions = applicationCommandPermissions
+            self.botUser = botUser
+        }
     }
     
     /// The gateway manager that this `DiscordCache` instance caches from.

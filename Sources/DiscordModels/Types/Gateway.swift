@@ -1249,7 +1249,7 @@ public struct Gateway: Sendable, Codable {
         }
         
         public var name: String?
-        public var type: Kind
+        public var type: Kind?
         public var url: String?
         public var id: String?
         public var created_at: Int?
@@ -1270,7 +1270,7 @@ public struct Gateway: Sendable, Codable {
         public var platform: String?
         public var supported_platforms: [String]?
         
-        public init(name: String?, type: Kind, url: String? = nil, created_at: Int? = nil, timestamps: Timestamps? = nil, application_id: String? = nil, details: String? = nil, state: String? = nil, emoji: ActivityEmoji? = nil, party: Party? = nil, party_id: String? = nil, assets: Assets? = nil, secrets: Secrets? = nil, instance: Bool? = nil, flags: [Flag]? = nil, buttons: [Button]? = nil, sync_id: String? = nil, session_id: String? = nil, platform: String? = nil, supported_platforms: [String]? = nil) {
+        public init(name: String? = nil, type: Kind? = nil, url: String? = nil, created_at: Int? = nil, timestamps: Timestamps? = nil, application_id: String? = nil, details: String? = nil, state: String? = nil, emoji: ActivityEmoji? = nil, party: Party? = nil, party_id: String? = nil, assets: Assets? = nil, secrets: Secrets? = nil, instance: Bool? = nil, flags: [Flag]? = nil, buttons: [Button]? = nil, sync_id: String? = nil, session_id: String? = nil, platform: String? = nil, supported_platforms: [String]? = nil) {
             self.name = name
             self.type = type
             self.url = url
