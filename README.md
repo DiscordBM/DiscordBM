@@ -243,6 +243,32 @@ If you want to only use Discord logger and don't use the rest of `DiscordBM`, yo
 
 </details>
 
+### Discord Cache
+<details>
+  <summary> Click to expand </summary>
+
+`DiscordBM` has the ability to cache Gateway events in-memory, and keep the data in sync with Discord:
+```swift
+let cache = await DiscordCache(
+    /// The `GatewayManager`/`bot` to cache the events from. 
+    gatewayManager: GatewayManager_YOU_MADE_IN_PREVIOUS_STEPS,
+    /// What intents to cache their related Gateway events. 
+    /// This does not affect what events you receive from Discord.
+    /// The intents you enter here must have been enabled in your `GatewayManager`.
+    /// With `nil`, `DiscordCache` will cache all events.
+    intents: [.guilds, .guildMembers],
+    /// In big guilds/servers, Discord only sends your own member/presence info.
+    /// You need to request the rest of the members, and `DiscordCache` can do that for you.
+    /// Must have `guildMembers` intent enabled.
+    requestAllMembers: .enabledWithPresence
+)
+
+/// Access the cached stuff:
+let aGuild = await cache.guilds[GUILD_ID]
+print("Guild name is:", aGuild.name)
+```
+  
+</details>
 ## Testability
 <details>
   <summary> Click to expand </summary>
