@@ -20,6 +20,7 @@ extension KeyedDecodingContainer {
         _: Array<D>.Type,
         forKey key: Key
     ) throws -> Array<D> where D: Decodable {
+        /// I know this check is rather slow, but I couldn't find a better way.
         if D.self is any _ToleratesDecode.Type {
             return try smartPath(Array<D>.self, forKey: key)
         } else {

@@ -32,22 +32,23 @@ public actor DiscordCache {
         
         /// `[GuildID: Guild]`
         public var guilds: [String: Gateway.GuildCreate] = [:]
-        /// Non-guild channels
+        /// `[ChannelID: Channel]`
+        /// Non-guild channels.
         public var channels: [String: DiscordChannel] = [:]
-        /// `[TargetID]: [AuditLog.Entry]]`
+        /// `[TargetID]: [Entry]]`
         /// A target id of `""` is used for entries that don't have a `target_id`.
         public var auditLogs: [String: [AuditLog.Entry]] = [:]
         /// `[GuildID: [Integration]]`
         public var integrations: [String: [Integration]] = [:]
-        /// `[GuildID: [Gateway.InviteCreate]]`
+        /// `[GuildID: [Invite]]`
         public var invites: [InviteID: [Gateway.InviteCreate]] = [:]
-        /// `[ChannelID: [Gateway.InviteCreate]]`
+        /// `[ChannelID: [Message]]`
         public var messages: [String: [Gateway.MessageCreate]] = [:]
-        /// `[GuildID: [AutoModerationRule]]`
+        /// `[GuildID: [Rule]]`
         public var autoModerationRules: [String: [AutoModerationRule]] = [:]
-        /// `[GuildID: [AutoModerationActionExecution]]`
+        /// `[GuildID: [ActionExecution]]`
         public var autoModerationExecutions: [String: [AutoModerationActionExecution]] = [:]
-        /// `[CommandID (or ApplicationID): GuildApplicationCommandPermissions]`
+        /// `[CommandID (or ApplicationID): Permissions]`
         public var applicationCommandPermissions: [String: GuildApplicationCommandPermissions] = [:]
         /// The current bot user.
         public var botUser: DiscordUser?
@@ -79,27 +80,33 @@ public actor DiscordCache {
     
     /// The gateway manager that this `DiscordCache` instance caches from.
     let gatewayManager: any GatewayManager
-    /// The intents for which the events should be cached. `nil` if all events should be cached.
+    /// What intents to cache their related Gateway events.
+    /// This does not affect what events you receive from Discord.
+    /// The intents you enter here must have been enabled in your `GatewayManager`.
+    /// With `nil`, all events will be cached.
     let intents: Set<Gateway.Intent>?
-    /// When a guild has too many members, Discord won't send all the members in
-    /// `.guildCreate` event, and you need to manually request them if you want.
+    /// In big guilds/servers, Discord only sends your own member/presence info by default.
+    /// You need to request the rest of the members, which is what this parameter specifies.
+    /// Must have `guildMembers` intent enabled.
     let requestMembersConfiguration: RequestMembersConfiguration?
     /// The storage of cached stuff.
     public var storage: Storage
     
+    /// Utility to access `Storage`.
     public subscript<T>(dynamicMember path: WritableKeyPath<Storage, T>) -> T {
         get { self.storage[keyPath: path] }
         set { self.storage[keyPath: path] = newValue }
     }
     
     /// - Parameters:
-    ///   - intents: The intents for which the events will cached.
-    ///    `nil` if all events should be cached.
-    
-    /// - Parameters:
     ///   - gatewayManager: The gateway manager that this `DiscordCache` instance caches from.
-    ///   - intents: The intents for which the events should be cached. `nil` if all events should be cached.
-    ///   - requestAllMembers: When a guild has too many members, Discord won't send all the members in the `.guildCreate` event, and you need to manually request them if you want.
+    ///   - intents: What intents to cache their related Gateway events.
+    ///     This does not affect what events you receive from Discord.
+    ///     The intents you enter here must have been enabled in your `GatewayManager`.
+    ///     With `nil`, all events will be cached.
+    ///   - requestAllMembers: In big guilds/servers, Discord only sends your own member/presence
+    ///     info by default. You need to request the rest of the members, which is what this
+    ///     parameter specifies. Must have `guildMembers` intent enabled.
     ///   - storage: The storage of cached stuff. You usually don't need to provide this parameter.
     public init(
         gatewayManager: any GatewayManager,

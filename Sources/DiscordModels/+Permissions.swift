@@ -160,6 +160,9 @@ extension Gateway.GuildCreate {
             return true
         }
         
+        /// Already checked for it.
+        if perm == .administrator { return false }
+        
         /// Member has any roles that allow.
         for role in roles where member.roles.contains(role.id) {
             if role.permissions.values.contains(perm) {
@@ -176,14 +179,24 @@ extension Gateway.GuildCreate {
         return false
     }
     
-    /// Check to see if a member has a role
-    public func memberHasRole(member: Guild.Member, roleId: String) -> Bool {
+    /// Check to see if a member has a role.
+    func memberHasRole(member: Guild.Member, roleId: String) -> Bool {
         if roleId == self.id {
             return true
         } else if member.roles.contains(roleId) {
             return true
         } else {
             return false
+        }
+    }
+    
+    /// Check to see if a member has the roles.
+    public func memberHasRoles(userId: String, roleIds: [String]) -> Bool {
+        guard let member = self.members.first(where: { $0.user?.id == userId }) else {
+            return false
+        }
+        return roleIds.allSatisfy {
+            self.memberHasRole(member: member, roleId: $0)
         }
     }
 }

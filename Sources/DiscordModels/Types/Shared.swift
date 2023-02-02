@@ -292,11 +292,6 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
     
     public var values: [DiscordLocale: C]
     
-    public init(from decoder: Decoder) throws {
-        let container = try _DiscordLocaleCodableContainer<C>(from: decoder)
-        self.values = container.toDictionary()
-    }
-    
     public init(dictionaryLiteral elements: (DiscordLocale, C)...) {
         self.values = .init(elements, uniquingKeysWith: { l, _ in l })
     }
@@ -308,6 +303,11 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
     public init? (_ elements: [DiscordLocale: C]?) {
         guard let elements = elements else { return nil }
         self.values = elements
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try _DiscordLocaleCodableContainer<C>(from: decoder)
+        self.values = container.toDictionary()
     }
     
     public func encode(to encoder: Encoder) throws {
