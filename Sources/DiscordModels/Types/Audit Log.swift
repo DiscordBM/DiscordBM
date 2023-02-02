@@ -5,11 +5,12 @@ public struct AuditLog: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-entry-structure
     public struct Entry: Sendable, Codable {
         
-        public enum Mixed: Sendable, Codable {
+        public enum Mixed: Sendable, Codable, CustomStringConvertible {
             case string(String)
             case int(Int)
             case double(Double)
             case bool(Bool)
+            case strings([String])
             case nameIds([NameID])
             case permissionOverwrites([DiscordChannel.Overwrite])
             case other(Other)
@@ -27,12 +28,13 @@ public struct AuditLog: Sendable, Codable {
                 }
             }
             
-            public var asString: String {
+            public var description: String {
                 switch self {
                 case let .string(string): return string
                 case let .int(int): return "\(int)"
-                case let .double(double): return String(format: "%.3f", double)
+                case let .double(double): return "\(double)"
                 case let .bool(bool): return "\(bool)"
+                case let .strings(array): return "\(array)"
                 case let .nameIds(nameIds): return "\(nameIds)"
                 case let .permissionOverwrites(overwrites): return "\(overwrites)"
                 case let .other(other): return "\(other)"
@@ -56,6 +58,8 @@ public struct AuditLog: Sendable, Codable {
                     self = .bool(bool)
                 } else if let double = try? container.decode(Double.self) {
                     self = .double(double)
+                } else if let array = try? container.decode([String].self) {
+                    self = .strings(array)
                 } else if let nameIds = try? container.decode([NameID].self) {
                     self = .nameIds(nameIds)
                 } else if let overwrites = try? container.decode([DiscordChannel.Overwrite].self) {
@@ -82,6 +86,8 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(double)
                 case let .bool(bool):
                     try container.encode(bool)
+                case let .strings(array):
+                    try container.encode(array)
                 case let .nameIds(nameIds):
                     try container.encode(nameIds)
                 case let .permissionOverwrites(overwrites):
