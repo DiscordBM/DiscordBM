@@ -199,4 +199,13 @@ extension Gateway.GuildCreate {
             self.memberHasRole(member: member, roleId: $0)
         }
     }
+    
+    public func memberHasAnyRoles(userId: String, roleIds: [String]) -> Bool {
+        guard let member = self.members.first(where: { $0.user?.id == userId }) else {
+            return false
+        }
+        return roleIds.contains {
+            self.memberHasRole(member: member, roleId: $0)
+        }
+    }
 }
