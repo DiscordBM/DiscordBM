@@ -12,7 +12,7 @@ extension Gateway.GuildCreate {
         permissions perms: [Permission]
     ) -> Bool {
         guard let channel = self.channels.first(where: { $0.id == channelId }),
-              let member = self.members.first(where: { $0.user?.id == userId })
+              let member = self.member(withUserId: userId)
         else {
             /// Don't even have access to the channel or the member.
             return false
@@ -144,7 +144,7 @@ extension Gateway.GuildCreate {
     
     /// Member has permission in guild. Doesn't check for channel overwrites.
     public func memberHasGuildPermission(userId: String, permission perm: Permission) -> Bool {
-        guard let member = self.members.first(where: { $0.user?.id == userId }) else {
+        guard let member = self.member(withUserId: userId) else {
             /// Don't even have access to the member.
             return false
         }
@@ -179,8 +179,14 @@ extension Gateway.GuildCreate {
         return false
     }
     
+    /// Get member with the specified user id.
+    public func member(withUserId userId: String) -> Guild.Member? {
+        self.members.first(where: { $0.user?.id == userId })
+    }
+    
     /// Check to see if a member has a role.
-    func memberHasRole(member: Guild.Member, roleId: String) -> Bool {
+    /// The member object must belong to the guild.
+    public func memberHasRole(member: Guild.Member, roleId: String) -> Bool {
         if roleId == self.id {
             return true
         } else if member.roles.contains(roleId) {
@@ -190,22 +196,12 @@ extension Gateway.GuildCreate {
         }
     }
     
-    /// Check to see if a member has the roles.
-    public func memberHasRoles(userId: String, roleIds: [String]) -> Bool {
-        guard let member = self.members.first(where: { $0.user?.id == userId }) else {
+    /// Check to see if a user has the roles.
+    /// Returns false if user is not present in the members list of the guild.
+    public func userHasRole(userId: String, roleId: String) -> Bool {
+        guard let member = self.member(withUserId: userId) else {
             return false
         }
-        return roleIds.allSatisfy {
-            self.memberHasRole(member: member, roleId: $0)
-        }
-    }
-    
-    public func memberHasAnyRoles(userId: String, roleIds: [String]) -> Bool {
-        guard let member = self.members.first(where: { $0.user?.id == userId }) else {
-            return false
-        }
-        return roleIds.contains {
-            self.memberHasRole(member: member, roleId: $0)
-        }
+        return self.memberHasRole(member: member, roleId: roleId)
     }
 }
