@@ -255,12 +255,14 @@ let cache = await DiscordCache(
     /// What intents to cache their related Gateway events. 
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
-    /// With `nil`, `DiscordCache` will cache all events.
+    /// With `.all`, `DiscordCache` will cache all events.
     intents: [.guilds, .guildMembers],
     /// In big guilds/servers, Discord only sends your own member/presence info.
     /// You need to request the rest of the members, and `DiscordCache` can do that for you.
     /// Must have `guildMembers` and `guildPresences` intents enabled depending on what you want.
-    requestAllMembers: .enabledWithPresence
+    requestAllMembers: .enabledWithPresences,
+    /// What messages to cache.
+    messageCachingPolicy: .saveEditHistoryAndDeleted
 )
 
 /// Access the cached stuff:
