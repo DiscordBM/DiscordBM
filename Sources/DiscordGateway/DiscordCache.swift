@@ -4,17 +4,56 @@ import DiscordModels
 @dynamicMemberLookup
 public actor DiscordCache {
     
-    public struct RequestMembersConfiguration: Sendable, Codable {
-        public let requestPresences: Bool
+    public enum Intents: Sendable, ExpressibleByArrayLiteral {
+        /// Will cache all events.
+        case all
+        /// Will cache the events related to the specified intents.
+        case specific(Set<Gateway.Intent>)
         
-        /// Requests members but doesn't request member presences.
-        public static var enabled: RequestMembersConfiguration {
-            .init(requestPresences: false)
+        public init(arrayLiteral elements: Gateway.Intent...) {
+            self = .specific(Set(elements))
         }
         
-        /// Requests member presences as well.
-        public static var enabledWithPresence: RequestMembersConfiguration {
-            .init(requestPresences: true)
+        public init<S>(_ elements: S) where S: Sequence, S.Element == Gateway.Intent {
+            self = .specific(.init(elements))
+        }
+    }
+    
+    public enum RequestMembers: Sendable {
+        case disabled
+        /// Only requests members.
+        case enabled
+        /// Requests all members as well as their presences.
+        case enabledWithPresences
+    }
+    
+    public enum MessageCachingPolicy: Sendable {
+        /// Caches messages, replaces edited messages with the new message,
+        /// removes deleted messages from storage.
+        case `default`
+        /// Caches messages, replaces edited messages with the new message,
+        /// moves deleted messages to another property of the storage.
+        case saveDeleted
+        /// Caches messages, replaces edited messages with the new message but moves old messages
+        /// to another property of the storage, removes deleted messages from storage.
+        case saveEditHistory
+        /// Caches messages, replaces edited messages with the new message but moves old messages
+        /// to another property of the storage, moves deleted messages to another property of
+        /// the storage.
+        case saveEditHistoryAndDeleted
+        
+        var shouldSaveDeleted: Bool {
+            switch self {
+            case .saveDeleted, .saveEditHistoryAndDeleted: return true
+            case .default, .saveEditHistory: return false
+            }
+        }
+        
+        var shouldSaveHistory: Bool {
+            switch self {
+            case .saveEditHistory, .saveEditHistoryAndDeleted: return true
+            case .default, .saveDeleted: return false
+            }
         }
     }
     
@@ -44,6 +83,13 @@ public actor DiscordCache {
         public var invites: [InviteID: [Gateway.InviteCreate]] = [:]
         /// `[ChannelID: [Message]]`
         public var messages: [String: [Gateway.MessageCreate]] = [:]
+        /// `[ChannelID: [MessageID: [EditedMessage]]]`
+        /// It's `[EditedMessage]` because it might keep the edited versions of the message too.
+        /// This does not keep the most recent message, which is available in `messages`.
+        public var editedMessages: [String: [String: [Gateway.MessageCreate]]] = [:]
+        /// `[ChannelID: [MessageID: [DeletedMessage]]]`
+        /// It's `[DeletedMessage]` because it might keep the edited versions of the message too.
+        public var deletedMessages: [String: [String: [Gateway.MessageCreate]]] = [:]
         /// `[GuildID: [Rule]]`
         public var autoModerationRules: [String: [AutoModerationRule]] = [:]
         /// `[GuildID: [ActionExecution]]`
@@ -60,6 +106,8 @@ public actor DiscordCache {
             integrations: [String: [Integration]] = [:],
             invites: [InviteID: [Gateway.InviteCreate]] = [:],
             messages: [String: [Gateway.MessageCreate]] = [:],
+            editedMessages: [String: [String: [Gateway.MessageCreate]]] = [:],
+            deletedMessages: [String: [String: [Gateway.MessageCreate]]] = [:],
             autoModerationRules: [String: [AutoModerationRule]] = [:],
             autoModerationExecutions: [String: [AutoModerationActionExecution]] = [:],
             applicationCommandPermissions: [String: GuildApplicationCommandPermissions] = [:],
@@ -71,6 +119,8 @@ public actor DiscordCache {
             self.integrations = integrations
             self.invites = invites
             self.messages = messages
+            self.editedMessages = editedMessages
+            self.deletedMessages = deletedMessages
             self.autoModerationRules = autoModerationRules
             self.autoModerationExecutions = autoModerationExecutions
             self.applicationCommandPermissions = applicationCommandPermissions
@@ -84,11 +134,13 @@ public actor DiscordCache {
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
     /// With `nil`, all events will be cached.
-    let intents: Set<Gateway.Intent>?
+    let intents: Intents
     /// In big guilds/servers, Discord only sends your own member/presence info by default.
     /// You need to request the rest of the members, which is what this parameter specifies.
-    /// Must have `guildMembers` intent enabled.
-    let requestMembersConfiguration: RequestMembersConfiguration?
+    /// Must have `guildMembers` and `guildPresences` intents enabled depending on what you want.
+    let requestMembers: RequestMembers
+    /// How to cache messages.
+    let messageCachingPolicy: MessageCachingPolicy
     /// The storage of cached stuff.
     public var storage: Storage
     
@@ -103,20 +155,23 @@ public actor DiscordCache {
     ///   - intents: What intents to cache their related Gateway events.
     ///     This does not affect what events you receive from Discord.
     ///     The intents you enter here must have been enabled in your `GatewayManager`.
-    ///     With `nil`, all events will be cached.
     ///   - requestAllMembers: In big guilds/servers, Discord only sends your own member/presence
     ///     info by default. You need to request the rest of the members, which is what this
-    ///     parameter specifies. Must have `guildMembers` intent enabled.
+    ///     parameter specifies. Must have `guildMembers` and `guildPresences` intents enabled
+    ///     depending on what you want.
+    ///   - messageCachingPolicy: How to cache messages.
     ///   - storage: The storage of cached stuff. You usually don't need to provide this parameter.
     public init(
         gatewayManager: any GatewayManager,
-        intents: Set<Gateway.Intent>?,
-        requestAllMembers: RequestMembersConfiguration?,
+        intents: Intents,
+        requestAllMembers: RequestMembers,
+        messageCachingPolicy: MessageCachingPolicy = .default,
         storage: Storage = Storage()
     ) async {
         self.gatewayManager = gatewayManager
         self.intents = intents
-        self.requestMembersConfiguration = requestAllMembers
+        self.requestMembers = requestAllMembers
+        self.messageCachingPolicy = messageCachingPolicy
         self.storage = storage
         await gatewayManager.addEventHandler(handleEvent)
     }
@@ -128,13 +183,13 @@ public actor DiscordCache {
             break
         case let .guildCreate(guildCreate):
             self.guilds[guildCreate.id] = guildCreate
-            if let config = requestMembersConfiguration {
+            if [.enabled, .enabledWithPresences].contains(requestMembers) {
                 Task {
                     await gatewayManager.requestGuildMembersChunk(payload: .init(
                         guild_id: guildCreate.id,
                         query: "",
                         limit: 0,
-                        presences: config.requestPresences,
+                        presences: requestMembers == .enabledWithPresences,
                         user_ids: nil,
                         nonce: nil
                     ))
@@ -383,20 +438,48 @@ public actor DiscordCache {
         case let .messageUpdate(message):
             if let idx = self.messages[message.channel_id]?
                 .firstIndex(where: { $0.id == message.id }) {
-                self.messages[message.channel_id]?.remove(at: idx)
-            }
-            if let idx = self.messages[message.channel_id]?
-                .firstIndex(where: { $0.id == message.id }) {
-                self.messages[message.channel_id]?[idx].update(with: message)
+                self.messages[message.channel_id]![idx].update(with: message)
+                if messageCachingPolicy.shouldSaveHistory {
+                    self.editedMessages[message.channel_id, default: [:]][message.id, default: []].append(
+                        self.messages[message.channel_id]![idx]
+                    )
+                }
             }
         case let .messageDelete(message):
             if let idx = self.messages[message.channel_id]?
                 .firstIndex(where: { $0.id == message.id }) {
-                self.messages[message.channel_id]?.remove(at: idx)
+                let deleted = self.messages[message.channel_id]?.remove(at: idx)
+                if messageCachingPolicy.shouldSaveDeleted, let deleted = deleted {
+                    if messageCachingPolicy.shouldSaveHistory {
+                        let history = self.editedMessages[message.channel_id]?[message.id] ?? []
+                        self.deletedMessages[message.channel_id, default: [:]][message.id, default: []].append(
+                            contentsOf: history
+                        )
+                    }
+                    self.deletedMessages[message.channel_id, default: [:]][message.id, default: []].append(
+                        deleted
+                    )
+                }
+                self.editedMessages[message.channel_id]?.removeValue(forKey: message.id)
             }
         case let .messageDeleteBulk(bulkDelete):
-            self.messages[bulkDelete.channel_id]?.removeAll {
-                bulkDelete.ids.contains($0.id)
+            self.messages[bulkDelete.channel_id]?.removeAll { message in
+                let shouldBeRemoved = bulkDelete.ids.contains(message.id)
+                if shouldBeRemoved {
+                    if messageCachingPolicy.shouldSaveDeleted {
+                        if messageCachingPolicy.shouldSaveHistory {
+                            let history = self.editedMessages[message.channel_id]?[message.id] ?? []
+                            self.deletedMessages[message.channel_id, default: [:]][message.id, default: []].append(
+                                contentsOf: history
+                            )
+                        }
+                        self.deletedMessages[message.channel_id, default: [:]][message.id, default: []].append(
+                            message
+                        )
+                    }
+                    self.editedMessages[message.channel_id]?.removeValue(forKey: message.id)
+                }
+                return shouldBeRemoved
             }
         case let .messageReactionAdd(reaction):
             if let idx = self.messages[reaction.channel_id]?
@@ -488,16 +571,19 @@ public actor DiscordCache {
     }
     
     private func intentsAllowCaching(event: Gateway.Event) -> Bool {
-        guard let intents = intents else { return true }
-        guard let correspondingIntents = event.data?.correspondingIntents else {
-            return false
-        }
-        if correspondingIntents.isEmpty {
+        guard let data = event.data else { return false }
+        switch intents {
+        case .all:
             return true
-        } else if correspondingIntents.contains(where: { intents.contains($0) }) {
-            return true
-        } else {
-            return false
+        case let .specific(intents):
+            let correspondingIntents = data.correspondingIntents
+            if correspondingIntents.isEmpty {
+                return true
+            } else if correspondingIntents.contains(where: { intents.contains($0) }) {
+                return true
+            } else {
+                return false
+            }
         }
     }
 }

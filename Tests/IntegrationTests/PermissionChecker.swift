@@ -38,7 +38,7 @@ class PermissionChecker: XCTestCase {
         
         let cache = await DiscordCache(
             gatewayManager: bot,
-            intents: nil,
+            intents: .all,
             requestAllMembers: .enabled
         )
         

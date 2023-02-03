@@ -1,11 +1,14 @@
 import Foundation
 import NIOCore
+import Logging
 
 actor SerialQueue {
     
     var lastSend: Date
     let waitTime: TimeAmount
-    let logger = DiscordGlobalConfiguration.makeLogger("DiscordSerialQueue")
+    var logger: Logger {
+        DiscordGlobalConfiguration.makeLogger("DiscordSerialQueue")
+    }
     
     init(waitTime: TimeAmount) {
         /// Setting `lastSend` to sometime in the past that is not way too far.
