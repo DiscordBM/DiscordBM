@@ -259,7 +259,7 @@ let cache = await DiscordCache(
     intents: [.guilds, .guildMembers],
     /// In big guilds/servers, Discord only sends your own member/presence info.
     /// You need to request the rest of the members, and `DiscordCache` can do that for you.
-    /// Must have `guildMembers` intent enabled.
+    /// Must have `guildMembers` and `guildPresences` intents enabled depending on what you want.
     requestAllMembers: .enabledWithPresence
 )
 
