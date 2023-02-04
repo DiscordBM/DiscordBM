@@ -133,7 +133,7 @@ public actor DiscordCache {
     /// What intents to cache their related Gateway events.
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
-    /// With `nil`, all events will be cached.
+    /// With `.all`, all events will be cached.
     let intents: Intents
     /// In big guilds/servers, Discord only sends your own member/presence info by default.
     /// You need to request the rest of the members, which is what this parameter specifies.
