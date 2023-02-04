@@ -24,9 +24,9 @@ Penny is available [here](https://github.com/vapor/penny-bot) and you can find `
   
 > If you're using `DiscordBM` on macOS Ventura (on either Xcode or VSCode), make sure you have **Xcode 14.1 or above**. Lower Xcode 14 versions have known issues that cause a lot of problems for libraries.    
 
-First you need to initialize a `BotGatewayManager` instance, then tell it to connect and start using it:
-
 ### Initializing a Gateway Manager On Your Own
+
+First you need to initialize a `BotGatewayManager` instance, then tell it to connect and start using it.   
 
 Make sure you've added [AsyncHTTPClient](https://github.com/swift-server/async-http-client) to your dependancies.
 ```swift
@@ -116,6 +116,21 @@ Task {
 /// Otherwise your executable will exit immediately after every run.
 /// RunLoop.current.run()
 ```
+
+### Mindset
+
+<details>
+  <summary> Click to expand </summary>
+  
+The way you can make sense of the library is to think of it as a direct implementation of the Discord API.   
+In most cases, the library doesn't try to abstract away Discord's stuff.   
+
+* If something is related to the Gateway, you should find it near `GatewayManager`. 
+* If there is a HTTP request you want to make, you'll need to use `DiscordClient`.
+* You should read Discord documentation's related notes when you want to use something of this library.   
+  Everything in the library has its related Discord documentation section linked near it.
+
+</details>
 
 ### Finding Your Bot Token
 <details>
