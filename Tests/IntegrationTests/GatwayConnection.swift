@@ -186,7 +186,7 @@ class GatewayConnectionTests: XCTestCase {
         
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we don't get invalid-session-ed.
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(nanoseconds: 10_000_000_000)
         
         await bot.disconnect()
         
