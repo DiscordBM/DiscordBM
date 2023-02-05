@@ -83,6 +83,7 @@ let package = Package(
         .target(
             name: "DiscordModels",
             dependencies: [
+                .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
                 "DiscordCore"
             ]
