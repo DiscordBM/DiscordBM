@@ -1,4 +1,5 @@
 import Atomics
+import DiscordModels
 import struct NIOCore.ByteBuffer
 
 #if swift(>=5.7)
@@ -19,9 +20,12 @@ public protocol GatewayManager: DiscordActor {
     
     /// Starts connecting to Discord.
     func connect() async
-    /// Requests guild members from Discord.
-    /// Refer to the documentation link of ``Gateway.RequestGuildMembers`` for more info.
+    /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
+    /// https://discord.com/developers/docs/topics/gateway-events#update-presence
+    func updatePresence(payload: Gateway.Identify.Presence) async
+    /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
+    func updateVoiceState(payload: VoiceStateUpdate) async
     /// Adds a handler to be notified of events.
     func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
     /// Adds a handler to be notified of event parsing failures.

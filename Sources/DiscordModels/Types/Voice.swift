@@ -46,3 +46,19 @@ public struct PartialVoiceState: Sendable, Codable {
         self.request_to_speak_timestamp = voiceState.request_to_speak_timestamp
     }
 }
+
+/// https://discord.com/developers/docs/topics/gateway-events#update-voice-state-gateway-voice-state-update-structure
+public struct VoiceStateUpdate: Sendable, Codable {
+    public var guild_id: String
+    public var channel_id: String?
+    public var self_deaf: Bool
+    public var self_mute: Bool
+    
+    /// For Gateway Voice-State update.
+    public init(guildId: String, channelId: String? = nil, selfMute: Bool, selfDeaf: Bool) {
+        self.guild_id = guildId
+        self.channel_id = channelId
+        self.self_mute = selfMute
+        self.self_deaf = selfDeaf
+    }
+}

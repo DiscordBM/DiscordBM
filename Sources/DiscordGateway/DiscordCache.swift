@@ -179,7 +179,7 @@ public actor DiscordCache {
     private func handleEvent(_ event: Gateway.Event) {
         guard intentsAllowCaching(event: event) else { return }
         switch event.data {
-        case .none, .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .interactionCreate:
+        case .none, .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate:
             break
         case let .guildCreate(guildCreate):
             self.guilds[guildCreate.id] = guildCreate

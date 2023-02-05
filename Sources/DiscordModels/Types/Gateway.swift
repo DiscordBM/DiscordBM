@@ -116,6 +116,7 @@ public struct Gateway: Sendable, Codable {
             case messageReactionRemoveEmoji(MessageReactionRemoveEmoji)
             
             case presenceUpdate(PresenceUpdate)
+            case requestPresenceUpdate(Identify.Presence)
             
             case stageInstanceCreate(StageInstance)
             case stageInstanceDelete(StageInstance)
@@ -126,6 +127,7 @@ public struct Gateway: Sendable, Codable {
             case userUpdate(DiscordUser)
             
             case voiceStateUpdate(VoiceState)
+            case requestVoiceStateUpdate(VoiceStateUpdate)
             
             case voiceServerUpdate(VoiceServerUpdate)
             
@@ -141,7 +143,7 @@ public struct Gateway: Sendable, Codable {
             
             public var correspondingIntents: [Intent] {
                 switch self {
-                case .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .interactionCreate, .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
+                case .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate, .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
                     return []
                 case .guildCreate, .guildUpdate, .guildDelete, .guildMembersChunk, .guildRoleCreate, .guildRoleUpdate, .guildRoleDelete, .channelCreate, .channelUpdate, .channelDelete, .threadCreate, .threadUpdate, .threadDelete, .threadSyncList, .threadMemberUpdate, .stageInstanceCreate, .stageInstanceDelete, .stageInstanceUpdate:
                     return [.guilds]
@@ -407,6 +409,10 @@ public struct Gateway: Sendable, Codable {
                 try container.encode(payload, forKey: .data)
             case let .requestGuildMembers(payload):
                 try container.encode(payload, forKey: .data)
+            case let .requestPresenceUpdate(payload):
+                try container.encode(payload, forKey: .data)
+            case let .requestVoiceStateUpdate(payload):
+                try container.encode(payload, forKey: .data)
             default:
                 throw EncodingError.notSupposedToBeSent(
                     message: "'\(self)' data is supposed to never be sent."
@@ -486,7 +492,7 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
-        /// https://discord.com/developers/docs/topics/gateway-events#presence-update-presence-update-event-fields
+        /// https://discord.com/developers/docs/topics/gateway-events#update-presence-gateway-presence-update-structure
         public struct Presence: Sendable, Codable {
             public var since: Int?
             public var activities: [Activity]
@@ -1270,27 +1276,11 @@ public struct Gateway: Sendable, Codable {
         public var platform: String?
         public var supported_platforms: [String]?
         
-        public init(name: String? = nil, type: Kind? = nil, url: String? = nil, created_at: Int? = nil, timestamps: Timestamps? = nil, application_id: String? = nil, details: String? = nil, state: String? = nil, emoji: ActivityEmoji? = nil, party: Party? = nil, party_id: String? = nil, assets: Assets? = nil, secrets: Secrets? = nil, instance: Bool? = nil, flags: [Flag]? = nil, buttons: [Button]? = nil, sync_id: String? = nil, session_id: String? = nil, platform: String? = nil, supported_platforms: [String]? = nil) {
+        /// Bots are only able to send `name`, `type`, and optionally `url`.
+        public init(name: String, type: Kind, url: String? = nil) {
             self.name = name
             self.type = type
             self.url = url
-            self.created_at = created_at
-            self.timestamps = timestamps
-            self.application_id = application_id
-            self.details = details
-            self.state = state
-            self.emoji = emoji
-            self.party = party
-            self.party_id = party_id
-            self.assets = assets
-            self.secrets = secrets
-            self.instance = instance
-            self.flags = flags.map { .init($0) }
-            self.buttons = buttons
-            self.sync_id = sync_id
-            self.session_id = session_id
-            self.platform = platform
-            self.supported_platforms = supported_platforms
         }
     }
     

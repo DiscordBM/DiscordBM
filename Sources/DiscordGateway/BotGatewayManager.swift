@@ -233,13 +233,30 @@ public actor BotGatewayManager: GatewayManager {
         }
     }
     
-    /// Requests guild members from Discord.
-    /// Refer to the documentation link of ``Gateway.RequestGuildMembers`` for more info.
+    /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
     public func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) {
         /// This took a lot of time to figure out, not sure why it needs opcode `1`.
         self.send(payload: .init(
             opcode: .requestGuildMembers,
             data: .requestGuildMembers(payload)
+        ), opcode: 1)
+    }
+    
+    /// https://discord.com/developers/docs/topics/gateway-events#update-presence
+    public func updatePresence(payload: Gateway.Identify.Presence) {
+        /// This took a lot of time to figure out, not sure why it needs opcode `1`.
+        self.send(payload: .init(
+            opcode: .presenceUpdate,
+            data: .requestPresenceUpdate(payload)
+        ), opcode: 1)
+    }
+    
+    /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
+    public func updateVoiceState(payload: VoiceStateUpdate) {
+        /// This took a lot of time to figure out, not sure why it needs opcode `1`.
+        self.send(payload: .init(
+            opcode: .voiceStateUpdate,
+            data: .requestVoiceStateUpdate(payload)
         ), opcode: 1)
     }
     

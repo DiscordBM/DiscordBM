@@ -42,7 +42,16 @@ class PermissionChecker: XCTestCase {
             requestAllMembers: .enabled
         )
         
+        let expectation = expectation(description: "Connected")
+        
+        await bot.addEventHandler { event in
+            if case .ready = event.data {
+                expectation.fulfill()
+            }
+        }
+        
         Task { await bot.connect() }
+        wait(for: [expectation], timeout: 10)
         
         try await Task.sleep(nanoseconds: 10_000_000_000)
         
