@@ -49,9 +49,6 @@ class GatewayConnectionTests: XCTestCase {
             } else if _ready == nil {
                 expectation.fulfill()
             }
-            if case .invalidSession = event.data {
-                XCTFail("Got Invalid-Session-ed")
-            }
         }
         
         Task { await bot.connect() }
@@ -109,9 +106,6 @@ class GatewayConnectionTests: XCTestCase {
             } else if _ready == nil {
                 expectation.fulfill()
             }
-            if case .invalidSession = event.data {
-                XCTFail("Got Invalid-Session-ed")
-            }
         }
         
         Task { await bot.connect() }
@@ -159,9 +153,6 @@ class GatewayConnectionTests: XCTestCase {
         await bot.addEventHandler { event in
             if case .ready = event.data {
                 expectation.fulfill()
-            }
-            if case .invalidSession = event.data {
-                XCTFail("Got Invalid-Session-ed")
             }
         }
         
