@@ -244,20 +244,20 @@ public actor BotGatewayManager: GatewayManager {
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     public func updatePresence(payload: Gateway.Identify.Presence) {
-        /// This took a lot of time to figure out, not sure why it needs opcode `1`.
+        /// This took a lot of time to figure out, not sure why it needs opcode `9` (works with `10` too?!).
         self.send(payload: .init(
             opcode: .presenceUpdate,
             data: .requestPresenceUpdate(payload)
-        ), opcode: 1)
+        ), opcode: 9)
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
     public func updateVoiceState(payload: VoiceStateUpdate) {
-        /// This took a lot of time to figure out, not sure why it needs opcode `1`.
+        /// This took a lot of time to figure out, not sure why it needs opcode `10` (works with `9` too?!).
         self.send(payload: .init(
             opcode: .voiceStateUpdate,
             data: .requestVoiceStateUpdate(payload)
-        ), opcode: 1)
+        ), opcode: 10)
     }
     
     /// Adds a handler to be notified of events.
