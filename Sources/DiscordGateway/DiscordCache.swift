@@ -1,4 +1,6 @@
 import DiscordModels
+import Foundation
+import OrderedCollections
 
 /// Caches Gateway events.
 @dynamicMemberLookup
@@ -71,16 +73,35 @@ public actor DiscordCache {
         }
     }
     
-    /// Keeps the storage from using too much memory.
-    /// Does not apply to `guilds`, `channels` & `botUser`.
+    /// Keeps the storage from using too much memory. Removes the oldest items.
+    ///
+    /// Note: The limit policy is applied with a small tolerance, so you can't count on
+    /// the limits being applied right-away. Realistically this should not matter anyway,
+    /// as the point of this is just to preserve memory.
     public enum ItemsLimitPolicy: @unchecked Sendable {
+        
+        /// `guilds`, `channels` and `botUser` are intentionally excluded.
+        /// For `guilds` and `channels`, Discord only sends a limited amount that are related
+        /// to your Gateway/shard. And `botUser` isn't a collection.
+        public enum Path: Sendable {
+            case auditLogs
+            case integrations
+            case invites
+            case messages
+            case editedMessages
+            case deletedMessages
+            case autoModerationRules
+            case autoModerationExecutions
+            case applicationCommandPermissions
+        }
+        
         case disabled
         case constant(Int)
-        case custom([PartialKeyPath<Storage>: Int])
+        case custom([Path: Int])
         
-        public static let `default` = ItemsLimitPolicy.constant(10_000)
+        public static let `default` = ItemsLimitPolicy.constant(100_000)
         
-        func limit(for path: PartialKeyPath<Storage>) -> Int? {
+        func limit(for path: Path) -> Int? {
             switch self {
             case .disabled:
                 return nil
@@ -90,11 +111,26 @@ public actor DiscordCache {
                 return custom[path]
             }
         }
+        
+        func calculateCheckForLimitEvery() -> Int {
+            switch self {
+            case .disabled: return 1 /// Doesn't matter
+            case let .constant(limit):
+                let powed = pow(1/2, Double(limit))
+                return max(10, Int(powed))
+            case let .custom(custom):
+                guard let minimum = custom.map(\.value).min() else {
+                    fatalError("It's meaningless for 'ItemsLimitPolicy.custom' to be empty. Please use `ItemsLimitPolicy.disabled` instead")
+                }
+                let powed = pow(1/2, Double(minimum))
+                return max(10, Int(powed))
+            }
+        }
     }
     
     /// The assumption is users might want to encode/decode contents of this storage using Codable.
     /// So this storage should be codable-backward-compatible.
-    public struct Storage: Sendable, Codable {
+    public struct Storage: @unchecked Sendable, Codable {
         
         public struct InviteID: Sendable, Codable, Hashable {
             public var guildId: String?
@@ -106,6 +142,9 @@ public actor DiscordCache {
             }
         }
         
+        /// Using `OrderedDictionary` for those which can be affected by the `ItemsLimitPolicy`
+        /// so we can remove the oldest items.
+        
         /// `[GuildID: Guild]`
         public var guilds: [String: Gateway.GuildCreate] = [:]
         /// `[ChannelID: Channel]`
@@ -113,41 +152,41 @@ public actor DiscordCache {
         public var channels: [String: DiscordChannel] = [:]
         /// `[TargetID]: [Entry]]`
         /// A target id of `""` is used for entries that don't have a `target_id`.
-        public var auditLogs: [String: [AuditLog.Entry]] = [:]
+        public var auditLogs: OrderedDictionary<String, [AuditLog.Entry]> = [:]
         /// `[GuildID: [Integration]]`
-        public var integrations: [String: [Integration]] = [:]
+        public var integrations: OrderedDictionary<String, [Integration]> = [:]
         /// `[InviteID: [Invite]]`
-        public var invites: [InviteID: [Gateway.InviteCreate]] = [:]
+        public var invites: OrderedDictionary<InviteID, [Gateway.InviteCreate]> = [:]
         /// `[ChannelID: [Message]]`
-        public var messages: [String: [Gateway.MessageCreate]] = [:]
+        public var messages: OrderedDictionary<String, [Gateway.MessageCreate]> = [:]
         /// `[ChannelID: [MessageID: [EditedMessage]]]`
         /// It's `[EditedMessage]` because it will keep all edited versions of a message.
         /// This does not keep the most recent message, which is available in `messages`.
-        public var editedMessages: [String: [String: [Gateway.MessageCreate]]] = [:]
+        public var editedMessages: OrderedDictionary<String, [String: [Gateway.MessageCreate]]> = [:]
         /// `[ChannelID: [MessageID: [DeletedMessage]]]`
         /// It's `[DeletedMessage]` because it might have the edited versions of the message too.
-        public var deletedMessages: [String: [String: [Gateway.MessageCreate]]] = [:]
+        public var deletedMessages: OrderedDictionary<String, [String: [Gateway.MessageCreate]]> = [:]
         /// `[GuildID: [Rule]]`
-        public var autoModerationRules: [String: [AutoModerationRule]] = [:]
+        public var autoModerationRules: OrderedDictionary<String, [AutoModerationRule]> = [:]
         /// `[GuildID: [ActionExecution]]`
-        public var autoModerationExecutions: [String: [AutoModerationActionExecution]] = [:]
+        public var autoModerationExecutions: OrderedDictionary<String, [AutoModerationActionExecution]> = [:]
         /// `[CommandID (or ApplicationID): Permissions]`
-        public var applicationCommandPermissions: [String: GuildApplicationCommandPermissions] = [:]
+        public var applicationCommandPermissions: OrderedDictionary<String, GuildApplicationCommandPermissions> = [:]
         /// The current bot user.
         public var botUser: DiscordUser?
         
         public init(
             guilds: [String: Gateway.GuildCreate] = [:],
             channels: [String: DiscordChannel] = [:],
-            auditLogs: [String: [AuditLog.Entry]] = [:],
-            integrations: [String: [Integration]] = [:],
-            invites: [InviteID: [Gateway.InviteCreate]] = [:],
-            messages: [String: [Gateway.MessageCreate]] = [:],
-            editedMessages: [String: [String: [Gateway.MessageCreate]]] = [:],
-            deletedMessages: [String: [String: [Gateway.MessageCreate]]] = [:],
-            autoModerationRules: [String: [AutoModerationRule]] = [:],
-            autoModerationExecutions: [String: [AutoModerationActionExecution]] = [:],
-            applicationCommandPermissions: [String: GuildApplicationCommandPermissions] = [:],
+            auditLogs: OrderedDictionary<String, [AuditLog.Entry]> = [:],
+            integrations: OrderedDictionary<String, [Integration]> = [:],
+            invites: OrderedDictionary<InviteID, [Gateway.InviteCreate]> = [:],
+            messages: OrderedDictionary<String, [Gateway.MessageCreate]> = [:],
+            editedMessages: OrderedDictionary<String, [String: [Gateway.MessageCreate]]> = [:],
+            deletedMessages: OrderedDictionary<String, [String: [Gateway.MessageCreate]]> = [:],
+            autoModerationRules: OrderedDictionary<String, [AutoModerationRule]> = [:],
+            autoModerationExecutions: OrderedDictionary<String, [AutoModerationActionExecution]> = [:],
+            applicationCommandPermissions: OrderedDictionary<String, GuildApplicationCommandPermissions> = [:],
             botUser: DiscordUser? = nil
         ) {
             self.guilds = guilds
@@ -178,11 +217,14 @@ public actor DiscordCache {
     let requestMembers: RequestMembers
     /// How to cache messages.
     let messageCachingPolicy: MessageCachingPolicy
-    /// Keeps the storage from using too much memory.
-    /// Does not apply to `guilds`, `channels` & `botUser`.
+    /// Keeps the storage from using too much memory. Removes the oldest items.
     let itemsLimitPolicy: ItemsLimitPolicy
+    /// How often to check and enforce the limit above.
+    private let checkForLimitEvery: Int
     /// The storage of cached stuff.
-    public var storage: Storage
+    public var storage: Storage {
+        didSet { checkItemsLimit() }
+    }
     
     /// Utility to access `Storage`.
     public subscript<T>(dynamicMember path: WritableKeyPath<Storage, T>) -> T {
@@ -200,8 +242,7 @@ public actor DiscordCache {
     ///     parameter specifies. Must have `guildMembers` and `guildPresences` intents enabled
     ///     depending on what you want.
     ///   - messageCachingPolicy: How to cache messages.
-    ///   - itemsLimitPolicy: Keeps the storage from using too much memory. Does not apply to
-    ///     `guilds`, `channels` & `botUser`.
+    ///   - itemsLimitPolicy: Keeps the storage from using too much memory. Removes the oldest items.
     ///   - storage: The storage of cached stuff. You usually don't need to provide this parameter.
     public init(
         gatewayManager: any GatewayManager,
@@ -216,6 +257,7 @@ public actor DiscordCache {
         self.requestMembers = requestAllMembers
         self.messageCachingPolicy = messageCachingPolicy
         self.itemsLimitPolicy = itemsLimitPolicy
+        self.checkForLimitEvery = itemsLimitPolicy.calculateCheckForLimitEvery()
         self.storage = storage
         await gatewayManager.addEventHandler(handleEvent)
     }
@@ -630,6 +672,107 @@ public actor DiscordCache {
             }
         }
     }
+    
+    private var itemsLimitCounter = 0
+    
+    private func checkItemsLimit() {
+        if case .disabled = itemsLimitPolicy { return }
+        itemsLimitCounter &+= 1
+        if itemsLimitCounter % checkForLimitEvery == 0 {
+            switch itemsLimitPolicy {
+            case .disabled: return
+            case let .constant(constant):
+                if self.auditLogs.count > constant {
+                    let extra = self.auditLogs.count - constant
+                    self.auditLogs.removeSubrange(0..<extra)
+                }
+                if self.integrations.count > constant {
+                    let extra = self.integrations.count - constant
+                    self.integrations.removeSubrange(0..<extra)
+                }
+                if self.invites.count > constant {
+                    let extra = self.invites.count - constant
+                    self.invites.removeSubrange(0..<extra)
+                }
+                if self.messages.count > constant {
+                    let extra = self.messages.count - constant
+                    self.messages.removeSubrange(0..<extra)
+                }
+                if self.editedMessages.count > constant {
+                    let extra = self.editedMessages.count - constant
+                    self.editedMessages.removeSubrange(0..<extra)
+                }
+                if self.deletedMessages.count > constant {
+                    let extra = self.deletedMessages.count - constant
+                    self.deletedMessages.removeSubrange(0..<extra)
+                }
+                if self.autoModerationRules.count > constant {
+                    let extra = self.autoModerationRules.count - constant
+                    self.autoModerationRules.removeSubrange(0..<extra)
+                }
+                if self.autoModerationExecutions.count > constant {
+                    let extra = self.autoModerationExecutions.count - constant
+                    self.autoModerationExecutions.removeSubrange(0..<extra)
+                }
+                if self.applicationCommandPermissions.count > constant {
+                    let extra = self.applicationCommandPermissions.count - constant
+                    self.applicationCommandPermissions.removeSubrange(0..<extra)
+                }
+            case let .custom(custom):
+                if let limit = custom[.auditLogs],
+                   self.auditLogs.count > limit {
+                    let extra = self.auditLogs.count - limit
+                    self.auditLogs.removeSubrange(0..<extra)
+                }
+                if let limit = custom[.integrations],
+                   self.integrations.count > limit {
+                    let extra = self.integrations.count - limit
+                    self.integrations.removeSubrange(0..<extra)
+                }
+                if let limit = custom[.invites],
+                   self.invites.count > limit {
+                    let extra = self.invites.count - limit
+                    self.invites.removeSubrange(0..<extra)
+                }
+                if let limit = custom[.messages],
+                   self.messages.count > limit {
+                    let extra = self.messages.count - limit
+                    self.messages.removeSubrange(0..<extra)
+                }
+                if let limit = custom[.editedMessages],
+                   self.editedMessages.count > limit {
+                    let extra = self.editedMessages.count - limit
+                    self.editedMessages.removeSubrange(0..<extra)
+                }
+                if let limit = custom[.deletedMessages],
+                   self.deletedMessages.count > limit {
+                    let extra = self.deletedMessages.count - limit
+                    self.deletedMessages.removeSubrange(0..<extra)
+                }
+                if let limit = custom[.autoModerationRules],
+                   self.autoModerationRules.count > limit {
+                    let extra = self.autoModerationRules.count - limit
+                    self.autoModerationRules.removeSubrange(0..<extra)
+                }
+                if let limit = custom[.autoModerationExecutions],
+                   self.autoModerationExecutions.count > limit {
+                    let extra = self.autoModerationExecutions.count - limit
+                    self.autoModerationExecutions.removeSubrange(0..<extra)
+                }
+                if let limit = custom[.applicationCommandPermissions],
+                   self.applicationCommandPermissions.count > limit {
+                    let extra = self.applicationCommandPermissions.count - limit
+                    self.applicationCommandPermissions.removeSubrange(0..<extra)
+                }
+            }
+        }
+    }
+    
+#if DEBUG
+    func _tests_modifyStorage(_ block: (inout Storage) -> Void) {
+        block(&self.storage)
+    }
+#endif
 }
 
 private func == (lhs: PartialEmoji, rhs: PartialEmoji) -> Bool {

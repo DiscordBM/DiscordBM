@@ -76,7 +76,6 @@ public actor DiscordLogManager {
         ///   - frequency: The frequency of the log-sendings. e.g. if its set to 30s, logs will only be sent once-in-30s. Should not be lower than 10s, because of Discord rate-limits.
         ///   - aliveNotice: Configuration for sending "I am alive" messages every once in a while. Note that alive notices are delayed until it's been `interval`-time past last message.
         ///   - fallbackLogger: The logger to use when `DiscordLogger` errors. You should use a log handler that logs to a main place like stdout.
-        ///   **SHOULD NOT** use a logger that uses `DiscordLogger`.
         ///   e.g. `Logger(label: "Fallback", factory: StreamLogHandler.standardOutput(label:))`
         ///   - mentions: ID of users/roles to be mentioned for each log-level.
         ///   - colors: Color of the embeds to be used for each log-level.

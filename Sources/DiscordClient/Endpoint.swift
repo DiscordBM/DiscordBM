@@ -240,9 +240,9 @@ public enum Endpoint: Sendable {
         case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .modifyWebhook1, .deleteWebhook1:
             return self.urlSuffix
         case let .getWebhook2(id, token),
-                let .modifyWebhook2(id, token),
-                let .deleteWebhook2(id, token),
-                let .executeWebhook(id, token):
+            let .modifyWebhook2(id, token),
+            let .deleteWebhook2(id, token),
+            let .executeWebhook(id, token):
             return "webhooks/\(id)/\(token.hash)"
         case let .getWebhookMessage(id, token, messageId):
             return "webhooks/\(id)/\(token.hash)/messages/\(messageId)"
@@ -321,6 +321,8 @@ public enum Endpoint: Sendable {
         }
     }
     
+    /// Some endpoints like don't require an authorization header because the endpoint itself
+    /// contains some kind of authorization token. Like half of the webhook endpoints.
     var requiresAuthorizationHeader: Bool {
         switch self {
         case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .modifyWebhook1, .deleteWebhook1:
