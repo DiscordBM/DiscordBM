@@ -231,22 +231,21 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
         ),
         aliveNotice: .init(
             address: try .url(WEBHOOK_URL),
-            interval: .hours(1),
+            /// If nil, DiscordLogger will only send 1 "I'm alive" notice, on boot.
+            /// If not nil, it will send a "I'm alive" notice every this-amount too. 
+            interval: nil,
             message: "I'm Alive! :)",
             color: .blue,
             initialNoticeMention: .user("970723029262942248")
         ),
         mentions: [
-            .critical: .role("970723029262942248"),
-            .error: .role("970723101044244510"),
             .warning: .role("970723134149918800"),
-            .trace: .role("970723180706668584"),
-            .debug: .role("970723199761383484"),
-            .notice: .role("970723218551865384"),
-            .info: .role("970723238097330237"),
+            .error: .role("970723101044244510"),
+            .critical: .role("970723029262942248"),
         ],
         extraMetadata: [.warning, .error, .critical],
-        disabledLogLevels: [.debug, .trace]
+        disabledLogLevels: [.debug, .trace],
+        disabledInDebug: true
     )
 )
 ```
@@ -255,6 +254,21 @@ If you want to only use Discord logger and don't use the rest of `DiscordBM`, yo
 /// In `Package.swift`:
 .product(name: "DiscordLogger", package: "DiscordBM"),
 ```
+
+#### Example
+
+```swift
+/// After bootstrapping the `LoggingSystem`, and with the configuration above, but `extraMetadata` set to `[.critical]`
+let logger = Logger(label: "LoggerLabel")
+logger.warning("Warning you about something!")
+logger.error("We're having an error!", metadata: [
+    "number": .stringConvertible(1),
+    "statusCode": "401 Unauthorized"
+])
+logger.critical("CRITICAL PROBLEM. ABOUT TO EXPLODE 💥")
+```
+
+<img width="489" alt="DiscordLogger Showcase Output" src="https://user-images.githubusercontent.com/54685446/217139045-e4abf8c7-d5f9-4e89-9170-53980e90af57.png">
 
 </details>
 

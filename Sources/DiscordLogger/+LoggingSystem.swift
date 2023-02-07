@@ -17,36 +17,30 @@ extension LoggingSystem {
         metadataProvider: Logger.MetadataProvider? = nil,
         makeMainLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
     ) {
+        LoggingSystem._bootstrap({ label, metadataProvider in
+            var otherHandler = makeMainLogHandler(label, metadataProvider)
+            otherHandler.logLevel = level
+            let handler = MultiplexLogHandler([
+                otherHandler,
+                DiscordLogHandler(
+                    label: label,
+                    address: address,
+                    level: level,
+                    metadataProvider: metadataProvider
+                )
+            ])
+            return handler
+        }, metadataProvider: metadataProvider)
+    }
+    
+    private static func _bootstrap(
+        _ factory: @escaping (String, Logger.MetadataProvider?) -> LogHandler,
+        metadataProvider: Logger.MetadataProvider?
+    ) {
 #if DEBUG
-        LoggingSystem.bootstrapInternal({ label, metadataProvider in
-            var otherHandler = makeMainLogHandler(label, metadataProvider)
-            otherHandler.logLevel = level
-            let handler = MultiplexLogHandler([
-                otherHandler,
-                DiscordLogHandler(
-                    label: label,
-                    address: address,
-                    level: level,
-                    metadataProvider: metadataProvider
-                )
-            ])
-            return handler
-        }, metadataProvider: metadataProvider)
+        LoggingSystem.bootstrapInternal(factory, metadataProvider: metadataProvider)
 #else
-        LoggingSystem.bootstrap({ label, metadataProvider in
-            var otherHandler = makeMainLogHandler(label, metadataProvider)
-            otherHandler.logLevel = level
-            let handler = MultiplexLogHandler([
-                otherHandler,
-                DiscordLogHandler(
-                    label: label,
-                    address: address,
-                    level: level,
-                    metadataProvider: metadataProvider
-                )
-            ])
-            return handler
-        }, metadataProvider: metadataProvider)
+        LoggingSystem.bootstrap(factory, metadataProvider: metadataProvider)
 #endif
     }
 }
