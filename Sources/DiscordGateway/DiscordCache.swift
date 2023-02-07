@@ -25,6 +25,20 @@ public actor DiscordCache {
         case enabled
         /// Requests all members as well as their presences.
         case enabledWithPresences
+        
+        var isEnabled: Bool {
+            switch self {
+            case .disabled: return false
+            case .enabled, .enabledWithPresences: return true
+            }
+        }
+        
+        var wantsPresences: Bool {
+            switch self {
+            case .disabled, .enabled: return false
+            case .enabledWithPresences: return true
+            }
+        }
     }
     
     public enum MessageCachingPolicy: Sendable {
@@ -213,13 +227,13 @@ public actor DiscordCache {
             break
         case let .guildCreate(guildCreate):
             self.guilds[guildCreate.id] = guildCreate
-            if [.enabled, .enabledWithPresences].contains(requestMembers) {
+            if requestMembers.isEnabled {
                 Task {
                     await gatewayManager.requestGuildMembersChunk(payload: .init(
                         guild_id: guildCreate.id,
                         query: "",
                         limit: 0,
-                        presences: requestMembers == .enabledWithPresences,
+                        presences: requestMembers.wantsPresences,
                         user_ids: nil,
                         nonce: nil
                     ))
