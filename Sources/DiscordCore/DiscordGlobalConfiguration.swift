@@ -14,18 +14,6 @@ public enum DiscordGlobalConfiguration {
     /// Function to make loggers with. You can override it with your own logger.
     /// The `String` argument represents the label of the logger.
     public static var makeLogger: (String) -> Logger = { Logger(label: $0) }
-    /// Log about sub-optimal situations during decode.
-    /// For example if a type can't find a representation to decode a value to,
-    /// and has to get rid of that value.
-    /// Does not include decode errors.
-    public static var enableLoggingDuringDecode: Bool = false
-    /// Global rate-limit for requests per second.
-    /// 50 by default, but you can ask Discord for a raise.
-    public static var globalRateLimit = 50
-    /// Whether or not to perform validations for `DefaultDiscordClient` payloads, before sending.
-    /// The library will throw a ``ValidationError`` if it finds anything invalid in the payload.
-    /// This all works based on Discord docs' validation notes.
-    public static var performClientSideValidations = true
 }
 
 //MARK: - DiscordDecoder
