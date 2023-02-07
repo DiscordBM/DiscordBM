@@ -324,7 +324,7 @@ class DiscordLoggerTests: XCTestCase {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
             configuration: .init(
-                frequency: .milliseconds(800),
+                frequency: .milliseconds(700),
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 aliveNotice: .init(
                     address: try .url(webhookUrl),
