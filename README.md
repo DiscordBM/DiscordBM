@@ -255,6 +255,21 @@ If you want to only use Discord logger and don't use the rest of `DiscordBM`, yo
 .product(name: "DiscordLogger", package: "DiscordBM"),
 ```
 
+#### Example
+
+```swift
+/// After bootstrapping the `LoggingSystem`, and with the configuration above, but `extraMetadata` set to `[.critical]`
+let logger = Logger(label: "LoggerLabel")
+logger.warning("Warning you about something!")
+logger.error("We're having an error!", metadata: [
+    "number": .stringConvertible(1),
+    "statusCode": "401 Unauthorized"
+])
+logger.critical("CRITICAL PROBLEM. ABOUT TO EXPLODE 💥")
+```
+
+<img width="489" alt="DiscordLogger Showcase Output" src="https://user-images.githubusercontent.com/54685446/217139045-e4abf8c7-d5f9-4e89-9170-53980e90af57.png">
+
 </details>
 
 ### Discord Cache
