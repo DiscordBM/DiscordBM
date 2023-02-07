@@ -15,7 +15,7 @@ public actor DiscordLogManager {
             let interval: TimeAmount?
             let message: String
             let color: DiscordColor
-            let initialNoticeMention: String
+            let initialNoticeMentions: [String]
             
             /// - Parameters:
             ///   - address: The address to send the logs to.
@@ -35,7 +35,7 @@ public actor DiscordLogManager {
                 self.interval = interval
                 self.message = message
                 self.color = color
-                self.initialNoticeMention = initialNoticeMention.toMentionString()
+                self.initialNoticeMentions = initialNoticeMention.toMentionStrings()
             }
         }
         
@@ -49,14 +49,14 @@ public actor DiscordLogManager {
                 .combined(mentions)
             }
             
-            func toMentionString() -> String {
+            func toMentionStrings() -> [String] {
                 switch self {
                 case let .user(id):
-                    return DiscordUtils.userMention(id: id)
+                    return [DiscordUtils.userMention(id: id)]
                 case let .role(id):
-                    return DiscordUtils.roleMention(id: id)
+                    return [DiscordUtils.roleMention(id: id)]
                 case let .combined(mentions):
-                    return mentions.map { $0.toMentionString() }.joined(separator: " ")
+                    return mentions.flatMap { $0.toMentionStrings() }
                 }
             }
         }
@@ -64,7 +64,7 @@ public actor DiscordLogManager {
         let frequency: TimeAmount
         let aliveNotice: AliveNotice?
         let fallbackLogger: Logger
-        let mentions: [Logger.Level: String]
+        let mentions: [Logger.Level: [String]]
         let colors: [Logger.Level: DiscordColor]
         let excludeMetadata: Set<Logger.Level>
         let extraMetadata: Set<Logger.Level>
@@ -102,13 +102,13 @@ public actor DiscordLogManager {
             excludeMetadata: Set<Logger.Level> = [.trace],
             extraMetadata: Set<Logger.Level> = [],
             disabledLogLevels: Set<Logger.Level> = [],
-            disabledInDebug: Bool = true,
+            disabledInDebug: Bool = false,
             maxStoredLogsCount: Int = 1_000
         ) {
             self.frequency = frequency
             self.fallbackLogger = fallbackLogger
             self.aliveNotice = aliveNotice
-            self.mentions = mentions.mapValues { $0.toMentionString() }
+            self.mentions = mentions.mapValues { $0.toMentionStrings() }
             self.colors = colors
             self.excludeMetadata = excludeMetadata
             self.extraMetadata = extraMetadata
@@ -284,13 +284,15 @@ public actor DiscordLogManager {
         var logLevels = Set(logs.compactMap(\.level))
             .sorted(by: >)
             .compactMap({ configuration.mentions[$0] })
+            .flatMap({ $0 })
+        let wantsAliveNoticeMention = logs.contains(where: \.isFirstAliveNotice)
+        let aliveNoticeMentions = wantsAliveNoticeMention ?
+        (self.configuration.aliveNotice?.initialNoticeMentions ?? []) : []
+        logLevels.append(contentsOf: aliveNoticeMentions)
         logLevels = Set(logLevels).sorted {
             logLevels.firstIndex(of: $0)! < logLevels.firstIndex(of: $1)!
         }
-        let wantsAliveNoticeMention = logs.contains(where: \.isFirstAliveNotice)
-        let aliveNoticeMention = wantsAliveNoticeMention ?
-        (configuration.aliveNotice.map({ "\($0.initialNoticeMention) " }) ?? "") : ""
-        let mentions = aliveNoticeMention + logLevels.joined(separator: " ")
+        let mentions = logLevels.joined(separator: " ")
         
         try await sendLogsToWebhook(
             content: mentions,
@@ -299,25 +301,6 @@ public actor DiscordLogManager {
         )
         
         self.setUpAliveNotices()
-    }
-    
-    private func sendLogsToChannel(
-        content: String,
-        embeds: [Embed],
-        id: String
-    ) async throws {
-        let payload = RequestBody.CreateMessage(
-            content: content,
-            embeds: embeds
-        )
-        let response = try await self.client.createMessage(channelId: id, payload: payload)
-        
-        do {
-            try response.guardIsSuccessfulResponse()
-        } catch {
-            logWarning("Received error from Discord after sending logs. This is a library issue. Please report on https://github.com/MahdiBM/DiscordBM/issue with full context",
-                       metadata: ["error": "\(error)", "payload": "\(payload)"])
-        }
     }
     
     private func sendLogsToWebhook(

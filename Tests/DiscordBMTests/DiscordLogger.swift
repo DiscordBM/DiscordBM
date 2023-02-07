@@ -33,8 +33,7 @@ class DiscordLoggerTests: XCTestCase {
                     .trace: .role("33333333"),
                     .notice: .user("22222222"),
                     .warning: .user("22222222"),
-                ],
-                disabledInDebug: false
+                ]
             )
         )
         let logger = DiscordLogHandler.multiplexLogger(
@@ -123,8 +122,7 @@ class DiscordLoggerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
-                excludeMetadata: [.trace],
-                disabledInDebug: false
+                excludeMetadata: [.trace]
             )
         )
         let logger = DiscordLogHandler.multiplexLogger(
@@ -155,8 +153,7 @@ class DiscordLoggerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
-                disabledLogLevels: [.debug],
-                disabledInDebug: false
+                disabledLogLevels: [.debug]
             )
         )
         let logger = DiscordLogHandler.multiplexLogger(
@@ -188,7 +185,6 @@ class DiscordLoggerTests: XCTestCase {
             configuration: .init(
                 frequency: .seconds(10),
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
-                disabledInDebug: false,
                 maxStoredLogsCount: 100
             )
         )
@@ -245,8 +241,7 @@ class DiscordLoggerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
-                extraMetadata: [.info],
-                disabledInDebug: false
+                extraMetadata: [.info]
             )
         )
         let logger = DiscordLogHandler.multiplexLogger(
@@ -287,8 +282,7 @@ class DiscordLoggerTests: XCTestCase {
             configuration: .init(
                 frequency: .milliseconds(100),
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
-                extraMetadata: [.warning],
-                disabledInDebug: false
+                extraMetadata: [.warning]
             )
         )
         let logger = DiscordLogHandler.multiplexLogger(
@@ -330,7 +324,7 @@ class DiscordLoggerTests: XCTestCase {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
             configuration: .init(
-                frequency: .zero,
+                frequency: .milliseconds(800),
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 aliveNotice: .init(
                     address: try .url(webhookUrl),
@@ -339,7 +333,7 @@ class DiscordLoggerTests: XCTestCase {
                     color: .red,
                     initialNoticeMention: .role("99999999")
                 ),
-                disabledInDebug: false
+                mentions: [.critical: .role("99999999")]
             )
         )
         
@@ -352,9 +346,11 @@ class DiscordLoggerTests: XCTestCase {
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         
+        logger.log(level: .critical, "Testing! 1")
+        
         try await Task.sleep(nanoseconds: 4_000_000_000)
         
-        logger.log(level: .debug, "Testing!")
+        logger.log(level: .debug, "Testing! 2")
         
         try await Task.sleep(nanoseconds: 1_000_000_000)
         
@@ -364,7 +360,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let payloads = self.client.payloads
         if payloads.count != 3 {
-            XCTFail("Expected 3 payloads, but found \(payloads.count): \(payloads)")
+            XCTFail("Expected 4 payloads, but found \(payloads.count): \(payloads)")
             return
         }
         
@@ -373,16 +369,26 @@ class DiscordLoggerTests: XCTestCase {
         do {
             let anyPayload = payloads[0]
             let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
-            XCTAssertEqual(payload.content, "<@&99999999> ")
+            XCTAssertEqual(payload.content, "<@&99999999>")
             
             let embeds = try XCTUnwrap(payload.embeds)
-            XCTAssertEqual(embeds.count, 1)
+            XCTAssertEqual(embeds.count, 2)
             
-            let embed = try XCTUnwrap(embeds.first)
-            XCTAssertEqual(embed.title, "Alive!")
-            let timestamp = try XCTUnwrap(embed.timestamp?.date.timeIntervalSince1970)
-            let range = (start-tolerance)...(start+tolerance)
-            XCTAssertTrue(range.contains(timestamp), "\(range) did not contain \(timestamp)")
+            do {
+                let embed = try XCTUnwrap(embeds.first)
+                XCTAssertEqual(embed.title, "Alive!")
+                let timestamp = try XCTUnwrap(embed.timestamp?.date.timeIntervalSince1970)
+                let range = (start-tolerance)...(start+tolerance)
+                XCTAssertTrue(range.contains(timestamp), "\(range) did not contain \(timestamp)")
+            }
+            
+            do {
+                let embed = try XCTUnwrap(embeds.last)
+                XCTAssertEqual(embed.title, "Testing! 1")
+                let timestamp = try XCTUnwrap(embed.timestamp?.date.timeIntervalSince1970)
+                let range = (start-tolerance)...(start+tolerance)
+                XCTAssertTrue(range.contains(timestamp), "\(range) did not contain \(timestamp)")
+            }
         }
         
         do {
@@ -394,7 +400,7 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertEqual(embeds.count, 1)
             
             let embed = try XCTUnwrap(embeds.first)
-            XCTAssertEqual(embed.title, "Testing!")
+            XCTAssertEqual(embed.title, "Testing! 2")
             let timestamp = try XCTUnwrap(embed.timestamp?.date.timeIntervalSince1970)
             let estimate = start + 4
             let range = (estimate-tolerance)...(estimate+tolerance)
@@ -423,8 +429,7 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .seconds(5),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
-                disabledInDebug: false
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
             )
         )
         
@@ -512,8 +517,7 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
-                disabledInDebug: false
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
             )
         )
         LoggingSystem.bootstrapWithDiscordLogger(
@@ -545,8 +549,7 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
-                disabledInDebug: false
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
             )
         )
         let simpleTraceIDMetadataProvider = Logger.MetadataProvider {

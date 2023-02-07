@@ -231,22 +231,21 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
         ),
         aliveNotice: .init(
             address: try .url(WEBHOOK_URL),
-            interval: .hours(1),
+            /// If nil, DiscordLogger will only send 1 "I'm alive" notice, on boot.
+            /// If not nil, it will send a "I'm alive" notice every this-amount too. 
+            interval: nil,
             message: "I'm Alive! :)",
             color: .blue,
             initialNoticeMention: .user("970723029262942248")
         ),
         mentions: [
-            .critical: .role("970723029262942248"),
-            .error: .role("970723101044244510"),
             .warning: .role("970723134149918800"),
-            .trace: .role("970723180706668584"),
-            .debug: .role("970723199761383484"),
-            .notice: .role("970723218551865384"),
-            .info: .role("970723238097330237"),
+            .error: .role("970723101044244510"),
+            .critical: .role("970723029262942248"),
         ],
         extraMetadata: [.warning, .error, .critical],
-        disabledLogLevels: [.debug, .trace]
+        disabledLogLevels: [.debug, .trace],
+        disabledInDebug: true
     )
 )
 ```

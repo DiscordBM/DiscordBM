@@ -57,6 +57,29 @@ public actor DiscordCache {
         }
     }
     
+    /// Keeps the storage from using too much memory.
+    /// Does not apply to `guilds`, `channels` & `botUser`.
+    public enum ItemsLimitPolicy: @unchecked Sendable {
+        case disabled
+        case constant(Int)
+        case custom([PartialKeyPath<Storage>: Int])
+        
+        public static let `default` = ItemsLimitPolicy.constant(10_000)
+        
+        func limit(for path: PartialKeyPath<Storage>) -> Int? {
+            switch self {
+            case .disabled:
+                return nil
+            case let .constant(limit):
+                return limit
+            case let .custom(custom):
+                return custom[path]
+            }
+        }
+    }
+    
+    /// The assumption is users might want to encode/decode contents of this storage using Codable.
+    /// So this storage should be codable-backward-compatible.
     public struct Storage: Sendable, Codable {
         
         public struct InviteID: Sendable, Codable, Hashable {
@@ -79,16 +102,16 @@ public actor DiscordCache {
         public var auditLogs: [String: [AuditLog.Entry]] = [:]
         /// `[GuildID: [Integration]]`
         public var integrations: [String: [Integration]] = [:]
-        /// `[GuildID: [Invite]]`
+        /// `[InviteID: [Invite]]`
         public var invites: [InviteID: [Gateway.InviteCreate]] = [:]
         /// `[ChannelID: [Message]]`
         public var messages: [String: [Gateway.MessageCreate]] = [:]
         /// `[ChannelID: [MessageID: [EditedMessage]]]`
-        /// It's `[EditedMessage]` because it might keep the edited versions of the message too.
+        /// It's `[EditedMessage]` because it will keep all edited versions of a message.
         /// This does not keep the most recent message, which is available in `messages`.
         public var editedMessages: [String: [String: [Gateway.MessageCreate]]] = [:]
         /// `[ChannelID: [MessageID: [DeletedMessage]]]`
-        /// It's `[DeletedMessage]` because it might keep the edited versions of the message too.
+        /// It's `[DeletedMessage]` because it might have the edited versions of the message too.
         public var deletedMessages: [String: [String: [Gateway.MessageCreate]]] = [:]
         /// `[GuildID: [Rule]]`
         public var autoModerationRules: [String: [AutoModerationRule]] = [:]
@@ -141,6 +164,9 @@ public actor DiscordCache {
     let requestMembers: RequestMembers
     /// How to cache messages.
     let messageCachingPolicy: MessageCachingPolicy
+    /// Keeps the storage from using too much memory.
+    /// Does not apply to `guilds`, `channels` & `botUser`.
+    let itemsLimitPolicy: ItemsLimitPolicy
     /// The storage of cached stuff.
     public var storage: Storage
     
@@ -160,18 +186,22 @@ public actor DiscordCache {
     ///     parameter specifies. Must have `guildMembers` and `guildPresences` intents enabled
     ///     depending on what you want.
     ///   - messageCachingPolicy: How to cache messages.
+    ///   - itemsLimitPolicy: Keeps the storage from using too much memory. Does not apply to
+    ///     `guilds`, `channels` & `botUser`.
     ///   - storage: The storage of cached stuff. You usually don't need to provide this parameter.
     public init(
         gatewayManager: any GatewayManager,
         intents: Intents,
         requestAllMembers: RequestMembers,
         messageCachingPolicy: MessageCachingPolicy = .default,
+        itemsLimitPolicy: ItemsLimitPolicy = .default,
         storage: Storage = Storage()
     ) async {
         self.gatewayManager = gatewayManager
         self.intents = intents
         self.requestMembers = requestAllMembers
         self.messageCachingPolicy = messageCachingPolicy
+        self.itemsLimitPolicy = itemsLimitPolicy
         self.storage = storage
         await gatewayManager.addEventHandler(handleEvent)
     }
