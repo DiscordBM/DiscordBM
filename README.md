@@ -268,7 +268,7 @@ logger.error("We're having an error!", metadata: [
 logger.critical("CRITICAL PROBLEM. ABOUT TO EXPLODE 💥")
 ```
 
-<img width="489" alt="DiscordLogger Showcase Output" src="https://user-images.githubusercontent.com/54685446/217139045-e4abf8c7-d5f9-4e89-9170-53980e90af57.png">
+<img width="370" alt="DiscordLogger Showcase Output" src="https://user-images.githubusercontent.com/54685446/217464224-1cb6ed75-8683-4977-8bd3-03752d7d7597.png">
 
 </details>
 
