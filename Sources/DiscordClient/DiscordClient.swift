@@ -1,8 +1,9 @@
+import DiscordModels
 import NIOHTTP1
 import NIOCore
 import Foundation
 
-public protocol DiscordClient {
+public protocol DiscordClient: Sendable {
     var appId: String? { get }
     
     func send(request: DiscordHTTPRequest) async throws -> DiscordHTTPResponse
@@ -322,6 +323,13 @@ public extension DiscordClient {
             to: endpoint,
             queries: [("with_counts", withCounts?.description)]
         ))
+    }
+    
+    /// https://discord.com/developers/docs/resources/guild#get-guild-roles
+    @inlinable
+    func getGuildRoles(id: String) async throws -> DiscordClientResponse<[Role]> {
+        let endpoint = Endpoint.getGuildRoles(id: id)
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/channel#get-channel

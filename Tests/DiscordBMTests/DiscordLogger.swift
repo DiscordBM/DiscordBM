@@ -512,6 +512,59 @@ class DiscordLoggerTests: XCTestCase {
         }
     }
     
+    /// This tests worst-case scenario of having too much text in the logs.
+    func testDoesNotExceedDiscordLimits() async throws {
+        DiscordGlobalConfiguration.logManager = DiscordLogManager(
+            client: self.client,
+            configuration: .init(
+                frequency: .seconds(30),
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
+                excludeMetadata: []
+            )
+        )
+        
+        let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".map { $0 }
+        func longString() -> String {
+            String((0..<6_500).map { _ in chars[chars.indices.randomElement()!] })
+        }
+        
+        let address = try WebhookAddress.url(webhookUrl)
+        let logger = DiscordLogHandler.multiplexLogger(
+            label: longString(),
+            address: address,
+            level: .trace,
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+        )
+        
+        func randomLevel() -> Logger.Level { Logger.Level.allCases.randomElement()! }
+        func longMessage() -> Logger.Message {
+            .init(stringLiteral: longString())
+        }
+        func longMetadata() -> Logger.Metadata {
+            .init(uniqueKeysWithValues: (0..<50).map { _ in
+                (longString(), Logger.MetadataValue.string(longString()))
+            })
+        }
+        for _ in 0..<30 {
+            logger.log(level: randomLevel(), longMessage(), metadata: longMetadata())
+        }
+        
+        /// To make sure the logs make it to the log-manager's storage.
+        try await Task.sleep(nanoseconds: 5_000_000_000)
+        
+        let all = await DiscordGlobalConfiguration.logManager._tests_getLogs()[address]!
+        XCTAssertEqual(all.count, 30)
+        for embed in all.map(\.embed) {
+            XCTAssertNoThrow(try embed.validate())
+        }
+        
+        let logs = await DiscordGlobalConfiguration.logManager
+            ._tests_getMaxAmountOfLogsAndFlush(address: address)
+        XCTAssertEqual(logs.count, 1)
+        let lengthSum = logs.map(\.embed.contentLength).reduce(into: 0, +=)
+        XCTAssertEqual(lengthSum, 5_980)
+    }
+    
     func testBootstrap() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,

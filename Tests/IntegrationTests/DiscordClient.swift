@@ -278,6 +278,12 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(role.unicode_emoji, rolePayload.unicode_emoji)
         XCTAssertEqual(role.mentionable, rolePayload.mentionable)
         
+        /// Get guild roles
+        let guildRoles = try await client.getGuildRoles(id: Constants.guildId).decode()
+        let rolesWithName = guildRoles.filter({ $0.name == role.name })
+        XCTAssertGreaterThanOrEqual(rolesWithName.count, 1)
+        
+        /// Add role to member
         let memberRoleAdditionResponse = try await client.addGuildMemberRole(
             guildId: Constants.guildId,
             userId: Constants.personalId,

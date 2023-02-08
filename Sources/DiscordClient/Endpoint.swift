@@ -7,6 +7,7 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
     case getFollowupInteractionResponse
     case getApplicationGlobalCommands
     case getGuild
+    case getGuildRoles
     case searchGuildMembers
     case getGuildMember
     case getChannel
@@ -27,6 +28,7 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
         case .getFollowupInteractionResponse: return "getFollowupInteractionResponse"
         case .getApplicationGlobalCommands: return "getApplicationGlobalCommands"
         case .getGuild: return "getGuild"
+        case .getGuildRoles: return "getGuildRoles"
         case .searchGuildMembers: return "searchGuildMembers"
         case .getGuildMember: return "getGuildMember"
         case .getChannel: return "getChannel"
@@ -60,6 +62,7 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
         case .getApplicationGlobalCommands: self = .getApplicationGlobalCommands
         case .deleteApplicationGlobalCommand: return nil
         case .getGuild: self = .getGuild
+        case .getGuildRoles: self = .getGuildRoles
         case .searchGuildMembers: self = .searchGuildMembers
         case .getGuildMember: self = .getGuildMember
         case .getChannel: self = .getChannel
@@ -113,6 +116,7 @@ public enum Endpoint: Sendable {
     case deleteApplicationGlobalCommand(appId: String, id: String)
     
     case getGuild(id: String)
+    case getGuildRoles(id: String)
     case searchGuildMembers(id: String)
     case getGuildMember(id: String, userId: String)
     
@@ -183,6 +187,8 @@ public enum Endpoint: Sendable {
             suffix = "applications/\(appId)/commands/\(id)"
         case let .getGuild(id):
             suffix = "guilds/\(id)"
+        case let .getGuildRoles(id):
+            suffix = "guilds/\(id)/roles"
         case let .searchGuildMembers(id):
             suffix = "guilds/\(id)/members/search"
         case let .getGuildMember(id, userId):
@@ -237,7 +243,7 @@ public enum Endpoint: Sendable {
     /// Doesn't expose secret url path parameters.
     var urlSuffixDescription: String {
         switch self {
-        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .modifyWebhook1, .deleteWebhook1:
+        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .modifyWebhook1, .deleteWebhook1:
             return self.urlSuffix
         case let .getWebhook2(id, token),
             let .modifyWebhook2(id, token),
@@ -281,6 +287,7 @@ public enum Endpoint: Sendable {
         case .getApplicationGlobalCommands: return .GET
         case .deleteApplicationGlobalCommand: return .DELETE
         case .getGuild: return .GET
+        case .getGuildRoles: return .GET
         case .searchGuildMembers: return .GET
         case .getGuildMember: return .GET
         case .getChannel: return .GET
@@ -316,7 +323,7 @@ public enum Endpoint: Sendable {
         switch self {
         case .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse:
             return false
-        case .getGateway, .getGatewayBot, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .getWebhook2, .modifyWebhook1, .modifyWebhook2, .deleteWebhook1, .deleteWebhook2, .executeWebhook, .getWebhookMessage, .editWebhookMessage, .deleteWebhookMessage:
+        case .getGateway, .getGatewayBot, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .getWebhook2, .modifyWebhook1, .modifyWebhook2, .deleteWebhook1, .deleteWebhook2, .executeWebhook, .getWebhookMessage, .editWebhookMessage, .deleteWebhookMessage:
             return true
         }
     }
@@ -325,7 +332,7 @@ public enum Endpoint: Sendable {
     /// contains some kind of authorization token. Like half of the webhook endpoints.
     var requiresAuthorizationHeader: Bool {
         switch self {
-        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .modifyWebhook1, .deleteWebhook1:
+        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .getChannel, .getChannelMessages, .getChannelMessage, .leaveGuild, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .addReaction, .createDM, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .modifyWebhook1, .deleteWebhook1:
             return true
         case .getWebhook2, .modifyWebhook2, .deleteWebhook2, .executeWebhook, .getWebhookMessage, .editWebhookMessage, .deleteWebhookMessage:
             return false
@@ -351,32 +358,33 @@ public enum Endpoint: Sendable {
         case .getApplicationGlobalCommands: return 15
         case .deleteApplicationGlobalCommand: return 16
         case .getGuild: return 17
-        case .searchGuildMembers: return 18
-        case .getGuildMember: return 19
-        case .getChannel: return 20
-        case .getChannelMessages: return 21
-        case .getChannelMessage: return 22
-        case .leaveGuild: return 23
-        case .createGuildRole: return 24
-        case .deleteGuildRole: return 25
-        case .addGuildMemberRole: return 26
-        case .removeGuildMemberRole: return 27
-        case .getGuildAuditLogs: return 28
-        case .addReaction: return 29
-        case .createDM: return 30
-        case .createWebhook: return 31
-        case .getChannelWebhooks: return 32
-        case .getGuildWebhooks: return 33
-        case .getWebhook1: return 34
-        case .getWebhook2: return 35
-        case .modifyWebhook1: return 36
-        case .modifyWebhook2: return 37
-        case .deleteWebhook1: return 38
-        case .deleteWebhook2: return 39
-        case .executeWebhook: return 40
-        case .getWebhookMessage: return 41
-        case .editWebhookMessage: return 42
-        case .deleteWebhookMessage: return 43
+        case .getGuildRoles: return 18
+        case .searchGuildMembers: return 19
+        case .getGuildMember: return 20
+        case .getChannel: return 21
+        case .getChannelMessages: return 22
+        case .getChannelMessage: return 23
+        case .leaveGuild: return 24
+        case .createGuildRole: return 25
+        case .deleteGuildRole: return 26
+        case .addGuildMemberRole: return 27
+        case .removeGuildMemberRole: return 28
+        case .getGuildAuditLogs: return 29
+        case .addReaction: return 30
+        case .createDM: return 31
+        case .createWebhook: return 32
+        case .getChannelWebhooks: return 33
+        case .getGuildWebhooks: return 34
+        case .getWebhook1: return 35
+        case .getWebhook2: return 36
+        case .modifyWebhook1: return 37
+        case .modifyWebhook2: return 38
+        case .deleteWebhook1: return 39
+        case .deleteWebhook2: return 40
+        case .executeWebhook: return 41
+        case .getWebhookMessage: return 42
+        case .editWebhookMessage: return 43
+        case .deleteWebhookMessage: return 44
         }
     }
 }

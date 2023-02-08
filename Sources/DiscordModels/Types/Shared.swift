@@ -624,7 +624,7 @@ extension TolerantDecodeDate: @unchecked Sendable { }
 #endif
 
 /// A dynamic color type that decode/encodes itself as an integer which Discord expects.
-public struct DiscordColor: Sendable, Codable, ExpressibleByIntegerLiteral {
+public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLiteral {
     
     public let value: Int
     

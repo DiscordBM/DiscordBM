@@ -24,7 +24,7 @@ public struct DiscordLogHandler: LogHandler {
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil
     ) {
-        self.label = label
+        self.label = prepare(label)
         self.address = address
         self.logLevel = level
         self.metadata = [:]
@@ -92,7 +92,7 @@ public struct DiscordLogHandler: LogHandler {
             title: prepare("\(message)"),
             timestamp: Date(),
             color: config.colors[level],
-            footer: .init(text: prepare(self.label)),
+            footer: .init(text: self.label), /// Already "prepared"
             fields: Array(allMetadata.sorted(by: { $0.key > $1.key }).compactMap {
                 key, value -> Embed.Field? in
                 let value = "\(value)"
@@ -103,11 +103,12 @@ public struct DiscordLogHandler: LogHandler {
         
         Task { await logManager.include(address: address, embed: embed, level: level) }
     }
-    
-    private func prepare(_ text: String) -> String {
-        let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
-        return String(escaped.unicodeScalars.maxCount(250))
-    }
+}
+
+private func prepare(_ text: String) -> String {
+    let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
+    /// `115` will prevent any embeds to have more than `5_980` content length.
+    return String(escaped.unicodeScalars.maxCount(115))
 }
 
 private extension Collection {

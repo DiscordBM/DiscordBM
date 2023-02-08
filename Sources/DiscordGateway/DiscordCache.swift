@@ -19,6 +19,13 @@ public actor DiscordCache {
         public init<S>(_ elements: S) where S: Sequence, S.Element == Gateway.Intent {
             self = .specific(.init(elements))
         }
+        
+        func contains(_ intent: Gateway.Intent) -> Bool {
+            switch self {
+            case .all: return true
+            case let .specific(intents): return intents.contains(intent)
+            }
+        }
     }
     
     public enum RequestMembers: Sendable {

@@ -259,15 +259,20 @@ public actor DiscordLogManager {
         
         guard var iterator = self.logs[address]?.makeIterator() else { return [] }
         
+        func lengthSum() -> Int { goodLogs.map(\.embed.contentLength).reduce(into: 0, +=) }
+        
         while goodLogs.count < 10,
               let log = iterator.next(),
-              (goodLogs.map(\.embed.contentLength).reduce(into: 0, +=) + log.embed.contentLength) < 6_000
+              (lengthSum() + log.embed.contentLength) <= 6_000
         {
             goodLogs.append(log)
         }
         
         /// Will get stuck if the first log is alone more than the limit length.
-        if goodLogs.isEmpty, (self.logs[address]?.first?.embed.contentLength ?? 0) > 6_000 {
+        /// The log handler is expected to prevent this from happening.
+        if goodLogs.isEmpty,
+           let firstLength = self.logs[address]?.first?.embed.contentLength,
+           firstLength > 6_000 {
             let first = self.logs[address]!.removeFirst()
             logWarning("First log alone is more than the limit length. This will not cause much problems but it is a library issue. Please report on https://github.com/MahdiBM/DiscordBM/issue with full context",
                        metadata: ["log": "\(first)"])
@@ -344,6 +349,10 @@ public actor DiscordLogManager {
 #if DEBUG
     func _tests_getLogs() -> [WebhookAddress: [Log]] {
         self.logs
+    }
+    
+    func _tests_getMaxAmountOfLogsAndFlush(address: WebhookAddress) -> [Log] {
+        self.getMaxAmountOfLogsAndFlush(address: address)
     }
 #endif
 }
