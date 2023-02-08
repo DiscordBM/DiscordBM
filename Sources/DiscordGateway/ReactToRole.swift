@@ -79,7 +79,7 @@ public actor ReactToRoleHandler {
             reactions: reactions,
             roleId: nil
         )
-        if let preferredRoleId,
+        if let preferredRoleId = preferredRoleId,
            await cache.guilds[guildId]?
             .roles.contains(where: { $0.id == preferredRoleId }) == true {
             self.configuration.roleId = preferredRoleId
