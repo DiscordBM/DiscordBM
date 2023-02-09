@@ -260,12 +260,16 @@ public actor DiscordCache {
         storage: Storage = Storage()
     ) async {
         self.gatewayManager = gatewayManager
-        self.intents = intents
+        self.intents = DiscordCache.calculateIntentsIntersection(
+            gatewayManager: gatewayManager,
+            intents: intents
+        )
         self.requestMembers = requestAllMembers
         self.messageCachingPolicy = messageCachingPolicy
         self.itemsLimitPolicy = itemsLimitPolicy
         self.checkForLimitEvery = itemsLimitPolicy.calculateCheckForLimitEvery()
         self.storage = storage
+        
         await gatewayManager.addEventHandler(handleEvent)
     }
     
@@ -772,6 +776,32 @@ public actor DiscordCache {
                     self.applicationCommandPermissions.removeSubrange(0..<extra)
                 }
             }
+        }
+    }
+    
+    static func calculateIntentsIntersection(
+        gatewayManager manager: any GatewayManager,
+        intents: Intents
+    ) -> Intents {
+        if let managerIntents = (manager as? BotGatewayManager)?.identifyPayload.intents.values {
+            switch intents {
+            case .all:
+                return .specific(managerIntents)
+            case let .specific(intents):
+                let extraIntents = intents.filter {
+                    !managerIntents.contains($0)
+                }
+                if !extraIntents.isEmpty {
+                    DiscordGlobalConfiguration.makeLogger("DiscordCache").warning(
+                        "'DiscordCache' contains intents that are not present in the 'BotGatewayManager'. This might cause events of some requested intents to not be cached", metadata: [
+                            "extraIntents": .stringConvertible(extraIntents)
+                        ]
+                    )
+                }
+                return .specific(intents.intersection(managerIntents))
+            }
+        } else {
+            return intents
         }
     }
     

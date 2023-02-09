@@ -5,6 +5,25 @@ import Foundation
 
 public actor ReactToRoleHandler {
     
+    public enum Reaction: Sendable, Equatable, Codable {
+        case unicodeEmoji(String)
+        case guildEmoji(name: String, id: String)
+        
+        var urlPathDescription: String {
+            switch self {
+            case let .unicodeEmoji(emoji): return emoji
+            case let .guildEmoji(name, id): return "\(name):\(id)"
+            }
+        }
+        
+        func `is`(_ emoji: PartialEmoji) -> Bool {
+            switch self {
+            case let .unicodeEmoji(unicode): return unicode == emoji.name
+            case let .guildEmoji(_, id): return id == emoji.id
+            }
+        }
+    }
+    
     public struct Configuration: Sendable, Codable, Equatable {
         public let id: UUID
         public let roleName: String
@@ -13,8 +32,12 @@ public actor ReactToRoleHandler {
         public let guildId: String
         public let channelId: String
         public let messageId: String
-        public let reactions: [String]
+        public let reactions: [Reaction]
         fileprivate(set) public var roleId: String?
+        
+        func hasChanges(comparedTo other: Configuration) -> Bool {
+            self.roleId != other.roleId
+        }
         
         public static func == (lhs: Configuration, rhs: Configuration) -> Bool {
             lhs.roleName == rhs.roleName &&
@@ -27,7 +50,8 @@ public actor ReactToRoleHandler {
     }
     
     public enum Error: Swift.Error {
-        case roleDoesNotExist(id: String)
+        case messageIsInaccessible(messageId: String, channelId: String, previousError: Swift.Error)
+        case roleIsInaccessible(id: String, previousError: Swift.Error?)
     }
     
     struct RequestHandler: Sendable {
@@ -36,23 +60,26 @@ public actor ReactToRoleHandler {
         let logger: Logger
         let guildId: String
         
-        
         func getRole(id: String) async throws -> Role {
             if let cache = cache,
                cache.intents.contains(.guilds) {
                 if let role = await cache.guilds[guildId]?.roles.first(where: { $0.id == id }) {
                     return role
                 } else {
-                    throw Error.roleDoesNotExist(id: id)
+                    throw Error.roleIsInaccessible(id: id, previousError: nil)
                 }
             } else {
-                if let role = try await client
-                    .getGuildRoles(id: guildId)
-                    .decode()
-                    .first(where: { $0.id == id }) {
-                    return role
-                } else {
-                    throw Error.roleDoesNotExist(id: id)
+                do {
+                    if let role = try await client
+                        .getGuildRoles(id: guildId)
+                        .decode()
+                        .first(where: { $0.id == id }) {
+                        return role
+                    } else {
+                        throw Error.roleIsInaccessible(id: id, previousError: nil)
+                    }
+                } catch {
+                    throw Error.roleIsInaccessible(id: id, previousError: error)
                 }
             }
         }
@@ -94,22 +121,28 @@ public actor ReactToRoleHandler {
         }
     }
     
-    var gatewayManager: any GatewayManager
+    let gatewayManager: any GatewayManager
     var client: any DiscordClient { gatewayManager.client }
     let requestHandler: RequestHandler
     var logger: Logger
-    var configuration: Configuration
+    private(set) var configuration: Configuration {
+        didSet {
+            if oldValue.hasChanges(comparedTo: self.configuration) {
+                self.onConfigurationChanged?(self.configuration)
+            }
+        }
+    }
     
-    let onRoleIdChanged: ((UUID, String?) -> Void)?
-    let onLifecycleEnd: ((UUID) -> Void)?
+    let onConfigurationChanged: ((Configuration) -> Void)?
+    let onLifecycleEnd: ((Configuration) -> Void)?
     
     public init(
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
         configuration: Configuration,
-        onRoleIdChanged: ((UUID, String?) -> Void)?,
-        onLifecycleEnd: ((UUID) -> Void)?
-    ) async {
+        onConfigurationChanged: ((Configuration) -> Void)? = nil,
+        onLifecycleEnd: ((Configuration) -> Void)? = nil
+    ) async throws {
         self.gatewayManager = gatewayManager
         self.logger = DiscordGlobalConfiguration.makeLogger("ReactToRole")
         logger[metadataKey: "id"] = "\(configuration.id.uuidString)"
@@ -120,9 +153,9 @@ public actor ReactToRoleHandler {
             guildId: configuration.guildId
         )
         self.configuration = configuration
-        self.onRoleIdChanged = onRoleIdChanged
+        self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
-        self.reactToMessage()
+        try await self.verifyAndReactToMessage()
     }
     
     public init(
@@ -135,10 +168,10 @@ public actor ReactToRoleHandler {
         guildId: String,
         channelId: String,
         messageId: String,
-        reactions: [String],
-        onRoleIdChanged: ((UUID, String?) -> Void)? = nil,
-        onLifecycleEnd: ((UUID) -> Void)? = nil
-    ) async {
+        reactions: [Reaction],
+        onConfigurationChanged: ((Configuration) -> Void)? = nil,
+        onLifecycleEnd: ((Configuration) -> Void)? = nil
+    ) async throws {
         self.gatewayManager = gatewayManager
         self.logger = DiscordGlobalConfiguration.makeLogger("ReactToRole")
         logger[metadataKey: "id"] = "\(configuration.id.uuidString)"
@@ -159,9 +192,9 @@ public actor ReactToRoleHandler {
             reactions: reactions,
             roleId: nil
         )
-        self.onRoleIdChanged = onRoleIdChanged
+        self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
-        self.reactToMessage()
+        try await self.verifyAndReactToMessage()
     }
     
     public init(
@@ -171,10 +204,10 @@ public actor ReactToRoleHandler {
         guildId: String,
         channelId: String,
         messageId: String,
-        reactions: [String],
+        reactions: [Reaction],
         existingRoleId: String,
-        onRoleIdChanged: ((UUID, String?) -> Void)? = nil,
-        onLifecycleEnd: ((UUID) -> Void)? = nil
+        onConfigurationChanged: ((Configuration) -> Void)? = nil,
+        onLifecycleEnd: ((Configuration) -> Void)? = nil
     ) async throws {
         self.gatewayManager = gatewayManager
         self.logger = DiscordGlobalConfiguration.makeLogger("ReactToRole")
@@ -197,9 +230,9 @@ public actor ReactToRoleHandler {
             reactions: reactions,
             roleId: nil
         )
-        self.onRoleIdChanged = onRoleIdChanged
+        self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
-        self.reactToMessage()
+        try await self.verifyAndReactToMessage()
     }
     
     func onGatewayEventPayload(_ data: Gateway.Event.Payload) {
@@ -220,20 +253,14 @@ public actor ReactToRoleHandler {
         }
     }
     
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(self.configuration.id)
-    }
-    
     func endLifecycle() {
-        self.onRoleIdChanged?(self.configuration.id, nil)
-        self.onLifecycleEnd?(self.configuration.id)
+        self.onLifecycleEnd?(self.configuration)
     }
     
     func onReactionAdd(_ reaction: Gateway.MessageReactionAdd) {
         if reaction.message_id == self.configuration.messageId,
            reaction.guild_id == self.configuration.guildId,
-           let reactionName = reaction.emoji.name,
-           self.configuration.reactions.contains(reactionName) {
+           self.configuration.reactions.contains(where: { $0.is(reaction.emoji) }) {
             Task {
                 await self.addRoleToMember(userId: reaction.user_id)
             }
@@ -243,8 +270,7 @@ public actor ReactToRoleHandler {
     func onReactionRemove(_ reaction: Gateway.MessageReactionRemove) {
         if reaction.message_id == self.configuration.messageId,
            reaction.guild_id == self.configuration.guildId,
-           let reactionName = reaction.emoji.name,
-           self.configuration.reactions.contains(reactionName),
+           self.configuration.reactions.contains(where: { $0.is(reaction.emoji) }),
            self.configuration.roleId != nil {
             Task {
                 await self.removeRoleFromMember(userId: reaction.user_id)
@@ -257,7 +283,6 @@ public actor ReactToRoleHandler {
            role.guild_id == self.configuration.guildId,
            role.role.name == self.configuration.roleName {
             self.configuration.roleId = role.role.id
-            self.onRoleIdChanged?(self.configuration.id, role.role.id)
         }
     }
     
@@ -266,7 +291,6 @@ public actor ReactToRoleHandler {
            role.guild_id == self.configuration.guildId,
            role.role_id == roleId {
             self.configuration.roleId = nil
-            self.onRoleIdChanged?(self.configuration.id, nil)
         }
     }
     
@@ -315,7 +339,6 @@ public actor ReactToRoleHandler {
                 color: self.configuration.roleColor
             ) {
                 self.configuration.roleId = role.id
-                self.onRoleIdChanged?(self.configuration.id, role.id)
             } else {
                 await createRole()
             }
@@ -358,42 +381,33 @@ public actor ReactToRoleHandler {
         }
     }
     
-    func reactToMessage() {
-        Task { [self] in
-            let message: Gateway.MessageCreate
+    func verifyAndReactToMessage() async throws {
+        let message: Gateway.MessageCreate
+        do {
+            message = try await client.getChannelMessage(
+                channelId: configuration.channelId,
+                messageId: configuration.messageId
+            ).decode()
+        } catch {
+            throw Error.messageIsInaccessible(
+                messageId: configuration.messageId,
+                channelId: configuration.channelId,
+                previousError: error
+            )
+        }
+        let me = message.reactions?.filter(\.me).map(\.emoji) ?? []
+        let remaining = configuration.reactions.filter { reaction in
+            !me.contains(where: { reaction.is($0) })
+        }
+        for reaction in remaining {
             do {
-                message = try await client.getChannelMessage(
-                    channelId: configuration.channelId,
-                    messageId: configuration.messageId
-                ).decode()
+                try await client.addReaction(
+                    channelId: self.configuration.channelId,
+                    messageId: self.configuration.messageId,
+                    emoji: reaction.urlPathDescription
+                ).guardIsSuccessfulResponse()
             } catch {
                 self.logger.report(error: error)
-                return
-            }
-            let me = message.reactions?.filter(\.me).map(\.emoji) ?? []
-            let remaining = configuration.reactions.filter { reaction in
-                !me.contains { emoji in
-                    if let name = emoji.name {
-                        if name == reaction {
-                            return true
-                        }
-                        if let id = emoji.id, "\(name):\(id)" == reaction {
-                            return true
-                        }
-                    }
-                    return false
-                }
-            }
-            for reaction in remaining {
-                do {
-                    try await client.addReaction(
-                        channelId: self.configuration.channelId,
-                        messageId: self.configuration.messageId,
-                        emoji: reaction
-                    ).guardIsSuccessfulResponse()
-                } catch {
-                    self.logger.report(error: error)
-                }
             }
         }
     }

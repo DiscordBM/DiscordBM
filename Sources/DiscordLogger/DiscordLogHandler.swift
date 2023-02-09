@@ -113,7 +113,7 @@ private func prepare(_ text: String, maxCount: Int) -> String {
 }
 
 private extension Collection {
-    func maxCount(_ count: Int) -> Self.SubSequence {
+    func maxCount(_ count: Int) -> SubSequence {
         let delta = (self.count - count)
         let dropCount = delta > 0 ? delta : 0
         return self.dropLast(dropCount)

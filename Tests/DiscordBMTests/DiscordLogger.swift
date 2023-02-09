@@ -566,7 +566,6 @@ class DiscordLoggerTests: XCTestCase {
             ._tests_getMaxAmountOfLogsAndFlush(address: address)
         XCTAssertEqual(logs.count, 1)
         let lengthSum = logs.map(\.embed.contentLength).reduce(into: 0, +=)
-        print(lengthSum)
         XCTAssertEqual(lengthSum, 5_980)
     }
     
@@ -650,7 +649,7 @@ class DiscordLoggerTests: XCTestCase {
     }
 }
 
-private class FakeDiscordClient: DiscordClient {
+private class FakeDiscordClient: DiscordClient, @unchecked Sendable {
     
     let appId: String? = "11111111"
     
