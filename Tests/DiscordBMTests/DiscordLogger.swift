@@ -513,7 +513,7 @@ class DiscordLoggerTests: XCTestCase {
     }
     
     /// This tests worst-case scenario of having too much text in the logs.
-    func testDoesNotExceedDiscordLimits() async throws {
+    func testDoesNotExceedDiscordLengthLimits() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
             configuration: .init(
@@ -545,6 +545,10 @@ class DiscordLoggerTests: XCTestCase {
                 (longString(), Logger.MetadataValue.string(longString()))
             })
         }
+        
+        /// Wait for the log-manager to start basically.
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
         for _ in 0..<30 {
             logger.log(level: randomLevel(), longMessage(), metadata: longMetadata())
         }
@@ -562,6 +566,7 @@ class DiscordLoggerTests: XCTestCase {
             ._tests_getMaxAmountOfLogsAndFlush(address: address)
         XCTAssertEqual(logs.count, 1)
         let lengthSum = logs.map(\.embed.contentLength).reduce(into: 0, +=)
+        print(lengthSum)
         XCTAssertEqual(lengthSum, 5_980)
     }
     

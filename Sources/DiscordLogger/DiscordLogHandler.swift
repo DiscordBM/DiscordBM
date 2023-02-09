@@ -7,6 +7,7 @@ public struct DiscordLogHandler: LogHandler {
     
     /// The label of this log handler.
     public let label: String
+    let preparedLabel: String
     /// The address to send the logs to.
     let address: WebhookAddress
     /// See `LogHandler.metadata`.
@@ -24,7 +25,8 @@ public struct DiscordLogHandler: LogHandler {
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil
     ) {
-        self.label = prepare(label)
+        self.label = label
+        self.preparedLabel = prepare(label, maxCount: 100)
         self.address = address
         self.logLevel = level
         self.metadata = [:]
@@ -89,15 +91,15 @@ public struct DiscordLogHandler: LogHandler {
         }
         
         let embed = Embed(
-            title: prepare("\(message)"),
+            title: prepare("\(message)", maxCount: 255),
             timestamp: Date(),
             color: config.colors[level],
-            footer: .init(text: self.label), /// Already "prepared"
+            footer: .init(text: self.preparedLabel),
             fields: Array(allMetadata.sorted(by: { $0.key > $1.key }).compactMap {
                 key, value -> Embed.Field? in
                 let value = "\(value)"
                 if key.isEmpty || value.isEmpty { return nil }
-                return .init(name: prepare(key), value: prepare(value))
+                return .init(name: prepare(key, maxCount: 50), value: prepare(value, maxCount: 175))
             }.maxCount(25))
         )
         
@@ -105,10 +107,9 @@ public struct DiscordLogHandler: LogHandler {
     }
 }
 
-private func prepare(_ text: String) -> String {
+private func prepare(_ text: String, maxCount: Int) -> String {
     let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
-    /// `115` will prevent any embeds to have more than `5_980` content length.
-    return String(escaped.unicodeScalars.maxCount(115))
+    return String(escaped.unicodeScalars.maxCount(maxCount))
 }
 
 private extension Collection {
