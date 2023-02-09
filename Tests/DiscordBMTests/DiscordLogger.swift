@@ -551,13 +551,15 @@ class DiscordLoggerTests: XCTestCase {
         #warning("remove")
         print("Start", Date().timeIntervalSince1970)
         for _ in 0..<30 {
+            try await Task.sleep(nanoseconds: 50_000_000)
             print("AAAAAAAA")
             logger.log(level: randomLevel(), longMessage(), metadata: longMetadata())
         }
-        print("End", Date().timeIntervalSince1970)
+        print("End 1", Date().timeIntervalSince1970)
         
         /// To make sure the logs make it to the log-manager's storage.
         try await Task.sleep(nanoseconds: 5_000_000_000)
+        print("End 2", Date().timeIntervalSince1970)
         
         let all = await DiscordGlobalConfiguration.logManager._tests_getLogs()[address]!
         XCTAssertEqual(all.count, 30)

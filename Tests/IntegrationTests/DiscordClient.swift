@@ -72,13 +72,19 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(edited.channel_id, Constants.channelId)
         
         /// Add Reaction
-        let reactionResponse = try await client.addReaction(
+        let reactionResponse = try await client.createReaction(
             channelId: Constants.channelId,
             messageId: message.id,
             emoji: "🚀"
         )
         
         XCTAssertEqual(reactionResponse.status, .noContent)
+        
+//        let deleteOwnReactionResponse = try await client.deleteOwnReaction()
+//        let deleteUserReactionResponse = try await client.deleteUserReaction()
+//        let getReactionsResponse = try await client.getReactions()
+//        let deleteAllReactionsResponse = try await client.deleteAllReactions()
+//        let deleteAllReactionsForEmojiResponse = try await client.deleteAllReactionsForEmoji()
         
         /// Get the message again
         let retrievedMessage = try await client.getChannelMessage(

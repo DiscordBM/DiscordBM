@@ -417,12 +417,90 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/resources/channel#create-reaction
     @inlinable
-    func addReaction(
+    func createReaction(
         channelId: String,
         messageId: String,
         emoji: String
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.addReaction(
+        let endpoint = Endpoint.createReaction(
+            channelId: channelId,
+            messageId: messageId,
+            emoji: emoji
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#delete-own-reaction
+    @inlinable
+    func deleteOwnReaction(
+        channelId: String,
+        messageId: String,
+        emoji: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteOwnReaction(
+            channelId: channelId,
+            messageId: messageId,
+            emoji: emoji
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#delete-user-reaction
+    @inlinable
+    func deleteUserReaction(
+        channelId: String,
+        messageId: String,
+        emoji: String,
+        userId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteUserReaction(
+            channelId: channelId,
+            messageId: messageId,
+            emoji: emoji,
+            userId: userId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#get-reactions
+    @inlinable
+    func getReactions(
+        channelId: String,
+        messageId: String,
+        emoji: String,
+        after: String? = nil,
+        limit: Int? = nil
+    ) async throws -> DiscordClientResponse<DiscordUser> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
+        let endpoint = Endpoint.getReactions(
+            channelId: channelId,
+            messageId: messageId,
+            emoji: emoji
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#delete-all-reactions
+    @inlinable
+    func deleteAllReactions(
+        channelId: String,
+        messageId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteAllReactions(
+            channelId: channelId,
+            messageId: messageId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji
+    @inlinable
+    func deleteAllReactionsForEmoji(
+        channelId: String,
+        messageId: String,
+        emoji: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteAllReactionsForEmoji(
             channelId: channelId,
             messageId: messageId,
             emoji: emoji

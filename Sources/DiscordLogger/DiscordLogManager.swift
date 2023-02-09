@@ -185,7 +185,7 @@ public actor DiscordLogManager {
         
 #if DEBUG
 #warning("remove")
-        print("COUNTI", count, address, isFirstAliveNotice, level?.rawValue ?? "nil")
+        print("COUNTI", count, isFirstAliveNotice, level?.rawValue ?? "nil")
 #endif
         
         if count > configuration.maxStoredLogsCount {

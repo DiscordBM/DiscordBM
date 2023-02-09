@@ -429,7 +429,7 @@ public actor ReactToRoleHandler {
         }
         for reaction in remaining {
             do {
-                try await client.addReaction(
+                try await client.createReaction(
                     channelId: self.configuration.channelId,
                     messageId: self.configuration.messageId,
                     emoji: reaction.urlPathDescription
