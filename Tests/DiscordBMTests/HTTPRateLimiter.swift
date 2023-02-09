@@ -47,7 +47,11 @@ class HTTPRateLimiterTests: XCTestCase {
             status: .ok
         )
         let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-        XCTAssertEqual(shouldRequest, .true)
+        switch shouldRequest {
+        case .after: break
+        default:
+            XCTFail("\(shouldRequest) was not a '.after'")
+        }
     }
     
     /// Bucket is exhausted but the we've already past `x-ratelimit-reset`.
@@ -66,11 +70,7 @@ class HTTPRateLimiterTests: XCTestCase {
             status: .ok
         )
         let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-        switch shouldRequest {
-        case .after: break
-        default:
-            XCTFail("\(shouldRequest) was not a '.after'")
-        }
+        XCTAssertEqual(shouldRequest, .true)
     }
     
     func testBucketAllowsButReachedGlobalInvalidRequests() async throws {
