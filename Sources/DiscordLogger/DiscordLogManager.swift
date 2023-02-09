@@ -133,7 +133,8 @@ public actor DiscordLogManager {
     
     nonisolated let client: any DiscordClient
     nonisolated let configuration: Configuration
-    
+    #warning("remove")
+    let id = UUID()
     private var logs: [WebhookAddress: [Log]] = [:]
     private var sendLogsTasks: [WebhookAddress: Task<Void, Never>] = [:]
     
@@ -185,7 +186,7 @@ public actor DiscordLogManager {
         
 #if DEBUG
 #warning("remove")
-        print("COUNTI", count, isFirstAliveNotice, level?.rawValue ?? "nil")
+        print("COUNTI", count, id, isFirstAliveNotice, level?.rawValue ?? "nil")
 #endif
         
         if count > configuration.maxStoredLogsCount {
