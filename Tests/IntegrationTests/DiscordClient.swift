@@ -1,4 +1,5 @@
 @testable import DiscordBM
+import DiscordClient
 import AsyncHTTPClient
 import Atomics
 import NIOCore
@@ -71,20 +72,59 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(edited.embeds.first?.description, newText)
         XCTAssertEqual(edited.channel_id, Constants.channelId)
         
-        /// Add Reaction
-        let reactionResponse = try await client.createReaction(
+        /// Add 4 Reactions
+        let reactions = ["🚀", "🤠", "👀", "❤️"]
+        for reaction in reactions {
+            let reactionResponse = try await client.createReaction(
+                channelId: Constants.channelId,
+                messageId: message.id,
+                emoji: .unicodeEmoji(reaction)
+            )
+            
+            XCTAssertEqual(reactionResponse.status, .noContent)
+        }
+        
+        let deleteOwnReactionResponse = try await client.deleteOwnReaction(
             channelId: Constants.channelId,
             messageId: message.id,
-            emoji: "🚀"
+            emoji: .unicodeEmoji(reactions[0])
         )
         
-        XCTAssertEqual(reactionResponse.status, .noContent)
+        XCTAssertEqual(deleteOwnReactionResponse.status, .noContent)
         
-//        let deleteOwnReactionResponse = try await client.deleteOwnReaction()
-//        let deleteUserReactionResponse = try await client.deleteUserReaction()
-//        let getReactionsResponse = try await client.getReactions()
-//        let deleteAllReactionsResponse = try await client.deleteAllReactions()
-//        let deleteAllReactionsForEmojiResponse = try await client.deleteAllReactionsForEmoji()
+        /// Needs another user to react to message first, so can't test it properly
+        //        try await client.deleteUserReaction(
+        //            channelId: Constants.channelId,
+        //            messageId: message.id,
+        //            emoji: .unicodeEmoji(reaction)
+        //            userId: ""
+        //        )
+        
+        let getReactionsResponse = try await client.getReactions(
+            channelId: Constants.channelId,
+            messageId: message.id,
+            emoji: .unicodeEmoji(reactions[1])
+        ).decode()
+        
+        XCTAssertEqual(getReactionsResponse.count, 1)
+        
+        let reactionUser = try XCTUnwrap(getReactionsResponse.first)
+        XCTAssertEqual(reactionUser.id, Constants.botId)
+        
+        let deleteAllReactionsForEmojiResponse = try await client.deleteAllReactionsForEmoji(
+            channelId: Constants.channelId,
+            messageId: message.id,
+            emoji: .unicodeEmoji(reactions[1])
+        )
+        
+        XCTAssertEqual(deleteAllReactionsForEmojiResponse.status, .noContent)
+        
+        let deleteAllReactionsResponse = try await client.deleteAllReactions(
+            channelId: Constants.channelId,
+            messageId: message.id
+        )
+        
+        XCTAssertEqual(deleteAllReactionsResponse.status, .noContent)
         
         /// Get the message again
         let retrievedMessage = try await client.getChannelMessage(
@@ -596,13 +636,20 @@ class DiscordClientTests: XCTestCase {
         let count = 50
         let container = Container(targetCounter: count)
         
+        let client: any DiscordClient = DefaultDiscordClient(
+            httpClient: httpClient,
+            token: Constants.token,
+            appId: Constants.botId,
+            configuration: .init(retryPolicy: nil)
+        )
+        
         let isFirstRequest = ManagedAtomic(false)
         Task {
             for _ in 0..<count {
                 let isFirst = isFirstRequest.load(ordering: .relaxed)
                 isFirstRequest.store(false, ordering: .relaxed)
                 do {
-                    _ = try await self.client.createMessage(
+                    _ = try await client.createMessage(
                         channelId: Constants.spamChannelId,
                         payload: .init(content: content)
                     ).decode()
@@ -620,7 +667,7 @@ class DiscordClientTests: XCTestCase {
                         if isFirst {
                             break
                         } else {
-                            fallthrough
+                            XCTFail("Received unexpected error: \(error)")
                         }
                     default:
                         XCTFail("Received unexpected error: \(error)")
@@ -788,6 +835,7 @@ private actor Container {
             try await Task.sleep(nanoseconds: 10_000_000_000)
             if waiter != nil {
                 waiter?.resume()
+                waiter = nil
                 XCTFail("Failed to test in-time")
             }
         }

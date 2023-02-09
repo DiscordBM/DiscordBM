@@ -420,12 +420,12 @@ public extension DiscordClient {
     func createReaction(
         channelId: String,
         messageId: String,
-        emoji: String
+        emoji: Reaction
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.createReaction(
             channelId: channelId,
             messageId: messageId,
-            emoji: emoji
+            emoji: emoji.urlPathDescription
         )
         return try await self.send(request: .init(to: endpoint))
     }
@@ -435,12 +435,12 @@ public extension DiscordClient {
     func deleteOwnReaction(
         channelId: String,
         messageId: String,
-        emoji: String
+        emoji: Reaction
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.deleteOwnReaction(
             channelId: channelId,
             messageId: messageId,
-            emoji: emoji
+            emoji: emoji.urlPathDescription
         )
         return try await self.send(request: .init(to: endpoint))
     }
@@ -450,13 +450,13 @@ public extension DiscordClient {
     func deleteUserReaction(
         channelId: String,
         messageId: String,
-        emoji: String,
+        emoji: Reaction,
         userId: String
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.deleteUserReaction(
             channelId: channelId,
             messageId: messageId,
-            emoji: emoji,
+            emoji: emoji.urlPathDescription,
             userId: userId
         )
         return try await self.send(request: .init(to: endpoint))
@@ -467,15 +467,15 @@ public extension DiscordClient {
     func getReactions(
         channelId: String,
         messageId: String,
-        emoji: String,
+        emoji: Reaction,
         after: String? = nil,
         limit: Int? = nil
-    ) async throws -> DiscordClientResponse<DiscordUser> {
+    ) async throws -> DiscordClientResponse<[DiscordUser]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = Endpoint.getReactions(
             channelId: channelId,
             messageId: messageId,
-            emoji: emoji
+            emoji: emoji.urlPathDescription
         )
         return try await self.send(request: .init(to: endpoint))
     }
@@ -498,12 +498,12 @@ public extension DiscordClient {
     func deleteAllReactionsForEmoji(
         channelId: String,
         messageId: String,
-        emoji: String
+        emoji: Reaction
     ) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.deleteAllReactionsForEmoji(
             channelId: channelId,
             messageId: messageId,
-            emoji: emoji
+            emoji: emoji.urlPathDescription
         )
         return try await self.send(request: .init(to: endpoint))
     }

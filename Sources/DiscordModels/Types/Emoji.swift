@@ -24,3 +24,27 @@ public struct PartialEmoji: Sendable, Codable {
         self.version = version
     }
 }
+
+#warning("Swift 5.6 / 5.7 have different codable behaviors ?!")
+public enum Reaction: Sendable, Equatable, Codable, ExpressibleByStringLiteral {
+    case unicodeEmoji(String)
+    case guildEmoji(name: String, id: String)
+    
+    public init(stringLiteral value: String) {
+        self = .unicodeEmoji(value)
+    }
+    
+    public var urlPathDescription: String {
+        switch self {
+        case let .unicodeEmoji(emoji): return emoji
+        case let .guildEmoji(name, id): return "\(name):\(id)"
+        }
+    }
+    
+    public func `is`(_ emoji: PartialEmoji) -> Bool {
+        switch self {
+        case let .unicodeEmoji(unicode): return unicode == emoji.name
+        case let .guildEmoji(_, id): return id == emoji.id
+        }
+    }
+}

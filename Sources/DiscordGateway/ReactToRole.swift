@@ -9,26 +9,6 @@ import Foundation
 
 public actor ReactToRoleHandler {
     
-#warning("Swift 5.6 / 5.7 have different codable behaviors ?!")
-    public enum Reaction: Sendable, Equatable, Codable {
-        case unicodeEmoji(String)
-        case guildEmoji(name: String, id: String)
-        
-        var urlPathDescription: String {
-            switch self {
-            case let .unicodeEmoji(emoji): return emoji
-            case let .guildEmoji(name, id): return "\(name):\(id)"
-            }
-        }
-        
-        func `is`(_ emoji: PartialEmoji) -> Bool {
-            switch self {
-            case let .unicodeEmoji(unicode): return unicode == emoji.name
-            case let .guildEmoji(_, id): return id == emoji.id
-            }
-        }
-    }
-    
     /// This configuration must be codable-backward-compatible.
     public struct Configuration: Sendable, Codable, Equatable {
         public let id: UUID
@@ -432,7 +412,7 @@ public actor ReactToRoleHandler {
                 try await client.createReaction(
                     channelId: self.configuration.channelId,
                     messageId: self.configuration.messageId,
-                    emoji: reaction.urlPathDescription
+                    emoji: reaction
                 ).guardIsSuccessfulResponse()
             } catch {
                 self.logger.report(error: error)

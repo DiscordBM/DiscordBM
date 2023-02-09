@@ -59,8 +59,31 @@ public struct DefaultDiscordClient: DiscordClient {
     }
     
     func checkRateLimitsAllowRequest(to endpoint: Endpoint) async throws {
-        if await !rateLimiter.shouldRequest(to: endpoint) {
+        switch await rateLimiter.shouldRequest(to: endpoint) {
+        case .true: return
+        case .false:
             throw DiscordClientError.rateLimited(url: "\(endpoint.urlDescription)")
+        case let .after(after):
+            if let backoff = configuration.retryPolicy?.backoff,
+               case let .basedOnHeaders(maxAllowed, _, _) = backoff {
+                if let maxAllowed = maxAllowed {
+                    if after <= maxAllowed {
+                        logger.warning("HTTP bucket is exhausted. Will wait \(after) seconds before making the request")
+                        let nanos = UInt64(after * 1_000_000_000)
+                        try await Task.sleep(nanoseconds: nanos)
+                        await rateLimiter.addGlobalRateLimitRecord()
+                    } else {
+                        throw DiscordClientError.rateLimited(url: "\(endpoint.urlDescription)")
+                    }
+                } else {
+                    logger.warning("HTTP bucket is exhausted. Will wait \(after) seconds before making the request")
+                    let nanos = UInt64(after * 1_000_000_000)
+                    try await Task.sleep(nanoseconds: nanos)
+                    await rateLimiter.addGlobalRateLimitRecord()
+                }
+            } else {
+                throw DiscordClientError.rateLimited(url: "\(endpoint.urlDescription)")
+            }
         }
     }
     
@@ -450,7 +473,7 @@ public struct ClientConfiguration {
             case basedOnHeaders(
                 maxAllowed: Double?,
                 retryIfGreater: Bool = false,
-                else: Backoff?
+                else: Backoff? = nil
             )
             
             public static var `default`: Backoff {
@@ -520,7 +543,7 @@ public struct ClientConfiguration {
         /// Only retries status code 429, 500 and 502 once.
         @inlinable
         public static var `default`: RetryPolicy {
-            RetryPolicy(statuses: [.tooManyRequests, .internalServerError, .badGateway])
+            RetryPolicy()
         }
         
         /// - Parameters:
@@ -529,7 +552,7 @@ public struct ClientConfiguration {
         ///   - backoff: The backoff configuration, to wait a some amount of time
         ///   _after_ a failed request.
         public init(
-            statuses: Set<HTTPResponseStatus>,
+            statuses: Set<HTTPResponseStatus> = [.tooManyRequests, .internalServerError, .badGateway],
             maxRetries: Int = 1,
             backoff: Backoff? = .default
         ) {
