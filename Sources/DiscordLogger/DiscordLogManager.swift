@@ -98,7 +98,7 @@ public actor DiscordLogManager {
                 .notice: .green,
                 .info: .blue,
             ],
-            excludeMetadata: Set<Logger.Level> = [.trace],
+            excludeMetadata: Set<Logger.Level> = [],
             extraMetadata: Set<Logger.Level> = [],
             disabledLogLevels: Set<Logger.Level> = [],
             disabledInDebug: Bool = false,
@@ -182,6 +182,12 @@ public actor DiscordLogManager {
         ))
         
         let count = logs[address]!.count
+        
+#if DEBUG
+#warning("remove")
+        print("COUNTI", count, address, isFirstAliveNotice, level?.rawValue ?? "nil")
+#endif
+        
         if count > configuration.maxStoredLogsCount {
             logs[address]!.removeFirst()
         }
@@ -263,20 +269,8 @@ public actor DiscordLogManager {
         
         while goodLogs.count < 10,
               let log = iterator.next(),
-              (lengthSum() + log.embed.contentLength) <= 6_000
-        {
+              (lengthSum() + log.embed.contentLength) <= 6_000 {
             goodLogs.append(log)
-        }
-        
-        /// Will get stuck if the first log is alone more than the limit length.
-        /// The log handler is expected to prevent this from happening.
-        if goodLogs.isEmpty,
-           let firstLength = self.logs[address]?.first?.embed.contentLength,
-           firstLength > 6_000 {
-            let first = self.logs[address]!.removeFirst()
-            logWarning("First log alone is more than the limit length. This will not cause much problems but it is a library issue. Please report on https://github.com/MahdiBM/DiscordBM/issue with full context",
-                       metadata: ["log": "\(first)"])
-            return self.getMaxAmountOfLogsAndFlush(address: address)
         }
         
         self.logs[address] = Array(self.logs[address]?.dropFirst(goodLogs.count) ?? [])
@@ -324,8 +318,7 @@ public actor DiscordLogManager {
         do {
             try response.guardIsSuccessfulResponse()
         } catch {
-            logWarning("Received error from Discord after sending logs. This is a library issue. Please report on https://github.com/MahdiBM/DiscordBM/issue with full context",
-                       metadata: ["error": "\(error)", "payload": "\(payload)"])
+            logWarning("Received error from Discord after sending logs. This might be a library issue. Please report on https://github.com/MahdiBM/DiscordBM/issue with full context", metadata: ["error": "\(error)", "payload": "\(payload)"])
         }
     }
     

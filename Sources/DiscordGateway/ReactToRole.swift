@@ -1,7 +1,11 @@
 import DiscordModels
 import DiscordClient
 import Logging
+#if os(Linux)
+@preconcurrency import Foundation
+#else
 import Foundation
+#endif
 
 public actor ReactToRoleHandler {
     
@@ -415,7 +419,7 @@ public actor ReactToRoleHandler {
 
 private extension Logger {
     func report(error: Error, function: String = #function, line: UInt = #line) {
-        self.error("ReactToRoleHandler failed", metadata: [
+        self.error("'ReactToRoleHandler' failed", metadata: [
             "error": "\(error)"
         ], function: function, line: line)
     }

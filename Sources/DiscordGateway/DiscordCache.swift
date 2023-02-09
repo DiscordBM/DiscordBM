@@ -84,7 +84,7 @@ public actor DiscordCache {
     ///
     /// Note: The limit policy is applied with a small tolerance, so you can't count on
     /// the limits being applied right-away. Realistically this should not matter anyway,
-    /// as the point of this is just to preserve memory.
+    /// as the point of this is to just preserve memory.
     public enum ItemsLimitPolicy: @unchecked Sendable {
         
         /// `guilds`, `channels` and `botUser` are intentionally excluded.

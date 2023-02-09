@@ -95,12 +95,17 @@ public struct DiscordLogHandler: LogHandler {
             timestamp: Date(),
             color: config.colors[level],
             footer: .init(text: self.preparedLabel),
-            fields: Array(allMetadata.sorted(by: { $0.key > $1.key }).compactMap {
-                key, value -> Embed.Field? in
-                let value = "\(value)"
-                if key.isEmpty || value.isEmpty { return nil }
-                return .init(name: prepare(key, maxCount: 50), value: prepare(value, maxCount: 175))
-            }.maxCount(25))
+            fields: Array(allMetadata.sorted(by: { $0.key > $1.key })
+                .map({ (key: $0.key, value: "\($0.value)") })
+                .filter({ !($0.key.isEmpty || $0.value.isEmpty) })
+                .maxCount(25)
+                .map({ key, value in
+                    Embed.Field(
+                        name: prepare(key, maxCount: 50),
+                        value: prepare(value, maxCount: 175)
+                    )
+                })
+            )
         )
         
         Task { await logManager.include(address: address, embed: embed, level: level) }

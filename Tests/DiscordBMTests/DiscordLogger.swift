@@ -518,8 +518,7 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .seconds(30),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
-                excludeMetadata: []
+                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
             )
         )
         
