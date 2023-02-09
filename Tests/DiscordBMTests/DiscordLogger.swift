@@ -548,9 +548,13 @@ class DiscordLoggerTests: XCTestCase {
         /// Wait for the log-manager to start basically.
         try await Task.sleep(nanoseconds: 2_000_000_000)
         
+        #warning("remove")
+        print("Start", Date().timeIntervalSince1970)
         for _ in 0..<30 {
+            print("AAAAAAAA")
             logger.log(level: randomLevel(), longMessage(), metadata: longMetadata())
         }
+        print("End", Date().timeIntervalSince1970)
         
         /// To make sure the logs make it to the log-manager's storage.
         try await Task.sleep(nanoseconds: 5_000_000_000)

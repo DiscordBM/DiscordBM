@@ -9,6 +9,7 @@ import Foundation
 
 public actor ReactToRoleHandler {
     
+#warning("Swift 5.6 / 5.7 have different codable behaviors ?!")
     public enum Reaction: Sendable, Equatable, Codable {
         case unicodeEmoji(String)
         case guildEmoji(name: String, id: String)
@@ -28,6 +29,7 @@ public actor ReactToRoleHandler {
         }
     }
     
+    /// This configuration must be codable-backward-compatible.
     public struct Configuration: Sendable, Codable, Equatable {
         public let id: UUID
         public let roleName: String
@@ -38,6 +40,28 @@ public actor ReactToRoleHandler {
         public let messageId: String
         public let reactions: [Reaction]
         fileprivate(set) public var roleId: String?
+        
+        public init(
+            id: UUID,
+            roleName: String,
+            roleUnicodeEmoji: String? = nil,
+            roleColor: DiscordColor,
+            guildId: String,
+            channelId: String,
+            messageId: String,
+            reactions: [Reaction],
+            roleId: String? = nil
+        ) {
+            self.id = id
+            self.roleName = roleName
+            self.roleUnicodeEmoji = roleUnicodeEmoji
+            self.roleColor = roleColor
+            self.guildId = guildId
+            self.channelId = channelId
+            self.messageId = messageId
+            self.reactions = reactions
+            self.roleId = roleId
+        }
         
         func hasChanges(comparedTo other: Configuration) -> Bool {
             self.roleId != other.roleId
@@ -164,10 +188,9 @@ public actor ReactToRoleHandler {
     
     public init(
         gatewayManager: any GatewayManager,
-        cache: DiscordCache,
-        configuration: Configuration,
+        cache: DiscordCache?,
         roleName: String,
-        roleUnicodeEmoji: String,
+        roleUnicodeEmoji: String? = nil,
         roleColor: DiscordColor,
         guildId: String,
         channelId: String,
@@ -177,8 +200,9 @@ public actor ReactToRoleHandler {
         onLifecycleEnd: ((Configuration) -> Void)? = nil
     ) async throws {
         self.gatewayManager = gatewayManager
+        let id = UUID()
         self.logger = DiscordGlobalConfiguration.makeLogger("ReactToRole")
-        logger[metadataKey: "id"] = "\(configuration.id.uuidString)"
+        logger[metadataKey: "id"] = "\(id.uuidString)"
         self.requestHandler = .init(
             cache: cache,
             client: gatewayManager.client,
@@ -186,7 +210,7 @@ public actor ReactToRoleHandler {
             guildId: guildId
         )
         self.configuration = .init(
-            id: UUID(),
+            id: id,
             roleName: roleName,
             roleUnicodeEmoji: roleUnicodeEmoji,
             roleColor: roleColor,
@@ -203,7 +227,7 @@ public actor ReactToRoleHandler {
     
     public init(
         gatewayManager: any GatewayManager,
-        cache: DiscordCache,
+        cache: DiscordCache?,
         configuration: Configuration,
         guildId: String,
         channelId: String,

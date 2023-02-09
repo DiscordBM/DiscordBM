@@ -90,11 +90,9 @@ public actor BotGatewayManager: GatewayManager {
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
         eventLoopGroup: EventLoopGroup,
-        httpClient: HTTPClient,
         client: any DiscordClient,
         maxFrameSize: Int =  1 << 31,
         compression: Bool = true,
-        appId: String? = nil,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup

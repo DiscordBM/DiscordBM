@@ -147,7 +147,7 @@ public actor DiscordLogManager {
         /// which doesn't need/use neither `token` nor `appId`.
         self.client = DefaultDiscordClient(httpClient: httpClient, token: "", appId: nil)
         self.configuration = configuration
-        Task { await self.startAliveNotices() }
+        Task { [weak self] in await self?.startAliveNotices() }
     }
     
     public init(
@@ -156,7 +156,7 @@ public actor DiscordLogManager {
     ) {
         self.client = client
         self.configuration = configuration
-        Task { await self.startAliveNotices() }
+        Task { [weak self] in await self?.startAliveNotices() }
     }
     
     func include(address: WebhookAddress, embed: Embed, level: Logger.Level) {

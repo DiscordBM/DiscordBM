@@ -17,4 +17,6 @@ enum Constants {
     static let perm2ChannelId = "1069614568466305135"
     static let perm3ChannelId = "1069615830851145798"
     static let secondAccountId = "966330655069843457"
+    static let reactionChannelId = "1073282726750330889"
+    static let reactionMessageId = "1073282967914414263"
 }
