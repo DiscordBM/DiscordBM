@@ -260,7 +260,8 @@ public actor DiscordLogManager {
         if configuration.disabledInDebug { return }
 #endif
         let nanos = UInt64(configuration.frequency.nanoseconds)
-        
+        #warning("remove")
+        print("SNEDIN", nanos / 1_000_000, id)
         @Sendable func send() async throws {
             try await Task.sleep(nanoseconds: nanos)
             try await performLogSend(address: address)
@@ -273,10 +274,10 @@ public actor DiscordLogManager {
     
     private func performLogSend(address: WebhookAddress) async throws {
         let logs = getMaxAmountOfLogsAndFlush(address: address)
-        try await sendLogs(logs, address: address)
         if self.logs[address]?.isEmpty != false {
             self.sendLogsTasks[address]?.cancel()
         }
+        try await sendLogs(logs, address: address)
     }
     
     private func getMaxAmountOfLogsAndFlush(address: WebhookAddress) -> [Log] {

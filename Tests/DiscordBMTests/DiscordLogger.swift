@@ -567,6 +567,8 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertNoThrow(try embed.validate())
         }
         
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
         let logs = await DiscordGlobalConfiguration.logManager
             ._tests_getMaxAmountOfLogsAndFlush(address: address)
         XCTAssertEqual(logs.count, 1)
