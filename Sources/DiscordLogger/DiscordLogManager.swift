@@ -141,7 +141,12 @@ public actor DiscordLogManager {
     let id = UUID()
     let lock = NIOLock()
     
-    private var logs: [WebhookAddress: [Log]] = [:]
+    private var logs: [WebhookAddress: [Log]] = [:] {
+        didSet {
+            #warning("remove")
+            print("DID", oldValue.map(\.value.count), "->", logs.map(\.value.count))
+        }
+    }
     private var sendLogsTasks: [WebhookAddress: Task<Void, Never>] = [:]
     
     private var aliveNoticeTask: Task<Void, Never>?
