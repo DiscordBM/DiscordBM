@@ -599,7 +599,7 @@ extension BotGatewayManager {
                             opcode: .init(encodedWebSocketOpcode: opcode)!
                         )
                     } catch {
-                        self.logger.error("Could not send payload through websocket", metadata: [
+                        self.logger.error("Could not send payload through websocket. This is warning if something goes wrong, not necessarily an error", metadata: [
                             "error": "\(error)",
                             "payload": .string("\(payload)"),
                             "opcode": .stringConvertible(opcode),

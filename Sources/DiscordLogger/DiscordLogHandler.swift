@@ -101,8 +101,8 @@ public struct DiscordLogHandler: LogHandler {
                 .maxCount(25)
                 .map({ key, value in
                     Embed.Field(
-                        name: prepare(key, maxCount: 50),
-                        value: prepare(value, maxCount: 175)
+                        name: prepare(key, maxCount: 25),
+                        value: prepare(value, maxCount: 200)
                     )
                 })
             )

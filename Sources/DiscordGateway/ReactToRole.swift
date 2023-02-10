@@ -7,10 +7,11 @@ import Logging
 import Foundation
 #endif
 
+/// Handles react-to-a-message-to-get-a-role.
 public actor ReactToRoleHandler {
     
     /// This configuration must be codable-backward-compatible.
-    public struct Configuration: Sendable, Codable, Equatable {
+    public struct Configuration: Sendable, Codable {
         public let id: UUID
         public let roleName: String
         public let roleUnicodeEmoji: String?
@@ -46,15 +47,6 @@ public actor ReactToRoleHandler {
         func hasChanges(comparedTo other: Configuration) -> Bool {
             self.roleId != other.roleId
         }
-        
-        public static func == (lhs: Configuration, rhs: Configuration) -> Bool {
-            lhs.roleName == rhs.roleName &&
-            lhs.roleUnicodeEmoji == rhs.roleUnicodeEmoji &&
-            lhs.guildId == rhs.guildId &&
-            lhs.channelId == rhs.channelId &&
-            lhs.messageId == rhs.messageId &&
-            lhs.reactions == rhs.reactions
-        }
     }
     
     public enum Error: Swift.Error {
@@ -62,6 +54,7 @@ public actor ReactToRoleHandler {
         case roleIsInaccessible(id: String, previousError: Swift.Error?)
     }
     
+    /// Handles the requests which can be done using either a cache (if available), or a client.
     struct RequestHandler: Sendable {
         let cache: DiscordCache?
         let client: any DiscordClient
@@ -133,7 +126,13 @@ public actor ReactToRoleHandler {
     var client: any DiscordClient { gatewayManager.client }
     let requestHandler: RequestHandler
     var logger: Logger
-    private(set) var configuration: Configuration {
+    
+    /// The configuration.
+    ///
+    /// For persistence, you should save the `configuration` somewhere (It's `Codable`),
+    /// and reload it the next time you need it.
+    /// Using `onConfigurationChanged` you can get notified when `configuration` changes.
+    private(set) public var configuration: Configuration {
         didSet {
             if oldValue.hasChanges(comparedTo: self.configuration) {
                 self.onConfigurationChanged?(self.configuration)
@@ -144,6 +143,13 @@ public actor ReactToRoleHandler {
     let onConfigurationChanged: ((Configuration) -> Void)?
     let onLifecycleEnd: ((Configuration) -> Void)?
     
+    /// - Parameters:
+    ///   - gatewayManager: The `GatewayManager`/`bot` to listen for events from.
+    ///   - cache: The `DiscordCache`. Preferred to have, but not necessary.
+    ///   - configuration: The configuration.
+    ///   - onConfigurationChanged: Hook for getting notified of configuration changes.
+    ///   - onLifecycleEnd: Hook for getting notified when this handler no longer serves a purpose.
+    ///     For example when the target message is deleted.
     public init(
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
@@ -167,6 +173,21 @@ public actor ReactToRoleHandler {
         try await self.verifyAndReactToMessage()
     }
     
+    /// Note: The role will be created only if a role with the name doesn't exist.
+    ///
+    /// - Parameters:
+    ///   - gatewayManager: The `GatewayManager`/`bot` to listen for events from.
+    ///   - cache: The `DiscordCache`. Preferred to have, but not necessary.
+    ///   - roleName: The name of the role you want to be assigned.
+    ///   - roleUnicodeEmoji: The role-emoji. Only affects guilds with the `roleIcons` feature.
+    ///   - roleColor: The color of the role.
+    ///   - guildId: The guild id.
+    ///   - channelId: The channel id where the message exists.
+    ///   - messageId: The message id.
+    ///   - reactions: What reactions to get the role with.
+    ///   - onConfigurationChanged: Hook for getting notified of configuration changes.
+    ///   - onLifecycleEnd: Hook for getting notified when this handler no longer serves a purpose.
+    ///     For example when the target message is deleted.
     public init(
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
@@ -207,10 +228,20 @@ public actor ReactToRoleHandler {
         try await self.verifyAndReactToMessage()
     }
     
+    /// - Parameters:
+    ///   - gatewayManager: The `GatewayManager`/`bot` to listen for events from.
+    ///   - cache: The `DiscordCache`. Preferred to have, but not necessary.
+    ///   - guildId: The guild id.
+    ///   - channelId: The channel id where the message exists.
+    ///   - messageId: The message id.
+    ///   - reactions: What reactions to get the role with.
+    ///   - existingRoleId: Existing role-id to assign.
+    ///   - onConfigurationChanged: Hook for getting notified of configuration changes.
+    ///   - onLifecycleEnd: Hook for getting notified when this handler no longer serves a purpose.
+    ///     For example when the target message is deleted.
     public init(
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
-        configuration: Configuration,
         guildId: String,
         channelId: String,
         messageId: String,
@@ -220,8 +251,9 @@ public actor ReactToRoleHandler {
         onLifecycleEnd: ((Configuration) -> Void)? = nil
     ) async throws {
         self.gatewayManager = gatewayManager
+        let id = UUID()
         self.logger = DiscordGlobalConfiguration.makeLogger("ReactToRole")
-        logger[metadataKey: "id"] = "\(configuration.id.uuidString)"
+        logger[metadataKey: "id"] = "\(id.uuidString)"
         self.requestHandler = .init(
             cache: cache,
             client: gatewayManager.client,
@@ -230,7 +262,7 @@ public actor ReactToRoleHandler {
         )
         let role = try await self.requestHandler.getRole(id: existingRoleId)
         self.configuration = .init(
-            id: UUID(),
+            id: id,
             roleName: role.name,
             roleUnicodeEmoji: role.unicode_emoji,
             roleColor: role.color,
@@ -238,7 +270,7 @@ public actor ReactToRoleHandler {
             channelId: channelId,
             messageId: messageId,
             reactions: reactions,
-            roleId: nil
+            roleId: role.id
         )
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
