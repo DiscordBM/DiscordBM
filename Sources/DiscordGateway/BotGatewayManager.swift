@@ -570,13 +570,13 @@ extension BotGatewayManager {
         connectionId: UInt? = nil,
         tryCount: Int = 0
     ) {
-        self.sendQueue.perform { [self] in
+        self.sendQueue.perform { [weak self] in
+            guard let self = self else { return }
             Task {
                 if let connectionId = connectionId,
                    self.connectionId.load(ordering: .relaxed) != connectionId {
                     return
                 }
-                if self.state == .stopped { return }
                 
                 let opcode = opcode ?? payload.opcode.rawValue
                 
@@ -584,7 +584,7 @@ extension BotGatewayManager {
                 do {
                     data = try DiscordGlobalConfiguration.encoder.encode(payload)
                 } catch {
-                    logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
+                    self.logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
                         "payload": .string("\(payload)"),
                         "opcode": .stringConvertible(opcode),
                         "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
@@ -599,7 +599,7 @@ extension BotGatewayManager {
                             opcode: .init(encodedWebSocketOpcode: opcode)!
                         )
                     } catch {
-                        logger.error("Could not send payload through websocket", metadata: [
+                        self.logger.error("Could not send payload through websocket", metadata: [
                             "error": "\(error)",
                             "payload": .string("\(payload)"),
                             "opcode": .stringConvertible(opcode),
@@ -607,7 +607,7 @@ extension BotGatewayManager {
                         ])
                     }
                 } else {
-                    logger.warning("Trying to send through ws when a connection is not established", metadata: [
+                    self.logger.warning("Trying to send through ws when a connection is not established", metadata: [
                         "payload": .string("\(payload)"),
                         "state": .stringConvertible(self._state.load(ordering: .relaxed)),
                         "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
