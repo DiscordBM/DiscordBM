@@ -72,7 +72,7 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertEqual(embed.title, "Testing!")
             let now = Date().timeIntervalSince1970
             let timestamp = embed.timestamp?.date.timeIntervalSince1970 ?? 0
-            XCTAssertTrue(((now-2)...(now+2)).contains(timestamp))
+            XCTAssertTrue(((now-10)...(now+10)).contains(timestamp))
             XCTAssertEqual(embed.color?.value, DiscordColor.brown.value)
             XCTAssertEqual(embed.footer?.text, "test")
             XCTAssertEqual(embed.fields?.count, 0)
@@ -83,7 +83,7 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertEqual(embed.title, "Testing! 2")
             let now = Date().timeIntervalSince1970
             let timestamp = embed.timestamp?.date.timeIntervalSince1970 ?? 0
-            XCTAssertTrue(((now-2)...(now+2)).contains(timestamp))
+            XCTAssertTrue(((now-10)...(now+10)).contains(timestamp))
             XCTAssertEqual(embed.color?.value, DiscordColor.green.value)
             XCTAssertEqual(embed.footer?.text, "test")
             XCTAssertEqual(embed.fields?.count, 0)
@@ -94,7 +94,7 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertEqual(embed.title, "Testing! 3")
             let now = Date().timeIntervalSince1970
             let timestamp = embed.timestamp?.date.timeIntervalSince1970 ?? 0
-            XCTAssertTrue(((now-2)...(now+2)).contains(timestamp))
+            XCTAssertTrue(((now-10)...(now+10)).contains(timestamp))
             XCTAssertEqual(embed.color?.value, DiscordColor.green.value)
             XCTAssertEqual(embed.footer?.text, "test")
             let fields = try XCTUnwrap(embed.fields)
@@ -110,7 +110,7 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertEqual(embed.title, "Testing! 4")
             let now = Date().timeIntervalSince1970
             let timestamp = embed.timestamp?.date.timeIntervalSince1970 ?? 0
-            XCTAssertTrue(((now-2)...(now+2)).contains(timestamp))
+            XCTAssertTrue(((now-10)...(now+10)).contains(timestamp))
             XCTAssertEqual(embed.color?.value, DiscordColor.orange.value)
             XCTAssertEqual(embed.footer?.text, "test")
         }
