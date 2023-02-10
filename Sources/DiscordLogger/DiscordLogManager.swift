@@ -186,11 +186,16 @@ public actor DiscordLogManager {
 #if DEBUG
         if configuration.disabledInDebug { return }
 #endif
-        if self.logs[address]?.isEmpty != false {
+        switch self.logs[address]?.isEmpty {
+        case .none:
+            self.logs[address] = []
             setUpSendLogsTask(address: address)
+        case .some(true):
+            setUpSendLogsTask(address: address)
+        case .some(false): break
         }
         
-        self.logs[address, default: []].append(.init(
+        self.logs[address]!.append(.init(
             embed: embed,
             level: level,
             isFirstAliveNotice: isFirstAliveNotice
@@ -203,6 +208,7 @@ public actor DiscordLogManager {
 #endif
         
         if count > configuration.maxStoredLogsCount {
+            print("REM1", id)
             logs[address]!.removeFirst()
         }
     }
@@ -287,7 +293,7 @@ public actor DiscordLogManager {
             goodLogs.append(log)
         }
         #warning("remove")
-        print("REMOVE", goodLogs.count)
+        print("REMOVE", goodLogs.count, id)
         self.logs[address] = Array(self.logs[address]?.dropFirst(goodLogs.count) ?? [])
         
         return goodLogs
