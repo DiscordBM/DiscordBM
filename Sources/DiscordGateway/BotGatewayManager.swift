@@ -576,6 +576,7 @@ extension BotGatewayManager {
                    self.connectionId.load(ordering: .relaxed) != connectionId {
                     return
                 }
+                if self.state == .stopped { return }
                 
                 let opcode = opcode ?? payload.opcode.rawValue
                 
