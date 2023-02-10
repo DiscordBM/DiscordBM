@@ -286,7 +286,8 @@ public actor DiscordLogManager {
               (lengthSum() + log.embed.contentLength) <= 6_000 {
             goodLogs.append(log)
         }
-        
+        #warning("remove")
+        print("REMOVE", goodLogs.count)
         self.logs[address] = Array(self.logs[address]?.dropFirst(goodLogs.count) ?? [])
         
         return goodLogs
