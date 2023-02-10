@@ -183,10 +183,6 @@ public actor BotGatewayManager: GatewayManager {
         self.logger = logger
     }
     
-    deinit {
-        Task { await self.disconnect() }
-    }
-    
     /// Starts connecting to Discord.
     /// `_state` must be set to an appropriate value before triggering this function.
     public func connect() async {
