@@ -517,7 +517,7 @@ class DiscordLoggerTests: XCTestCase {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
             configuration: .init(
-                frequency: .seconds(30),
+                frequency: .seconds(60),
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
             )
         )
@@ -567,6 +567,7 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertNoThrow(try embed.validate())
         }
         
+        #warning("remove")
         try await Task.sleep(nanoseconds: 2_000_000_000)
         
         let logs = await DiscordGlobalConfiguration.logManager
