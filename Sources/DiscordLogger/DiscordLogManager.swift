@@ -5,6 +5,9 @@ import NIOCore
 import Logging
 import Foundation
 
+#warning("remove")
+import NIOConcurrencyHelpers
+
 /// The manager of sending logs to Discord.
 public actor DiscordLogManager {
     
@@ -133,8 +136,11 @@ public actor DiscordLogManager {
     
     nonisolated let client: any DiscordClient
     nonisolated let configuration: Configuration
+    
     #warning("remove")
     let id = UUID()
+    let lock = NIOLock()
+    
     private var logs: [WebhookAddress: [Log]] = [:]
     private var sendLogsTasks: [WebhookAddress: Task<Void, Never>] = [:]
     
@@ -176,6 +182,8 @@ public actor DiscordLogManager {
         if self.logs[address]?.isEmpty != false {
             setUpSendLogsTask(address: address)
         }
+        
+        self.lock.lock()
         self.logs[address, default: []].append(.init(
             embed: embed,
             level: level,
@@ -183,7 +191,7 @@ public actor DiscordLogManager {
         ))
         
         let count = logs[address]!.count
-        
+        self.lock.unlock()
 #if DEBUG
 #warning("remove")
         print("COUNTI", count, id, isFirstAliveNotice, level?.rawValue ?? "nil")
