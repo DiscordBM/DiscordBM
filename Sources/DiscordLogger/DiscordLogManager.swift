@@ -176,6 +176,8 @@ public actor DiscordLogManager {
         level: Logger.Level?,
         isFirstAliveNotice: Bool
     ) {
+        self.lock.lock()
+        defer { self.lock.unlock() }
 #if DEBUG
         if configuration.disabledInDebug { return }
 #endif
@@ -183,7 +185,6 @@ public actor DiscordLogManager {
             setUpSendLogsTask(address: address)
         }
         
-        self.lock.lock()
         self.logs[address, default: []].append(.init(
             embed: embed,
             level: level,
@@ -191,7 +192,6 @@ public actor DiscordLogManager {
         ))
         
         let count = logs[address]!.count
-        self.lock.unlock()
 #if DEBUG
 #warning("remove")
         print("COUNTI", count, id, isFirstAliveNotice, level?.rawValue ?? "nil")
