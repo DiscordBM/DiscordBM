@@ -177,6 +177,7 @@ public enum RequestBody {
         public var unicode_emoji: String?
         public var mentionable: Bool?
         
+        /// `icon` and `unicode_emoji` require `roleIcons` guild feature, which most guild don't have.
         public init(name: String? = nil, permissions: [Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, icon: ImageData? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
             self.name = name
             self.permissions = permissions.map { .init($0) }

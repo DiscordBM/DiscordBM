@@ -13,9 +13,7 @@ public actor ReactToRoleHandler {
     /// This configuration must be codable-backward-compatible.
     public struct Configuration: Sendable, Codable {
         public let id: UUID
-        public let roleName: String
-        public let roleUnicodeEmoji: String?
-        public let roleColor: DiscordColor
+        public let role: RequestBody.CreateGuildRole
         public let guildId: String
         public let channelId: String
         public let messageId: String
@@ -24,9 +22,7 @@ public actor ReactToRoleHandler {
         
         public init(
             id: UUID,
-            roleName: String,
-            roleUnicodeEmoji: String? = nil,
-            roleColor: DiscordColor,
+            role: RequestBody.CreateGuildRole,
             guildId: String,
             channelId: String,
             messageId: String,
@@ -34,9 +30,7 @@ public actor ReactToRoleHandler {
             roleId: String? = nil
         ) {
             self.id = id
-            self.roleName = roleName
-            self.roleUnicodeEmoji = roleUnicodeEmoji
-            self.roleColor = roleColor
+            self.role = role
             self.guildId = guildId
             self.channelId = channelId
             self.messageId = messageId
@@ -85,11 +79,14 @@ public actor ReactToRoleHandler {
             }
         }
         
-        func getRoleIfExists(name: String, color: DiscordColor) async throws -> Role? {
+        func getRoleIfExists(role: RequestBody.CreateGuildRole) async throws -> Role? {
             if let cache = cache,
                cache.intents.contains(.guilds) {
                 if let role = await cache.guilds[guildId]?.roles.first(where: {
-                    $0.name == name && $0.color == color
+                    $0.name == role.name &&
+                    $0.color == role.color &&
+                    $0.permissions.values.sorted(by: { $0.rawValue > $1.rawValue })
+                    == (role.permissions?.values ?? []).sorted(by: { $0.rawValue > $1.rawValue })
                 }) {
                     return role
                 } else {
@@ -99,7 +96,12 @@ public actor ReactToRoleHandler {
                 return try await client
                     .getGuildRoles(id: guildId)
                     .decode()
-                    .first { $0.name == name && $0.color == color }
+                    .first {
+                        $0.name == role.name &&
+                        $0.color == role.color &&
+                        $0.permissions.values.sorted(by: { $0.rawValue > $1.rawValue })
+                        == (role.permissions?.values ?? []).sorted(by: { $0.rawValue > $1.rawValue })
+                    }
             }
         }
         
@@ -173,7 +175,8 @@ public actor ReactToRoleHandler {
         try await self.verifyAndReactToMessage()
     }
     
-    /// Note: The role will be created only if a role with the name doesn't exist.
+    /// Note: The role will be created only if a role matching the
+    /// name, color and permissions doesn't exist.
     ///
     /// - Parameters:
     ///   - gatewayManager: The `GatewayManager`/`bot` to listen for events from.
@@ -181,6 +184,7 @@ public actor ReactToRoleHandler {
     ///   - roleName: The name of the role you want to be assigned.
     ///   - roleUnicodeEmoji: The role-emoji. Only affects guilds with the `roleIcons` feature.
     ///   - roleColor: The color of the role.
+    ///   - rolePermissions: The permissions the role should have.
     ///   - guildId: The guild id.
     ///   - channelId: The channel id where the message exists.
     ///   - messageId: The message id.
@@ -191,9 +195,7 @@ public actor ReactToRoleHandler {
     public init(
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
-        roleName: String,
-        roleUnicodeEmoji: String? = nil,
-        roleColor: DiscordColor,
+        role: RequestBody.CreateGuildRole,
         guildId: String,
         channelId: String,
         messageId: String,
@@ -213,9 +215,7 @@ public actor ReactToRoleHandler {
         )
         self.configuration = .init(
             id: id,
-            roleName: roleName,
-            roleUnicodeEmoji: roleUnicodeEmoji,
-            roleColor: roleColor,
+            role: role,
             guildId: guildId,
             channelId: channelId,
             messageId: messageId,
@@ -231,22 +231,22 @@ public actor ReactToRoleHandler {
     /// - Parameters:
     ///   - gatewayManager: The `GatewayManager`/`bot` to listen for events from.
     ///   - cache: The `DiscordCache`. Preferred to have, but not necessary.
+    ///   - existingRoleId: Existing role-id to assign.
     ///   - guildId: The guild id.
     ///   - channelId: The channel id where the message exists.
     ///   - messageId: The message id.
     ///   - reactions: What reactions to get the role with.
-    ///   - existingRoleId: Existing role-id to assign.
     ///   - onConfigurationChanged: Hook for getting notified of configuration changes.
     ///   - onLifecycleEnd: Hook for getting notified when this handler no longer serves a purpose.
     ///     For example when the target message is deleted.
     public init(
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
+        existingRoleId: String,
         guildId: String,
         channelId: String,
         messageId: String,
         reactions: [Reaction],
-        existingRoleId: String,
         onConfigurationChanged: ((Configuration) -> Void)? = nil,
         onLifecycleEnd: ((Configuration) -> Void)? = nil
     ) async throws {
@@ -261,11 +261,18 @@ public actor ReactToRoleHandler {
             guildId: guildId
         )
         let role = try await self.requestHandler.getRole(id: existingRoleId)
+        
         self.configuration = .init(
             id: id,
-            roleName: role.name,
-            roleUnicodeEmoji: role.unicode_emoji,
-            roleColor: role.color,
+            role: .init(
+                name: role.name,
+                permissions: Array(role.permissions.values),
+                color: role.color,
+                hoist: role.hoist,
+                icon: nil, // FIXME: Add CDN endpoints so we can retrieve value of this
+                unicode_emoji: role.unicode_emoji,
+                mentionable: role.mentionable
+            ),
             guildId: guildId,
             channelId: channelId,
             messageId: messageId,
@@ -324,7 +331,7 @@ public actor ReactToRoleHandler {
     func onRoleCreate(_ role: Gateway.GuildRole) {
         if self.configuration.roleId == nil,
            role.guild_id == self.configuration.guildId,
-           role.role.name == self.configuration.roleName {
+           role.role.name == self.configuration.role.name {
             self.configuration.roleId = role.role.id
         }
     }
@@ -378,8 +385,7 @@ public actor ReactToRoleHandler {
     func setOrCreateRole() async {
         do {
             if let role = try await requestHandler.getRoleIfExists(
-                name: self.configuration.roleName,
-                color: self.configuration.roleColor
+                role: self.configuration.role
             ) {
                 self.configuration.roleId = role.id
             } else {
@@ -391,17 +397,15 @@ public actor ReactToRoleHandler {
     }
     
     func createRole() async {
-        let hasFeature = await requestHandler.guildHasFeature(.roleIcons)
-        let unicodeEmoji = hasFeature ? self.configuration.roleUnicodeEmoji : nil
+        var role = self.configuration.role
+        if await !requestHandler.guildHasFeature(.roleIcons) {
+            role.unicode_emoji = nil
+            role.icon = nil
+        }
         do {
             let result = try await client.createGuildRole(
                 guildId: self.configuration.guildId,
-                payload: .init(
-                    name: self.configuration.roleName,
-                    color: self.configuration.roleColor,
-                    unicode_emoji: unicodeEmoji,
-                    mentionable: true
-                )
+                payload: role
             )
             self.configuration.roleId = try result.decode().id
         } catch {
