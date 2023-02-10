@@ -27,7 +27,7 @@ class DiscordLoggerTests: XCTestCase {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
             configuration: .init(
-                frequency: .seconds(1),
+                frequency: .seconds(5),
                 fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 mentions: [
                     .trace: .role("33333333"),
@@ -44,18 +44,18 @@ class DiscordLoggerTests: XCTestCase {
         )
         logger.log(level: .trace, "Testing!")
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 100_000_000)
+        try await Task.sleep(nanoseconds: 50_000_000)
         logger.log(level: .notice, "Testing! 2")
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 100_000_000)
+        try await Task.sleep(nanoseconds: 50_000_000)
         logger.log(level: .notice, "Testing! 3", metadata: ["1": "2"])
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 100_000_000)
+        try await Task.sleep(nanoseconds: 50_000_000)
         logger.log(level: .warning, "Testing! 4")
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        wait(for: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 6)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
