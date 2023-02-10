@@ -9,10 +9,7 @@ class PermissionChecker: XCTestCase {
     
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
-            #warning("change")
-            var l = Logger(label: $0, factory: StreamLogHandler.standardOutput(label:))
-            l.logLevel = .trace
-            return l
+            Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
         }
         self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
     }

@@ -280,11 +280,11 @@ public actor BotGatewayManager: GatewayManager {
             return
         }
         self.connectionId.wrappingIncrement(ordering: .relaxed)
-        await connectionBackoff.resetTryCount()
-        self.closeWebSocket(ws: self.ws)
         self._state.store(.stopped, ordering: .relaxed)
         self.isFirstConnection = true
+        await connectionBackoff.resetTryCount()
         await self.sendQueue.reset()
+        self.closeWebSocket(ws: self.ws)
     }
 }
 
