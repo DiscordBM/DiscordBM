@@ -149,10 +149,8 @@ public struct Gateway: Sendable, Codable {
                     return [.guilds]
                 case .channelPinsUpdate:
                     return [.guilds, .directMessages]
-                case .threadMembersUpdate:
+                case .threadMembersUpdate, .guildMemberAdd, .guildMemberRemove, .guildMemberUpdate:
                     return [.guilds, .guildMembers]
-                case .guildMemberAdd, .guildMemberRemove, .guildMemberUpdate:
-                    return [.guildMembers]
                 case .guildBanAdd, .guildBanRemove, .guildAuditLogEntryCreate:
                     return [.guildModeration]
                 case .guildEmojisUpdate, .guildStickersUpdate:
@@ -536,7 +534,7 @@ public struct Gateway: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
-    public enum Intent: Int, Sendable, Codable {
+    public enum Intent: Int, Sendable, Codable, CaseIterable {
         case guilds = 0
         case guildMembers = 1
         case guildModeration = 2

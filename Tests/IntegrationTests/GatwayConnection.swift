@@ -32,7 +32,7 @@ class GatewayConnectionTests: XCTestCase {
                 status: .invisible,
                 afk: false
             ),
-            intents: [.guilds, .guildModeration, .guildEmojisAndStickers, .guildIntegrations, .guildWebhooks, .guildInvites, .guildVoiceStates, .guildMessages, .guildMessageReactions, .guildMessageTyping, .directMessages, .directMessageReactions, .directMessageTyping, .guildScheduledEvents, .autoModerationConfiguration, .autoModerationExecution, .guildMessages, .guildPresences, .messageContent]
+            intents: Gateway.Intent.allCases
         )
         
         let expectation = expectation(description: "Connected")
@@ -89,7 +89,7 @@ class GatewayConnectionTests: XCTestCase {
                 status: .invisible,
                 afk: false
             ),
-            intents: [.guilds, .guildModeration, .guildEmojisAndStickers, .guildIntegrations, .guildWebhooks, .guildInvites, .guildVoiceStates, .guildMessages, .guildMessageReactions, .guildMessageTyping, .directMessages, .directMessageReactions, .directMessageTyping, .guildScheduledEvents, .autoModerationConfiguration, .autoModerationExecution, .guildMessages, .guildPresences, .messageContent]
+            intents: Gateway.Intent.allCases
         )
         
         let expectation = expectation(description: "Connected")

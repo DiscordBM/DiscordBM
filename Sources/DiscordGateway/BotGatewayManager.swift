@@ -183,6 +183,10 @@ public actor BotGatewayManager: GatewayManager {
         self.logger = logger
     }
     
+    deinit {
+        Task { await self.disconnect() }
+    }
+    
     /// Starts connecting to Discord.
     /// `_state` must be set to an appropriate value before triggering this function.
     public func connect() async {
@@ -273,6 +277,12 @@ public actor BotGatewayManager: GatewayManager {
         logger.debug("Will disconnect", metadata: [
             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
         ])
+        if self._state.load(ordering: .relaxed) == .stopped {
+            logger.debug("Already disconnected", metadata: [
+                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+            ])
+            return
+        }
         self.connectionId.wrappingIncrement(ordering: .relaxed)
         await connectionBackoff.resetTryCount()
         self.closeWebSocket(ws: self.ws)

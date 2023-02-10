@@ -163,6 +163,7 @@ public actor ReactToRoleHandler {
         self.configuration = configuration
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
+        await gatewayManager.addEventHandler(self.handleEvent)
         try await self.verifyAndReactToMessage()
     }
     
@@ -202,6 +203,7 @@ public actor ReactToRoleHandler {
         )
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
+        await gatewayManager.addEventHandler(self.handleEvent)
         try await self.verifyAndReactToMessage()
     }
     
@@ -240,11 +242,12 @@ public actor ReactToRoleHandler {
         )
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
+        await gatewayManager.addEventHandler(self.handleEvent)
         try await self.verifyAndReactToMessage()
     }
     
-    func onGatewayEventPayload(_ data: Gateway.Event.Payload) {
-        switch data {
+    private func handleEvent(_ event: Gateway.Event) {
+        switch event.data {
         case let .messageReactionAdd(payload):
             self.onReactionAdd(payload)
         case let .messageReactionRemove(payload):

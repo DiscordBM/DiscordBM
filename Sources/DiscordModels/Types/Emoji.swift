@@ -25,24 +25,65 @@ public struct PartialEmoji: Sendable, Codable {
     }
 }
 
-#warning("Swift 5.6 / 5.7 have different codable behaviors ?!")
-public enum Reaction: Sendable, Equatable, Codable, ExpressibleByStringLiteral {
-    case unicodeEmoji(String)
-    case guildEmoji(name: String, id: String)
+/// A reaction emoji.
+public struct Reaction: Sendable, Equatable, Codable {
     
-    public init(stringLiteral value: String) {
-        self = .unicodeEmoji(value)
+    private enum Base: Sendable, Codable, Equatable {
+        case unicodeEmoji(String)
+        case guildEmoji(name: String, id: String)
     }
     
+    private let base: Base
+    
     public var urlPathDescription: String {
-        switch self {
+        switch self.base {
         case let .unicodeEmoji(emoji): return emoji
         case let .guildEmoji(name, id): return "\(name):\(id)"
         }
     }
     
+    private init(base: Base) {
+        self.base = base
+    }
+    
+    public init(from decoder: Decoder) throws {
+        self.base = try .init(from: decoder)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        try self.base.encode(to: encoder)
+    }
+    
+    public enum Error: Swift.Error {
+        case emojiScalarsCountIsNot1(String, count: Int)
+        case scalarIsNotEmoji(Unicode.Scalar)
+    }
+    
+    /// Unicode emoji. The function verifies that your input is an emoji or not.
+    public static func unicodeEmoji(_ emoji: Unicode.Scalar) throws -> Reaction {
+        guard emoji.properties.isEmoji else {
+            throw Error.scalarIsNotEmoji(emoji)
+        }
+        return Reaction(base: .unicodeEmoji(.init(emoji)))
+    }
+    
+    /// Unicode emoji. The function verifies that your input is an emoji or not.
+    public static func unicodeEmoji(_ emoji: String) throws -> Reaction {
+        let scalars = emoji.unicodeScalars
+        guard scalars.count == 1 else {
+            throw Error.emojiScalarsCountIsNot1(emoji, count: emoji.unicodeScalars.count)
+        }
+        return try .unicodeEmoji(scalars.first!)
+    }
+    
+    /// Custom discord guild emoji.
+    public static func guildEmoji(name: String, id: String) -> Reaction {
+        Reaction(base: .guildEmoji(name: name, id: id))
+    }
+    
+    /// Is the same as the partial emoji?
     public func `is`(_ emoji: PartialEmoji) -> Bool {
-        switch self {
+        switch self.base {
         case let .unicodeEmoji(unicode): return unicode == emoji.name
         case let .guildEmoji(_, id): return id == emoji.id
         }
