@@ -5,9 +5,6 @@ import NIOCore
 import Logging
 import Foundation
 
-#warning("remove")
-import NIOConcurrencyHelpers
-
 /// The manager of sending logs to Discord.
 public actor DiscordLogManager {
     
@@ -137,16 +134,7 @@ public actor DiscordLogManager {
     nonisolated let client: any DiscordClient
     nonisolated let configuration: Configuration
     
-    #warning("remove")
-    let id = UUID()
-    let lock = NIOLock()
-    
-    private var logs: [WebhookAddress: [Log]] = [:] {
-        didSet {
-            #warning("remove")
-            print("DID", oldValue.map(\.value.count), "->", logs.map(\.value.count))
-        }
-    }
+    private var logs: [WebhookAddress: [Log]] = [:]
     private var sendLogsTasks: [WebhookAddress: Task<Void, Never>] = [:]
     
     private var aliveNoticeTask: Task<Void, Never>?
@@ -181,8 +169,6 @@ public actor DiscordLogManager {
         level: Logger.Level?,
         isFirstAliveNotice: Bool
     ) {
-        self.lock.lock()
-        defer { self.lock.unlock() }
 #if DEBUG
         if configuration.disabledInDebug { return }
 #endif
@@ -201,14 +187,7 @@ public actor DiscordLogManager {
             isFirstAliveNotice: isFirstAliveNotice
         ))
         
-        let count = logs[address]!.count
-#if DEBUG
-#warning("remove")
-        print("COUNTI", count, id, isFirstAliveNotice, level?.rawValue ?? "nil")
-#endif
-        
-        if count > configuration.maxStoredLogsCount {
-            print("REM1", id)
+        if logs[address]!.count > configuration.maxStoredLogsCount {
             logs[address]!.removeFirst()
         }
     }
@@ -260,12 +239,9 @@ public actor DiscordLogManager {
         if configuration.disabledInDebug { return }
 #endif
         let nanos = UInt64(configuration.frequency.nanoseconds)
-        #warning("remove")
-        print("SNEDIN", nanos / 1_000_000, Date().timeIntervalSince1970, id)
+        
         @Sendable func send() async throws {
             try await Task.sleep(nanoseconds: nanos)
-#warning("remove")
-            print("WILLSEND", Date().timeIntervalSince1970, id)
             try await performLogSend(address: address)
             try await send()
         }
@@ -275,8 +251,6 @@ public actor DiscordLogManager {
     }
     
     private func performLogSend(address: WebhookAddress) async throws {
-#warning("remove")
-        print("FLUSH1", Date().timeIntervalSince1970, id)
         let logs = getMaxAmountOfLogsAndFlush(address: address)
         if self.logs[address]?.isEmpty != false {
             self.sendLogsTasks[address]?.cancel()
@@ -297,8 +271,7 @@ public actor DiscordLogManager {
               (lengthSum() + log.embed.contentLength) <= 6_000 {
             goodLogs.append(log)
         }
-        #warning("remove")
-        print("REMOVE", goodLogs.count, id)
+        
         self.logs[address] = Array(self.logs[address]?.dropFirst(goodLogs.count) ?? [])
         
         return goodLogs
@@ -371,9 +344,7 @@ public actor DiscordLogManager {
     }
     
     func _tests_getMaxAmountOfLogsAndFlush(address: WebhookAddress) -> [Log] {
-        #warning("remove")
-        print("FLUSH2", Date().timeIntervalSince1970, id)
-        return self.getMaxAmountOfLogsAndFlush(address: address)
+        self.getMaxAmountOfLogsAndFlush(address: address)
     }
 #endif
 }
