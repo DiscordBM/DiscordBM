@@ -106,18 +106,17 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertEqual(deleteOwnReactionResponse.status, .noContent)
         
-        /// Needs another user to react to message first, so can't test it properly
-        //        try await client.deleteUserReaction(
-        //            channelId: Constants.channelId,
-        //            messageId: message.id,
-        //            emoji: .unicodeEmoji(reaction)
-        //            userId: ""
-        //        )
+        try await client.deleteUserReaction(
+            channelId: Constants.channelId,
+            messageId: message.id,
+            emoji: .unicodeEmoji(reactions[1]),
+            userId: Constants.botId
+        ).guardIsSuccessfulResponse()
         
         let getReactionsResponse = try await client.getReactions(
             channelId: Constants.channelId,
             messageId: message.id,
-            emoji: .unicodeEmoji(reactions[1])
+            emoji: .unicodeEmoji(reactions[2])
         ).decode()
         
         XCTAssertEqual(getReactionsResponse.count, 1)
@@ -128,7 +127,7 @@ class DiscordClientTests: XCTestCase {
         let deleteAllReactionsForEmojiResponse = try await client.deleteAllReactionsForEmoji(
             channelId: Constants.channelId,
             messageId: message.id,
-            emoji: .unicodeEmoji(reactions[1])
+            emoji: .unicodeEmoji(reactions[2])
         )
         
         XCTAssertEqual(deleteAllReactionsForEmojiResponse.status, .noContent)
@@ -150,6 +149,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(retrievedMessage.content, edited.content)
         XCTAssertEqual(retrievedMessage.channel_id, edited.channel_id)
         XCTAssertEqual(retrievedMessage.embeds.first?.description, edited.embeds.first?.description)
+        XCTAssertFalse(retrievedMessage.reactions?.isEmpty == false)
         
         /// Get channel messages
         let allMessages = try await client.getChannelMessages(
@@ -588,6 +588,132 @@ class DiscordClientTests: XCTestCase {
             reason: "Testing! 2"
         )
         XCTAssertNoThrow(try delete2.guardIsSuccessfulResponse())
+    }
+    
+    func testCDN() async throws {
+        do {
+            let file = try await client.getCDNCustomEmoji(
+                emojiId: "1073704788400820324"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertEqual(file.extension, "png")
+            XCTAssertEqual(file.filename, "1073704788400820324.png")
+        }
+        
+        do {
+            let file = try await client.getCDNGuildIcon(
+                guildId: "922186320275722322",
+                icon: "a_6367dd2460a846748ad133206c910da5"
+            ).getFile(preferredName: "guildIcon")
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertEqual(file.extension, "gif")
+            XCTAssertEqual(file.filename, "guildIcon.gif")
+        }
+        
+        do {
+            let file = try await client.getCDNGuildSplash(
+                guildId: "922186320275722322",
+                splash: "276ba186b5208a74344706941eb7fe8d"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+        do {
+            let file = try await client.getCDNGuildDiscoverySplash(
+                guildId: "922186320275722322",
+                splash: "178be4921b08b761d9d9d6117c6864e2"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+        do {
+            let file = try await client.getCDNGuildBanner(
+                guildId: "922186320275722322",
+                banner: "6e2e4d93e102a997cc46d15c28b0dfa0"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+//        do {
+//            let file = try await client.getCDNUserBanner(
+//                userId: String,
+//                banner: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+        do {
+            let file = try await client.getCDNDefaultUserAvatar(
+                discriminator: 0517
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertEqual(file.extension, "png")
+        }
+        
+        do {
+            let file = try await client.getCDNUserAvatar(
+                userId: "290483761559240704",
+                avatar: "2df0a0198e00ba23bf2dc728c4db94d9"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+//        let file = try await client.getCDNGuildMemberAvatar(
+//            guildId: String,
+//            userId: String,
+//            avatar: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+        
+//        let file = try await client.getCDNApplicationIcon(
+//            appId: String, icon: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//
+//        let file = try await client.getCDNApplicationCover(
+//            appId: String, cover: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//
+//        let file = try await client.getCDNApplicationAsset(
+//            appId: String, assetId: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//
+//        let file = try await client.getCDNAchievementIcon(
+//            appId: String, achievementId: String, icon: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//
+//        let file = try await client.getCDNStickerPackBanner(
+//            assetId: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//
+//        let file = try await client.getCDNTeamIcon(
+//            teamId: String, icon: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//
+//        let file = try await client.getCDNSticker(
+//            stickerId: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//
+//        let file = try await client.getCDNRoleIcon(
+//            roleId: String, icon: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//
+//        let file = try await client.getCDNGuildScheduledEventCover(
+//            eventId: String, cover: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//
+//        let file = try await client.getCDNGuildMemberBanner(
+//            guildId: String, userId: String, banner: String
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 10)
     }
     
     func testMultipartPayload() async throws {

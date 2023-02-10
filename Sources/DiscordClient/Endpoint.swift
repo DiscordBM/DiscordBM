@@ -230,7 +230,7 @@ public enum Endpoint: Sendable {
     case CDNGuildMemberAvatar(guildId: String, userId: String, avatar: String)
     case CDNApplicationIcon(appId: String, icon: String)
     case CDNApplicationCover(appId: String, cover: String)
-    case CDNApplicationAsset(appId: String, asset: String)
+    case CDNApplicationAsset(appId: String, assetId: String)
     case CDNAchievementIcon(appId: String, achievementId: String, icon: String)
     case CDNStickerPackBanner(assetId: String)
     case CDNTeamIcon(teamId: String, icon: String)
@@ -348,7 +348,7 @@ public enum Endpoint: Sendable {
         case let .CDNUserBanner(userId, banner):
             suffix = "banners/\(userId)/\(banner)"
         case let .CDNDefaultUserAvatar(discriminator):
-            suffix = "embed/avatars/\(discriminator)"
+            suffix = "embed/avatars/\(discriminator).png" /// Needs `.png`
         case let .CDNUserAvatar(userId, avatar):
             suffix = "avatars/\(userId)/\(avatar)"
         case let .CDNGuildMemberAvatar(guildId, userId, avatar):

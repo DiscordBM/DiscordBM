@@ -28,6 +28,15 @@ public extension DiscordClient {
     }
     
     @inlinable
+    func send(
+        request: DiscordHTTPRequest,
+        fallbackFileName: String
+    ) async throws -> DiscordCDNResponse {
+        let response = try await self.send(request: request)
+        return DiscordCDNResponse(httpResponse: response, fallbackFileName: fallbackFileName)
+    }
+    
+    @inlinable
     func send<E: Encodable & Validatable, C: Codable>(
         request: DiscordHTTPRequest,
         payload: E
@@ -53,6 +62,8 @@ public enum DiscordClientError: Error {
     case badStatusCode(DiscordHTTPResponse)
     /// The body of the response was empty.
     case emptyBody(DiscordHTTPResponse)
+    /// Couldn't find a content-type header.
+    case noContentTypeHeader(DiscordHTTPResponse)
     /// You need to provide an `appId`.
     /// Either via the function arguments or the DiscordClient initializer.
     case appIdParameterRequired
@@ -808,5 +819,173 @@ public extension DiscordClient {
             to: endpoint,
             queries: [("thread_id", threadId)]
         ))
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNCustomEmoji(emojiId: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNCustomEmoji(emojiId: emojiId)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: emojiId)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNGuildIcon(guildId: String, icon: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNGuildIcon(guildId: guildId, icon: icon)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNGuildSplash(guildId: String, splash: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNGuildSplash(guildId: guildId, splash: splash)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: splash)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNGuildDiscoverySplash(
+        guildId: String,
+        splash: String
+    ) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNGuildDiscoverySplash(guildId: guildId, splash: splash)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: splash)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNGuildBanner(guildId: String, banner: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNGuildBanner(guildId: guildId, banner: banner)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: banner)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNUserBanner(userId: String, banner: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNUserBanner(userId: userId, banner: banner)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: banner)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNDefaultUserAvatar(discriminator: Int) async throws -> DiscordCDNResponse {
+        /// `discriminator % 5` is what Discord says.
+        let modulo = "\(discriminator % 5)"
+        let endpoint = Endpoint.CDNDefaultUserAvatar(discriminator: modulo)
+        return try await self.send(
+            request: .init(to: endpoint),
+            fallbackFileName: "\(discriminator)"
+        )
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNUserAvatar(userId: String, avatar: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNUserAvatar(userId: userId, avatar: avatar)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: avatar)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNGuildMemberAvatar(
+        guildId: String,
+        userId: String,
+        avatar: String
+    ) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNGuildMemberAvatar(
+            guildId: guildId,
+            userId: userId,
+            avatar: avatar
+        )
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: avatar)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNApplicationIcon(appId: String, icon: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNApplicationIcon(appId: appId, icon: icon)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNApplicationCover(appId: String, cover: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNApplicationCover(appId: appId, cover: cover)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: cover)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNApplicationAsset(appId: String, assetId: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNApplicationAsset(appId: appId, assetId: assetId)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: assetId)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNAchievementIcon(
+        appId: String,
+        achievementId: String,
+        icon: String
+    ) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNAchievementIcon(
+            appId: appId,
+            achievementId: achievementId,
+            icon: icon
+        )
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNStickerPackBanner(assetId: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNStickerPackBanner(assetId: assetId)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: assetId)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNTeamIcon(teamId: String, icon: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNTeamIcon(teamId: teamId, icon: icon)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNSticker(stickerId: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNSticker(stickerId: stickerId)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: stickerId)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNRoleIcon(roleId: String, icon: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNRoleIcon(roleId: roleId, icon: icon)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNGuildScheduledEventCover(
+        eventId: String,
+        cover: String
+    ) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNGuildScheduledEventCover(eventId: eventId, cover: cover)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: cover)
+    }
+    
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNGuildMemberBanner(
+        guildId: String,
+        userId: String,
+        banner: String
+    ) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNGuildMemberBanner(
+            guildId: guildId,
+            userId: userId,
+            banner: banner
+        )
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: banner)
     }
 }

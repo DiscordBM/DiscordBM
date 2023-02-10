@@ -88,7 +88,7 @@ class ReactToRoleTests: XCTestCase {
         var lifecycleEnded = false
         var configurationChanged = false
         
-        let handler = try await ReactToRoleHandler(
+        let _ = try await ReactToRoleHandler(
             gatewayManager: bot,
             cache: cache,
             role: .init(
@@ -266,7 +266,7 @@ class ReactToRoleTests: XCTestCase {
         var lifecycleEnded = false
         var configurationChanged = false
         
-        let handler = try await ReactToRoleHandler(
+        let _ = try await ReactToRoleHandler(
             gatewayManager: bot,
             cache: nil,
             role: .init(
@@ -447,7 +447,7 @@ class ReactToRoleTests: XCTestCase {
         var lifecycleEnded = false
         var configurationChanged = false
         
-        let handler = try await ReactToRoleHandler(
+        let _ = try await ReactToRoleHandler(
             gatewayManager: bot,
             cache: cache,
             configuration: .init(
@@ -626,7 +626,7 @@ class ReactToRoleTests: XCTestCase {
         
         var lifecycleEnded = false
         var configurationChanged = false
-        #warning("accept permissions for role creation")
+        
         let role = try await client.createGuildRole(
             guildId: Constants.guildId,
             payload: .init(
@@ -640,7 +640,7 @@ class ReactToRoleTests: XCTestCase {
             )
         ).decode()
         
-        let handler = try await ReactToRoleHandler(
+        let _ = try await ReactToRoleHandler(
             gatewayManager: bot,
             cache: cache,
             existingRoleId: role.id,
@@ -760,7 +760,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// With cache
         do {
-            let handler2 = try await ReactToRoleHandler(
+            let _ = try await ReactToRoleHandler(
                 gatewayManager: bot,
                 cache: cache,
                 role: .init(
@@ -792,7 +792,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// With no cache
         do {
-            let handler2 = try await ReactToRoleHandler(
+            let _ = try await ReactToRoleHandler(
                 gatewayManager: bot,
                 cache: nil,
                 role: .init(

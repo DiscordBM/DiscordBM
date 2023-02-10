@@ -261,6 +261,14 @@ public actor ReactToRoleHandler {
             guildId: guildId
         )
         let role = try await self.requestHandler.getRole(id: existingRoleId)
+        var icon: RequestBody.ImageData? = nil
+        if let roleIcon = role.icon {
+            let file = try await gatewayManager.client.getCDNRoleIcon(
+                roleId: role.id,
+                icon: roleIcon
+            ).getFile()
+            icon = .init(file: file)
+        }
         self.configuration = .init(
             id: id,
             role: .init(
@@ -268,7 +276,7 @@ public actor ReactToRoleHandler {
                 permissions: Array(role.permissions.values),
                 color: role.color,
                 hoist: role.hoist,
-                icon: nil, // FIXME: Add CDN endpoints so we can retrieve value of this
+                icon: icon,
                 unicode_emoji: role.unicode_emoji,
                 mentionable: role.mentionable
             ),

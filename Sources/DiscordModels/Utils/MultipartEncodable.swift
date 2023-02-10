@@ -73,6 +73,22 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
         self.filename = filename
     }
     
+    
+    /// - Parameters:
+    ///   - data: The file's contents.
+    ///   - nameNoExtension: The file's name without the extension.
+    ///   - contentType: The content type header containing the file's extension.
+    public init(data: ByteBuffer, nameNoExtension: String, contentType: String) {
+        self.data = data
+        let format = fileExtensionMediaTypeMapping.first(where: {
+            "\($0.value.0)/\($0.value.1)" == contentType
+        }) ?? fileExtensionMediaTypeMapping.first(where: {
+            $0.key == contentType
+        })
+        let `extension` = format.map({ ".\($0.key)" }) ?? ""
+        self.filename = nameNoExtension + `extension`
+    }
+    
     public var multipart: MultipartPart? {
         var part = MultipartPart(headers: [:], body: .init(self.data.readableBytesView))
         if let type = type {

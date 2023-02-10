@@ -1,4 +1,5 @@
 @preconcurrency import AsyncHTTPClient
+import DiscordModels
 import NIOHTTP1
 import struct NIOCore.ByteBuffer
 import Foundation
@@ -106,5 +107,33 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
     @inlinable
     public func decode() throws -> C {
         try httpResponse.decode(as: C.self)
+    }
+}
+
+public struct DiscordCDNResponse: Sendable {
+    public let httpResponse: DiscordHTTPResponse
+    public let fallbackFileName: String
+    
+    public init(httpResponse: DiscordHTTPResponse, fallbackFileName: String) {
+        self.httpResponse = httpResponse
+        self.fallbackFileName = fallbackFileName
+    }
+    
+    @inlinable
+    public func guardIsSuccessfulResponse() throws {
+        try self.httpResponse.guardIsSuccessfulResponse()
+    }
+    
+    @inlinable
+    public func getFile(preferredName: String? = nil) throws -> RawFile {
+        try self.guardIsSuccessfulResponse()
+        guard let body = self.httpResponse.body else {
+            throw DiscordClientError.emptyBody(httpResponse)
+        }
+        guard let contentType = self.httpResponse.headers.first(name: "Content-Type") else {
+            throw DiscordClientError.noContentTypeHeader(httpResponse)
+        }
+        let name = preferredName ?? fallbackFileName
+        return RawFile(data: body, nameNoExtension: name, contentType: contentType)
     }
 }
