@@ -141,6 +141,8 @@ class PermissionChecker: XCTestCase {
             permissions: [.manageThreads]
         ))
         
+        await bot.disconnect()
+        
         /// Wait 5 seconds to make sure it doesn't mess up the next tests due to Discord limits.
         try await Task.sleep(nanoseconds: 5_000_000_000)
     }
