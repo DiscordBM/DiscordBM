@@ -48,6 +48,20 @@ class DiscordClientTests: XCTestCase {
     }
     
     func testMessageSendDelete() async throws {
+        
+        /// Cleanup: Get channel messages and delete messages by the bot itself, if any
+        /// Makes this test resilient to failing because it has failed the last time
+        let allOldMessages = try await client.getChannelMessages(
+            channelId: Constants.channelId
+        ).decode()
+        
+        for message in allOldMessages where message.author?.id == Constants.botId {
+            try await client.deleteMessage(
+                channelId: message.channel_id,
+                messageId: message.id
+            ).guardIsSuccessfulResponse()
+        }
+        
         /// Create
         let text = "Testing! \(Date())"
         let message = try await client.createMessage(
