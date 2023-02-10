@@ -55,25 +55,19 @@ public struct Reaction: Sendable, Equatable, Codable {
     }
     
     public enum Error: Swift.Error {
-        case emojiScalarsCountIsNot1(String, count: Int)
-        case scalarIsNotEmoji(Unicode.Scalar)
-    }
-    
-    /// Unicode emoji. The function verifies that your input is an emoji or not.
-    public static func unicodeEmoji(_ emoji: Unicode.Scalar) throws -> Reaction {
-        guard emoji.properties.isEmoji else {
-            throw Error.scalarIsNotEmoji(emoji)
-        }
-        return Reaction(base: .unicodeEmoji(.init(emoji)))
+        case moreThan1Emoji(String, count: Int)
+        case notEmoji(String)
     }
     
     /// Unicode emoji. The function verifies that your input is an emoji or not.
     public static func unicodeEmoji(_ emoji: String) throws -> Reaction {
-        let scalars = emoji.unicodeScalars
-        guard scalars.count == 1 else {
-            throw Error.emojiScalarsCountIsNot1(emoji, count: emoji.unicodeScalars.count)
+        guard emoji.count == 1 else {
+            throw Error.moreThan1Emoji(emoji, count: emoji.unicodeScalars.count)
         }
-        return try .unicodeEmoji(scalars.first!)
+        guard emoji.unicodeScalars.contains(where: \.properties.isEmoji) else {
+            throw Error.notEmoji(emoji)
+        }
+        return Reaction(base: .unicodeEmoji(emoji))
     }
     
     /// Custom discord guild emoji.
