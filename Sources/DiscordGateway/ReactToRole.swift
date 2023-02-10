@@ -261,7 +261,6 @@ public actor ReactToRoleHandler {
             guildId: guildId
         )
         let role = try await self.requestHandler.getRole(id: existingRoleId)
-        
         self.configuration = .init(
             id: id,
             role: .init(
