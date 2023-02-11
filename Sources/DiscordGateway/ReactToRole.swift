@@ -187,6 +187,8 @@ public actor ReactToRoleHandler {
     /// Used to remove role from members only if they have no remaining acceptable reaction
     /// the message. Also assign role only if this is their first acceptable reaction.
     var currentReactions: [Reaction: Set<String>] = [:]
+    /// To avoid role-creation race-conditions
+    var lockedCreatingRole = false
     private(set) public var state = State.created
     
     /// The configuration.
@@ -248,6 +250,11 @@ public actor ReactToRoleHandler {
     ///   - guildId: The guild id.
     ///   - channelId: The channel id where the message exists.
     ///   - messageId: The message id.
+    ///   - grantOnStart: Grant the role to those who already reacted but don't have it,
+    ///     on start. **NOTE**: Only recommended if you use a `DiscordCache` with `guilds` and
+    ///     `guildMembers` intents enabled. Checking each member's roles requires an API request
+    ///     and if you don't provide a cache, those API requests have a chance to overwhelm
+    ///     Discord's rate-limits for you app.
     ///   - reactions: What reactions to get the role with.
     ///   - onConfigurationChanged: Hook for getting notified of configuration changes.
     ///   - onLifecycleEnd: Hook for getting notified when this handler no longer serves a purpose.
@@ -259,6 +266,7 @@ public actor ReactToRoleHandler {
         guildId: String,
         channelId: String,
         messageId: String,
+        grantOnStart: Bool = false,
         reactions: [Reaction],
         onConfigurationChanged: ((Configuration) -> Void)? = nil,
         onLifecycleEnd: ((Configuration) -> Void)? = nil
@@ -280,6 +288,7 @@ public actor ReactToRoleHandler {
             channelId: channelId,
             messageId: messageId,
             reactions: reactions,
+            grantOnStart: grantOnStart,
             roleId: nil
         )
         self.onConfigurationChanged = onConfigurationChanged
@@ -295,6 +304,11 @@ public actor ReactToRoleHandler {
     ///   - guildId: The guild id.
     ///   - channelId: The channel id where the message exists.
     ///   - messageId: The message id.
+    ///   - grantOnStart: Grant the role to those who already reacted but don't have it,
+    ///     on start. **NOTE**: Only recommended if you use a `DiscordCache` with `guilds` and
+    ///     `guildMembers` intents enabled. Checking each member's roles requires an API request
+    ///     and if you don't provide a cache, those API requests have a chance to overwhelm
+    ///     Discord's rate-limits for you app.
     ///   - reactions: What reactions to get the role with.
     ///   - onConfigurationChanged: Hook for getting notified of configuration changes.
     ///   - onLifecycleEnd: Hook for getting notified when this handler no longer serves a purpose.
@@ -306,6 +320,7 @@ public actor ReactToRoleHandler {
         guildId: String,
         channelId: String,
         messageId: String,
+        grantOnStart: Bool = false,
         reactions: [Reaction],
         onConfigurationChanged: ((Configuration) -> Void)? = nil,
         onLifecycleEnd: ((Configuration) -> Void)? = nil
@@ -332,21 +347,12 @@ public actor ReactToRoleHandler {
             channelId: channelId,
             messageId: messageId,
             reactions: reactions,
+            grantOnStart: grantOnStart,
             roleId: role.id
         )
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
         await gatewayManager.addEventHandler(self.handleEvent)
-        try await self.verify_populateReactions_start_react()
-    }
-    
-    /// Stop responding to gateway events.
-    public func stop() {
-        self.state = .stopped
-    }
-    
-    /// Re-start responding to gateway events.
-    public func restart() async throws {
         try await self.verify_populateReactions_start_react()
     }
     
@@ -357,6 +363,10 @@ public actor ReactToRoleHandler {
             self.onReactionAdd(payload)
         case let .messageReactionRemove(payload):
             self.onReactionRemove(payload)
+        case let .messageReactionRemoveAll(payload):
+            self.onReactionRemoveAll(payload)
+        case let .messageReactionRemoveEmoji(payload):
+            self.onReactionRemoveEmoji(payload)
         case let .guildRoleCreate(payload):
             self.onRoleCreate(payload)
         case let .guildRoleDelete(payload):
@@ -369,13 +379,26 @@ public actor ReactToRoleHandler {
         }
     }
     
+    /// Stop responding to gateway events.
+    public func stop() {
+        self.state = .stopped
+        self.currentReactions.removeAll()
+    }
+    
+    /// Re-start responding to gateway events.
+    public func restart() async throws {
+        try await self.verify_populateReactions_start_react()
+    }
+    
     func endLifecycle() {
         self.state = .stopped
+        self.currentReactions.removeAll()
         self.onLifecycleEnd?(self.configuration)
     }
     
     func onReactionAdd(_ reaction: Gateway.MessageReactionAdd) {
         if reaction.message_id == self.configuration.messageId,
+           reaction.channel_id == self.configuration.channelId,
            reaction.guild_id == self.configuration.guildId,
            self.configuration.reactions.contains(where: { $0.is(reaction.emoji) }) {
             Task {
@@ -396,23 +419,50 @@ public actor ReactToRoleHandler {
     
     func onReactionRemove(_ reaction: Gateway.MessageReactionRemove) {
         if reaction.message_id == self.configuration.messageId,
+           reaction.channel_id == self.configuration.channelId,
            reaction.guild_id == self.configuration.guildId,
            self.configuration.reactions.contains(where: { $0.is(reaction.emoji) }),
            self.configuration.roleId != nil {
-            Task {
-                do {
-                    let emojiReaction = try Reaction(emoji: reaction.emoji)
-                    if let idx = self.currentReactions[emojiReaction]?
-                        .firstIndex(of: reaction.user_id) {
-                        self.currentReactions[emojiReaction]?.remove(at: idx)
-                    }
-                    /// If there is no acceptable reaction remaining, remove the role from the user.
-                    if !currentReactions.values.contains(where: { $0.contains(reaction.user_id) }) {
-                        await self.removeRoleFromMember(userId: reaction.user_id)
-                    }
-                } catch {
-                    logger.report(error: error)
+            self.checkAndRemoveRoleFromUser(emoji: reaction.emoji, userId: reaction.user_id)
+        }
+    }
+    
+    func checkAndRemoveRoleFromUser(emoji: PartialEmoji, userId: String) {
+        Task {
+            do {
+                let emojiReaction = try Reaction(emoji: emoji)
+                if let idx = self.currentReactions[emojiReaction]?
+                    .firstIndex(of: userId) {
+                    self.currentReactions[emojiReaction]?.remove(at: idx)
                 }
+                /// If there is no acceptable reaction remaining, remove the role from the user.
+                if !currentReactions.values.contains(where: { $0.contains(userId) }) {
+                    await self.removeRoleFromMember(userId: userId)
+                }
+            } catch {
+                logger.report(error: error)
+            }
+        }
+    }
+    
+    func onReactionRemoveAll(_ payload: Gateway.MessageReactionRemoveAll) {
+        if payload.message_id == self.configuration.messageId,
+           payload.channel_id == self.configuration.channelId,
+           payload.guild_id == self.configuration.guildId {
+            /// Doesn't remove roles
+            self.currentReactions.removeAll()
+        }
+    }
+    
+    func onReactionRemoveEmoji(_ payload: Gateway.MessageReactionRemoveEmoji) {
+        if payload.message_id == self.configuration.messageId,
+           payload.channel_id == self.configuration.channelId,
+           payload.guild_id == self.configuration.guildId {
+            do {
+                let reaction = try Reaction(emoji: payload.emoji)
+                self.currentReactions.removeValue(forKey: reaction)
+            } catch {
+                logger.report(error: error)
             }
         }
     }
@@ -458,12 +508,12 @@ public actor ReactToRoleHandler {
     }
     
     func getRoleId() async -> String? {
-        var roleId = self.configuration.roleId
-        if roleId == nil {
+        if let roleId = self.configuration.roleId {
+            return roleId
+        } else {
             await self.setOrCreateRole()
-            roleId = self.configuration.roleId
+            return self.configuration.roleId
         }
-        return roleId
     }
     
     func addRoleToMember(userId: String) async {
@@ -508,6 +558,10 @@ public actor ReactToRoleHandler {
     }
     
     func createRole() async {
+        guard !self.lockedCreatingRole else { return }
+        self.lockedCreatingRole = true
+        defer { self.lockedCreatingRole = false }
+        
         var role = self.configuration.createRole
         if await !requestHandler.guildHasFeature(.roleIcons) {
             role.unicode_emoji = nil
@@ -569,6 +623,17 @@ public actor ReactToRoleHandler {
         }
         /// Start taking action on Gateway events
         self.state = .running
+        /// If members don't have the role, give it to them
+        if configuration.grantOnStart,
+           let roleId = await self.getRoleId() {
+            let users = self.currentReactions.values
+                .reduce(into: Set<String>(), { $0.formUnion($1) })
+            for user in users {
+                if await !requestHandler.memberHasRole(roleId: roleId, userId: user) {
+                    await self.addRoleToMember(roleId: roleId, userId: user)
+                }
+            }
+        }
         /// React to message
         let me = message.reactions?.filter(\.me).map(\.emoji) ?? []
         let remaining = configuration.reactions.filter { reaction in
@@ -583,17 +648,6 @@ public actor ReactToRoleHandler {
                 ).guardIsSuccessfulResponse()
             } catch {
                 self.logger.report(error: error)
-            }
-        }
-        /// If members don't have the role, give it to them
-        if configuration.grantOnStart,
-            let roleId = await getRoleId() {
-            let users = self.currentReactions.values
-                .reduce(into: Set<String>(), { $0.formUnion($1) })
-            for user in users {
-                if await !requestHandler.memberHasRole(roleId: roleId, userId: user) {
-                    await self.addRoleToMember(roleId: roleId, userId: user)
-                }
             }
         }
     }

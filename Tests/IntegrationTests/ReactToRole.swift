@@ -4,15 +4,14 @@ import Logging
 import struct NIOCore.ByteBuffer
 import XCTest
 
+
 class ReactToRoleTests: XCTestCase {
     
     var httpClient: HTTPClient!
     var client: DefaultDiscordClient!
+    let roleName = "test-reaction-role"
     
-    override func setUp() {
-        DiscordGlobalConfiguration.makeLogger = {
-            Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
-        }
+    override func setUp() async throws {
         self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         self.client = DefaultDiscordClient(
             httpClient: httpClient,
@@ -20,55 +19,10 @@ class ReactToRoleTests: XCTestCase {
             /// Intentionally wrong so reaction-handler can take action on its own reaction
             appId: "11111111"
         )
-    }
-    
-    override func tearDown() {
-        DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
-        try! httpClient.syncShutdown()
-        self.client = nil
-    }
-    #warning("test for multiple reactions")
-    #warning("test for when you already reacted but you don't have the role (enable 'configuration.grantOnStart' first)")
-    func testWithCache() async throws {
-        let bot = BotGatewayManager(
-            eventLoopGroup: httpClient.eventLoopGroup,
-            client: client,
-            compression: true,
-            identifyPayload: .init(
-                token: Constants.token,
-                presence: .init(
-                    activities: [.init(name: "Testing!", type: .competing)],
-                    status: .invisible,
-                    afk: false
-                ),
-                intents: Gateway.Intent.allCases
-            )
-        )
-        
-        let expectation = expectation(description: "Connected")
-        
-        await bot.addEventHandler { event in
-            if case .ready = event.data {
-                expectation.fulfill()
-            }
-        }
-        
-        let cache = await DiscordCache(
-            gatewayManager: bot,
-            intents: .all,
-            requestAllMembers: .enabledWithPresences
-        )
-        
-        Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
-        
-        /// So cache is populated
-        try await Task.sleep(nanoseconds: 5_000_000_000)
-        
-        let roleName = "test-reaction-role"
-        
         /// Remove roles with this name is there are any
-        let guildRoles = await cache.guilds[Constants.guildId]?.roles ?? []
+        let guildRoles = try await client
+            .getGuildRoles(id: Constants.guildId)
+            .decode()
         for role in guildRoles.filter({ $0.name == roleName }) {
             try await client.deleteGuildRole(
                 guildId: Constants.guildId,
@@ -76,6 +30,15 @@ class ReactToRoleTests: XCTestCase {
                 reason: "Tests cleanup"
             ).guardIsSuccessfulResponse()
         }
+    }
+    
+    override func tearDown() async throws {
+        try await httpClient.shutdown()
+        self.client = nil
+    }
+    
+    func testWithCache() async throws {
+        let (bot, cache) = try await makeBotAndCache()
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
@@ -132,7 +95,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify assigned the role to itself
@@ -152,7 +115,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardIsSuccessfulResponse()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify doesn't have the role anymore
@@ -172,7 +135,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardIsSuccessfulResponse()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify still doesn't have the role
@@ -206,54 +169,10 @@ class ReactToRoleTests: XCTestCase {
     }
     
     func testNoCache() async throws {
-        let bot = BotGatewayManager(
-            eventLoopGroup: httpClient.eventLoopGroup,
-            client: client,
-            compression: true,
-            identifyPayload: .init(
-                token: Constants.token,
-                presence: .init(
-                    activities: [.init(name: "Testing!", type: .competing)],
-                    status: .invisible,
-                    afk: false
-                ),
-                intents: Gateway.Intent.allCases
-            )
-        )
+        let (bot, cache) = try await makeBotAndCache()
         
-        let expectation = expectation(description: "Connected")
-        
-        await bot.addEventHandler { event in
-            if case .ready = event.data {
-                expectation.fulfill()
-            }
-        }
-        
-        let cache = await DiscordCache(
-            gatewayManager: bot,
-            intents: .all,
-            requestAllMembers: .enabledWithPresences
-        )
-        
-        Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
-        
-        /// So cache is populated
-        try await Task.sleep(nanoseconds: 5_000_000_000)
-        
-        let roleName = "test-reaction-role"
         let roleColor = DiscordColor.red
         let rolePermissions = [Permission.manageRoles]
-        
-        /// Remove roles with this name is there are any
-        let guildRoles = await cache.guilds[Constants.guildId]?.roles ?? []
-        for role in guildRoles.filter({ $0.name == roleName }) {
-            try await client.deleteGuildRole(
-                guildId: Constants.guildId,
-                roleId: role.id,
-                reason: "Tests cleanup"
-            ).guardIsSuccessfulResponse()
-        }
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
@@ -310,7 +229,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify assigned the role to itself
@@ -335,7 +254,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardIsSuccessfulResponse()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify doesn't have the role anymore
@@ -355,7 +274,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardIsSuccessfulResponse()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify still doesn't have the role
@@ -388,53 +307,361 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 5_000_000_000)
     }
     
-    func testInitializerAcceptingConfiguration() async throws {
-        let bot = BotGatewayManager(
-            eventLoopGroup: httpClient.eventLoopGroup,
-            client: client,
-            compression: true,
-            identifyPayload: .init(
-                token: Constants.token,
-                presence: .init(
-                    activities: [.init(name: "Testing!", type: .competing)],
-                    status: .invisible,
-                    afk: false
-                ),
-                intents: Gateway.Intent.allCases
-            )
-        )
+    func testMultipleReactions() async throws {
+        let (bot, cache) = try await makeBotAndCache()
         
-        let expectation = expectation(description: "Connected")
+        /// Make the reaction message
+        let reactionMessageId = try await client.createMessage(
+            channelId: Constants.reactionChannelId,
+            payload: .init(content: "React-To-Role test message!")
+        ).decode().id
         
-        await bot.addEventHandler { event in
-            if case .ready = event.data {
-                expectation.fulfill()
-            }
-        }
+        let reaction1 = try Reaction.unicodeEmoji("✅")
+        let reaction2 = try Reaction.unicodeEmoji("🐶")
         
-        let cache = await DiscordCache(
+        let handler = try await ReactToRoleHandler(
             gatewayManager: bot,
-            intents: .all,
-            requestAllMembers: .enabledWithPresences
+            cache: cache,
+            role: .init(
+                name: roleName,
+                permissions: nil,
+                color: .purple,
+                hoist: nil,
+                icon: nil,
+                unicode_emoji: nil,
+                mentionable: nil
+            ),
+            guildId: Constants.guildId,
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId,
+            reactions: [reaction1, reaction2]
         )
         
-        Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
+        /// On `init`, handler will react to the message.
+        /// Since I've intentionally set the app-id to a wrong app-id, the handler will
+        /// try to take action on its own reaction, and give itself the role.
         
-        /// So cache is populated
+        /// To make sure the handler has enough time
         try await Task.sleep(nanoseconds: 5_000_000_000)
         
-        let roleName = "test-reaction-role"
-        
-        /// Remove roles with this name is there are any
-        let guildRoles = await cache.guilds[Constants.guildId]?.roles ?? []
-        for role in guildRoles.filter({ $0.name == roleName }) {
-            try await client.deleteGuildRole(
-                guildId: Constants.guildId,
-                roleId: role.id,
-                reason: "Tests cleanup"
-            ).guardIsSuccessfulResponse()
+        do {
+            /// Verify reacted to `reaction1`
+            let reactionUsers = try await client.getReactions(
+                channelId: Constants.reactionChannelId,
+                messageId: reactionMessageId,
+                emoji: reaction1
+            ).decode()
+            
+            XCTAssertEqual(reactionUsers.count, 1)
+            
+            let user = try XCTUnwrap(reactionUsers.first)
+            XCTAssertEqual(user.id, Constants.botId)
         }
+        
+        do {
+            /// Verify reacted to `reaction2`
+            let reactionUsers = try await client.getReactions(
+                channelId: Constants.reactionChannelId,
+                messageId: reactionMessageId,
+                emoji: reaction2
+            ).decode()
+            
+            XCTAssertEqual(reactionUsers.count, 1)
+            
+            let user = try XCTUnwrap(reactionUsers.first)
+            XCTAssertEqual(user.id, Constants.botId)
+        }
+        
+        do {
+            /// Verify assigned the role to itself
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        try await client.deleteOwnReaction(
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId,
+            emoji: reaction1
+        ).guardIsSuccessfulResponse()
+        
+        /// To make sure cache receives the events
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        do {
+            /// Verify still has the role although 1 of the 2 reactions has been removed
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        try await client.deleteAllReactions(
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId
+        ).guardIsSuccessfulResponse()
+        
+        /// To make sure cache receives the events
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        do {
+            /// Verify still has the role
+            /// Because on "delete all reactions" the handler doesn't remove any roles
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        let _roleId = await handler.configuration.roleId
+        let roleId = try XCTUnwrap(_roleId)
+        
+        try await client.removeGuildMemberRole(
+            guildId: Constants.guildId,
+            userId: Constants.botId,
+            roleId: roleId
+        ).guardIsSuccessfulResponse()
+        
+        /// To make sure cache receives the events
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        do {
+            /// Verify does not have the role anymore
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNil(role, "\(member.roles) contained '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        try await client.createReaction(
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId,
+            emoji: reaction2
+        ).guardIsSuccessfulResponse()
+        
+        /// To make sure cache receives the events
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        do {
+            /// Verify has the role again because reacted again
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        try await client.createReaction(
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId,
+            emoji: reaction1
+        ).guardIsSuccessfulResponse()
+        
+        /// To make sure cache receives the events
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        do {
+            /// Verify still has the role
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        try await client.deleteAllReactionsForEmoji(
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId,
+            emoji: reaction1
+        ).guardIsSuccessfulResponse()
+        
+        /// To make sure cache receives the events
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        do {
+            /// Verify still has the role
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        try await client.deleteOwnReaction(
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId,
+            emoji: reaction2
+        ).guardIsSuccessfulResponse()
+        
+        /// To make sure cache receives the events
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        do {
+            /// Verify does not have the role anymore because both reactions removed
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNil(role, "\(member.roles) contained '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        try await client.deleteMessage(
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId
+        ).guardIsSuccessfulResponse()
+        
+        await bot.disconnect()
+        
+        /// So it doesn't mess up the next tests' gateway connections
+        try await Task.sleep(nanoseconds: 5_000_000_000)
+    }
+    
+    func testGrantOnStart() async throws {
+        let (bot, cache) = try await makeBotAndCache()
+        
+        /// Make the reaction message
+        let reactionMessageId = try await client.createMessage(
+            channelId: Constants.reactionChannelId,
+            payload: .init(content: "React-To-Role test message!")
+        ).decode().id
+        
+        let reaction = try Reaction.unicodeEmoji("✅")
+        
+        let handler = try await ReactToRoleHandler(
+            gatewayManager: bot,
+            cache: cache,
+            role: .init(
+                name: roleName,
+                permissions: nil,
+                color: .purple,
+                hoist: nil,
+                icon: nil,
+                unicode_emoji: nil,
+                mentionable: nil
+            ),
+            guildId: Constants.guildId,
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId,
+            grantOnStart: true,
+            reactions: [reaction]
+        )
+        
+        /// On `init`, handler will react to the message.
+        /// Since I've intentionally set the app-id to a wrong app-id, the handler will
+        /// try to take action on its own reaction, and give itself the role.
+        
+        /// To make sure the handler has enough time
+        try await Task.sleep(nanoseconds: 5_000_000_000)
+        
+        do {
+            /// Verify reacted
+            let reactionUsers = try await client.getReactions(
+                channelId: Constants.reactionChannelId,
+                messageId: reactionMessageId,
+                emoji: reaction
+            ).decode()
+            
+            XCTAssertEqual(reactionUsers.count, 1)
+            
+            let user = try XCTUnwrap(reactionUsers.first)
+            XCTAssertEqual(user.id, Constants.botId)
+        }
+        
+        do {
+            /// Verify assigned the role to itself
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        try await client.deleteOwnReaction(
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId,
+            emoji: reaction
+        ).guardIsSuccessfulResponse()
+        
+        /// To make sure cache receives the events
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        do {
+            /// Verify doesn't have the role anymore
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNil(role, "\(member.roles) contained '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        await handler.stop()
+        let stoppedState = await handler.state
+        XCTAssertEqual(stoppedState, .stopped)
+        
+        try await client.createReaction(
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId,
+            emoji: reaction
+        ).guardIsSuccessfulResponse()
+        
+        // To make sure cache receives the events
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        do {
+            /// Verify still doesn't have the role because the handler is stopped
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNil(role, "\(member.roles) contained '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        try await handler.restart()
+        let runningState = await handler.state
+        XCTAssertEqual(runningState, .running)
+        
+        // To make sure cache receives the events
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        do {
+            /// Verify has the role now, although the reaction was there even when handler restarted
+            let _guild = await cache.guilds[Constants.guildId]
+            let guild = try XCTUnwrap(_guild)
+            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let roles = guild.roles.filter({ member.roles.contains($0.id) })
+            let role = roles.first(where: { $0.name == roleName })
+            XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
+        }
+        
+        try await client.deleteMessage(
+            channelId: Constants.reactionChannelId,
+            messageId: reactionMessageId
+        ).guardIsSuccessfulResponse()
+        
+        await bot.disconnect()
+        
+        /// So it doesn't mess up the next tests' gateway connections
+        try await Task.sleep(nanoseconds: 5_000_000_000)
+    }
+    
+    func testInitializerAcceptingConfiguration() async throws {
+        let (bot, cache) = try await makeBotAndCache()
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
@@ -494,9 +721,6 @@ class ReactToRoleTests: XCTestCase {
         let user = try XCTUnwrap(reactionUsers.first)
         XCTAssertEqual(user.id, Constants.botId)
         
-        /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
-        
         do {
             /// Verify assigned the role to itself
             let _guild = await cache.guilds[Constants.guildId]
@@ -515,7 +739,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardIsSuccessfulResponse()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify doesn't have the role anymore
@@ -535,7 +759,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardIsSuccessfulResponse()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify still doesn't have the role
@@ -569,52 +793,7 @@ class ReactToRoleTests: XCTestCase {
     }
     
     func testInitializerWithExistingRole() async throws {
-        let bot = BotGatewayManager(
-            eventLoopGroup: httpClient.eventLoopGroup,
-            client: client,
-            compression: true,
-            identifyPayload: .init(
-                token: Constants.token,
-                presence: .init(
-                    activities: [.init(name: "Testing!", type: .competing)],
-                    status: .invisible,
-                    afk: false
-                ),
-                intents: Gateway.Intent.allCases
-            )
-        )
-        
-        let expectation = expectation(description: "Connected")
-        
-        await bot.addEventHandler { event in
-            if case .ready = event.data {
-                expectation.fulfill()
-            }
-        }
-        
-        let cache = await DiscordCache(
-            gatewayManager: bot,
-            intents: .all,
-            requestAllMembers: .enabledWithPresences
-        )
-        
-        Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
-        
-        /// So cache is populated
-        try await Task.sleep(nanoseconds: 5_000_000_000)
-        
-        let roleName = "test-reaction-role"
-        
-        /// Remove roles with this name is there are any
-        let guildRoles = await cache.guilds[Constants.guildId]?.roles ?? []
-        for role in guildRoles.filter({ $0.name == roleName }) {
-            try await client.deleteGuildRole(
-                guildId: Constants.guildId,
-                roleId: role.id,
-                reason: "Tests cleanup"
-            ).guardIsSuccessfulResponse()
-        }
+        let (bot, cache) = try await makeBotAndCache()
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
@@ -676,7 +855,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify assigned the role to itself
@@ -696,7 +875,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardIsSuccessfulResponse()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify doesn't have the role anymore
@@ -716,7 +895,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardIsSuccessfulResponse()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify still doesn't have the role
@@ -825,52 +1004,7 @@ class ReactToRoleTests: XCTestCase {
     }
     
     func testStartAndStop() async throws {
-        let bot = BotGatewayManager(
-            eventLoopGroup: httpClient.eventLoopGroup,
-            client: client,
-            compression: true,
-            identifyPayload: .init(
-                token: Constants.token,
-                presence: .init(
-                    activities: [.init(name: "Testing!", type: .competing)],
-                    status: .invisible,
-                    afk: false
-                ),
-                intents: Gateway.Intent.allCases
-            )
-        )
-        
-        let expectation = expectation(description: "Connected")
-        
-        await bot.addEventHandler { event in
-            if case .ready = event.data {
-                expectation.fulfill()
-            }
-        }
-        
-        let cache = await DiscordCache(
-            gatewayManager: bot,
-            intents: .all,
-            requestAllMembers: .enabledWithPresences
-        )
-        
-        Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
-        
-        /// So cache is populated
-        try await Task.sleep(nanoseconds: 5_000_000_000)
-        
-        let roleName = "test-reaction-role"
-        
-        /// Remove roles with this name is there are any
-        let guildRoles = await cache.guilds[Constants.guildId]?.roles ?? []
-        for role in guildRoles.filter({ $0.name == roleName }) {
-            try await client.deleteGuildRole(
-                guildId: Constants.guildId,
-                roleId: role.id,
-                reason: "Tests cleanup"
-            ).guardIsSuccessfulResponse()
-        }
+        let (bot, cache) = try await makeBotAndCache()
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
@@ -926,7 +1060,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify assigned the role to itself
@@ -946,7 +1080,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardIsSuccessfulResponse()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify doesn't have the role anymore
@@ -971,7 +1105,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardIsSuccessfulResponse()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify still doesn't have the role
@@ -996,7 +1130,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(runningState, .running)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         do {
             /// Verify re-assigned the role to itself

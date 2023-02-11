@@ -14,9 +14,9 @@ class GatewayConnectionTests: XCTestCase {
         self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
-        try! httpClient.syncShutdown()
+        try await httpClient.shutdown()
     }
     
     func testConnect() async throws {
@@ -145,7 +145,7 @@ class GatewayConnectionTests: XCTestCase {
                 status: .invisible,
                 afk: false
             ),
-            intents: [.guilds, .guildModeration, .guildEmojisAndStickers, .guildIntegrations, .guildWebhooks, .guildInvites, .guildVoiceStates, .guildMessages, .guildMessageReactions, .guildMessageTyping, .directMessages, .directMessageReactions, .directMessageTyping, .guildScheduledEvents, .autoModerationConfiguration, .autoModerationExecution, .guildMessages, .guildPresences, .messageContent]
+            intents: Gateway.Intent.allCases
         )
         
         let expectation = expectation(description: "Connected")

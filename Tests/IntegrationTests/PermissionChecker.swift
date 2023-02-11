@@ -14,9 +14,9 @@ class PermissionChecker: XCTestCase {
         self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
-        try! httpClient.syncShutdown()
+        try await httpClient.shutdown()
     }
     
     /// Checks to see if the permission checker functions work properly.
