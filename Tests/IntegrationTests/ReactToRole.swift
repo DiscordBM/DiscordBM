@@ -260,7 +260,7 @@ class ReactToRoleTests: XCTestCase {
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
-        let reaction = try Reaction.unicodeEmoji("✅")
+        let reaction = Reaction.guildEmoji(name: "dbm", id: "1073704788400820324")
         let unacceptableReaction = try Reaction.unicodeEmoji("🐶")
         
         var lifecycleEnded = false
