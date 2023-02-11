@@ -26,11 +26,11 @@ public struct PartialEmoji: Sendable, Codable {
 }
 
 /// A reaction emoji.
-public struct Reaction: Sendable, Equatable, Codable {
+public struct Reaction: Sendable, Hashable, Codable {
     
-    private enum Base: Sendable, Codable, Equatable {
+    private enum Base: Sendable, Codable, Hashable {
         case unicodeEmoji(String)
-        case guildEmoji(name: String, id: String)
+        case guildEmoji(name: String?, id: String)
     }
     
     private let base: Base
@@ -38,7 +38,7 @@ public struct Reaction: Sendable, Equatable, Codable {
     public var urlPathDescription: String {
         switch self.base {
         case let .unicodeEmoji(emoji): return emoji
-        case let .guildEmoji(name, id): return "\(name):\(id)"
+        case let .guildEmoji(name, id): return "\(name ?? ""):\(id)"
         }
     }
     
@@ -57,6 +57,7 @@ public struct Reaction: Sendable, Equatable, Codable {
     public enum Error: Swift.Error {
         case moreThan1Emoji(String, count: Int)
         case notEmoji(String)
+        case cantRecognizeEmoji(PartialEmoji)
     }
     
     /// Unicode emoji. The function verifies that your input is an emoji or not.
@@ -71,8 +72,18 @@ public struct Reaction: Sendable, Equatable, Codable {
     }
     
     /// Custom discord guild emoji.
-    public static func guildEmoji(name: String, id: String) -> Reaction {
+    public static func guildEmoji(name: String?, id: String) -> Reaction {
         Reaction(base: .guildEmoji(name: name, id: id))
+    }
+    
+    public init(emoji: PartialEmoji) throws {
+        if let id = emoji.id {
+            self = .guildEmoji(name: emoji.name, id: id)
+        } else if let name = emoji.name {
+            self = try .unicodeEmoji(name)
+        } else {
+            throw Error.cantRecognizeEmoji(emoji)
+        }
     }
     
     /// Is the same as the partial emoji?

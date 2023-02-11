@@ -13,33 +13,50 @@ public actor ReactToRoleHandler {
     /// This configuration must be codable-backward-compatible.
     public struct Configuration: Sendable, Codable {
         public let id: UUID
-        public let role: RequestBody.CreateGuildRole
+        public var createRole: RequestBody.CreateGuildRole
         public let guildId: String
         public let channelId: String
         public let messageId: String
         public let reactions: [Reaction]
+        public let grantOnStart: Bool
         fileprivate(set) public var roleId: String?
         
+        /// - Parameters:
+        ///   - id: The unique id of this configuration.
+        ///   - createRole: The role-creation payload.
+        ///   - guildId: The guild-id of the message.
+        ///   - channelId: The channel-id of the message.
+        ///   - messageId: The message-id.
+        ///   - reactions: The reactions to grant the role for.
+        ///   - grantOnStart: Grant the role to those who already reacted but don't have it,
+        ///     on start. **NOTE**: Only recommended if you use a `DiscordCache` with `guilds` and
+        ///     `guildMembers` intents enabled. Checking each member's roles requires an API request
+        ///     and if you don't provide a cache, those API requests have a chance to overwhelm
+        ///     Discord's rate-limits for you app.
+        ///   - roleId: The role-id, only if it's already been created.
         public init(
             id: UUID,
-            role: RequestBody.CreateGuildRole,
+            createRole: RequestBody.CreateGuildRole,
             guildId: String,
             channelId: String,
             messageId: String,
             reactions: [Reaction],
+            grantOnStart: Bool = false,
             roleId: String? = nil
         ) {
             self.id = id
-            self.role = role
+            self.createRole = createRole
             self.guildId = guildId
             self.channelId = channelId
             self.messageId = messageId
             self.reactions = reactions
+            self.grantOnStart = grantOnStart
             self.roleId = roleId
         }
         
         func hasChanges(comparedTo other: Configuration) -> Bool {
-            self.roleId != other.roleId
+            self.roleId != other.roleId ||
+            self.createRole != other.createRole
         }
     }
     
@@ -55,9 +72,17 @@ public actor ReactToRoleHandler {
         let logger: Logger
         let guildId: String
         
-        func getRole(id: String) async throws -> Role {
+        func cacheWithIntents(_ intents: Gateway.Intent...) -> DiscordCache? {
             if let cache = cache,
-               cache.intents.contains(.guilds) {
+               intents.allSatisfy({ cache.intents.contains($0) }) {
+                return cache
+            } else {
+                return nil
+            }
+        }
+        
+        func getRole(id: String) async throws -> Role {
+            if let cache = cacheWithIntents(.guilds) {
                 if let role = await cache.guilds[guildId]?.roles.first(where: { $0.id == id }) {
                     return role
                 } else {
@@ -80,8 +105,7 @@ public actor ReactToRoleHandler {
         }
         
         func getRoleIfExists(role: RequestBody.CreateGuildRole) async throws -> Role? {
-            if let cache = cache,
-               cache.intents.contains(.guilds) {
+            if let cache = cacheWithIntents(.guilds) {
                 if let role = await cache.guilds[guildId]?.roles.first(where: {
                     $0.name == role.name &&
                     $0.color == role.color &&
@@ -106,7 +130,7 @@ public actor ReactToRoleHandler {
         }
         
         func guildHasFeature(_ feature: Guild.Feature) async -> Bool {
-            if let cache = cache {
+            if let cache = cacheWithIntents(.guilds) {
                let guild = await cache.guilds[guildId]
                 return guild?.features.contains(feature) ?? false
             } else {
@@ -122,12 +146,48 @@ public actor ReactToRoleHandler {
                 }
             }
         }
+        
+        /// Defaults to `true` if it can't know.
+        func memberHasRole(roleId: String, userId: String) async -> Bool {
+            if let cache = cacheWithIntents(.guilds, .guildMembers) {
+                let guild = await cache.guilds[guildId]
+                return guild?.members
+                    .first(where: { $0.user?.id == userId })?
+                    .roles
+                    .contains(roleId) ?? true
+            } else {
+                do {
+                    return try await client.getGuildMember(guildId: guildId, userId: userId)
+                        .decode()
+                        .roles
+                        .contains(roleId)
+                } catch {
+                    logger.report(error: error)
+                    return true
+                }
+            }
+        }
+    }
+    
+    /// The state of a `ReactToRoleHandler`.
+    public enum State {
+        /// The instance have just been created
+        case created
+        /// Completely working
+        case running
+        /// Stopped working
+        case stopped
     }
     
     let gatewayManager: any GatewayManager
     var client: any DiscordClient { gatewayManager.client }
     let requestHandler: RequestHandler
     var logger: Logger
+    /// `[Reaction: Set<UserID>]`
+    /// Used to remove role from members only if they have no remaining acceptable reaction
+    /// the message. Also assign role only if this is their first acceptable reaction.
+    var currentReactions: [Reaction: Set<String>] = [:]
+    private(set) public var state = State.created
     
     /// The configuration.
     ///
@@ -172,7 +232,7 @@ public actor ReactToRoleHandler {
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
         await gatewayManager.addEventHandler(self.handleEvent)
-        try await self.verifyAndReactToMessage()
+        try await self.verify_populateReactions_start_react()
     }
     
     /// Note: The role will be created only if a role matching the
@@ -215,7 +275,7 @@ public actor ReactToRoleHandler {
         )
         self.configuration = .init(
             id: id,
-            role: role,
+            createRole: role,
             guildId: guildId,
             channelId: channelId,
             messageId: messageId,
@@ -225,7 +285,7 @@ public actor ReactToRoleHandler {
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
         await gatewayManager.addEventHandler(self.handleEvent)
-        try await self.verifyAndReactToMessage()
+        try await self.verify_populateReactions_start_react()
     }
     
     /// - Parameters:
@@ -261,25 +321,13 @@ public actor ReactToRoleHandler {
             guildId: guildId
         )
         let role = try await self.requestHandler.getRole(id: existingRoleId)
-        var createRole = RequestBody.CreateGuildRole(
-            name: role.name,
-            permissions: Array(role.permissions.values),
-            color: role.color,
-            hoist: role.hoist,
-            icon: nil,
-            unicode_emoji: role.unicode_emoji,
-            mentionable: role.mentionable
+        let createRole = try await RequestBody.CreateGuildRole(
+            role: role,
+            client: gatewayManager.client
         )
-        if let icon = role.icon {
-            let file = try await gatewayManager.client.getCDNRoleIcon(
-                roleId: role.id,
-                icon: icon
-            ).getFile()
-            createRole.icon = .init(file: file)
-        }
         self.configuration = .init(
             id: id,
-            role: createRole,
+            createRole: createRole,
             guildId: guildId,
             channelId: channelId,
             messageId: messageId,
@@ -289,10 +337,21 @@ public actor ReactToRoleHandler {
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
         await gatewayManager.addEventHandler(self.handleEvent)
-        try await self.verifyAndReactToMessage()
+        try await self.verify_populateReactions_start_react()
+    }
+    
+    /// Stop responding to gateway events.
+    public func stop() {
+        self.state = .stopped
+    }
+    
+    /// Re-start responding to gateway events.
+    public func restart() async throws {
+        try await self.verify_populateReactions_start_react()
     }
     
     private func handleEvent(_ event: Gateway.Event) {
+        guard state == .running else { return }
         switch event.data {
         case let .messageReactionAdd(payload):
             self.onReactionAdd(payload)
@@ -311,6 +370,7 @@ public actor ReactToRoleHandler {
     }
     
     func endLifecycle() {
+        self.state = .stopped
         self.onLifecycleEnd?(self.configuration)
     }
     
@@ -319,7 +379,17 @@ public actor ReactToRoleHandler {
            reaction.guild_id == self.configuration.guildId,
            self.configuration.reactions.contains(where: { $0.is(reaction.emoji) }) {
             Task {
-                await self.addRoleToMember(userId: reaction.user_id)
+                do {
+                    let emojiReaction = try Reaction(emoji: reaction.emoji)
+                    let alreadyReacted = self.currentReactions.values
+                        .contains(where: { $0.contains(reaction.user_id) })
+                    self.currentReactions[emojiReaction, default: []].insert(reaction.user_id)
+                    if !alreadyReacted {
+                        await self.addRoleToMember(userId: reaction.user_id)
+                    }
+                } catch {
+                    logger.report(error: error)
+                }
             }
         }
     }
@@ -330,7 +400,19 @@ public actor ReactToRoleHandler {
            self.configuration.reactions.contains(where: { $0.is(reaction.emoji) }),
            self.configuration.roleId != nil {
             Task {
-                await self.removeRoleFromMember(userId: reaction.user_id)
+                do {
+                    let emojiReaction = try Reaction(emoji: reaction.emoji)
+                    if let idx = self.currentReactions[emojiReaction]?
+                        .firstIndex(of: reaction.user_id) {
+                        self.currentReactions[emojiReaction]?.remove(at: idx)
+                    }
+                    /// If there is no acceptable reaction remaining, remove the role from the user.
+                    if !currentReactions.values.contains(where: { $0.contains(reaction.user_id) }) {
+                        await self.removeRoleFromMember(userId: reaction.user_id)
+                    }
+                } catch {
+                    logger.report(error: error)
+                }
             }
         }
     }
@@ -338,8 +420,18 @@ public actor ReactToRoleHandler {
     func onRoleCreate(_ role: Gateway.GuildRole) {
         if self.configuration.roleId == nil,
            role.guild_id == self.configuration.guildId,
-           role.role.name == self.configuration.role.name {
-            self.configuration.roleId = role.role.id
+           role.role.name == self.configuration.createRole.name {
+            Task {
+                do {
+                    self.configuration.createRole = try await .init(
+                        role: role.role,
+                        client: client
+                    )
+                    self.configuration.roleId = role.role.id
+                } catch {
+                    logger.report(error: error)
+                }
+            }
         }
     }
     
@@ -365,19 +457,27 @@ public actor ReactToRoleHandler {
         }
     }
     
+    func getRoleId() async -> String? {
+        var roleId = self.configuration.roleId
+        if roleId == nil {
+            await self.setOrCreateRole()
+            roleId = self.configuration.roleId
+        }
+        return roleId
+    }
+    
     func addRoleToMember(userId: String) async {
         guard userId != client.appId else { return }
-        var _roleId = self.configuration.roleId
-        if _roleId == nil {
-            await self.setOrCreateRole()
-            _roleId = self.configuration.roleId
-        }
-        guard let roleId = _roleId else {
+        guard let roleId = await getRoleId() else {
             self.logger.warning("Can't get a role to grant the member", metadata: [
                 "userId": .string(userId)
             ])
             return
         }
+        await self.addRoleToMember(roleId: roleId, userId: userId)
+    }
+    
+    func addRoleToMember(roleId: String, userId: String) async {
         do {
             try await client.addGuildMemberRole(
                 guildId: self.configuration.guildId,
@@ -392,8 +492,12 @@ public actor ReactToRoleHandler {
     func setOrCreateRole() async {
         do {
             if let role = try await requestHandler.getRoleIfExists(
-                role: self.configuration.role
+                role: self.configuration.createRole
             ) {
+                self.configuration.createRole = try await .init(
+                    role: role,
+                    client: client
+                )
                 self.configuration.roleId = role.id
             } else {
                 await createRole()
@@ -404,17 +508,21 @@ public actor ReactToRoleHandler {
     }
     
     func createRole() async {
-        var role = self.configuration.role
+        var role = self.configuration.createRole
         if await !requestHandler.guildHasFeature(.roleIcons) {
             role.unicode_emoji = nil
             role.icon = nil
         }
         do {
-            let result = try await client.createGuildRole(
+            let role = try await client.createGuildRole(
                 guildId: self.configuration.guildId,
                 payload: role
+            ).decode()
+            self.configuration.createRole = try await .init(
+                role: role,
+                client: client
             )
-            self.configuration.roleId = try result.decode().id
+            self.configuration.roleId = role.id
         } catch {
             self.logger.report(error: error)
         }
@@ -435,7 +543,8 @@ public actor ReactToRoleHandler {
         }
     }
     
-    func verifyAndReactToMessage() async throws {
+    func verify_populateReactions_start_react() async throws {
+        /// Verify message exists
         let message: Gateway.MessageCreate
         do {
             message = try await client.getChannelMessage(
@@ -449,6 +558,18 @@ public actor ReactToRoleHandler {
                 previousError: error
             )
         }
+        /// Populate reactions
+        for reaction in self.configuration.reactions {
+            let reactionsUsers = try await client.getReactions(
+                channelId: self.configuration.channelId,
+                messageId: self.configuration.messageId,
+                emoji: reaction
+            ).decode()
+            self.currentReactions[reaction] = Set(reactionsUsers.map(\.id))
+        }
+        /// Start taking action on Gateway events
+        self.state = .running
+        /// React to message
         let me = message.reactions?.filter(\.me).map(\.emoji) ?? []
         let remaining = configuration.reactions.filter { reaction in
             !me.contains(where: { reaction.is($0) })
@@ -464,13 +585,59 @@ public actor ReactToRoleHandler {
                 self.logger.report(error: error)
             }
         }
+        /// If members don't have the role, give it to them
+        if configuration.grantOnStart,
+            let roleId = await getRoleId() {
+            let users = self.currentReactions.values
+                .reduce(into: Set<String>(), { $0.formUnion($1) })
+            for user in users {
+                if await !requestHandler.memberHasRole(roleId: roleId, userId: user) {
+                    await self.addRoleToMember(roleId: roleId, userId: user)
+                }
+            }
+        }
     }
 }
 
+//MARK: + Logger
 private extension Logger {
     func report(error: Error, function: String = #function, line: UInt = #line) {
         self.error("'ReactToRoleHandler' failed", metadata: [
             "error": "\(error)"
         ], function: function, line: line)
+    }
+}
+
+//MARK: + CreateGuildRole
+private extension RequestBody.CreateGuildRole {
+    init(role: Role, client: any DiscordClient) async throws {
+        self = .init(
+            name: role.name,
+            permissions: Array(role.permissions.values),
+            color: role.color,
+            hoist: role.hoist,
+            icon: nil,
+            unicode_emoji: role.unicode_emoji,
+            mentionable: role.mentionable
+        )
+        if let icon = role.icon {
+            let file = try await client.getCDNRoleIcon(
+                roleId: role.id,
+                icon: icon
+            ).getFile()
+            self.icon = .init(file: file)
+        }
+    }
+    
+    static func != (lhs: Self, rhs: Self) -> Bool {
+        !(lhs.name == rhs.name &&
+          (lhs.permissions?.values ?? []).sorted(by: { $0.rawValue > $1.rawValue })
+          == (rhs.permissions?.values ?? []).sorted(by: { $0.rawValue > $1.rawValue }) &&
+          lhs.color == rhs.color &&
+          lhs.hoist == rhs.hoist &&
+          lhs.icon?.file.data == rhs.icon?.file.data &&
+          lhs.icon?.file.filename == rhs.icon?.file.filename &&
+          lhs.unicode_emoji == rhs.unicode_emoji &&
+          lhs.mentionable == rhs.mentionable)
     }
 }

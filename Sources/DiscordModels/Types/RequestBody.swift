@@ -211,7 +211,10 @@ public enum RequestBody {
         public var unicode_emoji: String?
         public var mentionable: Bool?
         
-        /// `icon` and `unicode_emoji` require `roleIcons` guild feature, which most guild don't have.
+        /// `icon` and `unicode_emoji` require `roleIcons` guild feature,
+        /// which most guild don't have.
+        /// No fields are required. If you send an empty payload, you'll get a basic role
+        /// with a name like "new role".
         public init(name: String? = nil, permissions: [Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, icon: ImageData? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
             self.name = name
             self.permissions = permissions.map { .init($0) }
