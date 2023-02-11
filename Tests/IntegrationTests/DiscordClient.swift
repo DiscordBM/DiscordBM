@@ -590,9 +590,10 @@ class DiscordClientTests: XCTestCase {
         XCTAssertNoThrow(try delete2.guardIsSuccessfulResponse())
     }
     
+    /// Couldn't find test-cases for some of the functions
     func testCDN() async throws {
-        do {
-            let file = try await client.getCDNCustomEmoji(
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNCustomEmoji(
                 emojiId: "1073704788400820324"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
@@ -600,8 +601,8 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(file.filename, "1073704788400820324.png")
         }
         
-        do {
-            let file = try await client.getCDNGuildIcon(
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNGuildIcon(
                 guildId: "922186320275722322",
                 icon: "a_6367dd2460a846748ad133206c910da5"
             ).getFile(preferredName: "guildIcon")
@@ -610,31 +611,31 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(file.filename, "guildIcon.gif")
         }
         
-        do {
-            let file = try await client.getCDNGuildSplash(
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNGuildSplash(
                 guildId: "922186320275722322",
                 splash: "276ba186b5208a74344706941eb7fe8d"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-        do {
-            let file = try await client.getCDNGuildDiscoverySplash(
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNGuildDiscoverySplash(
                 guildId: "922186320275722322",
                 splash: "178be4921b08b761d9d9d6117c6864e2"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-        do {
-            let file = try await client.getCDNGuildBanner(
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNGuildBanner(
                 guildId: "922186320275722322",
                 banner: "6e2e4d93e102a997cc46d15c28b0dfa0"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-//        do {
+//        await XCTAssertNoAsyncThrow {
 //            let file = try await client.getCDNUserBanner(
 //                userId: String,
 //                banner: String
@@ -642,78 +643,102 @@ class DiscordClientTests: XCTestCase {
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
         
-        do {
-            let file = try await client.getCDNDefaultUserAvatar(
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNDefaultUserAvatar(
                 discriminator: 0517
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
             XCTAssertEqual(file.extension, "png")
         }
         
-        do {
-            let file = try await client.getCDNUserAvatar(
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNUserAvatar(
                 userId: "290483761559240704",
                 avatar: "2df0a0198e00ba23bf2dc728c4db94d9"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-//        let file = try await client.getCDNGuildMemberAvatar(
-//            guildId: String,
-//            userId: String,
-//            avatar: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+        await XCTAssertNoAsyncThrow {
+            let file = try await client.getCDNGuildMemberAvatar(
+                guildId: "922186320275722322",
+                userId: "816681064855502868",
+                avatar: "b94e12ce3debd281000d5291eec2b502"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
         
-//        let file = try await client.getCDNApplicationIcon(
-//            appId: String, icon: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNApplicationIcon(
+//                appId: String, icon: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
 //
-//        let file = try await client.getCDNApplicationCover(
-//            appId: String, cover: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNApplicationCover(
+//                appId: String, cover: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await client.getCDNApplicationAsset(
+                appId: "401518684763586560",
+                assetId: "920476458709819483"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNAchievementIcon(
+//                appId: String, achievementId: String, icon: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNStickerPackBanner(
+//                assetId: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNTeamIcon(
+//                teamId: String, icon: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNSticker(
+                stickerId: "975144332535406633"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNRoleIcon(
+                roleId: "984557789999407214",
+                icon: "2cba6c72f7abd52885359054e09ab7a2"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNGuildScheduledEventCover(
+//                eventId: String, cover: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
 //
-//        let file = try await client.getCDNApplicationAsset(
-//            appId: String, assetId: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
-//
-//        let file = try await client.getCDNAchievementIcon(
-//            appId: String, achievementId: String, icon: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
-//
-//        let file = try await client.getCDNStickerPackBanner(
-//            assetId: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
-//
-//        let file = try await client.getCDNTeamIcon(
-//            teamId: String, icon: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
-//
-//        let file = try await client.getCDNSticker(
-//            stickerId: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
-//
-//        let file = try await client.getCDNRoleIcon(
-//            roleId: String, icon: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
-//
-//        let file = try await client.getCDNGuildScheduledEventCover(
-//            eventId: String, cover: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
-//
-//        let file = try await client.getCDNGuildMemberBanner(
-//            guildId: String, userId: String, banner: String
-//        ).getFile()
-//        XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNGuildMemberBanner(
+//                guildId: String, userId: String, banner: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
     }
     
     func testMultipartPayload() async throws {

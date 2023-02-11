@@ -366,7 +366,7 @@ public enum Endpoint: Sendable {
         case let .CDNTeamIcon(teamId, icon):
             suffix = "team-icons/\(teamId)/\(icon)"
         case let .CDNSticker(stickerId):
-            suffix = "stickers/\(stickerId)"
+            suffix = "stickers/\(stickerId).png" /// Needs `.png`
         case let .CDNRoleIcon(roleId, icon):
             suffix = "role-icons/\(roleId)/\(icon)"
         case let .CDNGuildScheduledEventCover(eventId, cover):

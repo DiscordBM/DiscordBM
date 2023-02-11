@@ -859,6 +859,12 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint), fallbackFileName: banner)
     }
     
+    /// Untested function.
+    /// If it didn't work, try to append `.png` to the end of `banner`.
+    /// If you are using this endpoint successfully, please open an issue and let me know what
+    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// (CDN data are _mostly_ public)
+    ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
     func getCDNUserBanner(userId: String, banner: String) async throws -> DiscordCDNResponse {
@@ -900,6 +906,12 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint), fallbackFileName: avatar)
     }
     
+    /// Untested function.
+    /// If it didn't work, try to append `.png` to the end of `icon`.
+    /// If you are using this endpoint successfully, please open an issue and let me know what
+    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// (CDN data are _mostly_ public)
+    ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
     func getCDNApplicationIcon(appId: String, icon: String) async throws -> DiscordCDNResponse {
@@ -907,6 +919,12 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
     }
     
+    /// Untested function.
+    /// If it didn't work, try to append `.png` to the end of `cover`.
+    /// If you are using this endpoint successfully, please open an issue and let me know what
+    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// (CDN data are _mostly_ public)
+    ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
     func getCDNApplicationCover(appId: String, cover: String) async throws -> DiscordCDNResponse {
@@ -921,6 +939,12 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint), fallbackFileName: assetId)
     }
     
+    /// Untested function.
+    /// If it didn't work, try to append `.png` to the end of `icon`.
+    /// If you are using this endpoint successfully, please open an issue and let me know what
+    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// (CDN data are _mostly_ public)
+    ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
     func getCDNAchievementIcon(
@@ -936,6 +960,12 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
     }
     
+    /// Untested function.
+    /// If it didn't work, try to append `.png` to the end of `assetId`.
+    /// If you are using this endpoint successfully, please open an issue and let me know what
+    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// (CDN data are _mostly_ public)
+    ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
     func getCDNStickerPackBanner(assetId: String) async throws -> DiscordCDNResponse {
@@ -943,6 +973,12 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint), fallbackFileName: assetId)
     }
     
+    /// Untested function.
+    /// If it didn't work, try to append `.png` to the end of `icon`.
+    /// If you are using this endpoint successfully, please open an issue and let me know what
+    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// (CDN data are _mostly_ public)
+    ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
     func getCDNTeamIcon(teamId: String, icon: String) async throws -> DiscordCDNResponse {
@@ -964,6 +1000,12 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
     }
     
+    /// Untested function.
+    /// If it didn't work, try to append `.png` to the end of `cover`.
+    /// If you are using this endpoint successfully, please open an issue and let me know what
+    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// (CDN data are _mostly_ public)
+    ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
     func getCDNGuildScheduledEventCover(
@@ -974,6 +1016,12 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint), fallbackFileName: cover)
     }
     
+    /// Untested function.
+    /// If it didn't work, try to append `.png` to the end of `banner`.
+    /// If you are using this endpoint successfully, please open an issue and let me know what
+    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// (CDN data are _mostly_ public)
+    ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
     func getCDNGuildMemberBanner(

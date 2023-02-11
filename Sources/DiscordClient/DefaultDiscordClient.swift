@@ -478,7 +478,7 @@ public struct ClientConfiguration {
             
             public static var `default`: Backoff {
                 .basedOnHeaders(
-                    maxAllowed: 10,
+                    maxAllowed: 5,
                     retryIfGreater: false,
                     else: .exponential(base: 0.2, coefficient: 0.5, rate: 2, upToTimes: 10)
                 )

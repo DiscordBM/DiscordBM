@@ -261,25 +261,25 @@ public actor ReactToRoleHandler {
             guildId: guildId
         )
         let role = try await self.requestHandler.getRole(id: existingRoleId)
-        var icon: RequestBody.ImageData? = nil
-        if let roleIcon = role.icon {
+        var createRole = RequestBody.CreateGuildRole(
+            name: role.name,
+            permissions: Array(role.permissions.values),
+            color: role.color,
+            hoist: role.hoist,
+            icon: nil,
+            unicode_emoji: role.unicode_emoji,
+            mentionable: role.mentionable
+        )
+        if let icon = role.icon {
             let file = try await gatewayManager.client.getCDNRoleIcon(
                 roleId: role.id,
-                icon: roleIcon
+                icon: icon
             ).getFile()
-            icon = .init(file: file)
+            createRole.icon = .init(file: file)
         }
         self.configuration = .init(
             id: id,
-            role: .init(
-                name: role.name,
-                permissions: Array(role.permissions.values),
-                color: role.color,
-                hoist: role.hoist,
-                icon: icon,
-                unicode_emoji: role.unicode_emoji,
-                mentionable: role.mentionable
-            ),
+            role: createRole,
             guildId: guildId,
             channelId: channelId,
             messageId: messageId,

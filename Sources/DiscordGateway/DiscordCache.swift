@@ -179,6 +179,8 @@ public actor DiscordCache {
         public var autoModerationExecutions: OrderedDictionary<String, [AutoModerationActionExecution]> = [:]
         /// `[CommandID (or ApplicationID): Permissions]`
         public var applicationCommandPermissions: OrderedDictionary<String, GuildApplicationCommandPermissions> = [:]
+        /// The current bot-application.
+        public var application: PartialApplication?
         /// The current bot user.
         public var botUser: DiscordUser?
         
@@ -194,6 +196,7 @@ public actor DiscordCache {
             autoModerationRules: OrderedDictionary<String, [AutoModerationRule]> = [:],
             autoModerationExecutions: OrderedDictionary<String, [AutoModerationActionExecution]> = [:],
             applicationCommandPermissions: OrderedDictionary<String, GuildApplicationCommandPermissions> = [:],
+            application: PartialApplication? = nil,
             botUser: DiscordUser? = nil
         ) {
             self.guilds = guilds
@@ -207,6 +210,7 @@ public actor DiscordCache {
             self.autoModerationRules = autoModerationRules
             self.autoModerationExecutions = autoModerationExecutions
             self.applicationCommandPermissions = applicationCommandPermissions
+            self.application = application
             self.botUser = botUser
         }
     }
@@ -276,8 +280,11 @@ public actor DiscordCache {
     private func handleEvent(_ event: Gateway.Event) {
         guard intentsAllowCaching(event: event) else { return }
         switch event.data {
-        case .none, .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate:
+        case .none, .heartbeat, .identify, .hello, .resume, .resumed, .invalidSession, .requestGuildMembers, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate:
             break
+        case let .ready(ready):
+            self.application = ready.application
+            self.botUser = ready.user
         case let .guildCreate(guildCreate):
             self.guilds[guildCreate.id] = guildCreate
             if requestMembers.isEnabled {
