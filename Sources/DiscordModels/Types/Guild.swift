@@ -220,6 +220,7 @@ extension Guild {
         public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
+        public var flags: IntBitField<Member.Flag>?
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }
