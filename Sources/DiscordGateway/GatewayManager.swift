@@ -11,7 +11,7 @@ public protocol DiscordActor: AnyObject { }
 #endif
 
 public protocol GatewayManager: DiscordActor {
-    /// A client to send requests to Discord.
+    /// The client to send requests to Discord with.
     nonisolated var client: any DiscordClient { get }
     /// This gateway manager's identifier.
     nonisolated var id: Int { get }

@@ -29,7 +29,7 @@ class HTTPRateLimiterTests: XCTestCase {
             status: .ok
         )
         let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-        XCTAssertEqual(shouldRequest, true)
+        XCTAssertEqual(shouldRequest, .true)
     }
     
     func testBucketExhausted() async throws {
@@ -47,7 +47,11 @@ class HTTPRateLimiterTests: XCTestCase {
             status: .ok
         )
         let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-        XCTAssertEqual(shouldRequest, false)
+        switch shouldRequest {
+        case .after: break
+        default:
+            XCTFail("\(shouldRequest) was not a '.after'")
+        }
     }
     
     /// Bucket is exhausted but the we've already past `x-ratelimit-reset`.
@@ -66,7 +70,7 @@ class HTTPRateLimiterTests: XCTestCase {
             status: .ok
         )
         let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-        XCTAssertEqual(shouldRequest, true)
+        XCTAssertEqual(shouldRequest, .true)
     }
     
     func testBucketAllowsButReachedGlobalInvalidRequests() async throws {
@@ -82,7 +86,7 @@ class HTTPRateLimiterTests: XCTestCase {
         /// Still only 499 invalid requests, so should allow requests.
         do {
             let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-            XCTAssertEqual(shouldRequest, true)
+            XCTAssertEqual(shouldRequest, .true)
         }
         
         await rateLimiter.include(
@@ -93,7 +97,7 @@ class HTTPRateLimiterTests: XCTestCase {
         /// Now 1000 invalid requests, so should NOT allow requests.
         do {
             let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-            XCTAssertEqual(shouldRequest, false)
+            XCTAssertEqual(shouldRequest, .false)
         }
     }
     
@@ -105,19 +109,19 @@ class HTTPRateLimiterTests: XCTestCase {
         /// Still only 49 requests, so should allow requests.
         do {
             let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-            XCTAssertEqual(shouldRequest, true)
+            XCTAssertEqual(shouldRequest, .true)
         }
         
         /// Now 50 invalid requests, so should NOT allow requests.
         do {
             let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-            XCTAssertEqual(shouldRequest, false)
+            XCTAssertEqual(shouldRequest, .false)
         }
         
         /// Interactions endpoints are not limited by the global rate limit, so should allow requests.
         do {
             let shouldRequest = await rateLimiter.shouldRequest(to: interactionEndpoint)
-            XCTAssertEqual(shouldRequest, true)
+            XCTAssertEqual(shouldRequest, .true)
         }
     }
     
@@ -128,6 +132,20 @@ class HTTPRateLimiterTests: XCTestCase {
             status: .ok
         )
         let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-        XCTAssertEqual(shouldRequest, true)
+        XCTAssertEqual(shouldRequest, .true)
+    }
+}
+
+extension HTTPRateLimiter.ShouldRequestResponse: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        if case .true = lhs, case .true = rhs {
+            return true
+        } else if case .false = lhs, case .false = rhs {
+            return true
+        } else if case let .after(lhs) = lhs, case let .after(rhs) = rhs {
+            return lhs == rhs
+        } else {
+            return false
+        }
     }
 }

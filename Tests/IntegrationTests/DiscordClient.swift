@@ -1,4 +1,5 @@
 @testable import DiscordBM
+import DiscordClient
 import AsyncHTTPClient
 import Atomics
 import NIOCore
@@ -18,8 +19,8 @@ class DiscordClientTests: XCTestCase {
         )
     }
     
-    override func tearDown() {
-        try! self.httpClient.syncShutdown()
+    override func tearDown() async throws {
+        try await httpClient.shutdown()
     }
     
     /// Just here so you know.
@@ -47,6 +48,20 @@ class DiscordClientTests: XCTestCase {
     }
     
     func testMessageSendDelete() async throws {
+        
+        /// Cleanup: Get channel messages and delete messages by the bot itself, if any
+        /// Makes this test resilient to failing because it has failed the last time
+        let allOldMessages = try await client.getChannelMessages(
+            channelId: Constants.channelId
+        ).decode()
+        
+        for message in allOldMessages where message.author?.id == Constants.botId {
+            try await client.deleteMessage(
+                channelId: message.channel_id,
+                messageId: message.id
+            ).guardIsSuccessfulResponse()
+        }
+        
         /// Create
         let text = "Testing! \(Date())"
         let message = try await client.createMessage(
@@ -71,14 +86,58 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(edited.embeds.first?.description, newText)
         XCTAssertEqual(edited.channel_id, Constants.channelId)
         
-        /// Add Reaction
-        let reactionResponse = try await client.addReaction(
+        /// Add 4 Reactions
+        let reactions = ["🚀", "🤠", "👀", "❤️"]
+        for reaction in reactions {
+            let reactionResponse = try await client.createReaction(
+                channelId: Constants.channelId,
+                messageId: message.id,
+                emoji: .unicodeEmoji(reaction)
+            )
+            
+            XCTAssertEqual(reactionResponse.status, .noContent)
+        }
+        
+        let deleteOwnReactionResponse = try await client.deleteOwnReaction(
             channelId: Constants.channelId,
             messageId: message.id,
-            emoji: "🚀"
+            emoji: .unicodeEmoji(reactions[0])
         )
         
-        XCTAssertEqual(reactionResponse.status, .noContent)
+        XCTAssertEqual(deleteOwnReactionResponse.status, .noContent)
+        
+        try await client.deleteUserReaction(
+            channelId: Constants.channelId,
+            messageId: message.id,
+            emoji: .unicodeEmoji(reactions[1]),
+            userId: Constants.botId
+        ).guardIsSuccessfulResponse()
+        
+        let getReactionsResponse = try await client.getReactions(
+            channelId: Constants.channelId,
+            messageId: message.id,
+            emoji: .unicodeEmoji(reactions[2])
+        ).decode()
+        
+        XCTAssertEqual(getReactionsResponse.count, 1)
+        
+        let reactionUser = try XCTUnwrap(getReactionsResponse.first)
+        XCTAssertEqual(reactionUser.id, Constants.botId)
+        
+        let deleteAllReactionsForEmojiResponse = try await client.deleteAllReactionsForEmoji(
+            channelId: Constants.channelId,
+            messageId: message.id,
+            emoji: .unicodeEmoji(reactions[2])
+        )
+        
+        XCTAssertEqual(deleteAllReactionsForEmojiResponse.status, .noContent)
+        
+        let deleteAllReactionsResponse = try await client.deleteAllReactions(
+            channelId: Constants.channelId,
+            messageId: message.id
+        )
+        
+        XCTAssertEqual(deleteAllReactionsResponse.status, .noContent)
         
         /// Get the message again
         let retrievedMessage = try await client.getChannelMessage(
@@ -90,6 +149,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(retrievedMessage.content, edited.content)
         XCTAssertEqual(retrievedMessage.channel_id, edited.channel_id)
         XCTAssertEqual(retrievedMessage.embeds.first?.description, edited.embeds.first?.description)
+        XCTAssertFalse(retrievedMessage.reactions?.isEmpty == false)
         
         /// Get channel messages
         let allMessages = try await client.getChannelMessages(
@@ -278,6 +338,12 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(role.unicode_emoji, rolePayload.unicode_emoji)
         XCTAssertEqual(role.mentionable, rolePayload.mentionable)
         
+        /// Get guild roles
+        let guildRoles = try await client.getGuildRoles(id: Constants.guildId).decode()
+        let rolesWithName = guildRoles.filter({ $0.name == role.name })
+        XCTAssertGreaterThanOrEqual(rolesWithName.count, 1)
+        
+        /// Add role to member
         let memberRoleAdditionResponse = try await client.addGuildMemberRole(
             guildId: Constants.guildId,
             userId: Constants.personalId,
@@ -331,6 +397,39 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertEqual(message.content, text)
         XCTAssertEqual(message.channel_id, response.id)
+    }
+    
+    func testThreads() async throws {
+        /// Create
+        let text = "Testing! \(Date())"
+        let message = try await client.createMessage(
+            channelId: Constants.threadId,
+            payload: .init(content: text)
+        ).decode()
+        
+        XCTAssertEqual(message.content, text)
+        XCTAssertEqual(message.channel_id, Constants.threadId)
+        
+        /// Edit
+        let newText = "Edit Testing! \(Date())"
+        let edited = try await client.editMessage(
+            channelId: Constants.threadId,
+            messageId: message.id,
+            payload: .init(embeds: [
+                .init(description: newText)
+            ])
+        ).decode()
+        
+        XCTAssertEqual(edited.content, text)
+        XCTAssertEqual(edited.embeds.first?.description, newText)
+        XCTAssertEqual(edited.channel_id, Constants.threadId)
+        
+        /// Delete
+        try await client.deleteMessage(
+            channelId: Constants.threadId,
+            messageId: message.id,
+            reason: "Random reason " + UUID().uuidString
+        ).guardIsSuccessfulResponse()
     }
     
     func testWebhooks() async throws {
@@ -524,6 +623,157 @@ class DiscordClientTests: XCTestCase {
         XCTAssertNoThrow(try delete2.guardIsSuccessfulResponse())
     }
     
+    /// Couldn't find test-cases for some of the functions
+    func testCDN() async throws {
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNCustomEmoji(
+                emojiId: "1073704788400820324"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertEqual(file.extension, "png")
+            XCTAssertEqual(file.filename, "1073704788400820324.png")
+        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNGuildIcon(
+                guildId: "922186320275722322",
+                icon: "a_6367dd2460a846748ad133206c910da5"
+            ).getFile(preferredName: "guildIcon")
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertEqual(file.extension, "gif")
+            XCTAssertEqual(file.filename, "guildIcon.gif")
+        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNGuildSplash(
+                guildId: "922186320275722322",
+                splash: "276ba186b5208a74344706941eb7fe8d"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNGuildDiscoverySplash(
+                guildId: "922186320275722322",
+                splash: "178be4921b08b761d9d9d6117c6864e2"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNGuildBanner(
+                guildId: "922186320275722322",
+                banner: "6e2e4d93e102a997cc46d15c28b0dfa0"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNUserBanner(
+//                userId: String,
+//                banner: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNDefaultUserAvatar(
+                discriminator: 0517
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertEqual(file.extension, "png")
+        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNUserAvatar(
+                userId: "290483761559240704",
+                avatar: "2df0a0198e00ba23bf2dc728c4db94d9"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await client.getCDNGuildMemberAvatar(
+                guildId: "922186320275722322",
+                userId: "816681064855502868",
+                avatar: "b94e12ce3debd281000d5291eec2b502"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNApplicationIcon(
+//                appId: String, icon: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+//
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNApplicationCover(
+//                appId: String, cover: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await client.getCDNApplicationAsset(
+                appId: "401518684763586560",
+                assetId: "920476458709819483"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNAchievementIcon(
+//                appId: String, achievementId: String, icon: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNStickerPackBanner(
+//                assetId: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNTeamIcon(
+//                teamId: String, icon: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNSticker(
+                stickerId: "975144332535406633"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+        await XCTAssertNoAsyncThrow {
+            let file = try await self.client.getCDNRoleIcon(
+                roleId: "984557789999407214",
+                icon: "2cba6c72f7abd52885359054e09ab7a2"
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 10)
+        }
+        
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNGuildScheduledEventCover(
+//                eventId: String, cover: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+//
+//        await XCTAssertNoAsyncThrow {
+//            let file = try await client.getCDNGuildMemberBanner(
+//                guildId: String, userId: String, banner: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+    }
+    
     func testMultipartPayload() async throws {
         let image = ByteBuffer(data: resource(name: "discordbm-logo.png"))
         
@@ -584,13 +834,20 @@ class DiscordClientTests: XCTestCase {
         let count = 50
         let container = Container(targetCounter: count)
         
+        let client: any DiscordClient = DefaultDiscordClient(
+            httpClient: httpClient,
+            token: Constants.token,
+            appId: Constants.botId,
+            configuration: .init(retryPolicy: nil)
+        )
+        
         let isFirstRequest = ManagedAtomic(false)
         Task {
             for _ in 0..<count {
                 let isFirst = isFirstRequest.load(ordering: .relaxed)
                 isFirstRequest.store(false, ordering: .relaxed)
                 do {
-                    _ = try await self.client.createMessage(
+                    _ = try await client.createMessage(
                         channelId: Constants.spamChannelId,
                         payload: .init(content: content)
                     ).decode()
@@ -608,7 +865,7 @@ class DiscordClientTests: XCTestCase {
                         if isFirst {
                             break
                         } else {
-                            fallthrough
+                            XCTFail("Received unexpected error: \(error)")
                         }
                     default:
                         XCTFail("Received unexpected error: \(error)")
@@ -776,6 +1033,7 @@ private actor Container {
             try await Task.sleep(nanoseconds: 10_000_000_000)
             if waiter != nil {
                 waiter?.resume()
+                waiter = nil
                 XCTFail("Failed to test in-time")
             }
         }

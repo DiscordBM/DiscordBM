@@ -283,42 +283,6 @@ extension DiscordChannel {
 }
 
 extension DiscordChannel {
-    /// An attachment object, but for sending.
-    /// https://discord.com/developers/docs/resources/channel#attachment-object
-    public struct AttachmentSend: Sendable, Codable, Validatable {
-        /// When sending, `id` is the index of this attachment in the `files` you provide.
-        public var id: String
-        public var filename: String?
-        public var description: String?
-        public var content_type: String?
-        public var size: Int?
-        public var url: String?
-        public var proxy_url: String?
-        public var height: Int?
-        public var width: Int?
-        public var ephemeral: Bool?
-        
-        /// `index` is the index of this attachment in the `files` you provide.
-        public init(index: UInt, filename: String? = nil, description: String? = nil, content_type: String? = nil, size: Int? = nil, url: String? = nil, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil, ephemeral: Bool? = nil) {
-            self.id = "\(index)"
-            self.filename = filename
-            self.description = description
-            self.content_type = content_type
-            self.size = size
-            self.url = url
-            self.proxy_url = proxy_url
-            self.height = height
-            self.width = width
-            self.ephemeral = ephemeral
-        }
-        
-        public func validate() throws {
-            try validateCharacterCountDoesNotExceed(description, max: 1_024, name: "description")
-        }
-    }
-}
-
-extension DiscordChannel {
     /// Partial ``Channel.Message`` object.
     public struct PartialMessage: Sendable, Codable {
         public var id: String
@@ -574,7 +538,7 @@ public struct Embed: Sendable, Codable, Validatable {
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
     public var contentLength: Int {
         let fields = fields?.reduce(into: 0) {
-            $0 = $1.name.unicodeScalars.count + $1.value.unicodeScalars.count
+            $0 += $1.name.unicodeScalars.count + $1.value.unicodeScalars.count
         } ?? 0
         return (title?.unicodeScalars.count ?? 0) +
         (description?.unicodeScalars.count ?? 0) +

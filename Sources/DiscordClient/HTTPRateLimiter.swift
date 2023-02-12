@@ -35,11 +35,16 @@ actor HTTPRateLimiter {
             self.reset = reset
         }
         
-        func shouldRequest() -> Bool {
+        func shouldRequest() -> ShouldRequestResponse {
             if remaining > 0 {
-                return true
+                return .true
             } else {
-                return reset < Date().timeIntervalSince1970
+                let wait = reset - Date().timeIntervalSince1970
+                if wait > 0 {
+                    return .after(wait)
+                } else {
+                    return .true
+                }
             }
         }
         
@@ -128,7 +133,7 @@ actor HTTPRateLimiter {
         }
     }
     
-    private func addGlobalRateLimitRecord() {
+    func addGlobalRateLimitRecord() {
         let globalId = self.currentGlobalRateLimitId()
         if self.requestsThisSecond.id == globalId {
             self.requestsThisSecond.count += 1
@@ -137,31 +142,41 @@ actor HTTPRateLimiter {
         }
     }
     
+    enum ShouldRequestResponse {
+        case `true`
+        case `false`
+        /// Need to wait some seconds
+        case after(Double)
+    }
+    
     /// Should request to the endpoint or not.
     /// This also adds a record to the global rate-limit, so if this returns true,
     /// you should make sure the request is sent, or otherwise this rate-limiter's
     /// global rate-limit will be less than the max amount and might not allow you
     /// to make too many requests per second, when it should.
-    func shouldRequest(to endpoint: Endpoint) -> Bool {
-        guard minutelyInvalidRequestsLimitAllows() else { return false }
+    func shouldRequest(to endpoint: Endpoint) -> ShouldRequestResponse {
+        guard minutelyInvalidRequestsLimitAllows() else { return .false }
         if endpoint.countsAgainstGlobalRateLimit {
-            guard globalRateLimitAllows() else { return false }
+            guard globalRateLimitAllows() else { return .false }
         }
         if let bucketId = self.endpoints[endpoint.id],
            let bucket = self.buckets[bucketId] {
-            if bucket.shouldRequest() {
+            switch bucket.shouldRequest() {
+            case .true:
                 self.addGlobalRateLimitRecord()
-                return true
-            } else {
+                return .true
+            case .false: return .false
+            case let .after(after):
+                /// Need to manually call `addGlobalRateLimitRecord()` when doing the request.
                 logger.warning("Hit HTTP Bucket rate-limit.", metadata: [
                     "label": .string(label),
                     "endpointId": .stringConvertible(endpoint.id),
                     "bucket": .stringConvertible(bucket)
                 ])
-                return false
+                return .after(after)
             }
         } else {
-            return true
+            return .true
         }
     }
     

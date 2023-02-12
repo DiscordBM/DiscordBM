@@ -1,7 +1,7 @@
 import DiscordCore
 
 extension DiscordGlobalConfiguration {
-    private static var _logManager: DiscordLogManager?
+    static var _logManager: DiscordLogManager?
     
     /// The manager of logging to Discord.
     /// You must initialize this, if you want to use `DiscordLogHandler`.

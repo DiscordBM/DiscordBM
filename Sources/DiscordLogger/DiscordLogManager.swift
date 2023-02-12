@@ -63,7 +63,6 @@ public actor DiscordLogManager {
         
         let frequency: TimeAmount
         let aliveNotice: AliveNotice?
-        let fallbackLogger: Logger
         let mentions: [Logger.Level: [String]]
         let colors: [Logger.Level: DiscordColor]
         let excludeMetadata: Set<Logger.Level>
@@ -75,7 +74,6 @@ public actor DiscordLogManager {
         /// - Parameters:
         ///   - frequency: The frequency of the log-sendings. e.g. if its set to 30s, logs will only be sent once-in-30s. Should not be lower than 10s, because of Discord rate-limits.
         ///   - aliveNotice: Configuration for sending "I am alive" messages every once in a while. Note that alive notices are delayed until it's been `interval`-time past last message.
-        ///   - fallbackLogger: The logger to use when `DiscordLogger` errors. You should use a log handler that logs to a main place like stdout.
         ///   e.g. `Logger(label: "Fallback", factory: StreamLogHandler.standardOutput(label:))`
         ///   - mentions: ID of users/roles to be mentioned for each log-level.
         ///   - colors: Color of the embeds to be used for each log-level.
@@ -86,7 +84,6 @@ public actor DiscordLogManager {
         ///   - maxStoredLogsCount: If there are more logs than this count, the log manager will start removing the oldest un-sent logs to prevent memory leaks.
         public init(
             frequency: TimeAmount = .seconds(20),
-            fallbackLogger: Logger,
             aliveNotice: AliveNotice? = nil,
             mentions: [Logger.Level: Mention] = [:],
             colors: [Logger.Level: DiscordColor] = [
@@ -98,14 +95,13 @@ public actor DiscordLogManager {
                 .notice: .green,
                 .info: .blue,
             ],
-            excludeMetadata: Set<Logger.Level> = [.trace],
+            excludeMetadata: Set<Logger.Level> = [],
             extraMetadata: Set<Logger.Level> = [],
             disabledLogLevels: Set<Logger.Level> = [],
             disabledInDebug: Bool = false,
             maxStoredLogsCount: Int = 1_000
         ) {
             self.frequency = frequency
-            self.fallbackLogger = fallbackLogger
             self.aliveNotice = aliveNotice
             self.mentions = mentions.mapValues { $0.toMentionStrings() }
             self.colors = colors
@@ -136,27 +132,34 @@ public actor DiscordLogManager {
     
     private var logs: [WebhookAddress: [Log]] = [:]
     private var sendLogsTasks: [WebhookAddress: Task<Void, Never>] = [:]
+    var fallbackLogger = Logger(label: "DBM.LogManager")
     
     private var aliveNoticeTask: Task<Void, Never>?
     
     public init(
         httpClient: HTTPClient,
-        configuration: Configuration
+        configuration: Configuration = Configuration()
     ) {
         /// Will only ever send requests to a webhook endpoint
         /// which doesn't need/use neither `token` nor `appId`.
         self.client = DefaultDiscordClient(httpClient: httpClient, token: "", appId: nil)
         self.configuration = configuration
-        Task { await self.startAliveNotices() }
+        Task { [weak self] in await self?.startAliveNotices() }
     }
     
     public init(
         client: any DiscordClient,
-        configuration: Configuration
+        configuration: Configuration = Configuration()
     ) {
         self.client = client
         self.configuration = configuration
-        Task { await self.startAliveNotices() }
+        Task { [weak self] in await self?.startAliveNotices() }
+    }
+    
+    /// To use after logging-system's bootstrap
+    /// Or if you want to change it to something else (do it after bootstrap or it'll be overridden)
+    public func renewFallbackLogger(to new: Logger? = nil) {
+        self.fallbackLogger = new ?? Logger(label: "DBM.LogManager")
     }
     
     func include(address: WebhookAddress, embed: Embed, level: Logger.Level) {
@@ -172,17 +175,22 @@ public actor DiscordLogManager {
 #if DEBUG
         if configuration.disabledInDebug { return }
 #endif
-        if self.logs[address]?.isEmpty != false {
+        switch self.logs[address]?.isEmpty {
+        case .none:
+            self.logs[address] = []
             setUpSendLogsTask(address: address)
+        case .some(true):
+            setUpSendLogsTask(address: address)
+        case .some(false): break
         }
-        self.logs[address, default: []].append(.init(
+        
+        self.logs[address]!.append(.init(
             embed: embed,
             level: level,
             isFirstAliveNotice: isFirstAliveNotice
         ))
         
-        let count = logs[address]!.count
-        if count > configuration.maxStoredLogsCount {
+        if logs[address]!.count > configuration.maxStoredLogsCount {
             logs[address]!.removeFirst()
         }
     }
@@ -247,10 +255,10 @@ public actor DiscordLogManager {
     
     private func performLogSend(address: WebhookAddress) async throws {
         let logs = getMaxAmountOfLogsAndFlush(address: address)
-        try await sendLogs(logs, address: address)
         if self.logs[address]?.isEmpty != false {
             self.sendLogsTasks[address]?.cancel()
         }
+        try await sendLogs(logs, address: address)
     }
     
     private func getMaxAmountOfLogsAndFlush(address: WebhookAddress) -> [Log] {
@@ -259,19 +267,12 @@ public actor DiscordLogManager {
         
         guard var iterator = self.logs[address]?.makeIterator() else { return [] }
         
+        func lengthSum() -> Int { goodLogs.map(\.embed.contentLength).reduce(into: 0, +=) }
+        
         while goodLogs.count < 10,
               let log = iterator.next(),
-              (goodLogs.map(\.embed.contentLength).reduce(into: 0, +=) + log.embed.contentLength) < 6_000
-        {
+              (lengthSum() + log.embed.contentLength) <= 6_000 {
             goodLogs.append(log)
-        }
-        
-        /// Will get stuck if the first log is alone more than the limit length.
-        if goodLogs.isEmpty, (self.logs[address]?.first?.embed.contentLength ?? 0) > 6_000 {
-            let first = self.logs[address]!.removeFirst()
-            logWarning("First log alone is more than the limit length. This will not cause much problems but it is a library issue. Please report on https://github.com/MahdiBM/DiscordBM/issue with full context",
-                       metadata: ["log": "\(first)"])
-            return self.getMaxAmountOfLogsAndFlush(address: address)
         }
         
         self.logs[address] = Array(self.logs[address]?.dropFirst(goodLogs.count) ?? [])
@@ -319,8 +320,7 @@ public actor DiscordLogManager {
         do {
             try response.guardIsSuccessfulResponse()
         } catch {
-            logWarning("Received error from Discord after sending logs. This is a library issue. Please report on https://github.com/MahdiBM/DiscordBM/issue with full context",
-                       metadata: ["error": "\(error)", "payload": "\(payload)"])
+            logWarning("Received error from Discord after sending logs. This might be a library issue. Please report on https://github.com/MahdiBM/DiscordBM/issue with full context", metadata: ["error": "\(error)", "payload": "\(payload)"])
         }
     }
     
@@ -330,7 +330,7 @@ public actor DiscordLogManager {
         function: String = #function,
         line: UInt = #line
     ) {
-        self.configuration.fallbackLogger.log(
+        self.fallbackLogger.log(
             level: .warning,
             message,
             metadata: metadata,
@@ -344,6 +344,10 @@ public actor DiscordLogManager {
 #if DEBUG
     func _tests_getLogs() -> [WebhookAddress: [Log]] {
         self.logs
+    }
+    
+    func _tests_getMaxAmountOfLogsAndFlush(address: WebhookAddress) -> [Log] {
+        self.getMaxAmountOfLogsAndFlush(address: address)
     }
 #endif
 }

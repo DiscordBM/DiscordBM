@@ -7,6 +7,7 @@ public struct DiscordLogHandler: LogHandler {
     
     /// The label of this log handler.
     public let label: String
+    let preparedLabel: String
     /// The address to send the logs to.
     let address: WebhookAddress
     /// See `LogHandler.metadata`.
@@ -25,6 +26,7 @@ public struct DiscordLogHandler: LogHandler {
         metadataProvider: Logger.MetadataProvider? = nil
     ) {
         self.label = label
+        self.preparedLabel = prepare(label, maxCount: 100)
         self.address = address
         self.logLevel = level
         self.metadata = [:]
@@ -89,29 +91,34 @@ public struct DiscordLogHandler: LogHandler {
         }
         
         let embed = Embed(
-            title: prepare("\(message)"),
+            title: prepare("\(message)", maxCount: 255),
             timestamp: Date(),
             color: config.colors[level],
-            footer: .init(text: prepare(self.label)),
-            fields: Array(allMetadata.sorted(by: { $0.key > $1.key }).compactMap {
-                key, value -> Embed.Field? in
-                let value = "\(value)"
-                if key.isEmpty || value.isEmpty { return nil }
-                return .init(name: prepare(key), value: prepare(value))
-            }.maxCount(25))
+            footer: .init(text: self.preparedLabel),
+            fields: Array(allMetadata.sorted(by: { $0.key > $1.key })
+                .map({ (key: $0.key, value: "\($0.value)") })
+                .filter({ !($0.key.isEmpty || $0.value.isEmpty) })
+                .maxCount(25)
+                .map({ key, value in
+                    Embed.Field(
+                        name: prepare(key, maxCount: 25),
+                        value: prepare(value, maxCount: 200)
+                    )
+                })
+            )
         )
         
         Task { await logManager.include(address: address, embed: embed, level: level) }
     }
-    
-    private func prepare(_ text: String) -> String {
-        let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
-        return String(escaped.unicodeScalars.maxCount(250))
-    }
+}
+
+private func prepare(_ text: String, maxCount: Int) -> String {
+    let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
+    return String(escaped.unicodeScalars.maxCount(maxCount))
 }
 
 private extension Collection {
-    func maxCount(_ count: Int) -> Self.SubSequence {
+    func maxCount(_ count: Int) -> SubSequence {
         let delta = (self.count - count)
         let dropCount = delta > 0 ? delta : 0
         return self.dropLast(dropCount)

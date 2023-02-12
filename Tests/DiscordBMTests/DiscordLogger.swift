@@ -27,8 +27,7 @@ class DiscordLoggerTests: XCTestCase {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
             configuration: .init(
-                frequency: .seconds(1),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
+                frequency: .seconds(5),
                 mentions: [
                     .trace: .role("33333333"),
                     .notice: .user("22222222"),
@@ -44,18 +43,18 @@ class DiscordLoggerTests: XCTestCase {
         )
         logger.log(level: .trace, "Testing!")
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 100_000_000)
+        try await Task.sleep(nanoseconds: 50_000_000)
         logger.log(level: .notice, "Testing! 2")
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 100_000_000)
+        try await Task.sleep(nanoseconds: 50_000_000)
         logger.log(level: .notice, "Testing! 3", metadata: ["1": "2"])
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 100_000_000)
+        try await Task.sleep(nanoseconds: 50_000_000)
         logger.log(level: .warning, "Testing! 4")
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        wait(for: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 6)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -72,7 +71,7 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertEqual(embed.title, "Testing!")
             let now = Date().timeIntervalSince1970
             let timestamp = embed.timestamp?.date.timeIntervalSince1970 ?? 0
-            XCTAssertTrue(((now-2)...(now+2)).contains(timestamp))
+            XCTAssertTrue(((now-10)...(now+10)).contains(timestamp))
             XCTAssertEqual(embed.color?.value, DiscordColor.brown.value)
             XCTAssertEqual(embed.footer?.text, "test")
             XCTAssertEqual(embed.fields?.count, 0)
@@ -83,7 +82,7 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertEqual(embed.title, "Testing! 2")
             let now = Date().timeIntervalSince1970
             let timestamp = embed.timestamp?.date.timeIntervalSince1970 ?? 0
-            XCTAssertTrue(((now-2)...(now+2)).contains(timestamp))
+            XCTAssertTrue(((now-10)...(now+10)).contains(timestamp))
             XCTAssertEqual(embed.color?.value, DiscordColor.green.value)
             XCTAssertEqual(embed.footer?.text, "test")
             XCTAssertEqual(embed.fields?.count, 0)
@@ -94,7 +93,7 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertEqual(embed.title, "Testing! 3")
             let now = Date().timeIntervalSince1970
             let timestamp = embed.timestamp?.date.timeIntervalSince1970 ?? 0
-            XCTAssertTrue(((now-2)...(now+2)).contains(timestamp))
+            XCTAssertTrue(((now-10)...(now+10)).contains(timestamp))
             XCTAssertEqual(embed.color?.value, DiscordColor.green.value)
             XCTAssertEqual(embed.footer?.text, "test")
             let fields = try XCTUnwrap(embed.fields)
@@ -110,7 +109,7 @@ class DiscordLoggerTests: XCTestCase {
             XCTAssertEqual(embed.title, "Testing! 4")
             let now = Date().timeIntervalSince1970
             let timestamp = embed.timestamp?.date.timeIntervalSince1970 ?? 0
-            XCTAssertTrue(((now-2)...(now+2)).contains(timestamp))
+            XCTAssertTrue(((now-10)...(now+10)).contains(timestamp))
             XCTAssertEqual(embed.color?.value, DiscordColor.orange.value)
             XCTAssertEqual(embed.footer?.text, "test")
         }
@@ -121,7 +120,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 excludeMetadata: [.trace]
             )
         )
@@ -152,7 +150,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 disabledLogLevels: [.debug]
             )
         )
@@ -184,7 +181,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .seconds(10),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 maxStoredLogsCount: 100
             )
         )
@@ -217,7 +213,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 disabledInDebug: true
             )
         )
@@ -240,7 +235,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 extraMetadata: [.info]
             )
         )
@@ -281,7 +275,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 extraMetadata: [.warning]
             )
         )
@@ -324,8 +317,7 @@ class DiscordLoggerTests: XCTestCase {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
             configuration: .init(
-                frequency: .milliseconds(800),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
+                frequency: .milliseconds(700),
                 aliveNotice: .init(
                     address: try .url(webhookUrl),
                     interval: .seconds(6),
@@ -427,10 +419,7 @@ class DiscordLoggerTests: XCTestCase {
     func testFrequency() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
-            configuration: .init(
-                frequency: .seconds(5),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
-            )
+            configuration: .init(frequency: .seconds(5))
         )
         
         let logger = DiscordLogHandler.multiplexLogger(
@@ -512,15 +501,65 @@ class DiscordLoggerTests: XCTestCase {
         }
     }
     
+    /// This tests worst-case scenario of having too much text in the logs.
+    func testDoesNotExceedDiscordLengthLimits() async throws {
+        DiscordGlobalConfiguration.logManager = DiscordLogManager(
+            client: self.client,
+            configuration: .init(frequency: .seconds(60))
+        )
+        
+        let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".map { $0 }
+        func longString() -> String {
+            String((0..<6_500).map { _ in chars[chars.indices.randomElement()!] })
+        }
+        
+        let address = try WebhookAddress.url(webhookUrl)
+        let logger = DiscordLogHandler.multiplexLogger(
+            label: longString(),
+            address: address,
+            level: .trace,
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+        )
+        
+        func randomLevel() -> Logger.Level { Logger.Level.allCases.randomElement()! }
+        func longMessage() -> Logger.Message {
+            .init(stringLiteral: longString())
+        }
+        func longMetadata() -> Logger.Metadata {
+            .init(uniqueKeysWithValues: (0..<50).map { _ in
+                (longString(), Logger.MetadataValue.string(longString()))
+            })
+        }
+        
+        /// Wait for the log-manager to start basically.
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        for _ in 0..<30 {
+            logger.log(level: randomLevel(), longMessage(), metadata: longMetadata())
+        }
+        
+        /// To make sure the logs make it to the log-manager's storage.
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        let all = await DiscordGlobalConfiguration.logManager._tests_getLogs()[address]!
+        XCTAssertEqual(all.count, 30)
+        for embed in all.map(\.embed) {
+            XCTAssertNoThrow(try embed.validate())
+        }
+        
+        let logs = await DiscordGlobalConfiguration.logManager
+            ._tests_getMaxAmountOfLogsAndFlush(address: address)
+        XCTAssertEqual(logs.count, 1)
+        let lengthSum = logs.map(\.embed.contentLength).reduce(into: 0, +=)
+        XCTAssertEqual(lengthSum, 5_980)
+    }
+    
     func testBootstrap() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
-            configuration: .init(
-                frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
-            )
+            configuration: .init(frequency: .milliseconds(100))
         )
-        LoggingSystem.bootstrapWithDiscordLogger(
+        await LoggingSystem.bootstrapWithDiscordLogger(
             address: try .url(webhookUrl),
             level: .error,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
@@ -547,10 +586,7 @@ class DiscordLoggerTests: XCTestCase {
     func testMetadataProviders() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
-            configuration: .init(
-                frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
-            )
+            configuration: .init(frequency: .milliseconds(100))
         )
         let simpleTraceIDMetadataProvider = Logger.MetadataProvider {
             guard let traceID = TraceNamespace.simpleTraceID else {
@@ -558,7 +594,7 @@ class DiscordLoggerTests: XCTestCase {
             }
             return ["simple-trace-id": .string(traceID)]
         }
-        LoggingSystem.bootstrapWithDiscordLogger(
+        await LoggingSystem.bootstrapWithDiscordLogger(
             address: try .url(webhookUrl),
             metadataProvider: simpleTraceIDMetadataProvider,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
@@ -592,7 +628,7 @@ class DiscordLoggerTests: XCTestCase {
     }
 }
 
-private class FakeDiscordClient: DiscordClient {
+private class FakeDiscordClient: DiscordClient, @unchecked Sendable {
     
     let appId: String? = "11111111"
     

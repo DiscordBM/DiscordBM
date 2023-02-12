@@ -6,9 +6,6 @@ actor SerialQueue {
     
     var lastSend: Date
     let waitTime: TimeAmount
-    var logger: Logger {
-        DiscordGlobalConfiguration.makeLogger("DiscordSerialQueue")
-    }
     
     init(waitTime: TimeAmount) {
         /// Setting `lastSend` to sometime in the past that is not way too far.
@@ -48,9 +45,10 @@ actor SerialQueue {
             do {
                 try await Task.sleep(nanoseconds: UInt64(wait.nanoseconds))
             } catch {
-                logger.warning("Unexpected SerialQueue failure", metadata: [
-                    "error": "\(error)"
-                ])
+                DiscordGlobalConfiguration.makeLogger("DiscordSerialQueue").warning(
+                    "Unexpected SerialQueue failure",
+                    metadata: [ "error": "\(error)"]
+                )
                 return
             }
             self.perform(task)

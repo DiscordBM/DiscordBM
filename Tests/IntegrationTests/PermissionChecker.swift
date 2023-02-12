@@ -14,9 +14,9 @@ class PermissionChecker: XCTestCase {
         self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
-        try! httpClient.syncShutdown()
+        try await httpClient.shutdown()
     }
     
     /// Checks to see if the permission checker functions work properly.
@@ -33,7 +33,7 @@ class PermissionChecker: XCTestCase {
                 status: .invisible,
                 afk: false
             ),
-            intents: [.guilds, .guildModeration, .guildEmojisAndStickers, .guildIntegrations, .guildWebhooks, .guildInvites, .guildVoiceStates, .guildMessages, .guildMessageReactions, .guildMessageTyping, .directMessages, .directMessageReactions, .directMessageTyping, .guildScheduledEvents, .autoModerationConfiguration, .autoModerationExecution, .guildMessages, .guildPresences, .messageContent]
+            intents: Gateway.Intent.allCases
         )
         
         let cache = await DiscordCache(
@@ -140,6 +140,8 @@ class PermissionChecker: XCTestCase {
             channelId: Constants.perm3ChannelId,
             permissions: [.manageThreads]
         ))
+        
+        await bot.disconnect()
         
         /// Wait 5 seconds to make sure it doesn't mess up the next tests due to Discord limits.
         try await Task.sleep(nanoseconds: 5_000_000_000)

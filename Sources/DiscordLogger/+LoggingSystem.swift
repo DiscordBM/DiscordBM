@@ -16,7 +16,7 @@ extension LoggingSystem {
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
         makeMainLogHandler: @escaping (String, Logger.MetadataProvider?) -> LogHandler
-    ) {
+    ) async {
         LoggingSystem._bootstrap({ label, metadataProvider in
             var otherHandler = makeMainLogHandler(label, metadataProvider)
             otherHandler.logLevel = level
@@ -31,6 +31,8 @@ extension LoggingSystem {
             ])
             return handler
         }, metadataProvider: metadataProvider)
+        /// If the log-manager is not yet set, then when it's set it'll use this new logger anyway.
+        await DiscordGlobalConfiguration._logManager?.renewFallbackLogger()
     }
     
     private static func _bootstrap(

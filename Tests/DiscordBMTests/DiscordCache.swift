@@ -10,7 +10,7 @@ class DiscordCacheTests: XCTestCase {
             gatewayManager: FakeGatewayManager(),
             intents: .all,
             requestAllMembers: .enabledWithPresences,
-            itemsLimitPolicy: .constant(10),
+            itemsLimit: .constant(10),
             storage: storage
         )
         
