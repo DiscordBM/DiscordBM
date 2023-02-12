@@ -19,8 +19,8 @@ class DiscordClientTests: XCTestCase {
         )
     }
     
-    override func tearDown() {
-        try! self.httpClient.syncShutdown()
+    override func tearDown() async throws {
+        try await httpClient.shutdown()
     }
     
     /// Just here so you know.
