@@ -207,8 +207,8 @@ public actor DiscordCache {
         /// `[ChannelID: Channel]`
         /// Non-guild channels.
         public var channels: [String: DiscordChannel] = [:]
-        /// `[TargetID]: [Entry]]`
-        /// A target id of `""` is used for entries that don't have a `target_id`.
+        /// `[GuildID or TargetID or ""]: [Entry]]`
+        /// `""` is used for entries that don't have a `guild_id`/`target_id`, if any.
         public var auditLogs: OrderedDictionary<String, [AuditLog.Entry]> = [:]
         /// `[GuildID: [Integration]]`
         public var integrations: OrderedDictionary<String, [Integration]> = [:]
@@ -567,7 +567,7 @@ public actor DiscordCache {
                 self.guilds[user.guild_id]!.guild_scheduled_events[idx].user_count! -= 1
             }
         case let .guildAuditLogEntryCreate(log):
-            self.auditLogs[log.target_id ?? "", default: []].append(log)
+            self.auditLogs[log.guild_id ?? log.target_id ?? "", default: []].append(log)
         case let .integrationCreate(integration), let .integrationUpdate(integration):
             if let idx = self.integrations[integration.guild_id]?
                 .firstIndex(where: { $0.id == integration.id }) {
