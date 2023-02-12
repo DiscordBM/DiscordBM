@@ -252,7 +252,7 @@ public struct DefaultDiscordClient: DiscordClient {
         }
     }
     
-    public func send<E: Encodable & Validatable>(
+    public func send<E: Encodable & ValidatablePayload>(
         request req: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
@@ -315,7 +315,7 @@ public struct DefaultDiscordClient: DiscordClient {
         }
     }
     
-    public func sendMultipart<E: MultipartEncodable & Validatable>(
+    public func sendMultipart<E: MultipartEncodable & ValidatablePayload>(
         request req: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {

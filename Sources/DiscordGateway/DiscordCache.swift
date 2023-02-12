@@ -6,9 +6,6 @@ import OrderedCollections
 @dynamicMemberLookup
 public actor DiscordCache {
     
-    public typealias Guilds = StringsChoice
-    public typealias Channels = StringsChoice
-    
     public enum StringsChoice: Sendable, ExpressibleByArrayLiteral {
         case all
         case none
@@ -54,9 +51,9 @@ public actor DiscordCache {
     public enum RequestMembers: Sendable {
         case disabled
         /// Only requests members.
-        case enabled(Guilds = .all)
+        case enabled(guilds: StringsChoice = .all)
         /// Requests all members as well as their presences.
-        case enabledWithPresences(Guilds = .all)
+        case enabledWithPresences(guilds: StringsChoice = .all)
         
         public static var enabled: RequestMembers { .enabled() }
         
@@ -88,14 +85,23 @@ public actor DiscordCache {
         case `default`
         /// Caches messages, replaces edited messages with the new message,
         /// moves deleted messages to another property of the storage.
-        case saveDeleted(Guilds = .all, Channels = .all)
+        case saveDeleted(
+            guilds: StringsChoice = .all,
+            channels: StringsChoice = .all
+        )
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, removes deleted messages from storage.
-        case saveEditHistory(Guilds = .all, Channels = .all)
+        case saveEditHistory(
+            guilds: StringsChoice = .all,
+            channels: StringsChoice = .all
+        )
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, moves deleted messages to another property of
         /// the storage.
-        case saveEditHistoryAndDeleted(Guilds = .all, Channels = .all)
+        case saveEditHistoryAndDeleted(
+            guilds: StringsChoice = .all,
+            channels: StringsChoice = .all
+        )
         
         public static var saveDeleted: MessageCachingPolicy { .saveDeleted() }
         
