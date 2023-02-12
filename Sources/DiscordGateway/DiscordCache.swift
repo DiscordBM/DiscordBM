@@ -6,9 +6,6 @@ import OrderedCollections
 @dynamicMemberLookup
 public actor DiscordCache {
     
-    public typealias Guilds = StringsChoice
-    public typealias Channels = StringsChoice
-    
     public enum StringsChoice: Sendable, ExpressibleByArrayLiteral {
         case all
         case none
@@ -54,9 +51,9 @@ public actor DiscordCache {
     public enum RequestMembers: Sendable {
         case disabled
         /// Only requests members.
-        case enabled(Guilds = .all)
+        case enabled(guilds: StringsChoice = .all)
         /// Requests all members as well as their presences.
-        case enabledWithPresences(Guilds = .all)
+        case enabledWithPresences(guilds: StringsChoice = .all)
         
         public static var enabled: RequestMembers { .enabled() }
         
@@ -88,14 +85,23 @@ public actor DiscordCache {
         case `default`
         /// Caches messages, replaces edited messages with the new message,
         /// moves deleted messages to another property of the storage.
-        case saveDeleted(Guilds = .all, Channels = .all)
+        case saveDeleted(
+            guilds: StringsChoice = .all,
+            channels: StringsChoice = .all
+        )
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, removes deleted messages from storage.
-        case saveEditHistory(Guilds = .all, Channels = .all)
+        case saveEditHistory(
+            guilds: StringsChoice = .all,
+            channels: StringsChoice = .all
+        )
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, moves deleted messages to another property of
         /// the storage.
-        case saveEditHistoryAndDeleted(Guilds = .all, Channels = .all)
+        case saveEditHistoryAndDeleted(
+            guilds: StringsChoice = .all,
+            channels: StringsChoice = .all
+        )
         
         public static var saveDeleted: MessageCachingPolicy { .saveDeleted() }
         
@@ -201,8 +207,8 @@ public actor DiscordCache {
         /// `[ChannelID: Channel]`
         /// Non-guild channels.
         public var channels: [String: DiscordChannel] = [:]
-        /// `[TargetID]: [Entry]]`
-        /// A target id of `""` is used for entries that don't have a `target_id`.
+        /// `[GuildID or TargetID or ""]: [Entry]]`
+        /// `""` is used for entries that don't have a `guild_id`/`target_id`, if any.
         public var auditLogs: OrderedDictionary<String, [AuditLog.Entry]> = [:]
         /// `[GuildID: [Integration]]`
         public var integrations: OrderedDictionary<String, [Integration]> = [:]
@@ -561,7 +567,7 @@ public actor DiscordCache {
                 self.guilds[user.guild_id]!.guild_scheduled_events[idx].user_count! -= 1
             }
         case let .guildAuditLogEntryCreate(log):
-            self.auditLogs[log.target_id ?? "", default: []].append(log)
+            self.auditLogs[log.guild_id ?? log.target_id ?? "", default: []].append(log)
         case let .integrationCreate(integration), let .integrationUpdate(integration):
             if let idx = self.integrations[integration.guild_id]?
                 .firstIndex(where: { $0.id == integration.id }) {

@@ -1,6 +1,6 @@
 
 /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
-public struct ApplicationCommand: Sendable, Codable, Validatable {
+public struct ApplicationCommand: Sendable, Codable, ValidatablePayload {
     
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {

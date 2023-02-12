@@ -361,7 +361,7 @@ public struct PartialChannel: Sendable, Codable {
 
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
-    public struct AllowedMentions: Sendable, Codable, Validatable {
+    public struct AllowedMentions: Sendable, Codable, ValidatablePayload {
         
         /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
         public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
@@ -390,7 +390,7 @@ extension DiscordChannel {
 }
 
 /// https://discord.com/developers/docs/resources/channel#embed-object
-public struct Embed: Sendable, Codable, Validatable {
+public struct Embed: Sendable, Codable, ValidatablePayload {
     
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
     public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {

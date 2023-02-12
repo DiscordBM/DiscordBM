@@ -4,6 +4,15 @@ public struct Guild: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
     public struct Member: Sendable, Codable {
+        
+        /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags
+        public enum Flag: Int, Sendable {
+            case didRejoin = 0
+            case completedOnboarding = 1
+            case bypassVerification = 2
+            case startedOnboarding = 3
+        }
+        
         public var user: DiscordUser?
         public var nick: String?
         public var avatar: String?
@@ -15,6 +24,7 @@ public struct Guild: Sendable, Codable {
         public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
+        public var flags: IntBitField<Flag>?
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
         
@@ -30,6 +40,7 @@ public struct Guild: Sendable, Codable {
             self.mute = guildMemberAdd.mute
             self.pending = guildMemberAdd.pending
             self.is_pending = guildMemberAdd.is_pending
+            self.flags = guildMemberAdd.flags
             self.permissions = guildMemberAdd.permissions
             self.communication_disabled_until = guildMemberAdd.communication_disabled_until
         }
@@ -209,6 +220,7 @@ extension Guild {
         public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
+        public var flags: IntBitField<Member.Flag>?
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }

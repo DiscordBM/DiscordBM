@@ -1,7 +1,7 @@
 @testable import DiscordModels
 import XCTest
 
-class ValidatableTests: XCTestCase, Validatable {
+class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
     
     func testValidateAssertIsNotEmpty() throws {
         try validateAssertIsNotEmpty(true, name: "a")
