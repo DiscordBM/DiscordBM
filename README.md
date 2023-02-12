@@ -395,3 +395,4 @@ These exceptions should not be a big deal depending on your code style, but migh
 
 ## Contribution & Support
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.   
+Passing the `linux-integration` tests is not required for PRs because of token/access problems.
