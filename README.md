@@ -296,6 +296,61 @@ print("Guild name is:", aGuild.name)
   
 </details>
 
+### React-To-Role
+<details>
+  <summary> Click to expand </summary>
+  
+`DiscordBM` can automatically assign a role to members when they react to a message with specific emojis:
+
+```swift
+let handler = try await ReactToRoleHandler(
+    gatewayManager: GatewayManager_YOU_MADE_IN_PREVIOUS_STEPS,
+    /// Your DiscordCache. This is not necessary (you can pass `nil`)
+    /// Only helpful if the cache has `guilds` and/or `guildMembers` intents enabled
+    cache: cache,
+    /// The role-creation payload
+    role: .init(
+        name: "cool-gang",
+        color: .green
+    ),
+    guildId: THE_GUILD_ID_OF_THE_MESSAGE_YOU_CREATED,
+    channelId: THE_CHANNEL_ID_OF_THE_MESSAGE_YOU_CREATED,
+    messageId: THE_MESSAGE_ID_OF_THE_MESSAGE_YOU_CREATED,
+    /// The list of reactions to get the role for
+    reactions: [.unicodeEmoji("🐔")]
+)
+```
+
+After this, anyone reacting with `🐔` to the message will be assigned the role.   
+There are a bunch more options, take a look at the other `ReactToRoleHandler` initializers for more info.
+
+#### Behavior
+The handler will:
+* Verify the message exists at all, and throws an error in the initializer if not.
+* React to the message as the bot-user with all the reactions you specified.
+* Re-create the role if it's removed or doesn't exist.
+* Stop working if you use `await handler.stop()`.
+* Re-start working again if you use `try await handler.start()`.
+
+#### Persistence 
+If you need to persist the handler somewhere:
+* You only need to persist handler's `configuration`, which is `Codable`.
+* You need to update the configuration you saved, whenever it's changed.   
+  To become notified of configuration changes, you should use the `onConfigurationChanged` parameter in initializers:
+
+```swift
+let handler = try await ReactToRoleHandler(
+    .
+    .
+    .
+    onConfigurationChanged: { configuration in 
+        await saveToDatabase(configuration: configuration)
+    }
+)
+```
+  
+</details>
+
 ## Testability
 <details>
   <summary> Click to expand </summary>
