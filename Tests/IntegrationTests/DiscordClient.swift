@@ -399,6 +399,39 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(message.channel_id, response.id)
     }
     
+    func testThreads() async throws {
+        /// Create
+        let text = "Testing! \(Date())"
+        let message = try await client.createMessage(
+            channelId: Constants.threadId,
+            payload: .init(content: text)
+        ).decode()
+        
+        XCTAssertEqual(message.content, text)
+        XCTAssertEqual(message.channel_id, Constants.threadId)
+        
+        /// Edit
+        let newText = "Edit Testing! \(Date())"
+        let edited = try await client.editMessage(
+            channelId: Constants.threadId,
+            messageId: message.id,
+            payload: .init(embeds: [
+                .init(description: newText)
+            ])
+        ).decode()
+        
+        XCTAssertEqual(edited.content, text)
+        XCTAssertEqual(edited.embeds.first?.description, newText)
+        XCTAssertEqual(edited.channel_id, Constants.threadId)
+        
+        /// Delete
+        try await client.deleteMessage(
+            channelId: Constants.threadId,
+            messageId: message.id,
+            reason: "Random reason " + UUID().uuidString
+        ).guardIsSuccessfulResponse()
+    }
+    
     func testWebhooks() async throws {
         let image1 = ByteBuffer(data: resource(name: "discordbm-logo.png"))
         let image2 = ByteBuffer(data: resource(name: "1kb.png"))

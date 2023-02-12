@@ -252,6 +252,7 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
     
+    /// The `channelId` could be a thread-id as well.
     /// https://discord.com/developers/docs/resources/channel#create-message
     @inlinable
     func createMessage(
@@ -262,6 +263,7 @@ public extension DiscordClient {
         return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
+    /// The `channelId` could be a thread-id as well.
     /// https://discord.com/developers/docs/resources/channel#edit-message
     @inlinable
     func editMessage(
@@ -273,6 +275,7 @@ public extension DiscordClient {
         return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
+    /// The `channelId` could be a thread-id as well.
     /// https://discord.com/developers/docs/resources/channel#delete-message
     @inlinable
     func deleteMessage(
