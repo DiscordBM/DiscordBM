@@ -15,6 +15,7 @@ public struct Guild: Sendable, Codable {
         public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
+        public var flags: IntBitField<DiscordUser.Flag>?
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
         
@@ -30,6 +31,7 @@ public struct Guild: Sendable, Codable {
             self.mute = guildMemberAdd.mute
             self.pending = guildMemberAdd.pending
             self.is_pending = guildMemberAdd.is_pending
+            self.flags = guildMemberAdd.flags
             self.permissions = guildMemberAdd.permissions
             self.communication_disabled_until = guildMemberAdd.communication_disabled_until
         }
