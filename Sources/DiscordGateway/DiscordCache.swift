@@ -6,24 +6,29 @@ import OrderedCollections
 @dynamicMemberLookup
 public actor DiscordCache {
     
-    public enum Intents: Sendable, ExpressibleByArrayLiteral {
+    public typealias Intents = AllOrSome<Gateway.Intent>
+    public typealias Guilds = AllOrSome<String>
+    public typealias Channels = AllOrSome<String>
+    
+    public enum AllOrSome<Some>: Sendable, ExpressibleByArrayLiteral
+    where Some: Hashable & Sendable {
         /// Will cache all events.
         case all
         /// Will cache the events related to the specified intents.
-        case specific(Set<Gateway.Intent>)
+        case some(Set<Some>)
         
-        public init(arrayLiteral elements: Gateway.Intent...) {
-            self = .specific(Set(elements))
+        public init(arrayLiteral elements: Some...) {
+            self = .some(Set(elements))
         }
         
-        public init<S>(_ elements: S) where S: Sequence, S.Element == Gateway.Intent {
-            self = .specific(.init(elements))
+        public init<S>(_ elements: S) where S: Sequence, S.Element == Some {
+            self = .some(.init(elements))
         }
         
-        func contains(_ intent: Gateway.Intent) -> Bool {
+        func contains(_ value: Some) -> Bool {
             switch self {
             case .all: return true
-            case let .specific(intents): return intents.contains(intent)
+            case let .some(values): return values.contains(value)
             }
         }
     }
@@ -31,21 +36,27 @@ public actor DiscordCache {
     public enum RequestMembers: Sendable {
         case disabled
         /// Only requests members.
-        case enabled
+        case enabled(Guilds)
         /// Requests all members as well as their presences.
-        case enabledWithPresences
+        case enabledWithPresences(Guilds)
         
-        var isEnabled: Bool {
+        public static var enabled: RequestMembers { .enabled(.all) }
+        
+        public static var enabledWithPresences: RequestMembers { .enabledWithPresences(.all) }
+        
+        func isEnabled(for guildId: String) -> Bool {
             switch self {
             case .disabled: return false
-            case .enabled, .enabledWithPresences: return true
+            case let .enabled(guilds), let .enabledWithPresences(guilds):
+                return guilds.contains(guildId)
             }
         }
         
-        var wantsPresences: Bool {
+        func wantsPresences(for guildId: String) -> Bool {
             switch self {
             case .disabled, .enabled: return false
-            case .enabledWithPresences: return true
+            case let .enabledWithPresences(guilds):
+                return guilds.contains(guildId)
             }
         }
     }
@@ -56,25 +67,37 @@ public actor DiscordCache {
         case `default`
         /// Caches messages, replaces edited messages with the new message,
         /// moves deleted messages to another property of the storage.
-        case saveDeleted
+        case saveDeleted(Guilds, Channels)
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, removes deleted messages from storage.
-        case saveEditHistory
+        case saveEditHistory(Guilds, Channels)
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, moves deleted messages to another property of
         /// the storage.
-        case saveEditHistoryAndDeleted
+        case saveEditHistoryAndDeleted(Guilds, Channels)
         
-        var shouldSaveDeleted: Bool {
+        public static var saveDeleted: MessageCachingPolicy { .saveDeleted(.all, .all) }
+        
+        public static var saveEditHistory: MessageCachingPolicy { .saveEditHistory(.all, .all) }
+        
+        public static var saveEditHistoryAndDeleted: MessageCachingPolicy {
+            .saveEditHistoryAndDeleted(.all, .all)
+        }
+        
+        func shouldSaveDeleted(guildId: String?, channelId: String) -> Bool {
             switch self {
-            case .saveDeleted, .saveEditHistoryAndDeleted: return true
+            case let .saveDeleted(guilds, channels),
+                let .saveEditHistoryAndDeleted(guilds, channels):
+                return guildId.map { guilds.contains($0) } ?? channels.contains(channelId)
             case .default, .saveEditHistory: return false
             }
         }
         
-        var shouldSaveHistory: Bool {
+        func shouldSaveHistory(guildId: String?, channelId: String) -> Bool {
             switch self {
-            case .saveEditHistory, .saveEditHistoryAndDeleted: return true
+            case let .saveEditHistory(guilds, channels),
+                let .saveEditHistoryAndDeleted(guilds, channels):
+                return guildId.map { guilds.contains($0) } ?? channels.contains(channelId)
             case .default, .saveDeleted: return false
             }
         }
@@ -85,7 +108,7 @@ public actor DiscordCache {
     /// Note: The limit policy is applied with a small tolerance, so you can't count on
     /// the limits being applied right-away. Realistically this should not matter anyway,
     /// as the point of this is to just preserve memory.
-    public enum ItemsLimitPolicy: @unchecked Sendable {
+    public enum ItemsLimit: @unchecked Sendable {
         
         /// `guilds`, `channels` and `botUser` are intentionally excluded.
         /// For `guilds` and `channels`, Discord only sends a limited amount that are related
@@ -106,7 +129,7 @@ public actor DiscordCache {
         case constant(Int)
         case custom([Path: Int])
         
-        public static let `default` = ItemsLimitPolicy.constant(100_000)
+        public static let `default` = ItemsLimit.constant(100_000)
         
         func limit(for path: Path) -> Int? {
             switch self {
@@ -127,7 +150,7 @@ public actor DiscordCache {
                 return max(10, Int(powed))
             case let .custom(custom):
                 guard let minimum = custom.map(\.value).min() else {
-                    fatalError("It's meaningless for 'ItemsLimitPolicy.custom' to be empty. Please use `ItemsLimitPolicy.disabled` instead")
+                    fatalError("It's meaningless for 'ItemsLimit.custom' to be empty. Please use `ItemsLimit.disabled` instead")
                 }
                 let powed = pow(1/2, Double(minimum))
                 return max(10, Int(powed))
@@ -149,7 +172,7 @@ public actor DiscordCache {
             }
         }
         
-        /// Using `OrderedDictionary` for those which can be affected by the `ItemsLimitPolicy`
+        /// Using `OrderedDictionary` for those which can be affected by the `ItemsLimit`
         /// so we can remove the oldest items.
         
         /// `[GuildID: Guild]`
@@ -229,7 +252,7 @@ public actor DiscordCache {
     /// How to cache messages.
     let messageCachingPolicy: MessageCachingPolicy
     /// Keeps the storage from using too much memory. Removes the oldest items.
-    let itemsLimitPolicy: ItemsLimitPolicy
+    let itemsLimit: ItemsLimit
     /// How often to check and enforce the limit above.
     private let checkForLimitEvery: Int
     /// The storage of cached stuff.
@@ -253,14 +276,14 @@ public actor DiscordCache {
     ///     parameter specifies. Must have `guildMembers` and `guildPresences` intents enabled
     ///     depending on what you want.
     ///   - messageCachingPolicy: How to cache messages.
-    ///   - itemsLimitPolicy: Keeps the storage from using too much memory. Removes the oldest items.
+    ///   - itemsLimit: Keeps the storage from using too much memory. Removes the oldest items.
     ///   - storage: The storage of cached stuff. You usually don't need to provide this parameter.
     public init(
         gatewayManager: any GatewayManager,
         intents: Intents,
         requestAllMembers: RequestMembers,
         messageCachingPolicy: MessageCachingPolicy = .default,
-        itemsLimitPolicy: ItemsLimitPolicy = .default,
+        itemsLimit: ItemsLimit = .default,
         storage: Storage = Storage()
     ) async {
         self.gatewayManager = gatewayManager
@@ -270,8 +293,8 @@ public actor DiscordCache {
         )
         self.requestMembers = requestAllMembers
         self.messageCachingPolicy = messageCachingPolicy
-        self.itemsLimitPolicy = itemsLimitPolicy
-        self.checkForLimitEvery = itemsLimitPolicy.calculateCheckForLimitEvery()
+        self.itemsLimit = itemsLimit
+        self.checkForLimitEvery = itemsLimit.calculateCheckForLimitEvery()
         self.storage = storage
         
         await gatewayManager.addEventHandler(handleEvent)
@@ -287,13 +310,13 @@ public actor DiscordCache {
             self.botUser = ready.user
         case let .guildCreate(guildCreate):
             self.guilds[guildCreate.id] = guildCreate
-            if requestMembers.isEnabled {
+            if requestMembers.isEnabled(for: guildCreate.id) {
                 Task {
                     await gatewayManager.requestGuildMembersChunk(payload: .init(
                         guild_id: guildCreate.id,
                         query: "",
                         limit: 0,
-                        presences: requestMembers.wantsPresences,
+                        presences: requestMembers.wantsPresences(for: guildCreate.id),
                         user_ids: nil,
                         nonce: nil
                     ))
@@ -543,7 +566,10 @@ public actor DiscordCache {
             if let idx = self.messages[message.channel_id]?
                 .firstIndex(where: { $0.id == message.id }) {
                 self.messages[message.channel_id]![idx].update(with: message)
-                if messageCachingPolicy.shouldSaveHistory {
+                if messageCachingPolicy.shouldSaveHistory(
+                    guildId: message.guild_id,
+                    channelId: message.channel_id
+                ) {
                     self.editedMessages[message.channel_id, default: [:]][message.id, default: []].append(
                         self.messages[message.channel_id]![idx]
                     )
@@ -553,8 +579,15 @@ public actor DiscordCache {
             if let idx = self.messages[message.channel_id]?
                 .firstIndex(where: { $0.id == message.id }) {
                 let deleted = self.messages[message.channel_id]?.remove(at: idx)
-                if messageCachingPolicy.shouldSaveDeleted, let deleted = deleted {
-                    if messageCachingPolicy.shouldSaveHistory {
+                if messageCachingPolicy.shouldSaveDeleted(
+                    guildId: message.guild_id,
+                    channelId: message.channel_id
+                ),
+                   let deleted = deleted {
+                    if messageCachingPolicy.shouldSaveHistory(
+                        guildId: message.guild_id,
+                        channelId: message.channel_id
+                    ) {
                         let history = self.editedMessages[message.channel_id]?[message.id] ?? []
                         self.deletedMessages[message.channel_id, default: [:]][message.id, default: []].append(
                             contentsOf: history
@@ -570,8 +603,14 @@ public actor DiscordCache {
             self.messages[bulkDelete.channel_id]?.removeAll { message in
                 let shouldBeRemoved = bulkDelete.ids.contains(message.id)
                 if shouldBeRemoved {
-                    if messageCachingPolicy.shouldSaveDeleted {
-                        if messageCachingPolicy.shouldSaveHistory {
+                    if messageCachingPolicy.shouldSaveDeleted(
+                        guildId: message.guild_id,
+                        channelId: message.channel_id
+                    ) {
+                        if messageCachingPolicy.shouldSaveHistory(
+                            guildId: message.guild_id,
+                            channelId: message.channel_id
+                        ) {
                             let history = self.editedMessages[message.channel_id]?[message.id] ?? []
                             self.deletedMessages[message.channel_id, default: [:]][message.id, default: []].append(
                                 contentsOf: history
@@ -679,7 +718,7 @@ public actor DiscordCache {
         switch intents {
         case .all:
             return true
-        case let .specific(intents):
+        case let .some(intents):
             let correspondingIntents = data.correspondingIntents
             if correspondingIntents.isEmpty {
                 return true
@@ -694,10 +733,10 @@ public actor DiscordCache {
     private var itemsLimitCounter = 0
     
     private func checkItemsLimit() {
-        if case .disabled = itemsLimitPolicy { return }
+        if case .disabled = itemsLimit { return }
         itemsLimitCounter &+= 1
         if itemsLimitCounter % checkForLimitEvery == 0 {
-            switch itemsLimitPolicy {
+            switch itemsLimit {
             case .disabled: return
             case let .constant(constant):
                 if self.auditLogs.count > constant {
@@ -793,8 +832,8 @@ public actor DiscordCache {
         if let managerIntents = (manager as? BotGatewayManager)?.identifyPayload.intents.values {
             switch intents {
             case .all:
-                return .specific(managerIntents)
-            case let .specific(intents):
+                return .some(managerIntents)
+            case let .some(intents):
                 let extraIntents = intents.filter {
                     !managerIntents.contains($0)
                 }
@@ -805,7 +844,7 @@ public actor DiscordCache {
                         ]
                     )
                 }
-                return .specific(intents.intersection(managerIntents))
+                return .some(intents.intersection(managerIntents))
             }
         } else {
             return intents

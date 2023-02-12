@@ -865,7 +865,7 @@ public extension DiscordClient {
     /// Untested function.
     /// If it didn't work, try to append `.png` to the end of `banner`.
     /// If you are using this endpoint successfully, please open an issue and let me know what
-    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// info you pass to the function, so I can fix the function and add it to the tests.
     /// (CDN data are _mostly_ public)
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
@@ -912,7 +912,7 @@ public extension DiscordClient {
     /// Untested function.
     /// If it didn't work, try to append `.png` to the end of `icon`.
     /// If you are using this endpoint successfully, please open an issue and let me know what
-    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// info you pass to the function, so I can fix the function and add it to the tests.
     /// (CDN data are _mostly_ public)
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
@@ -925,7 +925,7 @@ public extension DiscordClient {
     /// Untested function.
     /// If it didn't work, try to append `.png` to the end of `cover`.
     /// If you are using this endpoint successfully, please open an issue and let me know what
-    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// info you pass to the function, so I can fix the function and add it to the tests.
     /// (CDN data are _mostly_ public)
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
@@ -945,7 +945,7 @@ public extension DiscordClient {
     /// Untested function.
     /// If it didn't work, try to append `.png` to the end of `icon`.
     /// If you are using this endpoint successfully, please open an issue and let me know what
-    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// info you pass to the function, so I can fix the function and add it to the tests.
     /// (CDN data are _mostly_ public)
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
@@ -966,7 +966,7 @@ public extension DiscordClient {
     /// Untested function.
     /// If it didn't work, try to append `.png` to the end of `assetId`.
     /// If you are using this endpoint successfully, please open an issue and let me know what
-    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// info you pass to the function, so I can fix the function and add it to the tests.
     /// (CDN data are _mostly_ public)
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
@@ -979,7 +979,7 @@ public extension DiscordClient {
     /// Untested function.
     /// If it didn't work, try to append `.png` to the end of `icon`.
     /// If you are using this endpoint successfully, please open an issue and let me know what
-    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// info you pass to the function, so I can fix the function and add it to the tests.
     /// (CDN data are _mostly_ public)
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
@@ -1006,7 +1006,7 @@ public extension DiscordClient {
     /// Untested function.
     /// If it didn't work, try to append `.png` to the end of `cover`.
     /// If you are using this endpoint successfully, please open an issue and let me know what
-    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// info you pass to the function, so I can fix the function and add it to the tests.
     /// (CDN data are _mostly_ public)
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
@@ -1022,7 +1022,7 @@ public extension DiscordClient {
     /// Untested function.
     /// If it didn't work, try to append `.png` to the end of `banner`.
     /// If you are using this endpoint successfully, please open an issue and let me know what
-    /// info you enter to the function, so I can fix the function and add it to the tests.
+    /// info you pass to the function, so I can fix the function and add it to the tests.
     /// (CDN data are _mostly_ public)
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints

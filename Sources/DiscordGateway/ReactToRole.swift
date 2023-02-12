@@ -71,6 +71,20 @@ public actor ReactToRoleHandler {
         let client: any DiscordClient
         let logger: Logger
         let guildId: String
+        let guildMembersEnabled: Bool
+        
+        init(
+            cache: DiscordCache?,
+            client: any DiscordClient,
+            logger: Logger,
+            guildId: String
+        ) {
+            self.cache = cache
+            self.client = client
+            self.logger = logger
+            self.guildId = guildId
+            self.guildMembersEnabled = cache?.requestMembers.isEnabled(for: guildId) ?? false
+        }
         
         func cacheWithIntents(_ intents: Gateway.Intent...) -> DiscordCache? {
             if let cache = cache,
@@ -149,7 +163,8 @@ public actor ReactToRoleHandler {
         
         /// Defaults to `true` if it can't know.
         func memberHasRole(roleId: String, userId: String) async -> Bool {
-            if let cache = cacheWithIntents(.guilds, .guildMembers) {
+            if self.guildMembersEnabled,
+               let cache = cacheWithIntents(.guilds, .guildMembers) {
                 let guild = await cache.guilds[guildId]
                 return guild?.members
                     .first(where: { $0.user?.id == userId })?
