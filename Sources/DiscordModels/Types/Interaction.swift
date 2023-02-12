@@ -13,80 +13,69 @@ public struct Interaction: Sendable, Codable {
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data
     public enum Data: Sendable {
-        case messageComponent(MessageComponentData)
-        case applicationCommand(ApplicationCommandData)
-        case modalSubmit(ModalSubmitData)
-    }
-
-    /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-modal-submit-data-structure
-    public struct ModalSubmitData: Sendable, Codable {
-        public var customID: String
-        public var components: [ActionRow.Component]
-
-        enum CodingKeys: String, CodingKey {
-            case customID = "custom_id"
-            case components = "components"
-        }
-    }
-
-    /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-message-component-data-structure
-    public struct MessageComponentData: Sendable, Codable {
-        public var customID: String
-        public var componentType: ActionRow.Kind
-        public var values: [StringOrInt]?
-
-        enum CodingKeys: String, CodingKey {
-            case customID = "custom_id"
-            case componentType = "component_type"
-            case values = "values"
-        }
-    }
-
-    /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
-    public struct ApplicationCommandData: Sendable, Codable {
+        case messageComponent(MessageComponent)
+        case applicationCommand(ApplicationCommand)
+        case modalSubmit(ModalSubmit)
         
-        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
-        public struct ResolvedData: Sendable, Codable {
-            public var users: [String: DiscordUser]?
-            public var members: [String: Guild.PartialMember]?
-            public var roles: [String: Role]?
-            public var channels: [String: PartialChannel]?
-            public var messages: [String: DiscordChannel.PartialMessage]?
-            public var attachments: [String: DiscordChannel.Message.Attachment]?
-        }
-        
-        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
-        public struct Option: Sendable, Codable {
+        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
+        public struct ApplicationCommand: Sendable, Codable {
             
-            /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
-            public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-                case subCommand = 1
-                case subCommandGroup = 2
-                case string = 3
-                case integer = 4
-                case boolean = 5
-                case user = 6
-                case channel = 7
-                case role = 8
-                case mentionable = 9
-                case number = 10
-                case attachment = 11
+            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
+            public struct ResolvedData: Sendable, Codable {
+                public var users: [String: DiscordUser]?
+                public var members: [String: Guild.PartialMember]?
+                public var roles: [String: Role]?
+                public var channels: [String: PartialChannel]?
+                public var messages: [String: DiscordChannel.PartialMessage]?
+                public var attachments: [String: DiscordChannel.Message.Attachment]?
             }
             
+            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
+            public struct Option: Sendable, Codable {
+                
+                /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+                public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+                    case subCommand = 1
+                    case subCommandGroup = 2
+                    case string = 3
+                    case integer = 4
+                    case boolean = 5
+                    case user = 6
+                    case channel = 7
+                    case role = 8
+                    case mentionable = 9
+                    case number = 10
+                    case attachment = 11
+                }
+                
+                public var name: String
+                public var type: Kind
+                public var value: StringIntDoubleBool?
+                public var options: [Option]?
+                public var focused: Bool?
+            }
+            
+            public var id: String
             public var name: String
             public var type: Kind
-            public var value: StringIntDoubleBool?
+            public var resolved: ResolvedData?
             public var options: [Option]?
-            public var focused: Bool?
+            public var guild_id: String?
+            public var target_id: String?
         }
         
-        public var id: String
-        public var name: String
-        public var type: Kind
-        public var resolved: ResolvedData?
-        public var options: [Option]?
-        public var guild_id: String?
-        public var target_id: String?
+        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-message-component-data-structure
+        public struct MessageComponent: Sendable, Codable {
+            public var custom_id: String
+            public var component_type: ActionRow.Kind
+            public var values: [String]?
+        }
+        
+        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-modal-submit-data-structure
+        public struct ModalSubmit: Sendable, Codable {
+            public var custom_id: String
+            public var components: [ActionRow.Component]
+        }
     }
     
     public var id: String
@@ -104,7 +93,7 @@ public struct Interaction: Sendable, Codable {
     public var guild_locale: DiscordLocale?
     public var app_permissions: StringBitField<Permission>?
     public var entitlement_sku_ids: [String]?
-
+    
     enum CodingKeys: CodingKey {
         case id
         case application_id
@@ -122,63 +111,74 @@ public struct Interaction: Sendable, Codable {
         case app_permissions
         case entitlement_sku_ids
     }
-
+    
     public init(from decoder: Decoder) throws {
-        let container: KeyedDecodingContainer<Interaction.CodingKeys> = try decoder.container(keyedBy: Interaction.CodingKeys.self)
-
-        self.id = try container.decode(String.self, forKey: Interaction.CodingKeys.id)
-        self.application_id = try container.decode(String.self, forKey: Interaction.CodingKeys.application_id)
-        self.type = try container.decode(Interaction.Kind.self, forKey: Interaction.CodingKeys.type)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try container.decode(String.self, forKey: .id)
+        self.application_id = try container.decode(String.self, forKey: .application_id)
+        self.type = try container.decode(Interaction.Kind.self, forKey: .type)
         switch self.type {
         case .applicationCommand, .applicationCommandAutocomplete: 
-            self.data = .applicationCommand(try container.decode(Interaction.ApplicationCommandData.self, forKey: Interaction.CodingKeys.data))
+            self.data = .applicationCommand(
+                try container.decode(Data.ApplicationCommand.self, forKey: .data)
+            )
         case .messageComponent: 
-            self.data = .messageComponent(try container.decode(Interaction.MessageComponentData.self, forKey: Interaction.CodingKeys.data))
+            self.data = .messageComponent(
+                try container.decode(Data.MessageComponent.self, forKey: .data)
+            )
         case .modalSubmit:
-            self.data = .modalSubmit(try container.decode(Interaction.ModalSubmitData.self, forKey: Interaction.CodingKeys.data))
+            self.data = .modalSubmit(
+                try container.decode(Data.ModalSubmit.self, forKey: .data)
+            )
         case .ping:
             self.data = nil
         }
-        self.guild_id = try container.decodeIfPresent(String.self, forKey: Interaction.CodingKeys.guild_id)
-        self.channel_id = try container.decodeIfPresent(String.self, forKey: Interaction.CodingKeys.channel_id)
-        self.member = try container.decodeIfPresent(Guild.Member.self, forKey: Interaction.CodingKeys.member)
-        self.user = try container.decodeIfPresent(DiscordUser.self, forKey: Interaction.CodingKeys.user)
-        self.token = try container.decode(String.self, forKey: Interaction.CodingKeys.token)
-        self.version = try container.decode(Int.self, forKey: Interaction.CodingKeys.version)
-        self.message = try container.decodeIfPresent(DiscordChannel.Message.self, forKey: Interaction.CodingKeys.message)
-        self.locale = try container.decodeIfPresent(DiscordLocale.self, forKey: Interaction.CodingKeys.locale)
-        self.guild_locale = try container.decodeIfPresent(DiscordLocale.self, forKey: Interaction.CodingKeys.guild_locale)
-        self.app_permissions = try container.decodeIfPresent(StringBitField<Permission>.self, forKey: Interaction.CodingKeys.app_permissions)
-        self.entitlement_sku_ids = try container.decodeIfPresent([String].self, forKey: Interaction.CodingKeys.entitlement_sku_ids)
+        self.guild_id = try container.decodeIfPresent(String.self, forKey: .guild_id)
+        self.channel_id = try container.decodeIfPresent(String.self, forKey: .channel_id)
+        self.member = try container.decodeIfPresent(Guild.Member.self, forKey: .member)
+        self.user = try container.decodeIfPresent(DiscordUser.self, forKey: .user)
+        self.token = try container.decode(String.self, forKey: .token)
+        self.version = try container.decode(Int.self, forKey: .version)
+        self.message = try container.decodeIfPresent(DiscordChannel.Message.self, forKey: .message)
+        self.locale = try container.decodeIfPresent(DiscordLocale.self, forKey: .locale)
+        self.guild_locale = try container.decodeIfPresent(DiscordLocale.self, forKey: .guild_locale)
+        self.app_permissions = try container.decodeIfPresent(
+            StringBitField<Permission>.self,
+            forKey: .app_permissions
+        )
+        self.entitlement_sku_ids = try container.decodeIfPresent(
+            [String].self,
+            forKey: .entitlement_sku_ids
+        )
     }
-
+    
     public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: Interaction.CodingKeys.self)
-
-        try container.encode(self.id, forKey: Interaction.CodingKeys.id)
-        try container.encode(self.application_id, forKey: Interaction.CodingKeys.application_id)
-        try container.encode(self.type, forKey: Interaction.CodingKeys.type)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(self.id, forKey: .id)
+        try container.encode(self.application_id, forKey: .application_id)
+        try container.encode(self.type, forKey: .type)
         switch self.data {
-        case .applicationCommand(let cmd):
-            try container.encode(cmd, forKey: Interaction.CodingKeys.data)
-        case .messageComponent(let msgc):
-            try container.encode(msgc, forKey: Interaction.CodingKeys.data)
-        case .modalSubmit(let modals):
-            try container.encode(modals, forKey: Interaction.CodingKeys.data)
-        default:
-            ()
+        case .applicationCommand(let command):
+            try container.encode(command, forKey: .data)
+        case .messageComponent(let component):
+            try container.encode(component, forKey: .data)
+        case .modalSubmit(let modal):
+            try container.encode(modal, forKey: .data)
+        case .none: break
         }
-        try container.encodeIfPresent(self.guild_id, forKey: Interaction.CodingKeys.guild_id)
-        try container.encodeIfPresent(self.channel_id, forKey: Interaction.CodingKeys.channel_id)
-        try container.encodeIfPresent(self.member, forKey: Interaction.CodingKeys.member)
-        try container.encodeIfPresent(self.user, forKey: Interaction.CodingKeys.user)
-        try container.encode(self.token, forKey: Interaction.CodingKeys.token)
-        try container.encode(self.version, forKey: Interaction.CodingKeys.version)
-        try container.encodeIfPresent(self.message, forKey: Interaction.CodingKeys.message)
-        try container.encodeIfPresent(self.locale, forKey: Interaction.CodingKeys.locale)
-        try container.encodeIfPresent(self.guild_locale, forKey: Interaction.CodingKeys.guild_locale)
-        try container.encodeIfPresent(self.app_permissions, forKey: Interaction.CodingKeys.app_permissions)
-        try container.encodeIfPresent(self.entitlement_sku_ids, forKey: Interaction.CodingKeys.entitlement_sku_ids)
+        try container.encodeIfPresent(self.guild_id, forKey: .guild_id)
+        try container.encodeIfPresent(self.channel_id, forKey: .channel_id)
+        try container.encodeIfPresent(self.member, forKey: .member)
+        try container.encodeIfPresent(self.user, forKey: .user)
+        try container.encode(self.token, forKey: .token)
+        try container.encode(self.version, forKey: .version)
+        try container.encodeIfPresent(self.message, forKey: .message)
+        try container.encodeIfPresent(self.locale, forKey: .locale)
+        try container.encodeIfPresent(self.guild_locale, forKey: .guild_locale)
+        try container.encodeIfPresent(self.app_permissions, forKey: .app_permissions)
+        try container.encodeIfPresent(self.entitlement_sku_ids, forKey: .entitlement_sku_ids)
     }
 }
 
