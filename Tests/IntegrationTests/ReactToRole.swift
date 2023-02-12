@@ -142,6 +142,9 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNil(role, "\(member.roles) contained '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
+        /// Wait for the property below to be updated if needed
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        
         /// Lifecycle still not ended
         XCTAssertEqual(lifecycleEnded, false)
         
@@ -280,6 +283,9 @@ class ReactToRoleTests: XCTestCase {
             let role = roles.first(where: { $0.name == roleName })
             XCTAssertNil(role, "\(member.roles) contained '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
+        
+        /// Wait for the property below to be updated if needed
+        try await Task.sleep(nanoseconds: 1_000_000_000)
         
         /// Lifecycle still not ended
         XCTAssertEqual(lifecycleEnded, false)
@@ -766,6 +772,9 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNil(role, "\(member.roles) contained '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
+        /// Wait for the property below to be updated if needed
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        
         /// Lifecycle still not ended
         XCTAssertEqual(lifecycleEnded, false)
         
@@ -901,6 +910,9 @@ class ReactToRoleTests: XCTestCase {
             let role = roles.first(where: { $0.name == roleName })
             XCTAssertNil(role, "\(member.roles) contained '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
+        
+        /// Wait for the property below to be updated if needed
+        try await Task.sleep(nanoseconds: 1_000_000_000)
         
         /// Lifecycle still not ended
         XCTAssertEqual(lifecycleEnded, false)
@@ -1136,6 +1148,9 @@ class ReactToRoleTests: XCTestCase {
             let role = roles.first(where: { $0.name == roleName })
             XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
+        
+        /// Wait for the property below to be updated if needed
+        try await Task.sleep(nanoseconds: 1_000_000_000)
         
         /// Lifecycle still not ended
         XCTAssertEqual(lifecycleEnded, false)
