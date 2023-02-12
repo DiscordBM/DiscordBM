@@ -47,6 +47,7 @@ jobs:
             -Xlinker $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.6/macosx
 
   linux-integration:
+    if: github.repository == 'MahdiBM/DiscordBM'
     strategy:
       fail-fast: false
       matrix:
