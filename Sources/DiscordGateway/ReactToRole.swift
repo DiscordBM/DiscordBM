@@ -199,13 +199,15 @@ public actor ReactToRoleHandler {
     private(set) public var configuration: Configuration {
         didSet {
             if oldValue.hasChanges(comparedTo: self.configuration) {
-                self.onConfigurationChanged?(self.configuration)
+                Task {
+                    await self.onConfigurationChanged?(self.configuration)
+                }
             }
         }
     }
     
-    let onConfigurationChanged: ((Configuration) -> Void)?
-    let onLifecycleEnd: ((Configuration) -> Void)?
+    let onConfigurationChanged: ((Configuration) async -> Void)?
+    let onLifecycleEnd: ((Configuration) async -> Void)?
     
     /// - Parameters:
     ///   - gatewayManager: The `GatewayManager`/`bot` to listen for events from.
@@ -218,8 +220,8 @@ public actor ReactToRoleHandler {
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
         configuration: Configuration,
-        onConfigurationChanged: ((Configuration) -> Void)? = nil,
-        onLifecycleEnd: ((Configuration) -> Void)? = nil
+        onConfigurationChanged: ((Configuration) async -> Void)? = nil,
+        onLifecycleEnd: ((Configuration) async -> Void)? = nil
     ) async throws {
         self.gatewayManager = gatewayManager
         self.logger = DiscordGlobalConfiguration.makeLogger("ReactToRole")
@@ -268,8 +270,8 @@ public actor ReactToRoleHandler {
         messageId: String,
         grantOnStart: Bool = false,
         reactions: [Reaction],
-        onConfigurationChanged: ((Configuration) -> Void)? = nil,
-        onLifecycleEnd: ((Configuration) -> Void)? = nil
+        onConfigurationChanged: ((Configuration) async -> Void)? = nil,
+        onLifecycleEnd: ((Configuration) async -> Void)? = nil
     ) async throws {
         self.gatewayManager = gatewayManager
         let id = UUID()
@@ -322,8 +324,8 @@ public actor ReactToRoleHandler {
         messageId: String,
         grantOnStart: Bool = false,
         reactions: [Reaction],
-        onConfigurationChanged: ((Configuration) -> Void)? = nil,
-        onLifecycleEnd: ((Configuration) -> Void)? = nil
+        onConfigurationChanged: ((Configuration) async -> Void)? = nil,
+        onLifecycleEnd: ((Configuration) async -> Void)? = nil
     ) async throws {
         self.gatewayManager = gatewayManager
         let id = UUID()
@@ -393,7 +395,9 @@ public actor ReactToRoleHandler {
     func endLifecycle() {
         self.state = .stopped
         self.currentReactions.removeAll()
-        self.onLifecycleEnd?(self.configuration)
+        Task {
+            await self.onLifecycleEnd?(self.configuration)
+        }
     }
     
     func onReactionAdd(_ reaction: Gateway.MessageReactionAdd) {

@@ -57,12 +57,7 @@ class ReactToRoleTests: XCTestCase {
             cache: cache,
             role: .init(
                 name: roleName,
-                permissions: nil,
-                color: .green,
-                hoist: nil,
-                icon: nil,
-                unicode_emoji: nil,
-                mentionable: nil
+                color: .green
             ),
             guildId: Constants.guildId,
             channelId: Constants.reactionChannelId,
