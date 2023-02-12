@@ -825,7 +825,7 @@ public struct Gateway: Sendable, Codable {
         public var mute: Bool?
         public var pending: Bool?
         public var is_pending: Bool?
-        public var flags: IntBitField<DiscordUser.Flag>?
+        public var flags: IntBitField<Guild.Member.Flag>?
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
     }
