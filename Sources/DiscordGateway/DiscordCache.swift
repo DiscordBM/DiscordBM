@@ -6,26 +6,44 @@ import OrderedCollections
 @dynamicMemberLookup
 public actor DiscordCache {
     
-    public typealias Intents = AllOrSome<Gateway.Intent>
-    public typealias Guilds = AllOrSome<String>
-    public typealias Channels = AllOrSome<String>
+    public typealias Guilds = StringsChoice
+    public typealias Channels = StringsChoice
     
-    public enum AllOrSome<Some>: Sendable, ExpressibleByArrayLiteral
-    where Some: Hashable & Sendable {
-        /// Will cache all events.
+    public enum StringsChoice: Sendable, ExpressibleByArrayLiteral {
         case all
-        /// Will cache the events related to the specified intents.
-        case some(Set<Some>)
+        case none
+        case some(Set<String>)
         
-        public init(arrayLiteral elements: Some...) {
+        public init(arrayLiteral elements: String...) {
             self = .some(Set(elements))
         }
         
-        public init<S>(_ elements: S) where S: Sequence, S.Element == Some {
+        public init<S>(_ elements: S) where S: Sequence, S.Element == String {
             self = .some(.init(elements))
         }
         
-        func contains(_ value: Some) -> Bool {
+        func contains(_ value: String) -> Bool {
+            switch self {
+            case .all: return true
+            case .none: return false
+            case let .some(values): return values.contains(value)
+            }
+        }
+    }
+    
+    public enum Intents: Sendable, ExpressibleByArrayLiteral {
+        case all
+        case some(Set<Gateway.Intent>)
+        
+        public init(arrayLiteral elements: Gateway.Intent...) {
+            self = .some(Set(elements))
+        }
+        
+        public init<S>(_ elements: S) where S: Sequence, S.Element == Gateway.Intent {
+            self = .some(.init(elements))
+        }
+        
+        func contains(_ value: Gateway.Intent) -> Bool {
             switch self {
             case .all: return true
             case let .some(values): return values.contains(value)
@@ -36,13 +54,13 @@ public actor DiscordCache {
     public enum RequestMembers: Sendable {
         case disabled
         /// Only requests members.
-        case enabled(Guilds)
+        case enabled(Guilds = .all)
         /// Requests all members as well as their presences.
-        case enabledWithPresences(Guilds)
+        case enabledWithPresences(Guilds = .all)
         
-        public static var enabled: RequestMembers { .enabled(.all) }
+        public static var enabled: RequestMembers { .enabled() }
         
-        public static var enabledWithPresences: RequestMembers { .enabledWithPresences(.all) }
+        public static var enabledWithPresences: RequestMembers { .enabledWithPresences() }
         
         func isEnabled(for guildId: String) -> Bool {
             switch self {
@@ -62,26 +80,29 @@ public actor DiscordCache {
     }
     
     public enum MessageCachingPolicy: Sendable {
+        
+        /// `Channels` is for channels that don't belong to a guild.
+        
         /// Caches messages, replaces edited messages with the new message,
         /// removes deleted messages from storage.
         case `default`
         /// Caches messages, replaces edited messages with the new message,
         /// moves deleted messages to another property of the storage.
-        case saveDeleted(Guilds, Channels)
+        case saveDeleted(Guilds = .all, Channels = .all)
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, removes deleted messages from storage.
-        case saveEditHistory(Guilds, Channels)
+        case saveEditHistory(Guilds = .all, Channels = .all)
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, moves deleted messages to another property of
         /// the storage.
-        case saveEditHistoryAndDeleted(Guilds, Channels)
+        case saveEditHistoryAndDeleted(Guilds = .all, Channels = .all)
         
-        public static var saveDeleted: MessageCachingPolicy { .saveDeleted(.all, .all) }
+        public static var saveDeleted: MessageCachingPolicy { .saveDeleted() }
         
-        public static var saveEditHistory: MessageCachingPolicy { .saveEditHistory(.all, .all) }
+        public static var saveEditHistory: MessageCachingPolicy { .saveEditHistory() }
         
         public static var saveEditHistoryAndDeleted: MessageCachingPolicy {
-            .saveEditHistoryAndDeleted(.all, .all)
+            .saveEditHistoryAndDeleted()
         }
         
         func shouldSaveDeleted(guildId: String?, channelId: String) -> Bool {
