@@ -3,6 +3,17 @@ import NIOHTTP1
 import NIOCore
 import Foundation
 
+fileprivate struct CreateThreadPayload: Validatable, Encodable {
+    func validate() throws {
+    }
+
+    public let name: String
+    public let auto_archive_duration: ThreadArchiveDuration?
+    public let type: ThreadType?
+    public let invitable: Bool?
+    public let rate_limit_per_user: Int?
+}
+
 public protocol DiscordClient: Sendable {
     var appId: String? { get }
     
@@ -803,8 +814,72 @@ public extension DiscordClient {
             payload: payload
         )
     }
-    
-    
+
+    /// https://discord.com/developers/docs/resources/channel#start-thread-without-message
+    func joinThread(
+        id: String
+    ) async throws -> DiscordHTTPResponse {
+        return try await self.send(request: .init(to: .joinThread(threadID: id)))
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#add-thread-member
+    func add(
+        member: String,
+        toThread thread: String
+    ) async throws -> DiscordHTTPResponse {
+        return try await self.send(request: .init(to: .addThreadMember(threadID: thread, userID: member)))
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#remove-thread-member
+    func remove(
+        member: String,
+        fromThread thread: String
+    ) async throws -> DiscordHTTPResponse {
+        return try await self.send(request: .init(to: .removeThreadMember(threadID: thread, userID: member)))
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#leave-thread
+    func leaveThread(
+        id: String
+    ) async throws -> DiscordHTTPResponse {
+        return try await self.send(request: .init(to: .leaveThread(threadID: id)))
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#start-thread-without-message
+    func createThread(
+        in channel: String,
+        for message: String,
+        _ name: String,
+        archiveAfter duration: ThreadArchiveDuration?,
+        rateLimitPerUser limit: Int?
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = Endpoint.startThreadWithExistingMessage(channelID: channel, messageID: message)
+        return try await self.send(
+            request: .init(
+                to: endpoint
+            ),
+            payload: CreateThreadPayload(name: name, auto_archive_duration: duration, type: nil, invitable: nil, rate_limit_per_user: limit)
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#start-thread-without-message
+    func createThread(
+        in channel: String,
+        _ name: String,
+        type: ThreadType?,
+        invitable: Bool?,
+        archiveAfter duration: ThreadArchiveDuration?,
+        rateLimitPerUser limit: Int?
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = Endpoint.startThreadWithoutMessage(channelID: channel)
+        return try await self.send(
+            request: .init(
+                to: endpoint
+            ),
+            payload: CreateThreadPayload(name: name, auto_archive_duration: duration, type: type, invitable: invitable, rate_limit_per_user: limit)
+        )
+    }
+
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook-message
