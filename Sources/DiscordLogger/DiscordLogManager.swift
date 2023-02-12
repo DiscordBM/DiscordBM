@@ -63,7 +63,6 @@ public actor DiscordLogManager {
         
         let frequency: TimeAmount
         let aliveNotice: AliveNotice?
-        let fallbackLogger: Logger
         let mentions: [Logger.Level: [String]]
         let colors: [Logger.Level: DiscordColor]
         let excludeMetadata: Set<Logger.Level>
@@ -75,7 +74,6 @@ public actor DiscordLogManager {
         /// - Parameters:
         ///   - frequency: The frequency of the log-sendings. e.g. if its set to 30s, logs will only be sent once-in-30s. Should not be lower than 10s, because of Discord rate-limits.
         ///   - aliveNotice: Configuration for sending "I am alive" messages every once in a while. Note that alive notices are delayed until it's been `interval`-time past last message.
-        ///   - fallbackLogger: The logger to use when `DiscordLogger` errors. You should use a log handler that logs to a main place like stdout.
         ///   e.g. `Logger(label: "Fallback", factory: StreamLogHandler.standardOutput(label:))`
         ///   - mentions: ID of users/roles to be mentioned for each log-level.
         ///   - colors: Color of the embeds to be used for each log-level.
@@ -86,7 +84,6 @@ public actor DiscordLogManager {
         ///   - maxStoredLogsCount: If there are more logs than this count, the log manager will start removing the oldest un-sent logs to prevent memory leaks.
         public init(
             frequency: TimeAmount = .seconds(20),
-            fallbackLogger: Logger,
             aliveNotice: AliveNotice? = nil,
             mentions: [Logger.Level: Mention] = [:],
             colors: [Logger.Level: DiscordColor] = [
@@ -105,7 +102,6 @@ public actor DiscordLogManager {
             maxStoredLogsCount: Int = 1_000
         ) {
             self.frequency = frequency
-            self.fallbackLogger = fallbackLogger
             self.aliveNotice = aliveNotice
             self.mentions = mentions.mapValues { $0.toMentionStrings() }
             self.colors = colors
@@ -136,12 +132,13 @@ public actor DiscordLogManager {
     
     private var logs: [WebhookAddress: [Log]] = [:]
     private var sendLogsTasks: [WebhookAddress: Task<Void, Never>] = [:]
+    var fallbackLogger = Logger(label: "DBM.LogManager")
     
     private var aliveNoticeTask: Task<Void, Never>?
     
     public init(
         httpClient: HTTPClient,
-        configuration: Configuration
+        configuration: Configuration = Configuration()
     ) {
         /// Will only ever send requests to a webhook endpoint
         /// which doesn't need/use neither `token` nor `appId`.
@@ -152,11 +149,17 @@ public actor DiscordLogManager {
     
     public init(
         client: any DiscordClient,
-        configuration: Configuration
+        configuration: Configuration = Configuration()
     ) {
         self.client = client
         self.configuration = configuration
         Task { [weak self] in await self?.startAliveNotices() }
+    }
+    
+    /// To use after logging-system's bootstrap
+    /// Or if you want to change it to something else (do it after bootstrap or it'll be overridden)
+    public func renewFallbackLogger(to new: Logger? = nil) {
+        self.fallbackLogger = new ?? Logger(label: "DBM.LogManager")
     }
     
     func include(address: WebhookAddress, embed: Embed, level: Logger.Level) {
@@ -327,7 +330,7 @@ public actor DiscordLogManager {
         function: String = #function,
         line: UInt = #line
     ) {
-        self.configuration.fallbackLogger.log(
+        self.fallbackLogger.log(
             level: .warning,
             message,
             metadata: metadata,

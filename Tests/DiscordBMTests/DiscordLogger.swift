@@ -28,7 +28,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .seconds(5),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 mentions: [
                     .trace: .role("33333333"),
                     .notice: .user("22222222"),
@@ -121,7 +120,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 excludeMetadata: [.trace]
             )
         )
@@ -152,7 +150,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 disabledLogLevels: [.debug]
             )
         )
@@ -184,7 +181,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .seconds(10),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 maxStoredLogsCount: 100
             )
         )
@@ -217,7 +213,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 disabledInDebug: true
             )
         )
@@ -240,7 +235,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 extraMetadata: [.info]
             )
         )
@@ -281,7 +275,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 extraMetadata: [.warning]
             )
         )
@@ -325,7 +318,6 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(
                 frequency: .milliseconds(700),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init),
                 aliveNotice: .init(
                     address: try .url(webhookUrl),
                     interval: .seconds(6),
@@ -427,10 +419,7 @@ class DiscordLoggerTests: XCTestCase {
     func testFrequency() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
-            configuration: .init(
-                frequency: .seconds(5),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
-            )
+            configuration: .init(frequency: .seconds(5))
         )
         
         let logger = DiscordLogHandler.multiplexLogger(
@@ -516,10 +505,7 @@ class DiscordLoggerTests: XCTestCase {
     func testDoesNotExceedDiscordLengthLimits() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
-            configuration: .init(
-                frequency: .seconds(60),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
-            )
+            configuration: .init(frequency: .seconds(60))
         )
         
         let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".map { $0 }
@@ -571,12 +557,9 @@ class DiscordLoggerTests: XCTestCase {
     func testBootstrap() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
-            configuration: .init(
-                frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
-            )
+            configuration: .init(frequency: .milliseconds(100))
         )
-        LoggingSystem.bootstrapWithDiscordLogger(
+        await LoggingSystem.bootstrapWithDiscordLogger(
             address: try .url(webhookUrl),
             level: .error,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
@@ -603,10 +586,7 @@ class DiscordLoggerTests: XCTestCase {
     func testMetadataProviders() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
-            configuration: .init(
-                frequency: .milliseconds(100),
-                fallbackLogger: Logger(label: "", factory: SwiftLogNoOpLogHandler.init)
-            )
+            configuration: .init(frequency: .milliseconds(100))
         )
         let simpleTraceIDMetadataProvider = Logger.MetadataProvider {
             guard let traceID = TraceNamespace.simpleTraceID else {
@@ -614,7 +594,7 @@ class DiscordLoggerTests: XCTestCase {
             }
             return ["simple-trace-id": .string(traceID)]
         }
-        LoggingSystem.bootstrapWithDiscordLogger(
+        await LoggingSystem.bootstrapWithDiscordLogger(
             address: try .url(webhookUrl),
             metadataProvider: simpleTraceIDMetadataProvider,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }

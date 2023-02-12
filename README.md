@@ -84,8 +84,8 @@ let bot = BotGatewayManager(
 /// Make an instance like above
 let bot: BotGatewayManager = ...
 
-/// Add event handlers
 Task {
+    /// Add event handlers
     await bot.addEventHandler { event in
         switch event.data {
         case let .messageCreate(message):
@@ -201,19 +201,18 @@ import Logging
 
 /// Configure the Discord Logging Manager.
 DiscordGlobalConfiguration.logManager = DiscordLogManager(
-    httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS,
-    configuration: .init(fallbackLogger: Logger(
-        label: "DiscordBMFallback",
-        factory: StreamLogHandler.standardOutput(label:metadataProvider:)
-    ))
+    httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS
 )
 
-/// Bootstrap the `LoggingSystem`. After this, all your `Logger`s will automagically start using `DiscordLogHandler`.
-LoggingSystem.bootstrapWithDiscordLogger(
-    /// The address to send the logs to. You can easily create a webhook using Discord client apps.
-    address: try .url(WEBHOOK_URL),
-    makeMainLogHandler: StreamLogHandler.standardOutput(label:metadataProvider:)
-)
+Task {
+    /// Bootstrap the `LoggingSystem`. After this, all your `Logger`s will automagically start using `DiscordLogHandler`.
+    await LoggingSystem.bootstrapWithDiscordLogger(
+        /// The address to send the logs to. 
+        /// You can easily create a webhook using Discord client apps.
+        address: try .url(WEBHOOK_URL),
+        makeMainLogHandler: StreamLogHandler.standardOutput(label:metadataProvider:)
+    )
+}
 /// Make sure you haven't called `LoggingSystem.bootstrap` anywhere else, because you can only call it once.
 /// For example Vapor's templates use `LoggingSystem.bootstrap` on boot, and you need to remove that.
 ```
@@ -225,10 +224,6 @@ Read `DiscordLogManager.Configuration.init` documentation for full info.
 DiscordGlobalConfiguration.logManager = DiscordLogManager(
     httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS,
     configuration: .init(
-        fallbackLogger: Logger(
-            label: "DiscordBMFallback",
-            factory: StreamLogHandler.standardOutput(label:metadataProvider:)
-        ),
         aliveNotice: .init(
             address: try .url(WEBHOOK_URL),
             /// If nil, DiscordLogger will only send 1 "I'm alive" notice, on boot.
@@ -244,7 +239,7 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
             .critical: .role("970723029262942248"),
         ],
         extraMetadata: [.warning, .error, .critical],
-        disabledLogLevels: [.debug, .trace],
+        disabledLogLevels: [.debug, .trace], 
         disabledInDebug: true
     )
 )
