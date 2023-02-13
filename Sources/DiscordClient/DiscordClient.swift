@@ -622,7 +622,77 @@ public extension DiscordClient {
         )
     }
     
+    /// https://discord.com/developers/docs/resources/channel#start-thread-from-message
+    @inlinable
+    func startThreadFromMessage(
+        channelId: String,
+        messageId: String,
+        reason: String? = nil,
+        payload: RequestBody.CreateThreadFromMessage
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = Endpoint.startThreadFromMessage(channelId: channelId, messageId: messageId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#start-thread-without-message
+    @inlinable
+    func startThreadWithoutMessage(
+        channelId: String,
+        reason: String? = nil,
+        payload: RequestBody.CreateThreadWithoutMessage
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = Endpoint.startThreadWithoutMessage(channelId: channelId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#start-thread-without-message
+    @inlinable
+    func joinThread(id: String) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.joinThread(id: id)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#add-thread-member
+    @inlinable
+    func addThreadMember(
+        threadId: String,
+        userId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.addThreadMember(threadId: threadId, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#leave-thread
+    @inlinable
+    func leaveThread(id: String) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.leaveThread(id: id)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#remove-thread-member
+    @inlinable
+    func removeThreadMember(
+        threadId: String,
+        userId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.removeThreadMember(threadId: threadId, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
     /// https://discord.com/developers/docs/resources/webhook#create-webhook
+    @inlinable
     func createWebhook(
         channelId: String,
         reason: String? = nil,
@@ -639,12 +709,14 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#get-channel-webhooks
+    @inlinable
     func getChannelWebhooks(channelId: String) async throws -> DiscordClientResponse<[Webhook]> {
         let endpoint = Endpoint.getChannelWebhooks(channelId: channelId)
         return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
+    @inlinable
     func getGuildWebhooks(guildId: String) async throws -> DiscordClientResponse<[Webhook]> {
         let endpoint = Endpoint.getGuildWebhooks(guildId: guildId)
         return try await self.send(request: .init(to: endpoint))
@@ -652,6 +724,7 @@ public extension DiscordClient {
     
     /// Requires authentication using an authorized bot-token.
     /// https://discord.com/developers/docs/resources/webhook#get-webhook
+    @inlinable
     func getWebhook(id: String) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = Endpoint.getWebhook1(id: id)
         return try await self.send(request: .init(to: endpoint))
@@ -659,6 +732,7 @@ public extension DiscordClient {
     
     /// Doesn't require authentication using bot-token.
     /// https://discord.com/developers/docs/resources/webhook#get-webhook-with-token
+    @inlinable
     func getWebhook(address: WebhookAddress) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = Endpoint.getWebhook2(id: address.id, token: address.token)
         return try await self.send(request: .init(to: endpoint))
@@ -666,6 +740,7 @@ public extension DiscordClient {
     
     /// Requires authentication using an authorized bot-token.
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook
+    @inlinable
     func modifyWebhook(
         id: String,
         reason: String? = nil,
@@ -683,6 +758,7 @@ public extension DiscordClient {
     
     /// Doesn't require authentication using bot-token.
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
+    @inlinable
     func modifyWebhook(
         address: WebhookAddress,
         reason: String? = nil,
@@ -700,6 +776,7 @@ public extension DiscordClient {
     
     /// Requires authentication using an authorized bot-token.
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook
+    @inlinable
     func deleteWebhook(id: String, reason: String? = nil) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.deleteWebhook1(id: id)
         return try await self.send(request: .init(
@@ -710,6 +787,7 @@ public extension DiscordClient {
     
     /// Doesn't require authentication using bot-token.
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook-with-token
+    @inlinable
     func deleteWebhook(
         address: WebhookAddress,
         reason: String? = nil
@@ -765,6 +843,7 @@ public extension DiscordClient {
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#get-webhook-message
+    @inlinable
     func getWebhookMessage(
         address: WebhookAddress,
         messageId: String,
@@ -784,6 +863,7 @@ public extension DiscordClient {
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message
+    @inlinable
     func editWebhookMessage(
         address: WebhookAddress,
         messageId: String,
@@ -804,10 +884,10 @@ public extension DiscordClient {
         )
     }
     
-    
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook-message
+    @inlinable
     func deleteWebhookMessage(
         address: WebhookAddress,
         messageId: String,
