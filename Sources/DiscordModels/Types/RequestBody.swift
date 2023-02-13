@@ -3,7 +3,7 @@ import NIOFoundationCompat
 
 public enum RequestBody {
     
-    public struct CreateDM: Sendable, Codable, Validatable {
+    public struct CreateDM: Sendable, Codable, ValidatablePayload {
         public var recipient_id: String
         
         @inlinable
@@ -17,7 +17,7 @@ public enum RequestBody {
     
     /// An attachment object, but for sending.
     /// https://discord.com/developers/docs/resources/channel#attachment-object
-    public struct AttachmentSend: Sendable, Codable, Validatable {
+    public struct AttachmentSend: Sendable, Codable, ValidatablePayload {
         /// When sending, `id` is the index of this attachment in the `files` you provide.
         public var id: String
         public var filename: String?
@@ -50,7 +50,7 @@ public enum RequestBody {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object
-    public struct InteractionResponse: Sendable, Codable, MultipartEncodable, Validatable {
+    public struct InteractionResponse: Sendable, Codable, MultipartEncodable, ValidatablePayload {
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
         public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
@@ -71,7 +71,7 @@ public enum RequestBody {
         }
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structure
-        public struct CallbackData: Sendable, Codable, MultipartEncodable, Validatable {
+        public struct CallbackData: Sendable, Codable, MultipartEncodable, ValidatablePayload {
             public var tts: Bool?
             public var content: String?
             public var embeds: [Embed]?
@@ -202,7 +202,7 @@ public enum RequestBody {
     }
     
     /// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
-    public struct CreateGuildRole: Sendable, Codable, Validatable {
+    public struct CreateGuildRole: Sendable, Codable, ValidatablePayload {
         public var name: String?
         public var permissions: StringBitField<Permission>?
         public var color: DiscordColor?
@@ -231,7 +231,7 @@ public enum RequestBody {
     }
     
     /// https://discord.com/developers/docs/resources/channel#create-message-jsonform-params
-    public struct CreateMessage: Sendable, Codable, MultipartEncodable, Validatable {
+    public struct CreateMessage: Sendable, Codable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var nonce: StringOrInt?
         public var tts: Bool?
@@ -304,7 +304,7 @@ public enum RequestBody {
     }
     
     /// https://discord.com/developers/docs/resources/channel#edit-message-jsonform-params
-    public struct EditMessage: Sendable, Codable, MultipartEncodable, Validatable {
+    public struct EditMessage: Sendable, Codable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var embeds: [Embed]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
@@ -356,7 +356,7 @@ public enum RequestBody {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#execute-webhook-jsonform-params
-    public struct ExecuteWebhook: Sendable, Codable, MultipartEncodable, Validatable {
+    public struct ExecuteWebhook: Sendable, Codable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var username: String?
         public var avatar_url: String?
@@ -425,7 +425,7 @@ public enum RequestBody {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#create-webhook-json-params
-    public struct CreateWebhook: Sendable, Codable, Validatable {
+    public struct CreateWebhook: Sendable, Codable, ValidatablePayload {
         public var name: String
         public var avatar: ImageData?
         
@@ -440,7 +440,7 @@ public enum RequestBody {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
-    public struct ModifyWebhook: Sendable, Codable, Validatable {
+    public struct ModifyWebhook: Sendable, Codable, ValidatablePayload {
         public var name: String?
         public var avatar: ImageData?
         
@@ -453,7 +453,7 @@ public enum RequestBody {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook-json-params
-    public struct ModifyGuildWebhook: Sendable, Codable, Validatable {
+    public struct ModifyGuildWebhook: Sendable, Codable, ValidatablePayload {
         public var name: String?
         public var avatar: ImageData?
         public var channel_id: String?
@@ -468,7 +468,7 @@ public enum RequestBody {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message-jsonform-params
-    public struct EditWebhookMessage: Sendable, Codable, MultipartEncodable, Validatable {
+    public struct EditWebhookMessage: Sendable, Codable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var embeds: [Embed]?
         public var allowed_mentions: DiscordChannel.AllowedMentions?

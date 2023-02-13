@@ -1,5 +1,5 @@
 
-public protocol Validatable {
+public protocol ValidatablePayload {
     /// Default library functions only throw ``ValidationError``.
     func validate() throws
 }
@@ -21,7 +21,7 @@ public enum ValidationError: Error {
     case cantBeEmpty(name: String)
 }
 
-extension Validatable {
+extension ValidatablePayload {
     
     @inlinable
     func validateAtLeastOneIsNotEmpty(

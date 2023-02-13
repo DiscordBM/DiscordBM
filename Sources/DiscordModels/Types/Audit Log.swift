@@ -610,6 +610,7 @@ public struct AuditLog: Sendable, Codable {
             }
         }
         
+        public var guild_id: String?
         public var target_id: String?
         public var changes: [Change]?
         public var user_id: String?
@@ -618,6 +619,7 @@ public struct AuditLog: Sendable, Codable {
         public var reason: String?
         
         enum CodingKeys: String, CodingKey {
+            case guild_id
             case target_id
             case changes
             case user_id
@@ -627,6 +629,7 @@ public struct AuditLog: Sendable, Codable {
         
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
+            self.guild_id = try container.decodeIfPresent(String.self, forKey: .guild_id)
             self.target_id = try container.decodeIfPresent(String.self, forKey: .target_id)
             self.changes = try container.decodeIfPresent([Change].self, forKey: .changes)
             self.user_id = try container.decodeIfPresent(String.self, forKey: .user_id)

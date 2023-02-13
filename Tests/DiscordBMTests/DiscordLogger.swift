@@ -639,14 +639,14 @@ private class FakeDiscordClient: DiscordClient, @unchecked Sendable {
         fatalError()
     }
     
-    func send<E: Validatable & Encodable>(
+    func send<E: ValidatablePayload & Encodable>(
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
         fatalError()
     }
     
-    func sendMultipart<E: Validatable & MultipartEncodable>(
+    func sendMultipart<E: ValidatablePayload & MultipartEncodable>(
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
