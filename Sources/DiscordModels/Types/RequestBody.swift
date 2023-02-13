@@ -510,7 +510,7 @@ public enum RequestBody {
         }
     }
     
-    public struct CreateThreadFromMessage: Sendable, Codable, Validatable {
+    public struct CreateThreadFromMessage: Sendable, Codable, ValidatablePayload {
         public var name: String
         public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
         public var rate_limit_per_user: Int?
@@ -528,7 +528,7 @@ public enum RequestBody {
         public func validate() throws { }
     }
     
-    public struct CreateThreadWithoutMessage: Sendable, Codable, Validatable {
+    public struct CreateThreadWithoutMessage: Sendable, Codable, ValidatablePayload {
         public var name: String
         public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
         public var type: DiscordChannel.Kind?
