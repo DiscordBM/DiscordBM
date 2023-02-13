@@ -509,4 +509,46 @@ public enum RequestBody {
             }
         }
     }
+    
+    public struct CreateThreadFromMessage: Sendable, Codable, Validatable {
+        public var name: String
+        public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
+        public var rate_limit_per_user: Int?
+        
+        public init(
+            name: String,
+            auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil,
+            rate_limit_per_user: Int? = nil
+        ) {
+            self.name = name
+            self.auto_archive_duration = auto_archive_duration
+            self.rate_limit_per_user = rate_limit_per_user
+        }
+        
+        public func validate() throws { }
+    }
+    
+    public struct CreateThreadWithoutMessage: Sendable, Codable, Validatable {
+        public var name: String
+        public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
+        public var type: DiscordChannel.Kind?
+        public var invitable: Bool?
+        public var rate_limit_per_user: Int?
+        
+        public init(
+            name: String,
+            auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil,
+            type: DiscordChannel.Kind? = nil,
+            invitable: Bool? = nil,
+            rate_limit_per_user: Int? = nil
+        ) {
+            self.name = name
+            self.auto_archive_duration = auto_archive_duration
+            self.type = type
+            self.invitable = invitable
+            self.rate_limit_per_user = rate_limit_per_user
+        }
+        
+        public func validate() throws { }
+    }
 }
