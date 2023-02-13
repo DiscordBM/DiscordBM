@@ -322,7 +322,12 @@ let handler = try await ReactToRoleHandler(
 ```
 
 After this, anyone reacting with `🐔` to the message will be assigned the role.   
-There are a bunch more options, take a look at the other `ReactToRoleHandler` initializers for more info.
+There are a bunch more options, take a look at `ReactToRoleHandler` initializers for more info.
+
+> **Warning**   
+> The handler will need quite a few permissions. Namely `view messages`, `send messages` and `add reactions` in    
+> the channel where the message is, plus `manage roles` permission in the guild. These are only the minimums.   
+> If the bot is receiving 403 responses from Discord, it probably needs some more permissions as well.
 
 #### Behavior
 The handler will:
@@ -330,7 +335,7 @@ The handler will:
 * React to the message as the bot-user with all the reactions you specified.
 * Re-create the role if it's removed or doesn't exist.
 * Stop working if you use `await handler.stop()`.
-* Re-start working again if you use `try await handler.start()`.
+* Re-start working again if you use `try await handler.restart()`.
 
 #### Persistence 
 If you need to persist the handler somewhere:
