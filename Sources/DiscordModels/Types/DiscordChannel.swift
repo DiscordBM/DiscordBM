@@ -359,6 +359,14 @@ public struct ThreadMember: Sendable, Codable {
     }
 }
 
+/// Thread-related subset of `DiscordChannel.Kind`
+/// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
+public enum ThreadKind: Int, Sendable, Codable {
+    case announcementThread = 10
+    case publicThread = 11
+    case privateThread = 12
+}
+
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
 public struct PartialChannel: Sendable, Codable {
     public var id: String

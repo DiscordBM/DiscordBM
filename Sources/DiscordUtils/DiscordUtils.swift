@@ -112,5 +112,7 @@ public enum DiscordUtils {
             .replacingOccurrences(of: #">"#, with: #"\>"#)
             .replacingOccurrences(of: #"~"#, with: #"\~"#)
             .replacingOccurrences(of: #"|"#, with: #"\|"#)
+            .replacingOccurrences(of: #"<"#, with: #"\<"#)
+            .replacingOccurrences(of: #">"#, with: #"\>"#)
     }
 }

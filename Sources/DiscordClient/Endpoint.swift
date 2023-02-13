@@ -16,6 +16,11 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
     case getChannelMessage
     case getGuildAuditLogs
     case getReactions
+    case getThreadMember
+    case listThreadMembers
+    case listPublicArchivedThreads
+    case listPrivateArchivedThreads
+    case listJoinedPrivateArchivedThreads
     case getChannelWebhooks
     case getGuildWebhooks
     case getWebhook1
@@ -57,6 +62,11 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
         case .getChannelMessage: return "getChannelMessage"
         case .getGuildAuditLogs: return "getGuildAuditLogs"
         case .getReactions: return "getReactions"
+        case .getThreadMember: return "getThreadMember"
+        case .listThreadMembers: return "listThreadMembers"
+        case .listPublicArchivedThreads: return "listPublicArchivedThreads"
+        case .listPrivateArchivedThreads: return "listPrivateArchivedThreads"
+        case .listJoinedPrivateArchivedThreads: return "listJoinedPrivateArchivedThreads"
         case .getChannelWebhooks: return "getChannelWebhooks"
         case .getGuildWebhooks: return "getGuildWebhooks"
         case .getWebhook1: return "getWebhook1"
@@ -124,10 +134,16 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
         case .createDM: return nil
         case .startThreadFromMessage: return nil
         case .startThreadWithoutMessage: return nil
+        case .startThreadInForumChannel: return nil
         case .joinThread: return nil
         case .addThreadMember: return nil
         case .leaveThread: return nil
         case .removeThreadMember: return nil
+        case .getThreadMember: self = .getThreadMember
+        case .listThreadMembers: self = .listThreadMembers
+        case .listPublicArchivedThreads: self = .listPublicArchivedThreads
+        case .listPrivateArchivedThreads: self = .listPrivateArchivedThreads
+        case .listJoinedPrivateArchivedThreads: self = .listJoinedPrivateArchivedThreads
         case .createWebhook: return nil
         case .getChannelWebhooks: self = .getChannelWebhooks
         case .getGuildWebhooks: self = .getGuildWebhooks
@@ -223,10 +239,16 @@ public enum Endpoint: Sendable {
     /// Threads
     case startThreadFromMessage(channelId: String, messageId: String)
     case startThreadWithoutMessage(channelId: String)
+    case startThreadInForumChannel(channelId: String)
     case joinThread(id: String)
     case addThreadMember(threadId: String, userId: String)
     case leaveThread(id: String)
     case removeThreadMember(threadId: String, userId: String)
+    case getThreadMember(threadId: String, userId: String)
+    case listThreadMembers(threadId: String)
+    case listPublicArchivedThreads(channelId: String)
+    case listPrivateArchivedThreads(channelId: String)
+    case listJoinedPrivateArchivedThreads(channelId: String)
     
     /// Webhooks
     case createWebhook(channelId: String)
@@ -341,7 +363,8 @@ public enum Endpoint: Sendable {
             suffix = "users/@me/channels"
         case let .startThreadFromMessage(channelId, messageId):
             suffix = "channels/\(channelId)/messages/\(messageId)/threads"
-        case let .startThreadWithoutMessage(channelId):
+        case let .startThreadWithoutMessage(channelId),
+            let .startThreadInForumChannel(channelId):
             suffix = "channels/\(channelId)/threads"
         case let .joinThread(threadId):
             suffix = "channels/\(threadId)/thread-members/@me"
@@ -351,6 +374,16 @@ public enum Endpoint: Sendable {
             suffix = "channels/\(threadId)/thread-members/@me"
         case let .removeThreadMember(threadId, userId):
             suffix = "channels/\(threadId)/thread-members/\(userId)"
+        case let .getThreadMember(threadId, userId):
+            suffix = "channels/\(threadId)/thread-members/\(userId)"
+        case let .listThreadMembers(threadId):
+            suffix = "channels/\(threadId)/thread-members"
+        case let .listPublicArchivedThreads(channelId):
+            suffix = "channels/\(channelId)/threads/archived/public"
+        case let .listPrivateArchivedThreads(channelId):
+            suffix = "channels/\(channelId)/threads/archived/private"
+        case let .listJoinedPrivateArchivedThreads(channelId):
+            suffix = "channels/\(channelId)/users/@me/threads/archived/private"
         case let .createWebhook(channelId):
             suffix = "channels/\(channelId)/webhooks"
         case let .getChannelWebhooks(channelId):
@@ -417,7 +450,7 @@ public enum Endpoint: Sendable {
     /// Doesn't expose secret url path parameters.
     var urlSuffixDescription: String {
         switch self {
-        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .leaveGuild, .getChannel, .getChannelMessages, .getChannelMessage, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .createReaction, .deleteOwnReaction, .deleteUserReaction, .getReactions, .deleteAllReactions, .deleteAllReactionsForEmoji, .createDM, .startThreadFromMessage, .startThreadWithoutMessage, .joinThread, .addThreadMember, .leaveThread, .removeThreadMember, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .modifyWebhook1, .deleteWebhook1, .CDNCustomEmoji, .CDNGuildIcon, .CDNGuildSplash, .CDNGuildDiscoverySplash, .CDNGuildBanner, .CDNUserBanner, .CDNDefaultUserAvatar, .CDNUserAvatar, .CDNGuildMemberAvatar, .CDNApplicationIcon, .CDNApplicationCover, .CDNApplicationAsset, .CDNAchievementIcon, .CDNStickerPackBanner, .CDNTeamIcon, .CDNSticker, .CDNRoleIcon, .CDNGuildScheduledEventCover, .CDNGuildMemberBanner:
+        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .leaveGuild, .getChannel, .getChannelMessages, .getChannelMessage, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .createReaction, .deleteOwnReaction, .deleteUserReaction, .getReactions, .deleteAllReactions, .deleteAllReactionsForEmoji, .createDM, .startThreadFromMessage, .startThreadWithoutMessage, .startThreadInForumChannel, .joinThread, .addThreadMember, .leaveThread, .removeThreadMember, .getThreadMember, .listThreadMembers, .listPublicArchivedThreads, .listPrivateArchivedThreads, .listJoinedPrivateArchivedThreads, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .modifyWebhook1, .deleteWebhook1, .CDNCustomEmoji, .CDNGuildIcon, .CDNGuildSplash, .CDNGuildDiscoverySplash, .CDNGuildBanner, .CDNUserBanner, .CDNDefaultUserAvatar, .CDNUserAvatar, .CDNGuildMemberAvatar, .CDNApplicationIcon, .CDNApplicationCover, .CDNApplicationAsset, .CDNAchievementIcon, .CDNStickerPackBanner, .CDNTeamIcon, .CDNSticker, .CDNRoleIcon, .CDNGuildScheduledEventCover, .CDNGuildMemberBanner:
             return self.urlSuffix
         case let .getWebhook2(id, token),
             let .modifyWebhook2(id, token),
@@ -489,10 +522,16 @@ public enum Endpoint: Sendable {
         case .createDM: return .POST
         case .startThreadFromMessage: return .POST
         case .startThreadWithoutMessage: return .POST
+        case .startThreadInForumChannel: return .POST
         case .joinThread: return .PUT
         case .addThreadMember: return .PUT
         case .leaveThread: return .DELETE
         case .removeThreadMember: return .DELETE
+        case .getThreadMember: return .GET
+        case .listThreadMembers: return .GET
+        case .listPublicArchivedThreads: return .GET
+        case .listPrivateArchivedThreads: return .GET
+        case .listJoinedPrivateArchivedThreads: return .GET
         case .createWebhook: return .POST
         case .getChannelWebhooks: return .GET
         case .getGuildWebhooks: return .GET
@@ -530,7 +569,7 @@ public enum Endpoint: Sendable {
     
     var isCDNEndpoint: Bool {
         switch self {
-        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .leaveGuild, .getChannel, .getChannelMessages, .getChannelMessage, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .createReaction, .deleteOwnReaction, .deleteUserReaction, .getReactions, .deleteAllReactions, .deleteAllReactionsForEmoji, .createDM, .startThreadFromMessage, .startThreadWithoutMessage, .joinThread, .addThreadMember, .leaveThread, .removeThreadMember, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .getWebhook2, .modifyWebhook1, .modifyWebhook2, .deleteWebhook1, .deleteWebhook2, .executeWebhook, .getWebhookMessage, .editWebhookMessage, .deleteWebhookMessage:
+        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .leaveGuild, .getChannel, .getChannelMessages, .getChannelMessage, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .createReaction, .deleteOwnReaction, .deleteUserReaction, .getReactions, .deleteAllReactions, .deleteAllReactionsForEmoji, .createDM, .startThreadFromMessage, .startThreadWithoutMessage, .startThreadInForumChannel, .joinThread, .addThreadMember, .leaveThread, .removeThreadMember, .getThreadMember, .listThreadMembers, .listPublicArchivedThreads, .listPrivateArchivedThreads, .listJoinedPrivateArchivedThreads, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .getWebhook2, .modifyWebhook1, .modifyWebhook2, .deleteWebhook1, .deleteWebhook2, .executeWebhook, .getWebhookMessage, .editWebhookMessage, .deleteWebhookMessage:
             return false
         case  .CDNCustomEmoji, .CDNGuildIcon, .CDNGuildSplash, .CDNGuildDiscoverySplash, .CDNGuildBanner, .CDNUserBanner, .CDNDefaultUserAvatar, .CDNUserAvatar, .CDNGuildMemberAvatar, .CDNApplicationIcon, .CDNApplicationCover, .CDNApplicationAsset, .CDNAchievementIcon, .CDNStickerPackBanner, .CDNTeamIcon, .CDNSticker, .CDNRoleIcon, .CDNGuildScheduledEventCover, .CDNGuildMemberBanner:
             return true
@@ -543,7 +582,7 @@ public enum Endpoint: Sendable {
         switch self {
         case .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse:
             return false
-        case .getGateway, .getGatewayBot, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .leaveGuild, .getChannel, .getChannelMessages, .getChannelMessage, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .createReaction, .deleteOwnReaction, .deleteUserReaction, .getReactions, .deleteAllReactions, .deleteAllReactionsForEmoji, .createDM, .startThreadFromMessage, .startThreadWithoutMessage, .joinThread, .addThreadMember, .leaveThread, .removeThreadMember, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .getWebhook2, .modifyWebhook1, .modifyWebhook2, .deleteWebhook1, .deleteWebhook2, .executeWebhook, .getWebhookMessage, .editWebhookMessage, .deleteWebhookMessage, .CDNCustomEmoji, .CDNGuildIcon, .CDNGuildSplash, .CDNGuildDiscoverySplash, .CDNGuildBanner, .CDNUserBanner, .CDNDefaultUserAvatar, .CDNUserAvatar, .CDNGuildMemberAvatar, .CDNApplicationIcon, .CDNApplicationCover, .CDNApplicationAsset, .CDNAchievementIcon, .CDNStickerPackBanner, .CDNTeamIcon, .CDNSticker, .CDNRoleIcon, .CDNGuildScheduledEventCover, .CDNGuildMemberBanner:
+        case .getGateway, .getGatewayBot, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .leaveGuild, .getChannel, .getChannelMessages, .getChannelMessage, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .createReaction, .deleteOwnReaction, .deleteUserReaction, .getReactions, .deleteAllReactions, .deleteAllReactionsForEmoji, .createDM, .startThreadFromMessage, .startThreadWithoutMessage, .startThreadInForumChannel, .joinThread, .addThreadMember, .leaveThread, .removeThreadMember, .getThreadMember, .listThreadMembers, .listPublicArchivedThreads, .listPrivateArchivedThreads, .listJoinedPrivateArchivedThreads, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .getWebhook2, .modifyWebhook1, .modifyWebhook2, .deleteWebhook1, .deleteWebhook2, .executeWebhook, .getWebhookMessage, .editWebhookMessage, .deleteWebhookMessage, .CDNCustomEmoji, .CDNGuildIcon, .CDNGuildSplash, .CDNGuildDiscoverySplash, .CDNGuildBanner, .CDNUserBanner, .CDNDefaultUserAvatar, .CDNUserAvatar, .CDNGuildMemberAvatar, .CDNApplicationIcon, .CDNApplicationCover, .CDNApplicationAsset, .CDNAchievementIcon, .CDNStickerPackBanner, .CDNTeamIcon, .CDNSticker, .CDNRoleIcon, .CDNGuildScheduledEventCover, .CDNGuildMemberBanner:
             return true
         }
     }
@@ -552,7 +591,7 @@ public enum Endpoint: Sendable {
     /// contains some kind of authorization token. Like half of the webhook endpoints.
     var requiresAuthorizationHeader: Bool {
         switch self {
-        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .leaveGuild, .getChannel, .getChannelMessages, .getChannelMessage, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .createReaction, .deleteOwnReaction, .deleteUserReaction, .getReactions, .deleteAllReactions, .deleteAllReactionsForEmoji, .createDM, .startThreadFromMessage, .startThreadWithoutMessage, .joinThread, .addThreadMember, .leaveThread, .removeThreadMember, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .modifyWebhook1, .deleteWebhook1:
+        case .getGateway, .getGatewayBot, .createInteractionResponse, .getInteractionResponse, .editInteractionResponse, .deleteInteractionResponse, .postFollowupInteractionResponse, .getFollowupInteractionResponse, .editFollowupInteractionResponse, .deleteFollowupInteractionResponse, .createMessage, .editMessage, .deleteMessage, .createApplicationGlobalCommand, .getApplicationGlobalCommands, .deleteApplicationGlobalCommand, .getGuild, .getGuildRoles, .searchGuildMembers, .getGuildMember, .leaveGuild, .getChannel, .getChannelMessages, .getChannelMessage, .createGuildRole, .deleteGuildRole, .addGuildMemberRole, .removeGuildMemberRole, .getGuildAuditLogs, .createReaction, .deleteOwnReaction, .deleteUserReaction, .getReactions, .deleteAllReactions, .deleteAllReactionsForEmoji, .createDM, .startThreadFromMessage, .startThreadWithoutMessage, .startThreadInForumChannel, .joinThread, .addThreadMember, .leaveThread, .removeThreadMember, .getThreadMember, .listThreadMembers, .listPublicArchivedThreads, .listPrivateArchivedThreads, .listJoinedPrivateArchivedThreads, .createWebhook, .getChannelWebhooks, .getGuildWebhooks, .getWebhook1, .modifyWebhook1, .deleteWebhook1:
             return true
         case .getWebhook2, .modifyWebhook2, .deleteWebhook2, .executeWebhook, .getWebhookMessage, .editWebhookMessage, .deleteWebhookMessage, .CDNCustomEmoji, .CDNGuildIcon, .CDNGuildSplash, .CDNGuildDiscoverySplash, .CDNGuildBanner, .CDNUserBanner, .CDNDefaultUserAvatar, .CDNUserAvatar, .CDNGuildMemberAvatar, .CDNApplicationIcon, .CDNApplicationCover, .CDNApplicationAsset, .CDNAchievementIcon, .CDNStickerPackBanner, .CDNTeamIcon, .CDNSticker, .CDNRoleIcon, .CDNGuildScheduledEventCover, .CDNGuildMemberBanner:
             return false
@@ -599,42 +638,48 @@ public enum Endpoint: Sendable {
         case .createDM: return 36
         case .startThreadFromMessage: return 37
         case .startThreadWithoutMessage: return 38
-        case .joinThread: return 39
-        case .addThreadMember: return 40
-        case .leaveThread: return 41
-        case .removeThreadMember: return 42
-        case .createWebhook: return 43
-        case .getChannelWebhooks: return 44
-        case .getGuildWebhooks: return 45
-        case .getWebhook1: return 46
-        case .getWebhook2: return 47
-        case .modifyWebhook1: return 48
-        case .modifyWebhook2: return 49
-        case .deleteWebhook1: return 50
-        case .deleteWebhook2: return 51
-        case .executeWebhook: return 52
-        case .getWebhookMessage: return 53
-        case .editWebhookMessage: return 54
-        case .deleteWebhookMessage: return 55
-        case .CDNCustomEmoji: return 56
-        case .CDNGuildIcon: return 57
-        case .CDNGuildSplash: return 58
-        case .CDNGuildDiscoverySplash: return 59
-        case .CDNGuildBanner: return 60
-        case .CDNUserBanner: return 61
-        case .CDNDefaultUserAvatar: return 62
-        case .CDNUserAvatar: return 63
-        case .CDNGuildMemberAvatar: return 64
-        case .CDNApplicationIcon: return 65
-        case .CDNApplicationCover: return 66
-        case .CDNApplicationAsset: return 67
-        case .CDNAchievementIcon: return 68
-        case .CDNStickerPackBanner: return 69
-        case .CDNTeamIcon: return 70
-        case .CDNSticker: return 71
-        case .CDNRoleIcon: return 72
-        case .CDNGuildScheduledEventCover: return 73
-        case .CDNGuildMemberBanner: return 74
+        case .startThreadInForumChannel: return 39
+        case .joinThread: return 40
+        case .addThreadMember: return 41
+        case .leaveThread: return 42
+        case .removeThreadMember: return 43
+        case .getThreadMember: return 44
+        case .listThreadMembers: return 45
+        case .listPublicArchivedThreads: return 46
+        case .listPrivateArchivedThreads: return 47
+        case .listJoinedPrivateArchivedThreads: return 48
+        case .createWebhook: return 49
+        case .getChannelWebhooks: return 50
+        case .getGuildWebhooks: return 51
+        case .getWebhook1: return 52
+        case .getWebhook2: return 53
+        case .modifyWebhook1: return 54
+        case .modifyWebhook2: return 55
+        case .deleteWebhook1: return 56
+        case .deleteWebhook2: return 57
+        case .executeWebhook: return 58
+        case .getWebhookMessage: return 59
+        case .editWebhookMessage: return 60
+        case .deleteWebhookMessage: return 61
+        case .CDNCustomEmoji: return 62
+        case .CDNGuildIcon: return 63
+        case .CDNGuildSplash: return 64
+        case .CDNGuildDiscoverySplash: return 65
+        case .CDNGuildBanner: return 66
+        case .CDNUserBanner: return 67
+        case .CDNDefaultUserAvatar: return 68
+        case .CDNUserAvatar: return 69
+        case .CDNGuildMemberAvatar: return 70
+        case .CDNApplicationIcon: return 71
+        case .CDNApplicationCover: return 72
+        case .CDNApplicationAsset: return 73
+        case .CDNAchievementIcon: return 74
+        case .CDNStickerPackBanner: return 75
+        case .CDNTeamIcon: return 76
+        case .CDNSticker: return 77
+        case .CDNRoleIcon: return 78
+        case .CDNGuildScheduledEventCover: return 79
+        case .CDNGuildMemberBanner: return 80
         }
     }
 }

@@ -19,6 +19,8 @@ public enum ValidationError: Error {
     case hasPrecondition(name: String, reason: String)
     /// Field can't be empty.
     case cantBeEmpty(name: String)
+    /// The number is too big or too small.
+    case numberOutOfRange(name: String, number: String, min: String, max: String)
 }
 
 extension ValidatablePayload {
@@ -103,6 +105,25 @@ extension ValidatablePayload {
     func validateAssertIsNotEmpty(_ isNotEmpty: Bool, name: String) throws {
         if !isNotEmpty {
             throw ValidationError.cantBeEmpty(name: name)
+        }
+    }
+    
+    @inlinable
+    func validateNumberInRange<N: Numeric & Comparable>(
+        _ number: N?,
+        min: N,
+        max: N,
+        name: String
+    ) throws {
+        if let number = number {
+            guard number >= min, number <= max else {
+                throw ValidationError.numberOutOfRange(
+                    name: name,
+                    number: "\(number)",
+                    min: "\(min)",
+                    max: "\(max)"
+                )
+            }
         }
     }
 }

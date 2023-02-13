@@ -118,10 +118,6 @@ Task {
 ```
 
 ### Mindset
-
-<details>
-  <summary> Click to expand </summary>
-  
 The way you can make sense of the library is to think of it as a direct implementation of the Discord API.   
 In most cases, the library doesn't try to abstract away Discord's stuff.   
 
@@ -130,9 +126,7 @@ In most cases, the library doesn't try to abstract away Discord's stuff.
 * You should read Discord documentation's related notes when you want to use something of this library.   
   Everything in the library has its related Discord documentation section linked near it.
 
-</details>
-
-### Finding Your Bot Token And App ID
+### Bot Token And App ID
 <details>
   <summary> Click to expand </summary>
   
@@ -317,7 +311,7 @@ After this, anyone reacting with `🐔` to the message will be assigned the role
 There are a bunch more options, take a look at `ReactToRoleHandler` initializers for more info.
 
 > **Warning**   
-> The handler will need quite a few permissions. Namely `view messages`, `send messages` & `add reactions` in the channel where the message is, plus `manage roles` permission in the guild. These are only the minimums. If the bot is receiving 403 responses from Discord, it probably needs some more permissions as well.
+> The handler will need quite a few permissions. Namely `view messages`, `send messages` & `add reactions` in the channel where the message is, plus `manage roles` in the guild. These are only the minimums. If the bot is receiving 403 responses from Discord, it probably needs some more permissions as well.
 
 #### Behavior
 The handler will:

@@ -3,6 +3,9 @@ import XCTest
 
 class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
     
+    /// `ValidatablePayload` requirement
+    func validate() throws { }
+    
     func testValidateAssertIsNotEmpty() throws {
         try validateAssertIsNotEmpty(true, name: "a")
         XCTAssertThrowsError(
@@ -171,7 +174,46 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
         }
     }
     
-    func validate() throws { }
+    func validateNumberInRange() throws {
+        try validateNumberInRange(1, min: 0, max: 21_600, name: "adoand")
+        try validateNumberInRange(0, min: 0, max: 21_600, name: "")
+        try validateNumberInRange(21_599, min: 0, max: 21_600, name: "qerqer")
+        try validateNumberInRange(21_600.9, min: 0, max: 21_601, name: "kkdasd")
+        try validateNumberInRange(999, min: 0, max: 998, name: "tt")
+        XCTAssertThrowsError(
+            try validateNumberInRange(9, min: 10, max: 21, name: "tt")
+        ) { error in
+            let error = error as! ValidationError
+            XCTAssertEqual(error, .numberOutOfRange(name: "tt", number: "9", min: "10", max: "21"))
+        }
+        XCTAssertThrowsError(
+            try validateNumberInRange(22, min: 10, max: 21, name: "c,axz")
+        ) { error in
+            let error = error as! ValidationError
+            XCTAssertEqual(
+                error,
+                .numberOutOfRange(name: "c,axz", number: "22", min: "10", max: "21")
+            )
+        }
+        XCTAssertThrowsError(
+            try validateNumberInRange(-1391293, min: 10, max: 21, name: "rqerqrew")
+        ) { error in
+            let error = error as! ValidationError
+            XCTAssertEqual(
+                error,
+                .numberOutOfRange(name: "rqerqrew", number: "-1391293", min: "10", max: "21")
+            )
+        }
+        XCTAssertThrowsError(
+            try validateNumberInRange(934129139, min: 10, max: 21, name: "oewo")
+        ) { error in
+            let error = error as! ValidationError
+            XCTAssertEqual(
+                error,
+                .numberOutOfRange(name: "oewo", number: "934129139", min: "10", max: "21")
+            )
+        }
+    }
 }
 
 extension ValidationError: Equatable {

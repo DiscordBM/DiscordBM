@@ -246,6 +246,7 @@ public enum RequestBody {
         
         enum CodingKeys: String, CodingKey {
             case content
+            case nonce
             case tts
             case embeds
             case allowed_mentions
@@ -525,20 +526,28 @@ public enum RequestBody {
             self.rate_limit_per_user = rate_limit_per_user
         }
         
-        public func validate() throws { }
+        public func validate() throws {
+            try validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
+            try validateNumberInRange(
+                rate_limit_per_user,
+                min: 0,
+                max: 21_600,
+                name: "rate_limit_per_user"
+            )
+        }
     }
     
     public struct CreateThreadWithoutMessage: Sendable, Codable, ValidatablePayload {
         public var name: String
         public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
-        public var type: DiscordChannel.Kind?
+        public var type: ThreadKind
         public var invitable: Bool?
         public var rate_limit_per_user: Int?
         
         public init(
             name: String,
             auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil,
-            type: DiscordChannel.Kind? = nil,
+            type: ThreadKind,
             invitable: Bool? = nil,
             rate_limit_per_user: Int? = nil
         ) {
@@ -549,6 +558,112 @@ public enum RequestBody {
             self.rate_limit_per_user = rate_limit_per_user
         }
         
-        public func validate() throws { }
+        public func validate() throws {
+            try validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
+            try validateNumberInRange(
+                rate_limit_per_user,
+                min: 0,
+                max: 21_600,
+                name: "rate_limit_per_user"
+            )
+        }
+    }
+    
+    public struct CreateThreadInForumChannel: Sendable, Codable, ValidatablePayload {
+        
+        /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel-forum-thread-message-params-object
+        public struct ForumMessage: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+            public var content: String?
+            public var embeds: [Embed]?
+            public var allowed_mentions: DiscordChannel.AllowedMentions?
+            public var components: [Interaction.ActionRow]?
+            public var sticker_ids: [String]?
+            public var files: [RawFile]?
+            public var attachments: [AttachmentSend]?
+            public var flags: IntBitField<DiscordChannel.Message.Flag>?
+            
+            enum CodingKeys: String, CodingKey {
+                case content
+                case embeds
+                case allowed_mentions
+                case components
+                case sticker_ids
+                case attachments
+                case flags
+            }
+            
+            public init(content: String? = nil, embeds: [Embed]? = nil, allowed_mentions: DiscordChannel.AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
+                self.content = content
+                self.embeds = embeds
+                self.allowed_mentions = allowed_mentions
+                self.components = components
+                self.sticker_ids = sticker_ids
+                self.files = files
+                self.attachments = attachments
+                self.flags = flags.map { .init($0) }
+            }
+            
+            public func validate() throws {
+                try validateElementCountDoesNotExceed(sticker_ids, max: 3, name: "sticker_ids")
+                try validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
+                try allowed_mentions?.validate()
+                try validateAtLeastOneIsNotEmpty(
+                    content?.isEmpty,
+                    embeds?.isEmpty,
+                    sticker_ids?.isEmpty,
+                    components?.isEmpty,
+                    files?.isEmpty,
+                    names: "content", "embeds", "sticker_ids", "components", "files"
+                )
+                try validateCombinedCharacterCountDoesNotExceed(
+                    embeds?.reduce(into: 0, { $0 += $1.contentLength }),
+                    max: 6_000,
+                    names: "embeds"
+                )
+                try validateOnlyContains(
+                    flags?.values,
+                    name: "flags",
+                    reason: "Can only contain 'suppressEmbeds'",
+                    where: { $0 == .suppressEmbeds }
+                )
+                for attachment in attachments ?? [] {
+                    try attachment.validate()
+                }
+                for embed in embeds ?? [] {
+                    try embed.validate()
+                }
+            }
+        }
+        
+        public var name: String
+        public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
+        public var rate_limit_per_user: Int?
+        public var message: ForumMessage
+        public var applied_tags: [String]?
+        
+        public init(
+            name: String,
+            auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil,
+            rate_limit_per_user: Int? = nil,
+            message: ForumMessage,
+            applied_tags: [String]? = nil
+        ) {
+            self.name = name
+            self.auto_archive_duration = auto_archive_duration
+            self.rate_limit_per_user = rate_limit_per_user
+            self.message = message
+            self.applied_tags = applied_tags
+        }
+        
+        public func validate() throws {
+            try validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
+            try validateNumberInRange(
+                rate_limit_per_user,
+                min: 0,
+                max: 21_600,
+                name: "rate_limit_per_user"
+            )
+            try self.message.validate()
+        }
     }
 }
