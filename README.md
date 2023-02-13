@@ -132,20 +132,12 @@ In most cases, the library doesn't try to abstract away Discord's stuff.
 
 </details>
 
-### Finding Your Bot Token
+### Finding Your Bot Token And App ID
 <details>
   <summary> Click to expand </summary>
   
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding Bot Token](https://user-images.githubusercontent.com/54685446/200565393-ea31c2ad-fd3a-44a1-9789-89460ab5d1a9.png)
-
-</details>
-
-### Finding Your App ID
-<details>
-  <summary> Click to expand </summary>
-  
-In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding App ID](https://user-images.githubusercontent.com/54685446/200565475-9893d326-423e-4344-a853-9de2f9ed25b4.png)
 
 </details>
@@ -325,9 +317,7 @@ After this, anyone reacting with `🐔` to the message will be assigned the role
 There are a bunch more options, take a look at `ReactToRoleHandler` initializers for more info.
 
 > **Warning**   
-> The handler will need quite a few permissions. Namely `view messages`, `send messages` and `add reactions` in    
-> the channel where the message is, plus `manage roles` permission in the guild. These are only the minimums.   
-> If the bot is receiving 403 responses from Discord, it probably needs some more permissions as well.
+> The handler will need quite a few permissions. Namely `view messages`, `send messages` & `add reactions` in the channel where the message is, plus `manage roles` permission in the guild. These are only the minimums. If the bot is receiving 403 responses from Discord, it probably needs some more permissions as well.
 
 #### Behavior
 The handler will:
