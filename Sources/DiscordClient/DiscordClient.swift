@@ -56,24 +56,6 @@ public extension DiscordClient {
     }
 }
 
-public enum DiscordClientError: Error {
-    /// You have exhausted your rate-limits.
-    case rateLimited(url: String)
-    /// Discord responded with a non-2xx status code.
-    case badStatusCode(DiscordHTTPResponse)
-    /// The body of the response was empty.
-    case emptyBody(DiscordHTTPResponse)
-    /// Couldn't find a content-type header.
-    case noContentTypeHeader(DiscordHTTPResponse)
-    /// You need to provide an `appId`.
-    /// Either via the function arguments or the DiscordClient initializer.
-    case appIdParameterRequired
-    /// Can only send one of these query parameters.
-    case queryParametersMutuallyExclusive(queries: [(String, String)])
-    /// Query parameter is out of the accepted bounds.
-    case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)
-}
-
 //MARK: - Internal +DiscordClient
 extension DiscordClient {
     
@@ -716,31 +698,48 @@ public extension DiscordClient {
     @inlinable
     func getThreadMember(
         threadId: String,
-        userId: String,
-        withMember: Bool? = nil
+        userId: String
     ) async throws -> DiscordClientResponse<ThreadMember> {
+        let endpoint = Endpoint.getThreadMember(threadId: threadId, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#get-thread-member
+    @inlinable
+    func getThreadMemberWithMember(
+        threadId: String,
+        userId: String
+    ) async throws -> DiscordClientResponse<ThreadMemberWithMember> {
         let endpoint = Endpoint.getThreadMember(threadId: threadId, userId: userId)
         return try await self.send(request: .init(
             to: endpoint,
-            queries: [("with_member", withMember.map({ "\($0)" }))]
+            queries: [("with_member", "true")]
         ))
     }
     
     /// https://discord.com/developers/docs/resources/channel#list-thread-members
     @inlinable
     func listThreadMembers(
+        threadId: String
+    ) async throws -> DiscordClientResponse<[ThreadMember]> {
+        let endpoint = Endpoint.listThreadMembers(threadId: threadId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#list-thread-members
+    @inlinable
+    func listThreadMembersWithMember(
         threadId: String,
-        withMember: Bool? = nil,
         after: String? = nil,
         limit: Int? = nil
-    ) async throws -> DiscordClientResponse<[ThreadMember]> {
+    ) async throws -> DiscordClientResponse<[ThreadMemberWithMember]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 100)
         let endpoint = Endpoint.listThreadMembers(threadId: threadId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
-                ("with_member", withMember.map({ "\($0)" })),
-                ("after", after),
+                ("with_member", "true"),
+                ("after", after.map({ "\($0)" })),
                 ("limit", limit.map({ "\($0)" })),
             ]
         ))
@@ -752,6 +751,8 @@ public extension DiscordClient {
         before: Date? = nil,
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<RequestResponse.ArchivedThread> {
+        /// Not documented, but correct, at least at the time of writing the code.
+        try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
         let endpoint = Endpoint.listPublicArchivedThreads(channelId: channelId)
         return try await self.send(request: .init(
             to: endpoint,
@@ -763,17 +764,18 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/channel#list-private-archived-threads
-    @inlinable
     func listPrivateArchivedThreads(
         channelId: String,
-        before: String? = nil,
+        before: Date? = nil,
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<RequestResponse.ArchivedThread> {
+        /// Not documented, but correct, at least at the time of writing the code.
+        try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
         let endpoint = Endpoint.listPrivateArchivedThreads(channelId: channelId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
-                ("before", before),
+                ("before", before.map(iso8601DateFormatter.string(from:))),
                 ("limit", limit.map({ "\($0)" }))
             ]
         ))
@@ -786,6 +788,8 @@ public extension DiscordClient {
         before: String? = nil,
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<RequestResponse.ArchivedThread> {
+        /// Not documented, but correct, at least at the time of writing the code.
+        try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
         let endpoint = Endpoint.listJoinedPrivateArchivedThreads(channelId: channelId)
         return try await self.send(request: .init(
             to: endpoint,

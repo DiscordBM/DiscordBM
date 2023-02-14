@@ -349,7 +349,6 @@ public struct ThreadMember: Sendable, Codable {
     /// The field is documented but doesn't say what exactly it is.
     /// Discord says: "any user-thread settings, currently only used for notifications".
     public var flags: Int
-    public var member: Guild.Member?
     
     public init(threadMemberUpdate: Gateway.ThreadMemberUpdate) {
         self.id = threadMemberUpdate.id
@@ -357,6 +356,19 @@ public struct ThreadMember: Sendable, Codable {
         self.join_timestamp = threadMemberUpdate.join_timestamp
         self.flags = threadMemberUpdate.flags
     }
+}
+
+/// For a limited amount of endpoints which return the `member` object too.
+/// https://discord.com/developers/docs/resources/channel#thread-member-object-thread-member-structure
+public struct ThreadMemberWithMember: Sendable, Codable {
+    public var id: String?
+    public var user_id: String?
+    public var join_timestamp: DiscordTimestamp
+    /// FIXME:
+    /// The field is documented but doesn't say what exactly it is.
+    /// Discord says: "any user-thread settings, currently only used for notifications".
+    public var flags: Int
+    public var member: Guild.Member
 }
 
 /// Thread-related subset of `DiscordChannel.Kind`

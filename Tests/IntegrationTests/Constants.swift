@@ -19,5 +19,6 @@ enum Constants {
     static let secondAccountId = "966330655069843457"
     static let reactionChannelId = "1073282726750330889"
     static let threadsChannelId = "1074227452987052052"
-    static let threadId = "1074227495592800356"
+    static let forumChannelId = "1075089016979984435"
+    static let announcementsChannelId = "1075135538715172954"
 }

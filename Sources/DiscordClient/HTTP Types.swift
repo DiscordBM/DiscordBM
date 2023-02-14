@@ -125,7 +125,7 @@ public struct DiscordCDNResponse: Sendable {
     }
     
     @inlinable
-    public func getFile(preferredName: String? = nil) throws -> RawFile {
+    public func getFile(overrideName: String? = nil) throws -> RawFile {
         try self.guardIsSuccessfulResponse()
         guard let body = self.httpResponse.body else {
             throw DiscordClientError.emptyBody(httpResponse)
@@ -133,7 +133,44 @@ public struct DiscordCDNResponse: Sendable {
         guard let contentType = self.httpResponse.headers.first(name: "Content-Type") else {
             throw DiscordClientError.noContentTypeHeader(httpResponse)
         }
-        let name = preferredName ?? fallbackFileName
+        let name = overrideName ?? fallbackFileName
         return RawFile(data: body, nameNoExtension: name, contentType: contentType)
+    }
+}
+
+public enum DiscordClientError: LocalizedError {
+    /// You have exhausted your rate-limits.
+    case rateLimited(url: String)
+    /// Discord responded with a non-2xx status code.
+    case badStatusCode(DiscordHTTPResponse)
+    /// The body of the response was empty.
+    case emptyBody(DiscordHTTPResponse)
+    /// Couldn't find a content-type header.
+    case noContentTypeHeader(DiscordHTTPResponse)
+    /// You need to provide an `appId`.
+    /// Either via the function arguments or the DiscordClient initializer.
+    case appIdParameterRequired
+    /// Can only send one of these query parameters.
+    case queryParametersMutuallyExclusive(queries: [(String, String)])
+    /// Query parameter is out of the accepted bounds.
+    case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)
+    
+    public var errorDescription: String? {
+        switch self {
+        case let .rateLimited(url):
+            return "rateLimited(url: \(url)"
+        case let .badStatusCode(response):
+            return "badStatusCode(\(response)"
+        case let .emptyBody(response):
+            return "emptyBody(\(response)"
+        case let .noContentTypeHeader(response):
+            return "noContentTypeHeader(\(response)"
+        case .appIdParameterRequired:
+            return "appIdParameterRequired"
+        case let .queryParametersMutuallyExclusive(queries):
+            return "queryParametersMutuallyExclusive(queries: \(queries)"
+        case let .queryParameterOutOfBounds(name, value, lowerBound, upperBound):
+            return "queryParameterOutOfBounds(name: \(name), value: \(value ?? "nil"), lowerBound: \(lowerBound), upperBound: \(upperBound)"
+        }
     }
 }

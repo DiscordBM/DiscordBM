@@ -58,7 +58,7 @@ public struct DefaultDiscordClient: DiscordClient {
         )
     }
     
-    func checkRateLimitsAllowRequest(to endpoint: Endpoint) async throws {
+    func checkRateLimitsAllowRequest(to endpoint: Endpoint, requestId: UInt) async throws {
         switch await rateLimiter.shouldRequest(to: endpoint) {
         case .true: return
         case .false:
@@ -68,7 +68,13 @@ public struct DefaultDiscordClient: DiscordClient {
                case let .basedOnHeaders(maxAllowed, _, _) = backoff {
                 if let maxAllowed = maxAllowed {
                     if after <= maxAllowed {
-                        logger.warning("HTTP bucket is exhausted. Will wait \(after) seconds before making the request")
+                        logger.warning(
+                            "HTTP bucket is exhausted. Will wait \(after) seconds before making the request",
+                            metadata: [
+                                "endpoint": .stringConvertible(endpoint.urlDescription),
+                                "request-id": .stringConvertible(requestId)
+                            ]
+                        )
                         let nanos = UInt64(after * 1_000_000_000)
                         try await Task.sleep(nanoseconds: nanos)
                         await rateLimiter.addGlobalRateLimitRecord()
@@ -76,7 +82,13 @@ public struct DefaultDiscordClient: DiscordClient {
                         throw DiscordClientError.rateLimited(url: "\(endpoint.urlDescription)")
                     }
                 } else {
-                    logger.warning("HTTP bucket is exhausted. Will wait \(after) seconds before making the request")
+                    logger.warning(
+                        "HTTP bucket is exhausted. Will wait \(after) seconds before making the request",
+                        metadata: [
+                            "endpoint": .stringConvertible(endpoint.urlDescription),
+                            "request-id": .stringConvertible(requestId)
+                        ]
+                    )
                     let nanos = UInt64(after * 1_000_000_000)
                     try await Task.sleep(nanoseconds: nanos)
                     await rateLimiter.addGlobalRateLimitRecord()
@@ -210,14 +222,17 @@ public struct DefaultDiscordClient: DiscordClient {
             
             if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 logger.debug("Got cached response", metadata: [
-                    "endpoint": .string(req.endpoint.urlSuffixDescription),
+                    "endpoint": .string(req.endpoint.urlDescription),
                     "queries": .stringConvertible(req.queries),
                     "retry": .stringConvertible(retryCounter)
                 ])
                 return (cached, true)
             }
             
-            try await self.checkRateLimitsAllowRequest(to: req.endpoint)
+            try await self.checkRateLimitsAllowRequest(
+                to: req.endpoint,
+                requestId: requestId
+            )
             var request = try HTTPClient.Request(
                 url: req.endpoint.url + req.queries.makeForURLQuery(),
                 method: req.endpoint.httpMethod
@@ -269,14 +284,15 @@ public struct DefaultDiscordClient: DiscordClient {
             }
             if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 logger.debug("Got cached response", metadata: [
-                    "endpoint": .string(req.endpoint.urlSuffixDescription),
+                    "endpoint": .string(req.endpoint.urlDescription),
                     "queries": .stringConvertible(req.queries),
                     "retry": .stringConvertible(retryCounter)
                 ])
                 return (cached, true)
             }
             
-            try await self.checkRateLimitsAllowRequest(to: req.endpoint)
+            try await self.checkRateLimitsAllowRequest(to: req.endpoint, requestId: requestId)
+            
             let data = try DiscordGlobalConfiguration.encoder.encode(payload)
             var request = try HTTPClient.Request(
                 url: req.endpoint.url + req.queries.makeForURLQuery(),
@@ -332,14 +348,14 @@ public struct DefaultDiscordClient: DiscordClient {
             }
             if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
                 logger.debug("Got cached response", metadata: [
-                    "endpoint": .string(req.endpoint.urlSuffixDescription),
+                    "endpoint": .string(req.endpoint.urlDescription),
                     "queries": .stringConvertible(req.queries),
                     "retry": .stringConvertible(retryCounter)
                 ])
                 return (cached, true)
             }
             
-            try await self.checkRateLimitsAllowRequest(to: req.endpoint)
+            try await self.checkRateLimitsAllowRequest(to: req.endpoint, requestId: requestId)
             
             let body: HTTPClient.Body
             let contentType: String

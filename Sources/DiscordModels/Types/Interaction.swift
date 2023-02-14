@@ -1,3 +1,4 @@
+import Foundation
 
 /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-structure
 public struct Interaction: Sendable, Codable {
@@ -254,9 +255,18 @@ extension Interaction {
         
         public var components: [Component]
         
-        enum CodingError: Error {
+        public enum CodingError: LocalizedError {
             case unexpectedComponentKind(Kind)
             case actionRowIsSupposedToOnlyAppearAtTopLevel
+            
+            public var errorDescription: String? {
+                switch self {
+                case let .unexpectedComponentKind(kind):
+                    return "unexpectedComponentKind(\(kind))"
+                case .actionRowIsSupposedToOnlyAppearAtTopLevel:
+                    return "actionRowIsSupposedToOnlyAppearAtTopLevel"
+                }
+            }
         }
         
         enum CodingKeys: String, CodingKey {

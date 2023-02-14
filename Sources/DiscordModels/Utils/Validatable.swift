@@ -1,10 +1,11 @@
+import Foundation
 
 public protocol ValidatablePayload {
     /// Default library functions only throw ``ValidationError``.
     func validate() throws
 }
 
-public enum ValidationError: Error {
+public enum ValidationError: LocalizedError {
     /// At least one of these fields is required to be present.
     case atLeastOneFieldIsRequired(names: [String])
     /// Too many characters in the target (likely a String). Need to shorten it.
@@ -21,6 +22,27 @@ public enum ValidationError: Error {
     case cantBeEmpty(name: String)
     /// The number is too big or too small.
     case numberOutOfRange(name: String, number: String, min: String, max: String)
+    
+    public var errorDescription: String? {
+        switch self {
+        case let .atLeastOneFieldIsRequired(names):
+            return "atLeastOneFieldIsRequired(names: \(names))"
+        case let .tooManyCharacters(name, max):
+            return "tooManyCharacters(name: \(name), max: \(max)"
+        case let .invalidCharactersCount(name, min, max):
+            return "invalidCharactersCount(name: \(name), min: \(min), max: \(max)"
+        case let .tooManyElements(name, max):
+            return "tooManyElements(name: \(name), max: \(max)"
+        case let .containsProhibitedValues(name, reason, valuesRepresentation):
+            return "containsProhibitedValues(name: \(name), reason: \(reason), valuesRepresentation: \(valuesRepresentation)"
+        case let .hasPrecondition(name, reason):
+            return "hasPrecondition(name: \(name), reason: \(reason)"
+        case let .cantBeEmpty(name):
+            return "cantBeEmpty(name: \(name)"
+        case let .numberOutOfRange(name, number, min, max):
+            return "numberOutOfRange(name: \(name), number: \(number), min: \(min), max: \(max)"
+        }
+    }
 }
 
 extension ValidatablePayload {

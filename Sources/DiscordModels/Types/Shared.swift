@@ -321,9 +321,18 @@ extension DiscordLocaleDict: Sendable where C: Sendable { }
 /// A timestamp that decode/encodes itself how Discord expects.
 public struct DiscordTimestamp: Codable {
     
-    public enum DecodingError: Error {
+    public enum DecodingError: LocalizedError {
         case unexpectedFormat([CodingKey], String)
         case conversionFailure([CodingKey], String, DateComponents)
+        
+        public var errorDescription: String? {
+            switch self {
+            case let .unexpectedFormat(codingKey, string):
+                return "unexpectedFormat(\(codingKey), \(string)"
+            case let .conversionFailure(codingKey, string, components):
+                return "conversionFailure(\(codingKey), \(string), \(components))"
+            }
+        }
     }
     
     public var date: Date
@@ -531,8 +540,15 @@ extension IntBitField: Sendable where R: Sendable { }
 public struct StringBitField<R>: BitField, Codable
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
-    enum DecodingError: Error {
+    enum DecodingError: LocalizedError {
         case notRepresentingInt(String)
+        
+        public var errorDescription: String? {
+            switch self {
+            case let .notRepresentingInt(string):
+                return "notRepresentingInt(\(string))"
+            }
+        }
     }
     
     public var values: Set<R>
