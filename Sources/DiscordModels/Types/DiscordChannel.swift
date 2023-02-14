@@ -10,10 +10,10 @@ public struct DiscordChannel: Sendable, Codable {
         case guildVoice = 2
         case groupDm = 3
         case guildCategory = 4
-        case guildNews = 5
-        case guildNewsThread = 10
-        case guildPublicThread = 11
-        case guildPrivateThread = 12
+        case guildAnnouncement = 5
+        case announcementThread = 10
+        case publicThread = 11
+        case privateThread = 12
         case guildStageVoice = 13
         case guildDirectory = 14
         case guildForum = 15
@@ -61,6 +61,16 @@ public struct DiscordChannel: Sendable, Codable {
         case full = 2
     }
     
+    /// Not exactly documented, but they do mention these times in a few different places.
+    /// Times are in minutes.
+    /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
+    public enum AutoArchiveDuration: Int, Sendable, Codable {
+        case oneHour = 60
+        case oneDay = 1_440
+        case threeDays = 4_320
+        case sevenDays = 10_080
+    }
+    
     /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
     public struct ForumTag: Sendable, Codable {
         public var id: String?
@@ -94,7 +104,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var total_message_sent: Int?
     public var member_count: Int?
     public var thread_metadata: ThreadMetadata?
-    public var default_auto_archive_duration: Int?
+    public var default_auto_archive_duration: AutoArchiveDuration?
     public var default_thread_rate_limit_per_user: Int?
     public var default_reaction_emoji: ForumTag?
     public var default_sort_order: Int?
@@ -323,7 +333,7 @@ extension DiscordChannel {
 /// https://discord.com/developers/docs/resources/channel#thread-metadata-object
 public struct ThreadMetadata: Sendable, Codable {
     public var archived: Bool
-    public var auto_archive_duration: Int
+    public var auto_archive_duration: DiscordChannel.AutoArchiveDuration
     public var archive_timestamp: DiscordTimestamp
     public var locked: Bool
     public var invitable: Bool?
@@ -339,7 +349,6 @@ public struct ThreadMember: Sendable, Codable {
     /// The field is documented but doesn't say what exactly it is.
     /// Discord says: "any user-thread settings, currently only used for notifications".
     public var flags: Int
-    public var member: Guild.Member?
     
     public init(threadMemberUpdate: Gateway.ThreadMemberUpdate) {
         self.id = threadMemberUpdate.id
@@ -347,6 +356,27 @@ public struct ThreadMember: Sendable, Codable {
         self.join_timestamp = threadMemberUpdate.join_timestamp
         self.flags = threadMemberUpdate.flags
     }
+}
+
+/// For a limited amount of endpoints which return the `member` object too.
+/// https://discord.com/developers/docs/resources/channel#thread-member-object-thread-member-structure
+public struct ThreadMemberWithMember: Sendable, Codable {
+    public var id: String?
+    public var user_id: String?
+    public var join_timestamp: DiscordTimestamp
+    /// FIXME:
+    /// The field is documented but doesn't say what exactly it is.
+    /// Discord says: "any user-thread settings, currently only used for notifications".
+    public var flags: Int
+    public var member: Guild.Member
+}
+
+/// Thread-related subset of `DiscordChannel.Kind`
+/// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
+public enum ThreadKind: Int, Sendable, Codable {
+    case announcementThread = 10
+    case publicThread = 11
+    case privateThread = 12
 }
 
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure

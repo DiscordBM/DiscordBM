@@ -1,3 +1,4 @@
+import Foundation
 
 public struct Gateway: Sendable, Codable {
     
@@ -183,8 +184,15 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
-        public enum GatewayDecodingError: Error {
+        public enum GatewayDecodingError: LocalizedError {
             case unhandledDispatchEvent(type: String?)
+            
+            public var errorDescription: String? {
+                switch self {
+                case let .unhandledDispatchEvent(type):
+                    return "unhandledDispatchEvent(type: \(type)"
+                }
+            }
         }
         
         enum CodingKeys: String, CodingKey {
@@ -369,8 +377,15 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
-        enum EncodingError: Error {
+        enum EncodingError: LocalizedError {
             case notSupposedToBeSent(message: String)
+            
+            public var errorDescription: String? {
+                switch self {
+                case let .notSupposedToBeSent(message):
+                    return "notSupposedToBeSent(\(message)"
+                }
+            }
         }
         
         public func encode(to encoder: Encoder) throws {

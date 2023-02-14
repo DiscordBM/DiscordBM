@@ -21,6 +21,7 @@ public protocol DiscordClient: Sendable {
 
 //MARK: - Default functions for DiscordClient
 public extension DiscordClient {
+    
     @inlinable
     func send<C: Codable>(request: DiscordHTTPRequest) async throws -> DiscordClientResponse<C> {
         let response = try await self.send(request: request)
@@ -53,24 +54,6 @@ public extension DiscordClient {
         let response = try await self.sendMultipart(request: request, payload: payload)
         return DiscordClientResponse(httpResponse: response)
     }
-}
-
-public enum DiscordClientError: Error {
-    /// You have exhausted your rate-limits.
-    case rateLimited(url: String)
-    /// Discord responded with a non-2xx status code.
-    case badStatusCode(DiscordHTTPResponse)
-    /// The body of the response was empty.
-    case emptyBody(DiscordHTTPResponse)
-    /// Couldn't find a content-type header.
-    case noContentTypeHeader(DiscordHTTPResponse)
-    /// You need to provide an `appId`.
-    /// Either via the function arguments or the DiscordClient initializer.
-    case appIdParameterRequired
-    /// Can only send one of these query parameters.
-    case queryParametersMutuallyExclusive(queries: [(String, String)])
-    /// Query parameter is out of the accepted bounds.
-    case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)
 }
 
 //MARK: - Internal +DiscordClient
@@ -117,6 +100,9 @@ extension DiscordClient {
 }
 
 //MARK: - Public +DiscordClient
+
+private let iso8601DateFormatter = ISO8601DateFormatter()
+
 public extension DiscordClient {
     
     /// https://discord.com/developers/docs/topics/gateway#get-gateway
@@ -307,7 +293,7 @@ public extension DiscordClient {
         with_localizations: Bool? = nil
     ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
         let endpoint = Endpoint.getApplicationGlobalCommands(appId: try requireAppId(appId))
-        return try await send(request: .init(
+        return try await self.send(request: .init(
             to: endpoint,
             queries: [("with_localizations", with_localizations.map { "\($0)" })]
         ))
@@ -622,7 +608,200 @@ public extension DiscordClient {
         )
     }
     
+    /// https://discord.com/developers/docs/resources/channel#start-thread-from-message
+    @inlinable
+    func startThreadFromMessage(
+        channelId: String,
+        messageId: String,
+        reason: String? = nil,
+        payload: RequestBody.CreateThreadFromMessage
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = Endpoint.startThreadFromMessage(channelId: channelId, messageId: messageId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#start-thread-without-message
+    @inlinable
+    func startThreadWithoutMessage(
+        channelId: String,
+        reason: String? = nil,
+        payload: RequestBody.CreateThreadWithoutMessage
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = Endpoint.startThreadWithoutMessage(channelId: channelId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel
+    @inlinable
+    func startThreadInForumChannel(
+        channelId: String,
+        reason: String? = nil,
+        payload: RequestBody.CreateThreadInForumChannel
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = Endpoint.startThreadInForumChannel(channelId: channelId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#join-thread
+    @inlinable
+    func joinThread(id: String) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.joinThread(id: id)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#add-thread-member
+    @inlinable
+    func addThreadMember(
+        threadId: String,
+        userId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.addThreadMember(threadId: threadId, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#leave-thread
+    @inlinable
+    func leaveThread(id: String) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.leaveThread(id: id)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#remove-thread-member
+    @inlinable
+    func removeThreadMember(
+        threadId: String,
+        userId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.removeThreadMember(threadId: threadId, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#get-thread-member
+    @inlinable
+    func getThreadMember(
+        threadId: String,
+        userId: String
+    ) async throws -> DiscordClientResponse<ThreadMember> {
+        let endpoint = Endpoint.getThreadMember(threadId: threadId, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#get-thread-member
+    @inlinable
+    func getThreadMemberWithMember(
+        threadId: String,
+        userId: String
+    ) async throws -> DiscordClientResponse<ThreadMemberWithMember> {
+        let endpoint = Endpoint.getThreadMember(threadId: threadId, userId: userId)
+        return try await self.send(request: .init(
+            to: endpoint,
+            queries: [("with_member", "true")]
+        ))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#list-thread-members
+    @inlinable
+    func listThreadMembers(
+        threadId: String
+    ) async throws -> DiscordClientResponse<[ThreadMember]> {
+        let endpoint = Endpoint.listThreadMembers(threadId: threadId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#list-thread-members
+    @inlinable
+    func listThreadMembersWithMember(
+        threadId: String,
+        after: String? = nil,
+        limit: Int? = nil
+    ) async throws -> DiscordClientResponse<[ThreadMemberWithMember]> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 100)
+        let endpoint = Endpoint.listThreadMembers(threadId: threadId)
+        return try await self.send(request: .init(
+            to: endpoint,
+            queries: [
+                ("with_member", "true"),
+                ("after", after.map({ "\($0)" })),
+                ("limit", limit.map({ "\($0)" })),
+            ]
+        ))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#list-public-archived-threads
+    func listPublicArchivedThreads(
+        channelId: String,
+        before: Date? = nil,
+        limit: Int? = nil
+    ) async throws -> DiscordClientResponse<RequestResponse.ArchivedThread> {
+        /// Not documented, but correct, at least at the time of writing the code.
+        try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
+        let endpoint = Endpoint.listPublicArchivedThreads(channelId: channelId)
+        return try await self.send(request: .init(
+            to: endpoint,
+            queries: [
+                ("before", before.map(iso8601DateFormatter.string(from:))),
+                ("limit", limit.map({ "\($0)" }))
+            ]
+        ))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#list-private-archived-threads
+    func listPrivateArchivedThreads(
+        channelId: String,
+        before: Date? = nil,
+        limit: Int? = nil
+    ) async throws -> DiscordClientResponse<RequestResponse.ArchivedThread> {
+        /// Not documented, but correct, at least at the time of writing the code.
+        try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
+        let endpoint = Endpoint.listPrivateArchivedThreads(channelId: channelId)
+        return try await self.send(request: .init(
+            to: endpoint,
+            queries: [
+                ("before", before.map(iso8601DateFormatter.string(from:))),
+                ("limit", limit.map({ "\($0)" }))
+            ]
+        ))
+    }
+    
+    /// https://discord.com/developers/docs/resources/channel#list-joined-private-archived-threads
+    @inlinable
+    func listJoinedPrivateArchivedThreads(
+        channelId: String,
+        before: String? = nil,
+        limit: Int? = nil
+    ) async throws -> DiscordClientResponse<RequestResponse.ArchivedThread> {
+        /// Not documented, but correct, at least at the time of writing the code.
+        try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
+        let endpoint = Endpoint.listJoinedPrivateArchivedThreads(channelId: channelId)
+        return try await self.send(request: .init(
+            to: endpoint,
+            queries: [
+                ("before", before),
+                ("limit", limit.map({ "\($0)" }))
+            ]
+        ))
+    }
+    
     /// https://discord.com/developers/docs/resources/webhook#create-webhook
+    @inlinable
     func createWebhook(
         channelId: String,
         reason: String? = nil,
@@ -639,12 +818,14 @@ public extension DiscordClient {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#get-channel-webhooks
+    @inlinable
     func getChannelWebhooks(channelId: String) async throws -> DiscordClientResponse<[Webhook]> {
         let endpoint = Endpoint.getChannelWebhooks(channelId: channelId)
         return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
+    @inlinable
     func getGuildWebhooks(guildId: String) async throws -> DiscordClientResponse<[Webhook]> {
         let endpoint = Endpoint.getGuildWebhooks(guildId: guildId)
         return try await self.send(request: .init(to: endpoint))
@@ -652,6 +833,7 @@ public extension DiscordClient {
     
     /// Requires authentication using an authorized bot-token.
     /// https://discord.com/developers/docs/resources/webhook#get-webhook
+    @inlinable
     func getWebhook(id: String) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = Endpoint.getWebhook1(id: id)
         return try await self.send(request: .init(to: endpoint))
@@ -659,6 +841,7 @@ public extension DiscordClient {
     
     /// Doesn't require authentication using bot-token.
     /// https://discord.com/developers/docs/resources/webhook#get-webhook-with-token
+    @inlinable
     func getWebhook(address: WebhookAddress) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = Endpoint.getWebhook2(id: address.id, token: address.token)
         return try await self.send(request: .init(to: endpoint))
@@ -666,6 +849,7 @@ public extension DiscordClient {
     
     /// Requires authentication using an authorized bot-token.
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook
+    @inlinable
     func modifyWebhook(
         id: String,
         reason: String? = nil,
@@ -683,6 +867,7 @@ public extension DiscordClient {
     
     /// Doesn't require authentication using bot-token.
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
+    @inlinable
     func modifyWebhook(
         address: WebhookAddress,
         reason: String? = nil,
@@ -700,6 +885,7 @@ public extension DiscordClient {
     
     /// Requires authentication using an authorized bot-token.
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook
+    @inlinable
     func deleteWebhook(id: String, reason: String? = nil) async throws -> DiscordHTTPResponse {
         let endpoint = Endpoint.deleteWebhook1(id: id)
         return try await self.send(request: .init(
@@ -710,6 +896,7 @@ public extension DiscordClient {
     
     /// Doesn't require authentication using bot-token.
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook-with-token
+    @inlinable
     func deleteWebhook(
         address: WebhookAddress,
         reason: String? = nil
@@ -765,6 +952,7 @@ public extension DiscordClient {
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#get-webhook-message
+    @inlinable
     func getWebhookMessage(
         address: WebhookAddress,
         messageId: String,
@@ -784,6 +972,7 @@ public extension DiscordClient {
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message
+    @inlinable
     func editWebhookMessage(
         address: WebhookAddress,
         messageId: String,
@@ -804,10 +993,10 @@ public extension DiscordClient {
         )
     }
     
-    
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook-message
+    @inlinable
     func deleteWebhookMessage(
         address: WebhookAddress,
         messageId: String,

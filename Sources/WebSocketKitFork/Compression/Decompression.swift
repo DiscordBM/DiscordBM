@@ -1,3 +1,4 @@
+import Foundation
 import CZlib
 
 public enum Decompression {
@@ -12,7 +13,7 @@ public enum Decompression {
         public static let enabled = Configuration()
     }
     
-    public struct DecompressionError: Error, Equatable, CustomStringConvertible {
+    public struct DecompressionError: LocalizedError, Equatable, CustomStringConvertible {
         
         private enum Base: Error, Equatable {
             case inflationError(Int)
@@ -36,7 +37,18 @@ public enum Decompression {
         public static var invalidTrailingData = Self(base: .invalidTrailingData)
         
         public var description: String {
-            return String(describing: self.base)
+            switch self.base {
+            case let .inflationError(int):
+                return "inflationError(\(int))"
+            case let .initializationError(int):
+                return "initializationError(\(int))"
+            case .invalidTrailingData:
+                return "invalidTrailingData"
+            }
+        }
+        
+        public var errorDescription: String? {
+            self.description
         }
     }
     

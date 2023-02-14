@@ -382,7 +382,7 @@ class DiscordClientTests: XCTestCase {
     
     func testDMs() async throws {
         /// Create DM
-        let response = try await self.client.createDM(recipient_id: Constants.personalId).decode()
+        let response = try await client.createDM(recipient_id: Constants.personalId).decode()
         
         XCTAssertEqual(response.type, .dm)
         let recipient = try XCTUnwrap(response.recipients?.first)
@@ -400,35 +400,187 @@ class DiscordClientTests: XCTestCase {
     }
     
     func testThreads() async throws {
-        /// Create
-        let text = "Testing! \(Date())"
+        
+        /// Create a message for creating a thread
         let message = try await client.createMessage(
-            channelId: Constants.threadId,
-            payload: .init(content: text)
+            channelId: Constants.threadsChannelId,
+            payload: .init(content: "Thread-test Message")
         ).decode()
         
-        XCTAssertEqual(message.content, text)
-        XCTAssertEqual(message.channel_id, Constants.threadId)
-        
-        /// Edit
-        let newText = "Edit Testing! \(Date())"
-        let edited = try await client.editMessage(
-            channelId: Constants.threadId,
+        /// Create Thread
+        let thread = try await client.startThreadFromMessage(
+            channelId: Constants.threadsChannelId,
             messageId: message.id,
-            payload: .init(embeds: [
-                .init(description: newText)
-            ])
+            reason: "Testing!",
+            payload: .init(
+                name: "Creating a Thread to Test!",
+                auto_archive_duration: .threeDays,
+                rate_limit_per_user: 2
+            )
         ).decode()
         
-        XCTAssertEqual(edited.content, text)
-        XCTAssertEqual(edited.embeds.first?.description, newText)
-        XCTAssertEqual(edited.channel_id, Constants.threadId)
+        do {
+            let text = "Testing! \(Date())"
+            let message = try await client.createMessage(
+                channelId: thread.id,
+                payload: .init(content: text)
+            ).decode()
+            
+            XCTAssertEqual(message.content, text)
+            XCTAssertEqual(message.channel_id, thread.id)
+            
+            /// Edit
+            let newText = "Edit Testing! \(Date())"
+            let edited = try await client.editMessage(
+                channelId: thread.id,
+                messageId: message.id,
+                payload: .init(embeds: [
+                    .init(description: newText)
+                ])
+            ).decode()
+            
+            XCTAssertEqual(edited.content, text)
+            XCTAssertEqual(edited.embeds.first?.description, newText)
+            XCTAssertEqual(edited.channel_id, thread.id)
+            
+            /// Delete
+            try await client.deleteMessage(
+                channelId: thread.id,
+                messageId: message.id,
+                reason: "Random reason " + UUID().uuidString
+            ).guardIsSuccessfulResponse()
+        }
         
-        /// Delete
+        try await client.addThreadMember(
+            threadId: thread.id,
+            userId: Constants.personalId
+        ).guardIsSuccessfulResponse()
+        
+        let threadMember = try await client.getThreadMember(
+            threadId: thread.id,
+            userId: Constants.personalId
+        ).decode()
+        
+        XCTAssertEqual(threadMember.user_id, Constants.personalId)
+        
+        let threadMemberWithMember = try await client.getThreadMemberWithMember(
+            threadId: thread.id,
+            userId: Constants.personalId
+        ).decode()
+        
+        XCTAssertEqual(threadMemberWithMember.user_id, Constants.personalId)
+        XCTAssertNotNil(threadMemberWithMember.member.user?.id, Constants.personalId)
+        
+        let allThreadMembers = try await client.listThreadMembers(threadId: thread.id).decode()
+        
+        guard allThreadMembers.count == 2 else {
+            XCTFail("Expected 2 thread member but got \(allThreadMembers.count)")
+            return
+        }
+        
+        let allThreadMembersAfter = try await client.listThreadMembersWithMember(
+            threadId: thread.id,
+            after: allThreadMembers[0].user_id!
+        ).decode()
+        
+        XCTAssertEqual(allThreadMembersAfter.count, 1)
+        let otherUser = [Constants.personalId, Constants.botId].filter {
+            $0 != allThreadMembers[0].user_id!
+        }
+        XCTAssertEqual(allThreadMembersAfter.first?.user_id, otherUser[0])
+        
+        let limitedThreadMembers = try await client.listThreadMembersWithMember(
+            threadId: thread.id,
+            limit: 1
+        ).decode()
+        
+        XCTAssertEqual(limitedThreadMembers.count, 1)
+        
+        try await client.leaveThread(id: thread.id)
+            .guardIsSuccessfulResponse()
+        
+        let threadMembersLeft = try await client.listThreadMembers(threadId: thread.id).decode()
+        
+        XCTAssertEqual(threadMembersLeft.first?.user_id, Constants.personalId)
+        
+        try await client.joinThread(id: thread.id)
+            .guardIsSuccessfulResponse()
+        
+        let threadMembersRejoined = try await client.listThreadMembers(threadId: thread.id).decode()
+        
+        XCTAssertEqual(threadMembersRejoined.count, 2)
+        
+        try await client.removeThreadMember(
+            threadId: thread.id,
+            userId: Constants.personalId
+        ).guardIsSuccessfulResponse()
+        
+        let threadMembersRemoved = try await client.listThreadMembers(threadId: thread.id).decode()
+        
+        XCTAssertEqual(threadMembersRemoved.first?.user_id, Constants.botId)
+        
         try await client.deleteMessage(
-            channelId: Constants.threadId,
-            messageId: message.id,
-            reason: "Random reason " + UUID().uuidString
+            channelId: Constants.threadsChannelId,
+            messageId: message.id
+        ).guardIsSuccessfulResponse()
+        
+        let threadWithoutMessage = try await client.startThreadWithoutMessage(
+            channelId: Constants.announcementsChannelId,
+            reason: "Testing without message thread",
+            payload: .init(
+                name: "Thread test without message",
+                auto_archive_duration: .oneHour,
+                type: .announcementThread,
+                invitable: true,
+                rate_limit_per_user: 900
+            )
+        ).decode()
+        
+        let emptyArchivedThreads = try await client.listPublicArchivedThreads(
+            channelId: Constants.announcementsChannelId,
+            before: Date(),
+            limit: 2
+        ).decode()
+        
+        XCTAssertTrue(emptyArchivedThreads.threads.isEmpty)
+        XCTAssertTrue(emptyArchivedThreads.members.isEmpty)
+        
+        /// The message-id is the same as the thread id based on what Discord says
+        try await client.deleteMessage(
+            channelId: Constants.announcementsChannelId,
+            messageId: threadWithoutMessage.id
+        ).guardIsSuccessfulResponse()
+        
+        let forumThreadName = "Forum thread test"
+        let forumThread = try await client.startThreadInForumChannel(
+            channelId: Constants.forumChannelId,
+            reason: "Forum channel thread testing",
+            payload: .init(
+                name: forumThreadName,
+                auto_archive_duration: .oneDay,
+                rate_limit_per_user: nil,
+                message: .init(content: "Hello!"),
+                applied_tags: nil
+            )
+        ).decode()
+        
+        XCTAssertEqual(forumThread.name, forumThreadName)
+        
+        try await client.listPublicArchivedThreads(
+            channelId: Constants.threadsChannelId,
+            before: Date().addingTimeInterval(-60),
+            limit: 2
+        ).guardIsSuccessfulResponse()
+        
+        try await client.listPrivateArchivedThreads(
+            channelId: Constants.threadsChannelId,
+            before: Date().addingTimeInterval(-3_600),
+            limit: 2
+        ).guardIsSuccessfulResponse()
+        
+        try await client.listJoinedPrivateArchivedThreads(
+            channelId: Constants.threadsChannelId,
+            limit: 2
         ).guardIsSuccessfulResponse()
     }
     
@@ -438,7 +590,7 @@ class DiscordClientTests: XCTestCase {
         
         let webhookName1 = "TestWebhook1"
         
-        let webhook1 = try await self.client.createWebhook(
+        let webhook1 = try await client.createWebhook(
             channelId: Constants.webhooksChannelId,
             payload: .init(
                 name: webhookName1,
@@ -455,7 +607,7 @@ class DiscordClientTests: XCTestCase {
         
         let webhookName2 = "TestWebhook2"
         
-        let webhook2 = try await self.client.createWebhook(
+        let webhook2 = try await client.createWebhook(
             channelId: Constants.webhooksChannelId,
             payload: .init(name: webhookName2)
         ).decode()
@@ -470,17 +622,17 @@ class DiscordClientTests: XCTestCase {
         let webhook1Token = try XCTUnwrap(webhook1.token)
         let webhook2Token = try XCTUnwrap(webhook2.token)
         
-        let getWebhook1 = try await self.client.getWebhook(id: webhook1.id).decode()
+        let getWebhook1 = try await client.getWebhook(id: webhook1.id).decode()
         XCTAssertEqual(getWebhook1.id, webhook1.id)
         XCTAssertEqual(getWebhook1.token, webhook1.token)
         
-        let getWebhook2 = try await self.client.getWebhook(
+        let getWebhook2 = try await client.getWebhook(
             address: .deconstructed(id: webhook2.id, token: webhook2Token)
         ).decode()
         XCTAssertEqual(getWebhook2.id, webhook2.id)
         XCTAssertEqual(getWebhook2.token, webhook2.token)
         
-        let channelWebhooks = try await self.client.getChannelWebhooks(
+        let channelWebhooks = try await client.getChannelWebhooks(
             channelId: Constants.webhooksChannelId
         ).decode()
         
@@ -496,7 +648,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(channelWebhook2.token, webhook2.token)
         XCTAssertEqual(channelWebhook2.id, webhook2.id)
         
-        let guildWebhooks = try await self.client.getGuildWebhooks(
+        let guildWebhooks = try await client.getGuildWebhooks(
             guildId: Constants.guildId
         ).decode()
         
@@ -513,7 +665,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(guildWebhook2.id, webhook2.id)
         
         let webhookNewName1 = "WebhookTestNew1"
-        let modify1 = try await self.client.modifyWebhook(
+        let modify1 = try await client.modifyWebhook(
             id: webhook1.id,
             payload: .init(
                 name: webhookNewName1,
@@ -531,7 +683,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(modify1.channel_id, Constants.webhooks2ChannelId)
         
         let webhookNewName2 = "WebhookTestNew2"
-        let modify2 = try await self.client.modifyWebhook(
+        let modify2 = try await client.modifyWebhook(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             payload: .init(name: webhookNewName2)
         ).decode()
@@ -543,7 +695,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(modify2.guild_id, Constants.guildId)
         XCTAssertEqual(modify2.channel_id, Constants.webhooksChannelId)
         
-        let noContentResponse = try await self.client.executeWebhook(
+        let noContentResponse = try await client.executeWebhook(
             address: .deconstructed(id: webhook1.id, token: webhook1Token),
             payload: .init(content: "Testing! \(Date())")
         )
@@ -551,7 +703,7 @@ class DiscordClientTests: XCTestCase {
         
         let text = "Testing! \(Date())"
         let date = Date()
-        let message = try await self.client.executeWebhookWithResponse(
+        let message = try await client.executeWebhookWithResponse(
             address: .deconstructed(id: webhook1.id, token: webhook1Token),
             payload: .init(
                 content: text,
@@ -568,7 +720,7 @@ class DiscordClientTests: XCTestCase {
         
         let text2 = "Testing! \(Date())"
         let threadId = "1066278441256751114"
-        let threadMessage = try await self.client.executeWebhookWithResponse(
+        let threadMessage = try await client.executeWebhookWithResponse(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             threadId: threadId,
             payload: .init(content: text2)
@@ -577,7 +729,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(threadMessage.channel_id, threadId)
         XCTAssertEqual(threadMessage.content, text2)
         
-        let getMessage = try await self.client.getWebhookMessage(
+        let getMessage = try await client.getWebhookMessage(
             address: .deconstructed(id: webhook1.id, token: webhook1Token),
             messageId: message.id
         ).decode()
@@ -587,7 +739,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(getMessage.embeds.map(\.title), message.embeds.map(\.title))
         
         let newText = "Testing Edit! \(Date())"
-        let editThreadMessage = try await self.client.editWebhookMessage(
+        let editThreadMessage = try await client.editWebhookMessage(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             messageId: threadMessage.id,
             threadId: threadId,
@@ -597,7 +749,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(editThreadMessage.content, newText)
         XCTAssertEqual(editThreadMessage.id, threadMessage.id)
         
-        let getThreadMessage = try await self.client.getWebhookMessage(
+        let getThreadMessage = try await client.getWebhookMessage(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             messageId: threadMessage.id,
             threadId: threadId
@@ -606,17 +758,17 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(getThreadMessage.id, threadMessage.id)
         XCTAssertEqual(getThreadMessage.content, editThreadMessage.content)
         
-        let deleteThreadMessage = try await self.client.deleteWebhookMessage(
+        let deleteThreadMessage = try await client.deleteWebhookMessage(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             messageId: threadMessage.id,
             threadId: threadId
         )
         XCTAssertNoThrow(try deleteThreadMessage.guardIsSuccessfulResponse())
         
-        let delete1 = try await self.client.deleteWebhook(id: webhook1.id, reason: "Testing! 1")
+        let delete1 = try await client.deleteWebhook(id: webhook1.id, reason: "Testing! 1")
         XCTAssertNoThrow(try delete1.guardIsSuccessfulResponse())
         
-        let delete2 = try await self.client.deleteWebhook(
+        let delete2 = try await client.deleteWebhook(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             reason: "Testing! 2"
         )
@@ -625,8 +777,8 @@ class DiscordClientTests: XCTestCase {
     
     /// Couldn't find test-cases for some of the functions
     func testCDN() async throws {
-        await XCTAssertNoAsyncThrow {
-            let file = try await self.client.getCDNCustomEmoji(
+        do {
+            let file = try await client.getCDNCustomEmoji(
                 emojiId: "1073704788400820324"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
@@ -634,41 +786,41 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(file.filename, "1073704788400820324.png")
         }
         
-        await XCTAssertNoAsyncThrow {
-            let file = try await self.client.getCDNGuildIcon(
+        do {
+            let file = try await client.getCDNGuildIcon(
                 guildId: "922186320275722322",
                 icon: "a_6367dd2460a846748ad133206c910da5"
-            ).getFile(preferredName: "guildIcon")
+            ).getFile(overrideName: "guildIcon")
             XCTAssertGreaterThan(file.data.readableBytes, 10)
             XCTAssertEqual(file.extension, "gif")
             XCTAssertEqual(file.filename, "guildIcon.gif")
         }
         
-        await XCTAssertNoAsyncThrow {
-            let file = try await self.client.getCDNGuildSplash(
+        do {
+            let file = try await client.getCDNGuildSplash(
                 guildId: "922186320275722322",
                 splash: "276ba186b5208a74344706941eb7fe8d"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-        await XCTAssertNoAsyncThrow {
-            let file = try await self.client.getCDNGuildDiscoverySplash(
+        do {
+            let file = try await client.getCDNGuildDiscoverySplash(
                 guildId: "922186320275722322",
                 splash: "178be4921b08b761d9d9d6117c6864e2"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-        await XCTAssertNoAsyncThrow {
-            let file = try await self.client.getCDNGuildBanner(
+        do {
+            let file = try await client.getCDNGuildBanner(
                 guildId: "922186320275722322",
                 banner: "6e2e4d93e102a997cc46d15c28b0dfa0"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-//        await XCTAssertNoAsyncThrow {
+//        do {
 //            let file = try await client.getCDNUserBanner(
 //                userId: String,
 //                banner: String
@@ -676,23 +828,23 @@ class DiscordClientTests: XCTestCase {
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
         
-        await XCTAssertNoAsyncThrow {
-            let file = try await self.client.getCDNDefaultUserAvatar(
+        do {
+            let file = try await client.getCDNDefaultUserAvatar(
                 discriminator: 0517
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
             XCTAssertEqual(file.extension, "png")
         }
         
-        await XCTAssertNoAsyncThrow {
-            let file = try await self.client.getCDNUserAvatar(
+        do {
+            let file = try await client.getCDNUserAvatar(
                 userId: "290483761559240704",
                 avatar: "2df0a0198e00ba23bf2dc728c4db94d9"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-        await XCTAssertNoAsyncThrow {
+        do {
             let file = try await client.getCDNGuildMemberAvatar(
                 guildId: "922186320275722322",
                 userId: "816681064855502868",
@@ -701,21 +853,21 @@ class DiscordClientTests: XCTestCase {
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-//        await XCTAssertNoAsyncThrow {
+//        do {
 //            let file = try await client.getCDNApplicationIcon(
 //                appId: String, icon: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
 //
-//        await XCTAssertNoAsyncThrow {
+//        do {
 //            let file = try await client.getCDNApplicationCover(
 //                appId: String, cover: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
         
-        await XCTAssertNoAsyncThrow {
+        do {
             let file = try await client.getCDNApplicationAsset(
                 appId: "401518684763586560",
                 assetId: "920476458709819483"
@@ -723,50 +875,50 @@ class DiscordClientTests: XCTestCase {
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-//        await XCTAssertNoAsyncThrow {
+//        do {
 //            let file = try await client.getCDNAchievementIcon(
 //                appId: String, achievementId: String, icon: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
         
-//        await XCTAssertNoAsyncThrow {
+//        do {
 //            let file = try await client.getCDNStickerPackBanner(
 //                assetId: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
         
-//        await XCTAssertNoAsyncThrow {
+//        do {
 //            let file = try await client.getCDNTeamIcon(
 //                teamId: String, icon: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
         
-        await XCTAssertNoAsyncThrow {
-            let file = try await self.client.getCDNSticker(
+        do {
+            let file = try await client.getCDNSticker(
                 stickerId: "975144332535406633"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-        await XCTAssertNoAsyncThrow {
-            let file = try await self.client.getCDNRoleIcon(
+        do {
+            let file = try await client.getCDNRoleIcon(
                 roleId: "984557789999407214",
                 icon: "2cba6c72f7abd52885359054e09ab7a2"
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-//        await XCTAssertNoAsyncThrow {
+//        do {
 //            let file = try await client.getCDNGuildScheduledEventCover(
 //                eventId: String, cover: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
 //
-//        await XCTAssertNoAsyncThrow {
+//        do {
 //            let file = try await client.getCDNGuildMemberBanner(
 //                guildId: String, userId: String, banner: String
 //            ).getFile()
@@ -778,7 +930,7 @@ class DiscordClientTests: XCTestCase {
         let image = ByteBuffer(data: resource(name: "discordbm-logo.png"))
         
         do {
-            let response = try await self.client.createMessage(
+            let response = try await client.createMessage(
                 channelId: Constants.spamChannelId,
                 payload: .init(
                     content: "Multipart message!",
@@ -803,7 +955,7 @@ class DiscordClientTests: XCTestCase {
         }
         
         do {
-            let response = try await self.client.createMessage(
+            let response = try await client.createMessage(
                 channelId: Constants.spamChannelId,
                 payload: .init(
                     content: "Multipart message!",

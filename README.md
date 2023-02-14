@@ -118,10 +118,6 @@ Task {
 ```
 
 ### Mindset
-
-<details>
-  <summary> Click to expand </summary>
-  
 The way you can make sense of the library is to think of it as a direct implementation of the Discord API.   
 In most cases, the library doesn't try to abstract away Discord's stuff.   
 
@@ -130,22 +126,12 @@ In most cases, the library doesn't try to abstract away Discord's stuff.
 * You should read Discord documentation's related notes when you want to use something of this library.   
   Everything in the library has its related Discord documentation section linked near it.
 
-</details>
-
-### Finding Your Bot Token
+### Bot Token And App ID
 <details>
   <summary> Click to expand </summary>
   
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding Bot Token](https://user-images.githubusercontent.com/54685446/200565393-ea31c2ad-fd3a-44a1-9789-89460ab5d1a9.png)
-
-</details>
-
-### Finding Your App ID
-<details>
-  <summary> Click to expand </summary>
-  
-In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding App ID](https://user-images.githubusercontent.com/54685446/200565475-9893d326-423e-4344-a853-9de2f9ed25b4.png)
 
 </details>
@@ -322,7 +308,10 @@ let handler = try await ReactToRoleHandler(
 ```
 
 After this, anyone reacting with `🐔` to the message will be assigned the role.   
-There are a bunch more options, take a look at the other `ReactToRoleHandler` initializers for more info.
+There are a bunch more options, take a look at `ReactToRoleHandler` initializers for more info.
+
+> **Warning**   
+> The handler will need quite a few permissions. Namely `view messages`, `send messages` & `add reactions` in the channel where the message is, plus `manage roles` in the guild. These are only the minimums. If the bot is receiving 403 responses from Discord, it probably needs some more permissions as well.
 
 #### Behavior
 The handler will:
@@ -330,7 +319,7 @@ The handler will:
 * React to the message as the bot-user with all the reactions you specified.
 * Re-create the role if it's removed or doesn't exist.
 * Stop working if you use `await handler.stop()`.
-* Re-start working again if you use `try await handler.start()`.
+* Re-start working again if you use `try await handler.restart()`.
 
 #### Persistence 
 If you need to persist the handler somewhere:
@@ -395,3 +384,4 @@ These exceptions should not be a big deal depending on your code style, but migh
 
 ## Contribution & Support
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.   
+Passing the `linux-integration` tests is not required for PRs because of token/access problems.
