@@ -12,7 +12,7 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             try validateAssertIsNotEmpty(false, name: "a")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, ValidationError.cantBeEmpty(name: "a"))
+            XCTAssertEqual(error, ValidationError.cantBeEmpty(self, name: "a"))
         }
     }
     
@@ -28,7 +28,7 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             try validateAtLeastOneIsNotEmpty(true, names: "a")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .atLeastOneFieldIsRequired(names: ["a"]))
+            XCTAssertEqual(error, .atLeastOneFieldIsRequired(self, names: ["a"]))
         }
     }
     
@@ -47,13 +47,13 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             try validateCharacterCountDoesNotExceed("🇯🇵", max: 1, name: "emoji")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .tooManyCharacters(name: "emoji", max: 1))
+            XCTAssertEqual(error, .tooManyCharacters(self, name: "emoji", max: 1))
         }
         XCTAssertThrowsError(
             try validateCharacterCountDoesNotExceed("abdcefghijk", max: 10, name: "a")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .tooManyCharacters(name: "a", max: 10))
+            XCTAssertEqual(error, .tooManyCharacters(self, name: "a", max: 10))
         }
     }
     
@@ -67,13 +67,13 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             try validateCharacterCountInRange("🇯🇵", min: 3, max: 4, name: "emoji")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .invalidCharactersCount(name: "emoji", min: 3, max: 4))
+            XCTAssertEqual(error, .invalidCharactersCount(self, name: "emoji", min: 3, max: 4))
         }
         XCTAssertThrowsError(
             try validateCharacterCountInRange("abdcefghijk", min: 20, max: 40, name: "a")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .invalidCharactersCount(name: "a", min: 20, max: 40))
+            XCTAssertEqual(error, .invalidCharactersCount(self, name: "a", min: 20, max: 40))
         }
     }
     
@@ -88,7 +88,7 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             try validateCombinedCharacterCountDoesNotExceed(5_001, max: 5_000, names: "a", "b")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .tooManyCharacters(name: "a+b", max: 5_000))
+            XCTAssertEqual(error, .tooManyCharacters(self, name: "a+b", max: 5_000))
         }
     }
     
@@ -102,7 +102,7 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             try validateElementCountDoesNotExceed([1, 2, 3, 4, 5], max: 4, name: "t")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .tooManyElements(name: "t", max: 4))
+            XCTAssertEqual(error, .tooManyElements(self, name: "t", max: 4))
         }
     }
     
@@ -135,6 +135,7 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
         ) { error in
             let error = error as! ValidationError
             XCTAssertEqual(error, .containsProhibitedValues(
+                self,
                 name: "r",
                 reason: "k",
                 valuesRepresentation: "\([1, 2, 3, 4])"
@@ -170,7 +171,7 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             )
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .hasPrecondition(name: "qq", reason: "pji"))
+            XCTAssertEqual(error, .hasPrecondition(self, name: "qq", reason: "pji"))
         }
     }
     
@@ -184,7 +185,7 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             try validateNumberInRange(9, min: 10, max: 21, name: "tt")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .numberOutOfRange(name: "tt", number: "9", min: "10", max: "21"))
+            XCTAssertEqual(error, .numberOutOfRange(self, name: "tt", number: "9", min: "10", max: "21"))
         }
         XCTAssertThrowsError(
             try validateNumberInRange(22, min: 10, max: 21, name: "c,axz")
@@ -192,7 +193,7 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             let error = error as! ValidationError
             XCTAssertEqual(
                 error,
-                .numberOutOfRange(name: "c,axz", number: "22", min: "10", max: "21")
+                .numberOutOfRange(self, name: "c,axz", number: "22", min: "10", max: "21")
             )
         }
         XCTAssertThrowsError(
@@ -201,7 +202,7 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             let error = error as! ValidationError
             XCTAssertEqual(
                 error,
-                .numberOutOfRange(name: "rqerqrew", number: "-1391293", min: "10", max: "21")
+                .numberOutOfRange(self, name: "rqerqrew", number: "-1391293", min: "10", max: "21")
             )
         }
         XCTAssertThrowsError(
@@ -210,7 +211,7 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             let error = error as! ValidationError
             XCTAssertEqual(
                 error,
-                .numberOutOfRange(name: "oewo", number: "934129139", min: "10", max: "21")
+                .numberOutOfRange(self, name: "oewo", number: "934129139", min: "10", max: "21")
             )
         }
     }

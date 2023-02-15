@@ -81,9 +81,9 @@ public actor DiscordLogManager {
         ///   - extraMetadata: Will log `source`, `file`, `function` and `line` as well.
         ///   - disabledLogLevels: `Logger.Level`s to never be logged.
         ///   - disabledInDebug: Whether or not to disable logging in DEBUG.
-        ///   - maxStoredLogsCount: If there are more logs than this count, the log manager will start removing the oldest un-sent logs to prevent memory leaks.
+        ///   - maxStoredLogsCount: If there are more logs than this count, the log manager will start removing the oldest un-sent logs to reduce memory consumption.
         public init(
-            frequency: TimeAmount = .seconds(20),
+            frequency: TimeAmount = .seconds(10),
             aliveNotice: AliveNotice? = nil,
             mentions: [Logger.Level: Mention] = [:],
             colors: [Logger.Level: DiscordColor] = [
