@@ -1,4 +1,4 @@
-import DiscordClient
+import DiscordHTTP
 import DiscordUtils
 import AsyncHTTPClient
 import NIOCore

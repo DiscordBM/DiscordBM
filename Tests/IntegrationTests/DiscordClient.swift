@@ -1,5 +1,5 @@
 @testable import DiscordBM
-import DiscordClient
+import DiscordHTTP
 import AsyncHTTPClient
 import Atomics
 import NIOCore
@@ -1062,16 +1062,19 @@ class DiscordClientTests: XCTestCase {
             
             let commandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
             
-            let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(id: command.id!)
+            let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(
+                id: command.id!
+            )
             
             XCTAssertEqual(deletionResponse.status, .noContent)
             
-            let newCommandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
+            let newCommandsCount = try await cacheClient.getApplicationGlobalCommands()
+                .decode().count
             
             XCTAssertEqual(commandsCount, newCommandsCount)
         }
         
-        /// Because `ClientCache`s are shared even across different `DefaultDiscordClient`s.
+        /// Because `ClientCache`s are shared across different `DefaultDiscordClient`s.
         /// This is to make sure the last test doesn't have impact on the next tests.
         try await Task.sleep(nanoseconds: 2_000_000_000)
         

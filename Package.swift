@@ -40,7 +40,7 @@ let package = Package(
                 .product(name: "Atomics", package: "swift-atomics"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
                 "DiscordAuth",
-                "DiscordClient",
+                "DiscordHTTP",
                 "DiscordCore",
                 "DiscordGateway",
                 "DiscordLogger",
@@ -49,7 +49,7 @@ let package = Package(
             ]
         ),
         .target(
-            name: "DiscordClient",
+            name: "DiscordHTTP",
             dependencies: [
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "DiscordModels",
@@ -68,7 +68,7 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "WebSocketKitFork",
-                "DiscordClient",
+                "DiscordHTTP",
             ]
         ),
         .target(
@@ -76,7 +76,7 @@ let package = Package(
             dependencies: [
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "Logging", package: "swift-log"),
-                "DiscordClient",
+                "DiscordHTTP",
                 "DiscordUtils",
             ]
         ),

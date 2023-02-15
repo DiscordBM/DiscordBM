@@ -12,7 +12,7 @@ extension DiscordGlobalConfiguration {
     /// For example if a type can't find a representation to decode a value to,
     /// and has to get rid of that value.
     /// Does not include decode errors.
-    public static var enableLoggingDuringDecode: Bool = false
+    public static var enableLoggingDuringDecode = false
     
     static func makeDecodeLogger(_ label: String) -> Logger {
         if enableLoggingDuringDecode {

@@ -1,5 +1,5 @@
 import DiscordModels
-import DiscordClient
+import DiscordHTTP
 import Logging
 #if os(Linux)
 @preconcurrency import Foundation

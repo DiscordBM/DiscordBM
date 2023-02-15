@@ -698,8 +698,7 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
     }
     
     public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        self.value = try container.decode(Int.self)
+        self.value = try .init(from: decoder)
     }
     
     public func encode(to encoder: Encoder) throws {

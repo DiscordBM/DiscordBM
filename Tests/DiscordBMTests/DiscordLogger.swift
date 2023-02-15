@@ -1,5 +1,5 @@
 @testable import DiscordLogger
-import DiscordClient
+import DiscordHTTP
 import DiscordUtils
 @testable import Logging
 import NIOHTTP1
