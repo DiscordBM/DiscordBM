@@ -585,6 +585,19 @@ class DiscordClientTests: XCTestCase {
     }
     
     func testWebhooks() async throws {
+        
+        /// Cleanup before starting the actual tests
+        do {
+            let guildWebhooks = try await client.getGuildWebhooks(
+                guildId: Constants.guildId
+            ).decode()
+            
+            for webhook in guildWebhooks {
+                try await client.deleteWebhook(id: webhook.id)
+                    .guardIsSuccessfulResponse()
+            }
+        }
+        
         let image1 = ByteBuffer(data: resource(name: "discordbm-logo.png"))
         let image2 = ByteBuffer(data: resource(name: "1kb.png"))
         
