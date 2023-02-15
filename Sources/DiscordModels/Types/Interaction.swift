@@ -11,72 +11,56 @@ public struct Interaction: Sendable, Codable {
         case applicationCommandAutocomplete = 4
         case modalSubmit = 5
     }
-
+    
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
+    public struct ApplicationCommand: Sendable, Codable {
+        
+        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
+        public struct ResolvedData: Sendable, Codable {
+            public var users: [String: DiscordUser]?
+            public var members: [String: Guild.PartialMember]?
+            public var roles: [String: Role]?
+            public var channels: [String: PartialChannel]?
+            public var messages: [String: DiscordChannel.PartialMessage]?
+            public var attachments: [String: DiscordChannel.Message.Attachment]?
+        }
+        
+        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
+        public struct Option: Sendable, Codable {
+            public var name: String
+            public var type: DiscordModels.ApplicationCommand.Option.Kind
+            public var value: StringIntDoubleBool?
+            public var options: [Option]?
+            public var focused: Bool?
+        }
+        
+        public var id: String
+        public var name: String
+        public var type: Kind
+        public var resolved: ResolvedData?
+        public var options: [Option]?
+        public var guild_id: String?
+        public var target_id: String?
+    }
+    
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-message-component-data-structure
+    public struct MessageComponent: Sendable, Codable {
+        public var custom_id: String
+        public var component_type: ActionRow.Kind
+        public var values: [String]?
+    }
+    
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-modal-submit-data-structure
+    public struct ModalSubmit: Sendable, Codable {
+        public var custom_id: String
+        public var components: [ActionRow.Component]
+    }
+    
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data
     public enum Data: Sendable {
-        case messageComponent(MessageComponent)
         case applicationCommand(ApplicationCommand)
+        case messageComponent(MessageComponent)
         case modalSubmit(ModalSubmit)
-        
-        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
-        public struct ApplicationCommand: Sendable, Codable {
-            
-            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
-            public struct ResolvedData: Sendable, Codable {
-                public var users: [String: DiscordUser]?
-                public var members: [String: Guild.PartialMember]?
-                public var roles: [String: Role]?
-                public var channels: [String: PartialChannel]?
-                public var messages: [String: DiscordChannel.PartialMessage]?
-                public var attachments: [String: DiscordChannel.Message.Attachment]?
-            }
-            
-            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
-            public struct Option: Sendable, Codable {
-                
-                /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
-                public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-                    case subCommand = 1
-                    case subCommandGroup = 2
-                    case string = 3
-                    case integer = 4
-                    case boolean = 5
-                    case user = 6
-                    case channel = 7
-                    case role = 8
-                    case mentionable = 9
-                    case number = 10
-                    case attachment = 11
-                }
-                
-                public var name: String
-                public var type: Kind
-                public var value: StringIntDoubleBool?
-                public var options: [Option]?
-                public var focused: Bool?
-            }
-            
-            public var id: String
-            public var name: String
-            public var type: Kind
-            public var resolved: ResolvedData?
-            public var options: [Option]?
-            public var guild_id: String?
-            public var target_id: String?
-        }
-        
-        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-message-component-data-structure
-        public struct MessageComponent: Sendable, Codable {
-            public var custom_id: String
-            public var component_type: ActionRow.Kind
-            public var values: [String]?
-        }
-        
-        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-modal-submit-data-structure
-        public struct ModalSubmit: Sendable, Codable {
-            public var custom_id: String
-            public var components: [ActionRow.Component]
-        }
     }
     
     public var id: String
@@ -122,15 +106,15 @@ public struct Interaction: Sendable, Codable {
         switch self.type {
         case .applicationCommand, .applicationCommandAutocomplete: 
             self.data = .applicationCommand(
-                try container.decode(Data.ApplicationCommand.self, forKey: .data)
+                try container.decode(ApplicationCommand.self, forKey: .data)
             )
         case .messageComponent: 
             self.data = .messageComponent(
-                try container.decode(Data.MessageComponent.self, forKey: .data)
+                try container.decode(MessageComponent.self, forKey: .data)
             )
         case .modalSubmit:
             self.data = .modalSubmit(
-                try container.decode(Data.ModalSubmit.self, forKey: .data)
+                try container.decode(ModalSubmit.self, forKey: .data)
             )
         case .ping:
             self.data = nil

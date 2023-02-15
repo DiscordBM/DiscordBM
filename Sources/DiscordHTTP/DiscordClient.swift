@@ -280,7 +280,7 @@ public extension DiscordClient {
     @inlinable
     func createApplicationGlobalCommand(
         appId: String? = nil,
-        payload: ApplicationCommand
+        payload: RequestBody.ApplicationCommandCreate
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = Endpoint.createApplicationGlobalCommand(appId: try requireAppId(appId))
         return try await self.send(request: .init(to: endpoint), payload: payload)

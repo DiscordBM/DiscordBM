@@ -666,4 +666,55 @@ public enum RequestBody {
             try self.message.validate()
         }
     }
+    
+    public struct ApplicationCommandCreate: Sendable, Codable, ValidatablePayload {
+        public var name: String
+        public var name_localizations: DiscordLocaleDict<String>?
+        public var description: String
+        public var description_localizations: DiscordLocaleDict<String>?
+        public var options: [ApplicationCommand.Option]?
+        public var default_member_permissions: StringBitField<Permission>?
+        public var dm_permission: Bool?
+        public var type: ApplicationCommand.Kind?
+        public var nsfw: Bool?
+        
+        public init(name: String, name_localizations: [DiscordLocale: String]? = nil, description: String, description_localizations: [DiscordLocale: String]? = nil, options: [ApplicationCommand.Option]? = nil, default_member_permissions: [Permission]? = nil, dm_permission: Bool? = nil, type: ApplicationCommand.Kind? = nil, nsfw: Bool? = nil) {
+            self.name = name
+            self.name_localizations = .init(name_localizations)
+            self.description = description
+            self.description_localizations = .init(description_localizations)
+            self.options = options
+            self.default_member_permissions = default_member_permissions.map({ .init($0) })
+            self.dm_permission = dm_permission
+            self.type = type
+            self.nsfw = nsfw
+        }
+        
+        public func validate() throws {
+            try validateHasPrecondition(
+                condition: options?.isEmpty == false,
+                allowedIf: (type ?? .chatInput) == .chatInput,
+                name: "options",
+                reason: "'options' is only allowed if 'type' is 'chatInput'"
+            )
+            try validateHasPrecondition(
+                condition: !description.isEmpty || description_localizations?.values.isEmpty == false,
+                allowedIf: (type ?? .chatInput) == .chatInput,
+                name: "description+description_localizations",
+                reason: "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput'"
+            )
+            try validateElementCountDoesNotExceed(options, max: 25, name: "options")
+            try validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
+            try validateCharacterCountInRange(description, min: 1, max: 100, name: "description")
+            for (_, value) in name_localizations?.values ?? [:] {
+                try validateCharacterCountInRange(value, min: 1, max: 32, name: "name_localizations.name")
+            }
+            for (_, value) in description_localizations?.values ?? [:] {
+                try validateCharacterCountInRange(value, min: 1, max: 32, name: "description_localizations.name")
+            }
+            for option in options ?? [] {
+                try option.validate()
+            }
+        }
+    }
 }

@@ -1076,7 +1076,7 @@ class DiscordClientTests: XCTestCase {
             let commandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
             
             let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(
-                id: command.id!
+                id: command.id
             )
             
             XCTAssertEqual(deletionResponse.status, .noContent)
@@ -1120,7 +1120,9 @@ class DiscordClientTests: XCTestCase {
             
             let commandsCount = try await cacheClient.getApplicationGlobalCommands().decode().count
             
-            let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(id: command.id!)
+            let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(
+                id: command.id
+            )
             
             XCTAssertEqual(deletionResponse.status, .noContent)
             
@@ -1163,7 +1165,7 @@ class DiscordClientTests: XCTestCase {
             try await Task.sleep(nanoseconds: 1_000_000_000)
             
             let deletionResponse = try await cacheClient.deleteApplicationGlobalCommand(
-                id: command.id!
+                id: command.id
             )
             
             XCTAssertEqual(deletionResponse.status, .noContent)
