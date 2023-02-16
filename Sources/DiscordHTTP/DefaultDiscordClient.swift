@@ -58,41 +58,32 @@ public struct DefaultDiscordClient: DiscordClient {
         )
     }
     
-    func checkRateLimitsAllowRequest(to endpoint: Endpoint, requestId: UInt) async throws {
+    func checkRateLimitsAllowRequest(
+        to endpoint: Endpoint,
+        requestId: UInt,
+        retriesSoFar: Int
+    ) async throws {
         switch await rateLimiter.shouldRequest(to: endpoint) {
         case .true: return
         case .false:
             throw DiscordClientError.rateLimited(url: "\(endpoint.urlDescription)")
         case let .after(after):
-            if let backoff = configuration.retryPolicy?.backoff,
-               case let .basedOnHeaders(maxAllowed, _, _) = backoff {
-                if let maxAllowed = maxAllowed {
-                    if after <= maxAllowed {
-                        logger.warning(
-                            "HTTP bucket is exhausted. Will wait \(after) seconds before making the request",
-                            metadata: [
-                                "endpoint": .stringConvertible(endpoint.urlDescription),
-                                "request-id": .stringConvertible(requestId)
-                            ]
-                        )
-                        let nanos = UInt64(after * 1_000_000_000)
-                        try await Task.sleep(nanoseconds: nanos)
-                        await rateLimiter.addGlobalRateLimitRecord()
-                    } else {
-                        throw DiscordClientError.rateLimited(url: "\(endpoint.urlDescription)")
-                    }
-                } else {
-                    logger.warning(
-                        "HTTP bucket is exhausted. Will wait \(after) seconds before making the request",
-                        metadata: [
-                            "endpoint": .stringConvertible(endpoint.urlDescription),
-                            "request-id": .stringConvertible(requestId)
-                        ]
-                    )
-                    let nanos = UInt64(after * 1_000_000_000)
-                    try await Task.sleep(nanoseconds: nanos)
-                    await rateLimiter.addGlobalRateLimitRecord()
-                }
+            /// If we make the request, we'll get 429-ed. So we can just assume the status is 429.
+            if self.configuration.shouldRetry(
+                status: .tooManyRequests,
+                retriesSoFar: retriesSoFar
+            ) {
+                logger.debug(
+                    "HTTP bucket is exhausted. Will wait before making the request",
+                    metadata: [
+                        "wait-time": "\(after)",
+                        "endpoint": .stringConvertible(endpoint.urlDescription),
+                        "request-id": .stringConvertible(requestId)
+                    ]
+                )
+                let nanos = UInt64(after * 1_000_000_000)
+                try await Task.sleep(nanoseconds: nanos)
+                await rateLimiter.addGlobalRateLimitRecord()
             } else {
                 throw DiscordClientError.rateLimited(url: "\(endpoint.urlDescription)")
             }
@@ -231,7 +222,8 @@ public struct DefaultDiscordClient: DiscordClient {
             
             try await self.checkRateLimitsAllowRequest(
                 to: req.endpoint,
-                requestId: requestId
+                requestId: requestId,
+                retriesSoFar: retryCounter
             )
             var request = try HTTPClient.Request(
                 url: req.endpoint.url + req.queries.makeForURLQuery(),
@@ -291,7 +283,11 @@ public struct DefaultDiscordClient: DiscordClient {
                 return (cached, true)
             }
             
-            try await self.checkRateLimitsAllowRequest(to: req.endpoint, requestId: requestId)
+            try await self.checkRateLimitsAllowRequest(
+                to: req.endpoint,
+                requestId: requestId,
+                retriesSoFar: retryCounter
+            )
             
             let data = try DiscordGlobalConfiguration.encoder.encode(payload)
             var request = try HTTPClient.Request(
@@ -355,7 +351,11 @@ public struct DefaultDiscordClient: DiscordClient {
                 return (cached, true)
             }
             
-            try await self.checkRateLimitsAllowRequest(to: req.endpoint, requestId: requestId)
+            try await self.checkRateLimitsAllowRequest(
+                to: req.endpoint,
+                requestId: requestId,
+                retriesSoFar: retryCounter
+            )
             
             let body: HTTPClient.Body
             let contentType: String

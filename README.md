@@ -95,15 +95,10 @@ Task {
         }
     }
     
-    /// If you care about library parsing failures, handle them here
-    await bot.addEventParseFailureHandler { error, buffer in
-        /// Handle the failure using the `Error` thrown and the `ByteBuffer` received
-    }
-
     /// Tell the manager to connect to Discord.
     /// FYI, This will return _before_ the connection is fully established
     await bot.connect()
-
+    
     /// Use `bot.client` to send requests to Discord.
     try await bot.client.createMessage(
         channelId: CHANNEL_ID,
