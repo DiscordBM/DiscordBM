@@ -106,7 +106,7 @@ public actor DiscordCache {
             channels: StringsChoice = .all
         )
         
-        public static var `default`: MessageCachingPolicy { .normal() }
+        public static var normal: MessageCachingPolicy { .normal() }
         
         public static var saveDeleted: MessageCachingPolicy { .saveDeleted() }
         
@@ -324,7 +324,7 @@ public actor DiscordCache {
         gatewayManager: any GatewayManager,
         intents: Intents,
         requestAllMembers: RequestMembers,
-        messageCachingPolicy: MessageCachingPolicy = .default,
+        messageCachingPolicy: MessageCachingPolicy = .normal,
         itemsLimit: ItemsLimit = .default,
         storage: Storage = Storage()
     ) async {
