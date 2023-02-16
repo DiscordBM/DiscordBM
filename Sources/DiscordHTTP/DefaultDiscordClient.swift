@@ -77,6 +77,7 @@ public struct DefaultDiscordClient: DiscordClient {
                     "HTTP bucket is exhausted. Will wait before making the request",
                     metadata: [
                         "wait-time": "\(after)",
+                        "retriesWithoutThis": "\(retriesSoFar)",
                         "endpoint": .stringConvertible(endpoint.urlDescription),
                         "request-id": .stringConvertible(requestId)
                     ]
@@ -156,11 +157,11 @@ public struct DefaultDiscordClient: DiscordClient {
         headers: HTTPHeaders,
         requestId: UInt
     ) async throws {
-        let retryWait = self.configuration.shouldWaitBeforeRetry(
+        let retryWait = self.configuration.waitTimeBeforeRetry(
             retriesSoFar: retriesSoFar,
             headers: headers
         )
-        logger.warning("Will soon retry a request", metadata: [
+        logger.debug("Will soon retry a request", metadata: [
             "request-id": .stringConvertible(requestId),
             "retriesWithoutThis": .stringConvertible(retriesSoFar),
             "waitSecondsBeforeRetry": .stringConvertible(retryWait ?? 0)
@@ -169,7 +170,7 @@ public struct DefaultDiscordClient: DiscordClient {
             try await Task.sleep(nanoseconds: UInt64(retryWait * 1_000_000_000))
         }
         retriesSoFar += 1
-        logger.debug("Will retry a request right now", metadata: [
+        logger.trace("Will retry a request right now", metadata: [
             "request-id": .stringConvertible(requestId),
             "retriesWithoutThis": .stringConvertible(retriesSoFar)
         ])
@@ -544,7 +545,7 @@ public struct ClientConfiguration {
             set {
                 precondition(
                     newValue.allSatisfy({ $0.code >= 400 }),
-                    "Status codes less than 400 don't need retrying. This would cause problems"
+                    "Status codes less than 400 don't need retrying. This could cause problems"
                 )
                 self._statuses = newValue
             }
@@ -581,7 +582,7 @@ public struct ClientConfiguration {
         
         /// Should retry a request or not.
         func shouldRetry(status: HTTPResponseStatus, retriesSoFar times: Int) -> Bool {
-            maxRetries > times && self.statuses.contains(status)
+            self.maxRetries > times && self.statuses.contains(status)
         }
     }
     
@@ -600,7 +601,7 @@ public struct ClientConfiguration {
     }
     
     /// Returns the amount of time that the client should wait before the next retry, if any.
-    func shouldWaitBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> Double? {
+    func waitTimeBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> Double? {
         switch self.retryPolicy?.backoff {
         case let .some(backoff):
             return backoff.waitTimeBeforeRetry(retriesSoFar: times, headers: headers)
