@@ -508,7 +508,7 @@ class DiscordLoggerTests: XCTestCase {
             configuration: .init(frequency: .seconds(60))
         )
         
-        let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".map { $0 }
+        let chars = #"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\_*"#.map { $0 }
         func longString() -> String {
             String((0..<6_500).map { _ in chars[chars.indices.randomElement()!] })
         }

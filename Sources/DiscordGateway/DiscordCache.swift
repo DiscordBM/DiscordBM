@@ -82,7 +82,10 @@ public actor DiscordCache {
         
         /// Caches messages, replaces edited messages with the new message,
         /// removes deleted messages from storage.
-        case `default`
+        case normal(
+            guilds: StringsChoice = .all,
+            channels: StringsChoice = .all
+        )
         /// Caches messages, replaces edited messages with the new message,
         /// moves deleted messages to another property of the storage.
         case saveDeleted(
@@ -103,6 +106,8 @@ public actor DiscordCache {
             channels: StringsChoice = .all
         )
         
+        public static var `default`: MessageCachingPolicy { .normal() }
+        
         public static var saveDeleted: MessageCachingPolicy { .saveDeleted() }
         
         public static var saveEditHistory: MessageCachingPolicy { .saveEditHistory() }
@@ -111,12 +116,22 @@ public actor DiscordCache {
             .saveEditHistoryAndDeleted()
         }
         
+        func shouldSave(guildId: String?, channelId: String) -> Bool {
+            switch self {
+            case let .normal(guilds, channels),
+                let .saveDeleted(guilds, channels),
+                let .saveEditHistory(guilds, channels),
+                let .saveEditHistoryAndDeleted(guilds, channels):
+                return guildId.map { guilds.contains($0) } ?? channels.contains(channelId)
+            }
+        }
+        
         func shouldSaveDeleted(guildId: String?, channelId: String) -> Bool {
             switch self {
             case let .saveDeleted(guilds, channels),
                 let .saveEditHistoryAndDeleted(guilds, channels):
                 return guildId.map { guilds.contains($0) } ?? channels.contains(channelId)
-            case .default, .saveEditHistory: return false
+            case .normal, .saveEditHistory: return false
             }
         }
         
@@ -125,7 +140,7 @@ public actor DiscordCache {
             case let .saveEditHistory(guilds, channels),
                 let .saveEditHistoryAndDeleted(guilds, channels):
                 return guildId.map { guilds.contains($0) } ?? channels.contains(channelId)
-            case .default, .saveDeleted: return false
+            case .normal, .saveDeleted: return false
             }
         }
     }
@@ -588,7 +603,12 @@ public actor DiscordCache {
             let id = Storage.InviteID(guildId: invite.guild_id, channelId: invite.channel_id)
             self.invites.removeValue(forKey: id)
         case let .messageCreate(message):
-            self.messages[message.channel_id, default: []].append(message)
+            if messageCachingPolicy.shouldSave(
+                guildId: message.guild_id,
+                channelId: message.channel_id
+            ) {
+                self.messages[message.channel_id, default: []].append(message)
+            }
         case let .messageUpdate(message):
             if let idx = self.messages[message.channel_id]?
                 .firstIndex(where: { $0.id == message.id }) {
