@@ -84,7 +84,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     @inlinable
     public func decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
         try guardIsSuccessfulResponse()
-        if let data = body.map({ Data(buffer: $0) }) {
+        if let data = body.map({ Data(buffer: $0, byteTransferStrategy: .noCopy) }) {
             return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
         } else {
             throw DiscordClientError.emptyBody(self)
@@ -138,39 +138,51 @@ public struct DiscordCDNResponse: Sendable {
     }
 }
 
+/// Read `helpAnchor` for help about each error case.
 public enum DiscordClientError: LocalizedError {
-    /// You have exhausted your rate-limits.
     case rateLimited(url: String)
-    /// Discord responded with a non-2xx status code.
     case badStatusCode(DiscordHTTPResponse)
-    /// The body of the response was empty.
     case emptyBody(DiscordHTTPResponse)
-    /// Couldn't find a content-type header.
     case noContentTypeHeader(DiscordHTTPResponse)
-    /// You need to provide an `appId`.
-    /// Either via the function arguments or the DiscordClient initializer.
     case appIdParameterRequired
-    /// Can only send one of these query parameters.
     case queryParametersMutuallyExclusive(queries: [(String, String)])
-    /// Query parameter is out of the accepted bounds.
     case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)
     
     public var errorDescription: String? {
         switch self {
         case let .rateLimited(url):
-            return "rateLimited(url: \(url)"
+            return "rateLimited(url: \(url))"
         case let .badStatusCode(response):
-            return "badStatusCode(\(response)"
+            return "badStatusCode(\(response))"
         case let .emptyBody(response):
-            return "emptyBody(\(response)"
+            return "emptyBody(\(response))"
         case let .noContentTypeHeader(response):
-            return "noContentTypeHeader(\(response)"
+            return "noContentTypeHeader(\(response))"
         case .appIdParameterRequired:
             return "appIdParameterRequired"
         case let .queryParametersMutuallyExclusive(queries):
-            return "queryParametersMutuallyExclusive(queries: \(queries)"
+            return "queryParametersMutuallyExclusive(queries: \(queries))"
         case let .queryParameterOutOfBounds(name, value, lowerBound, upperBound):
-            return "queryParameterOutOfBounds(name: \(name), value: \(value ?? "nil"), lowerBound: \(lowerBound), upperBound: \(upperBound)"
+            return "queryParameterOutOfBounds(name: \(name), value: \(value ?? "nil"), lowerBound: \(lowerBound), upperBound: \(upperBound))"
+        }
+    }
+    
+    public var helpAnchor: String? {
+        switch self {
+        case let .rateLimited(url):
+            return "Discord has rate-limited you at '\(url)'. Try to send less messages or send at a slower pace"
+        case let .badStatusCode(response):
+            return "Discord responded with a non-200 status code. Discord says: \(response.body.map(String.init) ?? "nil")"
+        case let .emptyBody(response):
+            return "The response body was unexpectedly empty. If it happens frequently, you should report it to me at https://github.com/MahdiBM/DiscordBM/issues. Discord's response: \(response)"
+        case let .noContentTypeHeader(response):
+            return "Discord didn't send a Content-Type header. See if they mentions any errors in the response: \(response)"
+        case .appIdParameterRequired:
+            return "The 'appId' parameter is required. Either pass it in the initializer of DefaultDiscordClient/BotGatewayManager or use the 'appId' function parameter"
+        case let .queryParametersMutuallyExclusive(queries):
+            return "Discord only accepts one of these query parameters at a time: \(queries)"
+        case let .queryParameterOutOfBounds(name, value, lowerBound, upperBound):
+            return "The query parameter '\(name)' with a value of '\(value ?? "nil")' is out of the Discord-acceptable bounds of \(lowerBound)...\(upperBound)"
         }
     }
 }

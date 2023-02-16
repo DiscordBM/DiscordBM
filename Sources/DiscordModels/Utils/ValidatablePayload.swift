@@ -5,17 +5,19 @@ public protocol ValidatablePayload {
     func validate() throws
 }
 
+/// Read `helpAnchor` for help about each error case.
 public enum ValidationError: LocalizedError {
     
-    /// Suboptimal that we only use `ValidatablePayload`: it would also be too much of a
-    /// pain to manually do `CustomStringConvertible` for all `ValidatablePayload` types.
+    /// Suboptimal that we only use `ValidatablePayload` as the first argument of each case:
+    /// it would also be too much of a pain to manually do `CustomStringConvertible`
+    /// for all `ValidatablePayload` types.
     
     /// At least one of these fields is required to be present.
     case atLeastOneFieldIsRequired(ValidatablePayload, names: [String])
     /// Too many characters in the target (likely a String). Need to shorten it.
     case tooManyCharacters(ValidatablePayload, name: String, max: Int)
     /// Count of characters in the target (likely a String) is not acceptable.
-    case invalidCharactersCount(ValidatablePayload, name: String, min: Int, max: Int)
+    case characterCountOutOfRange(ValidatablePayload, name: String, min: Int, max: Int)
     /// Too many elements in the target (likely an Array). Need to shorten it.
     case tooManyElements(ValidatablePayload, name: String, max: Int)
     /// At least one of the values you are trying to send is prohibited. Remove them.
@@ -32,19 +34,40 @@ public enum ValidationError: LocalizedError {
         case let .atLeastOneFieldIsRequired(model, names):
             return "atLeastOneFieldIsRequired(\(model), names: \(names))"
         case let .tooManyCharacters(model, name, max):
-            return "tooManyCharacters(\(model), name: \(name), max: \(max)"
-        case let .invalidCharactersCount(model, name, min, max):
-            return "invalidCharactersCount(\(model), name: \(name), min: \(min), max: \(max)"
+            return "tooManyCharacters(\(model), name: \(name), max: \(max))"
+        case let .characterCountOutOfRange(model, name, min, max):
+            return "characterCountOutOfRange(\(model), name: \(name), min: \(min), max: \(max))"
         case let .tooManyElements(model, name, max):
-            return "tooManyElements(\(model), name: \(name), max: \(max)"
+            return "tooManyElements(\(model), name: \(name), max: \(max))"
         case let .containsProhibitedValues(model, name, reason, valuesRepresentation):
-            return "containsProhibitedValues(\(model), name: \(name), reason: \(reason), valuesRepresentation: \(valuesRepresentation)"
+            return "containsProhibitedValues(\(model), name: \(name), reason: \(reason), valuesRepresentation: \(valuesRepresentation))"
         case let .hasPrecondition(model, name, reason):
-            return "hasPrecondition(\(model), name: \(name), reason: \(reason)"
+            return "hasPrecondition(\(model), name: \(name), reason: \(reason))"
         case let .cantBeEmpty(model, name):
-            return "cantBeEmpty(\(model), name: \(name)"
+            return "cantBeEmpty(\(model), name: \(name))"
         case let .numberOutOfRange(model, name, number, min, max):
-            return "numberOutOfRange(\(model), name: \(name), number: \(number), min: \(min), max: \(max)"
+            return "numberOutOfRange(\(model), name: \(name), number: \(number), min: \(min), max: \(max))"
+        }
+    }
+    
+    public var helpAnchor: String? {
+        switch self {
+        case let .atLeastOneFieldIsRequired(model, names):
+            return "The model: \(model). At least one of these fields is required: \(names)"
+        case let .tooManyCharacters(model, name, max):
+            return "The model: \(model). Too many characters in the '\(name)' field. Max allowed is '\(max)'"
+        case let .characterCountOutOfRange(model, name, min, max):
+            return "The model: \(model). Character count of the '\(name)' field is out of the acceptable range of \(min)...\(max)"
+        case let .tooManyElements(model, name, max):
+            return "The model: \(model). Too many elements in the '\(name)' field. Max allowed is '\(max)'"
+        case let .containsProhibitedValues(model, name, reason, valuesRepresentation):
+            return "The model: \(model). The '\(name)' field contains prohibited values. Values: \(valuesRepresentation). Reason: \(reason)"
+        case let .hasPrecondition(model, name, reason):
+            return "The model: \(model). A precondition was not met for the '\(name)' field. Reason: \(reason)"
+        case let .cantBeEmpty(model, name):
+            return "The model: \(model). The '\(name)' field can't be empty."
+        case let .numberOutOfRange(model, name, number, min, max):
+            return "The model: \(model). The '\(name)' is set to the number '\(number)' which is out of the acceptable range of \(min)...\(max)"
         }
     }
 }
@@ -72,7 +95,7 @@ extension ValidatablePayload {
     func validateCharacterCountInRange(_ value: String?, min: Int, max: Int, name: String) throws {
         let count = value?.unicodeScalars.count ?? 0
         guard min <= count, count <= max else {
-            throw ValidationError.invalidCharactersCount(self, name: name, min: min, max: max)
+            throw ValidationError.characterCountOutOfRange(self, name: name, min: min, max: max)
         }
     }
     

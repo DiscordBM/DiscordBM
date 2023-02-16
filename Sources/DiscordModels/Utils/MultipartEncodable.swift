@@ -4,6 +4,7 @@ import Foundation
 
 private let allocator = ByteBufferAllocator()
 
+/// Note: you need to use a custom `CodingKey` to exclude this `files` field from Codable decode/encodes.
 public protocol MultipartEncodable: Encodable {
     var files: [RawFile]? { get }
 }

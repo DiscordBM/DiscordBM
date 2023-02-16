@@ -184,13 +184,21 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
+        /// Read `helpAnchor` for help about each error case.
         public enum GatewayDecodingError: LocalizedError {
             case unhandledDispatchEvent(type: String?)
             
             public var errorDescription: String? {
                 switch self {
                 case let .unhandledDispatchEvent(type):
-                    return "unhandledDispatchEvent(type: \(type)"
+                    return "unhandledDispatchEvent(type: \(type ?? "nil"))"
+                }
+            }
+            
+            public var helpAnchor: String? {
+                switch self {
+                case let .unhandledDispatchEvent(type):
+                    return "The dispatch event type '\(type)' is unhandled. This is probably a new Discord event which is not yet officially documented. I actively look for new events, and check Discord docs, so there is nothing to worry about. The library will support this event when it should"
                 }
             }
         }
@@ -377,13 +385,21 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
+        /// Read `helpAnchor` for help about each error case.
         enum EncodingError: LocalizedError {
             case notSupposedToBeSent(message: String)
             
             public var errorDescription: String? {
                 switch self {
                 case let .notSupposedToBeSent(message):
-                    return "notSupposedToBeSent(\(message)"
+                    return "notSupposedToBeSent(\(message))"
+                }
+            }
+            
+            public var helpAnchor: String? {
+                switch self {
+                case let .notSupposedToBeSent(message):
+                    return "This event is not supposed to be sent at all. This could be a library issue, please report at https://github.com/MahdiBM/DiscordBM/issues. Message: \(message)"
                 }
             }
         }

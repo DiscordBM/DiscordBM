@@ -321,16 +321,26 @@ extension DiscordLocaleDict: Sendable where C: Sendable { }
 /// A timestamp that decode/encodes itself how Discord expects.
 public struct DiscordTimestamp: Codable {
     
+    /// Read `helpAnchor` for help about each error case.
     public enum DecodingError: LocalizedError {
         case unexpectedFormat([CodingKey], String)
         case conversionFailure([CodingKey], String, DateComponents)
         
         public var errorDescription: String? {
             switch self {
-            case let .unexpectedFormat(codingKey, string):
-                return "unexpectedFormat(\(codingKey), \(string)"
-            case let .conversionFailure(codingKey, string, components):
-                return "conversionFailure(\(codingKey), \(string), \(components))"
+            case let .unexpectedFormat(codingKey, timestamp):
+                return "unexpectedFormat(\(codingKey), \(timestamp))"
+            case let .conversionFailure(codingKey, timestamp, components):
+                return "conversionFailure(\(codingKey), \(timestamp), \(components))"
+            }
+        }
+        
+        public var helpAnchor: String? {
+            switch self {
+            case let .unexpectedFormat(codingKey, timestamp):
+                return "The timestamp had an unexpected format. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues. Coding key: \(codingKey.map(\.stringValue)), timestamp: \(timestamp)"
+            case let .conversionFailure(codingKey, timestamp, components):
+                return "Could not convert the timestamp to a 'Date'. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues. Coding key: \(codingKey.map(\.stringValue)), timestamp: \(timestamp), components: \(components)"
             }
         }
     }
@@ -540,6 +550,7 @@ extension IntBitField: Sendable where R: Sendable { }
 public struct StringBitField<R>: BitField, Codable
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
+    /// Read `helpAnchor` for help about each error case.
     enum DecodingError: LocalizedError {
         case notRepresentingInt(String)
         
@@ -547,6 +558,13 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
             switch self {
             case let .notRepresentingInt(string):
                 return "notRepresentingInt(\(string))"
+            }
+        }
+        
+        public var helpAnchor: String? {
+            switch self {
+            case let .notRepresentingInt(string):
+                return "The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues. String: \(string)"
             }
         }
     }

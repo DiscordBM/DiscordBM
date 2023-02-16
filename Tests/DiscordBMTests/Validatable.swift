@@ -67,13 +67,13 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
             try validateCharacterCountInRange("🇯🇵", min: 3, max: 4, name: "emoji")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .invalidCharactersCount(self, name: "emoji", min: 3, max: 4))
+            XCTAssertEqual(error, .characterCountOutOfRange(self, name: "emoji", min: 3, max: 4))
         }
         XCTAssertThrowsError(
             try validateCharacterCountInRange("abdcefghijk", min: 20, max: 40, name: "a")
         ) { error in
             let error = error as! ValidationError
-            XCTAssertEqual(error, .invalidCharactersCount(self, name: "a", min: 20, max: 40))
+            XCTAssertEqual(error, .characterCountOutOfRange(self, name: "a", min: 20, max: 40))
         }
     }
     

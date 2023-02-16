@@ -120,6 +120,11 @@ public enum RequestBody {
             }
         }
         
+        enum CodingKeys: String, CodingKey {
+            case type
+            case data
+        }
+        
         public var type: Kind
         public var data: CallbackData?
         public var files: [RawFile]? {

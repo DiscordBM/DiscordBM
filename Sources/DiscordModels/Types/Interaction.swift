@@ -346,6 +346,7 @@ extension Interaction {
         
         public var components: [Component]
         
+        /// Read `helpAnchor` for help about each error case.
         public enum CodingError: LocalizedError {
             case unexpectedComponentKind(Kind)
             case actionRowIsSupposedToOnlyAppearAtTopLevel
@@ -356,6 +357,15 @@ extension Interaction {
                     return "unexpectedComponentKind(\(kind))"
                 case .actionRowIsSupposedToOnlyAppearAtTopLevel:
                     return "actionRowIsSupposedToOnlyAppearAtTopLevel"
+                }
+            }
+            
+            public var helpAnchor: String? {
+                switch self {
+                case let .unexpectedComponentKind(kind):
+                    return "This component kind was not expected here. This is a library decoding issue, please report at: https://github.com/MahdiBM/DiscordBM/issues. Kind: \(kind)"
+                case .actionRowIsSupposedToOnlyAppearAtTopLevel:
+                    return "I thought action-row is supposed to only appear at top-level as a container for other components. This is a library decoding issue, please report at: https://github.com/MahdiBM/DiscordBM/issues"
                 }
             }
         }
