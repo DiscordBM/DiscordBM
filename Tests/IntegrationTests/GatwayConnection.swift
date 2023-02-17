@@ -1,3 +1,6 @@
+#if swift(>=5.8)
+@preconcurrency import Atomics
+#endif
 @testable import DiscordGateway
 import AsyncHTTPClient
 import Logging
@@ -37,23 +40,26 @@ class GatewayConnectionTests: XCTestCase {
         
         let expectation = expectation(description: "Connected")
         
-        var _ready: Gateway.Ready?
-        var didHello = false
+        let connectionInfo = ConnectionInfo()
         
         await bot.addEventHandler { event in
-            if case let .ready(ready) = event.data {
-                _ready = ready
-                expectation.fulfill()
-            } else if event.opcode == .hello {
-                didHello = true
-            } else if _ready == nil {
-                expectation.fulfill()
+            Task {
+                if case let .ready(ready) = event.data {
+                    await connectionInfo.setReady(ready)
+                    expectation.fulfill()
+                } else if event.opcode == .hello {
+                    await connectionInfo.setDidHello()
+                } else if await connectionInfo.ready == nil {
+                    expectation.fulfill()
+                }
             }
         }
         
         Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
+await waitFulfill(for: [expectation], timeout: 10)
         
+        let didHello = await connectionInfo.didHello
+        let _ready = await connectionInfo.ready
         XCTAssertTrue(didHello)
         let ready = try XCTUnwrap(_ready)
         XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
@@ -94,23 +100,26 @@ class GatewayConnectionTests: XCTestCase {
         
         let expectation = expectation(description: "Connected")
         
-        var _ready: Gateway.Ready?
-        var didHello = false
+        let connectionInfo = ConnectionInfo()
         
         await bot.addEventHandler { event in
-            if case let .ready(ready) = event.data {
-                _ready = ready
-                expectation.fulfill()
-            } else if event.opcode == .hello {
-                didHello = true
-            } else if _ready == nil {
-                expectation.fulfill()
+            Task {
+                if case let .ready(ready) = event.data {
+                    await connectionInfo.setReady(ready)
+                    expectation.fulfill()
+                } else if event.opcode == .hello {
+                    await connectionInfo.setDidHello()
+                } else if await connectionInfo.ready == nil {
+                    expectation.fulfill()
+                }
             }
         }
         
         Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
+await waitFulfill(for: [expectation], timeout: 10)
         
+        let didHello = await connectionInfo.didHello
+        let _ready = await connectionInfo.ready
         XCTAssertTrue(didHello)
         let ready = try XCTUnwrap(_ready)
         XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
@@ -157,7 +166,8 @@ class GatewayConnectionTests: XCTestCase {
         }
         
         Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
+        
+        await waitFulfill(for: [expectation], timeout: 10)
         
         /// Didn't find a way to properly verify these functions.
         /// Here we just make the requests and make sure we don't get invalid-session-ed.
@@ -186,5 +196,20 @@ class GatewayConnectionTests: XCTestCase {
         try await Task.sleep(nanoseconds: 5_000_000_000)
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
         XCTAssertEqual(bot.state, .stopped)
+    }
+}
+
+private actor ConnectionInfo {
+    var ready: Gateway.Ready? = nil
+    var didHello = false
+    
+    init() { }
+    
+    func setReady(_ ready: Gateway.Ready) {
+        self.ready = ready
+    }
+    
+    func setDidHello() {
+        self.didHello = true
     }
 }

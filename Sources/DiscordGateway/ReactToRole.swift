@@ -185,7 +185,7 @@ public actor ReactToRoleHandler {
     }
     
     /// The state of a `ReactToRoleHandler`.
-    public enum State {
+    public enum State: Sendable {
         /// The instance have just been created
         case created
         /// Completely working
@@ -235,8 +235,8 @@ public actor ReactToRoleHandler {
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
         configuration: Configuration,
-        onConfigurationChanged: ((Configuration) async -> Void)? = nil,
-        onLifecycleEnd: ((Configuration) async -> Void)? = nil
+        onConfigurationChanged: (@Sendable (Configuration) async -> Void)? = nil,
+        onLifecycleEnd: (@Sendable (Configuration) async -> Void)? = nil
     ) async throws {
         self.gatewayManager = gatewayManager
         self.logger = DiscordGlobalConfiguration.makeLogger("ReactToRole")
@@ -250,7 +250,9 @@ public actor ReactToRoleHandler {
         self.configuration = configuration
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
-        await gatewayManager.addEventHandler(self.handleEvent)
+        await gatewayManager.addEventHandler { event in
+            Task { await self.handleEvent(event) }
+        }
         try await self.verify_populateReactions_start_react()
     }
     
@@ -285,8 +287,8 @@ public actor ReactToRoleHandler {
         messageId: String,
         grantOnStart: Bool = false,
         reactions: [Reaction],
-        onConfigurationChanged: ((Configuration) async -> Void)? = nil,
-        onLifecycleEnd: ((Configuration) async -> Void)? = nil
+        onConfigurationChanged: (@Sendable (Configuration) async -> Void)? = nil,
+        onLifecycleEnd: (@Sendable (Configuration) async -> Void)? = nil
     ) async throws {
         self.gatewayManager = gatewayManager
         let id = UUID()
@@ -310,7 +312,9 @@ public actor ReactToRoleHandler {
         )
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
-        await gatewayManager.addEventHandler(self.handleEvent)
+        await gatewayManager.addEventHandler { event in
+            Task { await self.handleEvent(event) }
+        }
         try await self.verify_populateReactions_start_react()
     }
     
@@ -339,8 +343,8 @@ public actor ReactToRoleHandler {
         messageId: String,
         grantOnStart: Bool = false,
         reactions: [Reaction],
-        onConfigurationChanged: ((Configuration) async -> Void)? = nil,
-        onLifecycleEnd: ((Configuration) async -> Void)? = nil
+        onConfigurationChanged: (@Sendable (Configuration) async -> Void)? = nil,
+        onLifecycleEnd: (@Sendable (Configuration) async -> Void)? = nil
     ) async throws {
         self.gatewayManager = gatewayManager
         let id = UUID()
@@ -369,7 +373,9 @@ public actor ReactToRoleHandler {
         )
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
-        await gatewayManager.addEventHandler(self.handleEvent)
+        await gatewayManager.addEventHandler { event in
+            Task { await self.handleEvent(event) }
+        }
         try await self.verify_populateReactions_start_react()
     }
     

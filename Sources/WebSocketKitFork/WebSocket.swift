@@ -5,7 +5,7 @@ import NIOSSL
 import Foundation
 import NIOFoundationCompat
 
-public final class WebSocket {
+public final class WebSocket: @unchecked Sendable {
     enum PeerType {
         case server
         case client

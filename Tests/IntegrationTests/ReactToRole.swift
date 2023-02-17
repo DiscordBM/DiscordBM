@@ -49,8 +49,7 @@ class ReactToRoleTests: XCTestCase {
         let reaction = try Reaction.unicodeEmoji("✅")
         let unacceptableReaction = try Reaction.unicodeEmoji("🐶")
         
-        var lifecycleEnded = false
-        var configurationChanged = false
+        let hookInfo = HookInfo()
         
         let _ = try await ReactToRoleHandler(
             gatewayManager: bot,
@@ -63,8 +62,8 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             reactions: [reaction],
-            onConfigurationChanged: { _ in configurationChanged = true },
-            onLifecycleEnd: { _ in lifecycleEnded = true }
+            onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
+            onLifecycleEnd: { _ in Task { await hookInfo.setLifecycleEnded() } }
         )
         
         /// On `init`, handler will react to the message.
@@ -75,7 +74,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 5_000_000_000)
         
         /// Configuration must have been changed and populated with the role id
-        XCTAssertEqual(configurationChanged, true)
+        do {
+            let configurationChanged = await hookInfo.configurationChanged
+            XCTAssertEqual(configurationChanged, true)
+        }
         
         /// Verify reacted
         let reactionUsers = try await client.getReactions(
@@ -146,7 +148,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 1_000_000_000)
         
         /// Lifecycle still not ended
-        XCTAssertEqual(lifecycleEnded, false)
+        do {
+            let lifecycleEnded = await hookInfo.lifecycleEnded
+            XCTAssertEqual(lifecycleEnded, false)
+        }
         
         /// Delete message
         try await client.deleteMessage(
@@ -158,7 +163,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 2_000_000_000)
         
         /// After message is deleted, lifecycle is ended
-        XCTAssertEqual(lifecycleEnded, true)
+        do {
+            let lifecycleEnded = await hookInfo.lifecycleEnded
+            XCTAssertEqual(lifecycleEnded, true)
+        }
         
         await bot.disconnect()
         
@@ -181,8 +189,7 @@ class ReactToRoleTests: XCTestCase {
         let reaction = Reaction.guildEmoji(name: "dbm", id: "1073704788400820324")
         let unacceptableReaction = try Reaction.unicodeEmoji("🐶")
         
-        var lifecycleEnded = false
-        var configurationChanged = false
+        let hookInfo = HookInfo()
         
         let _ = try await ReactToRoleHandler(
             gatewayManager: bot,
@@ -200,8 +207,8 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             reactions: [reaction],
-            onConfigurationChanged: { _ in configurationChanged = true },
-            onLifecycleEnd: { _ in lifecycleEnded = true }
+            onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
+            onLifecycleEnd: { _ in Task { await hookInfo.setLifecycleEnded() } }
         )
         
         /// On `init`, handler will react to the message.
@@ -212,7 +219,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 5_000_000_000)
         
         /// Configuration must have been changed and populated with the role id
-        XCTAssertEqual(configurationChanged, true)
+        do {
+            let configurationChanged = await hookInfo.configurationChanged
+            XCTAssertEqual(configurationChanged, true)
+        }
         
         /// Verify reacted
         let reactionUsers = try await client.getReactions(
@@ -288,7 +298,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 1_000_000_000)
         
         /// Lifecycle still not ended
-        XCTAssertEqual(lifecycleEnded, false)
+        do {
+            let lifecycleEnded = await hookInfo.lifecycleEnded
+            XCTAssertEqual(lifecycleEnded, false)
+        }
         
         /// Delete message
         try await client.deleteMessage(
@@ -300,7 +313,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 2_000_000_000)
         
         /// After message is deleted, lifecycle is ended
-        XCTAssertEqual(lifecycleEnded, true)
+        do {
+            let lifecycleEnded = await hookInfo.lifecycleEnded
+            XCTAssertEqual(lifecycleEnded, true)
+        }
         
         await bot.disconnect()
         
@@ -673,8 +689,7 @@ class ReactToRoleTests: XCTestCase {
         let reaction = try Reaction.unicodeEmoji("✅")
         let unacceptableReaction = try Reaction.unicodeEmoji("🐶")
         
-        var lifecycleEnded = false
-        var configurationChanged = false
+        let hookInfo = HookInfo()
         
         let _ = try await ReactToRoleHandler(
             gatewayManager: bot,
@@ -696,8 +711,8 @@ class ReactToRoleTests: XCTestCase {
                 reactions: [reaction],
                 roleId: nil
             ),
-            onConfigurationChanged: { _ in configurationChanged = true },
-            onLifecycleEnd: { _ in lifecycleEnded = true }
+            onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
+            onLifecycleEnd: { _ in Task { await hookInfo.setLifecycleEnded() } }
         )
         
         /// On `init`, handler will react to the message.
@@ -708,7 +723,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 5_000_000_000)
         
         /// Configuration must have been changed and populated with the role id
-        XCTAssertEqual(configurationChanged, true)
+        do {
+            let configurationChanged = await hookInfo.configurationChanged
+            XCTAssertEqual(configurationChanged, true)
+        }
         
         /// Verify reacted
         let reactionUsers = try await client.getReactions(
@@ -776,7 +794,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 1_000_000_000)
         
         /// Lifecycle still not ended
-        XCTAssertEqual(lifecycleEnded, false)
+        do {
+            let lifecycleEnded = await hookInfo.lifecycleEnded
+            XCTAssertEqual(lifecycleEnded, false)
+        }
         
         /// Delete message
         try await client.deleteMessage(
@@ -788,7 +809,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 2_000_000_000)
         
         /// After message is deleted, lifecycle is ended
-        XCTAssertEqual(lifecycleEnded, true)
+        do {
+            let lifecycleEnded = await hookInfo.lifecycleEnded
+            XCTAssertEqual(lifecycleEnded, true)
+        }
         
         await bot.disconnect()
         
@@ -808,8 +832,7 @@ class ReactToRoleTests: XCTestCase {
         let reaction = try Reaction.unicodeEmoji("✅")
         let unacceptableReaction = try Reaction.unicodeEmoji("🐶")
         
-        var lifecycleEnded = false
-        var configurationChanged = false
+        let hookInfo = HookInfo()
         
         let role = try await client.createGuildRole(
             guildId: Constants.guildId,
@@ -832,8 +855,8 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             reactions: [reaction],
-            onConfigurationChanged: { _ in configurationChanged = true },
-            onLifecycleEnd: { _ in lifecycleEnded = true }
+            onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
+            onLifecycleEnd: { _ in Task { await hookInfo.setLifecycleEnded() } }
         )
         
         /// On `init`, handler will react to the message.
@@ -844,7 +867,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 5_000_000_000)
         
         /// Configuration not must be changed because we already provided the role-id
-        XCTAssertEqual(configurationChanged, false)
+        do {
+            let configurationChanged = await hookInfo.configurationChanged
+            XCTAssertEqual(configurationChanged, false)
+        }
         
         /// Verify reacted
         let reactionUsers = try await client.getReactions(
@@ -915,7 +941,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 1_000_000_000)
         
         /// Lifecycle still not ended
-        XCTAssertEqual(lifecycleEnded, false)
+        do {
+            let lifecycleEnded = await hookInfo.lifecycleEnded
+            XCTAssertEqual(lifecycleEnded, false)
+        }
         
         /// Delete message
         try await client.deleteMessage(
@@ -927,7 +956,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 2_000_000_000)
         
         /// After message is deleted, lifecycle is ended
-        XCTAssertEqual(lifecycleEnded, true)
+        do {
+            let lifecycleEnded = await hookInfo.lifecycleEnded
+            XCTAssertEqual(lifecycleEnded, true)
+        }
         
         await bot.disconnect()
         
@@ -1021,8 +1053,7 @@ class ReactToRoleTests: XCTestCase {
         
         let reaction = try Reaction.unicodeEmoji("✅")
         
-        var lifecycleEnded = false
-        var configurationChanged = false
+        let hookInfo = HookInfo()
         
         let handler = try await ReactToRoleHandler(
             gatewayManager: bot,
@@ -1040,8 +1071,8 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             reactions: [reaction],
-            onConfigurationChanged: { _ in configurationChanged = true },
-            onLifecycleEnd: { _ in lifecycleEnded = true }
+            onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
+            onLifecycleEnd: { _ in Task { await hookInfo.setLifecycleEnded() } }
         )
         
         /// On `init`, handler will react to the message.
@@ -1052,7 +1083,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 5_000_000_000)
         
         /// Configuration must have been changed and populated with the role id
-        XCTAssertEqual(configurationChanged, true)
+        do {
+            let configurationChanged = await hookInfo.configurationChanged
+            XCTAssertEqual(configurationChanged, true)
+        }
         
         /// Verify reacted
         let reactionUsers = try await client.getReactions(
@@ -1153,7 +1187,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 1_000_000_000)
         
         /// Lifecycle still not ended
-        XCTAssertEqual(lifecycleEnded, false)
+        do {
+            let lifecycleEnded = await hookInfo.lifecycleEnded
+            XCTAssertEqual(lifecycleEnded, false)
+        }
         
         /// Delete message
         try await client.deleteMessage(
@@ -1165,7 +1202,10 @@ class ReactToRoleTests: XCTestCase {
         try await Task.sleep(nanoseconds: 2_000_000_000)
         
         /// After message is deleted, lifecycle is ended
-        XCTAssertEqual(lifecycleEnded, true)
+        do {
+            let lifecycleEnded = await hookInfo.lifecycleEnded
+            XCTAssertEqual(lifecycleEnded, true)
+        }
         
         await bot.disconnect()
         
@@ -1206,7 +1246,7 @@ class ReactToRoleTests: XCTestCase {
         )
         
         Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
+await waitFulfill(for: [expectation], timeout: 10)
         
         /// So cache is populated
         try await Task.sleep(nanoseconds: 5_000_000_000)
@@ -1227,11 +1267,26 @@ private actor FakeGatewayManager: GatewayManager {
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async { }
     func updatePresence(payload: Gateway.Identify.Presence) async { }
     func updateVoiceState(payload: VoiceStateUpdate) async { }
-    func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async { }
-    func addEventParseFailureHandler(_ handler: @escaping (Error, ByteBuffer) -> Void) async { }
+    func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) async { }
+    func addEventParseFailureHandler(
+        _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
+    ) async { }
     func disconnect() async { }
     
     init(client: DiscordClient) {
         self.client = client
+    }
+}
+
+private actor HookInfo {
+    var configurationChanged = false
+    var lifecycleEnded = false
+    
+    func setConfigurationChanged() {
+        self.configurationChanged = true
+    }
+    
+    func setLifecycleEnded() {
+        self.lifecycleEnded = true
     }
 }
