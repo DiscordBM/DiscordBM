@@ -1,12 +1,16 @@
 import DiscordModels
 import Foundation
+#if swift(>=5.8)
+@preconcurrency import OrderedCollections
+#else
 import OrderedCollections
+#endif
 
 /// Caches Gateway events.
 @dynamicMemberLookup
 public actor DiscordCache {
     
-    public enum StringsChoice: Sendable, ExpressibleByArrayLiteral {
+    public enum StringChoice: Sendable, ExpressibleByArrayLiteral {
         case all
         case none
         case some(Set<String>)
@@ -51,9 +55,9 @@ public actor DiscordCache {
     public enum RequestMembers: Sendable {
         case disabled
         /// Only requests members.
-        case enabled(guilds: StringsChoice = .all)
+        case enabled(guilds: StringChoice = .all)
         /// Requests all members as well as their presences.
-        case enabledWithPresences(guilds: StringsChoice = .all)
+        case enabledWithPresences(guilds: StringChoice = .all)
         
         public static var enabled: RequestMembers { .enabled() }
         
@@ -83,27 +87,27 @@ public actor DiscordCache {
         /// Caches messages, replaces edited messages with the new message,
         /// removes deleted messages from storage.
         case normal(
-            guilds: StringsChoice = .all,
-            channels: StringsChoice = .all
+            guilds: StringChoice = .all,
+            channels: StringChoice = .all
         )
         /// Caches messages, replaces edited messages with the new message,
         /// moves deleted messages to another property of the storage.
         case saveDeleted(
-            guilds: StringsChoice = .all,
-            channels: StringsChoice = .all
+            guilds: StringChoice = .all,
+            channels: StringChoice = .all
         )
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, removes deleted messages from storage.
         case saveEditHistory(
-            guilds: StringsChoice = .all,
-            channels: StringsChoice = .all
+            guilds: StringChoice = .all,
+            channels: StringChoice = .all
         )
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, moves deleted messages to another property of
         /// the storage.
         case saveEditHistoryAndDeleted(
-            guilds: StringsChoice = .all,
-            channels: StringsChoice = .all
+            guilds: StringChoice = .all,
+            channels: StringChoice = .all
         )
         
         public static var normal: MessageCachingPolicy { .normal() }
@@ -303,7 +307,7 @@ public actor DiscordCache {
     }
     
     /// Utility to access `Storage`.
-    public subscript<T>(dynamicMember path: WritableKeyPath<Storage, T>) -> T {
+    public subscript<T: Sendable>(dynamicMember path: WritableKeyPath<Storage, T>) -> T {
         get { self.storage[keyPath: path] }
         set { self.storage[keyPath: path] = newValue }
     }
@@ -339,7 +343,9 @@ public actor DiscordCache {
         self.checkForLimitEvery = itemsLimit.calculateCheckForLimitEvery()
         self.storage = storage
         
-        await gatewayManager.addEventHandler(handleEvent)
+        await gatewayManager.addEventHandler { event in
+            Task { await self.handleEvent(event) }
+        }
     }
     
     private func handleEvent(_ event: Gateway.Event) {
@@ -908,3 +914,6 @@ public actor DiscordCache {
 private func == (lhs: PartialEmoji, rhs: PartialEmoji) -> Bool {
     lhs.id == rhs.id && lhs.name == rhs.name
 }
+
+//MARK: - WritableKeyPath + Sendable
+extension WritableKeyPath: @unchecked Sendable where Root: Sendable, Value: Sendable { }

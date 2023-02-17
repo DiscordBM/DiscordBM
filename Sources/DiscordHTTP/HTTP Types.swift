@@ -2,6 +2,7 @@
 import DiscordModels
 import NIOHTTP1
 import struct NIOCore.ByteBuffer
+import NIOFoundationCompat
 import Foundation
 
 public struct DiscordHTTPRequest {

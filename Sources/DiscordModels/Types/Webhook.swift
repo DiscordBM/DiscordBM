@@ -24,7 +24,7 @@ public struct Webhook: Sendable, Codable {
 }
 
 /// The address of a Webhook.
-public struct WebhookAddress: Hashable {
+public struct WebhookAddress: Sendable, Hashable {
     
     public enum Error: Swift.Error {
         case invalidUrl(String)

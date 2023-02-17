@@ -8,9 +8,9 @@ import Foundation
 /// The manager of sending logs to Discord.
 public actor DiscordLogManager {
     
-    public struct Configuration {
+    public struct Configuration: Sendable {
         
-        public struct AliveNotice {
+        public struct AliveNotice: Sendable {
             let address: WebhookAddress
             let interval: TimeAmount?
             let message: String

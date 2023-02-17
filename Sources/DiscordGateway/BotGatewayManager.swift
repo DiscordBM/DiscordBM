@@ -1,10 +1,9 @@
 #if swift(>=5.8)
-@preconcurrency import WebSocketKitFork
 @preconcurrency import Atomics
 #else
-import WebSocketKitFork
 import Atomics
 #endif
+import WebSocketKitFork
 import Foundation
 import AsyncHTTPClient
 import Logging
