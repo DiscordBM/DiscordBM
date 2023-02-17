@@ -1246,7 +1246,11 @@ class ReactToRoleTests: XCTestCase {
         )
         
         Task { await bot.connect() }
+#if swift(>=5.8)
         await fulfillment(of: [expectation], timeout: 10)
+#else
+        wait(for: [expectation], timeout: 10)
+#endif
         
         /// So cache is populated
         try await Task.sleep(nanoseconds: 5_000_000_000)
