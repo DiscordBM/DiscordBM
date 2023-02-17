@@ -54,7 +54,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        wait(for: [expectation], timeout: 6)
+        await fulfillment(of: [expectation], timeout: 6)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -133,7 +133,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        wait(for: [expectation], timeout: 2)
+        await fulfillment(of: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -164,7 +164,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        wait(for: [expectation], timeout: 2)
+        await fulfillment(of: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -248,7 +248,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        wait(for: [expectation], timeout: 2)
+        await fulfillment(of: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -288,7 +288,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        wait(for: [expectation], timeout: 2)
+        await fulfillment(of: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -348,7 +348,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        wait(for: [expectation], timeout: 10)
+        await fulfillment(of: [expectation], timeout: 10)
         
         let payloads = self.client.payloads
         if payloads.count != 3 {
@@ -446,7 +446,7 @@ class DiscordLoggerTests: XCTestCase {
             
             let expectation = XCTestExpectation(description: "log-1")
             self.client.expectation = expectation
-            wait(for: [expectation], timeout: 3)
+            await fulfillment(of: [expectation], timeout: 3)
             
             let payloads = self.client.payloads
             /// Due to the `frequency`, we only should have 1 payload, which contains 4 embeds.
@@ -482,7 +482,7 @@ class DiscordLoggerTests: XCTestCase {
             
             let expectation = XCTestExpectation(description: "log-2")
             self.client.expectation = expectation
-            wait(for: [expectation], timeout: 3)
+            await fulfillment(of: [expectation], timeout: 3)
             
             let payloads = self.client.payloads
             /// Due to the `frequency`, we only should have 1 payload, which contains 4 embeds.
@@ -571,7 +571,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        wait(for: [expectation], timeout: 2)
+        await fulfillment(of: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
@@ -608,7 +608,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-        wait(for: [expectation], timeout: 2)
+        await fulfillment(of: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)

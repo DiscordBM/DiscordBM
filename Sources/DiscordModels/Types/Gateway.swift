@@ -198,7 +198,7 @@ public struct Gateway: Sendable, Codable {
             public var helpAnchor: String? {
                 switch self {
                 case let .unhandledDispatchEvent(type):
-                    return "The dispatch event type '\(type)' is unhandled. This is probably a new Discord event which is not yet officially documented. I actively look for new events, and check Discord docs, so there is nothing to worry about. The library will support this event when it should"
+                    return "The dispatch event type '\(type ?? "nil")' is unhandled. This is probably a new Discord event which is not yet officially documented. I actively look for new events, and check Discord docs, so there is nothing to worry about. The library will support this event when it should"
                 }
             }
         }

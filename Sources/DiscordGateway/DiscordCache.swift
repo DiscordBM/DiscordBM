@@ -899,7 +899,7 @@ public actor DiscordCache {
     }
     
 #if DEBUG
-    func _tests_modifyStorage(_ block: (inout Storage) -> Void) {
+    func _tests_modifyStorage(_ block: @Sendable (inout Storage) -> Void) {
         block(&self.storage)
     }
 #endif

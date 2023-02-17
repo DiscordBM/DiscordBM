@@ -27,9 +27,11 @@ public protocol GatewayManager: DiscordActor {
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
     func updateVoiceState(payload: VoiceStateUpdate) async
     /// Adds a handler to be notified of events.
-    func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) async
+    func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) async
     /// Adds a handler to be notified of event parsing failures.
-    func addEventParseFailureHandler(_ handler: @escaping (Error, ByteBuffer) -> Void) async
+    func addEventParseFailureHandler(
+        _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
+    ) async
     /// Disconnects from Discord.
     func disconnect() async
 }

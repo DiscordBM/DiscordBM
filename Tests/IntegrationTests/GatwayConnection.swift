@@ -52,7 +52,7 @@ class GatewayConnectionTests: XCTestCase {
         }
         
         Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
+        await fulfillment(of: [expectation], timeout: 10)
         
         XCTAssertTrue(didHello)
         let ready = try XCTUnwrap(_ready)
@@ -109,7 +109,7 @@ class GatewayConnectionTests: XCTestCase {
         }
         
         Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
+        await fulfillment(of: [expectation], timeout: 10)
         
         XCTAssertTrue(didHello)
         let ready = try XCTUnwrap(_ready)
@@ -157,7 +157,7 @@ class GatewayConnectionTests: XCTestCase {
         }
         
         Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
+        await fulfillment(of: [expectation], timeout: 10)
         
         /// Didn't find a way to properly verify these functions.
         /// Here we just make the requests and make sure we don't get invalid-session-ed.
