@@ -56,11 +56,7 @@ class GatewayConnectionTests: XCTestCase {
         }
         
         Task { await bot.connect() }
-#if swift(>=5.8)
-        await fulfillment(of: [expectation], timeout: 10)
-#else
-        wait(for: [expectation], timeout: 10)
-#endif
+await waitFulfill(for: [expectation], timeout: 10)
         
         let didHello = await connectionInfo.didHello
         let _ready = await connectionInfo.ready
@@ -120,11 +116,7 @@ class GatewayConnectionTests: XCTestCase {
         }
         
         Task { await bot.connect() }
-#if swift(>=5.8)
-        await fulfillment(of: [expectation], timeout: 10)
-#else
-        wait(for: [expectation], timeout: 10)
-#endif
+await waitFulfill(for: [expectation], timeout: 10)
         
         let didHello = await connectionInfo.didHello
         let _ready = await connectionInfo.ready
@@ -174,11 +166,8 @@ class GatewayConnectionTests: XCTestCase {
         }
         
         Task { await bot.connect() }
-#if swift(>=5.8)
-        await fulfillment(of: [expectation], timeout: 10)
-#else
-        wait(for: [expectation], timeout: 10)
-#endif
+        
+        await waitFulfill(for: [expectation], timeout: 10)
         
         /// Didn't find a way to properly verify these functions.
         /// Here we just make the requests and make sure we don't get invalid-session-ed.
