@@ -1,6 +1,6 @@
 import Logging
 import DiscordModels
-import DiscordUtils
+import DiscordUtilities
 import Foundation
 
 public struct DiscordLogHandler: LogHandler {

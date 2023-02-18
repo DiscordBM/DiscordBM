@@ -1,6 +1,6 @@
 @testable import DiscordLogger
 import DiscordHTTP
-import DiscordUtils
+import DiscordUtilities
 @testable import Logging
 import NIOHTTP1
 import XCTest

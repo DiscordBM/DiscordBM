@@ -4,4 +4,4 @@
 @_exported import DiscordGateway
 @_exported import DiscordLogger
 @_exported import DiscordModels
-@_exported import DiscordUtils
+@_exported import DiscordUtilities

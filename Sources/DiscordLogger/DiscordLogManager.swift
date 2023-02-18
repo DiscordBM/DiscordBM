@@ -1,5 +1,5 @@
 import DiscordHTTP
-import DiscordUtils
+import DiscordUtilities
 import AsyncHTTPClient
 import NIOCore
 import Logging
