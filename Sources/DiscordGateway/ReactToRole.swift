@@ -12,12 +12,21 @@ public actor ReactToRoleHandler {
     
     /// This configuration must be codable-backward-compatible.
     public struct Configuration: Sendable, Codable {
+        
+        public enum Exclusivity: Sendable, Codable {
+            case none
+            case toTheOtherReactions
+            case to([Reaction], maxAllowed: Int = 1)
+            case toTheOtherReactionsAnd([Reaction], maxAllowed: Int = 1)
+        }
+        
         public let id: UUID
         public var createRole: RequestBody.CreateGuildRole
         public let guildId: String
         public let channelId: String
         public let messageId: String
         public let reactions: [Reaction]
+        public let reactionsExclusivity: Exclusivity
         public let grantOnStart: Bool
         fileprivate(set) public var roleId: String?
         
@@ -35,12 +44,13 @@ public actor ReactToRoleHandler {
         ///     Discord's rate-limits for you app.
         ///   - roleId: The role-id, only if it's already been created.
         public init(
-            id: UUID,
+            id: UUID = UUID(),
             createRole: RequestBody.CreateGuildRole,
             guildId: String,
             channelId: String,
             messageId: String,
             reactions: [Reaction],
+            reactionsExclusivity: Exclusivity = .none,
             grantOnStart: Bool = false,
             roleId: String? = nil
         ) {
@@ -50,6 +60,7 @@ public actor ReactToRoleHandler {
             self.channelId = channelId
             self.messageId = messageId
             self.reactions = reactions
+            self.reactionsExclusivity = reactionsExclusivity
             self.grantOnStart = grantOnStart
             self.roleId = roleId
         }
