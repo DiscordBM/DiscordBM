@@ -7,7 +7,7 @@ import Logging
 import Foundation
 #endif
 
-/// Handles react-to-a-message-to-get-a-role.
+/// Handles react-to-message-to-get-a-role.
 public actor ReactToRoleHandler {
     
     /// This configuration must be codable-backward-compatible.
@@ -41,7 +41,7 @@ public actor ReactToRoleHandler {
         ///     on start. **NOTE**: Only recommended if you use a `DiscordCache` with `guilds` and
         ///     `guildMembers` intents enabled. Checking each member's roles requires an API request
         ///     and if you don't provide a cache, those API requests have a chance to overwhelm
-        ///     Discord's rate-limits for you app.
+        ///     Discord's rate-limits of you app.
         ///   - roleId: The role-id, only if it's already been created.
         public init(
             id: UUID = UUID(),

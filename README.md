@@ -185,15 +185,15 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
     httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS
 )
 
-Task {
-    /// Bootstrap the `LoggingSystem`. After this, all your `Logger`s will automagically start using `DiscordLogHandler`.
-    await LoggingSystem.bootstrapWithDiscordLogger(
-        /// The address to send the logs to. 
-        /// You can easily create a webhook using Discord client apps.
-        address: try .url(WEBHOOK_URL),
-        makeMainLogHandler: StreamLogHandler.standardOutput(label:metadataProvider:)
-    )
-}
+/// Bootstrap the `LoggingSystem`. After this, all your `Logger`s will automagically start using `DiscordLogHandler`.
+/// Do not use a `Task { }`. Wait before the `LoggingSystem` is bootstrapped.  
+await LoggingSystem.bootstrapWithDiscordLogger(
+    /// The address to send the logs to. 
+    /// You can easily create a webhook using Discord client apps.
+    address: try .url(WEBHOOK_URL),
+    makeMainLogHandler: StreamLogHandler.standardOutput(label:metadataProvider:)
+)
+
 /// Make sure you haven't called `LoggingSystem.bootstrap` anywhere else, because you can only call it once.
 /// For example Vapor's templates use `LoggingSystem.bootstrap` on boot, and you need to remove that.
 ```
