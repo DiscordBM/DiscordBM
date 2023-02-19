@@ -13,8 +13,10 @@ public actor ReactToRoleHandler {
     /// This configuration must be codable-backward-compatible.
     public struct Configuration: Sendable, Codable {
         
+        /// How to limit role-reactions.
         public struct PreventReactions: Sendable, Codable {
             
+            /// The main policy of how to limit role-reactions.
             public enum Policy: Sendable, Codable {
                 /// Users can only use `maxAllowed`-count reaction of this handler.
                 case handlerReactions(maxAllowed: Int = 1)
@@ -22,25 +24,37 @@ public actor ReactToRoleHandler {
                 case reactions(Set<Reaction>, maxAllowed: Int = 1)
                 /// Users can only use `maxAllowed`-count reactions of this handler or the list.
                 case handlerReactionsAnd(Set<Reaction>, maxAllowed: Int = 1)
+                
+                func extraReactionsToKeepTrackOf() -> Set<Reaction> {
+                    switch self {
+                    case .handlerReactions: return []
+                    case let .reactions(reactions, _): return reactions
+                    case let .handlerReactionsAnd(reactions, _): return reactions
+                    }
+                }
+                
+                func preconditionValidMaxAllowed() {
+                    switch self {
+                    case let .handlerReactions(maxAllowed),
+                        let .reactions(_, maxAllowed),
+                        let .handlerReactionsAnd(_, maxAllowed):
+                        precondition(maxAllowed > 0, "Max allowed is '\(maxAllowed)' but must be bigger than 0")
+                    }
+                }
             }
             
+            /// The main policy of how to limit role-reactions.
             public let policy: Policy
+            /// Remove the reactions that were prevented from the message.
             public let removePreventedReactions: Bool
             
             public init(policy: Policy, removePreventedReactions: Bool = true) {
                 self.policy = policy
                 self.removePreventedReactions = removePreventedReactions
+                policy.preconditionValidMaxAllowed()
             }
             
-            func extraReactionsToKeepTrackOf() -> Set<Reaction> {
-                switch self.policy {
-                case .handlerReactions: return []
-                case let .reactions(reactions, _): return reactions
-                case let .handlerReactionsAnd(reactions, _): return reactions
-                }
-            }
-            
-            public func shouldPrevent(
+            func shouldPrevent(
                 for userId: String,
                 reactions handlerReactions: Set<Reaction>,
                 currentReactions: [Reaction: Set<String>]
@@ -263,7 +277,7 @@ public actor ReactToRoleHandler {
     /// the message. Also assign role only if this is their first acceptable reaction.
     var currentReactions: [Reaction: Set<String>] = [:]
     lazy var allReactions: Set<Reaction> = {
-        let extra = self.configuration.preventReactions?.extraReactionsToKeepTrackOf() ?? []
+        let extra = self.configuration.preventReactions?.policy.extraReactionsToKeepTrackOf() ?? []
         return self.configuration.reactions.union(extra)
     }()
     /// To avoid role-creation race-conditions
@@ -349,6 +363,7 @@ public actor ReactToRoleHandler {
         messageId: String,
         grantOnStart: Bool = false,
         reactions: Set<Reaction>,
+        preventReactions: Configuration.PreventReactions? = nil,
         onConfigurationChanged: ((Configuration) async -> Void)? = nil,
         onLifecycleEnd: ((Configuration) async -> Void)? = nil
     ) async throws {
@@ -369,6 +384,7 @@ public actor ReactToRoleHandler {
             channelId: channelId,
             messageId: messageId,
             reactions: reactions,
+            preventReactions: preventReactions,
             grantOnStart: grantOnStart,
             roleId: nil
         )
@@ -403,6 +419,7 @@ public actor ReactToRoleHandler {
         messageId: String,
         grantOnStart: Bool = false,
         reactions: Set<Reaction>,
+        preventReactions: Configuration.PreventReactions? = nil,
         onConfigurationChanged: ((Configuration) async -> Void)? = nil,
         onLifecycleEnd: ((Configuration) async -> Void)? = nil
     ) async throws {
@@ -428,6 +445,7 @@ public actor ReactToRoleHandler {
             channelId: channelId,
             messageId: messageId,
             reactions: reactions,
+            preventReactions: preventReactions,
             grantOnStart: grantOnStart,
             roleId: role.id
         )
