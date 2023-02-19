@@ -13,11 +13,59 @@ public actor ReactToRoleHandler {
     /// This configuration must be codable-backward-compatible.
     public struct Configuration: Sendable, Codable {
         
-        public enum Exclusivity: Sendable, Codable {
-            case none
-            case toTheOtherReactions
-            case to([Reaction], maxAllowed: Int = 1)
-            case toTheOtherReactionsAnd([Reaction], maxAllowed: Int = 1)
+        public struct PreventReactions: Sendable, Codable {
+            
+            public enum Policy: Sendable, Codable {
+                /// Users can only use `maxAllowed`-count reaction of this handler.
+                case handlerReactions(maxAllowed: Int = 1)
+                /// Users can only use `maxAllowed`-count reactions of this list.
+                case reactions(Set<Reaction>, maxAllowed: Int = 1)
+                /// Users can only use `maxAllowed`-count reactions of this handler or the list.
+                case handlerReactionsAnd(Set<Reaction>, maxAllowed: Int = 1)
+            }
+            
+            public let policy: Policy
+            public let removePreventedReactions: Bool
+            
+            public init(policy: Policy, removePreventedReactions: Bool = true) {
+                self.policy = policy
+                self.removePreventedReactions = removePreventedReactions
+            }
+            
+            func extraReactionsToKeepTrackOf() -> Set<Reaction> {
+                switch self.policy {
+                case .handlerReactions: return []
+                case let .reactions(reactions, _): return reactions
+                case let .handlerReactionsAnd(reactions, _): return reactions
+                }
+            }
+            
+            public func shouldPrevent(
+                for userId: String,
+                reactions handlerReactions: Set<Reaction>,
+                currentReactions: [Reaction: Set<String>]
+            ) -> Bool {
+                switch self.policy {
+                case let .handlerReactions(maxAllowed):
+                    let count = handlerReactions.filter({ reaction in
+                        currentReactions[reaction]?.contains(userId) ?? false
+                    }).count
+                    return count >= maxAllowed
+                case let .reactions(reactions, maxAllowed):
+                    let count = reactions.filter({ reaction in
+                        currentReactions[reaction]?.contains(userId) ?? false
+                    }).count
+                    return count >= maxAllowed
+                case let .handlerReactionsAnd(reactions, maxAllowed):
+                    let count1 = handlerReactions.filter({ reaction in
+                        currentReactions[reaction]?.contains(userId) ?? false
+                    }).count
+                    let count2 = reactions.filter({ reaction in
+                        currentReactions[reaction]?.contains(userId) ?? false
+                    }).count
+                    return (count1 + count2) >= maxAllowed
+                }
+            }
         }
         
         public let id: UUID
@@ -25,10 +73,10 @@ public actor ReactToRoleHandler {
         public let guildId: String
         public let channelId: String
         public let messageId: String
-        public let reactions: [Reaction]
-        public let reactionsExclusivity: Exclusivity
+        public let reactions: Set<Reaction>
+        public let preventReactions: PreventReactions?
         public let grantOnStart: Bool
-        fileprivate(set) public var roleId: String?
+        public fileprivate(set) var roleId: String?
         
         /// - Parameters:
         ///   - id: The unique id of this configuration.
@@ -37,6 +85,7 @@ public actor ReactToRoleHandler {
         ///   - channelId: The channel-id of the message.
         ///   - messageId: The message-id.
         ///   - reactions: The reactions to grant the role for.
+        ///   - preventReactions: Prevents extra reactions using this configuration.
         ///   - grantOnStart: Grant the role to those who already reacted but don't have it,
         ///     on start. **NOTE**: Only recommended if you use a `DiscordCache` with `guilds` and
         ///     `guildMembers` intents enabled. Checking each member's roles requires an API request
@@ -49,8 +98,8 @@ public actor ReactToRoleHandler {
             guildId: String,
             channelId: String,
             messageId: String,
-            reactions: [Reaction],
-            reactionsExclusivity: Exclusivity = .none,
+            reactions: Set<Reaction>,
+            preventReactions: PreventReactions? = nil,
             grantOnStart: Bool = false,
             roleId: String? = nil
         ) {
@@ -60,7 +109,7 @@ public actor ReactToRoleHandler {
             self.channelId = channelId
             self.messageId = messageId
             self.reactions = reactions
-            self.reactionsExclusivity = reactionsExclusivity
+            self.preventReactions = preventReactions
             self.grantOnStart = grantOnStart
             self.roleId = roleId
         }
@@ -213,6 +262,10 @@ public actor ReactToRoleHandler {
     /// Used to remove role from members only if they have no remaining acceptable reaction
     /// the message. Also assign role only if this is their first acceptable reaction.
     var currentReactions: [Reaction: Set<String>] = [:]
+    lazy var allReactions: Set<Reaction> = {
+        let extra = self.configuration.preventReactions?.extraReactionsToKeepTrackOf() ?? []
+        return self.configuration.reactions.union(extra)
+    }()
     /// To avoid role-creation race-conditions
     var lockedCreatingRole = false
     private(set) public var state = State.created
@@ -295,7 +348,7 @@ public actor ReactToRoleHandler {
         channelId: String,
         messageId: String,
         grantOnStart: Bool = false,
-        reactions: [Reaction],
+        reactions: Set<Reaction>,
         onConfigurationChanged: ((Configuration) async -> Void)? = nil,
         onLifecycleEnd: ((Configuration) async -> Void)? = nil
     ) async throws {
@@ -349,7 +402,7 @@ public actor ReactToRoleHandler {
         channelId: String,
         messageId: String,
         grantOnStart: Bool = false,
-        reactions: [Reaction],
+        reactions: Set<Reaction>,
         onConfigurationChanged: ((Configuration) async -> Void)? = nil,
         onLifecycleEnd: ((Configuration) async -> Void)? = nil
     ) async throws {
@@ -430,14 +483,14 @@ public actor ReactToRoleHandler {
         if reaction.message_id == self.configuration.messageId,
            reaction.channel_id == self.configuration.channelId,
            reaction.guild_id == self.configuration.guildId,
-           self.configuration.reactions.contains(where: { $0.is(reaction.emoji) }) {
+           self.allReactions.contains(where: { $0.is(reaction.emoji) }) {
             Task {
                 do {
                     let emojiReaction = try Reaction(emoji: reaction.emoji)
                     let alreadyReacted = self.currentReactions.values
                         .contains(where: { $0.contains(reaction.user_id) })
                     self.currentReactions[emojiReaction, default: []].insert(reaction.user_id)
-                    if !alreadyReacted {
+                    if !alreadyReacted, self.configuration.reactions.contains(emojiReaction) {
                         await self.addRoleToMember(userId: reaction.user_id)
                     }
                 } catch {
@@ -451,7 +504,7 @@ public actor ReactToRoleHandler {
         if reaction.message_id == self.configuration.messageId,
            reaction.channel_id == self.configuration.channelId,
            reaction.guild_id == self.configuration.guildId,
-           self.configuration.reactions.contains(where: { $0.is(reaction.emoji) }),
+           self.allReactions.contains(where: { $0.is(reaction.emoji) }),
            self.configuration.roleId != nil {
             self.checkAndRemoveRoleFromUser(emoji: reaction.emoji, userId: reaction.user_id)
         }
@@ -466,7 +519,8 @@ public actor ReactToRoleHandler {
                     self.currentReactions[emojiReaction]?.remove(at: idx)
                 }
                 /// If there is no acceptable reaction remaining, remove the role from the user.
-                if !currentReactions.values.contains(where: { $0.contains(userId) }) {
+                if self.configuration.reactions.contains(emojiReaction),
+                   !currentReactions.values.contains(where: { $0.contains(userId) }) {
                     await self.removeRoleFromMember(userId: userId)
                 }
             } catch {
@@ -643,7 +697,7 @@ public actor ReactToRoleHandler {
             )
         }
         /// Populate reactions
-        for reaction in self.configuration.reactions {
+        for reaction in self.allReactions {
             let reactionsUsers = try await client.getReactions(
                 channelId: self.configuration.channelId,
                 messageId: self.configuration.messageId,

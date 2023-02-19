@@ -118,7 +118,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// Thread-only:
     public var member: ThreadMember?
     public var newly_created: Bool?
-    /// Only for `threadMembersUpdate` Gateway event.
+    /// Only populated by `threadMembersUpdate` Gateway event.
     public var threadMembers: [Gateway.ThreadMembersUpdate.ThreadMember]?
 }
 
