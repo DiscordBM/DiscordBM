@@ -28,7 +28,7 @@ extension MultipartEncodable {
 struct MultipartEncodingContainer: Encodable {
     
     struct JSON: Encodable, MultipartPartConvertible {
-        var buffer: ByteBuffer
+        let buffer: ByteBuffer
         
         var multipart: MultipartPart? {
             MultipartPart(
