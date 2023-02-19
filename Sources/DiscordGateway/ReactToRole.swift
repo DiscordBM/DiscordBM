@@ -438,7 +438,7 @@ public actor ReactToRoleHandler {
     }
     
     private func handleEvent(_ event: Gateway.Event) {
-        guard state == .running else { return }
+        guard self.state == .running else { return }
         switch event.data {
         case let .messageReactionAdd(payload):
             self.onReactionAdd(payload)
