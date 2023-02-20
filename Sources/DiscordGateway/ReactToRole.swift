@@ -25,15 +25,19 @@ public actor ReactToRoleHandler {
                 /// Users can only use `maxAllowed`-count reactions of this handler or the list.
                 case handlerReactionsAnd(Set<Reaction>, maxAllowed: Int = 1)
                 
+                /// The handler needs to keep track of these reactions too,
+                /// other than the main reactions of the handler.
                 func extraReactionsToKeepTrackOf() -> Set<Reaction> {
                     switch self {
-                    case .handlerReactions: return []
-                    case let .reactions(reactions, _): return reactions
-                    case let .handlerReactionsAnd(reactions, _): return reactions
+                    case .handlerReactions:
+                        return []
+                    case let .reactions(reactions, _),
+                        let .handlerReactionsAnd(reactions, _):
+                        return reactions
                     }
                 }
                 
-                func preconditionValidMaxAllowed() {
+                func preconditionValidateMaxAllowed() {
                     switch self {
                     case let .handlerReactions(maxAllowed),
                         let .reactions(_, maxAllowed),
@@ -51,9 +55,10 @@ public actor ReactToRoleHandler {
             public init(policy: Policy, removePreventedReactions: Bool = true) {
                 self.policy = policy
                 self.removePreventedReactions = removePreventedReactions
-                policy.preconditionValidMaxAllowed()
+                policy.preconditionValidateMaxAllowed()
             }
             
+            /// Should or should not prevent the reaction.
             func shouldPrevent(
                 for userId: String,
                 reactions handlerReactions: Set<Reaction>,
@@ -126,6 +131,18 @@ public actor ReactToRoleHandler {
             self.preventReactions = preventReactions
             self.grantOnStart = grantOnStart
             self.roleId = roleId
+        }
+        
+        func shouldPrevent(
+            for userId: String,
+            reactions handlerReactions: Set<Reaction>,
+            currentReactions: [Reaction: Set<String>]
+        ) -> Bool {
+            preventReactions?.shouldPrevent(
+                for: userId,
+                reactions: reactions,
+                currentReactions: currentReactions
+            ) ?? false
         }
         
         func hasChanges(comparedTo other: Configuration) -> Bool {
