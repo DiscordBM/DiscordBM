@@ -151,9 +151,27 @@ public actor ReactToRoleHandler {
         }
     }
     
-    public enum Error: Swift.Error {
+    public enum Error: LocalizedError {
         case messageIsInaccessible(messageId: String, channelId: String, previousError: Swift.Error)
         case roleIsInaccessible(id: String, previousError: Swift.Error?)
+        
+        public var errorDescription: String? {
+            switch self {
+            case let .messageIsInaccessible(messageId, channelId, previousError):
+                return "messageIsInaccessible(messageId: \(messageId), channelId: \(channelId), previousError: \(previousError))"
+            case let .roleIsInaccessible(id, previousError):
+                return "roleIsInaccessible(id: \(id), previousError: \(String(describing: previousError)))"
+            }
+        }
+        
+        public var helpAnchor: String? {
+            switch self {
+            case let .messageIsInaccessible(messageId, channelId, previousError):
+                return "Can't access a message with id '\(messageId)' in channel '\(channelId)'. This could be because the message doesn't exist or the bot doesn't have enough permissions to see it. Previous error: \(previousError)"
+            case let .roleIsInaccessible(id, previousError):
+                return "Can't access a role with id '\(id)'. This could be because the role doesn't exist or the bot doesn't have enough permissions to see it. Previous error: \(String(describing: previousError))"
+            }
+        }
     }
     
     /// Handles the requests which can be done using either a cache (if available), or a client.

@@ -1,3 +1,4 @@
+import Foundation
 
 /// https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-structure
 public struct Webhook: Sendable, Codable {
@@ -26,8 +27,22 @@ public struct Webhook: Sendable, Codable {
 /// The address of a Webhook.
 public struct WebhookAddress: Hashable {
     
-    public enum Error: Swift.Error {
+    public enum Error: LocalizedError {
         case invalidUrl(String)
+        
+        public var errorDescription: String? {
+            switch self {
+            case let .invalidUrl(url):
+                return "invalidUrl(\(url))"
+            }
+        }
+        
+        public var helpAnchor: String? {
+            switch self {
+            case let .invalidUrl(url):
+                return "The provided URL '\(url.debugDescription)' doesn't look like a webhook URL"
+            }
+        }
     }
     
     public var id: String
