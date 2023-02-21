@@ -55,6 +55,7 @@ public struct Reaction: Sendable, Hashable, Codable {
         try self.base.encode(to: encoder)
     }
     
+    /// Read `helpAnchor` for help about each error case.
     public enum Error: LocalizedError {
         case moreThan1Emoji(String, count: Int)
         case notEmoji(String)

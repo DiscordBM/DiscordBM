@@ -733,20 +733,20 @@ public struct Secret:
     CustomStringConvertible,
     CustomDebugStringConvertible {
     
-    public var _storage: String
+    public var value: String
     
     public init(stringLiteral value: String) {
-        self._storage = value
+        self.value = value
     }
     
     public init(_ value: String) {
-        self._storage = value
+        self.value = value
     }
     
     public var description: String {
-        let count = _storage.count
+        let count = value.count
         let keepCount = count > 24 ? 6 : 0
-        let dropped = _storage.dropLast(count - keepCount)
+        let dropped = value.dropLast(count - keepCount)
         return "\(dropped)****"
     }
     
@@ -755,22 +755,16 @@ public struct Secret:
     }
     
     public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        self._storage = try container.decode(String.self)
-    }
-    
-    public mutating func set(to newValue: String) {
-        self._storage = newValue
+        self.value = try .init(from: decoder)
     }
     
     public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(self._storage)
+        try self.value.encode(to: encoder)
     }
 }
 
 /// A class so we can use the same type recursively in itself.
-public final class DereferenceBox<C>: Codable, CustomStringConvertible where C: Codable {
+public final class DereferenceBox<C>: Codable where C: Codable {
     public let value: C
     
     public init(value: C) {
@@ -778,15 +772,11 @@ public final class DereferenceBox<C>: Codable, CustomStringConvertible where C: 
     }
     
     public init(from decoder: Decoder) throws {
-        value = try C.init(from: decoder)
+        value = try .init(from: decoder)
     }
     
     public func encode(to encoder: Encoder) throws {
         try value.encode(to: encoder)
-    }
-    
-    public var description: String {
-        "\(value)"
     }
 }
 

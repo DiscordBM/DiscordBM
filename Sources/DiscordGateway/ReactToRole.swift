@@ -151,6 +151,7 @@ public actor ReactToRoleHandler {
         }
     }
     
+    /// Read `helpAnchor` for help about each error case.
     public enum Error: LocalizedError {
         case messageIsInaccessible(messageId: String, channelId: String, previousError: Swift.Error)
         case roleIsInaccessible(id: String, previousError: Swift.Error?)
@@ -670,7 +671,7 @@ public actor ReactToRoleHandler {
                 guildId: self.configuration.guildId,
                 userId: userId,
                 roleId: roleId
-            ).guardIsSuccessfulResponse()
+            ).guardIsSuccessResponse()
         } catch {
             self.logger.report(error: error)
         }
@@ -728,7 +729,7 @@ public actor ReactToRoleHandler {
                 guildId: self.configuration.guildId,
                 userId: userId,
                 roleId: roleId
-            ).guardIsSuccessfulResponse()
+            ).guardIsSuccessResponse()
         } catch {
             self.logger.report(error: error)
         }
@@ -782,7 +783,7 @@ public actor ReactToRoleHandler {
                     channelId: self.configuration.channelId,
                     messageId: self.configuration.messageId,
                     emoji: reaction
-                ).guardIsSuccessfulResponse()
+                ).guardIsSuccessResponse()
             } catch {
                 self.logger.report(error: error)
             }

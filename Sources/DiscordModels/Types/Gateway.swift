@@ -198,7 +198,7 @@ public struct Gateway: Sendable, Codable {
             public var helpAnchor: String? {
                 switch self {
                 case let .unhandledDispatchEvent(type):
-                    return "The dispatch event type '\(type)' is unhandled. This is probably a new Discord event which is not yet officially documented. I actively look for new events, and check Discord docs, so there is nothing to worry about. The library will support this event when it should"
+                    return "The dispatch event type '\(type ?? "nil")' is unhandled. This is probably a new Discord event which is not yet officially documented. I actively look for new events, and check Discord docs, so there is nothing to worry about. The library will support this event when it should"
                 }
             }
         }
@@ -446,43 +446,6 @@ public struct Gateway: Sendable, Codable {
                 throw EncodingError.notSupposedToBeSent(
                     message: "'\(self)' data is supposed to never be sent."
                 )
-            }
-        }
-    }
-    
-    /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
-    public enum CloseCode: UInt16, Sendable, Codable {
-        case unknownError = 4000
-        case unknownOpcode = 4001
-        case decodeError = 4002
-        case notAuthenticated = 4003
-        case authenticationFailed = 4004
-        case alreadyAuthenticated = 4005
-        case invalidSequence = 4007
-        case rateLimited = 4008
-        case sessionTimedOut = 4009
-        case invalidShard = 4010
-        case shardingRequired = 4011
-        case invalidAPIVersion = 4012
-        case invalidIntents = 4013
-        case disallowedIntents = 4014
-        
-        public var canTryReconnect: Bool {
-            switch self {
-            case .unknownError: return true
-            case .unknownOpcode: return true
-            case .decodeError: return true
-            case .notAuthenticated: return true
-            case .authenticationFailed: return false
-            case .alreadyAuthenticated: return true
-            case .invalidSequence: return true
-            case .rateLimited: return true
-            case .sessionTimedOut: return true
-            case .invalidShard: return false
-            case .shardingRequired: return false
-            case .invalidAPIVersion: return false
-            case .invalidIntents: return false
-            case .disallowedIntents: return false
             }
         }
     }

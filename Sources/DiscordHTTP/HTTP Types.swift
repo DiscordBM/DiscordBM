@@ -74,16 +74,46 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
         + ")"
     }
     
+    /// Throws an error if the response's status code is not 2xx.
     @inlinable
-    public func guardIsSuccessfulResponse() throws {
+    public func guardIsSuccessResponse() throws {
         guard (200..<300).contains(self.status.code) else {
             throw DiscordClientError.badStatusCode(self)
         }
     }
     
+    /// Makes sure the response is a success response, or returns `JSONError`
+    /// so you have a chance to process the error and try to recover.
+    ///
+    /// Returns `nil` if is successful.
+    /// Returns `JSONError` is it's a recognizable error.
+    /// Throws an error if it can't decode the error info into a `JSONError`.
+    ///
+    /// The `JSONError` does not contain the full Discord error response.
+    /// For manual debugging, it's better to directly read the contents of the response:
+    /// ```
+    /// let responseDescription = httpResponse.description
+    /// print(httpResponse.description)
+    /// ```
+    @inlinable
+    public func decodeErrorIfUnsuccessful() throws -> JSONError? {
+        if (200..<300).contains(self.status.code) {
+            return nil
+        } else {
+            return try self._decode()
+        }
+    }
+    
+    /// Decode the response into an arbitrary type.
     @inlinable
     public func decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
-        try guardIsSuccessfulResponse()
+        try guardIsSuccessResponse()
+        return try self._decode()
+    }
+    
+    /// Doesn't check for successful-ness of the response
+    @usableFromInline
+    func _decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
         if let data = body.map({ Data(buffer: $0, byteTransferStrategy: .noCopy) }) {
             return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
         } else {
@@ -99,11 +129,31 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
         self.httpResponse = httpResponse
     }
     
+    /// Throws an error if the response's status code is not 2xx.
     @inlinable
-    public func guardIsSuccessfulResponse() throws {
-        try self.httpResponse.guardIsSuccessfulResponse()
+    public func guardIsSuccessResponse() throws {
+        try self.httpResponse.guardIsSuccessResponse()
     }
     
+    /// Makes sure the response is a success response, or returns `JSONError`
+    /// so you have a chance to process the error and try to recover.
+    ///
+    /// Returns `nil` if is successful.
+    /// Returns `JSONError` is it's a recognizable error.
+    /// Throws an error if it can't decode the error info into a `JSONError`.
+    ///
+    /// The `JSONError` does not contain the full Discord error response.
+    /// For manual debugging, it's better to directly read the contents of the response:
+    /// ```
+    /// let responseDescription = httpResponse.description
+    /// print(httpResponse.description)
+    /// ```
+    @inlinable
+    public func decodeErrorIfUnsuccessful() throws -> JSONError? {
+        try self.httpResponse.decodeErrorIfUnsuccessful()
+    }
+    
+    /// Decode the response.
     @inlinable
     public func decode() throws -> C {
         try httpResponse.decode(as: C.self)
@@ -120,13 +170,13 @@ public struct DiscordCDNResponse: Sendable {
     }
     
     @inlinable
-    public func guardIsSuccessfulResponse() throws {
-        try self.httpResponse.guardIsSuccessfulResponse()
+    public func guardIsSuccessResponse() throws {
+        try self.httpResponse.guardIsSuccessResponse()
     }
     
     @inlinable
     public func getFile(overrideName: String? = nil) throws -> RawFile {
-        try self.guardIsSuccessfulResponse()
+        try self.guardIsSuccessResponse()
         guard let body = self.httpResponse.body else {
             throw DiscordClientError.emptyBody(httpResponse)
         }

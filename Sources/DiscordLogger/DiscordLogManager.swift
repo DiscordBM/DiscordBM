@@ -318,7 +318,7 @@ public actor DiscordLogManager {
         )
         
         do {
-            try response.guardIsSuccessfulResponse()
+            try response.guardIsSuccessResponse()
         } catch {
             logWarning("Received error from Discord after sending logs. This might be a library issue. Please report on https://github.com/MahdiBM/DiscordBM/issue with full context", metadata: ["error": "\(error)", "payload": "\(payload)"])
         }

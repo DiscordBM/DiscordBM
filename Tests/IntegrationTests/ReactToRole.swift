@@ -28,7 +28,7 @@ class ReactToRoleTests: XCTestCase {
                 guildId: Constants.guildId,
                 roleId: role.id,
                 reason: "Tests cleanup"
-            ).guardIsSuccessfulResponse()
+            ).guardIsSuccessResponse()
         }
     }
     
@@ -107,7 +107,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the cache is updated with the new member info
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -127,7 +127,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the cache is updated with the new member info
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -152,7 +152,7 @@ class ReactToRoleTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the gateway event is sent and processed
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -249,7 +249,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the cache is updated with the new member info
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -269,7 +269,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the cache is updated with the new member info
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -294,7 +294,7 @@ class ReactToRoleTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the gateway event is sent and processed
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -387,7 +387,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction1
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// To make sure cache receives the events
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -405,7 +405,7 @@ class ReactToRoleTests: XCTestCase {
         try await client.deleteAllReactions(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// To make sure cache receives the events
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -428,7 +428,7 @@ class ReactToRoleTests: XCTestCase {
             guildId: Constants.guildId,
             userId: Constants.botId,
             roleId: roleId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// To make sure cache receives the events
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -447,7 +447,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction2
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// To make sure cache receives the events
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -466,7 +466,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction1
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// To make sure cache receives the events
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -485,7 +485,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction1
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// To make sure cache receives the events
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -504,7 +504,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction2
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// To make sure cache receives the events
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -522,7 +522,7 @@ class ReactToRoleTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         await bot.disconnect()
         
@@ -595,7 +595,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// To make sure cache receives the events
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -618,7 +618,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         // To make sure cache receives the events
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -653,7 +653,7 @@ class ReactToRoleTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         await bot.disconnect()
         
@@ -737,7 +737,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the cache is updated with the new member info
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -757,7 +757,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the cache is updated with the new member info
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -782,7 +782,7 @@ class ReactToRoleTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the gateway event is sent and processed
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -876,7 +876,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the cache is updated with the new member info
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -896,7 +896,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the cache is updated with the new member info
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -921,7 +921,7 @@ class ReactToRoleTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the gateway event is sent and processed
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -1084,7 +1084,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the cache is updated with the new member info
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -1109,7 +1109,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the cache is updated with the new member info
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -1129,7 +1129,7 @@ class ReactToRoleTests: XCTestCase {
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// Start
         try await handler.restart()
@@ -1159,7 +1159,7 @@ class ReactToRoleTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         /// So the gateway event is sent and processed
         try await Task.sleep(nanoseconds: 2_000_000_000)

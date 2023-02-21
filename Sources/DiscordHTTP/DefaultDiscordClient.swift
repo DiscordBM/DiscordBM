@@ -232,7 +232,7 @@ public struct DefaultDiscordClient: DiscordClient {
             )
             request.headers = req.headers
             if req.endpoint.requiresAuthorizationHeader {
-                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
             }
             
             logger.debug("Will send a request to Discord", metadata: [
@@ -297,7 +297,7 @@ public struct DefaultDiscordClient: DiscordClient {
             )
             request.headers = req.headers
             if req.endpoint.requiresAuthorizationHeader {
-                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
             }
             request.headers.replaceOrAdd(name: "Content-Type", value: "application/json")
             
@@ -373,7 +373,7 @@ public struct DefaultDiscordClient: DiscordClient {
             )
             request.headers = req.headers
             if req.endpoint.requiresAuthorizationHeader {
-                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token._storage)")
+                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
             }
             request.headers.replaceOrAdd(name: "Content-Type", value: contentType)
             
@@ -643,7 +643,7 @@ private final class ClientCacheStorage {
     func cache(for token: Secret) -> ClientCache {
         self.lock.lock()
         defer { self.lock.unlock() }
-        let token = token._storage
+        let token = token.value
         if let cache = self.storage[token] {
             return cache
         } else {

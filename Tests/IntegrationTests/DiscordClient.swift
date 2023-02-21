@@ -59,7 +59,7 @@ class DiscordClientTests: XCTestCase {
             try await client.deleteMessage(
                 channelId: message.channel_id,
                 messageId: message.id
-            ).guardIsSuccessfulResponse()
+            ).guardIsSuccessResponse()
         }
         
         /// Create
@@ -111,7 +111,7 @@ class DiscordClientTests: XCTestCase {
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[1]),
             userId: Constants.botId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         let getReactionsResponse = try await client.getReactions(
             channelId: Constants.channelId,
@@ -448,13 +448,13 @@ class DiscordClientTests: XCTestCase {
                 channelId: thread.id,
                 messageId: message.id,
                 reason: "Random reason " + UUID().uuidString
-            ).guardIsSuccessfulResponse()
+            ).guardIsSuccessResponse()
         }
         
         try await client.addThreadMember(
             threadId: thread.id,
             userId: Constants.personalId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         let threadMember = try await client.getThreadMember(
             threadId: thread.id,
@@ -497,14 +497,14 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(limitedThreadMembers.count, 1)
         
         try await client.leaveThread(id: thread.id)
-            .guardIsSuccessfulResponse()
+            .guardIsSuccessResponse()
         
         let threadMembersLeft = try await client.listThreadMembers(threadId: thread.id).decode()
         
         XCTAssertEqual(threadMembersLeft.first?.user_id, Constants.personalId)
         
         try await client.joinThread(id: thread.id)
-            .guardIsSuccessfulResponse()
+            .guardIsSuccessResponse()
         
         let threadMembersRejoined = try await client.listThreadMembers(threadId: thread.id).decode()
         
@@ -513,7 +513,7 @@ class DiscordClientTests: XCTestCase {
         try await client.removeThreadMember(
             threadId: thread.id,
             userId: Constants.personalId
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         let threadMembersRemoved = try await client.listThreadMembers(threadId: thread.id).decode()
         
@@ -522,7 +522,7 @@ class DiscordClientTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.threadsChannelId,
             messageId: message.id
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         let threadWithoutMessage = try await client.startThreadWithoutMessage(
             channelId: Constants.announcementsChannelId,
@@ -549,7 +549,7 @@ class DiscordClientTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.announcementsChannelId,
             messageId: threadWithoutMessage.id
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         let forumThreadName = "Forum thread test"
         let forumThread = try await client.startThreadInForumChannel(
@@ -570,18 +570,18 @@ class DiscordClientTests: XCTestCase {
             channelId: Constants.threadsChannelId,
             before: Date().addingTimeInterval(-60),
             limit: 2
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         try await client.listPrivateArchivedThreads(
             channelId: Constants.threadsChannelId,
             before: Date().addingTimeInterval(-3_600),
             limit: 2
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
         
         try await client.listJoinedPrivateArchivedThreads(
             channelId: Constants.threadsChannelId,
             limit: 2
-        ).guardIsSuccessfulResponse()
+        ).guardIsSuccessResponse()
     }
     
     func testWebhooks() async throws {
@@ -594,7 +594,7 @@ class DiscordClientTests: XCTestCase {
             
             for webhook in guildWebhooks {
                 try await client.deleteWebhook(id: webhook.id)
-                    .guardIsSuccessfulResponse()
+                    .guardIsSuccessResponse()
             }
         }
         
@@ -776,16 +776,16 @@ class DiscordClientTests: XCTestCase {
             messageId: threadMessage.id,
             threadId: threadId
         )
-        XCTAssertNoThrow(try deleteThreadMessage.guardIsSuccessfulResponse())
+        XCTAssertNoThrow(try deleteThreadMessage.guardIsSuccessResponse())
         
         let delete1 = try await client.deleteWebhook(id: webhook1.id, reason: "Testing! 1")
-        XCTAssertNoThrow(try delete1.guardIsSuccessfulResponse())
+        XCTAssertNoThrow(try delete1.guardIsSuccessResponse())
         
         let delete2 = try await client.deleteWebhook(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             reason: "Testing! 2"
         )
-        XCTAssertNoThrow(try delete2.guardIsSuccessfulResponse())
+        XCTAssertNoThrow(try delete2.guardIsSuccessResponse())
     }
     
     /// Couldn't find test-cases for some of the functions
