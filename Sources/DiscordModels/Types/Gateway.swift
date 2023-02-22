@@ -152,7 +152,7 @@ public struct Gateway: Sendable, Codable {
                     return [.guilds, .directMessages]
                 case .threadMembersUpdate, .guildMemberAdd, .guildMemberRemove, .guildMemberUpdate:
                     return [.guilds, .guildMembers]
-                case .guildBanAdd, .guildBanRemove, .guildAuditLogEntryCreate:
+                case .guildAuditLogEntryCreate, .guildBanAdd, .guildBanRemove:
                     return [.guildModeration]
                 case .guildEmojisUpdate, .guildStickersUpdate:
                     return [.guildEmojisAndStickers]
@@ -948,15 +948,12 @@ public struct Gateway: Sendable, Codable {
     public struct MessageCreate: Sendable, Codable {
         public var id: String
         public var channel_id: String
-        public var guild_id: String?
         public var author: PartialUser?
-        public var member: Guild.PartialMember?
         public var content: String
         public var timestamp: DiscordTimestamp
         public var edited_timestamp: DiscordTimestamp?
         public var tts: Bool
         public var mention_everyone: Bool
-        public var mentions: [DiscordChannel.Message.MentionUser]
         public var mention_roles: [String]
         public var mention_channels: [DiscordChannel.Message.ChannelMention]?
         public var attachments: [DiscordChannel.Message.Attachment]
@@ -978,6 +975,11 @@ public struct Gateway: Sendable, Codable {
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
+        public var role_subscription_data: RoleSubscriptionData?
+        /// The extra fields:
+        public var guild_id: String?
+        public var member: Guild.PartialMember?
+        public var mentions: [DiscordChannel.Message.MentionUser]
         
         public mutating func update(with partialMessage: DiscordChannel.PartialMessage) {
             self.id = partialMessage.id
@@ -1036,10 +1038,13 @@ public struct Gateway: Sendable, Codable {
             self.sticker_items = partialMessage.sticker_items
             self.stickers = partialMessage.stickers
             self.position = partialMessage.position
+            self.role_subscription_data = partialMessage.role_subscription_data
             if let member = partialMessage.member {
                 self.member = member
             }
-            self.guild_id = partialMessage.guild_id
+            if let guildId = partialMessage.guild_id {
+                self.guild_id = guildId
+            }
         }
     }
     

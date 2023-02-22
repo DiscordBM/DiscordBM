@@ -39,9 +39,6 @@ public enum GatewayCloseCode: UInt16, Sendable, Codable {
 
 /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
 public enum JSONErrorCode: Int, Sendable, Codable {
-    /// `unknown` Will never be thrown by Discord.
-    /// It indicates a new error code that this enum does not cover yet.
-    case unknown = -1
     case generalError = 0
     case unknownAccount = 10001
     case unknownApplication = 10002
@@ -232,22 +229,10 @@ public enum JSONErrorCode: Int, Sendable, Codable {
     case webhooksCanOnlyCreateThreadsInForumChannels = 220003
     case webhookServicesCannotBeUsedInForumChannels = 220004
     case messageBlockedByHarmfulLinksFilter = 240000
-    
-    public init(from decoder: Decoder) throws {
-        let rawValue = try Int(from: decoder)
-        if let code = JSONErrorCode(rawValue: rawValue) {
-            self = code
-        } else {
-            DiscordGlobalConfiguration.makeDecodeLogger("JSONErrorCode").warning(
-                "Can't recognize the error code",
-                metadata: ["code": .stringConvertible(rawValue)]
-            )
-            self = .unknown
-        }
-    }
 }
 
 public struct JSONError: Sendable, Codable {
     public var message: String
-    public var code: JSONErrorCode
+    /// Might be `nil` in case of something like a rate-limit error.
+    public var code: JSONErrorCode?
 }

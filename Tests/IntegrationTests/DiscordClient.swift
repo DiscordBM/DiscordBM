@@ -900,6 +900,14 @@ class DiscordClientTests: XCTestCase {
 //        }
         
 //        do {
+//            let file = try await client.getCDNStorePageAsset(
+//                appId: String,
+//                assetId: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+//        do {
 //            let file = try await client.getCDNStickerPackBanner(
 //                assetId: String
 //            ).getFile()

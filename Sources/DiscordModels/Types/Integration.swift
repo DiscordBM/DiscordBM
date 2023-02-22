@@ -7,6 +7,7 @@ public struct Integration: Sendable, Codable {
         case twitch
         case youtube
         case discord
+        case guildSubscription = "guild_subscription"
     }
     
     /// https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors

@@ -119,6 +119,8 @@ public struct Guild: Sendable, Codable {
         case suppressPremiumSubscriptions = 1
         case suppressGuildReminderNotifications = 2
         case suppressJoinNotificationReplies = 3
+        case suppressRoleSubscriptionPurchaseNotifications = 4
+        case suppressRoleSubscriptionPurchaseNotificationReplies = 5
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier
