@@ -305,7 +305,7 @@ public actor ReactToRoleHandler {
         channelId: String,
         messageId: String,
         grantOnStart: Bool = false,
-        reactions: [Reaction],
+        reactions: Set<Reaction>,
         onConfigurationChanged: (@Sendable (Configuration) async -> Void)? = nil,
         onLifecycleEnd: (@Sendable (Configuration) async -> Void)? = nil
     ) async throws {
@@ -361,7 +361,7 @@ public actor ReactToRoleHandler {
         channelId: String,
         messageId: String,
         grantOnStart: Bool = false,
-        reactions: [Reaction],
+        reactions: Set<Reaction>,
         onConfigurationChanged: (@Sendable (Configuration) async -> Void)? = nil,
         onLifecycleEnd: (@Sendable (Configuration) async -> Void)? = nil
     ) async throws {
@@ -450,7 +450,7 @@ public actor ReactToRoleHandler {
                     let alreadyReacted = self.currentReactions.values
                         .contains(where: { $0.contains(reaction.user_id) })
                     self.currentReactions[emojiReaction, default: []].insert(reaction.user_id)
-                    if !alreadyReacted, self.configuration.reactions.contains(emojiReaction) {
+                    if !alreadyReacted {
                         await self.addRoleToMember(userId: reaction.user_id)
                     }
                 } catch {
@@ -478,8 +478,7 @@ public actor ReactToRoleHandler {
                     self.currentReactions[emojiReaction]?.remove(at: idx)
                 }
                 /// If there is no acceptable reaction remaining, remove the role from the user.
-                if self.configuration.reactions.contains(emojiReaction),
-                   !currentReactions.values.contains(where: { $0.contains(userId) }) {
+                if !currentReactions.values.contains(where: { $0.contains(userId) }) {
                     await self.removeRoleFromMember(userId: userId)
                 }
             } catch {
