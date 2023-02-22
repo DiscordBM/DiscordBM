@@ -197,6 +197,7 @@ extension DiscordChannel {
             case ephemeral = 6
             case loading = 7
             case failedToMentionSomeRolesInThread = 8
+            case unknownValue10 = 10
             case suppressNotifications = 12
         }
         
