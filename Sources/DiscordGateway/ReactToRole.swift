@@ -14,10 +14,10 @@ public actor ReactToRoleHandler {
     public struct Configuration: Sendable, Codable {
         
         /// How to limit role-reactions.
-        public struct PreventReactions: Sendable, Codable {
+        public struct PreventReactions: Sendable, Codable, Equatable {
             
             /// The main policy of how to limit role-reactions.
-            public enum Policy: Sendable, Codable {
+            public enum Policy: Sendable, Codable, Equatable {
                 /// Users can only use `maxAllowed`-count reaction of this handler.
                 case handlerReactions(maxAllowed: Int = 1)
                 /// Users can only use `maxAllowed`-count reactions of this list.
@@ -42,7 +42,7 @@ public actor ReactToRoleHandler {
                     case let .handlerReactions(maxAllowed),
                         let .reactions(_, maxAllowed),
                         let .handlerReactionsAnd(_, maxAllowed):
-                        precondition(maxAllowed > 0, "Max allowed is '\(maxAllowed)' but must be bigger than 0")
+                        precondition(maxAllowed > 0, "Max allowed is '\(maxAllowed)' but must be greater than 0")
                     }
                 }
             }
@@ -93,7 +93,7 @@ public actor ReactToRoleHandler {
         public let channelId: String
         public let messageId: String
         public let reactions: Set<Reaction>
-        public let preventReactions: PreventReactions?
+        public fileprivate(set) var preventReactions: PreventReactions? = nil
         public let grantOnStart: Bool
         public fileprivate(set) var roleId: String?
         
@@ -118,7 +118,6 @@ public actor ReactToRoleHandler {
             channelId: String,
             messageId: String,
             reactions: Set<Reaction>,
-            preventReactions: PreventReactions? = nil,
             grantOnStart: Bool = false,
             roleId: String? = nil
         ) {
@@ -128,7 +127,6 @@ public actor ReactToRoleHandler {
             self.channelId = channelId
             self.messageId = messageId
             self.reactions = reactions
-            self.preventReactions = preventReactions
             self.grantOnStart = grantOnStart
             self.roleId = roleId
         }
@@ -147,7 +145,8 @@ public actor ReactToRoleHandler {
         
         func hasChanges(comparedTo other: Configuration) -> Bool {
             self.roleId != other.roleId ||
-            self.createRole != other.createRole
+            self.createRole != other.createRole ||
+            self.preventReactions != preventReactions
         }
     }
     
@@ -399,7 +398,6 @@ public actor ReactToRoleHandler {
         messageId: String,
         grantOnStart: Bool = false,
         reactions: Set<Reaction>,
-        preventReactions: Configuration.PreventReactions? = nil,
         onConfigurationChanged: ((Configuration) async -> Void)? = nil,
         onLifecycleEnd: ((Configuration) async -> Void)? = nil
     ) async throws {
@@ -420,7 +418,6 @@ public actor ReactToRoleHandler {
             channelId: channelId,
             messageId: messageId,
             reactions: reactions,
-            preventReactions: preventReactions,
             grantOnStart: grantOnStart,
             roleId: nil
         )
@@ -455,7 +452,6 @@ public actor ReactToRoleHandler {
         messageId: String,
         grantOnStart: Bool = false,
         reactions: Set<Reaction>,
-        preventReactions: Configuration.PreventReactions? = nil,
         onConfigurationChanged: ((Configuration) async -> Void)? = nil,
         onLifecycleEnd: ((Configuration) async -> Void)? = nil
     ) async throws {
@@ -481,7 +477,6 @@ public actor ReactToRoleHandler {
             channelId: channelId,
             messageId: messageId,
             reactions: reactions,
-            preventReactions: preventReactions,
             grantOnStart: grantOnStart,
             roleId: role.id
         )
@@ -787,6 +782,53 @@ public actor ReactToRoleHandler {
             } catch {
                 self.logger.report(error: error)
             }
+        }
+    }
+    
+    public enum PreventionError: LocalizedError {
+        case tooFewHandlers
+        case mismatchedMessageId
+        
+        public var errorDescription: String? {
+            switch self {
+            case .tooFewHandlers:
+                return "tooFewHandlers"
+            case .mismatchedMessageId:
+                return "mismatchedMessageId"
+            }
+        }
+        
+        public var helpAnchor: String? {
+            switch self {
+            case .tooFewHandlers:
+                return "Handlers count is less than 1"
+            case .mismatchedMessageId:
+                return "All ReactToRoleHandlers must have the same message id"
+            }
+        }
+    }
+    
+    public static func setUpPreventReactions(on handlers: [ReactToRoleHandler]) async throws {
+        guard handlers.count > 1 else {
+            throw PreventionError.tooFewHandlers
+        }
+        
+        var messageId: String? = nil
+        for handler in handlers {
+            if messageId == nil {
+                messageId = await handler.configuration.messageId
+            } else {
+                if await messageId != handler.configuration.messageId {
+                    throw PreventionError.mismatchedMessageId
+                }
+            }
+        }
+        
+        for handler in handlers {
+            handler.configuration.preventReactions = .init(
+                policy: .,
+                removePreventedReactions: <#T##Bool#>
+            )
         }
     }
 }

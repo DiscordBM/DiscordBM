@@ -39,6 +39,8 @@ public enum GatewayCloseCode: UInt16, Sendable, Codable {
 
 /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
 public enum JSONErrorCode: Int, Sendable, Codable {
+    /// `unknown` Will never be thrown by Discord.
+    /// It indicates a new error code that this enum does not cover yet.
     case unknown = -1
     case generalError = 0
     case unknownAccount = 10001
