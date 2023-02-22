@@ -7,9 +7,10 @@ public struct DiscordUser: Sendable, Codable {
         case none = 0
         case nitroClassic = 1
         case nitro = 2
+        case nitroBasic = 3
     }
     
-    /// https://discord.com/developers/docs/resources/user#user-object-user-structure
+    /// https://discord.com/developers/docs/resources/user#user-object-user-flags
     public enum Flag: Int, Sendable {
         case staff = 0
         case partner = 1
@@ -25,7 +26,6 @@ public struct DiscordUser: Sendable, Codable {
         case verifiedDeveloper = 17
         case certifiedModerator = 18
         case botHttpInteractions = 19
-        case unknownValue20 = 20
         case activeDeveloper = 22
     }
     

@@ -42,7 +42,6 @@ public enum Permission: Int, Sendable, Hashable, Codable {
     case sendMessagesInThreads = 38
     case useEmbeddedActivities = 39
     case moderateMembers = 40
-    case unknownValue41 = 41
 }
 
 /// https://discord.com/developers/docs/topics/permissions#role-object
