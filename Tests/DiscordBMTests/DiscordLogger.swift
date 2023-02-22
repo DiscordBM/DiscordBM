@@ -349,7 +349,7 @@ await waitFulfill(for: [expectation], timeout: 2)
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-await waitFulfill(for: [expectation], timeout: 10)
+        await waitFulfill(for: [expectation], timeout: 10)
         
         let payloads = self.client.payloads
         if payloads.count != 3 {

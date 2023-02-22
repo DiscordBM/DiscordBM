@@ -443,7 +443,8 @@ public actor ReactToRoleHandler {
     func onReactionAdd(_ reaction: Gateway.MessageReactionAdd) {
         if reaction.message_id == self.configuration.messageId,
            reaction.channel_id == self.configuration.channelId,
-           reaction.guild_id == self.configuration.guildId {
+           reaction.guild_id == self.configuration.guildId,
+           self.configuration.reactions.contains(where: { $0.is(reaction.emoji) }) {
             Task {
                 do {
                     let emojiReaction = try Reaction(emoji: reaction.emoji)
@@ -464,6 +465,7 @@ public actor ReactToRoleHandler {
         if reaction.message_id == self.configuration.messageId,
            reaction.channel_id == self.configuration.channelId,
            reaction.guild_id == self.configuration.guildId,
+           self.configuration.reactions.contains(where: { $0.is(reaction.emoji) }),
            self.configuration.roleId != nil {
             self.checkAndRemoveRoleFromUser(emoji: reaction.emoji, userId: reaction.user_id)
         }
@@ -575,7 +577,7 @@ public actor ReactToRoleHandler {
                 guildId: self.configuration.guildId,
                 userId: userId,
                 roleId: roleId
-            ).guardIsSuccessResponse()
+            ).guardSuccess()
         } catch {
             self.logger.report(error: error)
         }
@@ -633,7 +635,7 @@ public actor ReactToRoleHandler {
                 guildId: self.configuration.guildId,
                 userId: userId,
                 roleId: roleId
-            ).guardIsSuccessResponse()
+            ).guardSuccess()
         } catch {
             self.logger.report(error: error)
         }
@@ -687,7 +689,7 @@ public actor ReactToRoleHandler {
                     channelId: self.configuration.channelId,
                     messageId: self.configuration.messageId,
                     emoji: reaction
-                ).guardIsSuccessResponse()
+                ).guardSuccess()
             } catch {
                 self.logger.report(error: error)
             }
