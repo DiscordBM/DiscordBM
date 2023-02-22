@@ -167,6 +167,22 @@ extension DiscordChannel {
             case guildInviteReminder = 22
             case contextMenuCommand = 23
             case autoModerationAction = 24
+            case roleSubscriptionPurchase = 25
+            case interactionPremiumUpsell = 26
+            case stageStart = 27
+            case stageEnd = 28
+            case stageSpeaker = 29
+            case stageTopic = 31
+            case guildApplicationPremiumSubscription = 32
+            
+            public var isDeletable: Bool {
+                switch self {
+                case .`default`, .channelPinnedMessage, .guildMemberJoin, .userPremiumGuildSubscription, .userPremiumGuildSubscriptionTier1, .userPremiumGuildSubscriptionTier2, .userPremiumGuildSubscriptionTier3, .channelFollowAdd, .threadCreated, .reply, .chatInputCommand, .guildInviteReminder, .contextMenuCommand, .autoModerationAction, .roleSubscriptionPurchase, .interactionPremiumUpsell, .stageStart, .stageEnd, .stageSpeaker, .stageTopic:
+                    return true
+                case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
+                    return false
+                }
+            }
         }
         
         /// https://discord.com/developers/docs/resources/channel#message-object-message-flags

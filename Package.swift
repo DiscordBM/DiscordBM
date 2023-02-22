@@ -45,7 +45,7 @@ let package = Package(
                 "DiscordGateway",
                 "DiscordLogger",
                 "DiscordModels",
-                "DiscordUtils",
+                "DiscordUtilities",
             ]
         ),
         .target(
@@ -77,7 +77,7 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "Logging", package: "swift-log"),
                 "DiscordHTTP",
-                "DiscordUtils",
+                "DiscordUtilities",
             ]
         ),
         .target(
@@ -88,7 +88,7 @@ let package = Package(
                 "DiscordCore"
             ]
         ),
-        .target(name: "DiscordUtils"),
+        .target(name: "DiscordUtilities"),
         .target(
             name: "DiscordAuth",
             dependencies: [

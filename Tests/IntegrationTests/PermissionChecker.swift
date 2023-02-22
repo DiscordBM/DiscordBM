@@ -51,7 +51,7 @@ class PermissionChecker: XCTestCase {
         }
         
         Task { await bot.connect() }
-        wait(for: [expectation], timeout: 10)
+await waitFulfill(for: [expectation], timeout: 10)
         
         try await Task.sleep(nanoseconds: 10_000_000_000)
         

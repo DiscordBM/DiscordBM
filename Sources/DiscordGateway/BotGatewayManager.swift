@@ -1,7 +1,11 @@
-import Foundation
-import WebSocketKitFork
-import AsyncHTTPClient
+#if swift(>=5.8)
+@preconcurrency import Atomics
+#else
 import Atomics
+#endif
+import WebSocketKitFork
+import Foundation
+import AsyncHTTPClient
 import Logging
 import enum NIOWebSocket.WebSocketErrorCode
 import struct NIOCore.TimeAmount
@@ -259,12 +263,14 @@ public actor BotGatewayManager: GatewayManager {
     }
     
     /// Adds a handler to be notified of events.
-    public func addEventHandler(_ handler: @escaping (Gateway.Event) -> Void) {
+    public func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) {
         self.onEvents.append(handler)
     }
     
     /// Adds a handler to be notified of event parsing failures.
-    public func addEventParseFailureHandler(_ handler: @escaping (Error, ByteBuffer) -> Void) {
+    public func addEventParseFailureHandler(
+        _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
+    ) {
         self.onEventParseFailures.append(handler)
     }
     

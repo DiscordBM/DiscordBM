@@ -25,7 +25,7 @@ public struct Webhook: Sendable, Codable {
 }
 
 /// The address of a Webhook.
-public struct WebhookAddress: Hashable {
+public struct WebhookAddress: Sendable, Hashable {
     
     /// Read `helpAnchor` for help about each error case.
     public enum Error: LocalizedError {

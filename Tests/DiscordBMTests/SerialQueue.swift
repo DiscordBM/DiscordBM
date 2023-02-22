@@ -1,5 +1,9 @@
-@testable import DiscordGateway
+#if swift(>=5.8)
+@preconcurrency import Atomics
+#else
 import Atomics
+#endif
+@testable import DiscordGateway
 import XCTest
 
 class SerialQueueTests: XCTestCase {

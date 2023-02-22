@@ -70,10 +70,10 @@ private actor FakeGatewayManager: GatewayManager {
     nonisolated let id: Int = 0
     nonisolated let state: DiscordGateway.GatewayState = .stopped
     func connect() async { }
-    func requestGuildMembersChunk(payload: DiscordModels.Gateway.RequestGuildMembers) async { }
-    func updatePresence(payload: DiscordModels.Gateway.Identify.Presence) async { }
-    func updateVoiceState(payload: DiscordModels.VoiceStateUpdate) async { }
-    func addEventHandler(_ handler: @escaping (DiscordModels.Gateway.Event) -> Void) async { }
-    func addEventParseFailureHandler(_ handler: @escaping (Error, ByteBuffer) -> Void) async { }
+    func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async { }
+    func updatePresence(payload: Gateway.Identify.Presence) async { }
+    func updateVoiceState(payload: VoiceStateUpdate) async { }
+    func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) async { }
+    func addEventParseFailureHandler(_ handler: @Sendable @escaping (Error, ByteBuffer) -> Void) async { }
     func disconnect() async { }
 }

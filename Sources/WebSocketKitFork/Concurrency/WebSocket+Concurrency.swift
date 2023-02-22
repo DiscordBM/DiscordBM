@@ -78,7 +78,7 @@ extension WebSocket {
         headers: HTTPHeaders = [:],
         configuration: WebSocketClient.Configuration = .init(),
         on eventLoopGroup: EventLoopGroup,
-        onUpgrade: @escaping (WebSocket) async -> ()
+        onUpgrade: @Sendable @escaping (WebSocket) async -> ()
     ) async throws {
         return try await self.connect(
             to: url,
@@ -98,7 +98,7 @@ extension WebSocket {
         headers: HTTPHeaders = [:],
         configuration: WebSocketClient.Configuration = .init(),
         on eventLoopGroup: EventLoopGroup,
-        onUpgrade: @escaping (WebSocket) async -> ()
+        onUpgrade: @Sendable @escaping (WebSocket) async -> ()
     ) async throws {
         return try await self.connect(
             to: url,
@@ -122,7 +122,7 @@ extension WebSocket {
         headers: HTTPHeaders = [:],
         configuration: WebSocketClient.Configuration = .init(),
         on eventLoopGroup: EventLoopGroup,
-        onUpgrade: @escaping (WebSocket) async -> ()
+        onUpgrade: @Sendable @escaping (WebSocket) async -> ()
     ) async throws {
         return try await self.connect(
             scheme: scheme,

@@ -95,8 +95,8 @@ class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
     func testValidateElementCountDoesNotExceed() throws {
         try validateElementCountDoesNotExceed(Optional<Array<Never>>.none, max: 0, name: "a")
         try validateElementCountDoesNotExceed(Optional<Array<String>>.none, max: 1, name: "a")
-        try validateElementCountDoesNotExceed([], max: 0, name: "a")
-        try validateElementCountDoesNotExceed([], max: 1, name: "a")
+        try validateElementCountDoesNotExceed([String](), max: 0, name: "a")
+        try validateElementCountDoesNotExceed([String](), max: 1, name: "a")
         try validateElementCountDoesNotExceed([1, 2, 3, 4], max: 4, name: "a")
         XCTAssertThrowsError(
             try validateElementCountDoesNotExceed([1, 2, 3, 4, 5], max: 4, name: "t")

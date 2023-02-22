@@ -1,12 +1,13 @@
 import Logging
 import DiscordModels
-import DiscordUtils
+import DiscordUtilities
 import Foundation
 
 public struct DiscordLogHandler: LogHandler {
     
     /// The label of this log handler.
     public let label: String
+    /// The label prepared to be sent to Discord.
     let preparedLabel: String
     /// The address to send the logs to.
     let address: WebhookAddress
