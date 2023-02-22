@@ -5,9 +5,12 @@ import struct NIOCore.ByteBuffer
 import NIOFoundationCompat
 import Foundation
 
-public struct DiscordHTTPRequest {
+public struct DiscordHTTPRequest: Sendable {
+    /// The endpoint to send the request to.
     public let endpoint: Endpoint
+    /// The query parameters of the request.
     public let queries: [(String, String?)]
+    /// The extra headers of the request.
     public let headers: HTTPHeaders
     
     public init(
@@ -21,6 +24,7 @@ public struct DiscordHTTPRequest {
     }
 }
 
+/// Represents a raw Discord HTTP response.
 public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     let _response: HTTPClient.Response
     
@@ -75,44 +79,103 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
         + ")"
     }
     
+    /// Throws an error if the response does not indicate success.
     @inlinable
-    public func guardIsSuccessfulResponse() throws {
+    public func guardSuccess() throws {
         guard (200..<300).contains(self.status.code) else {
-            throw DiscordClientError.badStatusCode(self)
+            throw HTTPError.badStatusCode(self)
         }
     }
     
+    /// Makes sure the response is a success response, or tries to find a `JSONError`
+    /// so you have a chance to process the error and try to recover.
+    ///
+    /// Returns `none` if the response is a success response.
+    /// Returns `jsonError` if it's a recognizable error.
+    /// Otherwise returns `badStatusCode`.
+    ///
+    /// The `JSONError` does not contain the full Discord error response.
+    /// For manual debugging, it's better to directly read the contents of the response:
+    /// ```
+    /// let httpResponse: DiscordHTTPResponse = ...
+    /// print(httpResponse.description)
+    /// ```
+    @inlinable
+    public func guardDecodeError() -> HTTPErrorResponse {
+        if (200..<300).contains(self.status.code) {
+            return .none
+        } else {
+            if let error = try? self._decode(as: JSONError.self) {
+                return .jsonError(error)
+            } else {
+                return .basStatusCode(self)
+            }
+        }
+    }
+    
+    /// Decode the response into an arbitrary type.
     @inlinable
     public func decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
-        try guardIsSuccessfulResponse()
+        try self.guardSuccess()
+        return try self._decode()
+    }
+    
+    /// Doesn't check for success of the response
+    @usableFromInline
+    func _decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
         if let data = body.map({ Data(buffer: $0, byteTransferStrategy: .noCopy) }) {
             return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
         } else {
-            throw DiscordClientError.emptyBody(self)
+            throw HTTPError.emptyBody(self)
         }
     }
 }
 
+/// Represents a Discord HTTP response for endpoints that return some data in the body.
 public struct DiscordClientResponse<C>: Sendable where C: Codable {
+    /// The raw http response.
     public let httpResponse: DiscordHTTPResponse
     
     public init(httpResponse: DiscordHTTPResponse) {
         self.httpResponse = httpResponse
     }
     
+    /// Throws an error if the response does not indicate success.
     @inlinable
-    public func guardIsSuccessfulResponse() throws {
-        try self.httpResponse.guardIsSuccessfulResponse()
+    public func guardSuccess() throws {
+        try self.httpResponse.guardSuccess()
     }
     
+    /// Makes sure the response is a success response, or tries to find a `JSONError`
+    /// so you have a chance to process the error and try to recover.
+    ///
+    /// Returns `none` if the response is a success response.
+    /// Returns `jsonError` if it's a recognizable error.
+    /// Otherwise returns `badStatusCode`.
+    ///
+    /// The `JSONError` does not contain the full Discord error response.
+    /// For manual debugging, it's better to directly read the contents of the response:
+    /// ```
+    /// let httpResponse: DiscordHTTPResponse = ...
+    /// print(httpResponse.description)
+    /// ```
+    @inlinable
+    public func guardDecodeError() -> HTTPErrorResponse {
+        self.httpResponse.guardDecodeError()
+    }
+    
+    /// Decode the response.
     @inlinable
     public func decode() throws -> C {
         try httpResponse.decode(as: C.self)
     }
 }
 
+/// Represents a Discord HTTP response for CDN endpoints.
 public struct DiscordCDNResponse: Sendable {
+    /// The raw http response.
     public let httpResponse: DiscordHTTPResponse
+    /// The fallback name for the file that will be decoded.
     public let fallbackFileName: String
     
     public init(httpResponse: DiscordHTTPResponse, fallbackFileName: String) {
@@ -121,26 +184,36 @@ public struct DiscordCDNResponse: Sendable {
     }
     
     @inlinable
-    public func guardIsSuccessfulResponse() throws {
-        try self.httpResponse.guardIsSuccessfulResponse()
+    public func guardSuccess() throws {
+        try self.httpResponse.guardSuccess()
     }
     
     @inlinable
     public func getFile(overrideName: String? = nil) throws -> RawFile {
-        try self.guardIsSuccessfulResponse()
+        try self.guardSuccess()
         guard let body = self.httpResponse.body else {
-            throw DiscordClientError.emptyBody(httpResponse)
+            throw HTTPError.emptyBody(httpResponse)
         }
         guard let contentType = self.httpResponse.headers.first(name: "Content-Type") else {
-            throw DiscordClientError.noContentTypeHeader(httpResponse)
+            throw HTTPError.noContentTypeHeader(httpResponse)
         }
         let name = overrideName ?? fallbackFileName
         return RawFile(data: body, nameNoExtension: name, contentType: contentType)
     }
 }
 
+/// Represents a possible Discord HTTP error.
+public enum HTTPErrorResponse: Sendable {
+    /// The response indicates success. No errors have been found.
+    case none
+    /// The response does not indicate success and there is a recognizable error in the body.
+    case jsonError(JSONError)
+    /// The response does not indicate success and there is no recognizable error in the body.
+    case basStatusCode(DiscordHTTPResponse)
+}
+
 /// Read `helpAnchor` for help about each error case.
-public enum DiscordClientError: LocalizedError {
+public enum HTTPError: LocalizedError {
     case rateLimited(url: String)
     case badStatusCode(DiscordHTTPResponse)
     case emptyBody(DiscordHTTPResponse)

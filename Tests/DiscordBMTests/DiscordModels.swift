@@ -1,4 +1,5 @@
 @testable import DiscordModels
+import DiscordHTTP
 import NIOCore
 import XCTest
 
@@ -202,6 +203,29 @@ class DiscordModelsTests: XCTestCase {
         XCTAssertNoThrow(try Reaction.unicodeEmoji("😀"))
         XCTAssertThrowsError(try Reaction.unicodeEmoji("😀a"))
         XCTAssertThrowsError(try Reaction.unicodeEmoji("😀😀"))
+    }
+    
+    func testJSONErrorDecoding() throws {
+        let json = """
+        {
+        "message": "Invalid authentication token",
+        "code": 50014
+        }
+        """
+        let data = ByteBuffer(string: json)
+        let response = DiscordHTTPResponse(
+            host: "discord.com",
+            status: .unauthorized,
+            version: .http1_1,
+            body: data
+        )
+        let error =  try XCTUnwrap(response.guardDecodeError())
+        if case let .jsonError(jsonError) = error {
+            XCTAssertEqual(jsonError.message, "Invalid authentication token")
+            XCTAssertEqual(jsonError.code, .invalidAuthenticationToken)
+        } else {
+            XCTFail("\(error) was not a 'jsonError'")
+        }
     }
 }
 

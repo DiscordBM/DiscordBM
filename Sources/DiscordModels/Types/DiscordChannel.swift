@@ -96,6 +96,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var icon: String?
     public var owner_id: String?
     public var application_id: String?
+    public var manage: Bool?
     public var parent_id: String?
     public var last_pin_timestamp: DiscordTimestamp?
     public var rtc_region: String?
@@ -118,7 +119,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// Thread-only:
     public var member: ThreadMember?
     public var newly_created: Bool?
-    /// Only for `threadMembersUpdate` Gateway event.
+    /// Only populated by `threadMembersUpdate` Gateway event.
     public var threadMembers: [Gateway.ThreadMembersUpdate.ThreadMember]?
 }
 
@@ -196,7 +197,7 @@ extension DiscordChannel {
             case ephemeral = 6
             case loading = 7
             case failedToMentionSomeRolesInThread = 8
-            case unknownValue10 = 10
+            case suppressNotifications = 12
         }
         
         /// https://discord.com/developers/docs/resources/channel#channel-mention-object
@@ -305,11 +306,12 @@ extension DiscordChannel {
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
+        public var role_subscription_data: RoleSubscriptionData?
     }
 }
 
 extension DiscordChannel {
-    /// Partial ``Channel.Message`` object.
+    /// Partial ``DiscordChannel.Message`` object.
     public struct PartialMessage: Sendable, Codable {
         public var id: String
         public var channel_id: String
@@ -341,6 +343,7 @@ extension DiscordChannel {
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
+        public var role_subscription_data: RoleSubscriptionData?
         public var member: Guild.PartialMember?
         public var guild_id: String?
     }
@@ -449,7 +452,9 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         case autoModerationMessage = "auto_moderation_message"
     }
     
-    public enum DynamicURL: Sendable, Codable {
+    public enum DynamicURL: Sendable, Codable, ExpressibleByStringLiteral {
+        public typealias StringLiteralType = String
+        
         case exact(String)
         case attachment(name: String)
         
@@ -459,6 +464,14 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
                 return exact
             case let .attachment(name):
                 return "attachment://\(name)"
+            }
+        }
+        
+        public init(stringLiteral string: String) {
+            if string.hasPrefix("attachment://") {
+                self = .attachment(name: String(string.dropFirst(13)))
+            } else {
+                self = .exact(string)
             }
         }
         
@@ -604,4 +617,12 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
             try validateCharacterCountDoesNotExceed(field.value, max: 1_024, name: "field.value")
         }
     }
+}
+
+/// https://discord.com/developers/docs/resources/channel#role-subscription-data-object-role-subscription-data-object-structure
+public struct RoleSubscriptionData: Sendable, Codable {
+    public var role_subscription_listing_id: String
+    public var tier_name: String
+    public var total_months_subscribed: Int
+    public var is_renewal: Bool
 }

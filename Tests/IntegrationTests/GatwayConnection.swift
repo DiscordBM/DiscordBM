@@ -56,7 +56,7 @@ class GatewayConnectionTests: XCTestCase {
         }
         
         Task { await bot.connect() }
-await waitFulfill(for: [expectation], timeout: 10)
+        await waitFulfill(for: [expectation], timeout: 10)
         
         let didHello = await connectionInfo.didHello
         let _ready = await connectionInfo.ready
@@ -116,7 +116,7 @@ await waitFulfill(for: [expectation], timeout: 10)
         }
         
         Task { await bot.connect() }
-await waitFulfill(for: [expectation], timeout: 10)
+        await waitFulfill(for: [expectation], timeout: 10)
         
         let didHello = await connectionInfo.didHello
         let _ready = await connectionInfo.ready

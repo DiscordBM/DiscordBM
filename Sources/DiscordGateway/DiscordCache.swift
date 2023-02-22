@@ -409,10 +409,27 @@ public actor DiscordCache {
                 if let existingIndex = self.guilds[guildId]?.threads
                     .firstIndex(where: { $0.id == channel.id }) {
                     self.guilds[guildId]?.threads[existingIndex] = channel
+                    /// Update `last_message_id` of forums on thread-create.
+                    /// https://discord.com/developers/docs/topics/threads#forum-channel-fields
+                    if channel.type == .guildForum,
+                       let parentId = channel.parent_id,
+                       self.intents.contains(.guilds),
+                       let forumIdx = self.guilds[guildId]?.channels
+                        .firstIndex(where: { $0.id == parentId }) {
+                        self.guilds[guildId]?.channels[forumIdx].last_message_id = channel.id
+                    }
+                } else {
+                    self.guilds[guildId]?.threads.append(channel)
                 }
-                self.guilds[guildId]?.threads.append(channel)
             } else {
                 self.channels[channel.id] = channel
+                /// Update `last_message_id` of forums on thread-create.
+                /// https://discord.com/developers/docs/topics/threads#forum-channel-fields
+                if channel.type == .guildForum,
+                   let parentId = channel.parent_id,
+                   self.intents.contains(.guilds) {
+                    self.channels[parentId]?.last_message_id = channel.id
+                }
             }
         case let .threadUpdate(channel):
             if let guildId = channel.guild_id {
@@ -614,6 +631,19 @@ public actor DiscordCache {
                 channelId: message.channel_id
             ) {
                 self.messages[message.channel_id, default: []].append(message)
+            }
+            if self.intents.contains(.guilds) {
+                if let guildId = message.guild_id {
+                    if let channelIdx = self.guilds[guildId]?.channels
+                        .firstIndex(where: { $0.id == message.channel_id }) {
+                        self.guilds[guildId]?.channels[channelIdx].last_message_id = message.id
+                    } else if let threadIdx = self.guilds[guildId]?.threads
+                        .firstIndex(where: { $0.id == message.channel_id }) {
+                        self.guilds[guildId]?.threads[threadIdx].last_message_id = message.id
+                    }
+                } else {
+                    self.channels[message.channel_id]?.last_message_id = message.id
+                }
             }
         case let .messageUpdate(message):
             if let idx = self.messages[message.channel_id]?

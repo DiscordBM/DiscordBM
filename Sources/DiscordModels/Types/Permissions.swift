@@ -53,6 +53,11 @@ public struct Role: Sendable, Codable {
         public var bot_id: String?
         public var integration_id: String?
         public var premium_subscriber: Bool?
+        public var subscription_listing_id: String?
+        /// These two fields have a weird null-or-not-present value
+        /// which `Decodable` can't easily decode.
+//        public var available_for_purchase: Null
+//        public var guild_connections: Null
     }
     
     public var id: String

@@ -7,7 +7,7 @@ import Logging
 import Foundation
 #endif
 
-/// Handles react-to-a-message-to-get-a-role.
+/// Handles react-to-message-to-get-a-role.
 public actor ReactToRoleHandler {
     
     /// This configuration must be codable-backward-compatible.
@@ -17,9 +17,9 @@ public actor ReactToRoleHandler {
         public let guildId: String
         public let channelId: String
         public let messageId: String
-        public let reactions: [Reaction]
+        public let reactions: Set<Reaction>
         public let grantOnStart: Bool
-        fileprivate(set) public var roleId: String?
+        public fileprivate(set) var roleId: String?
         
         /// - Parameters:
         ///   - id: The unique id of this configuration.
@@ -32,15 +32,15 @@ public actor ReactToRoleHandler {
         ///     on start. **NOTE**: Only recommended if you use a `DiscordCache` with `guilds` and
         ///     `guildMembers` intents enabled. Checking each member's roles requires an API request
         ///     and if you don't provide a cache, those API requests have a chance to overwhelm
-        ///     Discord's rate-limits for you app.
+        ///     Discord's rate-limits of you app.
         ///   - roleId: The role-id, only if it's already been created.
         public init(
-            id: UUID,
+            id: UUID = UUID(),
             createRole: RequestBody.CreateGuildRole,
             guildId: String,
             channelId: String,
             messageId: String,
-            reactions: [Reaction],
+            reactions: Set<Reaction>,
             grantOnStart: Bool = false,
             roleId: String? = nil
         ) {
@@ -60,9 +60,28 @@ public actor ReactToRoleHandler {
         }
     }
     
-    public enum Error: Swift.Error {
+    /// Read `helpAnchor` for help about each error case.
+    public enum Error: LocalizedError {
         case messageIsInaccessible(messageId: String, channelId: String, previousError: Swift.Error)
         case roleIsInaccessible(id: String, previousError: Swift.Error?)
+        
+        public var errorDescription: String? {
+            switch self {
+            case let .messageIsInaccessible(messageId, channelId, previousError):
+                return "messageIsInaccessible(messageId: \(messageId), channelId: \(channelId), previousError: \(previousError))"
+            case let .roleIsInaccessible(id, previousError):
+                return "roleIsInaccessible(id: \(id), previousError: \(String(describing: previousError)))"
+            }
+        }
+        
+        public var helpAnchor: String? {
+            switch self {
+            case let .messageIsInaccessible(messageId, channelId, previousError):
+                return "Can't access a message with id '\(messageId)' in channel '\(channelId)'. This could be because the message doesn't exist or the bot doesn't have enough permissions to see it. Previous error: \(previousError)"
+            case let .roleIsInaccessible(id, previousError):
+                return "Can't access a role with id '\(id)'. This could be because the role doesn't exist or the bot doesn't have enough permissions to see it. Previous error: \(String(describing: previousError))"
+            }
+        }
     }
     
     /// Handles the requests which can be done using either a cache (if available), or a client.
@@ -286,7 +305,7 @@ public actor ReactToRoleHandler {
         channelId: String,
         messageId: String,
         grantOnStart: Bool = false,
-        reactions: [Reaction],
+        reactions: Set<Reaction>,
         onConfigurationChanged: (@Sendable (Configuration) async -> Void)? = nil,
         onLifecycleEnd: (@Sendable (Configuration) async -> Void)? = nil
     ) async throws {
@@ -342,7 +361,7 @@ public actor ReactToRoleHandler {
         channelId: String,
         messageId: String,
         grantOnStart: Bool = false,
-        reactions: [Reaction],
+        reactions: Set<Reaction>,
         onConfigurationChanged: (@Sendable (Configuration) async -> Void)? = nil,
         onLifecycleEnd: (@Sendable (Configuration) async -> Void)? = nil
     ) async throws {
@@ -380,7 +399,7 @@ public actor ReactToRoleHandler {
     }
     
     private func handleEvent(_ event: Gateway.Event) {
-        guard state == .running else { return }
+        guard self.state == .running else { return }
         switch event.data {
         case let .messageReactionAdd(payload):
             self.onReactionAdd(payload)
@@ -558,7 +577,7 @@ public actor ReactToRoleHandler {
                 guildId: self.configuration.guildId,
                 userId: userId,
                 roleId: roleId
-            ).guardIsSuccessfulResponse()
+            ).guardSuccess()
         } catch {
             self.logger.report(error: error)
         }
@@ -616,7 +635,7 @@ public actor ReactToRoleHandler {
                 guildId: self.configuration.guildId,
                 userId: userId,
                 roleId: roleId
-            ).guardIsSuccessfulResponse()
+            ).guardSuccess()
         } catch {
             self.logger.report(error: error)
         }
@@ -670,7 +689,7 @@ public actor ReactToRoleHandler {
                     channelId: self.configuration.channelId,
                     messageId: self.configuration.messageId,
                     emoji: reaction
-                ).guardIsSuccessfulResponse()
+                ).guardSuccess()
             } catch {
                 self.logger.report(error: error)
             }

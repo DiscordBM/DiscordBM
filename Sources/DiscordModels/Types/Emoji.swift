@@ -1,3 +1,4 @@
+import Foundation
 
 /// An Emoji with all fields marked as optional.
 /// https://discord.com/developers/docs/resources/emoji#emoji-object
@@ -54,10 +55,33 @@ public struct Reaction: Sendable, Hashable, Codable {
         try self.base.encode(to: encoder)
     }
     
-    public enum Error: Swift.Error {
+    /// Read `helpAnchor` for help about each error case.
+    public enum Error: LocalizedError {
         case moreThan1Emoji(String, count: Int)
         case notEmoji(String)
-        case cantRecognizeEmoji(PartialEmoji)
+        case cantConvertPartialEmoji(PartialEmoji)
+        
+        public var errorDescription: String? {
+            switch self {
+            case let .moreThan1Emoji(input, count):
+                return "moreThan1Emoji(\(input), count: \(count))"
+            case let .notEmoji(input):
+                return "notEmoji(\(input))"
+            case let .cantConvertPartialEmoji(partialEmoji):
+                return "cantConvertPartialEmoji(\(partialEmoji))"
+            }
+        }
+        
+        public var helpAnchor: String? {
+            switch self {
+            case let .moreThan1Emoji(input, count):
+                return "Expected only 1 emoji in the input '\(input)' but recognized '\(count)' emojis"
+            case let .notEmoji(input):
+                return "The input '\(input)' does not seem like an emoji"
+            case let .cantConvertPartialEmoji(partialEmoji):
+                return "Can't convert a partial emoji to a Reaction. Emoji: \(partialEmoji)"
+            }
+        }
     }
     
     /// Unicode emoji. The function verifies that your input is an emoji or not.
@@ -82,7 +106,7 @@ public struct Reaction: Sendable, Hashable, Codable {
         } else if let name = emoji.name {
             self = try .unicodeEmoji(name)
         } else {
-            throw Error.cantRecognizeEmoji(emoji)
+            throw Error.cantConvertPartialEmoji(emoji)
         }
     }
     

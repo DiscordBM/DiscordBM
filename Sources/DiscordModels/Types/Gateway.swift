@@ -152,7 +152,7 @@ public struct Gateway: Sendable, Codable {
                     return [.guilds, .directMessages]
                 case .threadMembersUpdate, .guildMemberAdd, .guildMemberRemove, .guildMemberUpdate:
                     return [.guilds, .guildMembers]
-                case .guildBanAdd, .guildBanRemove, .guildAuditLogEntryCreate:
+                case .guildAuditLogEntryCreate, .guildBanAdd, .guildBanRemove:
                     return [.guildModeration]
                 case .guildEmojisUpdate, .guildStickersUpdate:
                     return [.guildEmojisAndStickers]
@@ -446,43 +446,6 @@ public struct Gateway: Sendable, Codable {
                 throw EncodingError.notSupposedToBeSent(
                     message: "'\(self)' data is supposed to never be sent."
                 )
-            }
-        }
-    }
-    
-    /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
-    public enum CloseCode: UInt16, Sendable, Codable {
-        case unknownError = 4000
-        case unknownOpcode = 4001
-        case decodeError = 4002
-        case notAuthenticated = 4003
-        case authenticationFailed = 4004
-        case alreadyAuthenticated = 4005
-        case invalidSequence = 4007
-        case rateLimited = 4008
-        case sessionTimedOut = 4009
-        case invalidShard = 4010
-        case shardingRequired = 4011
-        case invalidAPIVersion = 4012
-        case invalidIntents = 4013
-        case disallowedIntents = 4014
-        
-        public var canTryReconnect: Bool {
-            switch self {
-            case .unknownError: return true
-            case .unknownOpcode: return true
-            case .decodeError: return true
-            case .notAuthenticated: return true
-            case .authenticationFailed: return false
-            case .alreadyAuthenticated: return true
-            case .invalidSequence: return true
-            case .rateLimited: return true
-            case .sessionTimedOut: return true
-            case .invalidShard: return false
-            case .shardingRequired: return false
-            case .invalidAPIVersion: return false
-            case .invalidIntents: return false
-            case .disallowedIntents: return false
             }
         }
     }
@@ -985,15 +948,12 @@ public struct Gateway: Sendable, Codable {
     public struct MessageCreate: Sendable, Codable {
         public var id: String
         public var channel_id: String
-        public var guild_id: String?
         public var author: PartialUser?
-        public var member: Guild.PartialMember?
         public var content: String
         public var timestamp: DiscordTimestamp
         public var edited_timestamp: DiscordTimestamp?
         public var tts: Bool
         public var mention_everyone: Bool
-        public var mentions: [DiscordChannel.Message.MentionUser]
         public var mention_roles: [String]
         public var mention_channels: [DiscordChannel.Message.ChannelMention]?
         public var attachments: [DiscordChannel.Message.Attachment]
@@ -1015,6 +975,11 @@ public struct Gateway: Sendable, Codable {
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
+        public var role_subscription_data: RoleSubscriptionData?
+        /// The extra fields:
+        public var guild_id: String?
+        public var member: Guild.PartialMember?
+        public var mentions: [DiscordChannel.Message.MentionUser]
         
         public mutating func update(with partialMessage: DiscordChannel.PartialMessage) {
             self.id = partialMessage.id
@@ -1073,10 +1038,13 @@ public struct Gateway: Sendable, Codable {
             self.sticker_items = partialMessage.sticker_items
             self.stickers = partialMessage.stickers
             self.position = partialMessage.position
+            self.role_subscription_data = partialMessage.role_subscription_data
             if let member = partialMessage.member {
                 self.member = member
             }
-            self.guild_id = partialMessage.guild_id
+            if let guildId = partialMessage.guild_id {
+                self.guild_id = guildId
+            }
         }
     }
     

@@ -63,7 +63,7 @@ class DiscordClientTests: XCTestCase {
             try await client.deleteMessage(
                 channelId: message.channel_id,
                 messageId: message.id
-            ).guardIsSuccessfulResponse()
+            ).guardSuccess()
         }
         
         /// Create
@@ -115,7 +115,7 @@ class DiscordClientTests: XCTestCase {
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[1]),
             userId: Constants.botId
-        ).guardIsSuccessfulResponse()
+        ).guardSuccess()
         
         let getReactionsResponse = try await client.getReactions(
             channelId: Constants.channelId,
@@ -309,7 +309,7 @@ class DiscordClientTests: XCTestCase {
             XCTFail("'searchGuildMembers' must fail with too-big limits")
         } catch {
             switch error {
-            case DiscordClientError.queryParameterOutOfBounds(
+            case HTTPError.queryParameterOutOfBounds(
                 name: "limit",
                 value: "10000",
                 lowerBound: 1,
@@ -452,13 +452,13 @@ class DiscordClientTests: XCTestCase {
                 channelId: thread.id,
                 messageId: message.id,
                 reason: "Random reason " + UUID().uuidString
-            ).guardIsSuccessfulResponse()
+            ).guardSuccess()
         }
         
         try await client.addThreadMember(
             threadId: thread.id,
             userId: Constants.personalId
-        ).guardIsSuccessfulResponse()
+        ).guardSuccess()
         
         let threadMember = try await client.getThreadMember(
             threadId: thread.id,
@@ -501,14 +501,14 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(limitedThreadMembers.count, 1)
         
         try await client.leaveThread(id: thread.id)
-            .guardIsSuccessfulResponse()
+            .guardSuccess()
         
         let threadMembersLeft = try await client.listThreadMembers(threadId: thread.id).decode()
         
         XCTAssertEqual(threadMembersLeft.first?.user_id, Constants.personalId)
         
         try await client.joinThread(id: thread.id)
-            .guardIsSuccessfulResponse()
+            .guardSuccess()
         
         let threadMembersRejoined = try await client.listThreadMembers(threadId: thread.id).decode()
         
@@ -517,7 +517,7 @@ class DiscordClientTests: XCTestCase {
         try await client.removeThreadMember(
             threadId: thread.id,
             userId: Constants.personalId
-        ).guardIsSuccessfulResponse()
+        ).guardSuccess()
         
         let threadMembersRemoved = try await client.listThreadMembers(threadId: thread.id).decode()
         
@@ -526,7 +526,7 @@ class DiscordClientTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.threadsChannelId,
             messageId: message.id
-        ).guardIsSuccessfulResponse()
+        ).guardSuccess()
         
         let threadWithoutMessage = try await client.startThreadWithoutMessage(
             channelId: Constants.announcementsChannelId,
@@ -553,7 +553,7 @@ class DiscordClientTests: XCTestCase {
         try await client.deleteMessage(
             channelId: Constants.announcementsChannelId,
             messageId: threadWithoutMessage.id
-        ).guardIsSuccessfulResponse()
+        ).guardSuccess()
         
         let forumThreadName = "Forum thread test"
         let forumThread = try await client.startThreadInForumChannel(
@@ -574,18 +574,18 @@ class DiscordClientTests: XCTestCase {
             channelId: Constants.threadsChannelId,
             before: Date().addingTimeInterval(-60),
             limit: 2
-        ).guardIsSuccessfulResponse()
+        ).guardSuccess()
         
         try await client.listPrivateArchivedThreads(
             channelId: Constants.threadsChannelId,
             before: Date().addingTimeInterval(-3_600),
             limit: 2
-        ).guardIsSuccessfulResponse()
+        ).guardSuccess()
         
         try await client.listJoinedPrivateArchivedThreads(
             channelId: Constants.threadsChannelId,
             limit: 2
-        ).guardIsSuccessfulResponse()
+        ).guardSuccess()
     }
     
     func testWebhooks() async throws {
@@ -598,7 +598,7 @@ class DiscordClientTests: XCTestCase {
             
             for webhook in guildWebhooks {
                 try await client.deleteWebhook(id: webhook.id)
-                    .guardIsSuccessfulResponse()
+                    .guardSuccess()
             }
         }
         
@@ -780,16 +780,16 @@ class DiscordClientTests: XCTestCase {
             messageId: threadMessage.id,
             threadId: threadId
         )
-        XCTAssertNoThrow(try deleteThreadMessage.guardIsSuccessfulResponse())
+        XCTAssertNoThrow(try deleteThreadMessage.guardSuccess())
         
         let delete1 = try await client.deleteWebhook(id: webhook1.id, reason: "Testing! 1")
-        XCTAssertNoThrow(try delete1.guardIsSuccessfulResponse())
+        XCTAssertNoThrow(try delete1.guardSuccess())
         
         let delete2 = try await client.deleteWebhook(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             reason: "Testing! 2"
         )
-        XCTAssertNoThrow(try delete2.guardIsSuccessfulResponse())
+        XCTAssertNoThrow(try delete2.guardSuccess())
     }
     
     /// Couldn't find test-cases for some of the functions
@@ -895,6 +895,14 @@ class DiscordClientTests: XCTestCase {
 //        do {
 //            let file = try await client.getCDNAchievementIcon(
 //                appId: String, achievementId: String, icon: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+        
+//        do {
+//            let file = try await client.getCDNStorePageAsset(
+//                appId: String,
+//                assetId: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
@@ -1024,9 +1032,9 @@ class DiscordClientTests: XCTestCase {
                 } catch {
                     await container.increaseCounter()
                     switch error {
-                    case DiscordClientError.rateLimited:
+                    case HTTPError.rateLimited:
                         rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
-                    case DiscordClientError.badStatusCode(let response)
+                    case HTTPError.badStatusCode(let response)
                         where response.status == .tooManyRequests:
                         /// If its the first request and we're having this error, then
                         /// it means the last tests have exhausted our rate-limit and

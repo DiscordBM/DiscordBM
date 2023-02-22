@@ -66,7 +66,7 @@ extension DiscordClient {
         } else {
             /// You have not passed your app-id in the init of `DiscordClient`/`GatewayManager`.
             /// You need to pass it in the function parameters at least.
-            throw DiscordClientError.appIdParameterRequired
+            throw HTTPError.appIdParameterRequired
         }
     }
     
@@ -74,7 +74,7 @@ extension DiscordClient {
     func checkMutuallyExclusive(queries: [(String, String?)]) throws {
         let notNil = queries.filter { $0.1 != nil }
         guard notNil.count < 2 else {
-            throw DiscordClientError.queryParametersMutuallyExclusive(
+            throw HTTPError.queryParametersMutuallyExclusive(
                 /// Force-unwrap is safe.
                 queries: notNil.map { ($0, $1!) }
             )
@@ -89,7 +89,7 @@ extension DiscordClient {
         upperBound: Int
     ) throws {
         guard value.map({ (lowerBound...upperBound).contains($0) }) != false else {
-            throw DiscordClientError.queryParameterOutOfBounds(
+            throw HTTPError.queryParameterOutOfBounds(
                 name: name,
                 value: value?.description,
                 lowerBound: 1,
@@ -582,6 +582,7 @@ public extension DiscordClient {
         user_id: String? = nil,
         action_type: AuditLog.Entry.ActionKind? = nil,
         before: String? = nil,
+        after: String? = nil,
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<AuditLog> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
@@ -592,6 +593,7 @@ public extension DiscordClient {
                 ("user_id", user_id),
                 ("action_type", action_type.map { "\($0.rawValue)" }),
                 ("before", before),
+                ("after", after),
                 ("limit", limit.map { "\($0)" })
             ]
         ))
@@ -1150,6 +1152,19 @@ public extension DiscordClient {
             icon: icon
         )
         return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
+    }
+    
+    /// Untested function.
+    /// If it didn't work, try to append `.png` to the end of `assetId`.
+    /// If you are using this endpoint successfully, please open an issue and let me know what
+    /// info you pass to the function, so I can fix the function and add it to the tests.
+    /// (CDN data are _mostly_ public)
+    ///
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNStorePageAsset(appId: String, assetId: String) async throws -> DiscordCDNResponse {
+        let endpoint = Endpoint.CDNStorePageAsset(appId: appId, assetId: assetId)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: assetId)
     }
     
     /// Untested function.

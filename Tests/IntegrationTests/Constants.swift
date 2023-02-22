@@ -1,7 +1,13 @@
 import Foundation
 
 enum Constants {
-    static let token = ProcessInfo.processInfo.environment["BOT_TOKEN"]!
+    static let token: String = {
+        if let token = ProcessInfo.processInfo.environment["BOT_TOKEN"] {
+            return token
+        } else {
+            fatalError("Due to the complexity of making integration tests work, they can only be run by the author of DiscordBM or the Github CI. Please reach out if you are facing any issues because of this")
+        }
+    }()
     static let botId = "1030118727418646629"
     static let botName = "DisBMLibTestBot"
     static let personalId = "290483761559240704"

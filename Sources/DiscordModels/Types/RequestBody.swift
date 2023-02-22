@@ -297,8 +297,8 @@ public enum RequestBody {
             try validateOnlyContains(
                 flags?.values,
                 name: "flags",
-                reason: "Can only contain 'suppressEmbeds'",
-                where: { $0 == .suppressEmbeds }
+                reason: "Can only contain 'suppressEmbeds' or 'suppressNotifications'",
+                where: { [.suppressEmbeds, .suppressNotifications].contains($0) }
             )
             for attachment in attachments ?? [] {
                 try attachment.validate()
@@ -628,8 +628,8 @@ public enum RequestBody {
                 try validateOnlyContains(
                     flags?.values,
                     name: "flags",
-                    reason: "Can only contain 'suppressEmbeds'",
-                    where: { $0 == .suppressEmbeds }
+                    reason: "Can only contain 'suppressEmbeds' or 'suppressNotifications'",
+                    where: { [.suppressEmbeds, .suppressNotifications].contains($0) }
                 )
                 for attachment in attachments ?? [] {
                     try attachment.validate()

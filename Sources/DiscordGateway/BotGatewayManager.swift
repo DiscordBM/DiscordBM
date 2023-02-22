@@ -502,7 +502,7 @@ extension BotGatewayManager {
         let description: String
         switch code {
         case let .unknown(codeNumber):
-            switch Gateway.CloseCode(rawValue: codeNumber) {
+            switch GatewayCloseCode(rawValue: codeNumber) {
             case let .some(discordCode):
                 description = "\(discordCode)"
             case .none:
@@ -519,7 +519,7 @@ extension BotGatewayManager {
     private nonisolated func canTryReconnect(code: WebSocketErrorCode?) -> Bool {
         switch code {
         case let .unknown(codeNumber):
-            guard let discordCode = Gateway.CloseCode(rawValue: codeNumber) else { return true }
+            guard let discordCode = GatewayCloseCode(rawValue: codeNumber) else { return true }
             return discordCode.canTryReconnect
         default: return true
         }
