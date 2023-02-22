@@ -12,88 +12,12 @@ public actor ReactToRoleHandler {
     
     /// This configuration must be codable-backward-compatible.
     public struct Configuration: Sendable, Codable {
-        
-        /// How to limit role-reactions.
-        public struct PreventReactions: Sendable, Codable, Equatable {
-            
-            /// The main policy of how to limit role-reactions.
-            public enum Policy: Sendable, Codable, Equatable {
-                /// Users can only use `maxAllowed`-count reaction of this handler.
-                case handlerReactions(maxAllowed: Int = 1)
-                /// Users can only use `maxAllowed`-count reactions of this list.
-                case reactions(Set<Reaction>, maxAllowed: Int = 1)
-                /// Users can only use `maxAllowed`-count reactions of this handler or the list.
-                case handlerReactionsAnd(Set<Reaction>, maxAllowed: Int = 1)
-                
-                /// The handler needs to keep track of these reactions too,
-                /// other than the main reactions of the handler.
-                func extraReactionsToKeepTrackOf() -> Set<Reaction> {
-                    switch self {
-                    case .handlerReactions:
-                        return []
-                    case let .reactions(reactions, _),
-                        let .handlerReactionsAnd(reactions, _):
-                        return reactions
-                    }
-                }
-                
-                func preconditionValidateMaxAllowed() {
-                    switch self {
-                    case let .handlerReactions(maxAllowed),
-                        let .reactions(_, maxAllowed),
-                        let .handlerReactionsAnd(_, maxAllowed):
-                        precondition(maxAllowed > 0, "Max allowed is '\(maxAllowed)' but must be greater than 0")
-                    }
-                }
-            }
-            
-            /// The main policy of how to limit role-reactions.
-            public let policy: Policy
-            /// Remove the reactions that were prevented from the message.
-            public let removePreventedReactions: Bool
-            
-            public init(policy: Policy, removePreventedReactions: Bool = true) {
-                self.policy = policy
-                self.removePreventedReactions = removePreventedReactions
-                policy.preconditionValidateMaxAllowed()
-            }
-            
-            /// Should or should not prevent the reaction.
-            func shouldPrevent(
-                for userId: String,
-                reactions handlerReactions: Set<Reaction>,
-                currentReactions: [Reaction: Set<String>]
-            ) -> Bool {
-                switch self.policy {
-                case let .handlerReactions(maxAllowed):
-                    let count = handlerReactions.filter({ reaction in
-                        currentReactions[reaction]?.contains(userId) ?? false
-                    }).count
-                    return count >= maxAllowed
-                case let .reactions(reactions, maxAllowed):
-                    let count = reactions.filter({ reaction in
-                        currentReactions[reaction]?.contains(userId) ?? false
-                    }).count
-                    return count >= maxAllowed
-                case let .handlerReactionsAnd(reactions, maxAllowed):
-                    let count1 = handlerReactions.filter({ reaction in
-                        currentReactions[reaction]?.contains(userId) ?? false
-                    }).count
-                    let count2 = reactions.filter({ reaction in
-                        currentReactions[reaction]?.contains(userId) ?? false
-                    }).count
-                    return (count1 + count2) >= maxAllowed
-                }
-            }
-        }
-        
         public let id: UUID
         public var createRole: RequestBody.CreateGuildRole
         public let guildId: String
         public let channelId: String
         public let messageId: String
         public let reactions: Set<Reaction>
-        public fileprivate(set) var preventReactions: PreventReactions? = nil
         public let grantOnStart: Bool
         public fileprivate(set) var roleId: String?
         
@@ -104,7 +28,6 @@ public actor ReactToRoleHandler {
         ///   - channelId: The channel-id of the message.
         ///   - messageId: The message-id.
         ///   - reactions: The reactions to grant the role for.
-        ///   - preventReactions: Prevents extra reactions using this configuration.
         ///   - grantOnStart: Grant the role to those who already reacted but don't have it,
         ///     on start. **NOTE**: Only recommended if you use a `DiscordCache` with `guilds` and
         ///     `guildMembers` intents enabled. Checking each member's roles requires an API request
@@ -131,22 +54,9 @@ public actor ReactToRoleHandler {
             self.roleId = roleId
         }
         
-        func shouldPrevent(
-            for userId: String,
-            reactions handlerReactions: Set<Reaction>,
-            currentReactions: [Reaction: Set<String>]
-        ) -> Bool {
-            preventReactions?.shouldPrevent(
-                for: userId,
-                reactions: reactions,
-                currentReactions: currentReactions
-            ) ?? false
-        }
-        
         func hasChanges(comparedTo other: Configuration) -> Bool {
             self.roleId != other.roleId ||
-            self.createRole != other.createRole ||
-            self.preventReactions != preventReactions
+            self.createRole != other.createRole
         }
     }
     
@@ -311,10 +221,6 @@ public actor ReactToRoleHandler {
     /// Used to remove role from members only if they have no remaining acceptable reaction
     /// the message. Also assign role only if this is their first acceptable reaction.
     var currentReactions: [Reaction: Set<String>] = [:]
-    lazy var allReactions: Set<Reaction> = {
-        let extra = self.configuration.preventReactions?.policy.extraReactionsToKeepTrackOf() ?? []
-        return self.configuration.reactions.union(extra)
-    }()
     /// To avoid role-creation race-conditions
     var lockedCreatingRole = false
     private(set) public var state = State.created
@@ -531,8 +437,7 @@ public actor ReactToRoleHandler {
     func onReactionAdd(_ reaction: Gateway.MessageReactionAdd) {
         if reaction.message_id == self.configuration.messageId,
            reaction.channel_id == self.configuration.channelId,
-           reaction.guild_id == self.configuration.guildId,
-           self.allReactions.contains(where: { $0.is(reaction.emoji) }) {
+           reaction.guild_id == self.configuration.guildId {
             Task {
                 do {
                     let emojiReaction = try Reaction(emoji: reaction.emoji)
@@ -553,7 +458,6 @@ public actor ReactToRoleHandler {
         if reaction.message_id == self.configuration.messageId,
            reaction.channel_id == self.configuration.channelId,
            reaction.guild_id == self.configuration.guildId,
-           self.allReactions.contains(where: { $0.is(reaction.emoji) }),
            self.configuration.roleId != nil {
             self.checkAndRemoveRoleFromUser(emoji: reaction.emoji, userId: reaction.user_id)
         }
@@ -746,7 +650,7 @@ public actor ReactToRoleHandler {
             )
         }
         /// Populate reactions
-        for reaction in self.allReactions {
+        for reaction in self.configuration.reactions {
             let reactionsUsers = try await client.getReactions(
                 channelId: self.configuration.channelId,
                 messageId: self.configuration.messageId,
@@ -782,53 +686,6 @@ public actor ReactToRoleHandler {
             } catch {
                 self.logger.report(error: error)
             }
-        }
-    }
-    
-    public enum PreventionError: LocalizedError {
-        case tooFewHandlers
-        case mismatchedMessageId
-        
-        public var errorDescription: String? {
-            switch self {
-            case .tooFewHandlers:
-                return "tooFewHandlers"
-            case .mismatchedMessageId:
-                return "mismatchedMessageId"
-            }
-        }
-        
-        public var helpAnchor: String? {
-            switch self {
-            case .tooFewHandlers:
-                return "Handlers count is less than 1"
-            case .mismatchedMessageId:
-                return "All ReactToRoleHandlers must have the same message id"
-            }
-        }
-    }
-    
-    public static func setUpPreventReactions(on handlers: [ReactToRoleHandler]) async throws {
-        guard handlers.count > 1 else {
-            throw PreventionError.tooFewHandlers
-        }
-        
-        var messageId: String? = nil
-        for handler in handlers {
-            if messageId == nil {
-                messageId = await handler.configuration.messageId
-            } else {
-                if await messageId != handler.configuration.messageId {
-                    throw PreventionError.mismatchedMessageId
-                }
-            }
-        }
-        
-        for handler in handlers {
-            handler.configuration.preventReactions = .init(
-                policy: .,
-                removePreventedReactions: <#T##Bool#>
-            )
         }
     }
 }
