@@ -76,8 +76,8 @@ public struct DefaultDiscordClient: DiscordClient {
                 logger.debug(
                     "HTTP bucket is exhausted. Will wait before making the request",
                     metadata: [
-                        "wait-time": "\(after)",
-                        "retriesWithoutThis": "\(retriesSoFar)",
+                        "wait-time": .stringConvertible(after),
+                        "retriesWithoutThis": .stringConvertible(retriesSoFar),
                         "endpoint": .stringConvertible(endpoint.urlDescription),
                         "request-id": .stringConvertible(requestId)
                     ]

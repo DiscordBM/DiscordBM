@@ -107,11 +107,12 @@ public enum DiscordUtils {
     ) -> String {
         text
             .replacingOccurrences(of: #"\"#, with: #"\\"#)
-            .replacingOccurrences(of: #"*"#, with: #"\*"#)
-            .replacingOccurrences(of: #"_"#, with: #"\_"#)
+            .replacingOccurrences(of: #"|"#, with: #"\|"#)
             .replacingOccurrences(of: #">"#, with: #"\>"#)
             .replacingOccurrences(of: #"<"#, with: #"\<"#)
+            .replacingOccurrences(of: #"`"#, with: #"\`"#)
             .replacingOccurrences(of: #"~"#, with: #"\~"#)
-            .replacingOccurrences(of: #"|"#, with: #"\|"#)
+            .replacingOccurrences(of: #"_"#, with: #"\_"#)
+            .replacingOccurrences(of: #"*"#, with: #"\*"#)
     }
 }
