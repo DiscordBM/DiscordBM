@@ -66,7 +66,7 @@ public struct DefaultDiscordClient: DiscordClient {
         switch await rateLimiter.shouldRequest(to: endpoint) {
         case .true: return
         case .false:
-            throw HTTPError.rateLimited(url: "\(endpoint.urlDescription)")
+            throw DiscordHTTPError.rateLimited(url: "\(endpoint.urlDescription)")
         case let .after(after):
             /// If we make the request, we'll get 429-ed. So we can just assume the status is 429.
             if self.configuration.shouldRetry(
@@ -86,7 +86,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 try await Task.sleep(nanoseconds: nanos)
                 await rateLimiter.addGlobalRateLimitRecord()
             } else {
-                throw HTTPError.rateLimited(url: "\(endpoint.urlDescription)")
+                throw DiscordHTTPError.rateLimited(url: "\(endpoint.urlDescription)")
             }
         }
     }

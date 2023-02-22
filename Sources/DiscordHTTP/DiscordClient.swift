@@ -66,7 +66,7 @@ extension DiscordClient {
         } else {
             /// You have not passed your app-id in the init of `DiscordClient`/`GatewayManager`.
             /// You need to pass it in the function parameters at least.
-            throw HTTPError.appIdParameterRequired
+            throw DiscordHTTPError.appIdParameterRequired
         }
     }
     
@@ -74,7 +74,7 @@ extension DiscordClient {
     func checkMutuallyExclusive(queries: [(String, String?)]) throws {
         let notNil = queries.filter { $0.1 != nil }
         guard notNil.count < 2 else {
-            throw HTTPError.queryParametersMutuallyExclusive(
+            throw DiscordHTTPError.queryParametersMutuallyExclusive(
                 /// Force-unwrap is safe.
                 queries: notNil.map { ($0, $1!) }
             )
@@ -89,7 +89,7 @@ extension DiscordClient {
         upperBound: Int
     ) throws {
         guard value.map({ (lowerBound...upperBound).contains($0) }) != false else {
-            throw HTTPError.queryParameterOutOfBounds(
+            throw DiscordHTTPError.queryParameterOutOfBounds(
                 name: name,
                 value: value?.description,
                 lowerBound: 1,

@@ -83,7 +83,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     @inlinable
     public func guardSuccess() throws {
         guard (200..<300).contains(self.status.code) else {
-            throw HTTPError.badStatusCode(self)
+            throw DiscordHTTPError.badStatusCode(self)
         }
     }
     
@@ -101,7 +101,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     /// print(httpResponse.description)
     /// ```
     @inlinable
-    public func guardDecodeError() -> HTTPErrorResponse {
+    public func guardDecodeError() -> DiscordHTTPErrorResponse {
         if (200..<300).contains(self.status.code) {
             return .none
         } else {
@@ -126,7 +126,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
         if let data = body.map({ Data(buffer: $0, byteTransferStrategy: .noCopy) }) {
             return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
         } else {
-            throw HTTPError.emptyBody(self)
+            throw DiscordHTTPError.emptyBody(self)
         }
     }
 }
@@ -160,7 +160,7 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
     /// print(httpResponse.description)
     /// ```
     @inlinable
-    public func guardDecodeError() -> HTTPErrorResponse {
+    public func guardDecodeError() -> DiscordHTTPErrorResponse {
         self.httpResponse.guardDecodeError()
     }
     
@@ -192,10 +192,10 @@ public struct DiscordCDNResponse: Sendable {
     public func getFile(overrideName: String? = nil) throws -> RawFile {
         try self.guardSuccess()
         guard let body = self.httpResponse.body else {
-            throw HTTPError.emptyBody(httpResponse)
+            throw DiscordHTTPError.emptyBody(httpResponse)
         }
         guard let contentType = self.httpResponse.headers.first(name: "Content-Type") else {
-            throw HTTPError.noContentTypeHeader(httpResponse)
+            throw DiscordHTTPError.noContentTypeHeader(httpResponse)
         }
         let name = overrideName ?? fallbackFileName
         return RawFile(data: body, nameNoExtension: name, contentType: contentType)
@@ -203,7 +203,7 @@ public struct DiscordCDNResponse: Sendable {
 }
 
 /// Represents a possible Discord HTTP error.
-public enum HTTPErrorResponse: Sendable {
+public enum DiscordHTTPErrorResponse: Sendable {
     /// The response indicates success. No errors have been found.
     case none
     /// The response does not indicate success and there is a recognizable error in the body.
@@ -213,7 +213,7 @@ public enum HTTPErrorResponse: Sendable {
 }
 
 /// Read `helpAnchor` for help about each error case.
-public enum HTTPError: LocalizedError {
+public enum DiscordHTTPError: LocalizedError {
     case rateLimited(url: String)
     case badStatusCode(DiscordHTTPResponse)
     case emptyBody(DiscordHTTPResponse)

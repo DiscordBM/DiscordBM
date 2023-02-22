@@ -309,7 +309,7 @@ class DiscordClientTests: XCTestCase {
             XCTFail("'searchGuildMembers' must fail with too-big limits")
         } catch {
             switch error {
-            case HTTPError.queryParameterOutOfBounds(
+            case DiscordHTTPError.queryParameterOutOfBounds(
                 name: "limit",
                 value: "10000",
                 lowerBound: 1,
@@ -1032,9 +1032,9 @@ class DiscordClientTests: XCTestCase {
                 } catch {
                     await container.increaseCounter()
                     switch error {
-                    case HTTPError.rateLimited:
+                    case DiscordHTTPError.rateLimited:
                         rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
-                    case HTTPError.badStatusCode(let response)
+                    case DiscordHTTPError.badStatusCode(let response)
                         where response.status == .tooManyRequests:
                         /// If its the first request and we're having this error, then
                         /// it means the last tests have exhausted our rate-limit and

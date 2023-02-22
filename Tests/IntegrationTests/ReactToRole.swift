@@ -1002,7 +1002,7 @@ class ReactToRoleTests: XCTestCase {
             case .messageIsInaccessible(
                 messageId: invalidMessageId,
                 channelId: Constants.reactionChannelId,
-                previousError: HTTPError.badStatusCode(_)):
+                previousError: DiscordHTTPError.badStatusCode(_)):
                 break /// Expected error
             default:
                 XCTFail("Unexpected error by handler: \(error)")
@@ -1034,7 +1034,7 @@ class ReactToRoleTests: XCTestCase {
             case .messageIsInaccessible(
                 messageId: invalidMessageId,
                 channelId: Constants.reactionChannelId,
-                previousError: HTTPError.badStatusCode(_)):
+                previousError: DiscordHTTPError.badStatusCode(_)):
                 break /// Expected error
             default:
                 XCTFail("Expected 'messageIsInaccessible' error, but got: \(error)")
