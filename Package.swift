@@ -86,7 +86,8 @@ let package = Package(
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
                 "DiscordCore"
-            ]
+            ],
+            plugins: ["GenerateEnumUnknownCase"]
         ),
         .target(name: "DiscordUtilities"),
         .target(
@@ -94,6 +95,20 @@ let package = Package(
             dependencies: [
                 "DiscordModels"
             ]
+        ),
+//        .plugin(
+//            name: "GenerateEnumUnknownCase",
+//            capability: .command(
+//                intent: .custom(
+//                    verb: "generate-enum-unknown-cases",
+//                    description: "Generates an 'unknown' case for resistance to Discord API evolution while Decoding"
+//                ),
+//                permissions: [.writeToPackageDirectory(reason: "Add enum source files")]
+//            )
+//        ),
+        .plugin(
+            name: "GenerateEnumUnknownCase",
+            capability: .buildTool()
         ),
         /// `WebSocketKit` will be replaced as soon as changes are final and merged in
         /// Vapor's `WebSocketKit`. This is just a copy-paste of that library.

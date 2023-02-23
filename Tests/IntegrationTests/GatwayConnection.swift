@@ -199,6 +199,7 @@ class GatewayConnectionTests: XCTestCase {
     }
 }
 
+/// An actor for silencing Sendable warnings.
 private actor ConnectionInfo {
     var ready: Gateway.Ready? = nil
     var didHello = false

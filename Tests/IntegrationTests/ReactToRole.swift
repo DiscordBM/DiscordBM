@@ -1278,6 +1278,7 @@ private actor FakeGatewayManager: GatewayManager {
     }
 }
 
+/// An actor for silencing Sendable warnings.
 private actor HookInfo {
     var configurationChanged = false
     var lifecycleEnded = false
