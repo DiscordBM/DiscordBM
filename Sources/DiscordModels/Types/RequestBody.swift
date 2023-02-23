@@ -277,6 +277,7 @@ public enum RequestBody {
         }
         
         public func validate() throws {
+            try validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
             try validateElementCountDoesNotExceed(sticker_ids, max: 3, name: "sticker_ids")
             try validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
             try validateCharacterCountDoesNotExceed(nonce?.asString, max: 25, name: "nonce")
@@ -339,6 +340,7 @@ public enum RequestBody {
         }
         
         public func validate() throws {
+            try validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
             try validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
             try validateCombinedCharacterCountDoesNotExceed(
                 embeds?.reduce(into: 0, { $0 += $1.contentLength }),
@@ -500,6 +502,7 @@ public enum RequestBody {
         }
         
         public func validate() throws {
+            try validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
             try validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
             try validateCombinedCharacterCountDoesNotExceed(
                 embeds?.reduce(into: 0, { $0 += $1.contentLength }),
@@ -609,6 +612,7 @@ public enum RequestBody {
             }
             
             public func validate() throws {
+                try validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
                 try validateElementCountDoesNotExceed(sticker_ids, max: 3, name: "sticker_ids")
                 try validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
                 try allowed_mentions?.validate()
