@@ -105,7 +105,7 @@ class DiscordUtilsTests: XCTestCase {
         \*Hello!\*
         \_\_\*\*\*How are you?\*\*\*\_\_
         \> \_I'm fine thank you!\_
-        \> \~Not really :\\(\~
+        \> \~Not really \:\\(\~
         \|\| Just Kidding! \|\| LOL \| HEHE
         """#
         let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
