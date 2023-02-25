@@ -12,15 +12,14 @@ extension DiscordGlobalConfiguration {
     /// For example if a type can't find a representation to decode a value to,
     /// and has to get rid of that value.
     /// Does not include decode errors.
-    public static var enableLoggingDuringDecode = false
-    
+    /// This is supposed to be only used by the library author. Enabling this flag is discouraged.
     static func makeDecodeLogger(_ label: String) -> Logger {
-        if enableLoggingDuringDecode {
+#if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
             var logger = DiscordGlobalConfiguration.makeLogger(label)
-            logger[metadataKey: "explanation"] = "Please report this on https://github.com/MahdiBM/DiscordBM/issues if there are no similar issues, so we can keep DiscordBM up to date for the community. You can disable these logs by using 'DiscordGlobalConfiguration.enableLoggingDuringDecode = false'"
+            logger[metadataKey: "tag"] = "decode-logger"
             return logger
-        } else {
+#else
             return Logger(label: label, factory: SwiftLogNoOpLogHandler.init)
-        }
+#endif
     }
 }
