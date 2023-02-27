@@ -21,11 +21,11 @@ public struct AutoModerationRule: Sendable, Codable {
         /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-preset-types
         public enum KeywordPreset: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case profanity = 1
-            case sexual_content = 2
+            case sexualContent = 2
             case slurs = 3
         }
         
-        public var keyword_filter: [String]
+        public var keyword_filter: [String]?
         public var presets: [KeywordPreset]?
         public var allow_list: [String]
         public var mention_total_limit: Int?
