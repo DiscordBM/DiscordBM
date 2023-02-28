@@ -5,32 +5,29 @@ import Foundation
 struct GenerateEnumUnknownCasePlugin: BuildToolPlugin {
     
     func createBuildCommands(context: PluginContext, target: Target) async throws -> [Command] {
-        guard let target = target as? SourceModuleTarget else {
-            return []
-        }
+        guard let target = target as? SourceModuleTarget else { return [] }
         
-        let fm = FileManager.default
         let dir = context.pluginWorkDirectory
-        print(dir, fm.fileExists(atPath: dir.string))
-        let outputDir = dir.appending(["GenerateEnumUnknownCase"])
-        try fm.createDirectory(atPath: outputDir.string, withIntermediateDirectories: true)
+        let outputDir = dir
+        
+        try FileManager.default.removeItem(atPath: dir.string)
         
         var isFirst = true
-        for file in target.sourceFiles(withSuffix: "swift") {
-            guard isFirst else { break }
+        return try target.sourceFiles(withSuffix: "swift").flatMap { file -> [Command] in
+            guard isFirst else { return [] }
             isFirst = false
-            let base = file.path.stem
-            let output = outputDir.appending(["\(base) + EnumPlugin.swift"]).string
             
-            let generated = """
-            public struct NewType: Codable {
-                var value: String
-            }
-            """
-            let data = Data(generated.utf8)
-            print(output, fm.createFile(atPath: output, contents: data))
+            let output = outputDir.appending(["\(file.path.stem) +GEUC.swift"])
+            
+            let tool = try context.tool(named: "GenerateEnumUnknownCaseExecutable")
+            
+            return [.buildCommand(
+                displayName: "Generating \(output.string.dropFirst(20))",
+                executable: tool.path,
+                arguments: [file.path, output],
+                inputFiles: [file.path],
+                outputFiles: [output]
+            )]
         }
-        
-        return []
     }
 }

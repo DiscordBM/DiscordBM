@@ -1,4 +1,4 @@
-// swift-tools-version: 5.6
+// swift-tools-version: 5.7
 
 import PackageDescription
 
@@ -26,6 +26,10 @@ let package = Package(
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.6.4"),
         .package(url: "https://github.com/apple/swift-atomics.git", from: "1.0.0"),
         .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.2"),
+        .package(
+            url: "https://github.com/apple/swift-syntax.git",
+            revision: "bcaad6d28b80fc47f7a69006697cec0d1ce8f940"
+        ),
         /// `WebSocketKit` dependencies
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.14.0"),
         .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.11.4"),
@@ -96,19 +100,17 @@ let package = Package(
                 "DiscordModels"
             ]
         ),
-//        .plugin(
-//            name: "GenerateEnumUnknownCase",
-//            capability: .command(
-//                intent: .custom(
-//                    verb: "generate-enum-unknown-cases",
-//                    description: "Generates an 'unknown' case for resistance to Discord API evolution while Decoding"
-//                ),
-//                permissions: [.writeToPackageDirectory(reason: "Add enum source files")]
-//            )
-//        ),
         .plugin(
             name: "GenerateEnumUnknownCase",
-            capability: .buildTool()
+            capability: .buildTool(),
+            dependencies: ["GenerateEnumUnknownCaseExecutable"]
+        ),
+        .executableTarget(
+            name: "GenerateEnumUnknownCaseExecutable",
+            dependencies: [
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
         ),
         /// `WebSocketKit` will be replaced as soon as changes are final and merged in
         /// Vapor's `WebSocketKit`. This is just a copy-paste of that library.
