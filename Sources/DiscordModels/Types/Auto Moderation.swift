@@ -27,20 +27,24 @@ public struct AutoModerationRule: Sendable, Codable {
         
         public var keyword_filter: [String]?
         public var presets: [KeywordPreset]?
-        public var allow_list: [String]
+        public var allow_list: [String]?
         public var mention_total_limit: Int?
         public var regex_patterns: [String]
     }
     
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object
-    public enum Action: Sendable, Codable {
-        case blockMessage
+    public enum Action: Sendable, Codable, ValidatablePayload {
+        case blockMessage(customMessage: String?)
         case sendAlertMessage(channelId: String)
         case timeout(durationSeconds: Int)
         
         private enum CodingKeys: String, CodingKey {
             case type
             case metadata
+        }
+        
+        private enum BlockMessageCodingKeys: String, CodingKey {
+            case custom_message
         }
         
         private enum SendAlertMessageCodingKeys: String, CodingKey {
@@ -56,7 +60,11 @@ public struct AutoModerationRule: Sendable, Codable {
             let type = try container.decode(Int.self, forKey: .type)
             switch type {
             case 1:
-                self = .blockMessage
+                let customMessage = try container.nestedContainer(
+                    keyedBy: BlockMessageCodingKeys.self,
+                    forKey: .metadata
+                ).decodeIfPresent(String.self, forKey: .custom_message)
+                self = .blockMessage(customMessage: customMessage)
             case 2:
                 let channelId = try container.nestedContainer(
                     keyedBy: SendAlertMessageCodingKeys.self,
@@ -72,7 +80,7 @@ public struct AutoModerationRule: Sendable, Codable {
             default:
                 throw DecodingError.dataCorrupted(.init(
                     codingPath: container.codingPath,
-                    debugDescription: "Unexpected AutoModerationAction 'type': \(type)"
+                    debugDescription: "Unexpected AutoModerationRule.Action 'type': \(type)"
                 ))
             }
         }
@@ -80,8 +88,13 @@ public struct AutoModerationRule: Sendable, Codable {
         public func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             switch self {
-            case .blockMessage:
+            case let .blockMessage(customMessage):
                 try container.encode(1, forKey: .type)
+                var metadataContainer = container.nestedContainer(
+                    keyedBy: BlockMessageCodingKeys.self,
+                    forKey: .metadata
+                )
+                try metadataContainer.encode(customMessage, forKey: .custom_message)
             case let .sendAlertMessage(channelId):
                 try container.encode(2, forKey: .type)
                 var metadataContainer = container.nestedContainer(
@@ -96,6 +109,25 @@ public struct AutoModerationRule: Sendable, Codable {
                     forKey: .metadata
                 )
                 try metadataContainer.encode(durationSeconds, forKey: .duration_seconds)
+            }
+        }
+        
+        public func validate() throws {
+            switch self {
+            case .blockMessage(let customMessage):
+                try validateCharacterCountDoesNotExceed(
+                    customMessage,
+                    max: 150,
+                    name: "customMessage"
+                )
+            case .timeout(let durationSeconds):
+                try validateNumberInRange(
+                    durationSeconds,
+                    min: 0,
+                    max: 2419200,
+                    name: "durationSeconds"
+                )
+            case .sendAlertMessage(_): break
             }
         }
     }
