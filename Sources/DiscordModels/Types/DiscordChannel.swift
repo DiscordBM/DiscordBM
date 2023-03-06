@@ -117,7 +117,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// Thread-only:
     public var member: ThreadMember?
     public var newly_created: Bool?
-    /// Only populated by `threadMembersUpdate` Gateway event.
+    /// Only populated by thread-related Gateway events.
     public var threadMembers: [Gateway.ThreadMembersUpdate.ThreadMember]?
 }
 
@@ -365,6 +365,8 @@ public struct ThreadMember: Sendable, Codable {
     /// FIXME:
     /// The field is documented but doesn't say what exactly it is.
     /// Discord says: "any user-thread settings, currently only used for notifications".
+    /// I think currently it's set to `1` or `0` depending on if you have notifications
+    /// enabled for the thread?
     public var flags: Int
     
     public init(threadMemberUpdate: Gateway.ThreadMemberUpdate) {
@@ -384,6 +386,8 @@ public struct ThreadMemberWithMember: Sendable, Codable {
     /// FIXME:
     /// The field is documented but doesn't say what exactly it is.
     /// Discord says: "any user-thread settings, currently only used for notifications".
+    /// I think currently it's set to `1` or `0` depending on if you have notifications
+    /// enabled for the thread?
     public var flags: Int
     public var member: Guild.Member
 }

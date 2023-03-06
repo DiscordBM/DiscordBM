@@ -613,6 +613,8 @@ public struct Gateway: Sendable, Codable {
         /// FIXME:
         /// The field is documented but doesn't say what exactly it is.
         /// Discord says: "any user-thread settings, currently only used for notifications".
+        /// I think currently it's set to `1` or `0` depending on if you have notifications
+        /// enabled for the thread?
         public var flags: Int
         public var guild_id: String
     }
@@ -641,6 +643,8 @@ public struct Gateway: Sendable, Codable {
             /// FIXME:
             /// The field is documented but doesn't say what exactly it is.
             /// Discord says: "any user-thread settings, currently only used for notifications".
+            /// I think currently it's set to `1` or `0` depending on if you have notifications
+            /// enabled for the thread?
             public var flags: Int
             public var member: Guild.Member
             public var presence: ThreadMemberPresenceUpdate?

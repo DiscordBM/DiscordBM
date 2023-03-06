@@ -108,7 +108,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
             if let error = try? self._decode(as: JSONError.self) {
                 return .jsonError(error)
             } else {
-                return .basStatusCode(self)
+                return .badStatusCode(self)
             }
         }
     }
@@ -209,7 +209,7 @@ public enum DiscordHTTPErrorResponse: Sendable {
     /// The response does not indicate success and there is a recognizable error in the body.
     case jsonError(JSONError)
     /// The response does not indicate success and there is no recognizable error in the body.
-    case basStatusCode(DiscordHTTPResponse)
+    case badStatusCode(DiscordHTTPResponse)
 }
 
 /// Read `helpAnchor` for help about each error case.
