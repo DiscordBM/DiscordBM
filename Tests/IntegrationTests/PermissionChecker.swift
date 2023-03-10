@@ -76,44 +76,44 @@ class PermissionChecker: XCTestCase {
         ))
         /// The account has the perm but doesn't have `viewChannel`,
         /// so in practice doesn't have the perm.
-        XCTAssertFalse(guild.memberHasPermissions(
+        XCTAssertFalse(guild.userHasPermissions(
             userId: Constants.secondAccountId,
             channelId: Constants.perm1ChannelId,
             permissions: [.manageChannels]
         ))
         /// The account has the perm.
-        XCTAssertTrue(guild.memberHasPermissions(
+        XCTAssertTrue(guild.userHasPermissions(
             userId: Constants.secondAccountId,
             channelId: Constants.perm2ChannelId,
             permissions: [.viewChannel]
         ))
         /// The account doesn't have the perm.
-        XCTAssertFalse(guild.memberHasPermissions(
+        XCTAssertFalse(guild.userHasPermissions(
             userId: Constants.secondAccountId,
             channelId: Constants.perm2ChannelId,
             permissions: [.sendMessages]
         ))
         /// The account doesn't has the perm but doesn't have the `sendMessages` perm,
         ///  which blocks this specific perm in practice.
-        XCTAssertFalse(guild.memberHasPermissions(
+        XCTAssertFalse(guild.userHasPermissions(
             userId: Constants.secondAccountId,
             channelId: Constants.perm2ChannelId,
             permissions: [.embedLinks]
         ))
         /// The account has all the permissions.
-        XCTAssertTrue(guild.memberHasPermissions(
+        XCTAssertTrue(guild.userHasPermissions(
             userId: Constants.secondAccountId,
             channelId: Constants.perm3ChannelId,
             permissions: [.viewChannel, .manageChannels, .createInstantInvite, .useExternalStickers]
         ))
         /// The account has all the permissions but one.
-        XCTAssertFalse(guild.memberHasPermissions(
+        XCTAssertFalse(guild.userHasPermissions(
             userId: Constants.secondAccountId,
             channelId: Constants.perm3ChannelId,
             permissions: [.viewChannel, .manageChannels, .sendTtsMessages, .useExternalStickers]
         ))
         /// The account has the permission thanks to a member-perm-overwrite.
-        XCTAssertTrue(guild.memberHasPermissions(
+        XCTAssertTrue(guild.userHasPermissions(
             userId: Constants.secondAccountId,
             channelId: Constants.perm3ChannelId,
             permissions: [.useExternalEmojis]
@@ -124,7 +124,7 @@ class PermissionChecker: XCTestCase {
             userId: Constants.secondAccountId,
             permission: .manageWebhooks
         ))
-        XCTAssertTrue(guild.memberHasPermissions(
+        XCTAssertTrue(guild.userHasPermissions(
             userId: Constants.secondAccountId,
             channelId: Constants.perm3ChannelId,
             permissions: [.manageWebhooks]
@@ -135,7 +135,7 @@ class PermissionChecker: XCTestCase {
             userId: Constants.secondAccountId,
             permission: .manageThreads
         ))
-        XCTAssertFalse(guild.memberHasPermissions(
+        XCTAssertFalse(guild.userHasPermissions(
             userId: Constants.secondAccountId,
             channelId: Constants.perm3ChannelId,
             permissions: [.manageThreads]
