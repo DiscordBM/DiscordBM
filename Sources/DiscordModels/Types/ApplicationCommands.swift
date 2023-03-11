@@ -111,6 +111,9 @@ public struct ApplicationCommand: Sendable, Codable {
                 name: "choices",
                 reason: "'choices' is only allowed if 'type' is 'string' or 'integer' or 'number'"
             )
+            for option in options ?? [] {
+                try option.validate()
+            }
         }
     }
     
