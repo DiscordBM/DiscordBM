@@ -3,6 +3,7 @@ extension Gateway.GuildCreate {
     
     /// Whether or not a member has a permission in a guild and channel.
     /// Member must be of the same guild.
+    /// `channelId` could also be a thread-id.
     /// https://discord.com/developers/docs/topics/permissions#permission-overwrites
     public func memberHasPermissions(
         member: Guild.Member,
@@ -10,7 +11,8 @@ extension Gateway.GuildCreate {
         channelId: String,
         permissions perms: [Permission]
     ) -> Bool {
-        guard let channel = self.channels.first(where: { $0.id == channelId }) else {
+        guard let channel = self.channels.first(where: { $0.id == channelId })
+                ?? self.threads.first(where: { $0.id == channelId }) else {
             /// Don't even have access to the channel.
             return false
         }
