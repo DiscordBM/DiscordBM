@@ -231,6 +231,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: req.endpoint.httpMethod
             )
             request.headers = req.headers
+            request.headers.add(name: "User-Agent", value: userAgent)
             if req.endpoint.requiresAuthorizationHeader {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
             }
@@ -296,10 +297,11 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: req.endpoint.httpMethod
             )
             request.headers = req.headers
+            request.headers.add(name: "User-Agent", value: userAgent)
+            request.headers.replaceOrAdd(name: "Content-Type", value: "application/json")
             if req.endpoint.requiresAuthorizationHeader {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
             }
-            request.headers.replaceOrAdd(name: "Content-Type", value: "application/json")
             
             request.body = .bytes(data)
             
@@ -372,10 +374,11 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: req.endpoint.httpMethod
             )
             request.headers = req.headers
+            request.headers.add(name: "User-Agent", value: userAgent)
+            request.headers.replaceOrAdd(name: "Content-Type", value: contentType)
             if req.endpoint.requiresAuthorizationHeader {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
             }
-            request.headers.replaceOrAdd(name: "Content-Type", value: contentType)
             
             request.body = body
             
@@ -736,3 +739,6 @@ extension HTTPHeaders {
         self.first(name: "x-ratelimit-reset-after") ?? self.first(name: "retry-after")
     }
 }
+
+//MARK: User-Agent constant
+private let userAgent = "DiscordBM (https://github.com/mahdibm/discordbm, 1.0.0)"
