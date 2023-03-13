@@ -101,7 +101,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     /// print(httpResponse.description)
     /// ```
     @inlinable
-    public func guardDecodeError() -> DiscordHTTPErrorResponse {
+    public func decodeError() -> DiscordHTTPErrorResponse {
         if (200..<300).contains(self.status.code) {
             return .none
         } else {
@@ -160,8 +160,8 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
     /// print(httpResponse.description)
     /// ```
     @inlinable
-    public func guardDecodeError() -> DiscordHTTPErrorResponse {
-        self.httpResponse.guardDecodeError()
+    public func decodeError() -> DiscordHTTPErrorResponse {
+        self.httpResponse.decodeError()
     }
     
     /// Decode the response.

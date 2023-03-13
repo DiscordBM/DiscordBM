@@ -219,7 +219,7 @@ class DiscordModelsTests: XCTestCase {
             version: .http1_1,
             body: data
         )
-        let error =  try XCTUnwrap(response.guardDecodeError())
+        let error =  try XCTUnwrap(response.decodeError())
         if case let .jsonError(jsonError) = error {
             XCTAssertEqual(jsonError.message, "Invalid authentication token")
             XCTAssertEqual(jsonError.code, .invalidAuthenticationToken)
