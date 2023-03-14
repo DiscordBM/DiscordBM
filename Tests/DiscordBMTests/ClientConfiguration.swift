@@ -234,7 +234,11 @@ class ClientConfigurationTests: XCTestCase {
                 headers: [:],
                 body: .init(string: "body right here :)")
             )
-            let item = ClientCache.CacheableItem(identity: .getChannel, queries: [])
+            let item = ClientCache.CacheableItem(
+                identity: .getChannel,
+                parameters: [],
+                queries: []
+            )
             await cache.add(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(item: item)
             XCTAssertEqual(response, fromCache)
@@ -252,6 +256,7 @@ class ClientConfigurationTests: XCTestCase {
             )
             let item = ClientCache.CacheableItem(
                 identity: .getChannel,
+                parameters: [],
                 queries: [("name", "mahdi"), ("age", "99"), ("height", nil)]
             )
             await cache.add(response: response, item: item, ttl: 5)
@@ -269,9 +274,41 @@ class ClientConfigurationTests: XCTestCase {
                 headers: [:],
                 body: .init(string: "body right here :)")
             )
-            let item = ClientCache.CacheableItem(identity: .getChannel, queries: [])
+            let item = ClientCache.CacheableItem(
+                identity: .getChannel,
+                parameters: [],
+                queries: []
+            )
             await cache.add(response: response, item: item, ttl: 5)
-            let fromCache = await cache.get(item: .init(identity: .getGuildAuditLogs, queries: []))
+            let fromCache = await cache.get(item: .init(
+                identity: .getGuildAuditLogs,
+                parameters: [],
+                queries: []
+            ))
+            XCTAssertNil(fromCache)
+        }
+        
+        /// No cached available because parameters different
+        do {
+            let cache = ClientCache()
+            let response = DiscordHTTPResponse(
+                host: "something.else",
+                status: .ok,
+                version: .http2,
+                headers: [:],
+                body: .init(string: "body right here :)")
+            )
+            let item = ClientCache.CacheableItem(
+                identity: .getChannel,
+                parameters: ["1"],
+                queries: []
+            )
+            await cache.add(response: response, item: item, ttl: 5)
+            let fromCache = await cache.get(item: .init(
+                identity: .getChannel,
+                parameters: [],
+                queries: []
+            ))
             XCTAssertNil(fromCache)
         }
         
@@ -285,9 +322,17 @@ class ClientConfigurationTests: XCTestCase {
                 headers: [:],
                 body: .init(string: "body right here :)")
             )
-            let item = ClientCache.CacheableItem(identity: .getChannel, queries: [("name", "mahdi")])
+            let item = ClientCache.CacheableItem(
+                identity: .getChannel,
+                parameters: [],
+                queries: [("name", "mahdi")]
+            )
             await cache.add(response: response, item: item, ttl: 5)
-            let fromCache = await cache.get(item: .init(identity: .getChannel, queries: []))
+            let fromCache = await cache.get(item: .init(
+                identity: .getChannel,
+                parameters: [],
+                queries: []
+            ))
             XCTAssertNil(fromCache)
         }
         
@@ -301,11 +346,16 @@ class ClientConfigurationTests: XCTestCase {
                 headers: [:],
                 body: .init(string: "body right here :)")
             )
-            let item = ClientCache.CacheableItem(identity: .getChannel, queries: [])
+            let item = ClientCache.CacheableItem(
+                identity: .getChannel,
+                parameters: [],
+                queries: []
+            )
             await cache.add(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(
                 item: .init(
                     identity: .getChannel,
+                    parameters: [],
                     queries: [("name", "mahdi")]
                 )
             )
@@ -322,7 +372,11 @@ class ClientConfigurationTests: XCTestCase {
                 headers: [:],
                 body: .init(string: "body right here :)")
             )
-            let item = ClientCache.CacheableItem(identity: .getChannel, queries: [])
+            let item = ClientCache.CacheableItem(
+                identity: .getChannel,
+                parameters: [],
+                queries: []
+            )
             await cache.add(response: response, item: item, ttl: 1.5)
             try await Task.sleep(nanoseconds: 1_500_000_000)
             let fromCache = await cache.get(item: item)

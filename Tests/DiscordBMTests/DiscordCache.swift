@@ -64,7 +64,6 @@ class DiscordCacheTests: XCTestCase {
     }
 }
 
-
 private actor FakeGatewayManager: GatewayManager {
     nonisolated var client: DiscordClient { get { fatalError() } }
     nonisolated let id: Int = 0

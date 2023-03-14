@@ -605,6 +605,170 @@ public enum Endpoint: Sendable {
         }
     }
     
+    /// URL-path parameters.
+    var parameters: [String] {
+        switch self {
+        case .getGateway, .getGatewayBot, .createDM:
+            return []
+        case .createInteractionResponse(let id, let token):
+            return [id, token]
+        case .getInteractionResponse(let appId, let token):
+            return [appId, token]
+        case .editInteractionResponse(let appId, let token):
+            return [appId, token]
+        case .deleteInteractionResponse(let appId, let token):
+            return [appId, token]
+        case .postFollowupInteractionResponse(let appId, let token):
+            return [appId, token]
+        case .getFollowupInteractionResponse(let appId, let token, let messageId):
+            return [appId, token, messageId]
+        case .editFollowupInteractionResponse(let appId, let token, let messageId):
+            return [appId, token, messageId]
+        case .deleteFollowupInteractionResponse(let appId, let token, let messageId):
+            return [appId, token, messageId]
+        case .createMessage(let channelId):
+            return [channelId]
+        case .editMessage(let channelId, let messageId):
+            return [channelId, messageId]
+        case .deleteMessage(let channelId, let messageId):
+            return [channelId, messageId]
+        case .createApplicationGlobalCommand(let appId):
+            return [appId]
+        case .getApplicationGlobalCommands(let appId):
+            return [appId]
+        case .deleteApplicationGlobalCommand(let appId, let id):
+            return [appId, id]
+        case .getGuild(let id):
+            return [id]
+        case .getGuildRoles(let id):
+            return [id]
+        case .searchGuildMembers(let id):
+            return [id]
+        case .getGuildMember(let id, let userId):
+            return [id, userId]
+        case .leaveGuild(let id):
+            return [id]
+        case .getChannel(let id):
+            return [id]
+        case .getChannelMessages(let channelId):
+            return [channelId]
+        case .getChannelMessage(let channelId, let messageId):
+            return [channelId, messageId]
+        case .createGuildRole(let guildId):
+            return [guildId]
+        case .deleteGuildRole(let guildId, let roleId):
+            return [guildId, roleId]
+        case .addGuildMemberRole(let guildId, let userId, let roleId):
+            return [guildId, userId, roleId]
+        case .removeGuildMemberRole(let guildId, let userId, let roleId):
+            return [guildId, userId, roleId]
+        case .getGuildAuditLogs(let guildId):
+            return [guildId]
+        case .createReaction(let channelId, let messageId, let emoji):
+            return [channelId, messageId, emoji]
+        case .deleteOwnReaction(let channelId, let messageId, let emoji):
+            return [channelId, messageId, emoji]
+        case .deleteUserReaction(let channelId, let messageId, let emoji, let userId):
+            return [channelId, messageId, emoji, userId]
+        case .getReactions(let channelId, let messageId, let emoji):
+            return [channelId, messageId, emoji]
+        case .deleteAllReactions(let channelId, let messageId):
+            return [channelId, messageId]
+        case .deleteAllReactionsForEmoji(let channelId, let messageId, let emoji):
+            return [channelId, messageId, emoji]
+        case .startThreadFromMessage(let channelId, let messageId):
+            return [channelId, messageId]
+        case .startThreadWithoutMessage(let channelId):
+            return [channelId]
+        case .startThreadInForumChannel(let channelId):
+            return [channelId]
+        case .joinThread(let id):
+            return [id]
+        case .addThreadMember(let threadId, let userId):
+            return [threadId, userId]
+        case .leaveThread(let id):
+            return [id]
+        case .removeThreadMember(let threadId, let userId):
+            return [threadId, userId]
+        case .getThreadMember(let threadId, let userId):
+            return [threadId, userId]
+        case .listThreadMembers(let threadId):
+            return [threadId]
+        case .listPublicArchivedThreads(let channelId):
+            return [channelId]
+        case .listPrivateArchivedThreads(let channelId):
+            return [channelId]
+        case .listJoinedPrivateArchivedThreads(let channelId):
+            return [channelId]
+        case .createWebhook(let channelId):
+            return [channelId]
+        case .getChannelWebhooks(let channelId):
+            return [channelId]
+        case .getGuildWebhooks(let guildId):
+            return [guildId]
+        case .getWebhook1(let id):
+            return [id]
+        case .getWebhook2(let id, let token):
+            return [id, token]
+        case .modifyWebhook1(let id):
+            return [id]
+        case .modifyWebhook2(let id, let token):
+            return [id, token]
+        case .deleteWebhook1(let id):
+            return [id]
+        case .deleteWebhook2(let id, let token):
+            return [id, token]
+        case .executeWebhook(let id, let token):
+            return [id, token]
+        case .getWebhookMessage(let id, let token, let messageId):
+            return [id, token, messageId]
+        case .editWebhookMessage(let id, let token, let messageId):
+            return [id, token, messageId]
+        case .deleteWebhookMessage(let id, let token, let messageId):
+            return [id, token, messageId]
+        case .CDNCustomEmoji(let emojiId):
+            return [emojiId]
+        case .CDNGuildIcon(let guildId, let icon):
+            return [guildId, icon]
+        case .CDNGuildSplash(let guildId, let splash):
+            return [guildId, splash]
+        case .CDNGuildDiscoverySplash(let guildId, let splash):
+            return [guildId, splash]
+        case .CDNGuildBanner(let guildId, let banner):
+            return [guildId, banner]
+        case .CDNUserBanner(let userId, let banner):
+            return [userId, banner]
+        case .CDNDefaultUserAvatar(let discriminator):
+            return [discriminator]
+        case .CDNUserAvatar(let userId, let avatar):
+            return [userId, avatar]
+        case .CDNGuildMemberAvatar(let guildId, let userId, let avatar):
+            return [guildId, userId, avatar]
+        case .CDNApplicationIcon(let appId, let icon):
+            return [appId, icon]
+        case .CDNApplicationCover(let appId, let cover):
+            return [appId, cover]
+        case .CDNApplicationAsset(let appId, let assetId):
+            return [appId, assetId]
+        case .CDNAchievementIcon(let appId, let achievementId, let icon):
+            return [appId, achievementId, icon]
+        case .CDNStorePageAsset(let appId, let assetId):
+            return [appId, assetId]
+        case .CDNStickerPackBanner(let assetId):
+            return [assetId]
+        case .CDNTeamIcon(let teamId, let icon):
+            return [teamId, icon]
+        case .CDNSticker(let stickerId):
+            return [stickerId]
+        case .CDNRoleIcon(let roleId, let icon):
+            return [roleId, icon]
+        case .CDNGuildScheduledEventCover(let eventId, let cover):
+            return [eventId, cover]
+        case .CDNGuildMemberBanner(let guildId, let userId, let banner):
+            return [guildId, userId, banner]
+        }
+    }
+    
     var id: Int {
         switch self {
         case .getGateway: return 1
