@@ -1,3 +1,4 @@
+import Foundation
 
 /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
 public struct ApplicationCommand: Sendable, Codable {
@@ -111,9 +112,7 @@ public struct ApplicationCommand: Sendable, Codable {
                 name: "choices",
                 reason: "'choices' is only allowed if 'type' is 'string' or 'integer' or 'number'"
             )
-            for option in options ?? [] {
-                try option.validate()
-            }
+            try options?.validate()
         }
     }
     
@@ -123,8 +122,10 @@ public struct ApplicationCommand: Sendable, Codable {
     public var guild_id: String?
     public var name: String
     public var name_localizations: DiscordLocaleDict<String>?
+    public var name_localized: String? /// Only for endpoints like get-application-commands
     public var description: String
     public var description_localizations: DiscordLocaleDict<String>?
+    public var description_localized: String? /// Only for endpoints like get-application-commands
     public var options: [Option]?
     public var default_member_permissions: StringBitField<Permission>?
     public var dm_permission: Bool?
@@ -148,6 +149,33 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
         public var type: Kind
         public var permission: Bool
         public var id: String
+        
+        public init(type: Kind, permission: Bool, id: String) {
+            self.type = type
+            self.permission = permission
+            self.id = id
+        }
+        
+        public enum ConversionError: LocalizedError {
+            case couldNotConvertToInteger(String)
+        }
+        
+        public static func allChannels(
+            inGuildWithId guildId: String,
+            permission: Bool
+        ) throws -> Self {
+            guard let guildNumber = Int(guildId) else {
+                throw ConversionError.couldNotConvertToInteger(guildId)
+            }
+            return self.init(type: .channel, permission: permission, id: "\(guildNumber - 1)")
+        }
+        
+        public static func allMembers(
+            inGuildWithId guildId: String,
+            permission: Bool
+        ) throws -> Self {
+            self.init(type: .user, permission: permission, id: guildId)
+        }
     }
     
     public var permissions: [Permission]

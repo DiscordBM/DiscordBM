@@ -179,3 +179,12 @@ extension ValidatablePayload {
         }
     }
 }
+
+// MARK: - +Array
+extension Array: ValidatablePayload where Element: ValidatablePayload {
+    public func validate() throws {
+        for element in self {
+            try element.validate()
+        }
+    }
+}

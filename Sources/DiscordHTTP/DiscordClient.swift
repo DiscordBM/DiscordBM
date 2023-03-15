@@ -70,6 +70,13 @@ extension DiscordClient {
         }
     }
     
+    /// For compiler warnings
+    @available(*, deprecated, message: "App id must be optional otherwise there is no point")
+    @usableFromInline
+    func requireAppId(_ : String) throws -> String {
+        fatalError()
+    }
+    
     @usableFromInline
     func checkMutuallyExclusive(queries: [(String, String?)]) throws {
         let notNil = queries.filter { $0.1 != nil }
@@ -276,40 +283,215 @@ public extension DiscordClient {
         ))
     }
     
-    /// https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
-    @inlinable
-    func createApplicationGlobalCommand(
-        appId: String? = nil,
-        payload: RequestBody.ApplicationCommandCreate
-    ) async throws -> DiscordClientResponse<ApplicationCommand> {
-        let endpoint = Endpoint.createApplicationGlobalCommand(appId: try requireAppId(appId))
-        return try await self.send(request: .init(to: endpoint), payload: payload)
-    }
-    
     /// https://discord.com/developers/docs/interactions/application-commands#get-global-application-commands
     @inlinable
-    func getApplicationGlobalCommands(
+    func getGlobalApplicationCommands(
         appId: String? = nil,
         with_localizations: Bool? = nil
     ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
-        let endpoint = Endpoint.getApplicationGlobalCommands(appId: try requireAppId(appId))
+        let endpoint = Endpoint.getGlobalApplicationCommands(appId: try requireAppId(appId))
         return try await self.send(request: .init(
             to: endpoint,
             queries: [("with_localizations", with_localizations.map { "\($0)" })]
         ))
     }
     
-    /// https://discord.com/developers/docs/interactions/application-commands#delete-global-application-command
+    /// https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
     @inlinable
-    func deleteApplicationGlobalCommand(
+    func createGlobalApplicationCommand(
         appId: String? = nil,
-        id: String
-    ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteApplicationGlobalCommand(
+        payload: RequestBody.ApplicationCommandCreate
+    ) async throws -> DiscordClientResponse<ApplicationCommand> {
+        let endpoint = Endpoint.createGlobalApplicationCommand(appId: try requireAppId(appId))
+        return try await self.send(request: .init(to: endpoint), payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#get-global-application-command
+    @inlinable
+    func getGlobalApplicationCommand(
+        appId: String? = nil,
+        commandId: String
+    ) async throws -> DiscordClientResponse<ApplicationCommand> {
+        let endpoint = Endpoint.getGlobalApplicationCommand(
             appId: try requireAppId(appId),
-            id: id
+            commandId: commandId
         )
         return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#edit-global-application-command
+    @inlinable
+    func editGlobalApplicationCommand(
+        appId: String? = nil,
+        commandId: String,
+        payload: RequestBody.ApplicationCommandEdit
+    ) async throws -> DiscordClientResponse<ApplicationCommand> {
+        let endpoint = Endpoint.editGlobalApplicationCommand(
+            appId: try requireAppId(appId),
+            commandId: commandId
+        )
+        return try await self.send(request: .init(to: endpoint), payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#delete-global-application-command
+    @inlinable
+    func deleteGlobalApplicationCommand(
+        appId: String? = nil,
+        commandId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteGlobalApplicationCommand(
+            appId: try requireAppId(appId),
+            commandId: commandId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+    @inlinable
+    func bulkOverwriteGlobalApplicationCommands(
+        appId: String? = nil,
+        payload: [RequestBody.ApplicationCommandCreate]
+    ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
+        let endpoint = Endpoint.bulkOverwriteGlobalApplicationCommands(
+            appId: try requireAppId(appId)
+        )
+        return try await self.send(request: .init(to: endpoint), payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#get-guild-application-commands
+    @inlinable
+    func getGuildApplicationCommands(
+        appId: String? = nil,
+        guildId: String,
+        with_localizations: Bool? = nil
+    ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
+        let endpoint = Endpoint.getGuildApplicationCommands(
+            appId: try requireAppId(appId),
+            guildId: guildId
+        )
+        return try await self.send(request: .init(
+            to: endpoint,
+            queries: [("with_localizations", with_localizations.map { "\($0)" })]
+        ))
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#create-guild-application-command
+    @inlinable
+    func createGuildApplicationCommand(
+        appId: String? = nil,
+        guildId: String,
+        payload: RequestBody.ApplicationCommandCreate
+    ) async throws -> DiscordClientResponse<ApplicationCommand> {
+        let endpoint = Endpoint.createGuildApplicationCommand(
+            appId: try requireAppId(appId),
+            guildId: guildId
+        )
+        return try await self.send(request: .init(to: endpoint), payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#get-guild-application-command
+    @inlinable
+    func getGuildApplicationCommand(
+        appId: String? = nil,
+        guildId: String,
+        commandId: String
+    ) async throws -> DiscordClientResponse<ApplicationCommand> {
+        let endpoint = Endpoint.getGuildApplicationCommand(
+            appId: try requireAppId(appId),
+            guildId: guildId,
+            commandId: commandId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#edit-guild-application-command
+    @inlinable
+    func editGuildApplicationCommand(
+        appId: String? = nil,
+        guildId: String,
+        commandId: String,
+        payload: RequestBody.ApplicationCommandEdit
+    ) async throws -> DiscordClientResponse<ApplicationCommand> {
+        let endpoint = Endpoint.editGuildApplicationCommand(
+            appId: try requireAppId(appId),
+            guildId: guildId,
+            commandId: commandId
+        )
+        return try await self.send(request: .init(to: endpoint), payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#delete-guild-application-command
+    @inlinable
+    func deleteGuildApplicationCommand(
+        appId: String? = nil,
+        guildId: String,
+        commandId: String
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = Endpoint.deleteGuildApplicationCommand(
+            appId: try requireAppId(appId),
+            guildId: guildId,
+            commandId: commandId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-guild-application-commands
+    @inlinable
+    func bulkOverwriteGuildApplicationCommands(
+        appId: String? = nil,
+        guildId: String,
+        payload: [RequestBody.ApplicationCommandCreate]
+    ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
+        let endpoint = Endpoint.bulkOverwriteGuildApplicationCommands(
+            appId: try requireAppId(appId),
+            guildId: guildId
+        )
+        return try await self.send(request: .init(to: endpoint), payload: payload)
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#get-application-command-permissions
+    @inlinable
+    func getGuildApplicationCommandPermissions(
+        appId: String? = nil,
+        guildId: String
+    ) async throws -> DiscordClientResponse<[GuildApplicationCommandPermissions]> {
+        let endpoint = Endpoint.getGuildApplicationCommandPermissions(
+            appId: try requireAppId(appId),
+            guildId: guildId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    /// https://discord.com/developers/docs/interactions/application-commands#edit-application-command-permissions
+    @inlinable
+    func getApplicationCommandPermissions(
+        appId: String? = nil,
+        guildId: String,
+        commandId: String
+    ) async throws -> DiscordClientResponse<GuildApplicationCommandPermissions> {
+        let endpoint = Endpoint.getApplicationCommandPermissions(
+            appId: try requireAppId(appId),
+            guildId: guildId,
+            commandId: commandId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+    
+    @available(*, unavailable, message: "Currently this endpoint can't be used with a bot token")
+    /// https://discord.com/developers/docs/interactions/application-commands#batch-edit-application-command-permissions
+    @inlinable
+    func editApplicationCommandPermissions(
+        appId: String? = nil,
+        guildId: String,
+        commandId: String,
+        payload: RequestBody.EditApplicationCommandPermissions
+    ) async throws -> DiscordClientResponse<GuildApplicationCommandPermissions> {
+        let endpoint = Endpoint.editApplicationCommandPermissions(
+            appId: try requireAppId(appId),
+            guildId: guildId,
+            commandId: commandId
+        )
+        return try await self.send(request: .init(to: endpoint), payload: payload)
     }
     
     /// https://discord.com/developers/docs/resources/guild#get-guild
