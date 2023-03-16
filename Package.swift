@@ -2,9 +2,13 @@
 
 import PackageDescription
 
+#if swift(>=5.7)
 let swiftSettings: [SwiftSetting] = [
     .unsafeFlags(["-Xfrontend", "-strict-concurrency=targeted"])
 ]
+#else
+let swiftSettings: [SwiftSetting] = []
+#endif
 
 let package = Package(
     name: "DiscordBM",
