@@ -5,7 +5,7 @@
         <img src="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
     </a>
     <a href="https://swift.org">
-        <img src="https://img.shields.io/badge/swift-5.6-brightgreen.svg" alt="Minimum Swift Version">
+        <img src="https://img.shields.io/badge/swift-5.6%20/%205.7%20/%205.8-brightgreen.svg" alt="Minimum Swift Version">
     </a>
 </p>
 
