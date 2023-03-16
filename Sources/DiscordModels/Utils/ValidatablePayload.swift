@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol ValidatablePayload {
+public protocol ValidatablePayload: Sendable {
     /// Default library functions only throw ``ValidationError``.
     func validate() throws
 }

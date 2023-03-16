@@ -2,6 +2,10 @@
 
 import PackageDescription
 
+let swiftSettings: [SwiftSetting] = [
+    .unsafeFlags(["-Xfrontend", "-strict-concurrency=targeted"])
+]
+
 let package = Package(
     name: "DiscordBM",
     platforms: [
@@ -46,21 +50,24 @@ let package = Package(
                 "DiscordLogger",
                 "DiscordModels",
                 "DiscordUtilities",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordHTTP",
             dependencies: [
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "DiscordModels",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordCore",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordGateway",
@@ -69,7 +76,8 @@ let package = Package(
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "WebSocketKitFork",
                 "DiscordHTTP",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordLogger",
@@ -78,7 +86,8 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
                 "DiscordHTTP",
                 "DiscordUtilities",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordModels",
@@ -86,14 +95,16 @@ let package = Package(
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
                 "DiscordCore"
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(name: "DiscordUtilities"),
         .target(
             name: "DiscordAuth",
             dependencies: [
                 "DiscordModels"
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         /// `WebSocketKit` will be replaced as soon as changes are final and merged in
         /// Vapor's `WebSocketKit`. This is just a copy-paste of that library.

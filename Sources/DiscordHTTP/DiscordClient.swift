@@ -8,12 +8,12 @@ public protocol DiscordClient: Sendable {
     
     func send(request: DiscordHTTPRequest) async throws -> DiscordHTTPResponse
     
-    func send<E: Encodable & ValidatablePayload>(
+    func send<E: Sendable & Encodable & ValidatablePayload>(
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse
     
-    func sendMultipart<E: MultipartEncodable & ValidatablePayload>(
+    func sendMultipart<E: Sendable & MultipartEncodable & ValidatablePayload>(
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse
@@ -38,7 +38,7 @@ public extension DiscordClient {
     }
     
     @inlinable
-    func send<E: Encodable & ValidatablePayload, C: Codable>(
+    func send<E: Sendable & Encodable & ValidatablePayload, C: Codable>(
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordClientResponse<C> {
@@ -47,7 +47,7 @@ public extension DiscordClient {
     }
     
     @inlinable
-    func sendMultipart<E: MultipartEncodable & ValidatablePayload, C: Codable>(
+    func sendMultipart<E: Sendable & MultipartEncodable & ValidatablePayload, C: Codable>(
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordClientResponse<C> {

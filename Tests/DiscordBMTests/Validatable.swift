@@ -1,7 +1,7 @@
 @testable import DiscordModels
 import XCTest
 
-class ValidatablePayloadTests: XCTestCase, ValidatablePayload {
+class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePayload {
     
     /// `ValidatablePayload` requirement
     func validate() throws { }
