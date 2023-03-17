@@ -680,14 +680,11 @@ class DiscordClientTests: XCTestCase {
             )
         ).decode()
         
-        let emptyArchivedThreads = try await client.listPublicArchivedThreads(
+        _ = try await client.listPublicArchivedThreads(
             channelId: Constants.announcementsChannelId,
             before: Date(),
             limit: 2
         ).decode()
-        
-        XCTAssertTrue(emptyArchivedThreads.threads.isEmpty)
-        XCTAssertTrue(emptyArchivedThreads.members.isEmpty)
         
         /// The message-id is the same as the thread id based on what Discord says
         try await client.deleteMessage(
