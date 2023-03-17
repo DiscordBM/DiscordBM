@@ -594,10 +594,10 @@ public actor DiscordCache {
             guard let idx = self.guilds[user.guild_id]?.guild_scheduled_events
                 .firstIndex(where: { $0.id == user.guild_scheduled_event_id })
             else { break }
-            if let idx = self.guilds[user.guild_id]?.guild_scheduled_events[idx]
+            if let ind = self.guilds[user.guild_id]?.guild_scheduled_events[idx]
                 .user_ids?.firstIndex(where: { $0 == user.user_id }) {
                 self.guilds[user.guild_id]?.guild_scheduled_events[idx]
-                    .user_ids?.remove(at: idx)
+                    .user_ids?.remove(at: ind)
             }
             if self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_count == nil {
                 self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_count = 0
