@@ -156,8 +156,23 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
             self.id = id
         }
         
+        /// Read `helpAnchor` for help about each error case.
         public enum ConversionError: LocalizedError {
             case couldNotConvertToInteger(String)
+            
+            public var errorDescription: String? {
+                switch self {
+                case let .couldNotConvertToInteger(string):
+                    return "couldNotConvertToInteger(\(string))"
+                }
+            }
+            
+            public var helpAnchor: String? {
+                switch self {
+                case let .couldNotConvertToInteger(string):
+                    return "Couldn't convert \(string.debugDescription) to an integer"
+                }
+            }
         }
         
         public static func allChannels(
