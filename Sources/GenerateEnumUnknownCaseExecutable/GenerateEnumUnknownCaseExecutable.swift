@@ -37,7 +37,6 @@ struct GenerateEnumUnknownCaseExecutable {
                 maximumNestingLevel: nil,
                 parseTransition: nil
             )
-            
         }
     }
 }

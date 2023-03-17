@@ -17,7 +17,7 @@ struct GenerateEnumUnknownCasePlugin: BuildToolPlugin {
             guard isFirst else { return [] }
             isFirst = false
             
-            let output = outputDir.appending(["\(file.path.stem) +GEUC.swift"])
+            let output = outputDir.appending(["\(file.path.stem) +GEUCP.swift"])
             
             let tool = try context.tool(named: "GenerateEnumUnknownCaseExecutable")
             

@@ -104,8 +104,8 @@ let package = Package(
                 .product(name: "MultipartKit", package: "multipart-kit"),
                 "DiscordCore"
             ],
-            plugins: ["GenerateEnumUnknownCase"],
-            swiftSettings: swiftSettings
+            swiftSettings: swiftSettings,
+            plugins: ["GenerateEnumUnknownCase"]
         ),
         .target(name: "DiscordUtilities"),
         .target(
@@ -125,7 +125,8 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         /// `WebSocketKit` will be replaced as soon as changes are final and merged in
         /// Vapor's `WebSocketKit`. This is just a copy-paste of that library.
