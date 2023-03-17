@@ -107,12 +107,13 @@ public enum DiscordUtils {
     ) -> String {
         text
             .replacingOccurrences(of: #"\"#, with: #"\\"#)
-            .replacingOccurrences(of: #"|"#, with: #"\|"#)
-            .replacingOccurrences(of: #">"#, with: #"\>"#)
-            .replacingOccurrences(of: #"<"#, with: #"\<"#)
-            .replacingOccurrences(of: #"`"#, with: #"\`"#)
-            .replacingOccurrences(of: #"~"#, with: #"\~"#)
-            .replacingOccurrences(of: #"_"#, with: #"\_"#)
-            .replacingOccurrences(of: #"*"#, with: #"\*"#)
+            .replacingOccurrences(of: #"|"#, with: #"\|"#) /// Makes invisible
+            .replacingOccurrences(of: #">"#, with: #"\>"#) /// Quotes
+            .replacingOccurrences(of: #"<"#, with: #"\<"#) /// `<::>` ids like custom emojis
+            .replacingOccurrences(of: #"`"#, with: #"\`"#) /// Code blocks
+            .replacingOccurrences(of: #"~"#, with: #"\~"#) /// Crosses the words
+            .replacingOccurrences(of: #"_"#, with: #"\_"#) /// Italic
+            .replacingOccurrences(of: #"*"#, with: #"\*"#) /// Bold
+            .replacingOccurrences(of: #":"#, with: #"\:"#) /// Emojis like `:key:`
     }
 }

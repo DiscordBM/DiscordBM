@@ -2,6 +2,14 @@
 
 import PackageDescription
 
+#if swift(>=5.7)
+let swiftSettings: [SwiftSetting] = [
+    .unsafeFlags(["-Xfrontend", "-strict-concurrency=targeted"])
+]
+#else
+let swiftSettings: [SwiftSetting] = []
+#endif
+
 let package = Package(
     name: "DiscordBM",
     platforms: [
@@ -50,21 +58,24 @@ let package = Package(
                 "DiscordLogger",
                 "DiscordModels",
                 "DiscordUtilities",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordHTTP",
             dependencies: [
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "DiscordModels",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordCore",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordGateway",
@@ -73,7 +84,8 @@ let package = Package(
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "WebSocketKitFork",
                 "DiscordHTTP",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordLogger",
@@ -82,7 +94,8 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
                 "DiscordHTTP",
                 "DiscordUtilities",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordModels",
@@ -91,14 +104,16 @@ let package = Package(
                 .product(name: "MultipartKit", package: "multipart-kit"),
                 "DiscordCore"
             ],
-            plugins: ["GenerateEnumUnknownCase"]
+            plugins: ["GenerateEnumUnknownCase"],
+            swiftSettings: swiftSettings
         ),
         .target(name: "DiscordUtilities"),
         .target(
             name: "DiscordAuth",
             dependencies: [
                 "DiscordModels"
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .plugin(
             name: "GenerateEnumUnknownCase",

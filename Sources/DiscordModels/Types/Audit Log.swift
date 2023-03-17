@@ -14,6 +14,7 @@ public struct AuditLog: Sendable, Codable {
             case nameIds([NameID])
             case permissionOverwrites([DiscordChannel.Overwrite])
             case permission(GuildApplicationCommandPermissions.Permission)
+            case actions([AutoModerationRule.Action])
             case other(Other)
             
             public struct NameID: Sendable, Codable {
@@ -39,6 +40,7 @@ public struct AuditLog: Sendable, Codable {
                 case let .nameIds(nameIds): return "\(nameIds)"
                 case let .permissionOverwrites(overwrites): return "\(overwrites)"
                 case let .permission(permission): return "\(permission)"
+                case let .actions(actions): return "\(actions)"
                 case let .other(other): return "\(other)"
                 }
             }
@@ -69,11 +71,15 @@ public struct AuditLog: Sendable, Codable {
                 } else if let permission = try? container
                     .decode(GuildApplicationCommandPermissions.Permission.self) {
                     self = .permission(permission)
+                } else if let actions = try? container.decode([AutoModerationRule.Action].self) {
+                    self = .actions(actions)
                 } else {
                     DiscordGlobalConfiguration
                         .makeDecodeLogger("DBM.AuditLog.Entry.Mixed")
                         .warning("Can't decode a value", metadata: [
-                            "codingPath": .stringConvertible(container.codingPath),
+                            "codingPath": .stringConvertible(
+                                container.codingPath.map(\.stringValue)
+                            ),
                             "container": "\(container)"
                         ])
                     self = .other(Other(container: container))
@@ -99,6 +105,8 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(overwrites)
                 case let .permission(permission):
                     try container.encode(permission)
+                case let .actions(actions):
+                    try container.encode(actions)
                 case let .other(other):
                     DiscordGlobalConfiguration
                         .makeLogger("DBM.AuditLog.Entry.Mixed_EncodingError")

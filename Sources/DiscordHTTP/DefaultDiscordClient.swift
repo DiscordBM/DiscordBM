@@ -101,6 +101,7 @@ public struct DefaultDiscordClient: DiscordClient {
     
     func getFromCache(
         identity: CacheableEndpointIdentity?,
+        parameters: [String],
         queries: [(String, String?)]
     ) async -> DiscordHTTPResponse? {
         /// Since the `ClientCache` is shared and another `DiscordClient` could have
@@ -111,6 +112,7 @@ public struct DefaultDiscordClient: DiscordClient {
         else { return nil }
         return await cache?.get(item: .init(
             identity: identity,
+            parameters: parameters,
             queries: queries
         ))
     }
@@ -118,6 +120,7 @@ public struct DefaultDiscordClient: DiscordClient {
     func saveInCache(
         response: DiscordHTTPResponse,
         identity: CacheableEndpointIdentity?,
+        parameters: [String],
         queries: [(String, String?)]
     ) async {
         guard let identity = identity,
@@ -133,6 +136,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 response: response,
                 item: .init(
                     identity: identity,
+                    parameters: parameters,
                     queries: queries
                 ), ttl: ttl
             )
@@ -201,6 +205,7 @@ public struct DefaultDiscordClient: DiscordClient {
             await self.saveInCache(
                 response: response,
                 identity: identity,
+                parameters: req.endpoint.parameters,
                 queries: req.queries
             )
         }
@@ -212,7 +217,11 @@ public struct DefaultDiscordClient: DiscordClient {
         try await self.sendWithRetries(request: req) {
             identity, retryCounter, requestId in
             
-            if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
+            if let cached = await self.getFromCache(
+                identity: identity,
+                parameters: req.endpoint.parameters,
+                queries: req.queries
+            ) {
                 logger.debug("Got cached response", metadata: [
                     "endpoint": .string(req.endpoint.urlDescription),
                     "queries": .stringConvertible(req.queries),
@@ -231,6 +240,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: req.endpoint.httpMethod
             )
             request.headers = req.headers
+            request.headers.add(name: "User-Agent", value: userAgent)
             if req.endpoint.requiresAuthorizationHeader {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
             }
@@ -260,7 +270,7 @@ public struct DefaultDiscordClient: DiscordClient {
         }
     }
     
-    public func send<E: Encodable & ValidatablePayload>(
+    public func send<E: Sendable & Encodable & ValidatablePayload>(
         request req: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
@@ -272,10 +282,18 @@ public struct DefaultDiscordClient: DiscordClient {
             identity, retryCounter, requestId in
             
             let identity = CacheableEndpointIdentity(endpoint: req.endpoint)
-            if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
+            if let cached = await self.getFromCache(
+                identity: identity,
+                parameters: req.endpoint.parameters,
+                queries: req.queries
+            ) {
                 return (cached, true)
             }
-            if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
+            if let cached = await self.getFromCache(
+                identity: identity,
+                parameters: req.endpoint.parameters,
+                queries: req.queries
+            ) {
                 logger.debug("Got cached response", metadata: [
                     "endpoint": .string(req.endpoint.urlDescription),
                     "queries": .stringConvertible(req.queries),
@@ -296,10 +314,11 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: req.endpoint.httpMethod
             )
             request.headers = req.headers
+            request.headers.add(name: "User-Agent", value: userAgent)
+            request.headers.replaceOrAdd(name: "Content-Type", value: "application/json")
             if req.endpoint.requiresAuthorizationHeader {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
             }
-            request.headers.replaceOrAdd(name: "Content-Type", value: "application/json")
             
             request.body = .bytes(data)
             
@@ -328,7 +347,7 @@ public struct DefaultDiscordClient: DiscordClient {
         }
     }
     
-    public func sendMultipart<E: MultipartEncodable & ValidatablePayload>(
+    public func sendMultipart<E: Sendable & MultipartEncodable & ValidatablePayload>(
         request req: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
@@ -340,10 +359,18 @@ public struct DefaultDiscordClient: DiscordClient {
             identity, retryCounter, requestId in
             
             let identity = CacheableEndpointIdentity(endpoint: req.endpoint)
-            if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
+            if let cached = await self.getFromCache(
+                identity: identity,
+                parameters: req.endpoint.parameters,
+                queries: req.queries
+            ) {
                 return (cached, true)
             }
-            if let cached = await self.getFromCache(identity: identity, queries: req.queries) {
+            if let cached = await self.getFromCache(
+                identity: identity,
+                parameters: req.endpoint.parameters,
+                queries: req.queries
+            ) {
                 logger.debug("Got cached response", metadata: [
                     "endpoint": .string(req.endpoint.urlDescription),
                     "queries": .stringConvertible(req.queries),
@@ -372,10 +399,11 @@ public struct DefaultDiscordClient: DiscordClient {
                 method: req.endpoint.httpMethod
             )
             request.headers = req.headers
+            request.headers.add(name: "User-Agent", value: userAgent)
+            request.headers.replaceOrAdd(name: "Content-Type", value: contentType)
             if req.endpoint.requiresAuthorizationHeader {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
             }
-            request.headers.replaceOrAdd(name: "Content-Type", value: contentType)
             
             request.body = body
             
@@ -662,10 +690,14 @@ actor ClientCache {
     
     struct CacheableItem: Hashable {
         let identity: CacheableEndpointIdentity
+        let parameters: [String]
         let queries: [(String, String?)]
         
         func hash(into hasher: inout Hasher) {
             hasher.combine(identity.rawValue)
+            for param in parameters {
+                hasher.combine(param)
+            }
             for (key, value) in queries {
                 hasher.combine(key)
                 hasher.combine(value)
@@ -674,6 +706,7 @@ actor ClientCache {
         
         static func == (lhs: Self, rhs: Self) -> Bool {
             lhs.identity == rhs.identity &&
+            lhs.parameters == rhs.parameters &&
             lhs.queries.elementsEqual(rhs.queries, by: {
                 $0.0 == $1.0 &&
                 $0.1 == $1.1
@@ -736,3 +769,6 @@ extension HTTPHeaders {
         self.first(name: "x-ratelimit-reset-after") ?? self.first(name: "retry-after")
     }
 }
+
+//MARK: User-Agent constant
+private let userAgent = "DiscordBM (https://github.com/mahdibm/discordbm, 1.0.0)"

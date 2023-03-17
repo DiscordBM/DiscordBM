@@ -101,14 +101,14 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     /// print(httpResponse.description)
     /// ```
     @inlinable
-    public func guardDecodeError() -> DiscordHTTPErrorResponse {
+    public func decodeError() -> DiscordHTTPErrorResponse {
         if (200..<300).contains(self.status.code) {
             return .none
         } else {
             if let error = try? self._decode(as: JSONError.self) {
                 return .jsonError(error)
             } else {
-                return .basStatusCode(self)
+                return .badStatusCode(self)
             }
         }
     }
@@ -160,8 +160,8 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
     /// print(httpResponse.description)
     /// ```
     @inlinable
-    public func guardDecodeError() -> DiscordHTTPErrorResponse {
-        self.httpResponse.guardDecodeError()
+    public func decodeError() -> DiscordHTTPErrorResponse {
+        self.httpResponse.decodeError()
     }
     
     /// Decode the response.
@@ -209,7 +209,7 @@ public enum DiscordHTTPErrorResponse: Sendable {
     /// The response does not indicate success and there is a recognizable error in the body.
     case jsonError(JSONError)
     /// The response does not indicate success and there is no recognizable error in the body.
-    case basStatusCode(DiscordHTTPResponse)
+    case badStatusCode(DiscordHTTPResponse)
 }
 
 /// Read `helpAnchor` for help about each error case.

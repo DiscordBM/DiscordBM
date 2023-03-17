@@ -43,19 +43,36 @@ public struct DiscordLogHandler: LogHandler {
         makeMainLogHandler: (String, Logger.MetadataProvider?) -> LogHandler
     ) -> Logger {
         Logger(label: label) { label in
-            var otherHandler = makeMainLogHandler(label, metadataProvider)
-            otherHandler.logLevel = level
-            let handler = MultiplexLogHandler([
-                otherHandler,
-                DiscordLogHandler(
-                    label: label,
-                    address: address,
-                    level: level,
-                    metadataProvider: metadataProvider
-                )
-            ])
-            return handler
+            multiplexLogHandler(
+                label: label,
+                address: address,
+                level: level,
+                metadataProvider: metadataProvider,
+                makeMainLogHandler: makeMainLogHandler
+            )
         }
+    }
+    
+    /// Make a log handler that logs to both the a main place like stdout and also to Discord.
+    public static func multiplexLogHandler(
+        label: String,
+        address: WebhookAddress,
+        level: Logger.Level = .info,
+        metadataProvider: Logger.MetadataProvider? = nil,
+        makeMainLogHandler: (String, Logger.MetadataProvider?) -> LogHandler
+    ) -> MultiplexLogHandler {
+        var otherHandler = makeMainLogHandler(label, metadataProvider)
+        otherHandler.logLevel = level
+        let handler = MultiplexLogHandler([
+            otherHandler,
+            DiscordLogHandler(
+                label: label,
+                address: address,
+                level: level,
+                metadataProvider: metadataProvider
+            )
+        ])
+        return handler
     }
     
     public subscript(metadataKey key: String) -> Logger.Metadata.Value? {

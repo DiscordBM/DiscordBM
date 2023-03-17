@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol ValidatablePayload {
+public protocol ValidatablePayload: Sendable {
     /// Default library functions only throw ``ValidationError``.
     func validate() throws
 }
@@ -176,6 +176,15 @@ extension ValidatablePayload {
                     max: "\(max)"
                 )
             }
+        }
+    }
+}
+
+// MARK: - +Array
+extension Array: ValidatablePayload where Element: ValidatablePayload {
+    public func validate() throws {
+        for element in self {
+            try element.validate()
         }
     }
 }

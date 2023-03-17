@@ -20,25 +20,23 @@ extension Gateway.GuildCreate {
     }
     
     /// Whether or not a member has a permission in a guild and channel.
-    /// - NOTE: You should request all guild member from gateway before calling this function.
-    /// `GatewayManager` has a `requestGuildMembersChunk(payload:)` function, for that.
-    /// `DiscordCache` comes with a configuration option to request all guild members for you.
+    /// Member must be of the same guild.
+    /// `channelId` could also be a thread-id.
     /// https://discord.com/developers/docs/topics/permissions#permission-overwrites
     ///
     /// Member object **must** belong to the guild and have a valid `user.id`.
     /// Use `userHasPermissions()` instead, if you don't have access to the member.
     public func memberHasPermissions(
         member: Guild.Member,
+        userId: String,
         channelId: String,
         permissions perms: [Permission]
     ) -> Bool {
-        guard let channel = self.channels.first(where: { $0.id == channelId }),
-              let userId = member.user?.id
-        else {
-            /// Don't even have access to the channel or the member.
+        guard let channel = self.channels.first(where: { $0.id == channelId })
+                ?? self.threads.first(where: { $0.id == channelId }) else {
+            /// Don't even have access to the channel.
             return false
         }
-        
         /// Guild owner has all permissions.
         if self.owner_id == userId { return true }
         
@@ -95,6 +93,28 @@ extension Gateway.GuildCreate {
         }
         
         return true
+    }
+    
+    /// Whether or not a user has a permission in a guild and channel.
+    /// - NOTE: You should request all guild member from gateway before calling this function.
+    /// `GatewayManager` has a `requestGuildMembersChunk(payload:)` function, for that.
+    /// `DiscordCache` comes with a configuration option to request all guild members for you.
+    /// https://discord.com/developers/docs/topics/permissions#permission-overwrites
+    public func userHasPermissions(
+        userId: String,
+        channelId: String,
+        permissions perms: [Permission]
+    ) -> Bool {
+        guard let member = self.member(withUserId: userId) else {
+            /// Don't even have access to the member.
+            return false
+        }
+        return self.memberHasPermissions(
+            member: member,
+            userId: userId,
+            channelId: channelId,
+            permissions: perms
+        )
     }
     
     /// Use `memberHasPermissions(userId:channelId:permissions:)` instead.

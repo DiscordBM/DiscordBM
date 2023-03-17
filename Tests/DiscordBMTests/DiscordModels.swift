@@ -219,13 +219,30 @@ class DiscordModelsTests: XCTestCase {
             version: .http1_1,
             body: data
         )
-        let error =  try XCTUnwrap(response.guardDecodeError())
+        let error =  try XCTUnwrap(response.decodeError())
         if case let .jsonError(jsonError) = error {
             XCTAssertEqual(jsonError.message, "Invalid authentication token")
             XCTAssertEqual(jsonError.code, .invalidAuthenticationToken)
         } else {
             XCTFail("\(error) was not a 'jsonError'")
         }
+    }
+    
+    func testCollectionContainsAnything() throws {
+        let array1: [String]? = nil
+        XCTAssertEqual(array1.containsAnything, false)
+        
+        let array2: [String]? = []
+        XCTAssertEqual(array2.containsAnything, false)
+        
+        let array3: [String]? = ["a"]
+        XCTAssertEqual(array3.containsAnything, true)
+        
+        let array4: [String] = []
+        XCTAssertEqual(array4.containsAnything, false)
+        
+        let array5: [String] = ["a"]
+        XCTAssertEqual(array5.containsAnything, true)
     }
 }
 

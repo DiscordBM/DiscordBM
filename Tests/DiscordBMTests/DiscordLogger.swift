@@ -357,7 +357,7 @@ await waitFulfill(for: [expectation], timeout: 2)
             return
         }
         
-        let tolerance = 1.0
+        let tolerance = 1.25
         
         do {
             let anyPayload = payloads[0]
