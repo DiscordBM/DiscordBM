@@ -5,9 +5,6 @@ extension Gateway.GuildCreate {
     /// Member must be of the same guild.
     /// `channelId` could also be a thread-id.
     /// https://discord.com/developers/docs/topics/permissions#permission-overwrites
-    ///
-    /// Member object **must** belong to the guild and have a valid `user.id`.
-    /// Use `userHasPermissions()` instead, if you don't have access to the member.
     public func memberHasPermissions(
         member: Guild.Member,
         userId: String,
@@ -172,22 +169,15 @@ extension Gateway.GuildCreate {
             return false
         }
         
-        return self.memberHasGuildPermission(member: member, permission: perm)
+        return self.memberHasGuildPermission(member: member, userId: userId, permission: perm)
     }
     
     /// Member has permission in guild. Doesn't check for channel overwrites.
-    ///
-    /// Member object **must** belong to the guild and have a valid `user.id`.
-    /// Use `userHasGuildPermission()` instead, if you don't have access to the member.
     public func memberHasGuildPermission(
         member: Guild.Member,
+        userId: String,
         permission perm: Permission
     ) -> Bool {
-        guard let userId = member.user?.id else {
-            /// Don't even have access to the member.
-            return false
-        }
-        
         /// Guild owner has all permissions.
         if self.owner_id == userId { return true }
         

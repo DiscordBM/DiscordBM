@@ -12,10 +12,7 @@ struct GenerateEnumUnknownCasePlugin: BuildToolPlugin {
         
         try FileManager.default.removeItem(atPath: dir.string)
         
-        var isFirst = true
         return try target.sourceFiles(withSuffix: "swift").flatMap { file -> [Command] in
-            guard isFirst else { return [] }
-            isFirst = false
             
             let output = outputDir.appending(["\(file.path.stem) +GEUCP.swift"])
             

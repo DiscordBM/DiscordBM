@@ -14,11 +14,9 @@ struct GenerateEnumUnknownCaseExecutable {
         guard let input = fm.contents(atPath: CommandLine.arguments[1]) else {
             throw CodeGeneratorError.invalidInput
         }
+        parse(file: input)
         
         let code = """
-        enum NewEnum {
-            case hello
-        }
         """
         
         print("DOING IT!------------------------------------------------------------------")
@@ -30,13 +28,30 @@ struct GenerateEnumUnknownCaseExecutable {
         }
     }
     
-    func parse(file: Data) {
+    static func parse(file: Data) {
         [UInt8](file).withUnsafeBufferPointer { pointer in
             let parsed = Parser.parse(
                 source: pointer,
                 maximumNestingLevel: nil,
                 parseTransition: nil
             )
+            
+            parsed.statements.forEach({
+//                print("Start", $0.firstToken, type(of: $0.firstToken), "END", separator: "\n")
+                print("Start", $0.tokens(viewMode: .fixedUp).enums, "END", separator: "\n")
+            })
+        }
+    }
+}
+
+extension TokenSequence {
+    var enums: [TokenSyntax] {
+        self.flatMap {
+            if $0 == TokenSyntax.keyword(.enum) {
+                return [$0]
+            } else {
+                return $0.tokens(viewMode: .fixedUp).
+            }
         }
     }
 }
