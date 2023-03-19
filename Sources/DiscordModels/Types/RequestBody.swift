@@ -64,7 +64,7 @@ public enum RequestBody {
             case deferredUpdateMessage = 6
             /// Edit a message.
             case updateMessage = 7
-            /// Auto-complete result for slash commands.
+            /// Auto-complete result for application commands.
             case applicationCommandAutoCompleteResult = 8
             /// A modal.
             case modal = 9

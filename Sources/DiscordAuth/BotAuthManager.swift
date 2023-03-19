@@ -16,11 +16,11 @@ public struct BotAuthManager: Sendable {
     
     /// The bot will immediately join servers which authorize your bot through this URL.
     public func makeBotAuthorizationURL(
-        withSlashCommands: Bool = true,
+        withApplicationCommands: Bool = true,
         permissions: [Permission] = []
     ) -> String {
         var scopes: [OAuth2Scope] = [.bot]
-        if withSlashCommands {
+        if withApplicationCommands {
             scopes.append(.applicationsCommands)
         }
         let permissions = StringBitField<Permission>(permissions).toBitValue()

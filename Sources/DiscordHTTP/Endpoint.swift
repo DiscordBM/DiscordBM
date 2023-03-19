@@ -211,7 +211,7 @@ public enum Endpoint: Sendable {
     case getGateway
     case getGatewayBot
     
-    /// Respond to Slash Commands
+    /// Respond to Application Commands
     case createInteractionResponse(id: String, token: String)
     case getInteractionResponse(appId: String, token: String)
     case editInteractionResponse(appId: String, token: String)
@@ -226,7 +226,7 @@ public enum Endpoint: Sendable {
     case editMessage(channelId: String, messageId: String)
     case deleteMessage(channelId: String, messageId: String)
     
-    /// Manage _Global_ Application/Slash Commands
+    /// Manage _Global_ Application Commands
     case getGlobalApplicationCommands(appId: String)
     case createGlobalApplicationCommand(appId: String)
     case getGlobalApplicationCommand(appId: String, commandId: String)
@@ -234,7 +234,7 @@ public enum Endpoint: Sendable {
     case deleteGlobalApplicationCommand(appId: String, commandId: String)
     case bulkOverwriteGlobalApplicationCommands(appId: String)
     
-    /// Manage _Guild_ Application/Slash Commands
+    /// Manage _Guild_ Application Commands
     case getGuildApplicationCommands(appId: String, guildId: String)
     case createGuildApplicationCommand(appId: String, guildId: String)
     case getGuildApplicationCommand(appId: String, guildId: String, commandId: String)
