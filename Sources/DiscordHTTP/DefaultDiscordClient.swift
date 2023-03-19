@@ -274,7 +274,7 @@ public struct DefaultDiscordClient: DiscordClient {
         request req: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
-        if DiscordGlobalConfiguration.performClientSideValidations {
+        if configuration.performValidations {
             try payload.validate()
         }
         
@@ -351,7 +351,7 @@ public struct DefaultDiscordClient: DiscordClient {
         request req: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
-        if DiscordGlobalConfiguration.performClientSideValidations {
+        if configuration.performValidations {
             try payload.validate()
         }
         
@@ -623,6 +623,11 @@ public struct ClientConfiguration {
     public var enableLoggingForRequests: Bool
     /// Retries failed requests based on this policy.
     public var retryPolicy: RetryPolicy?
+    /// Whether or not to perform validations for payloads, before sending.
+    /// The point is to catch invalid payload without actually sending them to Discord.
+    /// The library will throw a ``ValidationError`` if it finds anything invalid in the payload.
+    /// This all works based on Discord docs' validation notes.
+    public var performValidations: Bool
     
     func shouldRetry(status: HTTPResponseStatus, retriesSoFar times: Int) -> Bool {
         self.retryPolicy?.shouldRetry(status: status, retriesSoFar: times) ?? false
@@ -644,16 +649,22 @@ public struct ClientConfiguration {
     ///   - enableLoggingForRequests: Enable AHC request-specific logging.
     ///    Normal logs are not affected.
     ///   - retryPolicy: The policy to retry failed requests with.
+    ///   - performValidations: Whether or not to perform validations for payloads,
+    ///    before sending. The point is to catch invalid payload without actually sending them
+    ///    to Discord. The library will throw a ``ValidationError`` if it finds anything invalid
+    ///    in the payload. This all works based on Discord docs' validation notes.
     public init(
         cachingBehavior: CachingBehavior = .disabled,
         requestTimeout: TimeAmount = .seconds(30),
         enableLoggingForRequests: Bool = false,
-        retryPolicy: RetryPolicy? = .default
+        retryPolicy: RetryPolicy? = .default,
+        performValidations: Bool = true
     ) {
         self.cachingBehavior = cachingBehavior
         self.requestTimeout = requestTimeout
         self.enableLoggingForRequests = enableLoggingForRequests
         self.retryPolicy = retryPolicy
+        self.performValidations = performValidations
     }
 }
 
