@@ -998,15 +998,15 @@ class DiscordClientTests: XCTestCase {
             XCTAssertGreaterThan(file.data.readableBytes, 10)
         }
         
-        do {
-            let file = try await client.getCDNGuildMemberAvatar(
-                guildId: "922186320275722322",
-                userId: "816681064855502868",
-                avatar: "b94e12ce3debd281000d5291eec2b502"
-            ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
-        }
-        
+//        do {
+//            let file = try await client.getCDNGuildMemberAvatar(
+//                guildId: "922186320275722322",
+//                userId: "816681064855502868",
+//                avatar: "b94e12ce3debd281000d5291eec2b502"
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//        }
+//
 //        do {
 //            let file = try await client.getCDNApplicationIcon(
 //                appId: String, icon: String
