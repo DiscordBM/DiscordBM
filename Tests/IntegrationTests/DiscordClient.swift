@@ -776,15 +776,15 @@ class DiscordClientTests: XCTestCase {
         let webhook1Token = try XCTUnwrap(webhook1.token)
         let webhook2Token = try XCTUnwrap(webhook2.token)
         
-        let getWebhook1 = try await client.getWebhook(id: webhook1.id).decode()
-        XCTAssertEqual(getWebhook1.id, webhook1.id)
-        XCTAssertEqual(getWebhook1.token, webhook1.token)
+        let getWebhook = try await client.getWebhook(id: webhook1.id).decode()
+        XCTAssertEqual(getWebhook.id, webhook1.id)
+        XCTAssertEqual(getWebhook.token, webhook1.token)
         
-        let getWebhook2 = try await client.getWebhook(
+        let getWebhookWithToken = try await client.getWebhook(
             address: .deconstructed(id: webhook2.id, token: webhook2Token)
         ).decode()
-        XCTAssertEqual(getWebhook2.id, webhook2.id)
-        XCTAssertEqual(getWebhook2.token, webhook2.token)
+        XCTAssertEqual(getWebhookWithToken.id, webhook2.id)
+        XCTAssertEqual(getWebhookWithToken.token, webhook2.token)
         
         let channelWebhooks = try await client.getChannelWebhooks(
             channelId: Constants.webhooksChannelId

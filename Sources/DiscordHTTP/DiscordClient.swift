@@ -500,7 +500,7 @@ public extension DiscordClient {
         id: String,
         withCounts: Bool? = nil
     ) async throws -> DiscordClientResponse<Guild> {
-        let endpoint = Endpoint.getGuild(id: id)
+        let endpoint = Endpoint.getGuild(guildId: id)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [("with_counts", withCounts?.description)]
@@ -510,21 +510,21 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/guild#get-guild-roles
     @inlinable
     func getGuildRoles(id: String) async throws -> DiscordClientResponse<[Role]> {
-        let endpoint = Endpoint.getGuildRoles(id: id)
+        let endpoint = Endpoint.getGuildRoles(guildId: id)
         return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/channel#get-channel
     @inlinable
     func getChannel(id: String) async throws -> DiscordClientResponse<DiscordChannel> {
-        let endpoint = Endpoint.getChannel(id: id)
+        let endpoint = Endpoint.getChannel(channelId: id)
         return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/user#leave-guild
     @inlinable
     func leaveGuild(id: String) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.leaveGuild(id: id)
+        let endpoint = Endpoint.leaveGuild(guildId: id)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -699,7 +699,7 @@ public extension DiscordClient {
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<[Guild.Member]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
-        let endpoint = Endpoint.searchGuildMembers(id: guildId)
+        let endpoint = Endpoint.searchGuildMembers(guildId: guildId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
@@ -715,7 +715,7 @@ public extension DiscordClient {
         guildId: String,
         userId: String
     ) async throws -> DiscordClientResponse<Guild.Member> {
-        let endpoint = Endpoint.getGuildMember(id: guildId, userId: userId)
+        let endpoint = Endpoint.getGuildMember(guildId: guildId, userId: userId)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -1019,7 +1019,7 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/webhook#get-webhook
     @inlinable
     func getWebhook(id: String) async throws -> DiscordClientResponse<Webhook> {
-        let endpoint = Endpoint.getWebhook1(id: id)
+        let endpoint = Endpoint.getWebhook(id: id)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -1027,7 +1027,7 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/webhook#get-webhook-with-token
     @inlinable
     func getWebhook(address: WebhookAddress) async throws -> DiscordClientResponse<Webhook> {
-        let endpoint = Endpoint.getWebhook2(id: address.id, token: address.token)
+        let endpoint = Endpoint.getWebhookWithToken(id: address.id, token: address.token)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -1039,7 +1039,7 @@ public extension DiscordClient {
         reason: String? = nil,
         payload: RequestBody.ModifyGuildWebhook
     ) async throws -> DiscordClientResponse<Webhook> {
-        let endpoint = Endpoint.modifyWebhook1(id: id)
+        let endpoint = Endpoint.modifyWebhook(id: id)
         return try await self.send(
             request: .init(
                 to: endpoint,
@@ -1057,7 +1057,7 @@ public extension DiscordClient {
         reason: String? = nil,
         payload: RequestBody.ModifyWebhook
     ) async throws -> DiscordClientResponse<Webhook> {
-        let endpoint = Endpoint.modifyWebhook2(id: address.id, token: address.token)
+        let endpoint = Endpoint.modifyWebhookWithToken(id: address.id, token: address.token)
         return try await self.send(
             request: .init(
                 to: endpoint,
@@ -1071,7 +1071,7 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook
     @inlinable
     func deleteWebhook(id: String, reason: String? = nil) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteWebhook1(id: id)
+        let endpoint = Endpoint.deleteWebhook(id: id)
         return try await self.send(request: .init(
             to: endpoint,
             headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
@@ -1085,7 +1085,7 @@ public extension DiscordClient {
         address: WebhookAddress,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteWebhook2(id: address.id, token: address.token)
+        let endpoint = Endpoint.deleteWebhookWithToken(id: address.id, token: address.token)
         return try await self.send(request: .init(
             to: endpoint,
             headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
