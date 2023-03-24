@@ -1066,8 +1066,14 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: String?
     }
     
+    public enum ReactionKind: Int, Sendable, Codable {
+        case normal
+        case `super`
+    }
+    
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-add-message-reaction-add-event-fields
     public struct MessageReactionAdd: Sendable, Codable {
+        public var type: ReactionKind
         public var user_id: String
         public var channel_id: String
         public var message_id: String
@@ -1088,7 +1094,7 @@ public struct Gateway: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-all
-    public struct MessageReactionRemoveAll : Sendable, Codable {
+    public struct MessageReactionRemoveAll: Sendable, Codable {
         public var channel_id: String
         public var message_id: String
         public var guild_id: String?
