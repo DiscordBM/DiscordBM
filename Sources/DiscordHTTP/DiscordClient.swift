@@ -115,14 +115,14 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/topics/gateway#get-gateway
     @inlinable
     func getGateway() async throws -> DiscordClientResponse<Gateway.URL> {
-        let endpoint = Endpoint.getGateway
+        let endpoint = APIEndpoint.getGateway
         return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/topics/gateway#get-gateway-bot
     @inlinable
-    func getGatewayBot() async throws -> DiscordClientResponse<Gateway.BotConnectionInfo> {
-        let endpoint = Endpoint.getGatewayBot
+    func getBotGateway() async throws -> DiscordClientResponse<Gateway.BotConnectionInfo> {
+        let endpoint = APIEndpoint.getBotGateway
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -133,117 +133,120 @@ public extension DiscordClient {
         token: String,
         payload: RequestBody.InteractionResponse
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.createInteractionResponse(id: id, token: token)
-        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
-    }
-    
-    /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
-    @inlinable
-    func getInteractionResponse(
-        appId: String? = nil,
-        token: String,
-        thread_id: String? = nil
-    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        let endpoint = Endpoint.getInteractionResponse(
-            appId: try requireAppId(appId),
-            token: token
-        )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("thread_id", thread_id)]
-        ))
-    }
-    
-    /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
-    @inlinable
-    func editInteractionResponse(
-        appId: String? = nil,
-        token: String,
-        payload: RequestBody.InteractionResponse.CallbackData
-    ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.editInteractionResponse(
-            appId: try requireAppId(appId),
-            token: token
+        let endpoint = APIEndpoint.createInteractionResponse(
+            interactionId: id,
+            interactionToken: token
         )
         return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
-    /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
-    @inlinable
-    func deleteInteractionResponse(
-        appId: String? = nil,
-        token: String
-    ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteInteractionResponse(
-            appId: try requireAppId(appId),
-            token: token
-        )
-        return try await self.send(request: .init(to: endpoint))
-    }
-    
-    /// https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
-    @inlinable
-    func createFollowupInteractionResponse(
-        appId: String? = nil,
-        token: String,
-        payload: RequestBody.InteractionResponse
-    ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.postFollowupInteractionResponse(
-            appId: try requireAppId(appId),
-            token: token
-        )
-        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
-    }
-    
-    /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
-    @inlinable
-    func getFollowupInteractionResponse(
-        appId: String? = nil,
-        token: String,
-        messageId: String,
-        thread_id: String? = nil
-    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        let endpoint = Endpoint.getFollowupInteractionResponse(
-            appId: try requireAppId(appId),
-            token: token,
-            messageId: messageId
-        )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("thread_id", thread_id)]
-        ))
-    }
-    
-    /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
-    @inlinable
-    func editFollowupInteractionResponse(
-        appId: String? = nil,
-        token: String,
-        messageId: String,
-        payload: RequestBody.InteractionResponse
-    ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.editFollowupInteractionResponse(
-            appId: try requireAppId(appId),
-            token: token,
-            messageId: messageId
-        )
-        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
-    }
-    
-    /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-followup-message
-    @inlinable
-    func deleteFollowupInteractionResponse(
-        appId: String? = nil,
-        token: String,
-        messageId: String
-    ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteFollowupInteractionResponse(
-            appId: try requireAppId(appId),
-            token: token,
-            messageId: messageId
-        )
-        return try await self.send(request: .init(to: endpoint))
-    }
+//    /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
+//    @inlinable
+//    func getInteractionResponse(
+//        appId: String? = nil,
+//        token: String,
+//        thread_id: String? = nil
+//    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+//        let endpoint = APIEndpoint.getInteractionResponse(
+//            applicationId: try requireAppId(appId),
+//            token: token
+//        )
+//        return try await self.send(request: .init(
+//            to: endpoint,
+//            queries: [("thread_id", thread_id)]
+//        ))
+//    }
+//
+//    /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
+//    @inlinable
+//    func editInteractionResponse(
+//        appId: String? = nil,
+//        token: String,
+//        payload: RequestBody.InteractionResponse.CallbackData
+//    ) async throws -> DiscordHTTPResponse {
+//        let endpoint = APIEndpoint.editInteractionResponse(
+//            appId: try requireAppId(appId),
+//            token: token
+//        )
+//        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
+//    }
+//
+//    /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
+//    @inlinable
+//    func deleteInteractionResponse(
+//        appId: String? = nil,
+//        token: String
+//    ) async throws -> DiscordHTTPResponse {
+//        let endpoint = APIEndpoint.deleteInteractionResponse(
+//            appId: try requireAppId(appId),
+//            token: token
+//        )
+//        return try await self.send(request: .init(to: endpoint))
+//    }
+//
+//    /// https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
+//    @inlinable
+//    func createFollowupInteractionResponse(
+//        appId: String? = nil,
+//        token: String,
+//        payload: RequestBody.InteractionResponse
+//    ) async throws -> DiscordHTTPResponse {
+//        let endpoint = APIEndpoint.postFollowupInteractionResponse(
+//            appId: try requireAppId(appId),
+//            token: token
+//        )
+//        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
+//    }
+//
+//    /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
+//    @inlinable
+//    func getFollowupInteractionResponse(
+//        appId: String? = nil,
+//        token: String,
+//        messageId: String,
+//        thread_id: String? = nil
+//    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+//        let endpoint = APIEndpoint.getFollowupInteractionResponse(
+//            appId: try requireAppId(appId),
+//            token: token,
+//            messageId: messageId
+//        )
+//        return try await self.send(request: .init(
+//            to: endpoint,
+//            queries: [("thread_id", thread_id)]
+//        ))
+//    }
+//
+//    /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
+//    @inlinable
+//    func editFollowupInteractionResponse(
+//        appId: String? = nil,
+//        token: String,
+//        messageId: String,
+//        payload: RequestBody.InteractionResponse
+//    ) async throws -> DiscordHTTPResponse {
+//        let endpoint = APIEndpoint.editFollowupInteractionResponse(
+//            appId: try requireAppId(appId),
+//            token: token,
+//            messageId: messageId
+//        )
+//        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
+//    }
+//
+//    /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-followup-message
+//    @inlinable
+//    func deleteFollowupInteractionResponse(
+//        appId: String? = nil,
+//        token: String,
+//        messageId: String
+//    ) async throws -> DiscordHTTPResponse {
+//        let endpoint = APIEndpoint.deleteFollowupInteractionResponse(
+//            appId: try requireAppId(appId),
+//            token: token,
+//            messageId: messageId
+//        )
+//        return try await self.send(request: .init(to: endpoint))
+//    }
     
     /// The `channelId` could be a thread-id as well.
     /// https://discord.com/developers/docs/resources/channel#create-message
@@ -252,7 +255,7 @@ public extension DiscordClient {
         channelId: String,
         payload: RequestBody.CreateMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        let endpoint = Endpoint.createMessage(channelId: channelId)
+        let endpoint = APIEndpoint.createMessage(channelId: channelId)
         return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
@@ -264,7 +267,7 @@ public extension DiscordClient {
         messageId: String,
         payload: RequestBody.EditMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        let endpoint = Endpoint.editMessage(channelId: channelId, messageId: messageId)
+        let endpoint = APIEndpoint.updateMessage(channelId: channelId, messageId: messageId)
         return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
     
@@ -276,7 +279,7 @@ public extension DiscordClient {
         messageId: String,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteMessage(channelId: channelId, messageId: messageId)
+        let endpoint = APIEndpoint.deleteMessage(channelId: channelId, messageId: messageId)
         return try await self.send(request: .init(
             to: endpoint,
             headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
@@ -289,7 +292,7 @@ public extension DiscordClient {
         appId: String? = nil,
         with_localizations: Bool? = nil
     ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
-        let endpoint = Endpoint.getGlobalApplicationCommands(appId: try requireAppId(appId))
+        let endpoint = APIEndpoint.listApplicationCommands(applicationId: try requireAppId(appId))
         return try await self.send(request: .init(
             to: endpoint,
             queries: [("with_localizations", with_localizations.map { "\($0)" })]
@@ -302,7 +305,7 @@ public extension DiscordClient {
         appId: String? = nil,
         payload: RequestBody.ApplicationCommandCreate
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
-        let endpoint = Endpoint.createGlobalApplicationCommand(appId: try requireAppId(appId))
+        let endpoint = APIEndpoint.createApplicationCommand(applicationId: try requireAppId(appId))
         return try await self.send(request: .init(to: endpoint), payload: payload)
     }
     
@@ -312,8 +315,8 @@ public extension DiscordClient {
         appId: String? = nil,
         commandId: String
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
-        let endpoint = Endpoint.getGlobalApplicationCommand(
-            appId: try requireAppId(appId),
+        let endpoint = APIEndpoint.getApplicationCommand(
+            applicationId: try requireAppId(appId),
             commandId: commandId
         )
         return try await self.send(request: .init(to: endpoint))
@@ -326,8 +329,8 @@ public extension DiscordClient {
         commandId: String,
         payload: RequestBody.ApplicationCommandEdit
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
-        let endpoint = Endpoint.editGlobalApplicationCommand(
-            appId: try requireAppId(appId),
+        let endpoint = APIEndpoint.updateApplicationCommand(
+            applicationId: try requireAppId(appId),
             commandId: commandId
         )
         return try await self.send(request: .init(to: endpoint), payload: payload)
@@ -339,24 +342,24 @@ public extension DiscordClient {
         appId: String? = nil,
         commandId: String
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteGlobalApplicationCommand(
-            appId: try requireAppId(appId),
+        let endpoint = APIEndpoint.deleteApplicationCommand(
+            applicationId: try requireAppId(appId),
             commandId: commandId
         )
         return try await self.send(request: .init(to: endpoint))
     }
     
-    /// https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
-    @inlinable
-    func bulkOverwriteGlobalApplicationCommands(
-        appId: String? = nil,
-        payload: [RequestBody.ApplicationCommandCreate]
-    ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
-        let endpoint = Endpoint.bulkOverwriteGlobalApplicationCommands(
-            appId: try requireAppId(appId)
-        )
-        return try await self.send(request: .init(to: endpoint), payload: payload)
-    }
+//    /// https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+//    @inlinable
+//    func bulkOverwriteGlobalApplicationCommands(
+//        appId: String? = nil,
+//        payload: [RequestBody.ApplicationCommandCreate]
+//    ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
+//        let endpoint = APIEndpoint.bulkOverwriteApplicationCommands(
+//            applicationId: try requireAppId(appId)
+//        )
+//        return try await self.send(request: .init(to: endpoint), payload: payload)
+//    }
     
     /// https://discord.com/developers/docs/interactions/application-commands#get-guild-application-commands
     @inlinable
@@ -365,8 +368,8 @@ public extension DiscordClient {
         guildId: String,
         with_localizations: Bool? = nil
     ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
-        let endpoint = Endpoint.getGuildApplicationCommands(
-            appId: try requireAppId(appId),
+        let endpoint = APIEndpoint.listGuildApplicationCommands(
+            applicationId: try requireAppId(appId),
             guildId: guildId
         )
         return try await self.send(request: .init(
@@ -382,8 +385,8 @@ public extension DiscordClient {
         guildId: String,
         payload: RequestBody.ApplicationCommandCreate
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
-        let endpoint = Endpoint.createGuildApplicationCommand(
-            appId: try requireAppId(appId),
+        let endpoint = APIEndpoint.createGuildApplicationCommand(
+            applicationId: try requireAppId(appId),
             guildId: guildId
         )
         return try await self.send(request: .init(to: endpoint), payload: payload)
@@ -396,8 +399,8 @@ public extension DiscordClient {
         guildId: String,
         commandId: String
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
-        let endpoint = Endpoint.getGuildApplicationCommand(
-            appId: try requireAppId(appId),
+        let endpoint = APIEndpoint.getGuildApplicationCommand(
+            applicationId: try requireAppId(appId),
             guildId: guildId,
             commandId: commandId
         )
@@ -412,8 +415,8 @@ public extension DiscordClient {
         commandId: String,
         payload: RequestBody.ApplicationCommandEdit
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
-        let endpoint = Endpoint.editGuildApplicationCommand(
-            appId: try requireAppId(appId),
+        let endpoint = APIEndpoint.updateGuildApplicationCommand(
+            applicationId: try requireAppId(appId),
             guildId: guildId,
             commandId: commandId
         )
@@ -427,27 +430,27 @@ public extension DiscordClient {
         guildId: String,
         commandId: String
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteGuildApplicationCommand(
-            appId: try requireAppId(appId),
+        let endpoint = APIEndpoint.deleteGuildApplicationCommand(
+            applicationId: try requireAppId(appId),
             guildId: guildId,
             commandId: commandId
         )
         return try await self.send(request: .init(to: endpoint))
     }
     
-    /// https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-guild-application-commands
-    @inlinable
-    func bulkOverwriteGuildApplicationCommands(
-        appId: String? = nil,
-        guildId: String,
-        payload: [RequestBody.ApplicationCommandCreate]
-    ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
-        let endpoint = Endpoint.bulkOverwriteGuildApplicationCommands(
-            appId: try requireAppId(appId),
-            guildId: guildId
-        )
-        return try await self.send(request: .init(to: endpoint), payload: payload)
-    }
+//    /// https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-guild-application-commands
+//    @inlinable
+//    func bulkOverwriteGuildApplicationCommands(
+//        appId: String? = nil,
+//        guildId: String,
+//        payload: [RequestBody.ApplicationCommandCreate]
+//    ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
+//        let endpoint = APIEndpoint.bulkOverwriteGuildApplicationCommands(
+//            appId: try requireAppId(appId),
+//            guildId: guildId
+//        )
+//        return try await self.send(request: .init(to: endpoint), payload: payload)
+//    }
     
     /// https://discord.com/developers/docs/interactions/application-commands#get-application-command-permissions
     @inlinable
@@ -455,8 +458,8 @@ public extension DiscordClient {
         appId: String? = nil,
         guildId: String
     ) async throws -> DiscordClientResponse<[GuildApplicationCommandPermissions]> {
-        let endpoint = Endpoint.getGuildApplicationCommandPermissions(
-            appId: try requireAppId(appId),
+        let endpoint = APIEndpoint.getGuildApplicationCommandPermissions(
+            applicationId: try requireAppId(appId),
             guildId: guildId
         )
         return try await self.send(request: .init(to: endpoint))
@@ -469,7 +472,7 @@ public extension DiscordClient {
         guildId: String,
         commandId: String
     ) async throws -> DiscordClientResponse<GuildApplicationCommandPermissions> {
-        let endpoint = Endpoint.getApplicationCommandPermissions(
+        let endpoint = APIEndpoint.getApplicationCommandPermissions(
             appId: try requireAppId(appId),
             guildId: guildId,
             commandId: commandId
@@ -486,7 +489,7 @@ public extension DiscordClient {
         commandId: String,
         payload: RequestBody.EditApplicationCommandPermissions
     ) async throws -> DiscordClientResponse<GuildApplicationCommandPermissions> {
-        let endpoint = Endpoint.editApplicationCommandPermissions(
+        let endpoint = APIEndpoint.editApplicationCommandPermissions(
             appId: try requireAppId(appId),
             guildId: guildId,
             commandId: commandId
@@ -500,7 +503,7 @@ public extension DiscordClient {
         id: String,
         withCounts: Bool? = nil
     ) async throws -> DiscordClientResponse<Guild> {
-        let endpoint = Endpoint.getGuild(guildId: id)
+        let endpoint = APIEndpoint.getGuild(guildId: id)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [("with_counts", withCounts?.description)]
@@ -510,21 +513,21 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/guild#get-guild-roles
     @inlinable
     func getGuildRoles(id: String) async throws -> DiscordClientResponse<[Role]> {
-        let endpoint = Endpoint.getGuildRoles(guildId: id)
+        let endpoint = APIEndpoint.getGuildRoles(guildId: id)
         return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/channel#get-channel
     @inlinable
     func getChannel(id: String) async throws -> DiscordClientResponse<DiscordChannel> {
-        let endpoint = Endpoint.getChannel(channelId: id)
+        let endpoint = APIEndpoint.getChannel(channelId: id)
         return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/user#leave-guild
     @inlinable
     func leaveGuild(id: String) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.leaveGuild(guildId: id)
+        let endpoint = APIEndpoint.leaveGuild(guildId: id)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -535,7 +538,7 @@ public extension DiscordClient {
         reason: String? = nil,
         payload: RequestBody.CreateGuildRole
     ) async throws -> DiscordClientResponse<Role> {
-        let endpoint = Endpoint.createGuildRole(guildId: guildId)
+        let endpoint = APIEndpoint.createGuildRole(guildId: guildId)
         return try await self.send(
             request: .init(
                 to: endpoint,
@@ -552,7 +555,7 @@ public extension DiscordClient {
         roleId: String,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteGuildRole(guildId: guildId, roleId: roleId)
+        let endpoint = APIEndpoint.deleteGuildRole(guildId: guildId, roleId: roleId)
         return try await self.send(request: .init(
             to: endpoint,
             headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
@@ -567,7 +570,7 @@ public extension DiscordClient {
         roleId: String,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.addGuildMemberRole(
+        let endpoint = APIEndpoint.addGuildMemberRole(
             guildId: guildId,
             userId: userId,
             roleId: roleId
@@ -577,7 +580,7 @@ public extension DiscordClient {
             headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
         ))
     }
-    
+    googlevideo.com
     /// https://discord.com/developers/docs/resources/guild#remove-guild-member-role
     @inlinable
     func removeGuildMemberRole(
@@ -586,7 +589,7 @@ public extension DiscordClient {
         roleId: String,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.removeGuildMemberRole(
+        let endpoint = APIEndpoint.removeGuildMemberRole(
             guildId: guildId,
             userId: userId,
             roleId: roleId
@@ -604,7 +607,7 @@ public extension DiscordClient {
         messageId: String,
         emoji: Reaction
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.createReaction(
+        let endpoint = APIEndpoint.createReaction(
             channelId: channelId,
             messageId: messageId,
             emoji: emoji.urlPathDescription
@@ -619,7 +622,7 @@ public extension DiscordClient {
         messageId: String,
         emoji: Reaction
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteOwnReaction(
+        let endpoint = APIEndpoint.deleteOwnReaction(
             channelId: channelId,
             messageId: messageId,
             emoji: emoji.urlPathDescription
@@ -635,7 +638,7 @@ public extension DiscordClient {
         emoji: Reaction,
         userId: String
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteUserReaction(
+        let endpoint = APIEndpoint.deleteUserReaction(
             channelId: channelId,
             messageId: messageId,
             emoji: emoji.urlPathDescription,
@@ -654,7 +657,7 @@ public extension DiscordClient {
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<[DiscordUser]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
-        let endpoint = Endpoint.getReactions(
+        let endpoint = APIEndpoint.getReactions(
             channelId: channelId,
             messageId: messageId,
             emoji: emoji.urlPathDescription
@@ -668,7 +671,7 @@ public extension DiscordClient {
         channelId: String,
         messageId: String
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteAllReactions(
+        let endpoint = APIEndpoint.deleteAllReactions(
             channelId: channelId,
             messageId: messageId
         )
@@ -682,7 +685,7 @@ public extension DiscordClient {
         messageId: String,
         emoji: Reaction
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteAllReactionsForEmoji(
+        let endpoint = APIEndpoint.deleteAllReactionsForEmoji(
             channelId: channelId,
             messageId: messageId,
             emoji: emoji.urlPathDescription
@@ -699,7 +702,7 @@ public extension DiscordClient {
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<[Guild.Member]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
-        let endpoint = Endpoint.searchGuildMembers(guildId: guildId)
+        let endpoint = APIEndpoint.searchGuildMembers(guildId: guildId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
@@ -715,7 +718,7 @@ public extension DiscordClient {
         guildId: String,
         userId: String
     ) async throws -> DiscordClientResponse<Guild.Member> {
-        let endpoint = Endpoint.getGuildMember(guildId: guildId, userId: userId)
+        let endpoint = APIEndpoint.getGuildMember(guildId: guildId, userId: userId)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -734,7 +737,7 @@ public extension DiscordClient {
             ("before", before),
             ("after", after)
         ])
-        let endpoint = Endpoint.getChannelMessages(channelId: channelId)
+        let endpoint = APIEndpoint.getChannelMessages(channelId: channelId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
@@ -752,7 +755,7 @@ public extension DiscordClient {
         channelId: String,
         messageId: String
     ) async throws -> DiscordClientResponse<Gateway.MessageCreate> {
-        let endpoint = Endpoint.getChannelMessage(channelId: channelId, messageId: messageId)
+        let endpoint = APIEndpoint.getChannelMessage(channelId: channelId, messageId: messageId)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -768,7 +771,7 @@ public extension DiscordClient {
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<AuditLog> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
-        let endpoint = Endpoint.getGuildAuditLogs(guildId: guildId)
+        let endpoint = APIEndpoint.getGuildAuditLogs(guildId: guildId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
@@ -785,7 +788,7 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/user#create-dm
     @inlinable
     func createDM(recipient_id: String) async throws -> DiscordClientResponse<DiscordChannel> {
-        let endpoint = Endpoint.createDM
+        let endpoint = APIEndpoint.createDM
         return try await self.send(
             request: .init(to: endpoint),
             payload: RequestBody.CreateDM(recipient_id: recipient_id)
@@ -800,7 +803,7 @@ public extension DiscordClient {
         reason: String? = nil,
         payload: RequestBody.CreateThreadFromMessage
     ) async throws -> DiscordClientResponse<DiscordChannel> {
-        let endpoint = Endpoint.startThreadFromMessage(channelId: channelId, messageId: messageId)
+        let endpoint = APIEndpoint.startThreadFromMessage(channelId: channelId, messageId: messageId)
         return try await self.send(
             request: .init(
                 to: endpoint,
@@ -817,7 +820,7 @@ public extension DiscordClient {
         reason: String? = nil,
         payload: RequestBody.CreateThreadWithoutMessage
     ) async throws -> DiscordClientResponse<DiscordChannel> {
-        let endpoint = Endpoint.startThreadWithoutMessage(channelId: channelId)
+        let endpoint = APIEndpoint.startThreadWithoutMessage(channelId: channelId)
         return try await self.send(
             request: .init(
                 to: endpoint,
@@ -834,7 +837,7 @@ public extension DiscordClient {
         reason: String? = nil,
         payload: RequestBody.CreateThreadInForumChannel
     ) async throws -> DiscordClientResponse<DiscordChannel> {
-        let endpoint = Endpoint.startThreadInForumChannel(channelId: channelId)
+        let endpoint = APIEndpoint.startThreadInForumChannel(channelId: channelId)
         return try await self.send(
             request: .init(
                 to: endpoint,
@@ -847,7 +850,7 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/channel#join-thread
     @inlinable
     func joinThread(id: String) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.joinThread(id: id)
+        let endpoint = APIEndpoint.joinThread(id: id)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -857,14 +860,14 @@ public extension DiscordClient {
         threadId: String,
         userId: String
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.addThreadMember(threadId: threadId, userId: userId)
+        let endpoint = APIEndpoint.addThreadMember(threadId: threadId, userId: userId)
         return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/channel#leave-thread
     @inlinable
     func leaveThread(id: String) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.leaveThread(id: id)
+        let endpoint = APIEndpoint.leaveThread(id: id)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -874,7 +877,7 @@ public extension DiscordClient {
         threadId: String,
         userId: String
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.removeThreadMember(threadId: threadId, userId: userId)
+        let endpoint = APIEndpoint.removeThreadMember(threadId: threadId, userId: userId)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -884,7 +887,7 @@ public extension DiscordClient {
         threadId: String,
         userId: String
     ) async throws -> DiscordClientResponse<ThreadMember> {
-        let endpoint = Endpoint.getThreadMember(threadId: threadId, userId: userId)
+        let endpoint = APIEndpoint.getThreadMember(threadId: threadId, userId: userId)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -894,7 +897,7 @@ public extension DiscordClient {
         threadId: String,
         userId: String
     ) async throws -> DiscordClientResponse<ThreadMemberWithMember> {
-        let endpoint = Endpoint.getThreadMember(threadId: threadId, userId: userId)
+        let endpoint = APIEndpoint.getThreadMember(threadId: threadId, userId: userId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [("with_member", "true")]
@@ -906,7 +909,7 @@ public extension DiscordClient {
     func listThreadMembers(
         threadId: String
     ) async throws -> DiscordClientResponse<[ThreadMember]> {
-        let endpoint = Endpoint.listThreadMembers(threadId: threadId)
+        let endpoint = APIEndpoint.listThreadMembers(threadId: threadId)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -918,7 +921,7 @@ public extension DiscordClient {
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<[ThreadMemberWithMember]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 100)
-        let endpoint = Endpoint.listThreadMembers(threadId: threadId)
+        let endpoint = APIEndpoint.listThreadMembers(threadId: threadId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
@@ -937,7 +940,7 @@ public extension DiscordClient {
     ) async throws -> DiscordClientResponse<RequestResponse.ArchivedThread> {
         /// Not documented, but correct, at least at the time of writing the code.
         try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
-        let endpoint = Endpoint.listPublicArchivedThreads(channelId: channelId)
+        let endpoint = APIEndpoint.listPublicArchivedThreads(channelId: channelId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
