@@ -262,7 +262,7 @@ public extension DiscordClient {
     /// The `channelId` could be a thread-id as well.
     /// https://discord.com/developers/docs/resources/channel#edit-message
     @inlinable
-    func editMessage(
+    func updateMessage(
         channelId: String,
         messageId: String,
         payload: RequestBody.EditMessage
@@ -288,7 +288,7 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/interactions/application-commands#get-global-application-commands
     @inlinable
-    func getGlobalApplicationCommands(
+    func listApplicationCommands(
         appId: String? = nil,
         with_localizations: Bool? = nil
     ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
@@ -301,7 +301,7 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
     @inlinable
-    func createGlobalApplicationCommand(
+    func createApplicationCommand(
         appId: String? = nil,
         payload: RequestBody.ApplicationCommandCreate
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
@@ -311,7 +311,7 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/interactions/application-commands#get-global-application-command
     @inlinable
-    func getGlobalApplicationCommand(
+    func getApplicationCommand(
         appId: String? = nil,
         commandId: String
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
@@ -324,7 +324,7 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/interactions/application-commands#edit-global-application-command
     @inlinable
-    func editGlobalApplicationCommand(
+    func updateApplicationCommand(
         appId: String? = nil,
         commandId: String,
         payload: RequestBody.ApplicationCommandEdit
@@ -338,7 +338,7 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/interactions/application-commands#delete-global-application-command
     @inlinable
-    func deleteGlobalApplicationCommand(
+    func deleteApplicationCommand(
         appId: String? = nil,
         commandId: String
     ) async throws -> DiscordHTTPResponse {
@@ -363,7 +363,7 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/interactions/application-commands#get-guild-application-commands
     @inlinable
-    func getGuildApplicationCommands(
+    func listGuildApplicationCommands(
         appId: String? = nil,
         guildId: String,
         with_localizations: Bool? = nil
@@ -409,7 +409,7 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/interactions/application-commands#edit-guild-application-command
     @inlinable
-    func editGuildApplicationCommand(
+    func updateGuildApplicationCommand(
         appId: String? = nil,
         guildId: String,
         commandId: String,
@@ -512,8 +512,8 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/resources/guild#get-guild-roles
     @inlinable
-    func getGuildRoles(id: String) async throws -> DiscordClientResponse<[Role]> {
-        let endpoint = APIEndpoint.getGuildRoles(guildId: id)
+    func listGuildRoles(id: String) async throws -> DiscordClientResponse<[Role]> {
+        let endpoint = APIEndpoint.listGuildRoles(guildId: id)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -873,11 +873,11 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/resources/channel#remove-thread-member
     @inlinable
-    func removeThreadMember(
+    func deleteThreadMember(
         threadId: String,
         userId: String
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = APIEndpoint.removeThreadMember(threadId: threadId, userId: userId)
+        let endpoint = APIEndpoint.deleteThreadMember(threadId: threadId, userId: userId)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -1006,8 +1006,8 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/resources/webhook#get-channel-webhooks
     @inlinable
-    func getChannelWebhooks(channelId: String) async throws -> DiscordClientResponse<[Webhook]> {
-        let endpoint = Endpoint.getChannelWebhooks(channelId: channelId)
+    func listChannelWebhooks(channelId: String) async throws -> DiscordClientResponse<[Webhook]> {
+        let endpoint = Endpoint.listChannelWebhooks(channelId: channelId)
         return try await self.send(request: .init(to: endpoint))
     }
     
@@ -1030,19 +1030,19 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/webhook#get-webhook-with-token
     @inlinable
     func getWebhook(address: WebhookAddress) async throws -> DiscordClientResponse<Webhook> {
-        let endpoint = Endpoint.getWebhookWithToken(id: address.id, token: address.token)
+        let endpoint = Endpoint.getWebhookByToken(id: address.id, token: address.token)
         return try await self.send(request: .init(to: endpoint))
     }
     
     /// Requires authentication using an authorized bot-token.
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook
     @inlinable
-    func modifyWebhook(
+    func updateWebhook(
         id: String,
         reason: String? = nil,
         payload: RequestBody.ModifyGuildWebhook
     ) async throws -> DiscordClientResponse<Webhook> {
-        let endpoint = Endpoint.modifyWebhook(id: id)
+        let endpoint = Endpoint.updateWebhook(id: id)
         return try await self.send(
             request: .init(
                 to: endpoint,
@@ -1055,12 +1055,12 @@ public extension DiscordClient {
     /// Doesn't require authentication using bot-token.
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
     @inlinable
-    func modifyWebhook(
+    func updateWebhook(
         address: WebhookAddress,
         reason: String? = nil,
         payload: RequestBody.ModifyWebhook
     ) async throws -> DiscordClientResponse<Webhook> {
-        let endpoint = Endpoint.modifyWebhookWithToken(id: address.id, token: address.token)
+        let endpoint = Endpoint.updateWebhookByToken(id: address.id, token: address.token)
         return try await self.send(
             request: .init(
                 to: endpoint,
@@ -1088,7 +1088,7 @@ public extension DiscordClient {
         address: WebhookAddress,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = Endpoint.deleteWebhookWithToken(id: address.id, token: address.token)
+        let endpoint = Endpoint.deleteWebhookByToken(id: address.id, token: address.token)
         return try await self.send(request: .init(
             to: endpoint,
             headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
@@ -1160,13 +1160,13 @@ public extension DiscordClient {
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message
     @inlinable
-    func editWebhookMessage(
+    func updateWebhookMessage(
         address: WebhookAddress,
         messageId: String,
         threadId: String? = nil,
         payload: RequestBody.EditWebhookMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
-        let endpoint = Endpoint.editWebhookMessage(
+        let endpoint = Endpoint.updateWebhookMessage(
             id: address.id,
             token: address.token,
             messageId: messageId

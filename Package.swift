@@ -64,8 +64,7 @@ let package = Package(
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "DiscordModels",
             ],
-            swiftSettings: swiftSettings,
-            plugins: ["GenerateAPIEndpoints"]
+            swiftSettings: swiftSettings
         ),
         .plugin(
             name: "GenerateAPIEndpoints",
@@ -75,7 +74,7 @@ let package = Package(
                     description: "Generates API Endpoints"
                 ),
                 permissions: [
-                    .writeToPackageDirectory(reason: "Edit Endpoints")
+                    .writeToPackageDirectory(reason: "Overwrite APIEndpoint.swift")
                 ]
             ),
             dependencies: ["GenerateAPIEndpointsExec"]

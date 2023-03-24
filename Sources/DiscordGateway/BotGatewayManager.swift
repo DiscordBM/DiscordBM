@@ -371,7 +371,7 @@ extension BotGatewayManager {
                     return gatewayURL
                 }
             } else {
-                if let gatewayBot = try? await client.getGatewayBot().decode() {
+                if let gatewayBot = try? await client.getBotGateway().decode() {
                     logger.trace("Got Discord gateway url from gateway-bot api call. Max concurrency: \(gatewayBot.session_start_limit.max_concurrency)")
                     self.maxConcurrency = gatewayBot.session_start_limit.max_concurrency
                     return gatewayBot.url

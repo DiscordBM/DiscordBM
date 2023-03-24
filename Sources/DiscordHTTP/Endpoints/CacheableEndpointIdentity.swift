@@ -1,17 +1,17 @@
 /// The endpoints that can be cached. Basically the GET endpoints.
 public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
     case getGateway
-    case getGatewayBot
+    case getBotGateway
     case getInteractionResponse
     case getFollowupInteractionResponse
-    case getGlobalApplicationCommands
-    case getGlobalApplicationCommand
-    case getGuildApplicationCommands
+    case listApplicationCommands
+    case getApplicationCommand
+    case listGuildApplicationCommands
     case getGuildApplicationCommand
     case getGuildApplicationCommandPermissions
     case getApplicationCommandPermissions
     case getGuild
-    case getGuildRoles
+    case listGuildRoles
     case searchGuildMembers
     case getGuildMember
     case getChannel
@@ -24,10 +24,10 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
     case listPublicArchivedThreads
     case listPrivateArchivedThreads
     case listJoinedPrivateArchivedThreads
-    case getChannelWebhooks
+    case listChannelWebhooks
     case getGuildWebhooks
     case getWebhook
-    case getWebhookWithToken
+    case getWebhookByToken
     case getWebhookMessage
     case CDNCustomEmoji
     case CDNGuildIcon
@@ -53,17 +53,17 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
     public var description: String {
         switch self {
         case .getGateway: return "getGateway"
-        case .getGatewayBot: return "getGatewayBot"
+        case .getBotGateway: return "getBotGateway"
         case .getInteractionResponse: return "getInteractionResponse"
         case .getFollowupInteractionResponse: return "getFollowupInteractionResponse"
-        case .getGlobalApplicationCommands: return "getGlobalApplicationCommands"
-        case .getGlobalApplicationCommand: return "getGlobalApplicationCommand"
-        case .getGuildApplicationCommands: return "getGuildApplicationCommands"
+        case .listApplicationCommands: return "listApplicationCommands"
+        case .getApplicationCommand: return "getApplicationCommand"
+        case .listGuildApplicationCommands: return "listGuildApplicationCommands"
         case .getGuildApplicationCommand: return "getGuildApplicationCommand"
         case .getGuildApplicationCommandPermissions: return "getGuildApplicationCommandPermissions"
         case .getApplicationCommandPermissions: return "getApplicationCommandPermissions"
         case .getGuild: return "getGuild"
-        case .getGuildRoles: return "getGuildRoles"
+        case .listGuildRoles: return "listGuildRoles"
         case .searchGuildMembers: return "searchGuildMembers"
         case .getGuildMember: return "getGuildMember"
         case .getChannel: return "getChannel"
@@ -76,10 +76,10 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
         case .listPublicArchivedThreads: return "listPublicArchivedThreads"
         case .listPrivateArchivedThreads: return "listPrivateArchivedThreads"
         case .listJoinedPrivateArchivedThreads: return "listJoinedPrivateArchivedThreads"
-        case .getChannelWebhooks: return "getChannelWebhooks"
+        case .listChannelWebhooks: return "listChannelWebhooks"
         case .getGuildWebhooks: return "getGuildWebhooks"
         case .getWebhook: return "getWebhook"
-        case .getWebhookWithToken: return "getWebhookWithToken"
+        case .getWebhookByToken: return "getWebhookByToken"
         case .getWebhookMessage: return "getWebhookMessage"
         case .CDNCustomEmoji: return "CDNCustomEmoji"
         case .CDNGuildIcon: return "CDNGuildIcon"
@@ -107,7 +107,7 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
     init? (endpoint: APIEndpoint) {
         switch endpoint {
         case .getGateway: self = .getGateway
-        case .getGatewayBot: self = .getGatewayBot
+        case .getBotGateway: self = .getBotGateway
         case .createInteractionResponse: return nil
         case .getInteractionResponse: self = .getInteractionResponse
         case .editInteractionResponse: return nil
@@ -117,25 +117,25 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
         case .editFollowupInteractionResponse: return nil
         case .deleteFollowupInteractionResponse: return nil
         case .createMessage: return nil
-        case .editMessage: return nil
+        case .updateMessage: return nil
         case .deleteMessage: return nil
-        case .getGlobalApplicationCommands: self = .getGlobalApplicationCommands
-        case .createGlobalApplicationCommand: return nil
-        case .getGlobalApplicationCommand: self = .getGlobalApplicationCommand
-        case .editGlobalApplicationCommand: return nil
-        case .deleteGlobalApplicationCommand: return nil
+        case .listApplicationCommands: self = .listApplicationCommands
+        case .createApplicationCommand: return nil
+        case .getApplicationCommand: self = .getApplicationCommand
+        case .updateApplicationCommand: return nil
+        case .deleteApplicationCommand: return nil
         case .bulkOverwriteGlobalApplicationCommands: return nil
-        case .getGuildApplicationCommands: self = .getGuildApplicationCommands
+        case .listGuildApplicationCommands: self = .listGuildApplicationCommands
         case .createGuildApplicationCommand: return nil
         case .getGuildApplicationCommand: self = .getGuildApplicationCommand
-        case .editGuildApplicationCommand: return nil
+        case .updateGuildApplicationCommand: return nil
         case .deleteGuildApplicationCommand: return nil
         case .bulkOverwriteGuildApplicationCommands: return nil
         case .getGuildApplicationCommandPermissions: self = .getGuildApplicationCommandPermissions
         case .getApplicationCommandPermissions: self = .getApplicationCommandPermissions
         case .editApplicationCommandPermissions: return nil
         case .getGuild: self = .getGuild
-        case .getGuildRoles: self = .getGuildRoles
+        case .listGuildRoles: self = .listGuildRoles
         case .searchGuildMembers: self = .searchGuildMembers
         case .getGuildMember: self = .getGuildMember
         case .leaveGuild: return nil
@@ -160,30 +160,31 @@ public enum CacheableEndpointIdentity: Int, Sendable, Hashable, CustomStringConv
         case .joinThread: return nil
         case .addThreadMember: return nil
         case .leaveThread: return nil
-        case .removeThreadMember: return nil
+        case .deleteThreadMember: return nil
         case .getThreadMember: self = .getThreadMember
         case .listThreadMembers: self = .listThreadMembers
         case .listPublicArchivedThreads: self = .listPublicArchivedThreads
         case .listPrivateArchivedThreads: self = .listPrivateArchivedThreads
         case .listJoinedPrivateArchivedThreads: self = .listJoinedPrivateArchivedThreads
         case .createWebhook: return nil
-        case .getChannelWebhooks: self = .getChannelWebhooks
+        case .listChannelWebhooks: self = .listChannelWebhooks
         case .getGuildWebhooks: self = .getGuildWebhooks
         case .getWebhook: self = .getWebhook
-        case .getWebhookWithToken: self = .getWebhookWithToken
-        case .modifyWebhook: return nil
-        case .modifyWebhookWithToken: return nil
+        case .getWebhookByToken: self = .getWebhookByToken
+        case .updateWebhook: return nil
+        case .updateWebhookByToken: return nil
         case .deleteWebhook: return nil
-        case .deleteWebhookWithToken: return nil
+            #warning("this endpoint doesn't have a function?")
+        case .deleteWebhookByToken: return nil
         case .executeWebhook: return nil
         case .getWebhookMessage: self = .getWebhookMessage
-        case .editWebhookMessage: return nil
+        case .updateWebhookMessage: return nil
         case .deleteWebhookMessage: return nil
         }
     }
     
     init (endpoint: CDNEndpoint) {
-        switch self {
+        switch endpoint {
         case .customEmoji: self = .CDNCustomEmoji
         case .guildIcon: self = .CDNGuildIcon
         case .guildSplash: self = .CDNGuildSplash

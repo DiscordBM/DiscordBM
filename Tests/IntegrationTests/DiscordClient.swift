@@ -38,7 +38,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertTrue(url.contains("discord"), "payload: \(url)")
         
         /// Get from "bot gateway"
-        let botInfo = try await client.getGatewayBot().decode()
+        let botInfo = try await client.getBotGateway().decode()
         
         XCTAssertTrue(botInfo.url.contains("wss://"), "payload: \(botInfo)")
         XCTAssertTrue(botInfo.url.contains("discord"), "payload: \(botInfo)")
@@ -78,7 +78,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Edit
         let newText = "Edit Testing! \(Date())"
-        let edited = try await client.editMessage(
+        let edited = try await client.updateMessage(
             channelId: Constants.channelId,
             messageId: message.id,
             payload: .init(embeds: [
@@ -209,14 +209,14 @@ class DiscordClientTests: XCTestCase {
     
     func testGlobalApplicationCommands() async throws {
         /// Cleanup before start
-        for command in try await client.getGlobalApplicationCommands().decode() {
-            try await client.deleteGlobalApplicationCommand(commandId: command.id).guardSuccess()
+        for command in try await client.listApplicationCommands().decode() {
+            try await client.deleteApplicationCommand(commandId: command.id).guardSuccess()
         }
         
         /// Create
         let commandName1 = "test-command"
         let commandDesc1 = "Testing!"
-        let command1 = try await client.createGlobalApplicationCommand(
+        let command1 = try await client.createApplicationCommand(
             payload: .init(
                 name: commandName1,
                 description: commandDesc1,
@@ -232,7 +232,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(command1.description_localizations?.values.count, 2)
         
         /// Get one
-        let oneCommand = try await client.getGlobalApplicationCommand(
+        let oneCommand = try await client.getApplicationCommand(
             commandId: command1.id
         ).decode()
         XCTAssertEqual(oneCommand.name, commandName1)
@@ -240,7 +240,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Edit
         let commandName2 = "test-command-2"
-        let command2 = try await client.editGlobalApplicationCommand(
+        let command2 = try await client.updateApplicationCommand(
             commandId: command1.id,
             payload: .init(name: commandName2)
         ).decode()
@@ -248,7 +248,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(command2.name, commandName2)
         
         /// Get all
-        let allCommands = try await client.getGlobalApplicationCommands().decode()
+        let allCommands = try await client.listApplicationCommands().decode()
         
         XCTAssertEqual(allCommands.count, 1)
         let retrievedCommand1 = try XCTUnwrap(allCommands.first)
@@ -272,7 +272,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Delete
         let commandId = try XCTUnwrap(overwriteCommand1.id)
-        let deletionResponse = try await client.deleteGlobalApplicationCommand(
+        let deletionResponse = try await client.deleteApplicationCommand(
             commandId: commandId
         )
         XCTAssertEqual(deletionResponse.status, .noContent)
@@ -280,7 +280,7 @@ class DiscordClientTests: XCTestCase {
     
     func testGuildApplicationCommands() async throws {
         /// Cleanup before start
-        for command in try await client.getGuildApplicationCommands(
+        for command in try await client.listGuildApplicationCommands(
             guildId: Constants.guildId
         ).decode() {
             try await client.deleteGuildApplicationCommand(
@@ -340,7 +340,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Edit
         let commandName2 = "test-guild-command-2"
-        let command2 = try await client.editGuildApplicationCommand(
+        let command2 = try await client.updateGuildApplicationCommand(
             guildId: Constants.guildId,
             commandId: command1.id,
             payload: .init(name: commandName2)
@@ -349,7 +349,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(command2.name, commandName2)
         
         /// Get all
-        let allCommands = try await client.getGuildApplicationCommands(
+        let allCommands = try await client.listGuildApplicationCommands(
             guildId: Constants.guildId
         ).decode()
         
@@ -483,7 +483,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(role.mentionable, rolePayload.mentionable)
         
         /// Get guild roles
-        let guildRoles = try await client.getGuildRoles(id: Constants.guildId).decode()
+        let guildRoles = try await client.listGuildRoles(id: Constants.guildId).decode()
         let rolesWithName = guildRoles.filter({ $0.name == role.name })
         XCTAssertGreaterThanOrEqual(rolesWithName.count, 1)
         
@@ -575,7 +575,7 @@ class DiscordClientTests: XCTestCase {
             
             /// Edit
             let newText = "Edit Testing! \(Date())"
-            let edited = try await client.editMessage(
+            let edited = try await client.updateMessage(
                 channelId: thread.id,
                 messageId: message.id,
                 payload: .init(embeds: [
@@ -654,7 +654,7 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertEqual(threadMembersRejoined.count, 2)
         
-        try await client.removeThreadMember(
+        try await client.deleteThreadMember(
             threadId: thread.id,
             userId: Constants.personalId
         ).guardSuccess()
@@ -780,13 +780,13 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(getWebhook.id, webhook1.id)
         XCTAssertEqual(getWebhook.token, webhook1.token)
         
-        let getWebhookWithToken = try await client.getWebhook(
+        let getWebhookByToken = try await client.getWebhook(
             address: .deconstructed(id: webhook2.id, token: webhook2Token)
         ).decode()
-        XCTAssertEqual(getWebhookWithToken.id, webhook2.id)
-        XCTAssertEqual(getWebhookWithToken.token, webhook2.token)
+        XCTAssertEqual(getWebhookByToken.id, webhook2.id)
+        XCTAssertEqual(getWebhookByToken.token, webhook2.token)
         
-        let channelWebhooks = try await client.getChannelWebhooks(
+        let channelWebhooks = try await client.listChannelWebhooks(
             channelId: Constants.webhooksChannelId
         ).decode()
         
@@ -819,7 +819,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(guildWebhook2.id, webhook2.id)
         
         let webhookNewName1 = "WebhookTestNew1"
-        let modify1 = try await client.modifyWebhook(
+        let modify1 = try await client.updateWebhook(
             id: webhook1.id,
             payload: .init(
                 name: webhookNewName1,
@@ -837,7 +837,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(modify1.channel_id, Constants.webhooks2ChannelId)
         
         let webhookNewName2 = "WebhookTestNew2"
-        let modify2 = try await client.modifyWebhook(
+        let modify2 = try await client.updateWebhook(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             payload: .init(name: webhookNewName2)
         ).decode()
@@ -893,7 +893,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(getMessage.embeds.map(\.title), message.embeds.map(\.title))
         
         let newText = "Testing Edit! \(Date())"
-        let editThreadMessage = try await client.editWebhookMessage(
+        let editThreadMessage = try await client.updateWebhookMessage(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             messageId: threadMessage.id,
             threadId: threadId,
@@ -1215,22 +1215,22 @@ class DiscordClientTests: XCTestCase {
             /// must be the same (although it's wrong)
             let commandName = "test-command"
             let commandDesc = "Testing!"
-            let command = try await cacheClient.createGlobalApplicationCommand(
+            let command = try await cacheClient.createApplicationCommand(
                 payload: .init(name: commandName, description: commandDesc)
             ).decode()
             
             XCTAssertEqual(command.name, commandName)
             XCTAssertEqual(command.description, commandDesc)
             
-            let commandsCount = try await cacheClient.getGlobalApplicationCommands().decode().count
+            let commandsCount = try await cacheClient.listApplicationCommands().decode().count
             
-            let deletionResponse = try await cacheClient.deleteGlobalApplicationCommand(
+            let deletionResponse = try await cacheClient.deleteApplicationCommand(
                 commandId: command.id
             )
             
             XCTAssertEqual(deletionResponse.status, .noContent)
             
-            let newCommandsCount = try await cacheClient.getGlobalApplicationCommands()
+            let newCommandsCount = try await cacheClient.listApplicationCommands()
                 .decode().count
             
             XCTAssertEqual(commandsCount, newCommandsCount)
@@ -1244,7 +1244,7 @@ class DiscordClientTests: XCTestCase {
         do {
             let cachingBehavior = ClientConfiguration.CachingBehavior.custom(
                 defaultTTL: 2,
-                endpoints: [.getGlobalApplicationCommands: 0]
+                endpoints: [.listApplicationCommands: 0]
             )
             let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
             let cacheClient: any DiscordClient = DefaultDiscordClient(
@@ -1260,23 +1260,23 @@ class DiscordClientTests: XCTestCase {
             /// the second command count must NOT be the same.
             let commandName = "test-command"
             let commandDesc = "Testing!"
-            let command = try await cacheClient.createGlobalApplicationCommand(
+            let command = try await cacheClient.createApplicationCommand(
                 payload: .init(name: commandName, description: commandDesc)
             ).decode()
             
             XCTAssertEqual(command.name, commandName)
             XCTAssertEqual(command.description, commandDesc)
             
-            let commandsCount = try await cacheClient.getGlobalApplicationCommands().decode().count
+            let commandsCount = try await cacheClient.listApplicationCommands().decode().count
             
-            let deletionResponse = try await cacheClient.deleteGlobalApplicationCommand(
+            let deletionResponse = try await cacheClient.deleteApplicationCommand(
                 commandId: command.id
             )
             
             XCTAssertEqual(deletionResponse.status, .noContent)
             
             let newCommandsCount = try await cacheClient
-                .getGlobalApplicationCommands()
+                .listApplicationCommands()
                 .decode()
                 .count
             
@@ -1299,28 +1299,28 @@ class DiscordClientTests: XCTestCase {
             /// command count must NOT be the same.
             let commandName = "test-command"
             let commandDesc = "Testing!"
-            let command = try await cacheClient.createGlobalApplicationCommand(
+            let command = try await cacheClient.createApplicationCommand(
                 payload: .init(name: commandName, description: commandDesc)
             ).decode()
             
             XCTAssertEqual(command.name, commandName)
             XCTAssertEqual(command.description, commandDesc)
             
-            let commandsCount = try await cacheClient.getGlobalApplicationCommands().decode().count
+            let commandsCount = try await cacheClient.listApplicationCommands().decode().count
             
             /// I think the command-addition takes effect a second or so later, so we need to
             /// wait a second before we try to delete the command, otherwise Discord might
             /// think the command doesn't exist and return 404.
             try await Task.sleep(nanoseconds: 1_000_000_000)
             
-            let deletionResponse = try await cacheClient.deleteGlobalApplicationCommand(
+            let deletionResponse = try await cacheClient.deleteApplicationCommand(
                 commandId: command.id
             )
             
             XCTAssertEqual(deletionResponse.status, .noContent)
             
             let newCommandsCount = try await cacheClient
-                .getGlobalApplicationCommands()
+                .listApplicationCommands()
                 .decode()
                 .count
             

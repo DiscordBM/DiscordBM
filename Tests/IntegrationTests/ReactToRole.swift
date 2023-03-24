@@ -21,7 +21,7 @@ class ReactToRoleTests: XCTestCase {
         )
         /// Remove roles with this name is there are any
         let guildRoles = try await client
-            .getGuildRoles(id: Constants.guildId)
+            .listGuildRoles(id: Constants.guildId)
             .decode()
         for role in guildRoles.filter({ $0.name == roleName }) {
             try await client.deleteGuildRole(

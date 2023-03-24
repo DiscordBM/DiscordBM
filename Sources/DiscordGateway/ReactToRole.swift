@@ -124,7 +124,7 @@ public actor ReactToRoleHandler {
             } else {
                 do {
                     if let role = try await client
-                        .getGuildRoles(id: guildId)
+                        .listGuildRoles(id: guildId)
                         .decode()
                         .first(where: { $0.id == id }) {
                         return role
@@ -151,7 +151,7 @@ public actor ReactToRoleHandler {
                 }
             } else {
                 return try await client
-                    .getGuildRoles(id: guildId)
+                    .listGuildRoles(id: guildId)
                     .decode()
                     .first {
                         $0.name == role.name &&
