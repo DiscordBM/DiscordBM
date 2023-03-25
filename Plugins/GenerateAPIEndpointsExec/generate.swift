@@ -241,7 +241,7 @@ let result = """
 // MARK: - DO NOT EDIT. Auto-generated using the GenerateAPIEndpoints command plugin.
 
 /// If you want to add an endpoint that somehow doesn't exist, you'll need to
-/// properly edit `/Sources/GenerateAPIEndpointsExec/Resources/openapi.yml`, then trigger
+/// properly edit `/Plugins/GenerateAPIEndpointsExec/Resources/openapi.yml`, then trigger
 /// the `GenerateAPIEndpoints` plugin (right click on `DiscordBM` in the file navigator)
 
 import NIOHTTP1

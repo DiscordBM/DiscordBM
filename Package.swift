@@ -80,6 +80,7 @@ let package = Package(
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "Yams", package: "Yams")
             ],
+            path: "Plugins/GenerateAPIEndpointsExec",
             swiftSettings: swiftSettings
         ),
         .target(
