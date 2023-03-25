@@ -1067,8 +1067,8 @@ public struct Gateway: Sendable, Codable {
     }
     
     public enum ReactionKind: Int, Sendable, Codable {
-        case normal
-        case `super`
+        case normal = 0
+        case `super` = 1
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-add-message-reaction-add-event-fields
