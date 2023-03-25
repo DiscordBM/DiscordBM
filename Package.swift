@@ -43,11 +43,6 @@ let package = Package(
         .target(
             name: "DiscordBM",
             dependencies: [
-                .product(name: "NIO", package: "swift-nio"),
-                .product(name: "Logging", package: "swift-log"),
-                .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                .product(name: "Atomics", package: "swift-atomics"),
-                .product(name: "MultipartKit", package: "multipart-kit"),
                 "DiscordAuth",
                 "DiscordHTTP",
                 "DiscordCore",
