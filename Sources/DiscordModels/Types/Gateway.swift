@@ -1085,6 +1085,7 @@ public struct Gateway: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove
     public struct MessageReactionRemove: Sendable, Codable {
+        public var type: ReactionKind
         public var user_id: String
         public var channel_id: String
         public var message_id: String
