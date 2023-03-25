@@ -31,7 +31,7 @@ public enum Permission: Int, Sendable, Hashable, Codable {
     case manageNicknames = 27
     case manageRoles = 28
     case manageWebhooks = 29
-    case manageEmojisAndStickers = 30
+    case manageGuildExpressions = 30
     case useApplicationCommands = 31
     case requestToSpeak = 32
     case manageEvents = 33
@@ -42,6 +42,8 @@ public enum Permission: Int, Sendable, Hashable, Codable {
     case sendMessagesInThreads = 38
     case useEmbeddedActivities = 39
     case moderateMembers = 40
+    case viewCreatorMonetizationAnalytics = 41
+    case useSoundboard = 42
 }
 
 /// https://discord.com/developers/docs/topics/permissions#role-object
