@@ -81,6 +81,7 @@ let package = Package(
                 .product(name: "Yams", package: "Yams")
             ],
             path: "Plugins/GenerateAPIEndpointsExec",
+            resources: [.copy("Resources/openapi.yml")],
             swiftSettings: swiftSettings
         ),
         .target(

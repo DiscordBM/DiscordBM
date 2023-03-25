@@ -5,7 +5,7 @@ enum Constants {
         if let token = ProcessInfo.processInfo.environment["BOT_TOKEN"] {
             return token
         } else {
-            fatalError("Due to the complexity of making integration tests work, they can only be run by the author of DiscordBM or the Github CI. Please reach out if you are facing any issues because of this")
+            fatalError("Due to the complexity of making integration tests work, they can only be run by the author of DiscordBM or the Github CI, at least for now. Please reach out if you are facing any issues because of this")
         }
     }()
     static let botId = "1030118727418646629"

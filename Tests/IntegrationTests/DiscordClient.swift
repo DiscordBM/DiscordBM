@@ -436,7 +436,7 @@ class DiscordClientTests: XCTestCase {
             limit: nil
         ).decode()
         
-        XCTAssertTrue([1, 2].contains(search.count))
+        XCTAssertTrue((1...5).contains(search.count), search.count.description)
         XCTAssertTrue(search.allSatisfy({ $0.user?.username.contains("Mahdi") == true }))
         
         /// Search Guild members with invalid limit

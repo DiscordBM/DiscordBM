@@ -532,7 +532,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
                 "unknownValues": .stringConvertible(unknownValues),
                 "values": .stringConvertible(values.map(\.rawValue)),
                 "rawType": .string(Swift._typeName(R.self)),
-                "codingPath": .stringConvertible(decoder.codingPath)
+                "codingPath": .stringConvertible(decoder.codingPath.map(\.stringValue))
             ])
         }
     }
@@ -589,7 +589,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
                 "unknownValues": .stringConvertible(unknownValues),
                 "values": .stringConvertible(values.map(\.rawValue)),
                 "rawType": .string(Swift._typeName(R.self)),
-                "codingPath": .stringConvertible(decoder.codingPath)
+                "codingPath": .stringConvertible(decoder.codingPath.map(\.stringValue))
             ])
         }
     }
