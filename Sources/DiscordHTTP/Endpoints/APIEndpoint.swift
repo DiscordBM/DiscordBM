@@ -1,4 +1,4 @@
-// MARK: - DO NOT EDIT. Auto-generated endpoints using the GenerateAPIEndpoints command plugin.
+// MARK: - DO NOT EDIT. Auto-generated using the GenerateAPIEndpoints command plugin.
 
 import NIOHTTP1
 
@@ -1684,259 +1684,80 @@ public enum APIEndpoint: Endpoint {
 
     public var countsAgainstGlobalRateLimit: Bool {
         switch self {
-        case .getAutoModerationRule: return false
-        case .listAutoModerationRules: return false
-        case .createAutoModerationRule: return false
-        case .updateAutoModerationRule: return false
-        case .deleteAutoModerationRule: return false
-        case .listGuildAuditLogEntries: return false
-        case .getChannel: return false
-        case .listGuildChannels: return false
-        case .listPinnedMessages: return false
-        case .addGroupDmUser: return false
-        case .pinMessage: return false
-        case .setChannelPermissionOverwrite: return false
-        case .createDm: return false
-        case .createGuildChannel: return false
-        case .followChannel: return false
-        case .triggerTypingIndicator: return false
-        case .bulkUpdateGuildChannels: return false
-        case .updateChannel: return false
-        case .deleteChannel: return false
-        case .deleteChannelPermissionOverwrite: return false
-        case .deleteGroupDmUser: return false
-        case .unpinMessage: return false
-        case .getApplicationCommand: return false
-        case .getGuildApplicationCommand: return false
-        case .getGuildApplicationCommandPermissions: return false
-        case .listApplicationCommands: return false
-        case .listGuildApplicationCommandPermissions: return false
-        case .listGuildApplicationCommands: return false
-        case .bulkSetApplicationCommands: return false
-        case .bulkSetGuildApplicationCommands: return false
-        case .setGuildApplicationCommandPermissions: return false
-        case .createApplicationCommand: return false
-        case .createGuildApplicationCommand: return false
-        case .updateApplicationCommand: return false
-        case .updateGuildApplicationCommand: return false
-        case .deleteApplicationCommand: return false
-        case .deleteGuildApplicationCommand: return false
-        case .getGuildEmoji: return false
-        case .listGuildEmojis: return false
-        case .createGuildEmoji: return false
-        case .updateGuildEmoji: return false
-        case .deleteGuildEmoji: return false
-        case .getBotGateway: return false
-        case .getGateway: return false
-        case .getGuild: return false
-        case .getGuildBan: return false
-        case .getGuildPreview: return false
-        case .getGuildVanityUrl: return false
-        case .getGuildWelcomeScreen: return false
-        case .getGuildWidget: return false
-        case .getGuildWidgetPng: return false
-        case .getGuildWidgetSettings: return false
-        case .listGuildBans: return false
-        case .listGuildIntegrations: return false
-        case .listMyGuilds: return false
-        case .previewPruneGuild: return false
-        case .banUserFromGuild: return false
-        case .createGuild: return false
-        case .pruneGuild: return false
-        case .setGuildMfaLevel: return false
-        case .updateGuild: return false
-        case .updateGuildWelcomeScreen: return false
-        case .updateGuildWidgetSettings: return false
-        case .deleteGuild: return false
-        case .deleteGuildIntegration: return false
-        case .leaveGuild: return false
-        case .unbanUserFromGuild: return false
-        case .getGuildTemplate: return false
-        case .listGuildTemplates: return false
-        case .syncGuildTemplate: return false
-        case .createGuildFromTemplate: return false
-        case .createGuildTemplate: return false
-        case .updateGuildTemplate: return false
-        case .deleteGuildTemplate: return false
-        case .getFollowupMessage: return true
-        case .getOriginalInteractionResponse: return true
-        case .createFollowupMessage: return true
-        case .createInteractionResponse: return true
-        case .updateFollowupMessage: return true
-        case .updateOriginalInteractionResponse: return true
-        case .deleteFollowupMessage: return true
-        case .deleteOriginalInteractionResponse: return true
-        case .inviteResolve: return false
-        case .listChannelInvites: return false
-        case .listGuildInvites: return false
-        case .createChannelInvite: return false
-        case .inviteRevoke: return false
-        case .getGuildMember: return false
-        case .getMyGuildMember: return false
-        case .listGuildMembers: return false
-        case .searchGuildMembers: return false
-        case .addGuildMember: return false
-        case .updateGuildMember: return false
-        case .updateMyGuildMember: return false
-        case .deleteGuildMember: return false
-        case .getMessage: return false
-        case .listMessageReactionsByEmoji: return false
-        case .listMessages: return false
-        case .addMyMessageReaction: return false
-        case .bulkDeleteMessages: return false
-        case .createMessage: return false
-        case .crosspostMessage: return false
-        case .updateMessage: return false
-        case .deleteAllMessageReactions: return false
-        case .deleteAllMessageReactionsByEmoji: return false
-        case .deleteMessage: return false
-        case .deleteMyMessageReaction: return false
-        case .deleteUserMessageReaction: return false
-        case .getMyOauth2Application: return false
-        case .listGuildRoles: return false
-        case .addGuildMemberRole: return false
-        case .createGuildRole: return false
-        case .bulkUpdateGuildRoles: return false
-        case .updateGuildRole: return false
-        case .deleteGuildMemberRole: return false
-        case .deleteGuildRole: return false
-        case .getApplicationRoleConnectionsMetadata: return false
-        case .getApplicationUserRoleConnection: return false
-        case .updateApplicationRoleConnectionsMetadata: return false
-        case .updateApplicationUserRoleConnection: return false
-        case .getGuildScheduledEvent: return false
-        case .listGuildScheduledEventUsers: return false
-        case .listGuildScheduledEvents: return false
-        case .createGuildScheduledEvent: return false
-        case .updateGuildScheduledEvent: return false
-        case .deleteGuildScheduledEvent: return false
-        case .getStageInstance: return false
-        case .createStageInstance: return false
-        case .updateStageInstance: return false
-        case .deleteStageInstance: return false
-        case .getGuildSticker: return false
-        case .getSticker: return false
-        case .listGuildStickers: return false
-        case .listStickerPacks: return false
-        case .createGuildSticker: return false
-        case .updateGuildSticker: return false
-        case .deleteGuildSticker: return false
-        case .getActiveGuildThreads: return false
-        case .getThreadMember: return false
-        case .listMyPrivateArchivedThreads: return false
-        case .listPrivateArchivedThreads: return false
-        case .listPublicArchivedThreads: return false
-        case .listThreadMembers: return false
-        case .addThreadMember: return false
-        case .joinThread: return false
-        case .createThread: return false
-        case .createThreadFromMessage: return false
-        case .createThreadInForumChannel: return false
-        case .deleteThreadMember: return false
-        case .leaveThread: return false
-        case .getMyUser: return false
-        case .getUser: return false
-        case .listMyConnections: return false
-        case .updateMyUser: return false
-        case .listGuildVoiceRegions: return false
-        case .listVoiceRegions: return false
-        case .updateSelfVoiceState: return false
-        case .updateVoiceState: return false
-        case .getGuildWebhooks: return false
-        case .getWebhook: return false
-        case .getWebhookByToken: return false
-        case .getWebhookMessage: return false
-        case .getWebhooksMessagesOriginal: return false
-        case .listChannelWebhooks: return false
-        case .createWebhook: return false
-        case .executeWebhook: return false
-        case .patchWebhooksMessagesOriginal: return false
-        case .updateWebhook: return false
-        case .updateWebhookByToken: return false
-        case .updateWebhookMessage: return false
-        case .deleteWebhook: return false
-        case .deleteWebhookByToken: return false
-        case .deleteWebhookMessage: return false
-        case .deleteWebhooksMessagesOriginal: return false
-        }
-    }
-
-    public var requiresAuthorizationHeader: Bool {
-        switch self {
-        case .getAutoModerationRule: return false
-        case .listAutoModerationRules: return false
-        case .createAutoModerationRule: return false
-        case .updateAutoModerationRule: return false
-        case .deleteAutoModerationRule: return false
-        case .listGuildAuditLogEntries: return false
-        case .getChannel: return false
-        case .listGuildChannels: return false
-        case .listPinnedMessages: return false
-        case .addGroupDmUser: return false
-        case .pinMessage: return false
-        case .setChannelPermissionOverwrite: return false
-        case .createDm: return false
-        case .createGuildChannel: return false
-        case .followChannel: return false
-        case .triggerTypingIndicator: return false
-        case .bulkUpdateGuildChannels: return false
-        case .updateChannel: return false
-        case .deleteChannel: return false
-        case .deleteChannelPermissionOverwrite: return false
-        case .deleteGroupDmUser: return false
-        case .unpinMessage: return false
-        case .getApplicationCommand: return false
-        case .getGuildApplicationCommand: return false
-        case .getGuildApplicationCommandPermissions: return false
-        case .listApplicationCommands: return false
-        case .listGuildApplicationCommandPermissions: return false
-        case .listGuildApplicationCommands: return false
-        case .bulkSetApplicationCommands: return false
-        case .bulkSetGuildApplicationCommands: return false
-        case .setGuildApplicationCommandPermissions: return false
-        case .createApplicationCommand: return false
-        case .createGuildApplicationCommand: return false
-        case .updateApplicationCommand: return false
-        case .updateGuildApplicationCommand: return false
-        case .deleteApplicationCommand: return false
-        case .deleteGuildApplicationCommand: return false
-        case .getGuildEmoji: return false
-        case .listGuildEmojis: return false
-        case .createGuildEmoji: return false
-        case .updateGuildEmoji: return false
-        case .deleteGuildEmoji: return false
-        case .getBotGateway: return false
-        case .getGateway: return false
-        case .getGuild: return false
-        case .getGuildBan: return false
-        case .getGuildPreview: return false
-        case .getGuildVanityUrl: return false
-        case .getGuildWelcomeScreen: return false
-        case .getGuildWidget: return false
-        case .getGuildWidgetPng: return false
-        case .getGuildWidgetSettings: return false
-        case .listGuildBans: return false
-        case .listGuildIntegrations: return false
-        case .listMyGuilds: return false
-        case .previewPruneGuild: return false
-        case .banUserFromGuild: return false
-        case .createGuild: return false
-        case .pruneGuild: return false
-        case .setGuildMfaLevel: return false
-        case .updateGuild: return false
-        case .updateGuildWelcomeScreen: return false
-        case .updateGuildWidgetSettings: return false
-        case .deleteGuild: return false
-        case .deleteGuildIntegration: return false
-        case .leaveGuild: return false
-        case .unbanUserFromGuild: return false
-        case .getGuildTemplate: return false
-        case .listGuildTemplates: return false
-        case .syncGuildTemplate: return false
-        case .createGuildFromTemplate: return false
-        case .createGuildTemplate: return false
-        case .updateGuildTemplate: return false
-        case .deleteGuildTemplate: return false
+        case .getAutoModerationRule: return true
+        case .listAutoModerationRules: return true
+        case .createAutoModerationRule: return true
+        case .updateAutoModerationRule: return true
+        case .deleteAutoModerationRule: return true
+        case .listGuildAuditLogEntries: return true
+        case .getChannel: return true
+        case .listGuildChannels: return true
+        case .listPinnedMessages: return true
+        case .addGroupDmUser: return true
+        case .pinMessage: return true
+        case .setChannelPermissionOverwrite: return true
+        case .createDm: return true
+        case .createGuildChannel: return true
+        case .followChannel: return true
+        case .triggerTypingIndicator: return true
+        case .bulkUpdateGuildChannels: return true
+        case .updateChannel: return true
+        case .deleteChannel: return true
+        case .deleteChannelPermissionOverwrite: return true
+        case .deleteGroupDmUser: return true
+        case .unpinMessage: return true
+        case .getApplicationCommand: return true
+        case .getGuildApplicationCommand: return true
+        case .getGuildApplicationCommandPermissions: return true
+        case .listApplicationCommands: return true
+        case .listGuildApplicationCommandPermissions: return true
+        case .listGuildApplicationCommands: return true
+        case .bulkSetApplicationCommands: return true
+        case .bulkSetGuildApplicationCommands: return true
+        case .setGuildApplicationCommandPermissions: return true
+        case .createApplicationCommand: return true
+        case .createGuildApplicationCommand: return true
+        case .updateApplicationCommand: return true
+        case .updateGuildApplicationCommand: return true
+        case .deleteApplicationCommand: return true
+        case .deleteGuildApplicationCommand: return true
+        case .getGuildEmoji: return true
+        case .listGuildEmojis: return true
+        case .createGuildEmoji: return true
+        case .updateGuildEmoji: return true
+        case .deleteGuildEmoji: return true
+        case .getBotGateway: return true
+        case .getGateway: return true
+        case .getGuild: return true
+        case .getGuildBan: return true
+        case .getGuildPreview: return true
+        case .getGuildVanityUrl: return true
+        case .getGuildWelcomeScreen: return true
+        case .getGuildWidget: return true
+        case .getGuildWidgetPng: return true
+        case .getGuildWidgetSettings: return true
+        case .listGuildBans: return true
+        case .listGuildIntegrations: return true
+        case .listMyGuilds: return true
+        case .previewPruneGuild: return true
+        case .banUserFromGuild: return true
+        case .createGuild: return true
+        case .pruneGuild: return true
+        case .setGuildMfaLevel: return true
+        case .updateGuild: return true
+        case .updateGuildWelcomeScreen: return true
+        case .updateGuildWidgetSettings: return true
+        case .deleteGuild: return true
+        case .deleteGuildIntegration: return true
+        case .leaveGuild: return true
+        case .unbanUserFromGuild: return true
+        case .getGuildTemplate: return true
+        case .listGuildTemplates: return true
+        case .syncGuildTemplate: return true
+        case .createGuildFromTemplate: return true
+        case .createGuildTemplate: return true
+        case .updateGuildTemplate: return true
+        case .deleteGuildTemplate: return true
         case .getFollowupMessage: return false
         case .getOriginalInteractionResponse: return false
         case .createFollowupMessage: return false
@@ -1945,98 +1766,277 @@ public enum APIEndpoint: Endpoint {
         case .updateOriginalInteractionResponse: return false
         case .deleteFollowupMessage: return false
         case .deleteOriginalInteractionResponse: return false
-        case .inviteResolve: return false
-        case .listChannelInvites: return false
-        case .listGuildInvites: return false
-        case .createChannelInvite: return false
-        case .inviteRevoke: return false
-        case .getGuildMember: return false
-        case .getMyGuildMember: return false
-        case .listGuildMembers: return false
-        case .searchGuildMembers: return false
-        case .addGuildMember: return false
-        case .updateGuildMember: return false
-        case .updateMyGuildMember: return false
-        case .deleteGuildMember: return false
-        case .getMessage: return false
-        case .listMessageReactionsByEmoji: return false
-        case .listMessages: return false
-        case .addMyMessageReaction: return false
-        case .bulkDeleteMessages: return false
-        case .createMessage: return false
-        case .crosspostMessage: return false
-        case .updateMessage: return false
-        case .deleteAllMessageReactions: return false
-        case .deleteAllMessageReactionsByEmoji: return false
-        case .deleteMessage: return false
-        case .deleteMyMessageReaction: return false
-        case .deleteUserMessageReaction: return false
-        case .getMyOauth2Application: return false
-        case .listGuildRoles: return false
-        case .addGuildMemberRole: return false
-        case .createGuildRole: return false
-        case .bulkUpdateGuildRoles: return false
-        case .updateGuildRole: return false
-        case .deleteGuildMemberRole: return false
-        case .deleteGuildRole: return false
-        case .getApplicationRoleConnectionsMetadata: return false
-        case .getApplicationUserRoleConnection: return false
-        case .updateApplicationRoleConnectionsMetadata: return false
-        case .updateApplicationUserRoleConnection: return false
-        case .getGuildScheduledEvent: return false
-        case .listGuildScheduledEventUsers: return false
-        case .listGuildScheduledEvents: return false
-        case .createGuildScheduledEvent: return false
-        case .updateGuildScheduledEvent: return false
-        case .deleteGuildScheduledEvent: return false
-        case .getStageInstance: return false
-        case .createStageInstance: return false
-        case .updateStageInstance: return false
-        case .deleteStageInstance: return false
-        case .getGuildSticker: return false
-        case .getSticker: return false
-        case .listGuildStickers: return false
-        case .listStickerPacks: return false
-        case .createGuildSticker: return false
-        case .updateGuildSticker: return false
-        case .deleteGuildSticker: return false
-        case .getActiveGuildThreads: return false
-        case .getThreadMember: return false
-        case .listMyPrivateArchivedThreads: return false
-        case .listPrivateArchivedThreads: return false
-        case .listPublicArchivedThreads: return false
-        case .listThreadMembers: return false
-        case .addThreadMember: return false
-        case .joinThread: return false
-        case .createThread: return false
-        case .createThreadFromMessage: return false
-        case .createThreadInForumChannel: return false
-        case .deleteThreadMember: return false
-        case .leaveThread: return false
-        case .getMyUser: return false
-        case .getUser: return false
-        case .listMyConnections: return false
-        case .updateMyUser: return false
-        case .listGuildVoiceRegions: return false
-        case .listVoiceRegions: return false
-        case .updateSelfVoiceState: return false
-        case .updateVoiceState: return false
-        case .getGuildWebhooks: return false
-        case .getWebhook: return false
+        case .inviteResolve: return true
+        case .listChannelInvites: return true
+        case .listGuildInvites: return true
+        case .createChannelInvite: return true
+        case .inviteRevoke: return true
+        case .getGuildMember: return true
+        case .getMyGuildMember: return true
+        case .listGuildMembers: return true
+        case .searchGuildMembers: return true
+        case .addGuildMember: return true
+        case .updateGuildMember: return true
+        case .updateMyGuildMember: return true
+        case .deleteGuildMember: return true
+        case .getMessage: return true
+        case .listMessageReactionsByEmoji: return true
+        case .listMessages: return true
+        case .addMyMessageReaction: return true
+        case .bulkDeleteMessages: return true
+        case .createMessage: return true
+        case .crosspostMessage: return true
+        case .updateMessage: return true
+        case .deleteAllMessageReactions: return true
+        case .deleteAllMessageReactionsByEmoji: return true
+        case .deleteMessage: return true
+        case .deleteMyMessageReaction: return true
+        case .deleteUserMessageReaction: return true
+        case .getMyOauth2Application: return true
+        case .listGuildRoles: return true
+        case .addGuildMemberRole: return true
+        case .createGuildRole: return true
+        case .bulkUpdateGuildRoles: return true
+        case .updateGuildRole: return true
+        case .deleteGuildMemberRole: return true
+        case .deleteGuildRole: return true
+        case .getApplicationRoleConnectionsMetadata: return true
+        case .getApplicationUserRoleConnection: return true
+        case .updateApplicationRoleConnectionsMetadata: return true
+        case .updateApplicationUserRoleConnection: return true
+        case .getGuildScheduledEvent: return true
+        case .listGuildScheduledEventUsers: return true
+        case .listGuildScheduledEvents: return true
+        case .createGuildScheduledEvent: return true
+        case .updateGuildScheduledEvent: return true
+        case .deleteGuildScheduledEvent: return true
+        case .getStageInstance: return true
+        case .createStageInstance: return true
+        case .updateStageInstance: return true
+        case .deleteStageInstance: return true
+        case .getGuildSticker: return true
+        case .getSticker: return true
+        case .listGuildStickers: return true
+        case .listStickerPacks: return true
+        case .createGuildSticker: return true
+        case .updateGuildSticker: return true
+        case .deleteGuildSticker: return true
+        case .getActiveGuildThreads: return true
+        case .getThreadMember: return true
+        case .listMyPrivateArchivedThreads: return true
+        case .listPrivateArchivedThreads: return true
+        case .listPublicArchivedThreads: return true
+        case .listThreadMembers: return true
+        case .addThreadMember: return true
+        case .joinThread: return true
+        case .createThread: return true
+        case .createThreadFromMessage: return true
+        case .createThreadInForumChannel: return true
+        case .deleteThreadMember: return true
+        case .leaveThread: return true
+        case .getMyUser: return true
+        case .getUser: return true
+        case .listMyConnections: return true
+        case .updateMyUser: return true
+        case .listGuildVoiceRegions: return true
+        case .listVoiceRegions: return true
+        case .updateSelfVoiceState: return true
+        case .updateVoiceState: return true
+        case .getGuildWebhooks: return true
+        case .getWebhook: return true
         case .getWebhookByToken: return true
         case .getWebhookMessage: return true
         case .getWebhooksMessagesOriginal: return true
-        case .listChannelWebhooks: return false
-        case .createWebhook: return false
+        case .listChannelWebhooks: return true
+        case .createWebhook: return true
         case .executeWebhook: return true
         case .patchWebhooksMessagesOriginal: return true
-        case .updateWebhook: return false
+        case .updateWebhook: return true
         case .updateWebhookByToken: return true
         case .updateWebhookMessage: return true
-        case .deleteWebhook: return false
+        case .deleteWebhook: return true
         case .deleteWebhookByToken: return true
         case .deleteWebhookMessage: return true
         case .deleteWebhooksMessagesOriginal: return true
+        }
+    }
+
+    public var requiresAuthorizationHeader: Bool {
+        switch self {
+        case .getAutoModerationRule: return true
+        case .listAutoModerationRules: return true
+        case .createAutoModerationRule: return true
+        case .updateAutoModerationRule: return true
+        case .deleteAutoModerationRule: return true
+        case .listGuildAuditLogEntries: return true
+        case .getChannel: return true
+        case .listGuildChannels: return true
+        case .listPinnedMessages: return true
+        case .addGroupDmUser: return true
+        case .pinMessage: return true
+        case .setChannelPermissionOverwrite: return true
+        case .createDm: return true
+        case .createGuildChannel: return true
+        case .followChannel: return true
+        case .triggerTypingIndicator: return true
+        case .bulkUpdateGuildChannels: return true
+        case .updateChannel: return true
+        case .deleteChannel: return true
+        case .deleteChannelPermissionOverwrite: return true
+        case .deleteGroupDmUser: return true
+        case .unpinMessage: return true
+        case .getApplicationCommand: return true
+        case .getGuildApplicationCommand: return true
+        case .getGuildApplicationCommandPermissions: return true
+        case .listApplicationCommands: return true
+        case .listGuildApplicationCommandPermissions: return true
+        case .listGuildApplicationCommands: return true
+        case .bulkSetApplicationCommands: return true
+        case .bulkSetGuildApplicationCommands: return true
+        case .setGuildApplicationCommandPermissions: return true
+        case .createApplicationCommand: return true
+        case .createGuildApplicationCommand: return true
+        case .updateApplicationCommand: return true
+        case .updateGuildApplicationCommand: return true
+        case .deleteApplicationCommand: return true
+        case .deleteGuildApplicationCommand: return true
+        case .getGuildEmoji: return true
+        case .listGuildEmojis: return true
+        case .createGuildEmoji: return true
+        case .updateGuildEmoji: return true
+        case .deleteGuildEmoji: return true
+        case .getBotGateway: return true
+        case .getGateway: return true
+        case .getGuild: return true
+        case .getGuildBan: return true
+        case .getGuildPreview: return true
+        case .getGuildVanityUrl: return true
+        case .getGuildWelcomeScreen: return true
+        case .getGuildWidget: return true
+        case .getGuildWidgetPng: return true
+        case .getGuildWidgetSettings: return true
+        case .listGuildBans: return true
+        case .listGuildIntegrations: return true
+        case .listMyGuilds: return true
+        case .previewPruneGuild: return true
+        case .banUserFromGuild: return true
+        case .createGuild: return true
+        case .pruneGuild: return true
+        case .setGuildMfaLevel: return true
+        case .updateGuild: return true
+        case .updateGuildWelcomeScreen: return true
+        case .updateGuildWidgetSettings: return true
+        case .deleteGuild: return true
+        case .deleteGuildIntegration: return true
+        case .leaveGuild: return true
+        case .unbanUserFromGuild: return true
+        case .getGuildTemplate: return true
+        case .listGuildTemplates: return true
+        case .syncGuildTemplate: return true
+        case .createGuildFromTemplate: return true
+        case .createGuildTemplate: return true
+        case .updateGuildTemplate: return true
+        case .deleteGuildTemplate: return true
+        case .getFollowupMessage: return true
+        case .getOriginalInteractionResponse: return true
+        case .createFollowupMessage: return true
+        case .createInteractionResponse: return true
+        case .updateFollowupMessage: return true
+        case .updateOriginalInteractionResponse: return true
+        case .deleteFollowupMessage: return true
+        case .deleteOriginalInteractionResponse: return true
+        case .inviteResolve: return true
+        case .listChannelInvites: return true
+        case .listGuildInvites: return true
+        case .createChannelInvite: return true
+        case .inviteRevoke: return true
+        case .getGuildMember: return true
+        case .getMyGuildMember: return true
+        case .listGuildMembers: return true
+        case .searchGuildMembers: return true
+        case .addGuildMember: return true
+        case .updateGuildMember: return true
+        case .updateMyGuildMember: return true
+        case .deleteGuildMember: return true
+        case .getMessage: return true
+        case .listMessageReactionsByEmoji: return true
+        case .listMessages: return true
+        case .addMyMessageReaction: return true
+        case .bulkDeleteMessages: return true
+        case .createMessage: return true
+        case .crosspostMessage: return true
+        case .updateMessage: return true
+        case .deleteAllMessageReactions: return true
+        case .deleteAllMessageReactionsByEmoji: return true
+        case .deleteMessage: return true
+        case .deleteMyMessageReaction: return true
+        case .deleteUserMessageReaction: return true
+        case .getMyOauth2Application: return true
+        case .listGuildRoles: return true
+        case .addGuildMemberRole: return true
+        case .createGuildRole: return true
+        case .bulkUpdateGuildRoles: return true
+        case .updateGuildRole: return true
+        case .deleteGuildMemberRole: return true
+        case .deleteGuildRole: return true
+        case .getApplicationRoleConnectionsMetadata: return true
+        case .getApplicationUserRoleConnection: return true
+        case .updateApplicationRoleConnectionsMetadata: return true
+        case .updateApplicationUserRoleConnection: return true
+        case .getGuildScheduledEvent: return true
+        case .listGuildScheduledEventUsers: return true
+        case .listGuildScheduledEvents: return true
+        case .createGuildScheduledEvent: return true
+        case .updateGuildScheduledEvent: return true
+        case .deleteGuildScheduledEvent: return true
+        case .getStageInstance: return true
+        case .createStageInstance: return true
+        case .updateStageInstance: return true
+        case .deleteStageInstance: return true
+        case .getGuildSticker: return true
+        case .getSticker: return true
+        case .listGuildStickers: return true
+        case .listStickerPacks: return true
+        case .createGuildSticker: return true
+        case .updateGuildSticker: return true
+        case .deleteGuildSticker: return true
+        case .getActiveGuildThreads: return true
+        case .getThreadMember: return true
+        case .listMyPrivateArchivedThreads: return true
+        case .listPrivateArchivedThreads: return true
+        case .listPublicArchivedThreads: return true
+        case .listThreadMembers: return true
+        case .addThreadMember: return true
+        case .joinThread: return true
+        case .createThread: return true
+        case .createThreadFromMessage: return true
+        case .createThreadInForumChannel: return true
+        case .deleteThreadMember: return true
+        case .leaveThread: return true
+        case .getMyUser: return true
+        case .getUser: return true
+        case .listMyConnections: return true
+        case .updateMyUser: return true
+        case .listGuildVoiceRegions: return true
+        case .listVoiceRegions: return true
+        case .updateSelfVoiceState: return true
+        case .updateVoiceState: return true
+        case .getGuildWebhooks: return true
+        case .getWebhook: return true
+        case .getWebhookByToken: return false
+        case .getWebhookMessage: return false
+        case .getWebhooksMessagesOriginal: return false
+        case .listChannelWebhooks: return true
+        case .createWebhook: return true
+        case .executeWebhook: return false
+        case .patchWebhooksMessagesOriginal: return false
+        case .updateWebhook: return true
+        case .updateWebhookByToken: return false
+        case .updateWebhookMessage: return false
+        case .deleteWebhook: return true
+        case .deleteWebhookByToken: return false
+        case .deleteWebhookMessage: return false
+        case .deleteWebhooksMessagesOriginal: return false
         }
     }
 
@@ -2569,6 +2569,359 @@ public enum APIEndpoint: Endpoint {
         case .deleteWebhookByToken: return 172
         case .deleteWebhookMessage: return 173
         case .deleteWebhooksMessagesOriginal: return 174
+        }
+    }
+
+    public var description: String {
+        switch self {
+        case let .getAutoModerationRule(guildId, ruleId):
+            return "getAutoModerationRule(guildId: \(guildId), ruleId: \(ruleId))"
+        case let .listAutoModerationRules(guildId):
+            return "listAutoModerationRules(guildId: \(guildId))"
+        case let .createAutoModerationRule(guildId):
+            return "createAutoModerationRule(guildId: \(guildId))"
+        case let .updateAutoModerationRule(guildId, ruleId):
+            return "updateAutoModerationRule(guildId: \(guildId), ruleId: \(ruleId))"
+        case let .deleteAutoModerationRule(guildId, ruleId):
+            return "deleteAutoModerationRule(guildId: \(guildId), ruleId: \(ruleId))"
+        case let .listGuildAuditLogEntries(guildId):
+            return "listGuildAuditLogEntries(guildId: \(guildId))"
+        case let .getChannel(channelId):
+            return "getChannel(channelId: \(channelId))"
+        case let .listGuildChannels(guildId):
+            return "listGuildChannels(guildId: \(guildId))"
+        case let .listPinnedMessages(channelId):
+            return "listPinnedMessages(channelId: \(channelId))"
+        case let .addGroupDmUser(channelId, userId):
+            return "addGroupDmUser(channelId: \(channelId), userId: \(userId))"
+        case let .pinMessage(channelId, messageId):
+            return "pinMessage(channelId: \(channelId), messageId: \(messageId))"
+        case let .setChannelPermissionOverwrite(channelId, overwriteId):
+            return "setChannelPermissionOverwrite(channelId: \(channelId), overwriteId: \(overwriteId))"
+        case .createDm:
+            return "createDm"
+        case let .createGuildChannel(guildId):
+            return "createGuildChannel(guildId: \(guildId))"
+        case let .followChannel(channelId):
+            return "followChannel(channelId: \(channelId))"
+        case let .triggerTypingIndicator(channelId):
+            return "triggerTypingIndicator(channelId: \(channelId))"
+        case let .bulkUpdateGuildChannels(guildId):
+            return "bulkUpdateGuildChannels(guildId: \(guildId))"
+        case let .updateChannel(channelId):
+            return "updateChannel(channelId: \(channelId))"
+        case let .deleteChannel(channelId):
+            return "deleteChannel(channelId: \(channelId))"
+        case let .deleteChannelPermissionOverwrite(channelId, overwriteId):
+            return "deleteChannelPermissionOverwrite(channelId: \(channelId), overwriteId: \(overwriteId))"
+        case let .deleteGroupDmUser(channelId, userId):
+            return "deleteGroupDmUser(channelId: \(channelId), userId: \(userId))"
+        case let .unpinMessage(channelId, messageId):
+            return "unpinMessage(channelId: \(channelId), messageId: \(messageId))"
+        case let .getApplicationCommand(applicationId, commandId):
+            return "getApplicationCommand(applicationId: \(applicationId), commandId: \(commandId))"
+        case let .getGuildApplicationCommand(applicationId, guildId, commandId):
+            return "getGuildApplicationCommand(applicationId: \(applicationId), guildId: \(guildId), commandId: \(commandId))"
+        case let .getGuildApplicationCommandPermissions(applicationId, guildId, commandId):
+            return "getGuildApplicationCommandPermissions(applicationId: \(applicationId), guildId: \(guildId), commandId: \(commandId))"
+        case let .listApplicationCommands(applicationId):
+            return "listApplicationCommands(applicationId: \(applicationId))"
+        case let .listGuildApplicationCommandPermissions(applicationId, guildId):
+            return "listGuildApplicationCommandPermissions(applicationId: \(applicationId), guildId: \(guildId))"
+        case let .listGuildApplicationCommands(applicationId, guildId):
+            return "listGuildApplicationCommands(applicationId: \(applicationId), guildId: \(guildId))"
+        case let .bulkSetApplicationCommands(applicationId):
+            return "bulkSetApplicationCommands(applicationId: \(applicationId))"
+        case let .bulkSetGuildApplicationCommands(applicationId, guildId):
+            return "bulkSetGuildApplicationCommands(applicationId: \(applicationId), guildId: \(guildId))"
+        case let .setGuildApplicationCommandPermissions(applicationId, guildId, commandId):
+            return "setGuildApplicationCommandPermissions(applicationId: \(applicationId), guildId: \(guildId), commandId: \(commandId))"
+        case let .createApplicationCommand(applicationId):
+            return "createApplicationCommand(applicationId: \(applicationId))"
+        case let .createGuildApplicationCommand(applicationId, guildId):
+            return "createGuildApplicationCommand(applicationId: \(applicationId), guildId: \(guildId))"
+        case let .updateApplicationCommand(applicationId, commandId):
+            return "updateApplicationCommand(applicationId: \(applicationId), commandId: \(commandId))"
+        case let .updateGuildApplicationCommand(applicationId, guildId, commandId):
+            return "updateGuildApplicationCommand(applicationId: \(applicationId), guildId: \(guildId), commandId: \(commandId))"
+        case let .deleteApplicationCommand(applicationId, commandId):
+            return "deleteApplicationCommand(applicationId: \(applicationId), commandId: \(commandId))"
+        case let .deleteGuildApplicationCommand(applicationId, guildId, commandId):
+            return "deleteGuildApplicationCommand(applicationId: \(applicationId), guildId: \(guildId), commandId: \(commandId))"
+        case let .getGuildEmoji(guildId, emojiId):
+            return "getGuildEmoji(guildId: \(guildId), emojiId: \(emojiId))"
+        case let .listGuildEmojis(guildId):
+            return "listGuildEmojis(guildId: \(guildId))"
+        case let .createGuildEmoji(guildId):
+            return "createGuildEmoji(guildId: \(guildId))"
+        case let .updateGuildEmoji(guildId, emojiId):
+            return "updateGuildEmoji(guildId: \(guildId), emojiId: \(emojiId))"
+        case let .deleteGuildEmoji(guildId, emojiId):
+            return "deleteGuildEmoji(guildId: \(guildId), emojiId: \(emojiId))"
+        case .getBotGateway:
+            return "getBotGateway"
+        case .getGateway:
+            return "getGateway"
+        case let .getGuild(guildId):
+            return "getGuild(guildId: \(guildId))"
+        case let .getGuildBan(guildId, userId):
+            return "getGuildBan(guildId: \(guildId), userId: \(userId))"
+        case let .getGuildPreview(guildId):
+            return "getGuildPreview(guildId: \(guildId))"
+        case let .getGuildVanityUrl(guildId):
+            return "getGuildVanityUrl(guildId: \(guildId))"
+        case let .getGuildWelcomeScreen(guildId):
+            return "getGuildWelcomeScreen(guildId: \(guildId))"
+        case let .getGuildWidget(guildId):
+            return "getGuildWidget(guildId: \(guildId))"
+        case let .getGuildWidgetPng(guildId):
+            return "getGuildWidgetPng(guildId: \(guildId))"
+        case let .getGuildWidgetSettings(guildId):
+            return "getGuildWidgetSettings(guildId: \(guildId))"
+        case let .listGuildBans(guildId):
+            return "listGuildBans(guildId: \(guildId))"
+        case let .listGuildIntegrations(guildId):
+            return "listGuildIntegrations(guildId: \(guildId))"
+        case .listMyGuilds:
+            return "listMyGuilds"
+        case let .previewPruneGuild(guildId):
+            return "previewPruneGuild(guildId: \(guildId))"
+        case let .banUserFromGuild(guildId, userId):
+            return "banUserFromGuild(guildId: \(guildId), userId: \(userId))"
+        case .createGuild:
+            return "createGuild"
+        case let .pruneGuild(guildId):
+            return "pruneGuild(guildId: \(guildId))"
+        case let .setGuildMfaLevel(guildId):
+            return "setGuildMfaLevel(guildId: \(guildId))"
+        case let .updateGuild(guildId):
+            return "updateGuild(guildId: \(guildId))"
+        case let .updateGuildWelcomeScreen(guildId):
+            return "updateGuildWelcomeScreen(guildId: \(guildId))"
+        case let .updateGuildWidgetSettings(guildId):
+            return "updateGuildWidgetSettings(guildId: \(guildId))"
+        case let .deleteGuild(guildId):
+            return "deleteGuild(guildId: \(guildId))"
+        case let .deleteGuildIntegration(guildId, integrationId):
+            return "deleteGuildIntegration(guildId: \(guildId), integrationId: \(integrationId))"
+        case let .leaveGuild(guildId):
+            return "leaveGuild(guildId: \(guildId))"
+        case let .unbanUserFromGuild(guildId, userId):
+            return "unbanUserFromGuild(guildId: \(guildId), userId: \(userId))"
+        case let .getGuildTemplate(code):
+            return "getGuildTemplate(code: \(code))"
+        case let .listGuildTemplates(guildId):
+            return "listGuildTemplates(guildId: \(guildId))"
+        case let .syncGuildTemplate(guildId, code):
+            return "syncGuildTemplate(guildId: \(guildId), code: \(code))"
+        case let .createGuildFromTemplate(code):
+            return "createGuildFromTemplate(code: \(code))"
+        case let .createGuildTemplate(guildId):
+            return "createGuildTemplate(guildId: \(guildId))"
+        case let .updateGuildTemplate(guildId, code):
+            return "updateGuildTemplate(guildId: \(guildId), code: \(code))"
+        case let .deleteGuildTemplate(guildId, code):
+            return "deleteGuildTemplate(guildId: \(guildId), code: \(code))"
+        case let .getFollowupMessage(applicationId, interactionToken, messageId):
+            return "getFollowupMessage(applicationId: \(applicationId), interactionToken: \(interactionToken), messageId: \(messageId))"
+        case let .getOriginalInteractionResponse(applicationId, interactionToken):
+            return "getOriginalInteractionResponse(applicationId: \(applicationId), interactionToken: \(interactionToken))"
+        case let .createFollowupMessage(applicationId, interactionToken):
+            return "createFollowupMessage(applicationId: \(applicationId), interactionToken: \(interactionToken))"
+        case let .createInteractionResponse(interactionId, interactionToken):
+            return "createInteractionResponse(interactionId: \(interactionId), interactionToken: \(interactionToken))"
+        case let .updateFollowupMessage(applicationId, interactionToken, messageId):
+            return "updateFollowupMessage(applicationId: \(applicationId), interactionToken: \(interactionToken), messageId: \(messageId))"
+        case let .updateOriginalInteractionResponse(applicationId, interactionToken):
+            return "updateOriginalInteractionResponse(applicationId: \(applicationId), interactionToken: \(interactionToken))"
+        case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
+            return "deleteFollowupMessage(applicationId: \(applicationId), interactionToken: \(interactionToken), messageId: \(messageId))"
+        case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
+            return "deleteOriginalInteractionResponse(applicationId: \(applicationId), interactionToken: \(interactionToken))"
+        case let .inviteResolve(code):
+            return "inviteResolve(code: \(code))"
+        case let .listChannelInvites(channelId):
+            return "listChannelInvites(channelId: \(channelId))"
+        case let .listGuildInvites(guildId):
+            return "listGuildInvites(guildId: \(guildId))"
+        case let .createChannelInvite(channelId):
+            return "createChannelInvite(channelId: \(channelId))"
+        case let .inviteRevoke(code):
+            return "inviteRevoke(code: \(code))"
+        case let .getGuildMember(guildId, userId):
+            return "getGuildMember(guildId: \(guildId), userId: \(userId))"
+        case let .getMyGuildMember(guildId):
+            return "getMyGuildMember(guildId: \(guildId))"
+        case let .listGuildMembers(guildId):
+            return "listGuildMembers(guildId: \(guildId))"
+        case let .searchGuildMembers(guildId):
+            return "searchGuildMembers(guildId: \(guildId))"
+        case let .addGuildMember(guildId, userId):
+            return "addGuildMember(guildId: \(guildId), userId: \(userId))"
+        case let .updateGuildMember(guildId, userId):
+            return "updateGuildMember(guildId: \(guildId), userId: \(userId))"
+        case let .updateMyGuildMember(guildId):
+            return "updateMyGuildMember(guildId: \(guildId))"
+        case let .deleteGuildMember(guildId, userId):
+            return "deleteGuildMember(guildId: \(guildId), userId: \(userId))"
+        case let .getMessage(channelId, messageId):
+            return "getMessage(channelId: \(channelId), messageId: \(messageId))"
+        case let .listMessageReactionsByEmoji(channelId, messageId, emojiName):
+            return "listMessageReactionsByEmoji(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
+        case let .listMessages(channelId):
+            return "listMessages(channelId: \(channelId))"
+        case let .addMyMessageReaction(channelId, messageId, emojiName):
+            return "addMyMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
+        case let .bulkDeleteMessages(channelId):
+            return "bulkDeleteMessages(channelId: \(channelId))"
+        case let .createMessage(channelId):
+            return "createMessage(channelId: \(channelId))"
+        case let .crosspostMessage(channelId, messageId):
+            return "crosspostMessage(channelId: \(channelId), messageId: \(messageId))"
+        case let .updateMessage(channelId, messageId):
+            return "updateMessage(channelId: \(channelId), messageId: \(messageId))"
+        case let .deleteAllMessageReactions(channelId, messageId):
+            return "deleteAllMessageReactions(channelId: \(channelId), messageId: \(messageId))"
+        case let .deleteAllMessageReactionsByEmoji(channelId, messageId, emojiName):
+            return "deleteAllMessageReactionsByEmoji(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
+        case let .deleteMessage(channelId, messageId):
+            return "deleteMessage(channelId: \(channelId), messageId: \(messageId))"
+        case let .deleteMyMessageReaction(channelId, messageId, emojiName):
+            return "deleteMyMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
+        case let .deleteUserMessageReaction(channelId, messageId, emojiName, userId):
+            return "deleteUserMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName), userId: \(userId))"
+        case .getMyOauth2Application:
+            return "getMyOauth2Application"
+        case let .listGuildRoles(guildId):
+            return "listGuildRoles(guildId: \(guildId))"
+        case let .addGuildMemberRole(guildId, userId, roleId):
+            return "addGuildMemberRole(guildId: \(guildId), userId: \(userId), roleId: \(roleId))"
+        case let .createGuildRole(guildId):
+            return "createGuildRole(guildId: \(guildId))"
+        case let .bulkUpdateGuildRoles(guildId):
+            return "bulkUpdateGuildRoles(guildId: \(guildId))"
+        case let .updateGuildRole(guildId, roleId):
+            return "updateGuildRole(guildId: \(guildId), roleId: \(roleId))"
+        case let .deleteGuildMemberRole(guildId, userId, roleId):
+            return "deleteGuildMemberRole(guildId: \(guildId), userId: \(userId), roleId: \(roleId))"
+        case let .deleteGuildRole(guildId, roleId):
+            return "deleteGuildRole(guildId: \(guildId), roleId: \(roleId))"
+        case let .getApplicationRoleConnectionsMetadata(applicationId):
+            return "getApplicationRoleConnectionsMetadata(applicationId: \(applicationId))"
+        case let .getApplicationUserRoleConnection(applicationId):
+            return "getApplicationUserRoleConnection(applicationId: \(applicationId))"
+        case let .updateApplicationRoleConnectionsMetadata(applicationId):
+            return "updateApplicationRoleConnectionsMetadata(applicationId: \(applicationId))"
+        case let .updateApplicationUserRoleConnection(applicationId):
+            return "updateApplicationUserRoleConnection(applicationId: \(applicationId))"
+        case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
+            return "getGuildScheduledEvent(guildId: \(guildId), guildScheduledEventId: \(guildScheduledEventId))"
+        case let .listGuildScheduledEventUsers(guildId, guildScheduledEventId):
+            return "listGuildScheduledEventUsers(guildId: \(guildId), guildScheduledEventId: \(guildScheduledEventId))"
+        case let .listGuildScheduledEvents(guildId):
+            return "listGuildScheduledEvents(guildId: \(guildId))"
+        case let .createGuildScheduledEvent(guildId):
+            return "createGuildScheduledEvent(guildId: \(guildId))"
+        case let .updateGuildScheduledEvent(guildId, guildScheduledEventId):
+            return "updateGuildScheduledEvent(guildId: \(guildId), guildScheduledEventId: \(guildScheduledEventId))"
+        case let .deleteGuildScheduledEvent(guildId, guildScheduledEventId):
+            return "deleteGuildScheduledEvent(guildId: \(guildId), guildScheduledEventId: \(guildScheduledEventId))"
+        case let .getStageInstance(channelId):
+            return "getStageInstance(channelId: \(channelId))"
+        case .createStageInstance:
+            return "createStageInstance"
+        case let .updateStageInstance(channelId):
+            return "updateStageInstance(channelId: \(channelId))"
+        case let .deleteStageInstance(channelId):
+            return "deleteStageInstance(channelId: \(channelId))"
+        case let .getGuildSticker(guildId, stickerId):
+            return "getGuildSticker(guildId: \(guildId), stickerId: \(stickerId))"
+        case let .getSticker(stickerId):
+            return "getSticker(stickerId: \(stickerId))"
+        case let .listGuildStickers(guildId):
+            return "listGuildStickers(guildId: \(guildId))"
+        case .listStickerPacks:
+            return "listStickerPacks"
+        case let .createGuildSticker(guildId):
+            return "createGuildSticker(guildId: \(guildId))"
+        case let .updateGuildSticker(guildId, stickerId):
+            return "updateGuildSticker(guildId: \(guildId), stickerId: \(stickerId))"
+        case let .deleteGuildSticker(guildId, stickerId):
+            return "deleteGuildSticker(guildId: \(guildId), stickerId: \(stickerId))"
+        case let .getActiveGuildThreads(guildId):
+            return "getActiveGuildThreads(guildId: \(guildId))"
+        case let .getThreadMember(channelId, userId):
+            return "getThreadMember(channelId: \(channelId), userId: \(userId))"
+        case let .listMyPrivateArchivedThreads(channelId):
+            return "listMyPrivateArchivedThreads(channelId: \(channelId))"
+        case let .listPrivateArchivedThreads(channelId):
+            return "listPrivateArchivedThreads(channelId: \(channelId))"
+        case let .listPublicArchivedThreads(channelId):
+            return "listPublicArchivedThreads(channelId: \(channelId))"
+        case let .listThreadMembers(channelId):
+            return "listThreadMembers(channelId: \(channelId))"
+        case let .addThreadMember(channelId, userId):
+            return "addThreadMember(channelId: \(channelId), userId: \(userId))"
+        case let .joinThread(channelId):
+            return "joinThread(channelId: \(channelId))"
+        case let .createThread(channelId):
+            return "createThread(channelId: \(channelId))"
+        case let .createThreadFromMessage(channelId, messageId):
+            return "createThreadFromMessage(channelId: \(channelId), messageId: \(messageId))"
+        case let .createThreadInForumChannel(channelId):
+            return "createThreadInForumChannel(channelId: \(channelId))"
+        case let .deleteThreadMember(channelId, userId):
+            return "deleteThreadMember(channelId: \(channelId), userId: \(userId))"
+        case let .leaveThread(channelId):
+            return "leaveThread(channelId: \(channelId))"
+        case .getMyUser:
+            return "getMyUser"
+        case let .getUser(userId):
+            return "getUser(userId: \(userId))"
+        case .listMyConnections:
+            return "listMyConnections"
+        case .updateMyUser:
+            return "updateMyUser"
+        case let .listGuildVoiceRegions(guildId):
+            return "listGuildVoiceRegions(guildId: \(guildId))"
+        case .listVoiceRegions:
+            return "listVoiceRegions"
+        case let .updateSelfVoiceState(guildId):
+            return "updateSelfVoiceState(guildId: \(guildId))"
+        case let .updateVoiceState(guildId, userId):
+            return "updateVoiceState(guildId: \(guildId), userId: \(userId))"
+        case let .getGuildWebhooks(guildId):
+            return "getGuildWebhooks(guildId: \(guildId))"
+        case let .getWebhook(webhookId):
+            return "getWebhook(webhookId: \(webhookId))"
+        case let .getWebhookByToken(webhookId, webhookToken):
+            return "getWebhookByToken(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+        case let .getWebhookMessage(webhookId, webhookToken, messageId):
+            return "getWebhookMessage(webhookId: \(webhookId), webhookToken: \(webhookToken), messageId: \(messageId))"
+        case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
+            return "getWebhooksMessagesOriginal(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+        case let .listChannelWebhooks(channelId):
+            return "listChannelWebhooks(channelId: \(channelId))"
+        case let .createWebhook(channelId):
+            return "createWebhook(channelId: \(channelId))"
+        case let .executeWebhook(webhookId, webhookToken):
+            return "executeWebhook(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+        case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
+            return "patchWebhooksMessagesOriginal(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+        case let .updateWebhook(webhookId):
+            return "updateWebhook(webhookId: \(webhookId))"
+        case let .updateWebhookByToken(webhookId, webhookToken):
+            return "updateWebhookByToken(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+        case let .updateWebhookMessage(webhookId, webhookToken, messageId):
+            return "updateWebhookMessage(webhookId: \(webhookId), webhookToken: \(webhookToken), messageId: \(messageId))"
+        case let .deleteWebhook(webhookId):
+            return "deleteWebhook(webhookId: \(webhookId))"
+        case let .deleteWebhookByToken(webhookId, webhookToken):
+            return "deleteWebhookByToken(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+        case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
+            return "deleteWebhookMessage(webhookId: \(webhookId), webhookToken: \(webhookToken), messageId: \(messageId))"
+        case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
+            return "deleteWebhooksMessagesOriginal(webhookId: \(webhookId), webhookToken: \(webhookToken))"
         }
     }
 }

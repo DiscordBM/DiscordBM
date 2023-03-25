@@ -191,6 +191,51 @@ public enum CDNEndpoint: Endpoint {
         case .guildMemberBanner: return 20
         }
     }
+    
+    public var description: String {
+        switch self {
+        case let .customEmoji(emojiId):
+            return "customEmoji(emojiId: \(emojiId))"
+        case let .guildIcon(guildId, icon):
+            return "guildIcon(guildId: \(guildId), icon: \(icon))"
+        case let .guildSplash(guildId, splash):
+            return "guildSplash(guildId: \(guildId), splash: \(splash))"
+        case let .guildDiscoverySplash(guildId, splash):
+            return "guildDiscoverySplash(guildId: \(guildId), splash: \(splash))"
+        case let .guildBanner(guildId, banner):
+            return "guildBanner(guildId: \(guildId), banner: \(banner))"
+        case let .userBanner(userId, banner):
+            return "userBanner(userId: \(userId), banner: \(banner))"
+        case let .defaultUserAvatar(discriminator):
+            return "defaultUserAvatar(discriminator: \(discriminator))"
+        case let .userAvatar(userId, avatar):
+            return "userAvatar(userId: \(userId), avatar: \(avatar))"
+        case let .guildMemberAvatar(guildId, userId, avatar):
+            return "guildMemberAvatar(guildId: \(guildId), userId: \(userId), avatar: \(avatar))"
+        case let .applicationIcon(appId, icon):
+            return "applicationIcon(appId: \(appId), icon: \(icon))"
+        case let .applicationCover(appId, cover):
+            return "applicationCover(appId: \(appId), cover: \(cover))"
+        case let .applicationAsset(appId, assetId):
+            return "applicationAsset(appId: \(appId), assetId: \(assetId))"
+        case let .achievementIcon(appId, achievementId, icon):
+            return "achievementIcon(appId: \(appId), achievementId: \(achievementId), icon: \(icon))"
+        case let .storePageAsset(appId, assetId):
+            return "storePageAsset(appId: \(appId), assetId: \(assetId))"
+        case let .stickerPackBanner(assetId):
+            return "stickerPackBanner(assetId: \(assetId))"
+        case let .teamIcon(teamId, icon):
+            return "teamIcon(teamId: \(teamId), icon: \(icon))"
+        case let .sticker(stickerId):
+            return "sticker(stickerId: \(stickerId))"
+        case let .roleIcon(roleId, icon):
+            return "roleIcon(roleId: \(roleId), icon: \(icon))"
+        case let .guildScheduledEventCover(eventId, cover):
+            return "guildScheduledEventCover(eventId: \(eventId), cover: \(cover))"
+        case let .guildMemberBanner(guildId, userId, banner):
+            return "guildMemberBanner(guildId: \(guildId), userId: \(userId), banner: \(banner))"
+        }
+    }
 }
 
 public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {

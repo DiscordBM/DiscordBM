@@ -74,7 +74,7 @@ let package = Package(
                     description: "Generates API Endpoints"
                 ),
                 permissions: [
-                    .writeToPackageDirectory(reason: "Overwrite APIEndpoint.swift")
+                    .writeToPackageDirectory(reason: "Add Generated Endpoints")
                 ]
             ),
             dependencies: ["GenerateAPIEndpointsExec"]

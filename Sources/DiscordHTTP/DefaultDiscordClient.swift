@@ -59,7 +59,7 @@ public struct DefaultDiscordClient: DiscordClient {
     }
     
     func checkRateLimitsAllowRequest(
-        to endpoint: Endpoint,
+        to endpoint: any Endpoint,
         requestId: UInt,
         retriesSoFar: Int
     ) async throws {
@@ -92,7 +92,7 @@ public struct DefaultDiscordClient: DiscordClient {
     }
     
     func includeInRateLimits(
-        endpoint: Endpoint,
+        endpoint: AnyEndpoint,
         headers: HTTPHeaders,
         status: HTTPResponseStatus
     ) async {
@@ -465,7 +465,7 @@ public struct ClientConfiguration {
         /// Caches all cacheable endpoints for the entered seconds,
         /// except for `getGateway` which is cached for an hour.
         public static func enabled(defaultTTL: Double) -> CachingBehavior {
-            CachingBehavior.custom(defaultTTL: defaultTTL, endpoints: [.apiEndpoint(.getGateway): 3600])
+            CachingBehavior.custom(defaultTTL: defaultTTL, endpoints: [.api(.getGateway): 3600])
         }
         
         /// Doesn't allow caching at all.
@@ -706,10 +706,10 @@ actor ClientCache {
         
         func hash(into hasher: inout Hasher) {
             switch identity {
-            case .apiEndpoint(let endpoint):
+            case .api(let endpoint):
                 hasher.combine(0)
                 hasher.combine(endpoint.rawValue)
-            case .cdnEndpoint(let endpoint):
+            case .cdn(let endpoint):
                 hasher.combine(1)
                 hasher.combine(endpoint.rawValue)
             }

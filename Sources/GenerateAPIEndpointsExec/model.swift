@@ -119,28 +119,28 @@ struct API: Decodable {
                 
                 var countsAgainstGlobalRateLimit: Bool {
                     switch self {
-                    case .autoMod: return false
-                    case .auditLog: return false
-                    case .channels: return false
-                    case .commands: return false
-                    case .emoji: return false
-                    case .gateway: return false
-                    case .guilds: return false
-                    case .guildTemplates: return false
-                    case .interactions: return true
-                    case .invites: return false
-                    case .members: return false
-                    case .messages: return false
-                    case .oAuth: return false
-                    case .roles: return false
-                    case .roleConnections: return false
-                    case .scheduledEvents: return false
-                    case .stages: return false
-                    case .stickers: return false
-                    case .threads: return false
-                    case .users: return false
-                    case .voice: return false
-                    case .webhooks: return false
+                    case .autoMod: return true
+                    case .auditLog: return true
+                    case .channels: return true
+                    case .commands: return true
+                    case .emoji: return true
+                    case .gateway: return true
+                    case .guilds: return true
+                    case .guildTemplates: return true
+                    case .interactions: return false
+                    case .invites: return true
+                    case .members: return true
+                    case .messages: return true
+                    case .oAuth: return true
+                    case .roles: return true
+                    case .roleConnections: return true
+                    case .scheduledEvents: return true
+                    case .stages: return true
+                    case .stickers: return true
+                    case .threads: return true
+                    case .users: return true
+                    case .voice: return true
+                    case .webhooks: return true
                     }
                 }
                 

@@ -52,8 +52,7 @@ func makeRawCaseName(_ info: API.Path.Info) -> String {
     return "case .\(summary):"
 }
 
-@_disfavoredOverload
-func makeRawCaseName(_ info: API.Path.Info) -> (name: String, params: [String]) {
+func makeRawCaseNameWithParams(_ info: API.Path.Info) -> (name: String, params: [String]) {
     let summary = info.summary.toCamelCase()
     if summary.isEmpty {
         fatalError("Summary is empty: \(info)")
@@ -197,8 +196,8 @@ public var countsAgainstGlobalRateLimit: Bool {
 """
 
 let _requiresAuthorizationHeader = grouped.flatMap(\.value).map { info -> String in
-    let (name, params) = makeRawCaseName(info.info)
-    let requires = params.contains(webhookTokenParam)
+    let (name, params) = makeRawCaseNameWithParams(info.info)
+    let requires = !params.contains(webhookTokenParam)
     return name + " return \(requires)"
 }.joined(separator: "\n")
 
@@ -220,6 +219,28 @@ let parametersString = """
 public var parameters: [String] {
     switch self {
 \(_parameters.indent())
+    }
+}
+"""
+
+let _description = grouped.flatMap(\.value).map { info -> String in
+    let (name, params) = makeIterativeCase(info.info)
+    let rawName = info.info.summary.toCamelCase()
+    let paramsDescription = params.map {
+        #"\#($0): \(\#($0))"#
+    }.joined(separator: ", ")
+    if params.isEmpty {
+        return name + "\n" + #"return "\#(rawName)""#.indent()
+    } else {
+        let ret = #"return "\#(rawName)(\#(paramsDescription))""#
+        return name + "\n" + ret.indent()
+    }
+}.joined(separator: "\n")
+
+let descriptionString = """
+public var description: String {
+    switch self {
+\(_description.indent())
     }
 }
 """
@@ -282,7 +303,7 @@ init? (endpoint: APIEndpoint) {
 """
 
 let result = """
-// MARK: - DO NOT EDIT. Auto-generated endpoints using the GenerateAPIEndpoints command plugin.
+// MARK: - DO NOT EDIT. Auto-generated using the GenerateAPIEndpoints command plugin.
 
 import NIOHTTP1
 
@@ -305,6 +326,8 @@ public enum APIEndpoint: Endpoint {
 \(parametersString.indent())
 
 \(idString.indent())
+
+\(descriptionString.indent())
 }
 
 public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {

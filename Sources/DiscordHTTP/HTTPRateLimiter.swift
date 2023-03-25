@@ -180,7 +180,7 @@ actor HTTPRateLimiter {
         }
     }
     
-    func include(endpoint: Endpoint, headers: HTTPHeaders, status: HTTPResponseStatus) {
+    func include(endpoint: AnyEndpoint, headers: HTTPHeaders, status: HTTPResponseStatus) {
         /// Add to invalid requests limit if needed.
         if [429, 403, 401].contains(status.code) {
             let id = self.currentMinutelyRateLimitId()

@@ -6,7 +6,7 @@ import XCTest
 class HTTPRateLimiterTests: XCTestCase {
     
     var rateLimiter = HTTPRateLimiter(label: "Test_RateLimiter")
-    let endpoint = APIEndpoint.getGateway
+    let endpoint = AnyEndpoint.api(.getGateway)
     /// Interactions endpoints are unique in the sense that they by-pass the global rate limit.
     let interactionEndpoint = APIEndpoint.createInteractionResponse(
         interactionId: "",

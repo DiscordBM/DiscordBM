@@ -1244,7 +1244,7 @@ class DiscordClientTests: XCTestCase {
         do {
             let cachingBehavior = ClientConfiguration.CachingBehavior.custom(
                 defaultTTL: 2,
-                endpoints: [.apiEndpoint(.listApplicationCommands): 0]
+                endpoints: [.api(.listApplicationCommands): 0]
             )
             let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
             let cacheClient: any DiscordClient = DefaultDiscordClient(
