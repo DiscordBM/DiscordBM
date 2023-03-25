@@ -4873,7 +4873,7 @@ paths:
               schema:
                 type: string
               example: ''
-  /webhooks/{application.id}/{interaction.token}/messages/@original:
+  /webhooks/{application_id}/{interaction_token}/messages/@original:
     get:
       tags:
         - Interactions
@@ -4931,7 +4931,7 @@ paths:
           required: true
           description: '(Required) '
           example: <string>
-  /webhooks/{application.id}/{interaction.token}:
+  /webhooks/{application_id}/{interaction_token}:
     post:
       tags:
         - Interactions
@@ -4951,7 +4951,7 @@ paths:
           required: true
           description: '(Required) '
           example: <string>
-  /webhooks/{application.id}/{interaction.token}/messages/{message.id}:
+  /webhooks/{application_id}/{interaction_token}/messages/{message_id}:
     get:
       tags:
         - Interactions
@@ -12342,6 +12342,20 @@ paths:
               schema:
                 type: string
               example: ''
+    post-2:
+      tags:
+        - Threads
+      summary: create thread in forum channel
+      requestBody:
+        content: {}
+      parameters:
+        - name: channel_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
   /users/@me/connections:
     get:
       tags:

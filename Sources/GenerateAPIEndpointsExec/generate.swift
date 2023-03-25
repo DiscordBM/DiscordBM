@@ -236,6 +236,51 @@ public var id: Int {
 }
 """
 
+var cacheableCases = grouped.compactMap { tag, infos -> (API.Path.Info.Tag, [String])? in
+    let filtered = infos.filter { $0.method == .GET }
+    if filtered.isEmpty {
+        return nil
+    } else {
+        return (tag, filtered.map(\.info).map { "case \($0.summary.toCamelCase())" })
+    }
+}.map { tag, infos in
+    """
+    // MARK: \(tag.rawValue)
+    /// \(tag.link)
+    
+    \(infos.joined(separator: "\n"))
+    """
+}.joined(separator: "\n\n")
+
+var _cacheableDescription = grouped.flatMap(\.value).filter {
+    $0.method == .GET
+}.map {
+    makeRawCaseName($0.info) + #" return "\#($0.info.summary.toCamelCase())""#
+}.joined(separator: "\n")
+
+let cacheableDescriptionString = """
+public var description: String {
+    switch self {
+\(_cacheableDescription.indent())
+    }
+}
+"""
+
+var _cacheableInit = grouped.flatMap(\.value).filter {
+    $0.method == .GET
+}.map {
+    makeRawCaseName($0.info) + " self = .\($0.info.summary.toCamelCase())"
+}.joined(separator: "\n")
+
+let cacheableInitString = """
+init? (endpoint: APIEndpoint) {
+    switch endpoint {
+\(_cacheableInit.indent())
+    default: return nil
+    }
+}
+"""
+
 let result = """
 // MARK: - DO NOT EDIT. Auto-generated endpoints using the GenerateAPIEndpoints command plugin.
 
@@ -260,6 +305,15 @@ public enum APIEndpoint: Endpoint {
 \(parametersString.indent())
 
 \(idString.indent())
+}
+
+public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
+
+\(cacheableCases.indent())
+
+\(cacheableDescriptionString.indent())
+
+\(cacheableInitString.indent())
 }
 """
 

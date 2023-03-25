@@ -192,3 +192,76 @@ public enum CDNEndpoint: Endpoint {
         }
     }
 }
+
+public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
+    case customEmoji
+    case guildIcon
+    case guildSplash
+    case guildDiscoverySplash
+    case guildBanner
+    case userBanner
+    case defaultUserAvatar
+    case userAvatar
+    case guildMemberAvatar
+    case applicationIcon
+    case applicationCover
+    case applicationAsset
+    case achievementIcon
+    case storePageAsset
+    case stickerPackBanner
+    case teamIcon
+    case sticker
+    case roleIcon
+    case guildScheduledEventCover
+    case guildMemberBanner
+    
+    public var description: String {
+        switch self {
+        case .customEmoji: return "customEmoji"
+        case .guildIcon: return "guildIcon"
+        case .guildSplash: return "guildSplash"
+        case .guildDiscoverySplash: return "guildDiscoverySplash"
+        case .guildBanner: return "guildBanner"
+        case .userBanner: return "userBanner"
+        case .defaultUserAvatar: return "defaultUserAvatar"
+        case .userAvatar: return "userAvatar"
+        case .guildMemberAvatar: return "guildMemberAvatar"
+        case .applicationIcon: return "applicationIcon"
+        case .applicationCover: return "applicationCover"
+        case .applicationAsset: return "applicationAsset"
+        case .achievementIcon: return "achievementIcon"
+        case .storePageAsset: return "storePageAsset"
+        case .stickerPackBanner: return "stickerPackBanner"
+        case .teamIcon: return "teamIcon"
+        case .sticker: return "sticker"
+        case .roleIcon: return "roleIcon"
+        case .guildScheduledEventCover: return "guildScheduledEventCover"
+        case .guildMemberBanner: return "guildMemberBanner"
+        }
+    }
+    
+    init(endpoint: CDNEndpoint) {
+        switch endpoint {
+        case .customEmoji: self = .customEmoji
+        case .guildIcon: self = .guildIcon
+        case .guildSplash: self = .guildSplash
+        case .guildDiscoverySplash: self = .guildDiscoverySplash
+        case .guildBanner: self = .guildBanner
+        case .userBanner: self = .userBanner
+        case .defaultUserAvatar: self = .defaultUserAvatar
+        case .userAvatar: self = .userAvatar
+        case .guildMemberAvatar: self = .guildMemberAvatar
+        case .applicationIcon: self = .applicationIcon
+        case .applicationCover: self = .applicationCover
+        case .applicationAsset: self = .applicationAsset
+        case .achievementIcon: self = .achievementIcon
+        case .storePageAsset: self = .storePageAsset
+        case .stickerPackBanner: self = .stickerPackBanner
+        case .teamIcon: self = .teamIcon
+        case .sticker: self = .sticker
+        case .roleIcon: self = .roleIcon
+        case .guildScheduledEventCover: self = .guildScheduledEventCover
+        case .guildMemberBanner: self = .guildMemberBanner
+        }
+    }
+}

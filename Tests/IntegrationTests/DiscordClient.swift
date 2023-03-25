@@ -55,7 +55,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Cleanup: Get channel messages and delete messages by the bot itself, if any
         /// Makes this test resilient to failing because it has failed the last time
-        let allOldMessages = try await client.getChannelMessages(
+        let allOldMessages = try await client.listMessages(
             channelId: Constants.channelId
         ).decode()
         
@@ -93,7 +93,7 @@ class DiscordClientTests: XCTestCase {
         /// Add 4 Reactions
         let reactions = ["🚀", "🤠", "👀", "❤️"]
         for reaction in reactions {
-            let reactionResponse = try await client.createReaction(
+            let reactionResponse = try await client.addMyMessageReaction(
                 channelId: Constants.channelId,
                 messageId: message.id,
                 emoji: .unicodeEmoji(reaction)
@@ -102,49 +102,49 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(reactionResponse.status, .noContent)
         }
         
-        let deleteOwnReactionResponse = try await client.deleteOwnReaction(
+        let deleteMyMessageReactionResponse = try await client.deleteMyMessageReaction(
             channelId: Constants.channelId,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[0])
         )
         
-        XCTAssertEqual(deleteOwnReactionResponse.status, .noContent)
+        XCTAssertEqual(deleteMyMessageReactionResponse.status, .noContent)
         
-        try await client.deleteUserReaction(
+        try await client.deleteUserMessageReaction(
             channelId: Constants.channelId,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[1]),
             userId: Constants.botId
         ).guardSuccess()
         
-        let getReactionsResponse = try await client.getReactions(
+        let listMessageReactionsByEmojiResponse = try await client.listMessageReactionsByEmoji(
             channelId: Constants.channelId,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[2])
         ).decode()
         
-        XCTAssertEqual(getReactionsResponse.count, 1)
+        XCTAssertEqual(listMessageReactionsByEmojiResponse.count, 1)
         
-        let reactionUser = try XCTUnwrap(getReactionsResponse.first)
+        let reactionUser = try XCTUnwrap(listMessageReactionsByEmojiResponse.first)
         XCTAssertEqual(reactionUser.id, Constants.botId)
         
-        let deleteAllReactionsForEmojiResponse = try await client.deleteAllReactionsForEmoji(
+        let deleteAllMessageReactionsByEmojiResponse = try await client.deleteAllMessageReactionsByEmoji(
             channelId: Constants.channelId,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[2])
         )
         
-        XCTAssertEqual(deleteAllReactionsForEmojiResponse.status, .noContent)
+        XCTAssertEqual(deleteAllMessageReactionsByEmojiResponse.status, .noContent)
         
-        let deleteAllReactionsResponse = try await client.deleteAllReactions(
+        let deleteAllMessageReactionsResponse = try await client.deleteAllMessageReactions(
             channelId: Constants.channelId,
             messageId: message.id
         )
         
-        XCTAssertEqual(deleteAllReactionsResponse.status, .noContent)
+        XCTAssertEqual(deleteAllMessageReactionsResponse.status, .noContent)
         
         /// Get the message again
-        let retrievedMessage = try await client.getChannelMessage(
+        let retrievedMessage = try await client.getMessage(
             channelId: Constants.channelId,
             messageId: message.id
         ).decode()
@@ -156,7 +156,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertFalse(retrievedMessage.reactions?.isEmpty == false)
         
         /// Get channel messages
-        let allMessages = try await client.getChannelMessages(
+        let allMessages = try await client.listMessages(
             channelId: Constants.channelId
         ).decode()
         
@@ -166,7 +166,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(allMessages[2].content, "Hello! This is a test message!")
         
         /// Get channel messages with `limit == 2`
-        let allMessagesLimit = try await client.getChannelMessages(
+        let allMessagesLimit = try await client.listMessages(
             channelId: Constants.channelId,
             limit: 2
         ).decode()
@@ -174,7 +174,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(allMessagesLimit.count, 2)
         
         /// Get channel messages with `after`
-        let allMessagesAfter = try await client.getChannelMessages(
+        let allMessagesAfter = try await client.listMessages(
             channelId: Constants.channelId,
             after: allMessages[1].id
         ).decode()
@@ -182,7 +182,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(allMessagesAfter.count, 1)
         
         /// Get channel messages with `before`
-        let allMessagesBefore = try await client.getChannelMessages(
+        let allMessagesBefore = try await client.listMessages(
             channelId: Constants.channelId,
             before: allMessages[2].id
         ).decode()
@@ -190,7 +190,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(allMessagesBefore.count, 0)
         
         /// Get channel messages with `around`
-        let allMessagesAround = try await client.getChannelMessages(
+        let allMessagesAround = try await client.listMessages(
             channelId: Constants.channelId,
             around: allMessages[1].id
         ).decode()
@@ -258,7 +258,7 @@ class DiscordClientTests: XCTestCase {
         /// Bulk overwrite
         let commandName3 = "test-command-3"
         let commandType3: ApplicationCommand.Kind = .user
-        let overwrite = try await client.bulkOverwriteGlobalApplicationCommands(
+        let overwrite = try await client.bulkSetApplicationCommands(
             payload: [.init(
                 name: commandName3,
                 type: commandType3
@@ -317,7 +317,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(oneCommand.description, commandDesc1)
         
         /// Get permissions. Will be empty since we can't set up permissions using bot tokens
-        let allPerms = try await client.getGuildApplicationCommandPermissions(
+        let allPerms = try await client.listGuildApplicationCommandPermissions(
             guildId: Constants.guildId
         ).decode()
         
@@ -325,7 +325,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Get one permission. Will throw an error
         /// since we can't set up permissions using bot tokens
-        let onePerm = try await client.getApplicationCommandPermissions(
+        let onePerm = try await client.getGuildApplicationCommandPermissions(
             guildId: Constants.guildId,
             commandId: command1.id
         ).decodeError()
@@ -361,7 +361,7 @@ class DiscordClientTests: XCTestCase {
         /// Bulk overwrite
         let commandName3 = "test-guild-command-3"
         let commandType3: ApplicationCommand.Kind = .user
-        let overwrite = try await client.bulkOverwriteGuildApplicationCommands(
+        let overwrite = try await client.bulkSetGuildApplicationCommands(
             guildId: Constants.guildId,
             payload: [.init(
                 name: commandName3,
@@ -407,7 +407,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertNotEqual(guildWithCounts.approximate_presence_count, nil)
         
         /// Get guild audit logs
-        let auditLogs = try await client.getGuildAuditLogs(guildId: Constants.guildId).decode()
+        let auditLogs = try await client.listGuildAuditLogEntries(guildId: Constants.guildId).decode()
         XCTAssertEqual(auditLogs.audit_log_entries.count, 50)
         
         /// Leave guild
@@ -496,7 +496,7 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertEqual(memberRoleAdditionResponse.status, .noContent)
         
-        let memberRoleDeletionResponse = try await client.removeGuildMemberRole(
+        let memberRoleDeletionResponse = try await client.deleteGuildMemberRole(
             guildId: Constants.guildId,
             userId: Constants.personalId,
             roleId: role.id
@@ -515,7 +515,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(roleDeletionResponse.status, .noContent)
         
         /// Get guild audit logs with action type
-        let auditLogsWithActionType = try await client.getGuildAuditLogs(
+        let auditLogsWithActionType = try await client.listGuildAuditLogEntries(
             guildId: Constants.guildId,
             action_type: .roleDelete
         ).decode()
@@ -526,7 +526,7 @@ class DiscordClientTests: XCTestCase {
     
     func testDMs() async throws {
         /// Create DM
-        let response = try await client.createDM(recipient_id: Constants.personalId).decode()
+        let response = try await client.createDm(recipient_id: Constants.personalId).decode()
         
         XCTAssertEqual(response.type, .dm)
         let recipient = try XCTUnwrap(response.recipients?.first)
@@ -552,7 +552,7 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         /// Create Thread
-        let thread = try await client.startThreadFromMessage(
+        let thread = try await client.createThreadFromMessage(
             channelId: Constants.threadsChannelId,
             messageId: message.id,
             reason: "Testing!",
@@ -668,7 +668,7 @@ class DiscordClientTests: XCTestCase {
             messageId: message.id
         ).guardSuccess()
         
-        let threadWithoutMessage = try await client.startThreadWithoutMessage(
+        let threadWithoutMessage = try await client.createThread(
             channelId: Constants.announcementsChannelId,
             reason: "Testing without message thread",
             payload: .init(
@@ -719,7 +719,7 @@ class DiscordClientTests: XCTestCase {
             limit: 2
         ).guardSuccess()
         
-        try await client.listJoinedPrivateArchivedThreads(
+        try await client.listMyPrivateArchivedThreads(
             channelId: Constants.threadsChannelId,
             limit: 2
         ).guardSuccess()
@@ -1244,7 +1244,7 @@ class DiscordClientTests: XCTestCase {
         do {
             let cachingBehavior = ClientConfiguration.CachingBehavior.custom(
                 defaultTTL: 2,
-                endpoints: [.listApplicationCommands: 0]
+                endpoints: [.apiEndpoint(.listApplicationCommands): 0]
             )
             let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
             let cacheClient: any DiscordClient = DefaultDiscordClient(

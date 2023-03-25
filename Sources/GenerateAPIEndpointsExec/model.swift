@@ -49,6 +49,10 @@ struct API: Decodable {
                 let container = try decoder.singleValueContainer()
                 let infos = try container.decode([String: Info].self)
                 self.values = infos.map { methodString, info in
+                    var methodString = methodString
+                    if let idx = methodString.firstIndex(of: "-") {
+                        methodString.removeSubrange(idx...)
+                    }
                     let method = HTTPMethod(rawValue: methodString.uppercased())
                     if case .RAW = method {
                         fatalError("Unhandled method: \(method)")

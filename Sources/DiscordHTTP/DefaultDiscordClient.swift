@@ -465,7 +465,7 @@ public struct ClientConfiguration {
         /// Caches all cacheable endpoints for the entered seconds,
         /// except for `getGateway` which is cached for an hour.
         public static func enabled(defaultTTL: Double) -> CachingBehavior {
-            CachingBehavior.custom(defaultTTL: defaultTTL, endpoints: [.getGateway: 3600])
+            CachingBehavior.custom(defaultTTL: defaultTTL, endpoints: [.apiEndpoint(.getGateway): 3600])
         }
         
         /// Doesn't allow caching at all.
@@ -705,7 +705,14 @@ actor ClientCache {
         let queries: [(String, String?)]
         
         func hash(into hasher: inout Hasher) {
-            hasher.combine(identity.rawValue)
+            switch identity {
+            case .apiEndpoint(let endpoint):
+                hasher.combine(0)
+                hasher.combine(endpoint.rawValue)
+            case .cdnEndpoint(let endpoint):
+                hasher.combine(1)
+                hasher.combine(endpoint.rawValue)
+            }
             for param in parameters {
                 hasher.combine(param)
             }

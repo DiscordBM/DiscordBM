@@ -631,7 +631,7 @@ public actor ReactToRoleHandler {
               let roleId = self.configuration.roleId
         else { return }
         do {
-            try await client.removeGuildMemberRole(
+            try await client.deleteGuildMemberRole(
                 guildId: self.configuration.guildId,
                 userId: userId,
                 roleId: roleId
@@ -645,7 +645,7 @@ public actor ReactToRoleHandler {
         /// Verify message exists
         let message: Gateway.MessageCreate
         do {
-            message = try await client.getChannelMessage(
+            message = try await client.getMessage(
                 channelId: configuration.channelId,
                 messageId: configuration.messageId
             ).decode()
@@ -658,7 +658,7 @@ public actor ReactToRoleHandler {
         }
         /// Populate reactions
         for reaction in self.configuration.reactions {
-            let reactionsUsers = try await client.getReactions(
+            let reactionsUsers = try await client.listMessageReactionsByEmoji(
                 channelId: self.configuration.channelId,
                 messageId: self.configuration.messageId,
                 emoji: reaction
@@ -685,7 +685,7 @@ public actor ReactToRoleHandler {
         }
         for reaction in remaining {
             do {
-                try await client.createReaction(
+                try await client.addMyMessageReaction(
                     channelId: self.configuration.channelId,
                     messageId: self.configuration.messageId,
                     emoji: reaction

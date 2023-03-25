@@ -80,7 +80,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Verify reacted
-        let reactionUsers = try await client.getReactions(
+        let reactionUsers = try await client.listMessageReactionsByEmoji(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -105,7 +105,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Delete the reaction, check if role is removed
-        try await client.deleteOwnReaction(
+        try await client.deleteMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -125,7 +125,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Create an unrelated reaction, must not be granted the role
-        try await client.createReaction(
+        try await client.addMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
@@ -225,7 +225,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Verify reacted
-        let reactionUsers = try await client.getReactions(
+        let reactionUsers = try await client.listMessageReactionsByEmoji(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -255,7 +255,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Delete the reaction, check if role is removed
-        try await client.deleteOwnReaction(
+        try await client.deleteMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -275,7 +275,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Create an unrelated reaction, must not be granted the role
-        try await client.createReaction(
+        try await client.addMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
@@ -363,7 +363,7 @@ class ReactToRoleTests: XCTestCase {
         
         do {
             /// Verify reacted to `reaction1`
-            let reactionUsers = try await client.getReactions(
+            let reactionUsers = try await client.listMessageReactionsByEmoji(
                 channelId: Constants.reactionChannelId,
                 messageId: reactionMessageId,
                 emoji: reaction1
@@ -377,7 +377,7 @@ class ReactToRoleTests: XCTestCase {
         
         do {
             /// Verify reacted to `reaction2`
-            let reactionUsers = try await client.getReactions(
+            let reactionUsers = try await client.listMessageReactionsByEmoji(
                 channelId: Constants.reactionChannelId,
                 messageId: reactionMessageId,
                 emoji: reaction2
@@ -399,7 +399,7 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
-        try await client.deleteOwnReaction(
+        try await client.deleteMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction1
@@ -418,7 +418,7 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
-        try await client.deleteAllReactions(
+        try await client.deleteAllMessageReactions(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId
         ).guardSuccess()
@@ -440,7 +440,7 @@ class ReactToRoleTests: XCTestCase {
         let _roleId = await handler.configuration.roleId
         let roleId = try XCTUnwrap(_roleId)
         
-        try await client.removeGuildMemberRole(
+        try await client.deleteGuildMemberRole(
             guildId: Constants.guildId,
             userId: Constants.botId,
             roleId: roleId
@@ -459,7 +459,7 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNil(role, "\(member.roles) contained '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
-        try await client.createReaction(
+        try await client.addMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction2
@@ -478,7 +478,7 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
-        try await client.createReaction(
+        try await client.addMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction1
@@ -497,7 +497,7 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
-        try await client.deleteAllReactionsForEmoji(
+        try await client.deleteAllMessageReactionsByEmoji(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction1
@@ -516,7 +516,7 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
-        try await client.deleteOwnReaction(
+        try await client.deleteMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction2
@@ -585,7 +585,7 @@ class ReactToRoleTests: XCTestCase {
         
         do {
             /// Verify reacted
-            let reactionUsers = try await client.getReactions(
+            let reactionUsers = try await client.listMessageReactionsByEmoji(
                 channelId: Constants.reactionChannelId,
                 messageId: reactionMessageId,
                 emoji: reaction
@@ -607,7 +607,7 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
-        try await client.deleteOwnReaction(
+        try await client.deleteMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -630,7 +630,7 @@ class ReactToRoleTests: XCTestCase {
         let stoppedState = await handler.state
         XCTAssertEqual(stoppedState, .stopped)
         
-        try await client.createReaction(
+        try await client.addMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -729,7 +729,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Verify reacted
-        let reactionUsers = try await client.getReactions(
+        let reactionUsers = try await client.listMessageReactionsByEmoji(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -751,7 +751,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Delete the reaction, check if role is removed
-        try await client.deleteOwnReaction(
+        try await client.deleteMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -771,7 +771,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Create an unrelated reaction, must not be granted the role
-        try await client.createReaction(
+        try await client.addMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
@@ -873,7 +873,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Verify reacted
-        let reactionUsers = try await client.getReactions(
+        let reactionUsers = try await client.listMessageReactionsByEmoji(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -898,7 +898,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Delete the reaction, check if role is removed
-        try await client.deleteOwnReaction(
+        try await client.deleteMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -918,7 +918,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Create an unrelated reaction, must not be granted the role
-        try await client.createReaction(
+        try await client.addMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
@@ -1089,7 +1089,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Verify reacted
-        let reactionUsers = try await client.getReactions(
+        let reactionUsers = try await client.listMessageReactionsByEmoji(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -1114,7 +1114,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Delete the reaction, check if role is removed
-        try await client.deleteOwnReaction(
+        try await client.deleteMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -1139,7 +1139,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(stoppedState, .stopped)
         
         /// Create the reaction again, must not be granted the role
-        try await client.createReaction(
+        try await client.addMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction
@@ -1159,7 +1159,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Delete the reaction again
-        try await client.deleteOwnReaction(
+        try await client.deleteMyMessageReaction(
             channelId: Constants.reactionChannelId,
             messageId: reactionMessageId,
             emoji: reaction

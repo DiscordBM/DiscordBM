@@ -235,7 +235,7 @@ class ClientConfigurationTests: XCTestCase {
                 body: .init(string: "body right here :)")
             )
             let item = ClientCache.CacheableItem(
-                identity: .getChannel,
+                identity: .apiEndpoint(.getChannel),
                 parameters: [],
                 queries: []
             )
@@ -255,7 +255,7 @@ class ClientConfigurationTests: XCTestCase {
                 body: .init(string: "body right here :)")
             )
             let item = ClientCache.CacheableItem(
-                identity: .getChannel,
+                identity: .apiEndpoint(.getChannel),
                 parameters: [],
                 queries: [("name", "mahdi"), ("age", "99"), ("height", nil)]
             )
@@ -275,13 +275,13 @@ class ClientConfigurationTests: XCTestCase {
                 body: .init(string: "body right here :)")
             )
             let item = ClientCache.CacheableItem(
-                identity: .getChannel,
+                identity: .apiEndpoint(.getChannel),
                 parameters: [],
                 queries: []
             )
             await cache.add(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(item: .init(
-                identity: .getGuildAuditLogs,
+                identity: .apiEndpoint(.listGuildAuditLogEntries),
                 parameters: [],
                 queries: []
             ))
@@ -299,13 +299,13 @@ class ClientConfigurationTests: XCTestCase {
                 body: .init(string: "body right here :)")
             )
             let item = ClientCache.CacheableItem(
-                identity: .getChannel,
+                identity: .apiEndpoint(.getChannel),
                 parameters: ["1"],
                 queries: []
             )
             await cache.add(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(item: .init(
-                identity: .getChannel,
+                identity: .apiEndpoint(.getChannel),
                 parameters: [],
                 queries: []
             ))
@@ -323,13 +323,13 @@ class ClientConfigurationTests: XCTestCase {
                 body: .init(string: "body right here :)")
             )
             let item = ClientCache.CacheableItem(
-                identity: .getChannel,
+                identity: .apiEndpoint(.getChannel),
                 parameters: [],
                 queries: [("name", "mahdi")]
             )
             await cache.add(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(item: .init(
-                identity: .getChannel,
+                identity: .apiEndpoint(.getChannel),
                 parameters: [],
                 queries: []
             ))
@@ -347,14 +347,14 @@ class ClientConfigurationTests: XCTestCase {
                 body: .init(string: "body right here :)")
             )
             let item = ClientCache.CacheableItem(
-                identity: .getChannel,
+                identity: .apiEndpoint(.getChannel),
                 parameters: [],
                 queries: []
             )
             await cache.add(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(
                 item: .init(
-                    identity: .getChannel,
+                    identity: .apiEndpoint(.getChannel),
                     parameters: [],
                     queries: [("name", "mahdi")]
                 )
@@ -373,7 +373,7 @@ class ClientConfigurationTests: XCTestCase {
                 body: .init(string: "body right here :)")
             )
             let item = ClientCache.CacheableItem(
-                identity: .getChannel,
+                identity: .apiEndpoint(.getChannel),
                 parameters: [],
                 queries: []
             )
