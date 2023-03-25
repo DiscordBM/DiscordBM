@@ -113,7 +113,14 @@ public enum APIEndpoint: Endpoint {
     // MARK: Interactions
     /// https://discord.com/developers/docs/interactions/receiving-and-responding
     
+    case getFollowupMessage(applicationId: String, interactionToken: String, messageId: String)
+    case getOriginalInteractionResponse(applicationId: String, interactionToken: String)
+    case createFollowupMessage(applicationId: String, interactionToken: String)
     case createInteractionResponse(interactionId: String, interactionToken: String)
+    case updateFollowupMessage(applicationId: String, interactionToken: String, messageId: String)
+    case updateOriginalInteractionResponse(applicationId: String, interactionToken: String)
+    case deleteFollowupMessage(applicationId: String, interactionToken: String, messageId: String)
+    case deleteOriginalInteractionResponse(applicationId: String, interactionToken: String)
     
     // MARK: Invites
     /// https://discord.com/developers/docs/resources/invite
@@ -521,10 +528,41 @@ public enum APIEndpoint: Endpoint {
             let guildId = encoded(guildId)
             let code = encoded(code)
             suffix = "guilds/\(guildId)/templates/\(code)"
+        case let .getFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = encoded(applicationId)
+            let interactionToken = encoded(interactionToken)
+            let messageId = encoded(messageId)
+            suffix = "webhooks/application.id/interaction.token/messages/message.id"
+        case let .getOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = encoded(applicationId)
+            let interactionToken = encoded(interactionToken)
+            suffix = "webhooks/application.id/interaction.token/messages/@original"
+        case let .createFollowupMessage(applicationId, interactionToken):
+            let applicationId = encoded(applicationId)
+            let interactionToken = encoded(interactionToken)
+            suffix = "webhooks/application.id/interaction.token"
         case let .createInteractionResponse(interactionId, interactionToken):
             let interactionId = encoded(interactionId)
             let interactionToken = encoded(interactionToken)
             suffix = "interactions/\(interactionId)/\(interactionToken)/callback"
+        case let .updateFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = encoded(applicationId)
+            let interactionToken = encoded(interactionToken)
+            let messageId = encoded(messageId)
+            suffix = "webhooks/application.id/interaction.token/messages/message.id"
+        case let .updateOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = encoded(applicationId)
+            let interactionToken = encoded(interactionToken)
+            suffix = "webhooks/application.id/interaction.token/messages/@original"
+        case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = encoded(applicationId)
+            let interactionToken = encoded(interactionToken)
+            let messageId = encoded(messageId)
+            suffix = "webhooks/application.id/interaction.token/messages/message.id"
+        case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = encoded(applicationId)
+            let interactionToken = encoded(interactionToken)
+            suffix = "webhooks/application.id/interaction.token/messages/@original"
         case let .inviteResolve(code):
             let code = encoded(code)
             suffix = "invites/\(code)"
@@ -1102,10 +1140,41 @@ public enum APIEndpoint: Endpoint {
             let guildId = guildId.urlPathEncoded()
             let code = code.urlPathEncoded()
             suffix = "guilds/\(guildId)/templates/\(code)"
+        case let .getFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = applicationId.urlPathEncoded()
+            let interactionToken = interactionToken.urlPathEncoded()
+            let messageId = messageId.urlPathEncoded()
+            suffix = "webhooks/application.id/interaction.token/messages/message.id"
+        case let .getOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = applicationId.urlPathEncoded()
+            let interactionToken = interactionToken.urlPathEncoded()
+            suffix = "webhooks/application.id/interaction.token/messages/@original"
+        case let .createFollowupMessage(applicationId, interactionToken):
+            let applicationId = applicationId.urlPathEncoded()
+            let interactionToken = interactionToken.urlPathEncoded()
+            suffix = "webhooks/application.id/interaction.token"
         case let .createInteractionResponse(interactionId, interactionToken):
             let interactionId = interactionId.urlPathEncoded()
             let interactionToken = interactionToken.urlPathEncoded()
             suffix = "interactions/\(interactionId)/\(interactionToken)/callback"
+        case let .updateFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = applicationId.urlPathEncoded()
+            let interactionToken = interactionToken.urlPathEncoded()
+            let messageId = messageId.urlPathEncoded()
+            suffix = "webhooks/application.id/interaction.token/messages/message.id"
+        case let .updateOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = applicationId.urlPathEncoded()
+            let interactionToken = interactionToken.urlPathEncoded()
+            suffix = "webhooks/application.id/interaction.token/messages/@original"
+        case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = applicationId.urlPathEncoded()
+            let interactionToken = interactionToken.urlPathEncoded()
+            let messageId = messageId.urlPathEncoded()
+            suffix = "webhooks/application.id/interaction.token/messages/message.id"
+        case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = applicationId.urlPathEncoded()
+            let interactionToken = interactionToken.urlPathEncoded()
+            suffix = "webhooks/application.id/interaction.token/messages/@original"
         case let .inviteResolve(code):
             let code = code.urlPathEncoded()
             suffix = "invites/\(code)"
@@ -1503,7 +1572,14 @@ public enum APIEndpoint: Endpoint {
         case .createGuildTemplate: return .POST
         case .updateGuildTemplate: return .PATCH
         case .deleteGuildTemplate: return .DELETE
+        case .getFollowupMessage: return .GET
+        case .getOriginalInteractionResponse: return .GET
+        case .createFollowupMessage: return .POST
         case .createInteractionResponse: return .POST
+        case .updateFollowupMessage: return .PATCH
+        case .updateOriginalInteractionResponse: return .PATCH
+        case .deleteFollowupMessage: return .DELETE
+        case .deleteOriginalInteractionResponse: return .DELETE
         case .inviteResolve: return .GET
         case .listChannelInvites: return .GET
         case .listGuildInvites: return .GET
@@ -1674,7 +1750,14 @@ public enum APIEndpoint: Endpoint {
         case .createGuildTemplate: return false
         case .updateGuildTemplate: return false
         case .deleteGuildTemplate: return false
+        case .getFollowupMessage: return true
+        case .getOriginalInteractionResponse: return true
+        case .createFollowupMessage: return true
         case .createInteractionResponse: return true
+        case .updateFollowupMessage: return true
+        case .updateOriginalInteractionResponse: return true
+        case .deleteFollowupMessage: return true
+        case .deleteOriginalInteractionResponse: return true
         case .inviteResolve: return false
         case .listChannelInvites: return false
         case .listGuildInvites: return false
@@ -1845,7 +1928,14 @@ public enum APIEndpoint: Endpoint {
         case .createGuildTemplate: return false
         case .updateGuildTemplate: return false
         case .deleteGuildTemplate: return false
+        case .getFollowupMessage: return false
+        case .getOriginalInteractionResponse: return false
+        case .createFollowupMessage: return false
         case .createInteractionResponse: return false
+        case .updateFollowupMessage: return false
+        case .updateOriginalInteractionResponse: return false
+        case .deleteFollowupMessage: return false
+        case .deleteOriginalInteractionResponse: return false
         case .inviteResolve: return false
         case .listChannelInvites: return false
         case .listGuildInvites: return false
@@ -2090,8 +2180,22 @@ public enum APIEndpoint: Endpoint {
             return [guildId, code]
         case let .deleteGuildTemplate(guildId, code):
             return [guildId, code]
+        case let .getFollowupMessage(applicationId, interactionToken, messageId):
+            return [applicationId, interactionToken, messageId]
+        case let .getOriginalInteractionResponse(applicationId, interactionToken):
+            return [applicationId, interactionToken]
+        case let .createFollowupMessage(applicationId, interactionToken):
+            return [applicationId, interactionToken]
         case let .createInteractionResponse(interactionId, interactionToken):
             return [interactionId, interactionToken]
+        case let .updateFollowupMessage(applicationId, interactionToken, messageId):
+            return [applicationId, interactionToken, messageId]
+        case let .updateOriginalInteractionResponse(applicationId, interactionToken):
+            return [applicationId, interactionToken]
+        case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
+            return [applicationId, interactionToken, messageId]
+        case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
+            return [applicationId, interactionToken]
         case let .inviteResolve(code):
             return [code]
         case let .listChannelInvites(channelId):
@@ -2353,98 +2457,105 @@ public enum APIEndpoint: Endpoint {
         case .createGuildTemplate: return 72
         case .updateGuildTemplate: return 73
         case .deleteGuildTemplate: return 74
-        case .createInteractionResponse: return 75
-        case .inviteResolve: return 76
-        case .listChannelInvites: return 77
-        case .listGuildInvites: return 78
-        case .createChannelInvite: return 79
-        case .inviteRevoke: return 80
-        case .getGuildMember: return 81
-        case .getMyGuildMember: return 82
-        case .listGuildMembers: return 83
-        case .searchGuildMembers: return 84
-        case .addGuildMember: return 85
-        case .updateGuildMember: return 86
-        case .updateMyGuildMember: return 87
-        case .deleteGuildMember: return 88
-        case .getMessage: return 89
-        case .listMessageReactionsByEmoji: return 90
-        case .listMessages: return 91
-        case .addMyMessageReaction: return 92
-        case .bulkDeleteMessages: return 93
-        case .createMessage: return 94
-        case .crosspostMessage: return 95
-        case .updateMessage: return 96
-        case .deleteAllMessageReactions: return 97
-        case .deleteAllMessageReactionsByEmoji: return 98
-        case .deleteMessage: return 99
-        case .deleteMyMessageReaction: return 100
-        case .deleteUserMessageReaction: return 101
-        case .getMyOauth2Application: return 102
-        case .listGuildRoles: return 103
-        case .addGuildMemberRole: return 104
-        case .createGuildRole: return 105
-        case .bulkUpdateGuildRoles: return 106
-        case .updateGuildRole: return 107
-        case .deleteGuildMemberRole: return 108
-        case .deleteGuildRole: return 109
-        case .getApplicationRoleConnectionsMetadata: return 110
-        case .getApplicationUserRoleConnection: return 111
-        case .updateApplicationRoleConnectionsMetadata: return 112
-        case .updateApplicationUserRoleConnection: return 113
-        case .getGuildScheduledEvent: return 114
-        case .listGuildScheduledEventUsers: return 115
-        case .listGuildScheduledEvents: return 116
-        case .createGuildScheduledEvent: return 117
-        case .updateGuildScheduledEvent: return 118
-        case .deleteGuildScheduledEvent: return 119
-        case .getStageInstance: return 120
-        case .createStageInstance: return 121
-        case .updateStageInstance: return 122
-        case .deleteStageInstance: return 123
-        case .getGuildSticker: return 124
-        case .getSticker: return 125
-        case .listGuildStickers: return 126
-        case .listStickerPacks: return 127
-        case .createGuildSticker: return 128
-        case .updateGuildSticker: return 129
-        case .deleteGuildSticker: return 130
-        case .getActiveGuildThreads: return 131
-        case .getThreadMember: return 132
-        case .listMyPrivateArchivedThreads: return 133
-        case .listPrivateArchivedThreads: return 134
-        case .listPublicArchivedThreads: return 135
-        case .listThreadMembers: return 136
-        case .addThreadMember: return 137
-        case .joinThread: return 138
-        case .createThread: return 139
-        case .createThreadFromMessage: return 140
-        case .deleteThreadMember: return 141
-        case .leaveThread: return 142
-        case .getMyUser: return 143
-        case .getUser: return 144
-        case .listMyConnections: return 145
-        case .updateMyUser: return 146
-        case .listGuildVoiceRegions: return 147
-        case .listVoiceRegions: return 148
-        case .updateSelfVoiceState: return 149
-        case .updateVoiceState: return 150
-        case .getGuildWebhooks: return 151
-        case .getWebhook: return 152
-        case .getWebhookByToken: return 153
-        case .getWebhookMessage: return 154
-        case .getWebhooksMessagesOriginal: return 155
-        case .listChannelWebhooks: return 156
-        case .createWebhook: return 157
-        case .executeWebhook: return 158
-        case .patchWebhooksMessagesOriginal: return 159
-        case .updateWebhook: return 160
-        case .updateWebhookByToken: return 161
-        case .updateWebhookMessage: return 162
-        case .deleteWebhook: return 163
-        case .deleteWebhookByToken: return 164
-        case .deleteWebhookMessage: return 165
-        case .deleteWebhooksMessagesOriginal: return 166
+        case .getFollowupMessage: return 75
+        case .getOriginalInteractionResponse: return 76
+        case .createFollowupMessage: return 77
+        case .createInteractionResponse: return 78
+        case .updateFollowupMessage: return 79
+        case .updateOriginalInteractionResponse: return 80
+        case .deleteFollowupMessage: return 81
+        case .deleteOriginalInteractionResponse: return 82
+        case .inviteResolve: return 83
+        case .listChannelInvites: return 84
+        case .listGuildInvites: return 85
+        case .createChannelInvite: return 86
+        case .inviteRevoke: return 87
+        case .getGuildMember: return 88
+        case .getMyGuildMember: return 89
+        case .listGuildMembers: return 90
+        case .searchGuildMembers: return 91
+        case .addGuildMember: return 92
+        case .updateGuildMember: return 93
+        case .updateMyGuildMember: return 94
+        case .deleteGuildMember: return 95
+        case .getMessage: return 96
+        case .listMessageReactionsByEmoji: return 97
+        case .listMessages: return 98
+        case .addMyMessageReaction: return 99
+        case .bulkDeleteMessages: return 100
+        case .createMessage: return 101
+        case .crosspostMessage: return 102
+        case .updateMessage: return 103
+        case .deleteAllMessageReactions: return 104
+        case .deleteAllMessageReactionsByEmoji: return 105
+        case .deleteMessage: return 106
+        case .deleteMyMessageReaction: return 107
+        case .deleteUserMessageReaction: return 108
+        case .getMyOauth2Application: return 109
+        case .listGuildRoles: return 110
+        case .addGuildMemberRole: return 111
+        case .createGuildRole: return 112
+        case .bulkUpdateGuildRoles: return 113
+        case .updateGuildRole: return 114
+        case .deleteGuildMemberRole: return 115
+        case .deleteGuildRole: return 116
+        case .getApplicationRoleConnectionsMetadata: return 117
+        case .getApplicationUserRoleConnection: return 118
+        case .updateApplicationRoleConnectionsMetadata: return 119
+        case .updateApplicationUserRoleConnection: return 120
+        case .getGuildScheduledEvent: return 121
+        case .listGuildScheduledEventUsers: return 122
+        case .listGuildScheduledEvents: return 123
+        case .createGuildScheduledEvent: return 124
+        case .updateGuildScheduledEvent: return 125
+        case .deleteGuildScheduledEvent: return 126
+        case .getStageInstance: return 127
+        case .createStageInstance: return 128
+        case .updateStageInstance: return 129
+        case .deleteStageInstance: return 130
+        case .getGuildSticker: return 131
+        case .getSticker: return 132
+        case .listGuildStickers: return 133
+        case .listStickerPacks: return 134
+        case .createGuildSticker: return 135
+        case .updateGuildSticker: return 136
+        case .deleteGuildSticker: return 137
+        case .getActiveGuildThreads: return 138
+        case .getThreadMember: return 139
+        case .listMyPrivateArchivedThreads: return 140
+        case .listPrivateArchivedThreads: return 141
+        case .listPublicArchivedThreads: return 142
+        case .listThreadMembers: return 143
+        case .addThreadMember: return 144
+        case .joinThread: return 145
+        case .createThread: return 146
+        case .createThreadFromMessage: return 147
+        case .deleteThreadMember: return 148
+        case .leaveThread: return 149
+        case .getMyUser: return 150
+        case .getUser: return 151
+        case .listMyConnections: return 152
+        case .updateMyUser: return 153
+        case .listGuildVoiceRegions: return 154
+        case .listVoiceRegions: return 155
+        case .updateSelfVoiceState: return 156
+        case .updateVoiceState: return 157
+        case .getGuildWebhooks: return 158
+        case .getWebhook: return 159
+        case .getWebhookByToken: return 160
+        case .getWebhookMessage: return 161
+        case .getWebhooksMessagesOriginal: return 162
+        case .listChannelWebhooks: return 163
+        case .createWebhook: return 164
+        case .executeWebhook: return 165
+        case .patchWebhooksMessagesOriginal: return 166
+        case .updateWebhook: return 167
+        case .updateWebhookByToken: return 168
+        case .updateWebhookMessage: return 169
+        case .deleteWebhook: return 170
+        case .deleteWebhookByToken: return 171
+        case .deleteWebhookMessage: return 172
+        case .deleteWebhooksMessagesOriginal: return 173
         }
     }
 }

@@ -83,15 +83,6 @@ let cases = grouped.map { tag, infos in
     """
 }.joined(separator: "\n\n")
 
-extension String {
-    /// Indents 4 spaces.
-    func indent() -> String {
-        self.components(separatedBy: .newlines).map {
-            "    \($0)"
-        }.joined(separator: "\n")
-    }
-}
-
 let urlPrefixString = """
 var urlPrefix: String {
     "https://discord.com/api/v\\(DiscordGlobalConfiguration.apiVersion)/"

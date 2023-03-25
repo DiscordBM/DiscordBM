@@ -4873,6 +4873,163 @@ paths:
               schema:
                 type: string
               example: ''
+  /webhooks/{application.id}/{interaction.token}/messages/@original:
+    get:
+      tags:
+        - Interactions
+      summary: get original interaction response
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
+        - name: interaction_token
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <string>
+    patch:
+      tags:
+        - Interactions
+      summary: update original interaction response
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
+        - name: interaction_token
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <string>
+    delete:
+      tags:
+        - Interactions
+      summary: delete original interaction response
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
+        - name: interaction_token
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <string>
+  /webhooks/{application.id}/{interaction.token}:
+    post:
+      tags:
+        - Interactions
+      summary: create followup message
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
+        - name: interaction_token
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <string>
+  /webhooks/{application.id}/{interaction.token}/messages/{message.id}:
+    get:
+      tags:
+        - Interactions
+      summary: get followup message
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
+        - name: interaction_token
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <string>
+        - name: message_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <string>
+    patch:
+      tags:
+        - Interactions
+      summary: update followup message
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
+        - name: interaction_token
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <string>
+        - name: message_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <string>
+    delete:
+      tags:
+        - Interactions
+      summary: delete followup message
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
+        - name: interaction_token
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <string>
+        - name: message_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <string>
   /webhooks/{webhook_id}/{webhook_token}/messages/{message_id}:
     get:
       tags:
