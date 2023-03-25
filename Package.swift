@@ -2,7 +2,7 @@
 
 import PackageDescription
 
-#if swift(>=5.7)
+#if swift(>=5.7) && StrictConcurrency
 let swiftSettings: [SwiftSetting] = [
     .unsafeFlags(["-Xfrontend", "-strict-concurrency=targeted"])
 ]
