@@ -54,6 +54,8 @@ struct API: Decodable {
                         fatalError("Unhandled method: \(method)")
                     }
                     return (method, info)
+                }.sorted {
+                    $0.info.summary < $1.info.summary
                 }
             }
         }
@@ -262,6 +264,8 @@ struct API: Decodable {
             value.values.map { value in
                 Path(path: key, method: value.method, info: value.info)
             }
+        }.sorted {
+            $0.info.summary < $1.info.summary
         }.sorted {
             $0.method.priority < $1.method.priority
         }
