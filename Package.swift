@@ -26,7 +26,7 @@ let package = Package(
         .library(
             name: "DiscordLogger",
             targets: ["DiscordLogger"]
-        ),
+        )
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.42.0"),
@@ -34,6 +34,7 @@ let package = Package(
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.6.4"),
         .package(url: "https://github.com/apple/swift-atomics.git", from: "1.0.0"),
         .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.2"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
         /// `WebSocketKit` dependencies
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.14.0"),
         .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.11.4"),
@@ -62,6 +63,27 @@ let package = Package(
             dependencies: [
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "DiscordModels",
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .plugin(
+            name: "GenerateAPIEndpoints",
+            capability: .command(
+                intent: .custom(
+                    verb: "generate-api-endpoints",
+                    description: "Generates API Endpoints"
+                ),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Add Generated Endpoints")
+                ]
+            ),
+            dependencies: ["GenerateAPIEndpointsExec"]
+        ),
+        .executableTarget(
+            name: "GenerateAPIEndpointsExec",
+            dependencies: [
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "Yams", package: "Yams")
             ],
             swiftSettings: swiftSettings
         ),

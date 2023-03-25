@@ -7,18 +7,38 @@ import Foundation
 
 public struct DiscordHTTPRequest: Sendable {
     /// The endpoint to send the request to.
-    public let endpoint: Endpoint
+    public let endpoint: AnyEndpoint
     /// The query parameters of the request.
     public let queries: [(String, String?)]
     /// The extra headers of the request.
     public let headers: HTTPHeaders
     
     public init(
-        to endpoint: Endpoint,
+        to endpoint: AnyEndpoint,
         queries: [(String, String?)] = [],
         headers: HTTPHeaders = [:]
     ) {
         self.endpoint = endpoint
+        self.queries = queries
+        self.headers = headers
+    }
+    
+    public init(
+        to endpoint: APIEndpoint,
+        queries: [(String, String?)] = [],
+        headers: HTTPHeaders = [:]
+    ) {
+        self.endpoint = .api(endpoint)
+        self.queries = queries
+        self.headers = headers
+    }
+    
+    public init(
+        to endpoint: CDNEndpoint,
+        queries: [(String, String?)] = [],
+        headers: HTTPHeaders = [:]
+    ) {
+        self.endpoint = .cdn(endpoint)
         self.queries = queries
         self.headers = headers
     }
