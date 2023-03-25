@@ -110,7 +110,7 @@ class BitFieldTests: XCTestCase {
         do {
             let field1 = IntBitField<Raw>(bitValue: 999_999_999_999_999)
             let field2 = IntBitField<Raw>([
-                .administrator, .viewAuditLog, .kickMembers, .sendMessagesInThreads, .banMembers, .manageGuild, .manageChannels, .muteMembers, .manageMessages, .manageThreads, .sendMessages, .sendTtsMessages, .useExternalStickers, .manageWebhooks, .deafenMembers, .moderateMembers, .useExternalEmojis, .viewChannel, .prioritySpeaker, .createPrivateThreads, .useApplicationCommands, .createInstantInvite, .createPublicThreads, .embedLinks, .addReactions, .manageEvents, .changeNickname, .stream, .mentionEveryone
+                .administrator, .viewAuditLog, .kickMembers, .sendMessagesInThreads, .banMembers, .manageGuild, .manageChannels, .muteMembers, .manageMessages, .manageThreads, .sendMessages, .sendTtsMessages, .useExternalStickers, .manageWebhooks, .deafenMembers, .moderateMembers, .useExternalEmojis, .viewChannel, .prioritySpeaker, .createPrivateThreads, .useApplicationCommands, .createInstantInvite, .createPublicThreads, .embedLinks, .addReactions, .manageEvents, .changeNickname, .stream, .mentionEveryone, .useSoundboard
             ])
             XCTAssertEqual(field1, field2)
         }
@@ -120,7 +120,7 @@ class BitFieldTests: XCTestCase {
 
 extension IntBitField: Equatable {
     public static func == (lhs: IntBitField, rhs: IntBitField) -> Bool {
-        lhs.values.count == rhs.values.count &&
-        lhs.values.allSatisfy { rhs.values.contains($0) }
+        lhs.values.sorted(by: { $0.rawValue > $1.rawValue })
+        == rhs.values.sorted(by: { $0.rawValue > $1.rawValue })
     }
 }
