@@ -224,12 +224,70 @@ struct API: Decodable {
                 var required: Bool?
                 var description: String?
                 var example: String
+                /// var requestBody
                 /// var responses
             }
             
             var tags: [Tag]
             var summary: String
             var parameters: [Parameter]?
+            
+            func makeCase() -> String {
+                let summary = self.summary.toCamelCase()
+                if summary.isEmpty {
+                    fatalError("Summary is empty: \(self)")
+                }
+                let pathParams = (self.parameters ?? []).filter({ $0.in == .path })
+                if pathParams.isEmpty {
+                    return "case \(summary)"
+                } else {
+                    let paths = pathParams.map { param -> String in
+                        let type = param.schema.type.swiftTypeString
+                        let paramName = param.name.toCamelCase()
+                        return "\(paramName): \(type)"
+                    }.joined(separator: ", ")
+                    return "case \(summary)(\(paths))"
+                }
+            }
+            
+            func makeIterativeCase() -> (name: String, params: [String]) {
+                let summary = self.summary.toCamelCase()
+                if summary.isEmpty {
+                    fatalError("Summary is empty: \(self)")
+                }
+                let pathParams = (self.parameters ?? []).filter({ $0.in == .path })
+                if pathParams.isEmpty {
+                    return ("case .\(summary):", [])
+                } else {
+                    let paths = pathParams.map { param -> String in
+                        let paramName = param.name.toCamelCase()
+                        return paramName
+                    }
+                    let pathsJoined = paths.joined(separator: ", ")
+                    return ("case let .\(summary)(\(pathsJoined)):", paths)
+                }
+            }
+            
+            func makeRawCaseName() -> String {
+                let summary = self.summary.toCamelCase()
+                if summary.isEmpty {
+                    fatalError("Summary is empty: \(self)")
+                }
+                return "case .\(summary):"
+            }
+            
+            func makeRawCaseNameWithParams() -> (name: String, params: [String]) {
+                let summary = self.summary.toCamelCase()
+                if summary.isEmpty {
+                    fatalError("Summary is empty: \(self)")
+                }
+                let pathParams = (self.parameters ?? []).filter({ $0.in == .path })
+                let paths = pathParams.map { param -> String in
+                    let paramName = param.name.toCamelCase()
+                    return paramName
+                }
+                return ("case .\(summary):", paths)
+            }
         }
         
         var path: String
