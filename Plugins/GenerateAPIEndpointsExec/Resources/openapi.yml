@@ -3759,7 +3759,7 @@ paths:
     get:
       tags:
         - Guilds
-      summary: list my guilds
+      summary: list own guilds
       security:
         - bearerAuth: []
       parameters:
@@ -5309,7 +5309,7 @@ paths:
     get:
       tags:
         - Members
-      summary: get my guild member
+      summary: get own guild member
       security:
         - bearerAuth: []
       parameters:
@@ -5375,7 +5375,7 @@ paths:
     patch:
       tags:
         - Members
-      summary: update my guild member
+      summary: update own guild member
       requestBody:
         content:
           application/json:
@@ -5617,7 +5617,7 @@ paths:
     put:
       tags:
         - Messages
-      summary: add my message reaction
+      summary: add own message reaction
       requestBody:
         content: {}
       security:
@@ -5660,7 +5660,7 @@ paths:
     delete:
       tags:
         - Messages
-      summary: delete my message reaction
+      summary: delete own message reaction
       security:
         - bearerAuth: []
       parameters:
@@ -6159,7 +6159,7 @@ paths:
     get:
       tags:
         - OAuth
-      summary: get my oauth2 application
+      summary: get own oauth2 application
       responses:
         '200':
           description: OK
@@ -11937,7 +11937,7 @@ paths:
     get:
       tags:
         - Threads
-      summary: list my private archived threads
+      summary: list own private archived threads
       security:
         - bearerAuth: []
       parameters:
@@ -12360,7 +12360,7 @@ paths:
     get:
       tags:
         - Users
-      summary: list my connections
+      summary: list own connections
       security:
         - bearerAuth: []
       responses:
@@ -12380,7 +12380,7 @@ paths:
     get:
       tags:
         - Users
-      summary: get my user
+      summary: get own user
       security:
         - bearerAuth: []
       responses:
@@ -12399,7 +12399,7 @@ paths:
     patch:
       tags:
         - Users
-      summary: update my user
+      summary: update own user
       requestBody:
         content: {}
       security:

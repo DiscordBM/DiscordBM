@@ -89,7 +89,7 @@ public enum APIEndpoint: Endpoint {
     case getGuildWidgetSettings(guildId: String)
     case listGuildBans(guildId: String)
     case listGuildIntegrations(guildId: String)
-    case listMyGuilds
+    case listOwnGuilds
     case previewPruneGuild(guildId: String)
     case banUserFromGuild(guildId: String, userId: String)
     case createGuild
@@ -139,12 +139,12 @@ public enum APIEndpoint: Endpoint {
     /// https://discord.com/developers/docs/resources/guild
     
     case getGuildMember(guildId: String, userId: String)
-    case getMyGuildMember(guildId: String)
+    case getOwnGuildMember(guildId: String)
     case listGuildMembers(guildId: String)
     case searchGuildMembers(guildId: String)
     case addGuildMember(guildId: String, userId: String)
     case updateGuildMember(guildId: String, userId: String)
-    case updateMyGuildMember(guildId: String)
+    case updateOwnGuildMember(guildId: String)
     case deleteGuildMember(guildId: String, userId: String)
     
     // MARK: Messages
@@ -153,7 +153,7 @@ public enum APIEndpoint: Endpoint {
     case getMessage(channelId: String, messageId: String)
     case listMessageReactionsByEmoji(channelId: String, messageId: String, emojiName: String)
     case listMessages(channelId: String)
-    case addMyMessageReaction(channelId: String, messageId: String, emojiName: String)
+    case addOwnMessageReaction(channelId: String, messageId: String, emojiName: String)
     case bulkDeleteMessages(channelId: String)
     case createMessage(channelId: String)
     case crosspostMessage(channelId: String, messageId: String)
@@ -161,13 +161,13 @@ public enum APIEndpoint: Endpoint {
     case deleteAllMessageReactions(channelId: String, messageId: String)
     case deleteAllMessageReactionsByEmoji(channelId: String, messageId: String, emojiName: String)
     case deleteMessage(channelId: String, messageId: String)
-    case deleteMyMessageReaction(channelId: String, messageId: String, emojiName: String)
+    case deleteOwnMessageReaction(channelId: String, messageId: String, emojiName: String)
     case deleteUserMessageReaction(channelId: String, messageId: String, emojiName: String, userId: String)
     
     // MARK: OAuth
     /// https://discord.com/developers/docs/topics/oauth2
     
-    case getMyOauth2Application
+    case getOwnOauth2Application
     
     // MARK: Roles
     /// https://discord.com/developers/docs/resources/guild
@@ -222,7 +222,7 @@ public enum APIEndpoint: Endpoint {
     
     case getActiveGuildThreads(guildId: String)
     case getThreadMember(channelId: String, userId: String)
-    case listMyPrivateArchivedThreads(channelId: String)
+    case listOwnPrivateArchivedThreads(channelId: String)
     case listPrivateArchivedThreads(channelId: String)
     case listPublicArchivedThreads(channelId: String)
     case listThreadMembers(channelId: String)
@@ -237,10 +237,10 @@ public enum APIEndpoint: Endpoint {
     // MARK: Users
     /// https://discord.com/developers/docs/resources/user
     
-    case getMyUser
+    case getOwnUser
     case getUser(userId: String)
-    case listMyConnections
-    case updateMyUser
+    case listOwnConnections
+    case updateOwnUser
     
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice#list-voice-regions
@@ -469,7 +469,7 @@ public enum APIEndpoint: Endpoint {
         case let .listGuildIntegrations(guildId):
             let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/integrations"
-        case .listMyGuilds:
+        case .listOwnGuilds:
             suffix = "users/@me/guilds"
         case let .previewPruneGuild(guildId):
             let guildId = encoded(guildId)
@@ -587,7 +587,7 @@ public enum APIEndpoint: Endpoint {
             let guildId = encoded(guildId)
             let userId = encoded(userId)
             suffix = "guilds/\(guildId)/members/\(userId)"
-        case let .getMyGuildMember(guildId):
+        case let .getOwnGuildMember(guildId):
             let guildId = encoded(guildId)
             suffix = "users/@me/guilds/\(guildId)/member"
         case let .listGuildMembers(guildId):
@@ -604,7 +604,7 @@ public enum APIEndpoint: Endpoint {
             let guildId = encoded(guildId)
             let userId = encoded(userId)
             suffix = "guilds/\(guildId)/members/\(userId)"
-        case let .updateMyGuildMember(guildId):
+        case let .updateOwnGuildMember(guildId):
             let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/members/@me"
         case let .deleteGuildMember(guildId, userId):
@@ -623,7 +623,7 @@ public enum APIEndpoint: Endpoint {
         case let .listMessages(channelId):
             let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/messages"
-        case let .addMyMessageReaction(channelId, messageId, emojiName):
+        case let .addOwnMessageReaction(channelId, messageId, emojiName):
             let channelId = encoded(channelId)
             let messageId = encoded(messageId)
             let emojiName = encoded(emojiName)
@@ -655,7 +655,7 @@ public enum APIEndpoint: Endpoint {
             let channelId = encoded(channelId)
             let messageId = encoded(messageId)
             suffix = "channels/\(channelId)/messages/\(messageId)"
-        case let .deleteMyMessageReaction(channelId, messageId, emojiName):
+        case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
             let channelId = encoded(channelId)
             let messageId = encoded(messageId)
             let emojiName = encoded(emojiName)
@@ -666,7 +666,7 @@ public enum APIEndpoint: Endpoint {
             let emojiName = encoded(emojiName)
             let userId = encoded(userId)
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/\(userId)"
-        case .getMyOauth2Application:
+        case .getOwnOauth2Application:
             suffix = "oauth2/applications/@me"
         case let .listGuildRoles(guildId):
             let guildId = encoded(guildId)
@@ -770,7 +770,7 @@ public enum APIEndpoint: Endpoint {
             let channelId = encoded(channelId)
             let userId = encoded(userId)
             suffix = "channels/\(channelId)/thread-members/\(userId)"
-        case let .listMyPrivateArchivedThreads(channelId):
+        case let .listOwnPrivateArchivedThreads(channelId):
             let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/users/@me/threads/archived/private"
         case let .listPrivateArchivedThreads(channelId):
@@ -806,14 +806,14 @@ public enum APIEndpoint: Endpoint {
         case let .leaveThread(channelId):
             let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/thread-members/@me"
-        case .getMyUser:
+        case .getOwnUser:
             suffix = "users/@me"
         case let .getUser(userId):
             let userId = encoded(userId)
             suffix = "users/\(userId)"
-        case .listMyConnections:
+        case .listOwnConnections:
             suffix = "users/@me/connections"
-        case .updateMyUser:
+        case .updateOwnUser:
             suffix = "users/@me"
         case let .listGuildVoiceRegions(guildId):
             let guildId = encoded(guildId)
@@ -1084,7 +1084,7 @@ public enum APIEndpoint: Endpoint {
         case let .listGuildIntegrations(guildId):
             let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/integrations"
-        case .listMyGuilds:
+        case .listOwnGuilds:
             suffix = "users/@me/guilds"
         case let .previewPruneGuild(guildId):
             let guildId = guildId.urlPathEncoded()
@@ -1202,7 +1202,7 @@ public enum APIEndpoint: Endpoint {
             let guildId = guildId.urlPathEncoded()
             let userId = userId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/\(userId)"
-        case let .getMyGuildMember(guildId):
+        case let .getOwnGuildMember(guildId):
             let guildId = guildId.urlPathEncoded()
             suffix = "users/@me/guilds/\(guildId)/member"
         case let .listGuildMembers(guildId):
@@ -1219,7 +1219,7 @@ public enum APIEndpoint: Endpoint {
             let guildId = guildId.urlPathEncoded()
             let userId = userId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/\(userId)"
-        case let .updateMyGuildMember(guildId):
+        case let .updateOwnGuildMember(guildId):
             let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/@me"
         case let .deleteGuildMember(guildId, userId):
@@ -1238,7 +1238,7 @@ public enum APIEndpoint: Endpoint {
         case let .listMessages(channelId):
             let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages"
-        case let .addMyMessageReaction(channelId, messageId, emojiName):
+        case let .addOwnMessageReaction(channelId, messageId, emojiName):
             let channelId = channelId.urlPathEncoded()
             let messageId = messageId.urlPathEncoded()
             let emojiName = emojiName.urlPathEncoded()
@@ -1270,7 +1270,7 @@ public enum APIEndpoint: Endpoint {
             let channelId = channelId.urlPathEncoded()
             let messageId = messageId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)"
-        case let .deleteMyMessageReaction(channelId, messageId, emojiName):
+        case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
             let channelId = channelId.urlPathEncoded()
             let messageId = messageId.urlPathEncoded()
             let emojiName = emojiName.urlPathEncoded()
@@ -1281,7 +1281,7 @@ public enum APIEndpoint: Endpoint {
             let emojiName = emojiName.urlPathEncoded()
             let userId = userId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/\(userId)"
-        case .getMyOauth2Application:
+        case .getOwnOauth2Application:
             suffix = "oauth2/applications/@me"
         case let .listGuildRoles(guildId):
             let guildId = guildId.urlPathEncoded()
@@ -1385,7 +1385,7 @@ public enum APIEndpoint: Endpoint {
             let channelId = channelId.urlPathEncoded()
             let userId = userId.urlPathEncoded()
             suffix = "channels/\(channelId)/thread-members/\(userId)"
-        case let .listMyPrivateArchivedThreads(channelId):
+        case let .listOwnPrivateArchivedThreads(channelId):
             let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/users/@me/threads/archived/private"
         case let .listPrivateArchivedThreads(channelId):
@@ -1421,14 +1421,14 @@ public enum APIEndpoint: Endpoint {
         case let .leaveThread(channelId):
             let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/thread-members/@me"
-        case .getMyUser:
+        case .getOwnUser:
             suffix = "users/@me"
         case let .getUser(userId):
             let userId = userId.urlPathEncoded()
             suffix = "users/\(userId)"
-        case .listMyConnections:
+        case .listOwnConnections:
             suffix = "users/@me/connections"
-        case .updateMyUser:
+        case .updateOwnUser:
             suffix = "users/@me"
         case let .listGuildVoiceRegions(guildId):
             let guildId = guildId.urlPathEncoded()
@@ -1563,7 +1563,7 @@ public enum APIEndpoint: Endpoint {
         case .getGuildWidgetSettings: return .GET
         case .listGuildBans: return .GET
         case .listGuildIntegrations: return .GET
-        case .listMyGuilds: return .GET
+        case .listOwnGuilds: return .GET
         case .previewPruneGuild: return .GET
         case .banUserFromGuild: return .PUT
         case .createGuild: return .POST
@@ -1597,17 +1597,17 @@ public enum APIEndpoint: Endpoint {
         case .createChannelInvite: return .POST
         case .inviteRevoke: return .DELETE
         case .getGuildMember: return .GET
-        case .getMyGuildMember: return .GET
+        case .getOwnGuildMember: return .GET
         case .listGuildMembers: return .GET
         case .searchGuildMembers: return .GET
         case .addGuildMember: return .PUT
         case .updateGuildMember: return .PATCH
-        case .updateMyGuildMember: return .PATCH
+        case .updateOwnGuildMember: return .PATCH
         case .deleteGuildMember: return .DELETE
         case .getMessage: return .GET
         case .listMessageReactionsByEmoji: return .GET
         case .listMessages: return .GET
-        case .addMyMessageReaction: return .PUT
+        case .addOwnMessageReaction: return .PUT
         case .bulkDeleteMessages: return .POST
         case .createMessage: return .POST
         case .crosspostMessage: return .POST
@@ -1615,9 +1615,9 @@ public enum APIEndpoint: Endpoint {
         case .deleteAllMessageReactions: return .DELETE
         case .deleteAllMessageReactionsByEmoji: return .DELETE
         case .deleteMessage: return .DELETE
-        case .deleteMyMessageReaction: return .DELETE
+        case .deleteOwnMessageReaction: return .DELETE
         case .deleteUserMessageReaction: return .DELETE
-        case .getMyOauth2Application: return .GET
+        case .getOwnOauth2Application: return .GET
         case .listGuildRoles: return .GET
         case .addGuildMemberRole: return .PUT
         case .createGuildRole: return .POST
@@ -1648,7 +1648,7 @@ public enum APIEndpoint: Endpoint {
         case .deleteGuildSticker: return .DELETE
         case .getActiveGuildThreads: return .GET
         case .getThreadMember: return .GET
-        case .listMyPrivateArchivedThreads: return .GET
+        case .listOwnPrivateArchivedThreads: return .GET
         case .listPrivateArchivedThreads: return .GET
         case .listPublicArchivedThreads: return .GET
         case .listThreadMembers: return .GET
@@ -1659,10 +1659,10 @@ public enum APIEndpoint: Endpoint {
         case .createThreadInForumChannel: return .POST
         case .deleteThreadMember: return .DELETE
         case .leaveThread: return .DELETE
-        case .getMyUser: return .GET
+        case .getOwnUser: return .GET
         case .getUser: return .GET
-        case .listMyConnections: return .GET
-        case .updateMyUser: return .PATCH
+        case .listOwnConnections: return .GET
+        case .updateOwnUser: return .PATCH
         case .listGuildVoiceRegions: return .GET
         case .listVoiceRegions: return .GET
         case .updateSelfVoiceState: return .PATCH
@@ -1742,7 +1742,7 @@ public enum APIEndpoint: Endpoint {
         case .getGuildWidgetSettings: return true
         case .listGuildBans: return true
         case .listGuildIntegrations: return true
-        case .listMyGuilds: return true
+        case .listOwnGuilds: return true
         case .previewPruneGuild: return true
         case .banUserFromGuild: return true
         case .createGuild: return true
@@ -1776,17 +1776,17 @@ public enum APIEndpoint: Endpoint {
         case .createChannelInvite: return true
         case .inviteRevoke: return true
         case .getGuildMember: return true
-        case .getMyGuildMember: return true
+        case .getOwnGuildMember: return true
         case .listGuildMembers: return true
         case .searchGuildMembers: return true
         case .addGuildMember: return true
         case .updateGuildMember: return true
-        case .updateMyGuildMember: return true
+        case .updateOwnGuildMember: return true
         case .deleteGuildMember: return true
         case .getMessage: return true
         case .listMessageReactionsByEmoji: return true
         case .listMessages: return true
-        case .addMyMessageReaction: return true
+        case .addOwnMessageReaction: return true
         case .bulkDeleteMessages: return true
         case .createMessage: return true
         case .crosspostMessage: return true
@@ -1794,9 +1794,9 @@ public enum APIEndpoint: Endpoint {
         case .deleteAllMessageReactions: return true
         case .deleteAllMessageReactionsByEmoji: return true
         case .deleteMessage: return true
-        case .deleteMyMessageReaction: return true
+        case .deleteOwnMessageReaction: return true
         case .deleteUserMessageReaction: return true
-        case .getMyOauth2Application: return true
+        case .getOwnOauth2Application: return true
         case .listGuildRoles: return true
         case .addGuildMemberRole: return true
         case .createGuildRole: return true
@@ -1827,7 +1827,7 @@ public enum APIEndpoint: Endpoint {
         case .deleteGuildSticker: return true
         case .getActiveGuildThreads: return true
         case .getThreadMember: return true
-        case .listMyPrivateArchivedThreads: return true
+        case .listOwnPrivateArchivedThreads: return true
         case .listPrivateArchivedThreads: return true
         case .listPublicArchivedThreads: return true
         case .listThreadMembers: return true
@@ -1838,10 +1838,10 @@ public enum APIEndpoint: Endpoint {
         case .createThreadInForumChannel: return true
         case .deleteThreadMember: return true
         case .leaveThread: return true
-        case .getMyUser: return true
+        case .getOwnUser: return true
         case .getUser: return true
-        case .listMyConnections: return true
-        case .updateMyUser: return true
+        case .listOwnConnections: return true
+        case .updateOwnUser: return true
         case .listGuildVoiceRegions: return true
         case .listVoiceRegions: return true
         case .updateSelfVoiceState: return true
@@ -1921,7 +1921,7 @@ public enum APIEndpoint: Endpoint {
         case .getGuildWidgetSettings: return true
         case .listGuildBans: return true
         case .listGuildIntegrations: return true
-        case .listMyGuilds: return true
+        case .listOwnGuilds: return true
         case .previewPruneGuild: return true
         case .banUserFromGuild: return true
         case .createGuild: return true
@@ -1955,17 +1955,17 @@ public enum APIEndpoint: Endpoint {
         case .createChannelInvite: return true
         case .inviteRevoke: return true
         case .getGuildMember: return true
-        case .getMyGuildMember: return true
+        case .getOwnGuildMember: return true
         case .listGuildMembers: return true
         case .searchGuildMembers: return true
         case .addGuildMember: return true
         case .updateGuildMember: return true
-        case .updateMyGuildMember: return true
+        case .updateOwnGuildMember: return true
         case .deleteGuildMember: return true
         case .getMessage: return true
         case .listMessageReactionsByEmoji: return true
         case .listMessages: return true
-        case .addMyMessageReaction: return true
+        case .addOwnMessageReaction: return true
         case .bulkDeleteMessages: return true
         case .createMessage: return true
         case .crosspostMessage: return true
@@ -1973,9 +1973,9 @@ public enum APIEndpoint: Endpoint {
         case .deleteAllMessageReactions: return true
         case .deleteAllMessageReactionsByEmoji: return true
         case .deleteMessage: return true
-        case .deleteMyMessageReaction: return true
+        case .deleteOwnMessageReaction: return true
         case .deleteUserMessageReaction: return true
-        case .getMyOauth2Application: return true
+        case .getOwnOauth2Application: return true
         case .listGuildRoles: return true
         case .addGuildMemberRole: return true
         case .createGuildRole: return true
@@ -2006,7 +2006,7 @@ public enum APIEndpoint: Endpoint {
         case .deleteGuildSticker: return true
         case .getActiveGuildThreads: return true
         case .getThreadMember: return true
-        case .listMyPrivateArchivedThreads: return true
+        case .listOwnPrivateArchivedThreads: return true
         case .listPrivateArchivedThreads: return true
         case .listPublicArchivedThreads: return true
         case .listThreadMembers: return true
@@ -2017,10 +2017,10 @@ public enum APIEndpoint: Endpoint {
         case .createThreadInForumChannel: return true
         case .deleteThreadMember: return true
         case .leaveThread: return true
-        case .getMyUser: return true
+        case .getOwnUser: return true
         case .getUser: return true
-        case .listMyConnections: return true
-        case .updateMyUser: return true
+        case .listOwnConnections: return true
+        case .updateOwnUser: return true
         case .listGuildVoiceRegions: return true
         case .listVoiceRegions: return true
         case .updateSelfVoiceState: return true
@@ -2154,7 +2154,7 @@ public enum APIEndpoint: Endpoint {
             return [guildId]
         case let .listGuildIntegrations(guildId):
             return [guildId]
-        case .listMyGuilds:
+        case .listOwnGuilds:
             return []
         case let .previewPruneGuild(guildId):
             return [guildId]
@@ -2222,7 +2222,7 @@ public enum APIEndpoint: Endpoint {
             return [code]
         case let .getGuildMember(guildId, userId):
             return [guildId, userId]
-        case let .getMyGuildMember(guildId):
+        case let .getOwnGuildMember(guildId):
             return [guildId]
         case let .listGuildMembers(guildId):
             return [guildId]
@@ -2232,7 +2232,7 @@ public enum APIEndpoint: Endpoint {
             return [guildId, userId]
         case let .updateGuildMember(guildId, userId):
             return [guildId, userId]
-        case let .updateMyGuildMember(guildId):
+        case let .updateOwnGuildMember(guildId):
             return [guildId]
         case let .deleteGuildMember(guildId, userId):
             return [guildId, userId]
@@ -2242,7 +2242,7 @@ public enum APIEndpoint: Endpoint {
             return [channelId, messageId, emojiName]
         case let .listMessages(channelId):
             return [channelId]
-        case let .addMyMessageReaction(channelId, messageId, emojiName):
+        case let .addOwnMessageReaction(channelId, messageId, emojiName):
             return [channelId, messageId, emojiName]
         case let .bulkDeleteMessages(channelId):
             return [channelId]
@@ -2258,11 +2258,11 @@ public enum APIEndpoint: Endpoint {
             return [channelId, messageId, emojiName]
         case let .deleteMessage(channelId, messageId):
             return [channelId, messageId]
-        case let .deleteMyMessageReaction(channelId, messageId, emojiName):
+        case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
             return [channelId, messageId, emojiName]
         case let .deleteUserMessageReaction(channelId, messageId, emojiName, userId):
             return [channelId, messageId, emojiName, userId]
-        case .getMyOauth2Application:
+        case .getOwnOauth2Application:
             return []
         case let .listGuildRoles(guildId):
             return [guildId]
@@ -2324,7 +2324,7 @@ public enum APIEndpoint: Endpoint {
             return [guildId]
         case let .getThreadMember(channelId, userId):
             return [channelId, userId]
-        case let .listMyPrivateArchivedThreads(channelId):
+        case let .listOwnPrivateArchivedThreads(channelId):
             return [channelId]
         case let .listPrivateArchivedThreads(channelId):
             return [channelId]
@@ -2346,13 +2346,13 @@ public enum APIEndpoint: Endpoint {
             return [channelId, userId]
         case let .leaveThread(channelId):
             return [channelId]
-        case .getMyUser:
+        case .getOwnUser:
             return []
         case let .getUser(userId):
             return [userId]
-        case .listMyConnections:
+        case .listOwnConnections:
             return []
-        case .updateMyUser:
+        case .updateOwnUser:
             return []
         case let .listGuildVoiceRegions(guildId):
             return [guildId]
@@ -2453,7 +2453,7 @@ public enum APIEndpoint: Endpoint {
         case .getGuildWidgetSettings: return 52
         case .listGuildBans: return 53
         case .listGuildIntegrations: return 54
-        case .listMyGuilds: return 55
+        case .listOwnGuilds: return 55
         case .previewPruneGuild: return 56
         case .banUserFromGuild: return 57
         case .createGuild: return 58
@@ -2487,17 +2487,17 @@ public enum APIEndpoint: Endpoint {
         case .createChannelInvite: return 86
         case .inviteRevoke: return 87
         case .getGuildMember: return 88
-        case .getMyGuildMember: return 89
+        case .getOwnGuildMember: return 89
         case .listGuildMembers: return 90
         case .searchGuildMembers: return 91
         case .addGuildMember: return 92
         case .updateGuildMember: return 93
-        case .updateMyGuildMember: return 94
+        case .updateOwnGuildMember: return 94
         case .deleteGuildMember: return 95
         case .getMessage: return 96
         case .listMessageReactionsByEmoji: return 97
         case .listMessages: return 98
-        case .addMyMessageReaction: return 99
+        case .addOwnMessageReaction: return 99
         case .bulkDeleteMessages: return 100
         case .createMessage: return 101
         case .crosspostMessage: return 102
@@ -2505,9 +2505,9 @@ public enum APIEndpoint: Endpoint {
         case .deleteAllMessageReactions: return 104
         case .deleteAllMessageReactionsByEmoji: return 105
         case .deleteMessage: return 106
-        case .deleteMyMessageReaction: return 107
+        case .deleteOwnMessageReaction: return 107
         case .deleteUserMessageReaction: return 108
-        case .getMyOauth2Application: return 109
+        case .getOwnOauth2Application: return 109
         case .listGuildRoles: return 110
         case .addGuildMemberRole: return 111
         case .createGuildRole: return 112
@@ -2538,7 +2538,7 @@ public enum APIEndpoint: Endpoint {
         case .deleteGuildSticker: return 137
         case .getActiveGuildThreads: return 138
         case .getThreadMember: return 139
-        case .listMyPrivateArchivedThreads: return 140
+        case .listOwnPrivateArchivedThreads: return 140
         case .listPrivateArchivedThreads: return 141
         case .listPublicArchivedThreads: return 142
         case .listThreadMembers: return 143
@@ -2549,10 +2549,10 @@ public enum APIEndpoint: Endpoint {
         case .createThreadInForumChannel: return 148
         case .deleteThreadMember: return 149
         case .leaveThread: return 150
-        case .getMyUser: return 151
+        case .getOwnUser: return 151
         case .getUser: return 152
-        case .listMyConnections: return 153
-        case .updateMyUser: return 154
+        case .listOwnConnections: return 153
+        case .updateOwnUser: return 154
         case .listGuildVoiceRegions: return 155
         case .listVoiceRegions: return 156
         case .updateSelfVoiceState: return 157
@@ -2686,8 +2686,8 @@ public enum APIEndpoint: Endpoint {
             return "listGuildBans(guildId: \(guildId))"
         case let .listGuildIntegrations(guildId):
             return "listGuildIntegrations(guildId: \(guildId))"
-        case .listMyGuilds:
-            return "listMyGuilds"
+        case .listOwnGuilds:
+            return "listOwnGuilds"
         case let .previewPruneGuild(guildId):
             return "previewPruneGuild(guildId: \(guildId))"
         case let .banUserFromGuild(guildId, userId):
@@ -2754,8 +2754,8 @@ public enum APIEndpoint: Endpoint {
             return "inviteRevoke(code: \(code))"
         case let .getGuildMember(guildId, userId):
             return "getGuildMember(guildId: \(guildId), userId: \(userId))"
-        case let .getMyGuildMember(guildId):
-            return "getMyGuildMember(guildId: \(guildId))"
+        case let .getOwnGuildMember(guildId):
+            return "getOwnGuildMember(guildId: \(guildId))"
         case let .listGuildMembers(guildId):
             return "listGuildMembers(guildId: \(guildId))"
         case let .searchGuildMembers(guildId):
@@ -2764,8 +2764,8 @@ public enum APIEndpoint: Endpoint {
             return "addGuildMember(guildId: \(guildId), userId: \(userId))"
         case let .updateGuildMember(guildId, userId):
             return "updateGuildMember(guildId: \(guildId), userId: \(userId))"
-        case let .updateMyGuildMember(guildId):
-            return "updateMyGuildMember(guildId: \(guildId))"
+        case let .updateOwnGuildMember(guildId):
+            return "updateOwnGuildMember(guildId: \(guildId))"
         case let .deleteGuildMember(guildId, userId):
             return "deleteGuildMember(guildId: \(guildId), userId: \(userId))"
         case let .getMessage(channelId, messageId):
@@ -2774,8 +2774,8 @@ public enum APIEndpoint: Endpoint {
             return "listMessageReactionsByEmoji(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
         case let .listMessages(channelId):
             return "listMessages(channelId: \(channelId))"
-        case let .addMyMessageReaction(channelId, messageId, emojiName):
-            return "addMyMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
+        case let .addOwnMessageReaction(channelId, messageId, emojiName):
+            return "addOwnMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
         case let .bulkDeleteMessages(channelId):
             return "bulkDeleteMessages(channelId: \(channelId))"
         case let .createMessage(channelId):
@@ -2790,12 +2790,12 @@ public enum APIEndpoint: Endpoint {
             return "deleteAllMessageReactionsByEmoji(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
         case let .deleteMessage(channelId, messageId):
             return "deleteMessage(channelId: \(channelId), messageId: \(messageId))"
-        case let .deleteMyMessageReaction(channelId, messageId, emojiName):
-            return "deleteMyMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
+        case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
+            return "deleteOwnMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
         case let .deleteUserMessageReaction(channelId, messageId, emojiName, userId):
             return "deleteUserMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName), userId: \(userId))"
-        case .getMyOauth2Application:
-            return "getMyOauth2Application"
+        case .getOwnOauth2Application:
+            return "getOwnOauth2Application"
         case let .listGuildRoles(guildId):
             return "listGuildRoles(guildId: \(guildId))"
         case let .addGuildMemberRole(guildId, userId, roleId):
@@ -2856,8 +2856,8 @@ public enum APIEndpoint: Endpoint {
             return "getActiveGuildThreads(guildId: \(guildId))"
         case let .getThreadMember(channelId, userId):
             return "getThreadMember(channelId: \(channelId), userId: \(userId))"
-        case let .listMyPrivateArchivedThreads(channelId):
-            return "listMyPrivateArchivedThreads(channelId: \(channelId))"
+        case let .listOwnPrivateArchivedThreads(channelId):
+            return "listOwnPrivateArchivedThreads(channelId: \(channelId))"
         case let .listPrivateArchivedThreads(channelId):
             return "listPrivateArchivedThreads(channelId: \(channelId))"
         case let .listPublicArchivedThreads(channelId):
@@ -2878,14 +2878,14 @@ public enum APIEndpoint: Endpoint {
             return "deleteThreadMember(channelId: \(channelId), userId: \(userId))"
         case let .leaveThread(channelId):
             return "leaveThread(channelId: \(channelId))"
-        case .getMyUser:
-            return "getMyUser"
+        case .getOwnUser:
+            return "getOwnUser"
         case let .getUser(userId):
             return "getUser(userId: \(userId))"
-        case .listMyConnections:
-            return "listMyConnections"
-        case .updateMyUser:
-            return "updateMyUser"
+        case .listOwnConnections:
+            return "listOwnConnections"
+        case .updateOwnUser:
+            return "updateOwnUser"
         case let .listGuildVoiceRegions(guildId):
             return "listGuildVoiceRegions(guildId: \(guildId))"
         case .listVoiceRegions:
@@ -2985,7 +2985,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case getGuildWidgetSettings
     case listGuildBans
     case listGuildIntegrations
-    case listMyGuilds
+    case listOwnGuilds
     case previewPruneGuild
     
     // MARK: Guild Templates
@@ -3011,7 +3011,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     /// https://discord.com/developers/docs/resources/guild
     
     case getGuildMember
-    case getMyGuildMember
+    case getOwnGuildMember
     case listGuildMembers
     case searchGuildMembers
     
@@ -3025,7 +3025,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     // MARK: OAuth
     /// https://discord.com/developers/docs/topics/oauth2
     
-    case getMyOauth2Application
+    case getOwnOauth2Application
     
     // MARK: Roles
     /// https://discord.com/developers/docs/resources/guild
@@ -3063,7 +3063,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     
     case getActiveGuildThreads
     case getThreadMember
-    case listMyPrivateArchivedThreads
+    case listOwnPrivateArchivedThreads
     case listPrivateArchivedThreads
     case listPublicArchivedThreads
     case listThreadMembers
@@ -3071,9 +3071,9 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     // MARK: Users
     /// https://discord.com/developers/docs/resources/user
     
-    case getMyUser
+    case getOwnUser
     case getUser
-    case listMyConnections
+    case listOwnConnections
     
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice#list-voice-regions
@@ -3119,7 +3119,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .getGuildWidgetSettings: return "getGuildWidgetSettings"
         case .listGuildBans: return "listGuildBans"
         case .listGuildIntegrations: return "listGuildIntegrations"
-        case .listMyGuilds: return "listMyGuilds"
+        case .listOwnGuilds: return "listOwnGuilds"
         case .previewPruneGuild: return "previewPruneGuild"
         case .getGuildTemplate: return "getGuildTemplate"
         case .listGuildTemplates: return "listGuildTemplates"
@@ -3129,13 +3129,13 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .listChannelInvites: return "listChannelInvites"
         case .listGuildInvites: return "listGuildInvites"
         case .getGuildMember: return "getGuildMember"
-        case .getMyGuildMember: return "getMyGuildMember"
+        case .getOwnGuildMember: return "getOwnGuildMember"
         case .listGuildMembers: return "listGuildMembers"
         case .searchGuildMembers: return "searchGuildMembers"
         case .getMessage: return "getMessage"
         case .listMessageReactionsByEmoji: return "listMessageReactionsByEmoji"
         case .listMessages: return "listMessages"
-        case .getMyOauth2Application: return "getMyOauth2Application"
+        case .getOwnOauth2Application: return "getOwnOauth2Application"
         case .listGuildRoles: return "listGuildRoles"
         case .getApplicationRoleConnectionsMetadata: return "getApplicationRoleConnectionsMetadata"
         case .getApplicationUserRoleConnection: return "getApplicationUserRoleConnection"
@@ -3149,13 +3149,13 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .listStickerPacks: return "listStickerPacks"
         case .getActiveGuildThreads: return "getActiveGuildThreads"
         case .getThreadMember: return "getThreadMember"
-        case .listMyPrivateArchivedThreads: return "listMyPrivateArchivedThreads"
+        case .listOwnPrivateArchivedThreads: return "listOwnPrivateArchivedThreads"
         case .listPrivateArchivedThreads: return "listPrivateArchivedThreads"
         case .listPublicArchivedThreads: return "listPublicArchivedThreads"
         case .listThreadMembers: return "listThreadMembers"
-        case .getMyUser: return "getMyUser"
+        case .getOwnUser: return "getOwnUser"
         case .getUser: return "getUser"
-        case .listMyConnections: return "listMyConnections"
+        case .listOwnConnections: return "listOwnConnections"
         case .listGuildVoiceRegions: return "listGuildVoiceRegions"
         case .listVoiceRegions: return "listVoiceRegions"
         case .getGuildWebhooks: return "getGuildWebhooks"
@@ -3195,7 +3195,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .getGuildWidgetSettings: self = .getGuildWidgetSettings
         case .listGuildBans: self = .listGuildBans
         case .listGuildIntegrations: self = .listGuildIntegrations
-        case .listMyGuilds: self = .listMyGuilds
+        case .listOwnGuilds: self = .listOwnGuilds
         case .previewPruneGuild: self = .previewPruneGuild
         case .getGuildTemplate: self = .getGuildTemplate
         case .listGuildTemplates: self = .listGuildTemplates
@@ -3205,13 +3205,13 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .listChannelInvites: self = .listChannelInvites
         case .listGuildInvites: self = .listGuildInvites
         case .getGuildMember: self = .getGuildMember
-        case .getMyGuildMember: self = .getMyGuildMember
+        case .getOwnGuildMember: self = .getOwnGuildMember
         case .listGuildMembers: self = .listGuildMembers
         case .searchGuildMembers: self = .searchGuildMembers
         case .getMessage: self = .getMessage
         case .listMessageReactionsByEmoji: self = .listMessageReactionsByEmoji
         case .listMessages: self = .listMessages
-        case .getMyOauth2Application: self = .getMyOauth2Application
+        case .getOwnOauth2Application: self = .getOwnOauth2Application
         case .listGuildRoles: self = .listGuildRoles
         case .getApplicationRoleConnectionsMetadata: self = .getApplicationRoleConnectionsMetadata
         case .getApplicationUserRoleConnection: self = .getApplicationUserRoleConnection
@@ -3225,13 +3225,13 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .listStickerPacks: self = .listStickerPacks
         case .getActiveGuildThreads: self = .getActiveGuildThreads
         case .getThreadMember: self = .getThreadMember
-        case .listMyPrivateArchivedThreads: self = .listMyPrivateArchivedThreads
+        case .listOwnPrivateArchivedThreads: self = .listOwnPrivateArchivedThreads
         case .listPrivateArchivedThreads: self = .listPrivateArchivedThreads
         case .listPublicArchivedThreads: self = .listPublicArchivedThreads
         case .listThreadMembers: self = .listThreadMembers
-        case .getMyUser: self = .getMyUser
+        case .getOwnUser: self = .getOwnUser
         case .getUser: self = .getUser
-        case .listMyConnections: self = .listMyConnections
+        case .listOwnConnections: self = .listOwnConnections
         case .listGuildVoiceRegions: self = .listGuildVoiceRegions
         case .listVoiceRegions: self = .listVoiceRegions
         case .getGuildWebhooks: self = .getGuildWebhooks

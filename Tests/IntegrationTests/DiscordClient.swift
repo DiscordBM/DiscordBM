@@ -93,7 +93,7 @@ class DiscordClientTests: XCTestCase {
         /// Add 4 Reactions
         let reactions = ["🚀", "🤠", "👀", "❤️"]
         for reaction in reactions {
-            let reactionResponse = try await client.addMyMessageReaction(
+            let reactionResponse = try await client.addOwnMessageReaction(
                 channelId: Constants.channelId,
                 messageId: message.id,
                 emoji: .unicodeEmoji(reaction)
@@ -102,13 +102,13 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(reactionResponse.status, .noContent)
         }
         
-        let deleteMyMessageReactionResponse = try await client.deleteMyMessageReaction(
+        let deleteOwnMessageReactionResponse = try await client.deleteOwnMessageReaction(
             channelId: Constants.channelId,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[0])
         )
         
-        XCTAssertEqual(deleteMyMessageReactionResponse.status, .noContent)
+        XCTAssertEqual(deleteOwnMessageReactionResponse.status, .noContent)
         
         try await client.deleteUserMessageReaction(
             channelId: Constants.channelId,
@@ -719,7 +719,7 @@ class DiscordClientTests: XCTestCase {
             limit: 2
         ).guardSuccess()
         
-        try await client.listMyPrivateArchivedThreads(
+        try await client.listOwnPrivateArchivedThreads(
             channelId: Constants.threadsChannelId,
             limit: 2
         ).guardSuccess()

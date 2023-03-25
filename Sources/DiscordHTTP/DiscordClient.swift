@@ -602,12 +602,12 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/resources/channel#create-reaction
     @inlinable
-    func addMyMessageReaction(
+    func addOwnMessageReaction(
         channelId: String,
         messageId: String,
         emoji: Reaction
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = APIEndpoint.addMyMessageReaction(
+        let endpoint = APIEndpoint.addOwnMessageReaction(
             channelId: channelId,
             messageId: messageId,
             emojiName: emoji.urlPathDescription
@@ -617,12 +617,12 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/resources/channel#delete-own-reaction
     @inlinable
-    func deleteMyMessageReaction(
+    func deleteOwnMessageReaction(
         channelId: String,
         messageId: String,
         emoji: Reaction
     ) async throws -> DiscordHTTPResponse {
-        let endpoint = APIEndpoint.deleteMyMessageReaction(
+        let endpoint = APIEndpoint.deleteOwnMessageReaction(
             channelId: channelId,
             messageId: messageId,
             emojiName: emoji.urlPathDescription
@@ -970,14 +970,14 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/resources/channel#list-joined-private-archived-threads
     @inlinable
-    func listMyPrivateArchivedThreads(
+    func listOwnPrivateArchivedThreads(
         channelId: String,
         before: String? = nil,
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<RequestResponse.ArchivedThread> {
         /// Not documented, but correct, at least at the time of writing the code.
         try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
-        let endpoint = APIEndpoint.listMyPrivateArchivedThreads(channelId: channelId)
+        let endpoint = APIEndpoint.listOwnPrivateArchivedThreads(channelId: channelId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
