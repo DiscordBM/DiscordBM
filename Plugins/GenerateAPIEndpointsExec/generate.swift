@@ -23,6 +23,8 @@ var urlPrefix: String {
 }
 """
 
+let noEncodeParamSuffixes = ["Id", "code", "Token"]
+
 let _url = grouped.flatMap(\.value).map { info in
     let (name, params) = info.info.makeIterativeCase()
     var split = info.path.split(whereSeparator: { ["{", "}"].contains($0) })
@@ -42,19 +44,21 @@ let _url = grouped.flatMap(\.value).map { info in
     guard suffix.removeFirst() == "/" else {
         fatalError("'\(split.joined())' did not start with a slash '/'")
     }
-    let paramsEncoded = params.map { param in
-        #"let \#(param) = encoded(\#(param))"#
+    let paramsEncoded = params.compactMap { param -> String? in
+        if noEncodeParamSuffixes.contains(where: { param.hasSuffix($0) }) {
+            return nil
+        } else {
+            return #"let \#(param) = \#(param).urlPathEncoded()"#
+        }
     }.joined(separator: "\n")
-    let pramsWithNewLine = params.isEmpty ? "" : "\n" + paramsEncoded.indent()
+    let paramsEmpty = params.isEmpty || paramsEncoded.isEmpty
+    let pramsWithNewLine = paramsEmpty ? "" : "\n" + paramsEncoded.indent()
     let ret = #"suffix = "\#(suffix)""#
     return name + pramsWithNewLine + "\n" + ret.indent()
 }.joined(separator: "\n")
 
 let urlString = """
 public var url: String {
-    func encoded(_ string: String) -> String {
-        string.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? string
-    }
     let suffix: String
     switch self {
 \(_url.indent())
@@ -84,14 +88,17 @@ let _urlDescription = grouped.flatMap(\.value).map { info in
     guard suffix.removeFirst() == "/" else {
         fatalError("'\(split.joined())' did not start with a slash '/'")
     }
-    let paramsEncoded = params.map { param -> String in
+    let paramsEncoded = params.compactMap { param -> String? in
         if param == webhookTokenParam {
             return #"let \#(param) = \#(param).urlPathEncoded().hash"#
+        } else if noEncodeParamSuffixes.contains(where: { param.hasSuffix($0) }) {
+            return nil
         } else {
             return #"let \#(param) = \#(param).urlPathEncoded()"#
         }
     }.joined(separator: "\n")
-    let pramsWithNewLine = params.isEmpty ? "" : "\n" + paramsEncoded.indent()
+    let paramsEmpty = params.isEmpty || paramsEncoded.isEmpty
+    let pramsWithNewLine = paramsEmpty ? "" : "\n" + paramsEncoded.indent()
     let ret = #"suffix = "\#(suffix)""#
     return name + pramsWithNewLine + "\n" + ret.indent()
 }.joined(separator: "\n")

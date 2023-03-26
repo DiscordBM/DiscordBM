@@ -275,618 +275,360 @@ public enum APIEndpoint: Endpoint {
     }
 
     public var url: String {
-        func encoded(_ string: String) -> String {
-            string.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? string
-        }
         let suffix: String
         switch self {
         case let .getAutoModerationRule(guildId, ruleId):
-            let guildId = encoded(guildId)
-            let ruleId = encoded(ruleId)
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .listAutoModerationRules(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/auto-moderation/rules"
         case let .createAutoModerationRule(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/auto-moderation/rules"
         case let .updateAutoModerationRule(guildId, ruleId):
-            let guildId = encoded(guildId)
-            let ruleId = encoded(ruleId)
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .deleteAutoModerationRule(guildId, ruleId):
-            let guildId = encoded(guildId)
-            let ruleId = encoded(ruleId)
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .listGuildAuditLogEntries(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/audit-logs"
         case let .getChannel(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)"
         case let .listGuildChannels(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/channels"
         case let .listPinnedMessages(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/pins"
         case let .addGroupDmUser(channelId, userId):
-            let channelId = encoded(channelId)
-            let userId = encoded(userId)
             suffix = "channels/\(channelId)/recipients/\(userId)"
         case let .pinMessage(channelId, messageId):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
             suffix = "channels/\(channelId)/pins/\(messageId)"
         case let .setChannelPermissionOverwrite(channelId, overwriteId):
-            let channelId = encoded(channelId)
-            let overwriteId = encoded(overwriteId)
             suffix = "channels/\(channelId)/permissions/\(overwriteId)"
         case .createDm:
             suffix = "users/@me/channels"
         case let .createGuildChannel(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/channels"
         case let .followChannel(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/followers"
         case let .triggerTypingIndicator(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/typing"
         case let .bulkUpdateGuildChannels(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/channels"
         case let .updateChannel(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)"
         case let .deleteChannel(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)"
         case let .deleteChannelPermissionOverwrite(channelId, overwriteId):
-            let channelId = encoded(channelId)
-            let overwriteId = encoded(overwriteId)
             suffix = "channels/\(channelId)/permissions/\(overwriteId)"
         case let .deleteGroupDmUser(channelId, userId):
-            let channelId = encoded(channelId)
-            let userId = encoded(userId)
             suffix = "channels/\(channelId)/recipients/\(userId)"
         case let .unpinMessage(channelId, messageId):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
             suffix = "channels/\(channelId)/pins/\(messageId)"
         case let .getApplicationCommand(applicationId, commandId):
-            let applicationId = encoded(applicationId)
-            let commandId = encoded(commandId)
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .getGuildApplicationCommand(applicationId, guildId, commandId):
-            let applicationId = encoded(applicationId)
-            let guildId = encoded(guildId)
-            let commandId = encoded(commandId)
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .getGuildApplicationCommandPermissions(applicationId, guildId, commandId):
-            let applicationId = encoded(applicationId)
-            let guildId = encoded(guildId)
-            let commandId = encoded(commandId)
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions"
         case let .listApplicationCommands(applicationId):
-            let applicationId = encoded(applicationId)
             suffix = "applications/\(applicationId)/commands"
         case let .listGuildApplicationCommandPermissions(applicationId, guildId):
-            let applicationId = encoded(applicationId)
-            let guildId = encoded(guildId)
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/permissions"
         case let .listGuildApplicationCommands(applicationId, guildId):
-            let applicationId = encoded(applicationId)
-            let guildId = encoded(guildId)
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .bulkSetApplicationCommands(applicationId):
-            let applicationId = encoded(applicationId)
             suffix = "applications/\(applicationId)/commands"
         case let .bulkSetGuildApplicationCommands(applicationId, guildId):
-            let applicationId = encoded(applicationId)
-            let guildId = encoded(guildId)
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .setGuildApplicationCommandPermissions(applicationId, guildId, commandId):
-            let applicationId = encoded(applicationId)
-            let guildId = encoded(guildId)
-            let commandId = encoded(commandId)
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions"
         case let .createApplicationCommand(applicationId):
-            let applicationId = encoded(applicationId)
             suffix = "applications/\(applicationId)/commands"
         case let .createGuildApplicationCommand(applicationId, guildId):
-            let applicationId = encoded(applicationId)
-            let guildId = encoded(guildId)
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .updateApplicationCommand(applicationId, commandId):
-            let applicationId = encoded(applicationId)
-            let commandId = encoded(commandId)
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .updateGuildApplicationCommand(applicationId, guildId, commandId):
-            let applicationId = encoded(applicationId)
-            let guildId = encoded(guildId)
-            let commandId = encoded(commandId)
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .deleteApplicationCommand(applicationId, commandId):
-            let applicationId = encoded(applicationId)
-            let commandId = encoded(commandId)
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .deleteGuildApplicationCommand(applicationId, guildId, commandId):
-            let applicationId = encoded(applicationId)
-            let guildId = encoded(guildId)
-            let commandId = encoded(commandId)
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .getGuildEmoji(guildId, emojiId):
-            let guildId = encoded(guildId)
-            let emojiId = encoded(emojiId)
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case let .listGuildEmojis(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/emojis"
         case let .createGuildEmoji(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/emojis"
         case let .updateGuildEmoji(guildId, emojiId):
-            let guildId = encoded(guildId)
-            let emojiId = encoded(emojiId)
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case let .deleteGuildEmoji(guildId, emojiId):
-            let guildId = encoded(guildId)
-            let emojiId = encoded(emojiId)
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case .getBotGateway:
             suffix = "gateway/bot"
         case .getGateway:
             suffix = "gateway"
         case let .getGuild(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)"
         case let .getGuildBan(guildId, userId):
-            let guildId = encoded(guildId)
-            let userId = encoded(userId)
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case let .getGuildPreview(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/preview"
         case let .getGuildVanityUrl(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/vanity-url"
         case let .getGuildWelcomeScreen(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/welcome-screen"
         case let .getGuildWidget(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/widget.json"
         case let .getGuildWidgetPng(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/widget.png"
         case let .getGuildWidgetSettings(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/widget"
         case let .listGuildBans(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/bans"
         case let .listGuildIntegrations(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/integrations"
         case .listOwnGuilds:
             suffix = "users/@me/guilds"
         case let .previewPruneGuild(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/prune"
         case let .banUserFromGuild(guildId, userId):
-            let guildId = encoded(guildId)
-            let userId = encoded(userId)
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case .createGuild:
             suffix = "guilds"
         case let .pruneGuild(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/prune"
         case let .setGuildMfaLevel(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/mfa"
         case let .updateGuild(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)"
         case let .updateGuildWelcomeScreen(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/welcome-screen"
         case let .updateGuildWidgetSettings(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/widget"
         case let .deleteGuild(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)"
         case let .deleteGuildIntegration(guildId, integrationId):
-            let guildId = encoded(guildId)
-            let integrationId = encoded(integrationId)
             suffix = "guilds/\(guildId)/integrations/\(integrationId)"
         case let .leaveGuild(guildId):
-            let guildId = encoded(guildId)
             suffix = "users/@me/guilds/\(guildId)"
         case let .unbanUserFromGuild(guildId, userId):
-            let guildId = encoded(guildId)
-            let userId = encoded(userId)
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case let .getGuildTemplate(code):
-            let code = encoded(code)
             suffix = "guilds/templates/\(code)"
         case let .listGuildTemplates(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/templates"
         case let .syncGuildTemplate(guildId, code):
-            let guildId = encoded(guildId)
-            let code = encoded(code)
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .createGuildFromTemplate(code):
-            let code = encoded(code)
             suffix = "guilds/templates/\(code)"
         case let .createGuildTemplate(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/templates"
         case let .updateGuildTemplate(guildId, code):
-            let guildId = encoded(guildId)
-            let code = encoded(code)
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .deleteGuildTemplate(guildId, code):
-            let guildId = encoded(guildId)
-            let code = encoded(code)
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .getFollowupMessage(applicationId, interactionToken, messageId):
-            let applicationId = encoded(applicationId)
-            let interactionToken = encoded(interactionToken)
-            let messageId = encoded(messageId)
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .getOriginalInteractionResponse(applicationId, interactionToken):
-            let applicationId = encoded(applicationId)
-            let interactionToken = encoded(interactionToken)
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .createFollowupMessage(applicationId, interactionToken):
-            let applicationId = encoded(applicationId)
-            let interactionToken = encoded(interactionToken)
             suffix = "webhooks/\(applicationId)/\(interactionToken)"
         case let .createInteractionResponse(interactionId, interactionToken):
-            let interactionId = encoded(interactionId)
-            let interactionToken = encoded(interactionToken)
             suffix = "interactions/\(interactionId)/\(interactionToken)/callback"
         case let .updateFollowupMessage(applicationId, interactionToken, messageId):
-            let applicationId = encoded(applicationId)
-            let interactionToken = encoded(interactionToken)
-            let messageId = encoded(messageId)
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .updateOriginalInteractionResponse(applicationId, interactionToken):
-            let applicationId = encoded(applicationId)
-            let interactionToken = encoded(interactionToken)
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
-            let applicationId = encoded(applicationId)
-            let interactionToken = encoded(interactionToken)
-            let messageId = encoded(messageId)
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
-            let applicationId = encoded(applicationId)
-            let interactionToken = encoded(interactionToken)
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .inviteResolve(code):
-            let code = encoded(code)
             suffix = "invites/\(code)"
         case let .listChannelInvites(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/invites"
         case let .listGuildInvites(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/invites"
         case let .createChannelInvite(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/invites"
         case let .inviteRevoke(code):
-            let code = encoded(code)
             suffix = "invites/\(code)"
         case let .getGuildMember(guildId, userId):
-            let guildId = encoded(guildId)
-            let userId = encoded(userId)
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .getOwnGuildMember(guildId):
-            let guildId = encoded(guildId)
             suffix = "users/@me/guilds/\(guildId)/member"
         case let .listGuildMembers(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/members"
         case let .searchGuildMembers(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/members/search"
         case let .addGuildMember(guildId, userId):
-            let guildId = encoded(guildId)
-            let userId = encoded(userId)
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .updateGuildMember(guildId, userId):
-            let guildId = encoded(guildId)
-            let userId = encoded(userId)
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .updateOwnGuildMember(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/members/@me"
         case let .deleteGuildMember(guildId, userId):
-            let guildId = encoded(guildId)
-            let userId = encoded(userId)
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .getMessage(channelId, messageId):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .listMessageReactionsByEmoji(channelId, messageId, emojiName):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
-            let emojiName = encoded(emojiName)
+            let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)"
         case let .listMessages(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/messages"
         case let .addOwnMessageReaction(channelId, messageId, emojiName):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
-            let emojiName = encoded(emojiName)
+            let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me"
         case let .bulkDeleteMessages(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/messages/bulk-delete"
         case let .createMessage(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/messages"
         case let .crosspostMessage(channelId, messageId):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
             suffix = "channels/\(channelId)/messages/\(messageId)/crosspost"
         case let .updateMessage(channelId, messageId):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .deleteAllMessageReactions(channelId, messageId):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions"
         case let .deleteAllMessageReactionsByEmoji(channelId, messageId, emojiName):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
-            let emojiName = encoded(emojiName)
+            let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)"
         case let .deleteMessage(channelId, messageId):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
-            let emojiName = encoded(emojiName)
+            let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me"
         case let .deleteUserMessageReaction(channelId, messageId, emojiName, userId):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
-            let emojiName = encoded(emojiName)
-            let userId = encoded(userId)
+            let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/\(userId)"
         case .getOwnOauth2Application:
             suffix = "oauth2/applications/@me"
         case let .listGuildRoles(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/roles"
         case let .addGuildMemberRole(guildId, userId, roleId):
-            let guildId = encoded(guildId)
-            let userId = encoded(userId)
-            let roleId = encoded(roleId)
             suffix = "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .createGuildRole(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/roles"
         case let .bulkUpdateGuildRoles(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/roles"
         case let .updateGuildRole(guildId, roleId):
-            let guildId = encoded(guildId)
-            let roleId = encoded(roleId)
             suffix = "guilds/\(guildId)/roles/\(roleId)"
         case let .deleteGuildMemberRole(guildId, userId, roleId):
-            let guildId = encoded(guildId)
-            let userId = encoded(userId)
-            let roleId = encoded(roleId)
             suffix = "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .deleteGuildRole(guildId, roleId):
-            let guildId = encoded(guildId)
-            let roleId = encoded(roleId)
             suffix = "guilds/\(guildId)/roles/\(roleId)"
         case let .getApplicationRoleConnectionsMetadata(applicationId):
-            let applicationId = encoded(applicationId)
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .getApplicationUserRoleConnection(applicationId):
-            let applicationId = encoded(applicationId)
             suffix = "users/@me/applications/\(applicationId)/role-connection"
         case let .updateApplicationRoleConnectionsMetadata(applicationId):
-            let applicationId = encoded(applicationId)
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .updateApplicationUserRoleConnection(applicationId):
-            let applicationId = encoded(applicationId)
             suffix = "users/@me/applications/\(applicationId)/role-connection"
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
-            let guildId = encoded(guildId)
-            let guildScheduledEventId = encoded(guildScheduledEventId)
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .listGuildScheduledEventUsers(guildId, guildScheduledEventId):
-            let guildId = encoded(guildId)
-            let guildScheduledEventId = encoded(guildScheduledEventId)
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)/users"
         case let .listGuildScheduledEvents(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/scheduled-events"
         case let .createGuildScheduledEvent(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/scheduled-events"
         case let .updateGuildScheduledEvent(guildId, guildScheduledEventId):
-            let guildId = encoded(guildId)
-            let guildScheduledEventId = encoded(guildScheduledEventId)
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .deleteGuildScheduledEvent(guildId, guildScheduledEventId):
-            let guildId = encoded(guildId)
-            let guildScheduledEventId = encoded(guildScheduledEventId)
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .getStageInstance(channelId):
-            let channelId = encoded(channelId)
             suffix = "stage-instances/\(channelId)"
         case .createStageInstance:
             suffix = "stage-instances"
         case let .updateStageInstance(channelId):
-            let channelId = encoded(channelId)
             suffix = "stage-instances/\(channelId)"
         case let .deleteStageInstance(channelId):
-            let channelId = encoded(channelId)
             suffix = "stage-instances/\(channelId)"
         case let .getGuildSticker(guildId, stickerId):
-            let guildId = encoded(guildId)
-            let stickerId = encoded(stickerId)
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .getSticker(stickerId):
-            let stickerId = encoded(stickerId)
             suffix = "stickers/\(stickerId)"
         case let .listGuildStickers(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/stickers"
         case .listStickerPacks:
             suffix = "sticker-packs"
         case let .createGuildSticker(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/stickers"
         case let .updateGuildSticker(guildId, stickerId):
-            let guildId = encoded(guildId)
-            let stickerId = encoded(stickerId)
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .deleteGuildSticker(guildId, stickerId):
-            let guildId = encoded(guildId)
-            let stickerId = encoded(stickerId)
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .getActiveGuildThreads(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/threads/active"
         case let .getThreadMember(channelId, userId):
-            let channelId = encoded(channelId)
-            let userId = encoded(userId)
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .listOwnPrivateArchivedThreads(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/users/@me/threads/archived/private"
         case let .listPrivateArchivedThreads(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/threads/archived/private"
         case let .listPublicArchivedThreads(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/threads/archived/public"
         case let .listThreadMembers(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/thread-members"
         case let .addThreadMember(channelId, userId):
-            let channelId = encoded(channelId)
-            let userId = encoded(userId)
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .joinThread(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/thread-members/@me"
         case let .createThread(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/threads"
         case let .createThreadFromMessage(channelId, messageId):
-            let channelId = encoded(channelId)
-            let messageId = encoded(messageId)
             suffix = "channels/\(channelId)/messages/\(messageId)/threads"
         case let .createThreadInForumChannel(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/threads"
         case let .deleteThreadMember(channelId, userId):
-            let channelId = encoded(channelId)
-            let userId = encoded(userId)
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .leaveThread(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/thread-members/@me"
         case .getOwnUser:
             suffix = "users/@me"
         case let .getUser(userId):
-            let userId = encoded(userId)
             suffix = "users/\(userId)"
         case .listOwnConnections:
             suffix = "users/@me/connections"
         case .updateOwnUser:
             suffix = "users/@me"
         case let .listGuildVoiceRegions(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/regions"
         case .listVoiceRegions:
             suffix = "voice/regions"
         case let .updateSelfVoiceState(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/voice-states/@me"
         case let .updateVoiceState(guildId, userId):
-            let guildId = encoded(guildId)
-            let userId = encoded(userId)
             suffix = "guilds/\(guildId)/voice-states/\(userId)"
         case let .getGuildWebhooks(guildId):
-            let guildId = encoded(guildId)
             suffix = "guilds/\(guildId)/webhooks"
         case let .getWebhook(webhookId):
-            let webhookId = encoded(webhookId)
             suffix = "webhooks/\(webhookId)"
         case let .getWebhookByToken(webhookId, webhookToken):
-            let webhookId = encoded(webhookId)
-            let webhookToken = encoded(webhookToken)
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
-            let webhookId = encoded(webhookId)
-            let webhookToken = encoded(webhookToken)
-            let messageId = encoded(messageId)
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = encoded(webhookId)
-            let webhookToken = encoded(webhookToken)
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .listChannelWebhooks(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/webhooks"
         case let .createWebhook(channelId):
-            let channelId = encoded(channelId)
             suffix = "channels/\(channelId)/webhooks"
         case let .executeWebhook(webhookId, webhookToken):
-            let webhookId = encoded(webhookId)
-            let webhookToken = encoded(webhookToken)
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = encoded(webhookId)
-            let webhookToken = encoded(webhookToken)
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .updateWebhook(webhookId):
-            let webhookId = encoded(webhookId)
             suffix = "webhooks/\(webhookId)"
         case let .updateWebhookByToken(webhookId, webhookToken):
-            let webhookId = encoded(webhookId)
-            let webhookToken = encoded(webhookToken)
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .updateWebhookMessage(webhookId, webhookToken, messageId):
-            let webhookId = encoded(webhookId)
-            let webhookToken = encoded(webhookToken)
-            let messageId = encoded(messageId)
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .deleteWebhook(webhookId):
-            let webhookId = encoded(webhookId)
             suffix = "webhooks/\(webhookId)"
         case let .deleteWebhookByToken(webhookId, webhookToken):
-            let webhookId = encoded(webhookId)
-            let webhookToken = encoded(webhookToken)
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
-            let webhookId = encoded(webhookId)
-            let webhookToken = encoded(webhookToken)
-            let messageId = encoded(messageId)
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = encoded(webhookId)
-            let webhookToken = encoded(webhookToken)
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         }
         return urlPrefix + suffix
@@ -896,611 +638,366 @@ public enum APIEndpoint: Endpoint {
         let suffix: String
         switch self {
         case let .getAutoModerationRule(guildId, ruleId):
-            let guildId = guildId.urlPathEncoded()
-            let ruleId = ruleId.urlPathEncoded()
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .listAutoModerationRules(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/auto-moderation/rules"
         case let .createAutoModerationRule(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/auto-moderation/rules"
         case let .updateAutoModerationRule(guildId, ruleId):
-            let guildId = guildId.urlPathEncoded()
-            let ruleId = ruleId.urlPathEncoded()
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .deleteAutoModerationRule(guildId, ruleId):
-            let guildId = guildId.urlPathEncoded()
-            let ruleId = ruleId.urlPathEncoded()
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .listGuildAuditLogEntries(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/audit-logs"
         case let .getChannel(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)"
         case let .listGuildChannels(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/channels"
         case let .listPinnedMessages(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/pins"
         case let .addGroupDmUser(channelId, userId):
-            let channelId = channelId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "channels/\(channelId)/recipients/\(userId)"
         case let .pinMessage(channelId, messageId):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "channels/\(channelId)/pins/\(messageId)"
         case let .setChannelPermissionOverwrite(channelId, overwriteId):
-            let channelId = channelId.urlPathEncoded()
-            let overwriteId = overwriteId.urlPathEncoded()
             suffix = "channels/\(channelId)/permissions/\(overwriteId)"
         case .createDm:
             suffix = "users/@me/channels"
         case let .createGuildChannel(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/channels"
         case let .followChannel(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/followers"
         case let .triggerTypingIndicator(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/typing"
         case let .bulkUpdateGuildChannels(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/channels"
         case let .updateChannel(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)"
         case let .deleteChannel(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)"
         case let .deleteChannelPermissionOverwrite(channelId, overwriteId):
-            let channelId = channelId.urlPathEncoded()
-            let overwriteId = overwriteId.urlPathEncoded()
             suffix = "channels/\(channelId)/permissions/\(overwriteId)"
         case let .deleteGroupDmUser(channelId, userId):
-            let channelId = channelId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "channels/\(channelId)/recipients/\(userId)"
         case let .unpinMessage(channelId, messageId):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "channels/\(channelId)/pins/\(messageId)"
         case let .getApplicationCommand(applicationId, commandId):
-            let applicationId = applicationId.urlPathEncoded()
-            let commandId = commandId.urlPathEncoded()
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .getGuildApplicationCommand(applicationId, guildId, commandId):
-            let applicationId = applicationId.urlPathEncoded()
-            let guildId = guildId.urlPathEncoded()
-            let commandId = commandId.urlPathEncoded()
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .getGuildApplicationCommandPermissions(applicationId, guildId, commandId):
-            let applicationId = applicationId.urlPathEncoded()
-            let guildId = guildId.urlPathEncoded()
-            let commandId = commandId.urlPathEncoded()
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions"
         case let .listApplicationCommands(applicationId):
-            let applicationId = applicationId.urlPathEncoded()
             suffix = "applications/\(applicationId)/commands"
         case let .listGuildApplicationCommandPermissions(applicationId, guildId):
-            let applicationId = applicationId.urlPathEncoded()
-            let guildId = guildId.urlPathEncoded()
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/permissions"
         case let .listGuildApplicationCommands(applicationId, guildId):
-            let applicationId = applicationId.urlPathEncoded()
-            let guildId = guildId.urlPathEncoded()
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .bulkSetApplicationCommands(applicationId):
-            let applicationId = applicationId.urlPathEncoded()
             suffix = "applications/\(applicationId)/commands"
         case let .bulkSetGuildApplicationCommands(applicationId, guildId):
-            let applicationId = applicationId.urlPathEncoded()
-            let guildId = guildId.urlPathEncoded()
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .setGuildApplicationCommandPermissions(applicationId, guildId, commandId):
-            let applicationId = applicationId.urlPathEncoded()
-            let guildId = guildId.urlPathEncoded()
-            let commandId = commandId.urlPathEncoded()
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions"
         case let .createApplicationCommand(applicationId):
-            let applicationId = applicationId.urlPathEncoded()
             suffix = "applications/\(applicationId)/commands"
         case let .createGuildApplicationCommand(applicationId, guildId):
-            let applicationId = applicationId.urlPathEncoded()
-            let guildId = guildId.urlPathEncoded()
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .updateApplicationCommand(applicationId, commandId):
-            let applicationId = applicationId.urlPathEncoded()
-            let commandId = commandId.urlPathEncoded()
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .updateGuildApplicationCommand(applicationId, guildId, commandId):
-            let applicationId = applicationId.urlPathEncoded()
-            let guildId = guildId.urlPathEncoded()
-            let commandId = commandId.urlPathEncoded()
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .deleteApplicationCommand(applicationId, commandId):
-            let applicationId = applicationId.urlPathEncoded()
-            let commandId = commandId.urlPathEncoded()
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .deleteGuildApplicationCommand(applicationId, guildId, commandId):
-            let applicationId = applicationId.urlPathEncoded()
-            let guildId = guildId.urlPathEncoded()
-            let commandId = commandId.urlPathEncoded()
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .getGuildEmoji(guildId, emojiId):
-            let guildId = guildId.urlPathEncoded()
-            let emojiId = emojiId.urlPathEncoded()
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case let .listGuildEmojis(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/emojis"
         case let .createGuildEmoji(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/emojis"
         case let .updateGuildEmoji(guildId, emojiId):
-            let guildId = guildId.urlPathEncoded()
-            let emojiId = emojiId.urlPathEncoded()
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case let .deleteGuildEmoji(guildId, emojiId):
-            let guildId = guildId.urlPathEncoded()
-            let emojiId = emojiId.urlPathEncoded()
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case .getBotGateway:
             suffix = "gateway/bot"
         case .getGateway:
             suffix = "gateway"
         case let .getGuild(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)"
         case let .getGuildBan(guildId, userId):
-            let guildId = guildId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case let .getGuildPreview(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/preview"
         case let .getGuildVanityUrl(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/vanity-url"
         case let .getGuildWelcomeScreen(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/welcome-screen"
         case let .getGuildWidget(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/widget.json"
         case let .getGuildWidgetPng(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/widget.png"
         case let .getGuildWidgetSettings(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/widget"
         case let .listGuildBans(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/bans"
         case let .listGuildIntegrations(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/integrations"
         case .listOwnGuilds:
             suffix = "users/@me/guilds"
         case let .previewPruneGuild(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/prune"
         case let .banUserFromGuild(guildId, userId):
-            let guildId = guildId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case .createGuild:
             suffix = "guilds"
         case let .pruneGuild(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/prune"
         case let .setGuildMfaLevel(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/mfa"
         case let .updateGuild(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)"
         case let .updateGuildWelcomeScreen(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/welcome-screen"
         case let .updateGuildWidgetSettings(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/widget"
         case let .deleteGuild(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)"
         case let .deleteGuildIntegration(guildId, integrationId):
-            let guildId = guildId.urlPathEncoded()
-            let integrationId = integrationId.urlPathEncoded()
             suffix = "guilds/\(guildId)/integrations/\(integrationId)"
         case let .leaveGuild(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "users/@me/guilds/\(guildId)"
         case let .unbanUserFromGuild(guildId, userId):
-            let guildId = guildId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case let .getGuildTemplate(code):
-            let code = code.urlPathEncoded()
             suffix = "guilds/templates/\(code)"
         case let .listGuildTemplates(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/templates"
         case let .syncGuildTemplate(guildId, code):
-            let guildId = guildId.urlPathEncoded()
-            let code = code.urlPathEncoded()
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .createGuildFromTemplate(code):
-            let code = code.urlPathEncoded()
             suffix = "guilds/templates/\(code)"
         case let .createGuildTemplate(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/templates"
         case let .updateGuildTemplate(guildId, code):
-            let guildId = guildId.urlPathEncoded()
-            let code = code.urlPathEncoded()
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .deleteGuildTemplate(guildId, code):
-            let guildId = guildId.urlPathEncoded()
-            let code = code.urlPathEncoded()
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .getFollowupMessage(applicationId, interactionToken, messageId):
-            let applicationId = applicationId.urlPathEncoded()
-            let interactionToken = interactionToken.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .getOriginalInteractionResponse(applicationId, interactionToken):
-            let applicationId = applicationId.urlPathEncoded()
-            let interactionToken = interactionToken.urlPathEncoded()
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .createFollowupMessage(applicationId, interactionToken):
-            let applicationId = applicationId.urlPathEncoded()
-            let interactionToken = interactionToken.urlPathEncoded()
             suffix = "webhooks/\(applicationId)/\(interactionToken)"
         case let .createInteractionResponse(interactionId, interactionToken):
-            let interactionId = interactionId.urlPathEncoded()
-            let interactionToken = interactionToken.urlPathEncoded()
             suffix = "interactions/\(interactionId)/\(interactionToken)/callback"
         case let .updateFollowupMessage(applicationId, interactionToken, messageId):
-            let applicationId = applicationId.urlPathEncoded()
-            let interactionToken = interactionToken.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .updateOriginalInteractionResponse(applicationId, interactionToken):
-            let applicationId = applicationId.urlPathEncoded()
-            let interactionToken = interactionToken.urlPathEncoded()
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
-            let applicationId = applicationId.urlPathEncoded()
-            let interactionToken = interactionToken.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
-            let applicationId = applicationId.urlPathEncoded()
-            let interactionToken = interactionToken.urlPathEncoded()
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .inviteResolve(code):
-            let code = code.urlPathEncoded()
             suffix = "invites/\(code)"
         case let .listChannelInvites(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/invites"
         case let .listGuildInvites(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/invites"
         case let .createChannelInvite(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/invites"
         case let .inviteRevoke(code):
-            let code = code.urlPathEncoded()
             suffix = "invites/\(code)"
         case let .getGuildMember(guildId, userId):
-            let guildId = guildId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .getOwnGuildMember(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "users/@me/guilds/\(guildId)/member"
         case let .listGuildMembers(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members"
         case let .searchGuildMembers(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/search"
         case let .addGuildMember(guildId, userId):
-            let guildId = guildId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .updateGuildMember(guildId, userId):
-            let guildId = guildId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .updateOwnGuildMember(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/@me"
         case let .deleteGuildMember(guildId, userId):
-            let guildId = guildId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .getMessage(channelId, messageId):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .listMessageReactionsByEmoji(channelId, messageId, emojiName):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)"
         case let .listMessages(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages"
         case let .addOwnMessageReaction(channelId, messageId, emojiName):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me"
         case let .bulkDeleteMessages(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/bulk-delete"
         case let .createMessage(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages"
         case let .crosspostMessage(channelId, messageId):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/crosspost"
         case let .updateMessage(channelId, messageId):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .deleteAllMessageReactions(channelId, messageId):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions"
         case let .deleteAllMessageReactionsByEmoji(channelId, messageId, emojiName):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)"
         case let .deleteMessage(channelId, messageId):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me"
         case let .deleteUserMessageReaction(channelId, messageId, emojiName, userId):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             let emojiName = emojiName.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/\(userId)"
         case .getOwnOauth2Application:
             suffix = "oauth2/applications/@me"
         case let .listGuildRoles(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/roles"
         case let .addGuildMemberRole(guildId, userId, roleId):
-            let guildId = guildId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
-            let roleId = roleId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .createGuildRole(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/roles"
         case let .bulkUpdateGuildRoles(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/roles"
         case let .updateGuildRole(guildId, roleId):
-            let guildId = guildId.urlPathEncoded()
-            let roleId = roleId.urlPathEncoded()
             suffix = "guilds/\(guildId)/roles/\(roleId)"
         case let .deleteGuildMemberRole(guildId, userId, roleId):
-            let guildId = guildId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
-            let roleId = roleId.urlPathEncoded()
             suffix = "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .deleteGuildRole(guildId, roleId):
-            let guildId = guildId.urlPathEncoded()
-            let roleId = roleId.urlPathEncoded()
             suffix = "guilds/\(guildId)/roles/\(roleId)"
         case let .getApplicationRoleConnectionsMetadata(applicationId):
-            let applicationId = applicationId.urlPathEncoded()
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .getApplicationUserRoleConnection(applicationId):
-            let applicationId = applicationId.urlPathEncoded()
             suffix = "users/@me/applications/\(applicationId)/role-connection"
         case let .updateApplicationRoleConnectionsMetadata(applicationId):
-            let applicationId = applicationId.urlPathEncoded()
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .updateApplicationUserRoleConnection(applicationId):
-            let applicationId = applicationId.urlPathEncoded()
             suffix = "users/@me/applications/\(applicationId)/role-connection"
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
-            let guildId = guildId.urlPathEncoded()
-            let guildScheduledEventId = guildScheduledEventId.urlPathEncoded()
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .listGuildScheduledEventUsers(guildId, guildScheduledEventId):
-            let guildId = guildId.urlPathEncoded()
-            let guildScheduledEventId = guildScheduledEventId.urlPathEncoded()
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)/users"
         case let .listGuildScheduledEvents(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/scheduled-events"
         case let .createGuildScheduledEvent(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/scheduled-events"
         case let .updateGuildScheduledEvent(guildId, guildScheduledEventId):
-            let guildId = guildId.urlPathEncoded()
-            let guildScheduledEventId = guildScheduledEventId.urlPathEncoded()
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .deleteGuildScheduledEvent(guildId, guildScheduledEventId):
-            let guildId = guildId.urlPathEncoded()
-            let guildScheduledEventId = guildScheduledEventId.urlPathEncoded()
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .getStageInstance(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "stage-instances/\(channelId)"
         case .createStageInstance:
             suffix = "stage-instances"
         case let .updateStageInstance(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "stage-instances/\(channelId)"
         case let .deleteStageInstance(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "stage-instances/\(channelId)"
         case let .getGuildSticker(guildId, stickerId):
-            let guildId = guildId.urlPathEncoded()
-            let stickerId = stickerId.urlPathEncoded()
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .getSticker(stickerId):
-            let stickerId = stickerId.urlPathEncoded()
             suffix = "stickers/\(stickerId)"
         case let .listGuildStickers(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/stickers"
         case .listStickerPacks:
             suffix = "sticker-packs"
         case let .createGuildSticker(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/stickers"
         case let .updateGuildSticker(guildId, stickerId):
-            let guildId = guildId.urlPathEncoded()
-            let stickerId = stickerId.urlPathEncoded()
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .deleteGuildSticker(guildId, stickerId):
-            let guildId = guildId.urlPathEncoded()
-            let stickerId = stickerId.urlPathEncoded()
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .getActiveGuildThreads(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/threads/active"
         case let .getThreadMember(channelId, userId):
-            let channelId = channelId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .listOwnPrivateArchivedThreads(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/users/@me/threads/archived/private"
         case let .listPrivateArchivedThreads(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/threads/archived/private"
         case let .listPublicArchivedThreads(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/threads/archived/public"
         case let .listThreadMembers(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/thread-members"
         case let .addThreadMember(channelId, userId):
-            let channelId = channelId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .joinThread(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/thread-members/@me"
         case let .createThread(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/threads"
         case let .createThreadFromMessage(channelId, messageId):
-            let channelId = channelId.urlPathEncoded()
-            let messageId = messageId.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/threads"
         case let .createThreadInForumChannel(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/threads"
         case let .deleteThreadMember(channelId, userId):
-            let channelId = channelId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .leaveThread(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/thread-members/@me"
         case .getOwnUser:
             suffix = "users/@me"
         case let .getUser(userId):
-            let userId = userId.urlPathEncoded()
             suffix = "users/\(userId)"
         case .listOwnConnections:
             suffix = "users/@me/connections"
         case .updateOwnUser:
             suffix = "users/@me"
         case let .listGuildVoiceRegions(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/regions"
         case .listVoiceRegions:
             suffix = "voice/regions"
         case let .updateSelfVoiceState(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/voice-states/@me"
         case let .updateVoiceState(guildId, userId):
-            let guildId = guildId.urlPathEncoded()
-            let userId = userId.urlPathEncoded()
             suffix = "guilds/\(guildId)/voice-states/\(userId)"
         case let .getGuildWebhooks(guildId):
-            let guildId = guildId.urlPathEncoded()
             suffix = "guilds/\(guildId)/webhooks"
         case let .getWebhook(webhookId):
-            let webhookId = webhookId.urlPathEncoded()
             suffix = "webhooks/\(webhookId)"
         case let .getWebhookByToken(webhookId, webhookToken):
-            let webhookId = webhookId.urlPathEncoded()
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
-            let webhookId = webhookId.urlPathEncoded()
             let webhookToken = webhookToken.urlPathEncoded().hash
-            let messageId = messageId.urlPathEncoded()
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = webhookId.urlPathEncoded()
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .listChannelWebhooks(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/webhooks"
         case let .createWebhook(channelId):
-            let channelId = channelId.urlPathEncoded()
             suffix = "channels/\(channelId)/webhooks"
         case let .executeWebhook(webhookId, webhookToken):
-            let webhookId = webhookId.urlPathEncoded()
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = webhookId.urlPathEncoded()
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .updateWebhook(webhookId):
-            let webhookId = webhookId.urlPathEncoded()
             suffix = "webhooks/\(webhookId)"
         case let .updateWebhookByToken(webhookId, webhookToken):
-            let webhookId = webhookId.urlPathEncoded()
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .updateWebhookMessage(webhookId, webhookToken, messageId):
-            let webhookId = webhookId.urlPathEncoded()
             let webhookToken = webhookToken.urlPathEncoded().hash
-            let messageId = messageId.urlPathEncoded()
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .deleteWebhook(webhookId):
-            let webhookId = webhookId.urlPathEncoded()
             suffix = "webhooks/\(webhookId)"
         case let .deleteWebhookByToken(webhookId, webhookToken):
-            let webhookId = webhookId.urlPathEncoded()
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
-            let webhookId = webhookId.urlPathEncoded()
             let webhookToken = webhookToken.urlPathEncoded().hash
-            let messageId = messageId.urlPathEncoded()
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = webhookId.urlPathEncoded()
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         }
