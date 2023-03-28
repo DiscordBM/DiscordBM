@@ -32,7 +32,7 @@ extension LoggingSystem {
             return handler
         }, metadataProvider: metadataProvider)
         /// If the log-manager is not yet set, then when it's set it'll use this new logger anyway.
-        await DiscordGlobalConfiguration._logManager?.renewFallbackLogger()
+        await ConfigurationStorage.shared.logManager?.renewFallbackLogger()
     }
     
     private static func _bootstrap(

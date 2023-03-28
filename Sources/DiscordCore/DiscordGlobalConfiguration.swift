@@ -2,19 +2,43 @@ import Foundation
 import Logging
 import MultipartKit
 
+/// The point of this storage is to disable Sendable warnings when using
+/// `-strict-concurrency=complete`
+private class ConfigurationStorage: @unchecked Sendable {
+    var decoder: any DiscordDecoder = JSONDecoder()
+    var encoder: any DiscordEncoder = JSONEncoder()
+    var multipartEncoder: any DiscordMultipartEncoder = FormDataEncoder()
+    var makeLogger: @Sendable (String) -> Logger = { Logger(label: $0) }
+    
+    static let shared = ConfigurationStorage()
+}
+
 public enum DiscordGlobalConfiguration {
     /// Currently only 10 is supported.
     public static let apiVersion = 10
     /// The global decoder to decode JSONs with.
-    public static var decoder: any DiscordDecoder = JSONDecoder()
+    public static var decoder: any DiscordDecoder {
+        get { ConfigurationStorage.shared.decoder }
+        set { ConfigurationStorage.shared.decoder = newValue }
+    }
     /// The global encoder to encode JSONs with.
-    public static var encoder: any DiscordEncoder = JSONEncoder()
+    public static var encoder: any DiscordEncoder {
+        get { ConfigurationStorage.shared.encoder }
+        set { ConfigurationStorage.shared.encoder = newValue }
+    }
     /// The global encoder to encode Multipart forms with.
-    /// I don't think it's easy to get it working with another encoder, but it's possible.
-    public static var multipartEncoder: any DiscordMultipartEncoder = FormDataEncoder()
+    /// I don't think it's easy to get it working with another encoder because it uses
+    /// some `MultipartKit` types.
+    public static var multipartEncoder: any DiscordMultipartEncoder {
+        get { ConfigurationStorage.shared.multipartEncoder }
+        set { ConfigurationStorage.shared.multipartEncoder = newValue }
+    }
     /// Function to make loggers with. You can override it with your own logger.
     /// The `String` argument represents the label of the logger.
-    public static var makeLogger: @Sendable (String) -> Logger = { Logger(label: $0) }
+    public static var makeLogger: @Sendable (String) -> Logger {
+        get { ConfigurationStorage.shared.makeLogger }
+        set { ConfigurationStorage.shared.makeLogger = newValue }
+    }
 }
 
 //MARK: - DiscordDecoder

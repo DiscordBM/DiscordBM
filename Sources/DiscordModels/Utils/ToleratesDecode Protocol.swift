@@ -50,7 +50,7 @@ extension KeyedDecodingContainer {
                     if let value = try? container.decode(String.self) {
                         toleratesDecodeLogger.warning("Found a new enum value", metadata: [
                             "newKey": .string(value),
-                            "decodedSoFar": .stringConvertible(elements),
+                            "decodedSoFar": .stringConvertible(DescriptionBox(elements)),
                             "totalCount": .stringConvertible(container.count ?? -1),
                             "type": .string(_typeName(D.self))
                         ])
@@ -60,7 +60,7 @@ extension KeyedDecodingContainer {
                     if let value = try? container.decode(Int.self) {
                         toleratesDecodeLogger.warning("Found a new enum value", metadata: [
                             "newKey": .stringConvertible(value),
-                            "decodedSoFar": .stringConvertible(elements),
+                            "decodedSoFar": .stringConvertible(DescriptionBox(elements)),
                             "totalCount": .stringConvertible(container.count ?? -1),
                             "type": .string(_typeName(D.self))
                         ])
@@ -89,5 +89,14 @@ extension KeyedDecodingContainer {
         }
         
         return elements
+    }
+}
+
+private struct DescriptionBox<T>: @unchecked Sendable, CustomStringConvertible {
+    var value: T
+    var description: String { "\(value)" }
+    
+    init(_ value: T) {
+        self.value = value
     }
 }
