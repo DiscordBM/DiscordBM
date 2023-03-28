@@ -59,7 +59,7 @@ public struct DefaultDiscordClient: DiscordClient {
     }
     
     func checkRateLimitsAllowRequest(
-        to endpoint: any Endpoint,
+        to endpoint: AnyEndpoint,
         requestId: UInt,
         retriesSoFar: Int
     ) async throws {

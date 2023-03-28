@@ -10,10 +10,11 @@ public enum DiscordGlobalConfiguration {
     /// The global encoder to encode JSONs with.
     public static var encoder: any DiscordEncoder = JSONEncoder()
     /// The global encoder to encode Multipart forms with.
+    /// I don't think it's easy to get it working with another encoder, but it's possible.
     public static var multipartEncoder: any DiscordMultipartEncoder = FormDataEncoder()
     /// Function to make loggers with. You can override it with your own logger.
     /// The `String` argument represents the label of the logger.
-    public static var makeLogger: (String) -> Logger = { Logger(label: $0) }
+    public static var makeLogger: @Sendable (String) -> Logger = { Logger(label: $0) }
 }
 
 //MARK: - DiscordDecoder

@@ -4,7 +4,6 @@ import Logging
 import struct NIOCore.ByteBuffer
 import XCTest
 
-
 class ReactToRoleTests: XCTestCase {
     
     var httpClient: HTTPClient!

@@ -2,13 +2,11 @@
 
 import PackageDescription
 
-#if swift(>=5.7) && StrictConcurrency
 let swiftSettings: [SwiftSetting] = [
-    .unsafeFlags(["-Xfrontend", "-strict-concurrency=targeted"])
+    // Versioned Releases Can't use this flag?! So can't commit this flag to git.
+    /// `minimal` / `targeted` / `complete`
+//            .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
 ]
-#else
-let swiftSettings: [SwiftSetting] = []
-#endif
 
 let package = Package(
     name: "DiscordBM",
@@ -61,29 +59,6 @@ let package = Package(
             ],
             swiftSettings: swiftSettings
         ),
-        .plugin(
-            name: "GenerateAPIEndpoints",
-            capability: .command(
-                intent: .custom(
-                    verb: "generate-api-endpoints",
-                    description: "Generates API Endpoints"
-                ),
-                permissions: [
-                    .writeToPackageDirectory(reason: "Add Generated Endpoints")
-                ]
-            ),
-            dependencies: ["GenerateAPIEndpointsExec"]
-        ),
-        .executableTarget(
-            name: "GenerateAPIEndpointsExec",
-            dependencies: [
-                .product(name: "NIOHTTP1", package: "swift-nio"),
-                .product(name: "Yams", package: "Yams")
-            ],
-            path: "Plugins/GenerateAPIEndpointsExec",
-            resources: [.copy("Resources/openapi.yml")],
-            swiftSettings: swiftSettings
-        ),
         .target(
             name: "DiscordCore",
             dependencies: [
@@ -127,6 +102,29 @@ let package = Package(
             dependencies: [
                 "DiscordModels"
             ],
+            swiftSettings: swiftSettings
+        ),
+        .plugin(
+            name: "GenerateAPIEndpoints",
+            capability: .command(
+                intent: .custom(
+                    verb: "generate-api-endpoints",
+                    description: "Generates API Endpoints"
+                ),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Add Generated Endpoints")
+                ]
+            ),
+            dependencies: ["GenerateAPIEndpointsExec"]
+        ),
+        .executableTarget(
+            name: "GenerateAPIEndpointsExec",
+            dependencies: [
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "Yams", package: "Yams")
+            ],
+            path: "Plugins/GenerateAPIEndpointsExec",
+            resources: [.copy("Resources/openapi.yml")],
             swiftSettings: swiftSettings
         ),
         /// `WebSocketKit` will be replaced as soon as changes are final and merged in

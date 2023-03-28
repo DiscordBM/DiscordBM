@@ -187,7 +187,7 @@ public var description: String {
 }
 """
 
-var _id = grouped.flatMap(\.value).enumerated().map { idx, info in
+let _id = grouped.flatMap(\.value).enumerated().map { idx, info in
     info.info.makeRawCaseName() + " return \(idx + 1)"
 }.joined(separator: "\n")
 
@@ -199,7 +199,7 @@ public var id: Int {
 }
 """
 
-var cacheableCases = grouped.compactMap { tag, infos -> (API.Path.Info.Tag, [String])? in
+let cacheableCases = grouped.compactMap { tag, infos -> (API.Path.Info.Tag, [String])? in
     let filtered = infos.filter { $0.method == .GET }
     if filtered.isEmpty {
         return nil
@@ -215,7 +215,7 @@ var cacheableCases = grouped.compactMap { tag, infos -> (API.Path.Info.Tag, [Str
     """
 }.joined(separator: "\n\n")
 
-var _cacheableDescription = grouped.flatMap(\.value).filter {
+let _cacheableDescription = grouped.flatMap(\.value).filter {
     $0.method == .GET
 }.map {
     $0.info.makeRawCaseName() + #" return "\#($0.info.summary.toCamelCase())""#
@@ -229,7 +229,7 @@ public var description: String {
 }
 """
 
-var _cacheableInit = grouped.flatMap(\.value).filter {
+let _cacheableInit = grouped.flatMap(\.value).filter {
     $0.method == .GET
 }.map {
     $0.info.makeRawCaseName() + " self = .\($0.info.summary.toCamelCase())"
