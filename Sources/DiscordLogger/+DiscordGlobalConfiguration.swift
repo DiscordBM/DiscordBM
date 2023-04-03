@@ -18,6 +18,6 @@ extension DiscordGlobalConfiguration {
             }
             return logManager
         }
-        set(newValue) { ConfigurationStorage.shared.logManager = newValue }
+        set { ConfigurationStorage.shared.logManager = newValue }
     }
 }

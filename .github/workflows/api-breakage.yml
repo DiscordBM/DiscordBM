@@ -8,7 +8,7 @@ jobs:
   api-breakage:
     strategy:
       fail-fast: false
-    container: swift:5.7-jammy
+    container: swift:5.8-jammy
     runs-on: ubuntu-latest
     steps:
       - name: Check out package
