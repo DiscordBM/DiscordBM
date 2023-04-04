@@ -613,11 +613,18 @@ extension BotGatewayManager {
                         ])
                     }
                 } else {
-                    self.logger.warning("Trying to send through ws when a connection is not established", metadata: [
-                        "payload": .string("\(payload)"),
-                        "state": .stringConvertible(self._state.load(ordering: .relaxed)),
-                        "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-                    ])
+                    /// Pings aka `heartbeat`s are fine if they are sent when a ws connection
+                    /// is not established. Pings are not disabled after a connection goes down
+                    /// so long story short, the gateway manager never gets stuck in a bad
+                    /// cycle of no-connection.
+                    self.logger.log(
+                        level: (payload.opcode == .heartbeat) ? .debug : .warning,
+                        "Trying to send through ws when a connection is not established",
+                        metadata: [
+                            "payload": .string("\(payload)"),
+                            "state": .stringConvertible(self._state.load(ordering: .relaxed)),
+                            "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                        ])
                 }
             }
         }
