@@ -10,4 +10,4 @@ DerivedData/
 .swiftpm
 Package.resolved
 .devcontainer
-.vscode/settings.json
+.vscode

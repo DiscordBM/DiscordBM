@@ -1,11 +1,7 @@
-#if swift(>=5.8)
-@preconcurrency import Atomics
-#else
-import Atomics
-#endif
 import WebSocketKitFork
 import Foundation
 import AsyncHTTPClient
+import Atomics
 import Logging
 import enum NIOWebSocket.WebSocketErrorCode
 import struct NIOCore.TimeAmount

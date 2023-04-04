@@ -1,11 +1,7 @@
-#if swift(>=5.8)
-@preconcurrency import Atomics
-#else
-import Atomics
-#endif
 @testable import DiscordBM
 import DiscordHTTP
 import AsyncHTTPClient
+import Atomics
 import NIOCore
 import XCTest
 

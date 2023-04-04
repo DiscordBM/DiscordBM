@@ -27,15 +27,15 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.42.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.49.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
-        .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.6.4"),
-        .package(url: "https://github.com/apple/swift-atomics.git", from: "1.0.0"),
-        .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.2"),
+        .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.15.0"),
+        .package(url: "https://github.com/apple/swift-atomics.git", from: "1.1.0"),
+        .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.3"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
         /// `WebSocketKit` dependencies
-        .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.14.0"),
-        .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.11.4"),
+        .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.23.0"),
+        .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.15.0"),
     ],
     targets: [
         .target(

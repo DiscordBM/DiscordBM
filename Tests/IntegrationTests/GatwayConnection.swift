@@ -1,8 +1,6 @@
-#if swift(>=5.8)
-@preconcurrency import Atomics
-#endif
 @testable import DiscordGateway
 import AsyncHTTPClient
+import Atomics
 import Logging
 import XCTest
 
