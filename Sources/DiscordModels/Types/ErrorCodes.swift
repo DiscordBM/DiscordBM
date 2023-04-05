@@ -201,6 +201,7 @@ public enum JSONErrorCode: Int, Sendable, Codable {
     case cannotMixSubscriptionAndNonSubscriptionRolesForEmoji = 50144
     case cannotConvertBetweenPremiumEmojiAndNormalEmoji = 50145
     case uploadedFileNotFound = 50146
+    case cannotDeleteGuildSubscriptionIntegration = 50163
     case missingPermissionToSendSticker = 50600
     case twoFactorRequiredForOperation = 60003
     case noUsersWithDiscordTagExist = 80004

@@ -135,6 +135,24 @@ extension ValidatablePayload {
     }
     
     @inlinable
+    func validateCaseInsensitivelyDoesNotContain(
+        _ value: (any StringProtocol)?,
+        name: String,
+        values: [some StringProtocol],
+        reason: String
+    ) throws {
+        if let value = value,
+           values.contains(where: { value.localizedCaseInsensitiveContains($0) }) {
+            throw ValidationError.containsProhibitedValues(
+                self,
+                name: name,
+                reason: reason,
+                valuesRepresentation: "\(values)"
+            )
+        }
+    }
+    
+    @inlinable
     func validateHasPrecondition(
         condition: Bool,
         allowedIf: Bool,

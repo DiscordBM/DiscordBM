@@ -143,6 +143,37 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
         }
     }
     
+    func testValidateCaseInsensitivelyDoesNotContain() throws {
+        try validateCaseInsensitivelyDoesNotContain(
+            nil,
+            name: "aaabbb",
+            values: ["discord", "clyde"],
+            reason: "res"
+        )
+        try validateCaseInsensitivelyDoesNotContain(
+            "discor",
+            name: "aaabbb",
+            values: ["discord", "clyde"],
+            reason: "res"
+        )
+        XCTAssertThrowsError(
+            try validateCaseInsensitivelyDoesNotContain(
+                "diScordclYde",
+                name: "aabb",
+                values: ["discord", "clyde"],
+                reason: "rrr"
+            )
+        ) { error in
+            let error = error as! ValidationError
+            XCTAssertEqual(error, .containsProhibitedValues(
+                self,
+                name: "aabb",
+                reason: "rrr",
+                valuesRepresentation: "\(["discord", "clyde"])"
+            ))
+        }
+    }
+    
     func testValidateHasPrecondition() throws {
         try validateHasPrecondition(
             condition: true,

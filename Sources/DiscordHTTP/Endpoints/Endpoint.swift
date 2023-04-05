@@ -8,7 +8,7 @@ public protocol Endpoint: Sendable, CustomStringConvertible {
     /// Interaction endpoints don't count against the global rate limit.
     /// Even if the global rate-limit is exceeded, you can still respond to interactions.
     var countsAgainstGlobalRateLimit: Bool { get }
-    /// Some endpoints like don't require an authorization header because the endpoint itself
+    /// Some endpoints don't require an authorization header because the endpoint url itself
     /// contains some kind of authorization token. Like some of the webhook endpoints.
     var requiresAuthorizationHeader: Bool { get }
     /// Path parameters.

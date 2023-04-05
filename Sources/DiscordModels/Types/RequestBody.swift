@@ -428,6 +428,12 @@ public enum RequestBody {
         
         public func validate() throws {
             try validateCharacterCountInRange(name, min: 1, max: 80, name: "name")
+            try validateCaseInsensitivelyDoesNotContain(
+                name,
+                name: "name",
+                values: ["clyde", "discord"],
+                reason: "name can't contain 'clyde' or 'discord' (case-insensitive)"
+            )
         }
     }
     

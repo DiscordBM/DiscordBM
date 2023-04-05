@@ -4,6 +4,7 @@ public struct PartialApplication: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/application#application-object-application-flags
     public enum Flag: Int, Sendable {
+        case applicationAutoModerationRuleCreateBadge = 6
         case gatewayPresence = 12
         case gatewayPresenceLimited = 13
         case gatewayGuildMembers = 14

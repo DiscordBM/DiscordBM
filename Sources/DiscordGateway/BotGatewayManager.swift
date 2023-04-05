@@ -586,7 +586,7 @@ extension BotGatewayManager {
                 do {
                     data = try DiscordGlobalConfiguration.encoder.encode(payload)
                 } catch {
-                    self.logger.error("Could not encode payload. This is a library issue, please report on https://github.com/MahdiBM/DiscordBM/issues", metadata: [
+                    self.logger.error("Could not encode payload", metadata: [
                         "payload": .string("\(payload)"),
                         "opcode": .stringConvertible(opcode),
                         "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
@@ -601,7 +601,7 @@ extension BotGatewayManager {
                             opcode: .init(encodedWebSocketOpcode: opcode)!
                         )
                     } catch {
-                        self.logger.error("Could not send payload through websocket. This is warning if something goes wrong, not necessarily an error", metadata: [
+                        self.logger.error("Could not send payload through websocket", metadata: [
                             "error": "\(error)",
                             "payload": .string("\(payload)"),
                             "opcode": .stringConvertible(opcode),
