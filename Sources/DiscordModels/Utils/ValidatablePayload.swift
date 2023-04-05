@@ -136,9 +136,9 @@ extension ValidatablePayload {
     
     @inlinable
     func validateCaseInsensitivelyDoesNotContain(
-        _ value: (any StringProtocol)?,
+        _ value: String?,
         name: String,
-        values: [some StringProtocol],
+        values: [String],
         reason: String
     ) throws {
         if let value = value,
