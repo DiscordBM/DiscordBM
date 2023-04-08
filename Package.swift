@@ -5,7 +5,7 @@ import PackageDescription
 let swiftSettings: [SwiftSetting] = [
     // Versioned Releases Can't use this flag?! So can't commit this flag to git.
     /// `minimal` / `targeted` / `complete`
-//            .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
+    //            .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
 ]
 
 let package = Package(

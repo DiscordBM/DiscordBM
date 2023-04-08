@@ -3,7 +3,7 @@ extension StringProtocol {
     func toCamelCase() -> String {
         var capitalized = self.capitalized
             .replacingOccurrences(of: "_", with: "")
-            .filter({ !$0.isWhitespace })
+            .replacingOccurrences(of: " ", with: "")
         if !capitalized.isEmpty {
             let lower = capitalized.removeFirst().lowercased()
             capitalized = lower + capitalized

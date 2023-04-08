@@ -245,7 +245,7 @@ init? (endpoint: APIEndpoint) {
 """
 
 let result = """
-// MARK: - DO NOT EDIT. Auto-generated using the GenerateAPIEndpoints command plugin.
+// DO NOT EDIT. Auto-generated using the GenerateAPIEndpoints command plugin.
 
 /// If you want to add an endpoint that somehow doesn't exist, you'll need to
 /// properly edit `/Plugins/GenerateAPIEndpointsExec/Resources/openapi.yml`, then trigger

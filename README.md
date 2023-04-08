@@ -86,6 +86,7 @@ let bot: BotGatewayManager = ...
 
 Task {
     /// Add event handlers
+    /// You can also use the `GatewayEventHandler` protocol for more convenience
     await bot.addEventHandler { event in
         switch event.data {
         case let .messageCreate(message):
