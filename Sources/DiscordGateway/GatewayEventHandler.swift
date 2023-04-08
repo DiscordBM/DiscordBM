@@ -5,6 +5,7 @@ import DiscordModels
 /// Create a type that conforms to `GatewayEventHandler`:
 /// ```
 /// struct EventHandler: GatewayEventHandler {
+///     var event: Gateway.Event
 ///
 ///     func onMessageCreate(_ payload: Gateway.MessageCreate) async {
 ///         /// Do what you want
@@ -23,10 +24,12 @@ import DiscordModels
 /// let bot: any GatewayManager = YOUR_GATEWAY_MANAGER
 ///
 /// await bot.addEventHandler { event in
-///     EventHandler().handle(event: event)
+///     EventHandler(event: event).handle()
 /// }
 /// ```
 public protocol GatewayEventHandler: Sendable {
+    var event: Gateway.Event { get }
+    
     func onChannelCreate(_ payload: DiscordChannel) async
     func onChannelUpdate(_ payload: DiscordChannel) async
     func onChannelDelete(_ payload: DiscordChannel) async
@@ -92,9 +95,9 @@ public protocol GatewayEventHandler: Sendable {
 }
 
 public extension GatewayEventHandler {
-    func handle(event: Gateway.Event) {
+    func handle() {
         Task {
-            self.handle(event: event)
+            await self.handleAsync()
         }
     }
     
@@ -166,7 +169,7 @@ public extension GatewayEventHandler {
 
 // MARK: - Handle
 extension GatewayEventHandler {
-    func _handle(event: Gateway.Event) async {
+    func handleAsync() async {
         switch event.data {
         case .none, .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession:
             /// State management data, users don't need to touch these.
