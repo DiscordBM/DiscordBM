@@ -30,6 +30,10 @@ import DiscordModels
 public protocol GatewayEventHandler: Sendable {
     var event: Gateway.Event { get }
     
+    /// To be executed before handling events.
+    /// If returns `false`, the event won't be passed to the functions below anymore.
+    func onEventHandlerStart() async -> Bool
+    
     func onChannelCreate(_ payload: DiscordChannel) async
     func onChannelUpdate(_ payload: DiscordChannel) async
     func onChannelDelete(_ payload: DiscordChannel) async
@@ -103,6 +107,7 @@ public extension GatewayEventHandler {
     
     // MARK: - Default Do-Nothings
     
+    func onEventHandlerStart() async -> Bool { true }
     func onChannelCreate(_: DiscordChannel) async { }
     func onChannelUpdate(_: DiscordChannel) async { }
     func onChannelDelete(_: DiscordChannel) async { }
@@ -170,6 +175,8 @@ public extension GatewayEventHandler {
 // MARK: - Handle
 extension GatewayEventHandler {
     func handleAsync() async {
+        guard await self.onEventHandlerStart() else { return }
+        
         switch event.data {
         case .none, .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession:
             /// State management data, users don't need to touch these.
