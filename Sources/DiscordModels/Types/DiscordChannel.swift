@@ -433,9 +433,9 @@ extension DiscordChannel {
             self.replied_user = replied_user
         }
         
-        public func validate() throws {
-            try validateElementCountDoesNotExceed(roles, max: 100, name: "roles")
-            try validateElementCountDoesNotExceed(users, max: 100, name: "users")
+        public func validations() -> Validation {
+            validateElementCountDoesNotExceed(roles, max: 100, name: "roles")
+            validateElementCountDoesNotExceed(users, max: 100, name: "users")
         }
     }
 }
@@ -608,15 +608,15 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         (author?.name.unicodeScalars.count ?? 0)
     }
     
-    public func validate() throws {
-        try validateElementCountDoesNotExceed(fields, max: 25, name: "fields")
-        try validateCharacterCountDoesNotExceed(title, max: 256, name: "title")
-        try validateCharacterCountDoesNotExceed(description, max: 4_096, name: "description")
-        try validateCharacterCountDoesNotExceed(footer?.text, max: 2_048, name: "footer.text")
-        try validateCharacterCountDoesNotExceed(author?.name, max: 256, name: "author.name")
+    public func validations() -> Validation {
+        validateElementCountDoesNotExceed(fields, max: 25, name: "fields")
+        validateCharacterCountDoesNotExceed(title, max: 256, name: "title")
+        validateCharacterCountDoesNotExceed(description, max: 4_096, name: "description")
+        validateCharacterCountDoesNotExceed(footer?.text, max: 2_048, name: "footer.text")
+        validateCharacterCountDoesNotExceed(author?.name, max: 256, name: "author.name")
         for field in fields ?? [] {
-            try validateCharacterCountDoesNotExceed(field.name, max: 256, name: "field.name")
-            try validateCharacterCountDoesNotExceed(field.value, max: 1_024, name: "field.value")
+            validateCharacterCountDoesNotExceed(field.name, max: 256, name: "field.name")
+            validateCharacterCountDoesNotExceed(field.value, max: 1_024, name: "field.value")
         }
     }
 }

@@ -5,13 +5,13 @@ import DiscordModels
 /// Create a type that conforms to `GatewayEventHandler`:
 /// ```
 /// struct EventHandler: GatewayEventHandler {
-///     var event: Gateway.Event
+///     let event: Gateway.Event
 ///
 ///     func onMessageCreate(_ payload: Gateway.MessageCreate) async {
 ///         /// Do what you want
 ///     }
 ///
-///     func onIntegrationCreate(_ payload: Gateway.IntegrationCreate) async {
+///     func onInteractionCreate(_ payload: Interaction) async {
 ///         /// Do what you want
 ///     }
 ///
@@ -99,6 +99,7 @@ public protocol GatewayEventHandler: Sendable {
 }
 
 public extension GatewayEventHandler {
+    @inlinable
     func handle() {
         Task {
             await self.handleAsync()
@@ -107,7 +108,9 @@ public extension GatewayEventHandler {
     
     // MARK: - Default Do-Nothings
     
+    @inlinable
     func onEventHandlerStart() async -> Bool { true }
+    
     func onChannelCreate(_: DiscordChannel) async { }
     func onChannelUpdate(_: DiscordChannel) async { }
     func onChannelDelete(_: DiscordChannel) async { }
@@ -174,6 +177,7 @@ public extension GatewayEventHandler {
 
 // MARK: - Handle
 extension GatewayEventHandler {
+    @inlinable
     func handleAsync() async {
         guard await self.onEventHandlerStart() else { return }
         

@@ -275,7 +275,7 @@ public struct DefaultDiscordClient: DiscordClient {
         payload: E
     ) async throws -> DiscordHTTPResponse {
         if configuration.performValidations {
-            try payload.validate()
+            try payload.validations().throw(model: payload)
         }
         
         return try await self.sendWithRetries(request: req) {
@@ -352,7 +352,7 @@ public struct DefaultDiscordClient: DiscordClient {
         payload: E
     ) async throws -> DiscordHTTPResponse {
         if configuration.performValidations {
-            try payload.validate()
+            try payload.validations().throw(model: payload)
         }
         
         return try await self.sendWithRetries(request: req) {
@@ -625,7 +625,7 @@ public struct ClientConfiguration {
     public var retryPolicy: RetryPolicy?
     /// Whether or not to perform validations for payloads, before sending.
     /// The point is to catch invalid payload without actually sending them to Discord.
-    /// The library will throw a ``ValidationError`` if it finds anything invalid in the payload.
+    /// The library will throw a ``Validation`` if it finds anything invalid in the payload.
     /// This all works based on Discord docs' validation notes.
     public var performValidations: Bool
     
@@ -651,7 +651,7 @@ public struct ClientConfiguration {
     ///   - retryPolicy: The policy to retry failed requests with.
     ///   - performValidations: Whether or not to perform validations for payloads,
     ///    before sending. The point is to catch invalid payload without actually sending them
-    ///    to Discord. The library will throw a ``ValidationError`` if it finds anything invalid
+    ///    to Discord. The library will throw a ``Validation`` if it finds anything invalid
     ///    in the payload. This all works based on Discord docs' validation notes.
     public init(
         cachingBehavior: CachingBehavior = .disabled,

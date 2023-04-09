@@ -112,22 +112,23 @@ public struct AutoModerationRule: Sendable, Codable {
             }
         }
         
-        public func validate() throws {
+        public func validations() -> Validation {
             switch self {
             case .blockMessage(let customMessage):
-                try validateCharacterCountDoesNotExceed(
+                validateCharacterCountDoesNotExceed(
                     customMessage,
                     max: 150,
                     name: "customMessage"
                 )
             case .timeout(let durationSeconds):
-                try validateNumberInRange(
+                validateNumberInRange(
                     durationSeconds,
                     min: 0,
                     max: 2419200,
                     name: "durationSeconds"
                 )
-            case .sendAlertMessage(_): break
+            case .sendAlertMessage(_):
+                Validation.none
             }
         }
     }

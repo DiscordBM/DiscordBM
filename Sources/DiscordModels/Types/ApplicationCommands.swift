@@ -76,43 +76,43 @@ public struct ApplicationCommand: Sendable, Codable {
             self.autocomplete = autocomplete
         }
         
-        public func validate() throws {
-            try validateNumberInRange(min_length, min: 0, max: 6_000, name: "min_length")
-            try validateNumberInRange(max_length, min: 0, max: 6_000, name: "max_length")
-            try validateElementCountDoesNotExceed(choices, max: 25, name: "choices")
-            try validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
-            try validateCharacterCountInRange(description, min: 1, max: 100, name: "description")
-            try validateHasPrecondition(
+        public func validations() -> Validation {
+            validateNumberInRange(min_length, min: 0, max: 6_000, name: "min_length")
+            validateNumberInRange(max_length, min: 0, max: 6_000, name: "max_length")
+            validateElementCountDoesNotExceed(choices, max: 25, name: "choices")
+            validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
+            validateCharacterCountInRange(description, min: 1, max: 100, name: "description")
+            validateHasPrecondition(
                 condition: autocomplete != nil,
                 allowedIf: [.string, .integer, .number].contains(type),
                 name: "autocomplete",
                 reason: "'autocomplete' is only allowed if 'type' is 'string' or 'integer' or 'number'"
             )
-            try validateHasPrecondition(
+            validateHasPrecondition(
                 condition: autocomplete != nil,
                 allowedIf: choices?.isEmpty != false,
                 name: "autocomplete",
                 reason: "'autocomplete' is only allowed if 'choices' is not present"
             )
-            try validateHasPrecondition(
+            validateHasPrecondition(
                 condition: (min_value != nil) || (max_value != nil),
                 allowedIf: [.integer, .number].contains(type),
                 name: "min_value+max_value",
                 reason: "'min_value' or 'max_value' are only allowed if 'type' is 'integer' or 'number'"
             )
-            try validateHasPrecondition(
+            validateHasPrecondition(
                 condition: (min_length != nil) || (max_length != nil),
                 allowedIf: type == .string,
                 name: "min_length+max_length",
                 reason: "'min_length' or 'max_length' are only allowed if 'type' is 'string'"
             )
-            try validateHasPrecondition(
+            validateHasPrecondition(
                 condition: choices?.isEmpty == false,
                 allowedIf: [.string, .integer, .number].contains(type),
                 name: "choices",
                 reason: "'choices' is only allowed if 'type' is 'string' or 'integer' or 'number'"
             )
-            try options?.validate()
+            options?.validations()
         }
     }
     
