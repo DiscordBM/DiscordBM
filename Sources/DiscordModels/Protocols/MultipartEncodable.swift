@@ -4,7 +4,8 @@ import Foundation
 
 private let allocator = ByteBufferAllocator()
 
-/// Note: you need to use a custom `CodingKey` to exclude this `files` field from Codable decode/encodes.
+/// Note: you need to use a custom `CodingKey` on conforming types to exclude
+/// this `files` field from Codable decode/encodes.
 public protocol MultipartEncodable: Encodable {
     var files: [RawFile]? { get }
 }
@@ -45,7 +46,7 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
     /// `Encodable` conformance.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        let data = self.data.getData(at: self.data.readerIndex, length: self.data.readableBytes)
+        let data = Data(buffer: self.data)
         try container.encode(data, forKey: .data)
         try container.encode(self.filename, forKey: .filename)
     }

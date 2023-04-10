@@ -1,9 +1,10 @@
 import Foundation
 
-/// Read `helpAnchor` for help about each error case.
+/// Read `helpAnchor` for help.
 public struct ValidationError: LocalizedError {
     /// The model that failed the validations.
     public let model: any Sendable
+    /// The failed validations. Will never be empty.
     public let failures: [ValidationFailure]
     
     public var errorDescription: String? {

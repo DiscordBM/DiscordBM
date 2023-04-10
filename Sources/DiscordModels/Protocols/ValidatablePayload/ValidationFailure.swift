@@ -18,7 +18,7 @@ public enum ValidationFailure: Sendable {
     case numberOutOfRange(name: String, number: String, min: String, max: String)
     
     /// To be used in `ValidationError`.
-    var errorDescription: String {
+    public var errorDescription: String {
         switch self {
         case let .atLeastOneFieldIsRequired(names):
             return "atLeastOneFieldIsRequired(names: \(names))"
@@ -40,7 +40,7 @@ public enum ValidationFailure: Sendable {
     }
     
     /// To be used in `ValidationError`.
-    var helpAnchor: String {
+    public var helpAnchor: String {
         switch self {
         case let .atLeastOneFieldIsRequired(names):
             return "At least one of these fields is required: \(names)"
