@@ -3,7 +3,7 @@ import CZlib
 
 public enum Decompression {
     
-    public struct Configuration {
+    public struct Configuration: Sendable {
         /// For now we only support `deflate`, because it's the main compression
         /// algorithm for web-sockets (RFC 7692).
         let algorithm: Compression.Algorithm = .deflate
@@ -24,17 +24,17 @@ public enum Decompression {
         private var base: Base
         
         /// An error occurred when inflating. Error code is included to aid diagnosis.
-        public static var inflationError: (Int) -> Self = {
+        public static let inflationError: (Int) -> Self = {
             Self(base: .inflationError($0))
         }
         
         /// Decoder could not be initialized. Error code is included to aid diagnosis.
-        public static var initializationError: (Int) -> Self = {
+        public static let initializationError: (Int) -> Self = {
             Self(base: .initializationError($0))
         }
         
         /// Decompression completed but there was invalid trailing data behind the compressed data.
-        public static var invalidTrailingData = Self(base: .invalidTrailingData)
+        public static let invalidTrailingData = Self(base: .invalidTrailingData)
         
         public var description: String {
             switch self.base {

@@ -297,7 +297,8 @@ public final class WebSocket: @unchecked Sendable {
             self.frameSequence = nil
         }
     }
-
+    
+    @Sendable
     private func pingAndScheduleNextTimeoutTask() {
         guard channel.isActive, let pingInterval = pingInterval else {
             return

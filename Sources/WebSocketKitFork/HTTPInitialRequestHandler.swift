@@ -1,7 +1,7 @@
 import NIO
 import NIOHTTP1
 
-final class HTTPInitialRequestHandler: ChannelInboundHandler, RemovableChannelHandler {
+final class HTTPInitialRequestHandler: Sendable, ChannelInboundHandler, RemovableChannelHandler {
     typealias InboundIn = HTTPClientResponsePart
     typealias OutboundOut = HTTPClientRequestPart
 

@@ -7,7 +7,7 @@ import NIOSSL
 import NIOTransportServices
 import Atomics
 
-public final class WebSocketClient {
+public final class WebSocketClient: @unchecked Sendable {
     public enum Error: Swift.Error, LocalizedError {
         case invalidURL
         case invalidResponseStatus(HTTPResponseHead)
@@ -22,7 +22,7 @@ public final class WebSocketClient {
         case createNew
     }
 
-    public struct Configuration {
+    public struct Configuration: Sendable {
         public var tlsConfiguration: TLSConfiguration?
         public var maxFrameSize: Int
         public var decompression: Decompression.Configuration?

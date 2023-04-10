@@ -129,18 +129,22 @@ let package = Package(
         ),
         /// `WebSocketKit` will be replaced as soon as changes are final and merged in
         /// Vapor's `WebSocketKit`. This is just a copy-paste of that library.
-        .target(name: "WebSocketKitFork", dependencies: [
-            "CZlib",
-            .product(name: "NIO", package: "swift-nio"),
-            .product(name: "NIOCore", package: "swift-nio"),
-            .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
-            .product(name: "NIOFoundationCompat", package: "swift-nio"),
-            .product(name: "NIOHTTP1", package: "swift-nio"),
-            .product(name: "NIOSSL", package: "swift-nio-ssl"),
-            .product(name: "NIOWebSocket", package: "swift-nio"),
-            .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
-            .product(name: "Atomics", package: "swift-atomics")
-        ]),
+            .target(
+                name: "WebSocketKitFork",
+                dependencies: [
+                    "CZlib",
+                    .product(name: "NIO", package: "swift-nio"),
+                    .product(name: "NIOCore", package: "swift-nio"),
+                    .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
+                    .product(name: "NIOFoundationCompat", package: "swift-nio"),
+                    .product(name: "NIOHTTP1", package: "swift-nio"),
+                    .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                    .product(name: "NIOWebSocket", package: "swift-nio"),
+                    .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
+                    .product(name: "Atomics", package: "swift-atomics")
+                ],
+                swiftSettings: swiftSettings
+            ),
         /// `WebSocketKit` dependency
         .target(
             name: "CZlib",

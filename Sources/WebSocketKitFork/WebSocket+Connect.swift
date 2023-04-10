@@ -4,7 +4,7 @@ extension WebSocket {
         headers: HTTPHeaders = [:],
         configuration: WebSocketClient.Configuration = .init(),
         on eventLoopGroup: EventLoopGroup,
-        onUpgrade: @escaping (WebSocket) -> ()
+        onUpgrade: /* @Sendable */ @escaping (WebSocket) -> ()
     ) -> EventLoopFuture<Void> {
         guard let url = URL(string: url) else {
             return eventLoopGroup.next().makeFailedFuture(WebSocketClient.Error.invalidURL)

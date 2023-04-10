@@ -4,7 +4,7 @@ import NIOWebSocket
 extension WebSocket {
     public static func client(
         on channel: Channel,
-        onUpgrade: @escaping (WebSocket) -> ()
+        onUpgrade: @Sendable @escaping (WebSocket) -> ()
     ) -> EventLoopFuture<Void> {
         return self.handle(on: channel, as: .client, decompression: nil, onUpgrade: onUpgrade)
     }
@@ -19,7 +19,7 @@ extension WebSocket {
 
     public static func server(
         on channel: Channel,
-        onUpgrade: @escaping (WebSocket) -> ()
+        onUpgrade: @Sendable @escaping (WebSocket) -> ()
     ) -> EventLoopFuture<Void> {
         return self.handle(on: channel, as: .server, decompression: nil, onUpgrade: onUpgrade)
     }
