@@ -11,7 +11,7 @@ public enum RequestBody {
             self.recipient_id = recipient_id
         }
         
-        public func validations() -> Validation { }
+        public func validate() -> [ValidationFailure] { }
     }
     
     /// An attachment object, but for sending.
@@ -43,7 +43,7 @@ public enum RequestBody {
             self.ephemeral = ephemeral
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateCharacterCountDoesNotExceed(description, max: 1_024, name: "description")
         }
     }
@@ -101,17 +101,17 @@ public enum RequestBody {
                 self.files = files
             }
             
-            public func validations() -> Validation {
+            public func validate() -> [ValidationFailure] {
                 validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
-                allowedMentions?.validations()
+                allowedMentions?.validate()
                 validateOnlyContains(
                     flags?.values,
                     name: "flags",
                     reason: "Can only contain 'suppressEmbeds' and 'ephemeral'",
                     where: { [.suppressEmbeds, .ephemeral].contains($0) }
                 )
-                attachments?.validations()
-                embeds?.validations()
+                attachments?.validate()
+                embeds?.validate()
             }
         }
         
@@ -131,8 +131,8 @@ public enum RequestBody {
             self.data = data
         }
         
-        public func validations() -> Validation {
-            data?.validations()
+        public func validate() -> [ValidationFailure] {
+            data?.validate()
         }
     }
     
@@ -225,7 +225,7 @@ public enum RequestBody {
             self.mentionable = mentionable
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateCharacterCountDoesNotExceed(name, max: 1_000, name: "name")
         }
     }
@@ -271,12 +271,12 @@ public enum RequestBody {
             self.flags = flags.map { .init($0) }
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
             validateElementCountDoesNotExceed(sticker_ids, max: 3, name: "sticker_ids")
             validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
             validateCharacterCountDoesNotExceed(nonce?.asString, max: 25, name: "nonce")
-            allowed_mentions?.validations()
+            allowed_mentions?.validate()
             validateAtLeastOneIsNotEmpty(
                 content?.isEmpty,
                 embeds?.isEmpty,
@@ -296,8 +296,8 @@ public enum RequestBody {
                 reason: "Can only contain 'suppressEmbeds' or 'suppressNotifications'",
                 where: { [.suppressEmbeds, .suppressNotifications].contains($0) }
             )
-            attachments?.validations()
-            embeds?.validations()
+            attachments?.validate()
+            embeds?.validate()
         }
     }
     
@@ -330,7 +330,7 @@ public enum RequestBody {
             self.attachments = attachments
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
             validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
             validateCombinedCharacterCountDoesNotExceed(
@@ -344,9 +344,9 @@ public enum RequestBody {
                 reason: "Can only contain 'suppressEmbeds'",
                 where: { $0 == .suppressEmbeds }
             )
-            allowed_mentions?.validations()
-            attachments?.validations()
-            embeds?.validations()
+            allowed_mentions?.validate()
+            attachments?.validate()
+            embeds?.validate()
         }
     }
     
@@ -391,7 +391,7 @@ public enum RequestBody {
             self.thread_name = thread_name
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
             validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
             validateAtLeastOneIsNotEmpty(
@@ -409,9 +409,9 @@ public enum RequestBody {
                 reason: "Can only contain 'suppressEmbeds'",
                 where: { $0 == .suppressEmbeds }
             )
-            allowed_mentions?.validations()
-            attachments?.validations()
-            embeds?.validations()
+            allowed_mentions?.validate()
+            attachments?.validate()
+            embeds?.validate()
         }
     }
     
@@ -425,7 +425,7 @@ public enum RequestBody {
             self.avatar = avatar
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 80, name: "name")
             validateCaseInsensitivelyDoesNotContain(
                 name,
@@ -446,7 +446,7 @@ public enum RequestBody {
             self.avatar = avatar
         }
         
-        public func validations() -> Validation { }
+        public func validate() -> [ValidationFailure] { }
     }
     
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook-json-params
@@ -461,7 +461,7 @@ public enum RequestBody {
             self.channel_id = channel_id
         }
         
-        public func validations() -> Validation { }
+        public func validate() -> [ValidationFailure] { }
     }
     
     /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message-jsonform-params
@@ -490,7 +490,7 @@ public enum RequestBody {
             self.attachments = attachments
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
             validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
             validateCombinedCharacterCountDoesNotExceed(
@@ -498,9 +498,9 @@ public enum RequestBody {
                 max: 6_000,
                 names: "embeds"
             )
-            allowed_mentions?.validations()
-            attachments?.validations()
-            embeds?.validations()
+            allowed_mentions?.validate()
+            attachments?.validate()
+            embeds?.validate()
         }
     }
     
@@ -519,7 +519,7 @@ public enum RequestBody {
             self.rate_limit_per_user = rate_limit_per_user
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
             validateNumberInRange(
                 rate_limit_per_user,
@@ -551,7 +551,7 @@ public enum RequestBody {
             self.rate_limit_per_user = rate_limit_per_user
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
             validateNumberInRange(
                 rate_limit_per_user,
@@ -596,11 +596,11 @@ public enum RequestBody {
                 self.flags = flags.map { .init($0) }
             }
             
-            public func validations() -> Validation {
+            public func validate() -> [ValidationFailure] {
                 validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
                 validateElementCountDoesNotExceed(sticker_ids, max: 3, name: "sticker_ids")
                 validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
-                allowed_mentions?.validations()
+                allowed_mentions?.validate()
                 validateAtLeastOneIsNotEmpty(
                     content?.isEmpty,
                     embeds?.isEmpty,
@@ -620,8 +620,8 @@ public enum RequestBody {
                     reason: "Can only contain 'suppressEmbeds' or 'suppressNotifications'",
                     where: { [.suppressEmbeds, .suppressNotifications].contains($0) }
                 )
-                attachments?.validations()
-                embeds?.validations()
+                attachments?.validate()
+                embeds?.validate()
             }
         }
         
@@ -645,7 +645,7 @@ public enum RequestBody {
             self.applied_tags = applied_tags
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
             validateNumberInRange(
                 rate_limit_per_user,
@@ -653,7 +653,7 @@ public enum RequestBody {
                 max: 21_600,
                 name: "rate_limit_per_user"
             )
-            self.message.validations()
+            self.message.validate()
         }
     }
     
@@ -680,7 +680,7 @@ public enum RequestBody {
             self.nsfw = nsfw
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateHasPrecondition(
                 condition: options.containsAnything,
                 allowedIf: (type ?? .chatInput) == .chatInput,
@@ -703,7 +703,7 @@ public enum RequestBody {
             for (_, value) in description_localizations?.values ?? [:] {
                 validateCharacterCountInRange(value, min: 1, max: 32, name: "description_localizations.name")
             }
-            options?.validations()
+            options?.validate()
         }
     }
     
@@ -728,7 +728,7 @@ public enum RequestBody {
             self.nsfw = nsfw
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateElementCountDoesNotExceed(options, max: 25, name: "options")
             validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
             validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
@@ -738,7 +738,7 @@ public enum RequestBody {
             for (_, value) in description_localizations?.values ?? [:] {
                 validateCharacterCountInRange(value, min: 1, max: 32, name: "description_localizations.name")
             }
-            options?.validations()
+            options?.validate()
         }
     }
     
@@ -749,6 +749,6 @@ public enum RequestBody {
             self.permissions = permissions
         }
         
-        public func validations() -> Validation { }
+        public func validate() -> [ValidationFailure] { }
     }
 }

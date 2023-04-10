@@ -76,7 +76,7 @@ public struct ApplicationCommand: Sendable, Codable {
             self.autocomplete = autocomplete
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateNumberInRange(min_length, min: 0, max: 6_000, name: "min_length")
             validateNumberInRange(max_length, min: 0, max: 6_000, name: "max_length")
             validateElementCountDoesNotExceed(choices, max: 25, name: "choices")
@@ -112,7 +112,7 @@ public struct ApplicationCommand: Sendable, Codable {
                 name: "choices",
                 reason: "'choices' is only allowed if 'type' is 'string' or 'integer' or 'number'"
             )
-            options?.validations()
+            options?.validate()
         }
     }
     

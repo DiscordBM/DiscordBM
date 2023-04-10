@@ -112,7 +112,7 @@ public struct AutoModerationRule: Sendable, Codable {
             }
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             switch self {
             case .blockMessage(let customMessage):
                 validateCharacterCountDoesNotExceed(
@@ -128,7 +128,7 @@ public struct AutoModerationRule: Sendable, Codable {
                     name: "durationSeconds"
                 )
             case .sendAlertMessage(_):
-                Validation.none
+                [ValidationFailure]()
             }
         }
     }

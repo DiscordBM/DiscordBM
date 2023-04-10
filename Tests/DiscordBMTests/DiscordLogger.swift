@@ -547,7 +547,7 @@ await waitFulfill(for: [expectation], timeout: 2)
         let all = await DiscordGlobalConfiguration.logManager._tests_getLogs()[address]!
         XCTAssertEqual(all.count, 30)
         for embed in all.map(\.embed) {
-            XCTAssertNoThrow(try embed.validations().throw(model: embed))
+            XCTAssertNoThrow(try embed.validate().throw(model: embed))
         }
         
         let logs = await DiscordGlobalConfiguration.logManager

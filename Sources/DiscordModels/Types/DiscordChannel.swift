@@ -433,7 +433,7 @@ extension DiscordChannel {
             self.replied_user = replied_user
         }
         
-        public func validations() -> Validation {
+        public func validate() -> [ValidationFailure] {
             validateElementCountDoesNotExceed(roles, max: 100, name: "roles")
             validateElementCountDoesNotExceed(users, max: 100, name: "users")
         }
@@ -608,7 +608,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         (author?.name.unicodeScalars.count ?? 0)
     }
     
-    public func validations() -> Validation {
+    public func validate() -> [ValidationFailure] {
         validateElementCountDoesNotExceed(fields, max: 25, name: "fields")
         validateCharacterCountDoesNotExceed(title, max: 256, name: "title")
         validateCharacterCountDoesNotExceed(description, max: 4_096, name: "description")
