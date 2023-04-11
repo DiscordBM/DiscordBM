@@ -223,7 +223,7 @@ public enum RequestBody {
         }
 
         /// Creates a response of type `Kind.pong`.
-        public static func pong() -> Self {
+        public static var pong: Self {
             .init(type: .pong)
         }
 
@@ -233,12 +233,12 @@ public enum RequestBody {
         }
 
         /// Creates a response of type `Kind.deferredChannelMessageWithSource`.
-        public static func deferredChannelMessageWithSource() -> Self {
+        public static var deferredChannelMessageWithSource: Self {
             .init(type: .deferredChannelMessageWithSource)
         }
 
         /// Creates a response of type `Kind.deferredUpdateMessage`.
-        public static func deferredUpdateMessage() -> Self {
+        public static var deferredUpdateMessage: Self {
             .init(type: .deferredUpdateMessage)
         }
 
