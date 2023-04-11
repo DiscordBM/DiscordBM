@@ -172,6 +172,20 @@ public extension DiscordClient {
         return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
 
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
+    @inlinable
+    func updateOriginalInteractionResponseFull(
+        appId: String? = nil,
+        token: String,
+        payload: RequestBody.InteractionResponse
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+        let endpoint = APIEndpoint.updateOriginalInteractionResponse(
+            applicationId: try requireAppId(appId),
+            interactionToken: token
+        )
+        return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
+    }
+
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
     @inlinable
     func deleteOriginalInteractionResponse(
