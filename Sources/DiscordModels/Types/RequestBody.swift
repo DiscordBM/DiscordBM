@@ -213,13 +213,48 @@ public enum RequestBody {
             data?.files
         }
         
-        public init(type: Kind, data: CallbackData? = nil) {
+        private init(type: Kind, data: CallbackData? = nil) {
             self.type = type
             self.data = data
         }
-        
+
         public func validate() -> [ValidationFailure] {
             data?.validate()
+        }
+
+        /// Creates a response of type `Kind.pong`.
+        public static func pong() -> Self {
+            .init(type: .pong)
+        }
+
+        /// Creates a response of type `Kind.channelMessageWithSource`.
+        public static func channelMessageWithSource(_ message: CallbackData.Message) -> Self {
+            .init(type: .channelMessageWithSource, data: .message(message))
+        }
+
+        /// Creates a response of type `Kind.deferredChannelMessageWithSource`.
+        public static func deferredChannelMessageWithSource() -> Self {
+            .init(type: .deferredChannelMessageWithSource)
+        }
+
+        /// Creates a response of type `Kind.deferredUpdateMessage`.
+        public static func deferredUpdateMessage() -> Self {
+            .init(type: .deferredUpdateMessage)
+        }
+
+        /// Creates a response of type `Kind.updateMessage`.
+        public static func updateMessage(_ message: CallbackData.Message) -> Self {
+            .init(type: .updateMessage, data: .message(message))
+        }
+
+        /// Creates a response of type `Kind.applicationCommandAutoCompleteResult`.
+        public static func autocompleteResult(_ result: CallbackData.Autocomplete) -> Self {
+            .init(type: .applicationCommandAutoCompleteResult, data: .autocomplete(result))
+        }
+
+        /// Creates a response of type `Kind.modal`.
+        public static func modal(_ modal: CallbackData.Modal) -> Self {
+            .init(type: .modal, data: .modal(modal))
         }
     }
     

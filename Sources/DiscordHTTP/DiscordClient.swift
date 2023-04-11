@@ -164,7 +164,7 @@ public extension DiscordClient {
         appId: String? = nil,
         token: String,
         payload: RequestBody.InteractionResponse.CallbackData
-    ) async throws -> DiscordHTTPResponse {
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = APIEndpoint.updateOriginalInteractionResponse(
             applicationId: try requireAppId(appId),
             interactionToken: token
