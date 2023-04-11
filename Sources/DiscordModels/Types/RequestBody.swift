@@ -233,13 +233,13 @@ public enum RequestBody {
         }
 
         /// Creates a response of type `Kind.deferredChannelMessageWithSource`.
-        public static var deferredChannelMessageWithSource: Self {
-            .init(type: .deferredChannelMessageWithSource)
+        public static func deferredChannelMessageWithSource(_ message: Message? = nil) -> Self {
+            .init(type: .deferredChannelMessageWithSource, data: message.map { .message($0) })
         }
 
         /// Creates a response of type `Kind.deferredUpdateMessage`.
-        public static var deferredUpdateMessage: Self {
-            .init(type: .deferredUpdateMessage)
+        public static func deferredUpdateMessage(_ message: Message? = nil) -> Self {
+            .init(type: .deferredUpdateMessage, data: message.map { .message($0) })
         }
 
         /// Creates a response of type `Kind.updateMessage`.
