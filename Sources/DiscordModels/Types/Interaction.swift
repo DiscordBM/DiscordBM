@@ -328,8 +328,16 @@ extension Interaction {
                     throw CodingError.actionRowIsSupposedToOnlyAppearAtTopLevel
                 case .button:
                     self = try .button(.init(from: decoder))
-                case .stringSelect, .userSelect, .roleSelect, .mentionableSelect, .channelSelect:
+                case .stringSelect:
                     self = try .stringSelect(.init(from: decoder))
+                case .userSelect:
+                    self = try .userSelect(.init(from: decoder))
+                case .roleSelect:
+                    self = try .roleSelect(.init(from: decoder))
+                case .mentionableSelect:
+                    self = try .mentionableSelect(.init(from: decoder))
+                case .channelSelect:
+                    self = try .channelSelect(.init(from: decoder))
                 case .textInput:
                     self = try .textInput(.init(from: decoder))
                 }
