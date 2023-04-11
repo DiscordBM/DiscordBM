@@ -241,7 +241,7 @@ extension Interaction {
         }
         
         /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
-        public struct SelectMenu: Sendable, Codable {
+        public struct StringSelectMenu: Sendable, Codable {
             
         /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure
             public struct Option: Sendable, Codable {
@@ -270,6 +270,42 @@ extension Interaction {
             public init(custom_id: String, options: [Option], placeholder: String? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
                 self.custom_id = custom_id
                 self.options = options
+                self.placeholder = placeholder
+                self.min_values = min_values
+                self.max_values = max_values
+                self.disabled = disabled
+            }
+        }
+
+        /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
+        public struct ChannelSelectMenu: Sendable, Codable {
+            public var custom_id: String
+            public var channel_types: [DiscordChannel.Kind]?
+            public var placeholder: String?
+            public var min_values: Int?
+            public var max_values: Int?
+            public var disabled: Bool?
+
+            public init(custom_id: String, channel_types: [DiscordChannel.Kind]? = nil, placeholder: String? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
+                self.custom_id = custom_id
+                self.channel_types = channel_types
+                self.placeholder = placeholder
+                self.min_values = min_values
+                self.max_values = max_values
+                self.disabled = disabled
+            }
+        }
+
+        /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
+        public struct SelectMenu: Sendable, Codable {
+            public var custom_id: String
+            public var placeholder: String?
+            public var min_values: Int?
+            public var max_values: Int?
+            public var disabled: Bool?
+
+            public init(custom_id: String, placeholder: String? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
+                self.custom_id = custom_id
                 self.placeholder = placeholder
                 self.min_values = min_values
                 self.max_values = max_values
@@ -309,12 +345,12 @@ extension Interaction {
         
         public enum Component: Sendable, Codable {
             case button(Button)
-            case stringSelect(SelectMenu)
+            case stringSelect(StringSelectMenu)
             case textInput(TextInput)
             case userSelect(SelectMenu)
             case roleSelect(SelectMenu)
             case mentionableSelect(SelectMenu)
-            case channelSelect(SelectMenu)
+            case channelSelect(ChannelSelectMenu)
             
             enum CodingKeys: String, CodingKey {
                 case type
