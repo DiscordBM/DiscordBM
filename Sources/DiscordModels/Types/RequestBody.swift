@@ -68,88 +68,88 @@ public enum RequestBody {
             /// A modal.
             case modal = 9
         }
+
+        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-messages
+        public struct Message: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+            public var tts: Bool?
+            public var content: String?
+            public var embeds: [Embed]?
+            public var allowedMentions: DiscordChannel.AllowedMentions?
+            public var flags: IntBitField<DiscordChannel.Message.Flag>?
+            public var components: [Interaction.ActionRow]?
+            public var attachments: [AttachmentSend]?
+            public var files: [RawFile]?
+
+            enum CodingKeys: String, CodingKey {
+                case tts
+                case content
+                case embeds
+                case allowedMentions
+                case flags
+                case components
+                case attachments
+            }
+
+            public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: DiscordChannel.AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [AttachmentSend]? = nil, files: [RawFile]? = nil) {
+                self.tts = tts
+                self.content = content
+                self.embeds = embeds
+                self.allowedMentions = allowedMentions
+                self.flags = flags.map { .init($0) }
+                self.components = components
+                self.attachments = attachments
+                self.files = files
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
+                allowedMentions?.validate()
+                validateOnlyContains(
+                    flags?.values,
+                    name: "flags",
+                    reason: "Can only contain 'suppressEmbeds' and 'ephemeral'",
+                    where: { [.suppressEmbeds, .ephemeral].contains($0) }
+                )
+                attachments?.validate()
+                embeds?.validate()
+            }
+        }
+
+        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-autocomplete
+        public struct Autocomplete: Sendable, Codable, ValidatablePayload {
+            public var choices: [ApplicationCommand.Option.Choice]
+
+            public init(choices: [ApplicationCommand.Option.Choice]) {
+                self.choices = choices
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateElementCountDoesNotExceed(choices, max: 25, name: "choices")
+            }
+        }
+
+        /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-modal
+        public struct Modal: Sendable, Codable, ValidatablePayload {
+            public var custom_id: String
+            public var title: String
+            public var components: [Interaction.ActionRow]
+
+            public init(custom_id: String, title: String, components: [Interaction.ActionRow]) {
+                self.custom_id = custom_id
+                self.title = title
+                self.components = components
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateElementCountInRange(components, min: 1, max: 5, name: "components")
+            }
+        }
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structure
         public enum CallbackData: Sendable, Codable, MultipartEncodable, ValidatablePayload {
             case message(Message)
             case autocomplete(Autocomplete)
             case modal(Modal)
-
-            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-messages
-            public struct Message: Sendable, Codable, MultipartEncodable, ValidatablePayload {
-                public var tts: Bool?
-                public var content: String?
-                public var embeds: [Embed]?
-                public var allowedMentions: DiscordChannel.AllowedMentions?
-                public var flags: IntBitField<DiscordChannel.Message.Flag>?
-                public var components: [Interaction.ActionRow]?
-                public var attachments: [AttachmentSend]?
-                public var files: [RawFile]?
-
-                enum CodingKeys: String, CodingKey {
-                    case tts
-                    case content
-                    case embeds
-                    case allowedMentions
-                    case flags
-                    case components
-                    case attachments
-                }
-
-                public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: DiscordChannel.AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [AttachmentSend]? = nil, files: [RawFile]? = nil) {
-                    self.tts = tts
-                    self.content = content
-                    self.embeds = embeds
-                    self.allowedMentions = allowedMentions
-                    self.flags = flags.map { .init($0) }
-                    self.components = components
-                    self.attachments = attachments
-                    self.files = files
-                }
-
-                public func validate() -> [ValidationFailure] {
-                    validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
-                    allowedMentions?.validate()
-                    validateOnlyContains(
-                        flags?.values,
-                        name: "flags",
-                        reason: "Can only contain 'suppressEmbeds' and 'ephemeral'",
-                        where: { [.suppressEmbeds, .ephemeral].contains($0) }
-                    )
-                    attachments?.validate()
-                    embeds?.validate()
-                }
-            }
-
-            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-autocomplete
-            public struct Autocomplete: Sendable, Codable, ValidatablePayload {
-                public var choices: [ApplicationCommand.Option.Choice]
-
-                public init(choices: [ApplicationCommand.Option.Choice]) {
-                    self.choices = choices
-                }
-
-                public func validate() -> [ValidationFailure] {
-                    validateElementCountDoesNotExceed(choices, max: 25, name: "choices")
-                }
-            }
-
-            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-modal
-            public struct Modal: Sendable, Codable, ValidatablePayload {
-                public var custom_id: String
-                public var title: String
-                public var components: [Interaction.ActionRow]
-
-                public init(custom_id: String, title: String, components: [Interaction.ActionRow]) {
-                    self.custom_id = custom_id
-                    self.title = title
-                    self.components = components
-                }
-
-                public func validate() -> [ValidationFailure] {
-                    validateElementCountInRange(components, min: 1, max: 5, name: "components")
-                }
-            }
 
             public var files: [RawFile]? {
                 switch self {
@@ -228,7 +228,7 @@ public enum RequestBody {
         }
 
         /// Creates a response of type `Kind.channelMessageWithSource`.
-        public static func channelMessageWithSource(_ message: CallbackData.Message) -> Self {
+        public static func channelMessageWithSource(_ message: Message) -> Self {
             .init(type: .channelMessageWithSource, data: .message(message))
         }
 
@@ -243,17 +243,17 @@ public enum RequestBody {
         }
 
         /// Creates a response of type `Kind.updateMessage`.
-        public static func updateMessage(_ message: CallbackData.Message) -> Self {
+        public static func updateMessage(_ message: Message) -> Self {
             .init(type: .updateMessage, data: .message(message))
         }
 
         /// Creates a response of type `Kind.applicationCommandAutoCompleteResult`.
-        public static func autocompleteResult(_ result: CallbackData.Autocomplete) -> Self {
+        public static func autocompleteResult(_ result: Autocomplete) -> Self {
             .init(type: .applicationCommandAutoCompleteResult, data: .autocomplete(result))
         }
 
         /// Creates a response of type `Kind.modal`.
-        public static func modal(_ modal: CallbackData.Modal) -> Self {
+        public static func modal(_ modal: Modal) -> Self {
             .init(type: .modal, data: .modal(modal))
         }
     }
