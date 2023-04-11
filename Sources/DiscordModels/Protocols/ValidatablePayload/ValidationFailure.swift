@@ -8,6 +8,8 @@ public enum ValidationFailure: Sendable {
     case characterCountOutOfRange(name: String, min: Int, max: Int)
     /// Too many elements in the target (likely an Array). Need to shorten it.
     case tooManyElements(name: String, max: Int)
+    /// Count of elements in the target is not acceptable.
+    case elementCountOutOfRange(name: String, min: Int, max: Int)
     /// At least one of the values you are trying to send is prohibited. Remove them.
     case containsProhibitedValues(name: String, reason: String, valuesRepresentation: String)
     /// Precondition needs to be met first.
@@ -28,6 +30,8 @@ public enum ValidationFailure: Sendable {
             return "characterCountOutOfRange(name: \(name), min: \(min), max: \(max))"
         case let .tooManyElements(name, max):
             return "tooManyElements(name: \(name), max: \(max))"
+        case let .elementCountOutOfRange(name, min, max):
+            return "elementCountOutOfRange(name: \(name), min: \(min), max: \(max))"
         case let .containsProhibitedValues(name, reason, valuesRepresentation):
             return "containsProhibitedValues(name: \(name), reason: \(reason), valuesRepresentation: \(valuesRepresentation))"
         case let .hasPrecondition(name, reason):
@@ -50,6 +54,8 @@ public enum ValidationFailure: Sendable {
             return "Character count of the '\(name)' field is out of the acceptable range of \(min)...\(max)"
         case let .tooManyElements(name, max):
             return "Too many elements in the '\(name)' field. Max allowed is '\(max)'"
+        case let .elementCountOutOfRange(name, min, max):
+            return "Element count of the '\(name)' field is out of the acceptable range of \(min)...\(max)"
         case let .containsProhibitedValues(name, reason, valuesRepresentation):
             return "The '\(name)' field contains prohibited values. Values: \(valuesRepresentation). Reason: \(reason)"
         case let .hasPrecondition(name, reason):

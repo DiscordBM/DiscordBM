@@ -76,6 +76,39 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             XCTAssertErrorsEqual(error, .characterCountOutOfRange(name: "a", min: 20, max: 40))
         }
     }
+
+    func testValidateElementCountInRange() throws {
+        try validateElementCountInRange(
+            Optional<[String]>.none,
+            min: 0,
+            max: 0,
+            name: "a"
+        ).throw()
+        try validateElementCountInRange(
+            Optional<[String]>.none,
+            min: 0,
+            max: 12,
+            name: "a"
+        ).throw()
+        try validateElementCountInRange([String](), min: 0, max: 0, name: "a").throw()
+        try validateElementCountInRange(
+            ["a", "b", "c", "d", "e"],
+            min: 5,
+            max: 5,
+            name: "a"
+        ).throw()
+        XCTAssertThrowsError(
+            try validateElementCountInRange(
+                ["a", "b", "d", "c", "e", "f", "g", "h", "i", "j", "k"],
+                min: 20,
+                max: 40,
+                name: "a"
+            ).throw()
+        ) { error in
+            let error = error as! ValidationError
+            XCTAssertErrorsEqual(error, .elementCountOutOfRange(name: "a", min: 20, max: 40))
+        }
+    }
     
     func testValidateCombinedCharacterCountDoesNotExceed() throws {
         try validateCombinedCharacterCountDoesNotExceed(nil, max: 0, names: "a").throw()

@@ -70,48 +70,135 @@ public enum RequestBody {
         }
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structure
-        public struct CallbackData: Sendable, Codable, MultipartEncodable, ValidatablePayload {
-            public var tts: Bool?
-            public var content: String?
-            public var embeds: [Embed]?
-            public var allowedMentions: DiscordChannel.AllowedMentions?
-            public var flags: IntBitField<DiscordChannel.Message.Flag>?
-            public var components: [Interaction.ActionRow]?
-            public var attachments: [AttachmentSend]?
-            public var files: [RawFile]?
-            
-            enum CodingKeys: String, CodingKey {
-                case tts
-                case content
-                case embeds
-                case allowedMentions
-                case flags
-                case components
-                case attachments
+        public enum CallbackData: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+            case message(Message)
+            case autocomplete(Autocomplete)
+            case modal(Modal)
+
+            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-messages
+            public struct Message: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+                public var tts: Bool?
+                public var content: String?
+                public var embeds: [Embed]?
+                public var allowedMentions: DiscordChannel.AllowedMentions?
+                public var flags: IntBitField<DiscordChannel.Message.Flag>?
+                public var components: [Interaction.ActionRow]?
+                public var attachments: [AttachmentSend]?
+                public var files: [RawFile]?
+
+                enum CodingKeys: String, CodingKey {
+                    case tts
+                    case content
+                    case embeds
+                    case allowedMentions
+                    case flags
+                    case components
+                    case attachments
+                }
+
+                public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: DiscordChannel.AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [AttachmentSend]? = nil, files: [RawFile]? = nil) {
+                    self.tts = tts
+                    self.content = content
+                    self.embeds = embeds
+                    self.allowedMentions = allowedMentions
+                    self.flags = flags.map { .init($0) }
+                    self.components = components
+                    self.attachments = attachments
+                    self.files = files
+                }
+
+                public func validate() -> [ValidationFailure] {
+                    validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
+                    allowedMentions?.validate()
+                    validateOnlyContains(
+                        flags?.values,
+                        name: "flags",
+                        reason: "Can only contain 'suppressEmbeds' and 'ephemeral'",
+                        where: { [.suppressEmbeds, .ephemeral].contains($0) }
+                    )
+                    attachments?.validate()
+                    embeds?.validate()
+                }
             }
-            
-            public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: DiscordChannel.AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [AttachmentSend]? = nil, files: [RawFile]? = nil) {
-                self.tts = tts
-                self.content = content
-                self.embeds = embeds
-                self.allowedMentions = allowedMentions
-                self.flags = flags.map { .init($0) }
-                self.components = components
-                self.attachments = attachments
-                self.files = files
+
+            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-autocomplete
+            public struct Autocomplete: Sendable, Codable, ValidatablePayload {
+                public var choices: [ApplicationCommand.Option.Choice]
+
+                public init(choices: [ApplicationCommand.Option.Choice]) {
+                    self.choices = choices
+                }
+
+                public func validate() -> [ValidationFailure] {
+                    validateElementCountDoesNotExceed(choices, max: 25, name: "choices")
+                }
             }
-            
+
+            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-modal
+            public struct Modal: Sendable, Codable, ValidatablePayload {
+                public var custom_id: String
+                public var title: String
+                public var components: [Interaction.ActionRow]
+
+                public init(custom_id: String, title: String, components: [Interaction.ActionRow]) {
+                    self.custom_id = custom_id
+                    self.title = title
+                    self.components = components
+                }
+
+                public func validate() -> [ValidationFailure] {
+                    validateElementCountInRange(components, min: 1, max: 5, name: "components")
+                }
+            }
+
+            public var files: [RawFile]? {
+                switch self {
+                case let .message(message):
+                    return message.files
+                case .autocomplete:
+                    return nil
+                case .modal:
+                    return nil
+                }
+            }
+
             public func validate() -> [ValidationFailure] {
-                validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
-                allowedMentions?.validate()
-                validateOnlyContains(
-                    flags?.values,
-                    name: "flags",
-                    reason: "Can only contain 'suppressEmbeds' and 'ephemeral'",
-                    where: { [.suppressEmbeds, .ephemeral].contains($0) }
-                )
-                attachments?.validate()
-                embeds?.validate()
+                switch self {
+                case let .message(message):
+                    message.validate()
+                case let .autocomplete(autocomplete):
+                    autocomplete.validate()
+                case let .modal(modal):
+                    modal.validate()
+                }
+            }
+
+            public init(from decoder: Decoder) throws {
+                let container = try decoder.singleValueContainer()
+                if let message = try? container.decode(Message.self) {
+                    self = .message(message)
+                } else if let autocomplete = try? container.decode(Autocomplete.self) {
+                    self = .autocomplete(autocomplete)
+                } else if let modal = try? container.decode(Modal.self) {
+                    self = .modal(modal)
+                } else {
+                    throw DecodingError.typeMismatch(Self.self, .init(
+                        codingPath: decoder.codingPath,
+                        debugDescription: "Could not decode '\(Self.self)'"
+                    ))
+                }
+            }
+
+            public func encode(to encoder: Encoder) throws {
+                var container = encoder.singleValueContainer()
+                switch self {
+                case let .message(message):
+                    try container.encode(message)
+                case let .autocomplete(autocomplete):
+                    try container.encode(autocomplete)
+                case let .modal(modal):
+                    try container.encode(modal)
+                }
             }
         }
         

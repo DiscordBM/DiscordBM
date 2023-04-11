@@ -66,6 +66,15 @@ extension ValidatablePayload {
         }
         return nil
     }
+
+    @inlinable
+    func validateElementCountInRange<T>(_ array: Array<T>?, min: Int, max: Int, name: String) -> ValidationFailure? {
+        let count = array?.count ?? 0
+        guard min <= count, count <= max else {
+            return ValidationFailure.elementCountOutOfRange(name: name, min: min, max: max)
+        }
+        return nil
+    }
     
     @inlinable
     func validateOnlyContains<C: Collection>(
