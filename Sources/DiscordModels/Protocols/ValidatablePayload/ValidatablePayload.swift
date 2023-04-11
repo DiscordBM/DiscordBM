@@ -36,6 +36,16 @@ extension ValidatablePayload {
         }
         return nil
     }
+
+    @inlinable
+    func validateCharacterCountInRangeOrNil(_ value: String?, min: Int, max: Int, name: String) -> ValidationFailure? {
+        guard let value = value else { return nil }
+        let count = value.unicodeScalars.count
+        guard min <= count, count <= max else {
+            return ValidationFailure.characterCountOutOfRange(name: name, min: min, max: max)
+        }
+        return nil
+    }
     
     @inlinable
     func validateCombinedCharacterCountDoesNotExceed(

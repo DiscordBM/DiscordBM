@@ -68,12 +68,23 @@ public struct DiscordChannel: Sendable, Codable {
         case threeDays = 4_320
         case sevenDays = 10_080
     }
-    
+
+    /// https://discord.com/developers/docs/resources/channel#default-reaction-object-default-reaction-structure
+    public struct DefaultReaction: Sendable, Codable {
+        public var emoji_id: String?
+        public var emoji_name: String?
+
+        public init(emoji_id: String? = nil, emoji_name: String? = nil) {
+            self.emoji_id = emoji_id
+            self.emoji_name = emoji_name
+        }
+    }
+
     /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
     public struct ForumTag: Sendable, Codable {
-        public var id: String?
-        public var name: String?
-        public var moderated: Bool?
+        public var id: String
+        public var name: String
+        public var moderated: Bool
         public var emoji_id: String?
         public var emoji_name: String?
     }
@@ -105,7 +116,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var thread_metadata: ThreadMetadata?
     public var default_auto_archive_duration: AutoArchiveDuration?
     public var default_thread_rate_limit_per_user: Int?
-    public var default_reaction_emoji: ForumTag?
+    public var default_reaction_emoji: DefaultReaction?
     public var default_sort_order: Int?
     public var default_forum_layout: ForumLayout?
     public var permissions: StringBitField<Permission>?

@@ -610,7 +610,7 @@ paths:
   /guilds/{guild_id}/channels:
     get:
       tags:
-        - Channels
+        - Guilds
       summary: list guild channels
       parameters:
         - name: guild_id
@@ -635,7 +635,7 @@ paths:
               example: ''
     post:
       tags:
-        - Channels
+        - Guilds
       summary: create guild channel
       parameters:
         - name: Content-Type
@@ -665,7 +665,7 @@ paths:
               example: ''
     patch:
       tags:
-        - Channels
+        - Guilds
       summary: bulk update guild channels
       parameters:
         - name: Content-Type

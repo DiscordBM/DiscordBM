@@ -26,16 +26,13 @@ public enum APIEndpoint: Endpoint {
     /// https://discord.com/developers/docs/resources/channel
     
     case getChannel(channelId: String)
-    case listGuildChannels(guildId: String)
     case listPinnedMessages(channelId: String)
     case addGroupDmUser(channelId: String, userId: String)
     case pinMessage(channelId: String, messageId: String)
     case setChannelPermissionOverwrite(channelId: String, overwriteId: String)
     case createDm
-    case createGuildChannel(guildId: String)
     case followChannel(channelId: String)
     case triggerTypingIndicator(channelId: String)
-    case bulkUpdateGuildChannels(guildId: String)
     case updateChannel(channelId: String)
     case deleteChannel(channelId: String)
     case deleteChannelPermissionOverwrite(channelId: String, overwriteId: String)
@@ -89,13 +86,16 @@ public enum APIEndpoint: Endpoint {
     case getGuildWidgetPng(guildId: String)
     case getGuildWidgetSettings(guildId: String)
     case listGuildBans(guildId: String)
+    case listGuildChannels(guildId: String)
     case listGuildIntegrations(guildId: String)
     case listOwnGuilds
     case previewPruneGuild(guildId: String)
     case banUserFromGuild(guildId: String, userId: String)
     case createGuild
+    case createGuildChannel(guildId: String)
     case pruneGuild(guildId: String)
     case setGuildMfaLevel(guildId: String)
+    case bulkUpdateGuildChannels(guildId: String)
     case updateGuild(guildId: String)
     case updateGuildWelcomeScreen(guildId: String)
     case updateGuildWidgetSettings(guildId: String)
@@ -292,8 +292,6 @@ public enum APIEndpoint: Endpoint {
             suffix = "guilds/\(guildId)/audit-logs"
         case let .getChannel(channelId):
             suffix = "channels/\(channelId)"
-        case let .listGuildChannels(guildId):
-            suffix = "guilds/\(guildId)/channels"
         case let .listPinnedMessages(channelId):
             suffix = "channels/\(channelId)/pins"
         case let .addGroupDmUser(channelId, userId):
@@ -304,14 +302,10 @@ public enum APIEndpoint: Endpoint {
             suffix = "channels/\(channelId)/permissions/\(overwriteId)"
         case .createDm:
             suffix = "users/@me/channels"
-        case let .createGuildChannel(guildId):
-            suffix = "guilds/\(guildId)/channels"
         case let .followChannel(channelId):
             suffix = "channels/\(channelId)/followers"
         case let .triggerTypingIndicator(channelId):
             suffix = "channels/\(channelId)/typing"
-        case let .bulkUpdateGuildChannels(guildId):
-            suffix = "guilds/\(guildId)/channels"
         case let .updateChannel(channelId):
             suffix = "channels/\(channelId)"
         case let .deleteChannel(channelId):
@@ -386,6 +380,8 @@ public enum APIEndpoint: Endpoint {
             suffix = "guilds/\(guildId)/widget"
         case let .listGuildBans(guildId):
             suffix = "guilds/\(guildId)/bans"
+        case let .listGuildChannels(guildId):
+            suffix = "guilds/\(guildId)/channels"
         case let .listGuildIntegrations(guildId):
             suffix = "guilds/\(guildId)/integrations"
         case .listOwnGuilds:
@@ -396,10 +392,14 @@ public enum APIEndpoint: Endpoint {
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case .createGuild:
             suffix = "guilds"
+        case let .createGuildChannel(guildId):
+            suffix = "guilds/\(guildId)/channels"
         case let .pruneGuild(guildId):
             suffix = "guilds/\(guildId)/prune"
         case let .setGuildMfaLevel(guildId):
             suffix = "guilds/\(guildId)/mfa"
+        case let .bulkUpdateGuildChannels(guildId):
+            suffix = "guilds/\(guildId)/channels"
         case let .updateGuild(guildId):
             suffix = "guilds/\(guildId)"
         case let .updateGuildWelcomeScreen(guildId):
@@ -654,8 +654,6 @@ public enum APIEndpoint: Endpoint {
             suffix = "guilds/\(guildId)/audit-logs"
         case let .getChannel(channelId):
             suffix = "channels/\(channelId)"
-        case let .listGuildChannels(guildId):
-            suffix = "guilds/\(guildId)/channels"
         case let .listPinnedMessages(channelId):
             suffix = "channels/\(channelId)/pins"
         case let .addGroupDmUser(channelId, userId):
@@ -666,14 +664,10 @@ public enum APIEndpoint: Endpoint {
             suffix = "channels/\(channelId)/permissions/\(overwriteId)"
         case .createDm:
             suffix = "users/@me/channels"
-        case let .createGuildChannel(guildId):
-            suffix = "guilds/\(guildId)/channels"
         case let .followChannel(channelId):
             suffix = "channels/\(channelId)/followers"
         case let .triggerTypingIndicator(channelId):
             suffix = "channels/\(channelId)/typing"
-        case let .bulkUpdateGuildChannels(guildId):
-            suffix = "guilds/\(guildId)/channels"
         case let .updateChannel(channelId):
             suffix = "channels/\(channelId)"
         case let .deleteChannel(channelId):
@@ -748,6 +742,8 @@ public enum APIEndpoint: Endpoint {
             suffix = "guilds/\(guildId)/widget"
         case let .listGuildBans(guildId):
             suffix = "guilds/\(guildId)/bans"
+        case let .listGuildChannels(guildId):
+            suffix = "guilds/\(guildId)/channels"
         case let .listGuildIntegrations(guildId):
             suffix = "guilds/\(guildId)/integrations"
         case .listOwnGuilds:
@@ -758,10 +754,14 @@ public enum APIEndpoint: Endpoint {
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case .createGuild:
             suffix = "guilds"
+        case let .createGuildChannel(guildId):
+            suffix = "guilds/\(guildId)/channels"
         case let .pruneGuild(guildId):
             suffix = "guilds/\(guildId)/prune"
         case let .setGuildMfaLevel(guildId):
             suffix = "guilds/\(guildId)/mfa"
+        case let .bulkUpdateGuildChannels(guildId):
+            suffix = "guilds/\(guildId)/channels"
         case let .updateGuild(guildId):
             suffix = "guilds/\(guildId)"
         case let .updateGuildWelcomeScreen(guildId):
@@ -1018,16 +1018,13 @@ public enum APIEndpoint: Endpoint {
         case .deleteAutoModerationRule: return .DELETE
         case .listGuildAuditLogEntries: return .GET
         case .getChannel: return .GET
-        case .listGuildChannels: return .GET
         case .listPinnedMessages: return .GET
         case .addGroupDmUser: return .PUT
         case .pinMessage: return .PUT
         case .setChannelPermissionOverwrite: return .PUT
         case .createDm: return .POST
-        case .createGuildChannel: return .POST
         case .followChannel: return .POST
         case .triggerTypingIndicator: return .POST
-        case .bulkUpdateGuildChannels: return .PATCH
         case .updateChannel: return .PATCH
         case .deleteChannel: return .DELETE
         case .deleteChannelPermissionOverwrite: return .DELETE
@@ -1065,13 +1062,16 @@ public enum APIEndpoint: Endpoint {
         case .getGuildWidgetPng: return .GET
         case .getGuildWidgetSettings: return .GET
         case .listGuildBans: return .GET
+        case .listGuildChannels: return .GET
         case .listGuildIntegrations: return .GET
         case .listOwnGuilds: return .GET
         case .previewPruneGuild: return .GET
         case .banUserFromGuild: return .PUT
         case .createGuild: return .POST
+        case .createGuildChannel: return .POST
         case .pruneGuild: return .POST
         case .setGuildMfaLevel: return .POST
+        case .bulkUpdateGuildChannels: return .PATCH
         case .updateGuild: return .PATCH
         case .updateGuildWelcomeScreen: return .PATCH
         case .updateGuildWidgetSettings: return .PATCH
@@ -1198,16 +1198,13 @@ public enum APIEndpoint: Endpoint {
         case .deleteAutoModerationRule: return true
         case .listGuildAuditLogEntries: return true
         case .getChannel: return true
-        case .listGuildChannels: return true
         case .listPinnedMessages: return true
         case .addGroupDmUser: return true
         case .pinMessage: return true
         case .setChannelPermissionOverwrite: return true
         case .createDm: return true
-        case .createGuildChannel: return true
         case .followChannel: return true
         case .triggerTypingIndicator: return true
-        case .bulkUpdateGuildChannels: return true
         case .updateChannel: return true
         case .deleteChannel: return true
         case .deleteChannelPermissionOverwrite: return true
@@ -1245,13 +1242,16 @@ public enum APIEndpoint: Endpoint {
         case .getGuildWidgetPng: return true
         case .getGuildWidgetSettings: return true
         case .listGuildBans: return true
+        case .listGuildChannels: return true
         case .listGuildIntegrations: return true
         case .listOwnGuilds: return true
         case .previewPruneGuild: return true
         case .banUserFromGuild: return true
         case .createGuild: return true
+        case .createGuildChannel: return true
         case .pruneGuild: return true
         case .setGuildMfaLevel: return true
+        case .bulkUpdateGuildChannels: return true
         case .updateGuild: return true
         case .updateGuildWelcomeScreen: return true
         case .updateGuildWidgetSettings: return true
@@ -1378,16 +1378,13 @@ public enum APIEndpoint: Endpoint {
         case .deleteAutoModerationRule: return true
         case .listGuildAuditLogEntries: return true
         case .getChannel: return true
-        case .listGuildChannels: return true
         case .listPinnedMessages: return true
         case .addGroupDmUser: return true
         case .pinMessage: return true
         case .setChannelPermissionOverwrite: return true
         case .createDm: return true
-        case .createGuildChannel: return true
         case .followChannel: return true
         case .triggerTypingIndicator: return true
-        case .bulkUpdateGuildChannels: return true
         case .updateChannel: return true
         case .deleteChannel: return true
         case .deleteChannelPermissionOverwrite: return true
@@ -1425,13 +1422,16 @@ public enum APIEndpoint: Endpoint {
         case .getGuildWidgetPng: return true
         case .getGuildWidgetSettings: return true
         case .listGuildBans: return true
+        case .listGuildChannels: return true
         case .listGuildIntegrations: return true
         case .listOwnGuilds: return true
         case .previewPruneGuild: return true
         case .banUserFromGuild: return true
         case .createGuild: return true
+        case .createGuildChannel: return true
         case .pruneGuild: return true
         case .setGuildMfaLevel: return true
+        case .bulkUpdateGuildChannels: return true
         case .updateGuild: return true
         case .updateGuildWelcomeScreen: return true
         case .updateGuildWidgetSettings: return true
@@ -1565,8 +1565,6 @@ public enum APIEndpoint: Endpoint {
             return [guildId]
         case let .getChannel(channelId):
             return [channelId]
-        case let .listGuildChannels(guildId):
-            return [guildId]
         case let .listPinnedMessages(channelId):
             return [channelId]
         case let .addGroupDmUser(channelId, userId):
@@ -1577,14 +1575,10 @@ public enum APIEndpoint: Endpoint {
             return [channelId, overwriteId]
         case .createDm:
             return []
-        case let .createGuildChannel(guildId):
-            return [guildId]
         case let .followChannel(channelId):
             return [channelId]
         case let .triggerTypingIndicator(channelId):
             return [channelId]
-        case let .bulkUpdateGuildChannels(guildId):
-            return [guildId]
         case let .updateChannel(channelId):
             return [channelId]
         case let .deleteChannel(channelId):
@@ -1659,6 +1653,8 @@ public enum APIEndpoint: Endpoint {
             return [guildId]
         case let .listGuildBans(guildId):
             return [guildId]
+        case let .listGuildChannels(guildId):
+            return [guildId]
         case let .listGuildIntegrations(guildId):
             return [guildId]
         case .listOwnGuilds:
@@ -1669,9 +1665,13 @@ public enum APIEndpoint: Endpoint {
             return [guildId, userId]
         case .createGuild:
             return []
+        case let .createGuildChannel(guildId):
+            return [guildId]
         case let .pruneGuild(guildId):
             return [guildId]
         case let .setGuildMfaLevel(guildId):
+            return [guildId]
+        case let .bulkUpdateGuildChannels(guildId):
             return [guildId]
         case let .updateGuild(guildId):
             return [guildId]
@@ -1913,60 +1913,60 @@ public enum APIEndpoint: Endpoint {
         case .deleteAutoModerationRule: return 5
         case .listGuildAuditLogEntries: return 6
         case .getChannel: return 7
-        case .listGuildChannels: return 8
-        case .listPinnedMessages: return 9
-        case .addGroupDmUser: return 10
-        case .pinMessage: return 11
-        case .setChannelPermissionOverwrite: return 12
-        case .createDm: return 13
-        case .createGuildChannel: return 14
-        case .followChannel: return 15
-        case .triggerTypingIndicator: return 16
-        case .bulkUpdateGuildChannels: return 17
-        case .updateChannel: return 18
-        case .deleteChannel: return 19
-        case .deleteChannelPermissionOverwrite: return 20
-        case .deleteGroupDmUser: return 21
-        case .unpinMessage: return 22
-        case .getApplicationCommand: return 23
-        case .getGuildApplicationCommand: return 24
-        case .getGuildApplicationCommandPermissions: return 25
-        case .listApplicationCommands: return 26
-        case .listGuildApplicationCommandPermissions: return 27
-        case .listGuildApplicationCommands: return 28
-        case .bulkSetApplicationCommands: return 29
-        case .bulkSetGuildApplicationCommands: return 30
-        case .setGuildApplicationCommandPermissions: return 31
-        case .createApplicationCommand: return 32
-        case .createGuildApplicationCommand: return 33
-        case .updateApplicationCommand: return 34
-        case .updateGuildApplicationCommand: return 35
-        case .deleteApplicationCommand: return 36
-        case .deleteGuildApplicationCommand: return 37
-        case .getGuildEmoji: return 38
-        case .listGuildEmojis: return 39
-        case .createGuildEmoji: return 40
-        case .updateGuildEmoji: return 41
-        case .deleteGuildEmoji: return 42
-        case .getBotGateway: return 43
-        case .getGateway: return 44
-        case .getGuild: return 45
-        case .getGuildBan: return 46
-        case .getGuildOnboarding: return 47
-        case .getGuildPreview: return 48
-        case .getGuildVanityUrl: return 49
-        case .getGuildWelcomeScreen: return 50
-        case .getGuildWidget: return 51
-        case .getGuildWidgetPng: return 52
-        case .getGuildWidgetSettings: return 53
-        case .listGuildBans: return 54
-        case .listGuildIntegrations: return 55
-        case .listOwnGuilds: return 56
-        case .previewPruneGuild: return 57
-        case .banUserFromGuild: return 58
-        case .createGuild: return 59
-        case .pruneGuild: return 60
-        case .setGuildMfaLevel: return 61
+        case .listPinnedMessages: return 8
+        case .addGroupDmUser: return 9
+        case .pinMessage: return 10
+        case .setChannelPermissionOverwrite: return 11
+        case .createDm: return 12
+        case .followChannel: return 13
+        case .triggerTypingIndicator: return 14
+        case .updateChannel: return 15
+        case .deleteChannel: return 16
+        case .deleteChannelPermissionOverwrite: return 17
+        case .deleteGroupDmUser: return 18
+        case .unpinMessage: return 19
+        case .getApplicationCommand: return 20
+        case .getGuildApplicationCommand: return 21
+        case .getGuildApplicationCommandPermissions: return 22
+        case .listApplicationCommands: return 23
+        case .listGuildApplicationCommandPermissions: return 24
+        case .listGuildApplicationCommands: return 25
+        case .bulkSetApplicationCommands: return 26
+        case .bulkSetGuildApplicationCommands: return 27
+        case .setGuildApplicationCommandPermissions: return 28
+        case .createApplicationCommand: return 29
+        case .createGuildApplicationCommand: return 30
+        case .updateApplicationCommand: return 31
+        case .updateGuildApplicationCommand: return 32
+        case .deleteApplicationCommand: return 33
+        case .deleteGuildApplicationCommand: return 34
+        case .getGuildEmoji: return 35
+        case .listGuildEmojis: return 36
+        case .createGuildEmoji: return 37
+        case .updateGuildEmoji: return 38
+        case .deleteGuildEmoji: return 39
+        case .getBotGateway: return 40
+        case .getGateway: return 41
+        case .getGuild: return 42
+        case .getGuildBan: return 43
+        case .getGuildOnboarding: return 44
+        case .getGuildPreview: return 45
+        case .getGuildVanityUrl: return 46
+        case .getGuildWelcomeScreen: return 47
+        case .getGuildWidget: return 48
+        case .getGuildWidgetPng: return 49
+        case .getGuildWidgetSettings: return 50
+        case .listGuildBans: return 51
+        case .listGuildChannels: return 52
+        case .listGuildIntegrations: return 53
+        case .listOwnGuilds: return 54
+        case .previewPruneGuild: return 55
+        case .banUserFromGuild: return 56
+        case .createGuild: return 57
+        case .createGuildChannel: return 58
+        case .pruneGuild: return 59
+        case .setGuildMfaLevel: return 60
+        case .bulkUpdateGuildChannels: return 61
         case .updateGuild: return 62
         case .updateGuildWelcomeScreen: return 63
         case .updateGuildWidgetSettings: return 64
@@ -2100,8 +2100,6 @@ public enum APIEndpoint: Endpoint {
             return "listGuildAuditLogEntries(guildId: \(guildId))"
         case let .getChannel(channelId):
             return "getChannel(channelId: \(channelId))"
-        case let .listGuildChannels(guildId):
-            return "listGuildChannels(guildId: \(guildId))"
         case let .listPinnedMessages(channelId):
             return "listPinnedMessages(channelId: \(channelId))"
         case let .addGroupDmUser(channelId, userId):
@@ -2112,14 +2110,10 @@ public enum APIEndpoint: Endpoint {
             return "setChannelPermissionOverwrite(channelId: \(channelId), overwriteId: \(overwriteId))"
         case .createDm:
             return "createDm"
-        case let .createGuildChannel(guildId):
-            return "createGuildChannel(guildId: \(guildId))"
         case let .followChannel(channelId):
             return "followChannel(channelId: \(channelId))"
         case let .triggerTypingIndicator(channelId):
             return "triggerTypingIndicator(channelId: \(channelId))"
-        case let .bulkUpdateGuildChannels(guildId):
-            return "bulkUpdateGuildChannels(guildId: \(guildId))"
         case let .updateChannel(channelId):
             return "updateChannel(channelId: \(channelId))"
         case let .deleteChannel(channelId):
@@ -2194,6 +2188,8 @@ public enum APIEndpoint: Endpoint {
             return "getGuildWidgetSettings(guildId: \(guildId))"
         case let .listGuildBans(guildId):
             return "listGuildBans(guildId: \(guildId))"
+        case let .listGuildChannels(guildId):
+            return "listGuildChannels(guildId: \(guildId))"
         case let .listGuildIntegrations(guildId):
             return "listGuildIntegrations(guildId: \(guildId))"
         case .listOwnGuilds:
@@ -2204,10 +2200,14 @@ public enum APIEndpoint: Endpoint {
             return "banUserFromGuild(guildId: \(guildId), userId: \(userId))"
         case .createGuild:
             return "createGuild"
+        case let .createGuildChannel(guildId):
+            return "createGuildChannel(guildId: \(guildId))"
         case let .pruneGuild(guildId):
             return "pruneGuild(guildId: \(guildId))"
         case let .setGuildMfaLevel(guildId):
             return "setGuildMfaLevel(guildId: \(guildId))"
+        case let .bulkUpdateGuildChannels(guildId):
+            return "bulkUpdateGuildChannels(guildId: \(guildId))"
         case let .updateGuild(guildId):
             return "updateGuild(guildId: \(guildId))"
         case let .updateGuildWelcomeScreen(guildId):
@@ -2457,7 +2457,6 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     /// https://discord.com/developers/docs/resources/channel
     
     case getChannel
-    case listGuildChannels
     case listPinnedMessages
     
     // MARK: Commands
@@ -2495,6 +2494,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case getGuildWidgetPng
     case getGuildWidgetSettings
     case listGuildBans
+    case listGuildChannels
     case listGuildIntegrations
     case listOwnGuilds
     case previewPruneGuild
@@ -2608,7 +2608,6 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .listAutoModerationRules: return "listAutoModerationRules"
         case .listGuildAuditLogEntries: return "listGuildAuditLogEntries"
         case .getChannel: return "getChannel"
-        case .listGuildChannels: return "listGuildChannels"
         case .listPinnedMessages: return "listPinnedMessages"
         case .getApplicationCommand: return "getApplicationCommand"
         case .getGuildApplicationCommand: return "getGuildApplicationCommand"
@@ -2630,6 +2629,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .getGuildWidgetPng: return "getGuildWidgetPng"
         case .getGuildWidgetSettings: return "getGuildWidgetSettings"
         case .listGuildBans: return "listGuildBans"
+        case .listGuildChannels: return "listGuildChannels"
         case .listGuildIntegrations: return "listGuildIntegrations"
         case .listOwnGuilds: return "listOwnGuilds"
         case .previewPruneGuild: return "previewPruneGuild"
@@ -2685,7 +2685,6 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .listAutoModerationRules: self = .listAutoModerationRules
         case .listGuildAuditLogEntries: self = .listGuildAuditLogEntries
         case .getChannel: self = .getChannel
-        case .listGuildChannels: self = .listGuildChannels
         case .listPinnedMessages: self = .listPinnedMessages
         case .getApplicationCommand: self = .getApplicationCommand
         case .getGuildApplicationCommand: self = .getGuildApplicationCommand
@@ -2707,6 +2706,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .getGuildWidgetPng: self = .getGuildWidgetPng
         case .getGuildWidgetSettings: self = .getGuildWidgetSettings
         case .listGuildBans: self = .listGuildBans
+        case .listGuildChannels: self = .listGuildChannels
         case .listGuildIntegrations: self = .listGuildIntegrations
         case .listOwnGuilds: self = .listOwnGuilds
         case .previewPruneGuild: self = .previewPruneGuild

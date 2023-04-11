@@ -110,6 +110,7 @@ extension DiscordClient {
 
 private let iso8601DateFormatter = ISO8601DateFormatter()
 
+/// MARK: - `APIEndpoint` functions
 public extension DiscordClient {
     
     /// https://discord.com/developers/docs/topics/gateway#get-gateway
@@ -522,6 +523,85 @@ public extension DiscordClient {
     func getChannel(id: String) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.getChannel(channelId: id)
         return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// This endpoint doesn't have a test since we can't create group DMs easily,
+    /// but still should work fine if you actually needed it, because there are two similar
+    /// functions down below for updating other types of channels, and those do have tests.
+    /// https://discord.com/developers/docs/resources/channel#modify-channel
+    func updateGroupDMChannel(
+        id: String,
+        reason: String? = nil,
+        payload: RequestBody.ModifyGroupDMChannel
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = APIEndpoint.updateChannel(channelId: id)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#modify-channel
+    func updateGuildChannel(
+        id: String,
+        reason: String? = nil,
+        payload: RequestBody.ModifyGuildChannel
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = APIEndpoint.updateChannel(channelId: id)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#modify-channel
+    func updateThreadChannel(
+        id: String,
+        reason: String? = nil,
+        payload: RequestBody.ModifyThreadChannel
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = APIEndpoint.updateChannel(channelId: id)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#deleteclose-channel
+    func deleteChannel(
+        id: String,
+        reason: String? = nil
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = APIEndpoint.deleteChannel(channelId: id)
+        return try await self.send(request: .init(
+            to: endpoint,
+            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+        ))
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#create-guild-channel
+    func createGuildChannel(
+        guildId: String,
+        reason: String? = nil,
+        payload: RequestBody.CreateGuildChannel
+    ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = APIEndpoint.createGuildChannel(guildId: guildId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
     }
     
     /// https://discord.com/developers/docs/resources/user#leave-guild
@@ -1214,7 +1294,10 @@ public extension DiscordClient {
             queries: [("thread_id", threadId)]
         ))
     }
-    
+}
+
+/// MARK: - `CDNEndpoint` functions
+public extension DiscordClient {
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
     func getCDNCustomEmoji(emojiId: String) async throws -> DiscordCDNResponse {

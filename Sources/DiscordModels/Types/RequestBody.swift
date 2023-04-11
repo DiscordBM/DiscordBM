@@ -751,4 +751,216 @@ public enum RequestBody {
         
         public func validate() -> [ValidationFailure] { }
     }
+
+    /// https://discord.com/developers/docs/resources/channel#modify-channel-json-params-group-dm
+    public struct ModifyGroupDMChannel: Sendable, Codable, ValidatablePayload {
+        public var name: String?
+        public var icon: ImageData?
+
+        init(name: String? = nil, icon: ImageData? = nil) {
+            self.name = name
+            self.icon = icon
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRangeOrNil(name, min: 1, max: 100, name: "name")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#overwrite-object
+    public struct PartialChannelOverwrite: Sendable, Codable {
+
+        /// https://discord.com/developers/docs/resources/channel#overwrite-object
+        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+            case role = 0
+            case member = 1
+        }
+
+        public var id: String
+        public var type: Kind
+        public var allow: StringBitField<Permission>?
+        public var deny: StringBitField<Permission>?
+
+        public init(id: String, type: Kind, allow: [Permission]? = nil, deny: [Permission]? = nil) {
+            self.id = id
+            self.type = type
+            self.allow = allow.map { .init($0) }
+            self.deny = deny.map { .init($0) }
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
+    public struct PartialForumTag: Sendable, Codable {
+        public var id: String?
+        public var name: String
+        public var moderated: Bool?
+        public var emoji_id: String?
+        public var emoji_name: String?
+
+        public init(id: String? = nil, name: String, moderated: Bool? = nil, emoji_id: String? = nil, emoji_name: String? = nil) {
+            self.id = id
+            self.name = name
+            self.moderated = moderated
+            self.emoji_id = emoji_id
+            self.emoji_name = emoji_name
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#modify-channel-json-params-guild-channel
+    public struct ModifyGuildChannel: Sendable, Codable, ValidatablePayload {
+        public var name: String?
+        public var type: DiscordChannel.Kind?
+        public var position: Int?
+        public var topic: String?
+        public var nsfw: Bool?
+        public var rate_limit_per_user: Int?
+        public var bitrate: Int?
+        public var user_limit: Int?
+        public var permission_overwrites: [PartialChannelOverwrite]?
+        public var parent_id: String?
+        public var rtc_region: String?
+        public var video_quality_mode: DiscordChannel.VideoQualityMode?
+        public var default_auto_archive_duration: DiscordChannel.AutoArchiveDuration?
+        public var flags: IntBitField<DiscordChannel.Flag>?
+        public var available_tags: [PartialForumTag]?
+        public var default_reaction_emoji: DiscordChannel.DefaultReaction?
+        public var default_thread_rate_limit_per_user: Int?
+        public var default_sort_order: DiscordChannel.SortOrder?
+        public var default_forum_layout: DiscordChannel.ForumLayout?
+
+        public init(name: String? = nil, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: String? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, flags: [DiscordChannel.Flag]? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_thread_rate_limit_per_user: Int? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
+            self.name = name
+            self.type = type
+            self.position = position
+            self.topic = topic
+            self.nsfw = nsfw
+            self.rate_limit_per_user = rate_limit_per_user
+            self.bitrate = bitrate
+            self.user_limit = user_limit
+            self.permission_overwrites = permission_overwrites
+            self.parent_id = parent_id
+            self.rtc_region = rtc_region
+            self.video_quality_mode = video_quality_mode
+            self.default_auto_archive_duration = default_auto_archive_duration
+            self.flags = flags.map { .init($0) }
+            self.available_tags = available_tags
+            self.default_reaction_emoji = default_reaction_emoji
+            self.default_thread_rate_limit_per_user = default_thread_rate_limit_per_user
+            self.default_sort_order = default_sort_order
+            self.default_forum_layout = default_forum_layout
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRangeOrNil(name, min: 1, max: 100, name: "name")
+            validateCharacterCountDoesNotExceed(topic, max: 4_096, name: "topic")
+            validateNumberInRange(
+                rate_limit_per_user,
+                min: 0,
+                max: 21_600,
+                name: "rate_limit_per_user"
+            )
+            validateNumberInRange(bitrate, min: 8_000, max: 384_000, name: "bitrate")
+            validateNumberInRange(user_limit, min: 0, max: 10_000, name: "user_limit")
+            validateOnlyContains(
+                flags?.values,
+                name: "flags",
+                reason: "Can only contain 'requireTag'",
+                where: { .requireTag == $0 }
+            )
+            validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#modify-channel-json-params-thread
+    public struct ModifyThreadChannel: Sendable, Codable, ValidatablePayload {
+        public var name: String?
+        public var archived: Bool?
+        public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
+        public var locked: Bool?
+        public var invitable: Bool?
+        public var rate_limit_per_user: Int?
+        public var flags: IntBitField<DiscordChannel.Flag>?
+        public var applied_tags: [PartialForumTag]?
+
+        public init(name: String? = nil, archived: Bool? = nil, auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, locked: Bool? = nil, invitable: Bool? = nil, rate_limit_per_user: Int? = nil, flags: [DiscordChannel.Flag]? = nil, applied_tags: [PartialForumTag]? = nil) {
+            self.name = name
+            self.archived = archived
+            self.auto_archive_duration = auto_archive_duration
+            self.locked = locked
+            self.invitable = invitable
+            self.rate_limit_per_user = rate_limit_per_user
+            self.flags = flags.map { .init($0) }
+            self.applied_tags = applied_tags
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRangeOrNil(name, min: 1, max: 100, name: "name")
+            validateNumberInRange(
+                rate_limit_per_user,
+                min: 0,
+                max: 21_600,
+                name: "rate_limit_per_user"
+            )
+            validateOnlyContains(
+                flags?.values,
+                name: "flags",
+                reason: "Can only contain 'pinned'",
+                where: { .pinned == $0 }
+            )
+            validateElementCountDoesNotExceed(applied_tags, max: 5, name: "applied_tags")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#create-guild-channel-json-params
+    public struct CreateGuildChannel: Sendable, Codable, ValidatablePayload {
+        public var name: String
+        public var type: DiscordChannel.Kind?
+        public var position: Int?
+        public var topic: String?
+        public var nsfw: Bool?
+        public var rate_limit_per_user: Int?
+        public var bitrate: Int?
+        public var user_limit: Int?
+        public var permission_overwrites: [PartialChannelOverwrite]?
+        public var parent_id: String?
+        public var rtc_region: String?
+        public var video_quality_mode: DiscordChannel.VideoQualityMode?
+        public var default_auto_archive_duration: DiscordChannel.AutoArchiveDuration?
+        public var available_tags: [PartialForumTag]?
+        public var default_reaction_emoji: DiscordChannel.DefaultReaction?
+        public var default_sort_order: DiscordChannel.SortOrder?
+
+        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: String? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, flags: [DiscordChannel.Flag]? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_thread_rate_limit_per_user: Int? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
+            self.name = name
+            self.type = type
+            self.position = position
+            self.topic = topic
+            self.nsfw = nsfw
+            self.rate_limit_per_user = rate_limit_per_user
+            self.bitrate = bitrate
+            self.user_limit = user_limit
+            self.permission_overwrites = permission_overwrites
+            self.parent_id = parent_id
+            self.rtc_region = rtc_region
+            self.video_quality_mode = video_quality_mode
+            self.default_auto_archive_duration = default_auto_archive_duration
+            self.available_tags = available_tags
+            self.default_reaction_emoji = default_reaction_emoji
+            self.default_sort_order = default_sort_order
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
+            validateCharacterCountDoesNotExceed(topic, max: 4_096, name: "topic")
+            validateNumberInRange(
+                rate_limit_per_user,
+                min: 0,
+                max: 21_600,
+                name: "rate_limit_per_user"
+            )
+            validateNumberInRange(bitrate, min: 8_000, max: 384_000, name: "bitrate")
+            validateNumberInRange(user_limit, min: 0, max: 10_000, name: "user_limit")
+            validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
+        }
+    }
 }

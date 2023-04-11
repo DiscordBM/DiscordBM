@@ -403,7 +403,9 @@ class DiscordClientTests: XCTestCase {
         XCTAssertNotEqual(guildWithCounts.approximate_presence_count, nil)
         
         /// Get guild audit logs
-        let auditLogs = try await client.listGuildAuditLogEntries(guildId: Constants.guildId).decode()
+        let auditLogs = try await client.listGuildAuditLogEntries(
+            guildId: Constants.guildId
+        ).decode()
         XCTAssertEqual(auditLogs.audit_log_entries.count, 50)
         
         /// Leave guild
@@ -411,12 +413,28 @@ class DiscordClientTests: XCTestCase {
         let leaveGuild = try await client.leaveGuild(id: Constants.guildId + "1111")
         
         XCTAssertEqual(leaveGuild.status, .badRequest)
-        
+
+        /// Create channel
+        let createChannel = try await client.createGuildChannel(
+            guildId: Constants.guildId,
+            reason: "Testing",
+            payload: .init(name: "Test-Create-Channel")
+        ).decode()
+
         /// Get channel
-        let channel = try await client.getChannel(id: Constants.channelId).decode()
-        
-        XCTAssertEqual(channel.id, Constants.channelId)
-        
+        let getChannel = try await client.getChannel(id: createChannel.id).decode()
+
+        XCTAssertEqual("\(getChannel)", "\(createChannel)")
+
+        let topic = "Test Topic"
+        let updateChannel = try await client.updateGuildChannel(
+            id: createChannel.id,
+            payload: .init(topic: topic)
+        ).decode()
+
+        XCTAssertEqual(updateChannel.id, createChannel.id)
+        XCTAssertEqual(updateChannel.topic, topic)
+
         /// Get member
         let member = try await client.getGuildMember(
             guildId: Constants.guildId,
@@ -518,6 +536,8 @@ class DiscordClientTests: XCTestCase {
         
         let entries = auditLogsWithActionType.audit_log_entries
         XCTAssertTrue(entries.contains(where: { $0.reason == reason }), "Entries: \(entries)")
+
+        try await client.deleteChannel(id: createChannel.id).guardSuccess()
     }
     
     func testDMs() async throws {
@@ -527,7 +547,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(response.type, .dm)
         let recipient = try XCTUnwrap(response.recipients?.first)
         XCTAssertEqual(recipient.id, Constants.personalId)
-        
+
         /// Send a message to the DM channel
         let text = "Testing! \(Date())"
         let message = try await client.createMessage(
@@ -558,6 +578,15 @@ class DiscordClientTests: XCTestCase {
                 rate_limit_per_user: 2
             )
         ).decode()
+
+        let updatedThreadName = "Creating a Thread to Test! Updated Name"
+        let updateThread = try await client.updateThreadChannel(
+            id: thread.id,
+            payload: .init(name: updatedThreadName)
+        ).decode()
+
+        XCTAssertEqual(updateThread.id, thread.id)
+        XCTAssertEqual(updateThread.name, updatedThreadName)
         
         do {
             let text = "Testing! \(Date())"
