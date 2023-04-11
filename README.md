@@ -53,8 +53,9 @@ let bot = BotGatewayManager(
 See the [GatewayConnection tests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
 
 > **Warning**   
-> In a production app, you should use environment variables to load your Bot Token, instead of hard-coding it.   
-> App ID is public so no need to worry about that.
+> In a production app you should use environment variables to load your Bot Token.   
+> Avoid hard-coding your Bot Token to reduce the chances of leaking it.   
+> App ID is public so no need to worry about that.   
 
 ### Initializing a Gateway Manager With Vapor
 <details>
@@ -125,6 +126,10 @@ In most cases, the library doesn't try to abstract away Discord's stuff.
 * If there is a HTTP request you want to make, you'll need to use `DiscordClient`.
 * You should read Discord documentation's related notes when you want to use something of this library.   
   Everything in the library has its related Discord documentation section linked near it.
+  
+> **Warning**   
+> `DiscordBM` is still in beta so new releases can come with breaking changes.   
+> **Read the release notes** to fix the breaking changes that you encounter and become aware of new features.
 
 ### Bot Token And App ID
 <details>
