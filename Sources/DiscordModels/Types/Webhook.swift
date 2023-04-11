@@ -20,7 +20,7 @@ public struct Webhook: Sendable, Codable {
     public var token: String?
     public var application_id: String?
     public var source_guild: PartialGuild?
-    public var source_channel: PartialChannel?
+    public var source_channel: DiscordChannel?
     public var url: String?
 }
 

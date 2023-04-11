@@ -971,13 +971,13 @@ public enum RequestBody {
         public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
         public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
         public var roles: [Role]?
-        public var channels: [PartialChannel]?
+        public var channels: [DiscordChannel]?
         public var afk_channel_id: String?
         public var afk_timeout: Guild.AFKTimeout?
         public var system_channel_id: String?
         public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>?
 
-        public init(name: String, icon: ImageData? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, roles: [Role]? = nil, channels: [PartialChannel]? = nil, afk_channel_id: String? = nil, afk_timeout: Guild.AFKTimeout? = nil, system_channel_id: String? = nil, system_channel_flags: [Guild.SystemChannelFlag]? = nil) {
+        public init(name: String, icon: ImageData? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, roles: [Role]? = nil, channels: [DiscordChannel]? = nil, afk_channel_id: String? = nil, afk_timeout: Guild.AFKTimeout? = nil, system_channel_id: String? = nil, system_channel_flags: [Guild.SystemChannelFlag]? = nil) {
             self.name = name
             self.icon = icon
             self.verification_level = verification_level

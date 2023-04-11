@@ -1,6 +1,7 @@
 import Foundation
 
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
+/// The same as what the Discord API docs call "partial channel".
 public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
@@ -409,16 +410,6 @@ public enum ThreadKind: Int, Sendable, Codable {
     case announcementThread = 10
     case publicThread = 11
     case privateThread = 12
-}
-
-/// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
-public struct PartialChannel: Sendable, Codable {
-    public var id: String
-    public var type: DiscordChannel.Kind
-    public var name: String?
-    public var permissions: StringBitField<Permission>?
-    public var parent_id: String?
-    public var thread_metadata: ThreadMetadata?
 }
 
 extension DiscordChannel {

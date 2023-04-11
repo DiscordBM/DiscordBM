@@ -17,6 +17,18 @@ public struct Interaction: Sendable, Codable {
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
         public struct ResolvedData: Sendable, Codable {
+
+            /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
+            /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
+            public struct PartialChannel: Sendable, Codable {
+                public var id: String
+                public var type: DiscordChannel.Kind
+                public var name: String?
+                public var permissions: StringBitField<Permission>?
+                public var parent_id: String?
+                public var thread_metadata: ThreadMetadata?
+            }
+
             public var users: [String: DiscordUser]?
             public var members: [String: Guild.PartialMember]?
             public var roles: [String: Role]?
@@ -69,6 +81,7 @@ public struct Interaction: Sendable, Codable {
     public var data: Data?
     public var guild_id: String?
     public var channel_id: String?
+    public var channel: DiscordChannel?
     public var member: Guild.Member?
     public var user: DiscordUser?
     public var token: String
@@ -86,6 +99,7 @@ public struct Interaction: Sendable, Codable {
         case data
         case guild_id
         case channel_id
+        case channel
         case member
         case user
         case token
@@ -121,6 +135,7 @@ public struct Interaction: Sendable, Codable {
         }
         self.guild_id = try container.decodeIfPresent(String.self, forKey: .guild_id)
         self.channel_id = try container.decodeIfPresent(String.self, forKey: .channel_id)
+        self.channel = try container.decodeIfPresent(DiscordChannel.self, forKey: .channel)
         self.member = try container.decodeIfPresent(Guild.Member.self, forKey: .member)
         self.user = try container.decodeIfPresent(DiscordUser.self, forKey: .user)
         self.token = try container.decode(String.self, forKey: .token)
