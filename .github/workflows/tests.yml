@@ -52,7 +52,7 @@ jobs:
       fail-fast: false
       matrix:
         container:
-          - swift:5.7-jammy
+          - swift:5.8-jammy
     container: ${{ matrix.container }}
     runs-on: ubuntu-latest
     env:
