@@ -963,4 +963,84 @@ public enum RequestBody {
             validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
         }
     }
+
+    public struct CreateGuild: Sendable, Codable, ValidatablePayload {
+        public var name: String
+        public var icon: ImageData?
+        public var verification_level: Guild.VerificationLevel?
+        public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
+        public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
+        public var roles: [Role]?
+        public var channels: [PartialChannel]?
+        public var afk_channel_id: String?
+        public var afk_timeout: Guild.AFKTimeout?
+        public var system_channel_id: String?
+        public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>?
+
+        public init(name: String, icon: ImageData? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, roles: [Role]? = nil, channels: [PartialChannel]? = nil, afk_channel_id: String? = nil, afk_timeout: Guild.AFKTimeout? = nil, system_channel_id: String? = nil, system_channel_flags: [Guild.SystemChannelFlag]? = nil) {
+            self.name = name
+            self.icon = icon
+            self.verification_level = verification_level
+            self.default_message_notifications = default_message_notifications
+            self.explicit_content_filter = explicit_content_filter
+            self.roles = roles
+            self.channels = channels
+            self.afk_channel_id = afk_channel_id
+            self.afk_timeout = afk_timeout
+            self.system_channel_id = system_channel_id
+            self.system_channel_flags = system_channel_flags.map { .init($0) }
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(name, min: 2, max: 100, name: "name")
+        }
+    }
+
+    public struct ModifyGuild: Sendable, Codable, ValidatablePayload {
+        public var name: String?
+        public var verification_level: Guild.VerificationLevel?
+        public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
+        public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
+        public var afk_channel_id: String?
+        public var afk_timeout: Guild.AFKTimeout?
+        public var icon: ImageData?
+        public var owner_id: String?
+        public var splash: ImageData?
+        public var discovery_splash: ImageData?
+        public var banner: ImageData?
+        public var system_channel_id: String?
+        public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>?
+        public var rules_channel_id: String?
+        public var public_updates_channel_id: String?
+        public var preferred_locale: DiscordLocale?
+        public var features: [Guild.Feature]?
+        public var description: String?
+        public var premium_progress_bar_enabled: Bool?
+
+        public init(name: String? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, afk_channel_id: String? = nil, afk_timeout: Guild.AFKTimeout? = nil, icon: ImageData? = nil, owner_id: String? = nil, splash: ImageData? = nil, discovery_splash: ImageData? = nil, banner: ImageData? = nil, system_channel_id: String? = nil, system_channel_flags: [Guild.SystemChannelFlag]? = nil, rules_channel_id: String? = nil, public_updates_channel_id: String? = nil, preferred_locale: DiscordLocale? = nil, features: [Guild.Feature]? = nil, description: String? = nil, premium_progress_bar_enabled: Bool? = nil) {
+            self.name = name
+            self.verification_level = verification_level
+            self.default_message_notifications = default_message_notifications
+            self.explicit_content_filter = explicit_content_filter
+            self.afk_channel_id = afk_channel_id
+            self.afk_timeout = afk_timeout
+            self.icon = icon
+            self.owner_id = owner_id
+            self.splash = splash
+            self.discovery_splash = discovery_splash
+            self.banner = banner
+            self.system_channel_id = system_channel_id
+            self.system_channel_flags = system_channel_flags.map { .init($0) }
+            self.rules_channel_id = rules_channel_id
+            self.public_updates_channel_id = public_updates_channel_id
+            self.preferred_locale = preferred_locale
+            self.features = features
+            self.description = description
+            self.premium_progress_bar_enabled = premium_progress_bar_enabled
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(name, min: 2, max: 100, name: "name")
+        }
+    }
 }

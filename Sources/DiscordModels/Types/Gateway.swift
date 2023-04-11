@@ -673,7 +673,7 @@ public struct Gateway: Sendable, Codable {
         /// Deprecated
         public var region: String?
         public var afk_channel_id: String?
-        public var afk_timeout: Int
+        public var afk_timeout: Guild.AFKTimeout
         public var widget_enabled: Bool?
         public var widget_channel_id: String?
         public var verification_level: Guild.VerificationLevel

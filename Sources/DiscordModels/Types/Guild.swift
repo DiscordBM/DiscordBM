@@ -153,6 +153,15 @@ public struct Guild: Sendable, Codable {
         case safe = 2
         case ageRestricted = 3
     }
+
+    /// https://discord.com/developers/docs/resources/guild#create-guild-json-params
+    public enum AFKTimeout: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+        case oneMinute = 60
+        case fiveMinutes = 300
+        case fifteenMinutes = 900
+        case halfAnHour = 1800
+        case anHour = 3600
+    }
     
     public var id: String
     public var name: String
@@ -166,7 +175,7 @@ public struct Guild: Sendable, Codable {
     /// Deprecated
     public var region: String?
     public var afk_channel_id: String?
-    public var afk_timeout: Int
+    public var afk_timeout: AFKTimeout
     public var widget_enabled: Bool?
     public var widget_channel_id: String?
     public var verification_level: VerificationLevel

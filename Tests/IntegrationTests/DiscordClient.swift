@@ -378,7 +378,24 @@ class DiscordClientTests: XCTestCase {
         )
         XCTAssertEqual(deletionResponse.status, .noContent)
     }
-    
+
+    func testGuildCreateUpdateDelete() async throws {
+        let guildName = "Test Guild"
+        let createGuild = try await client.createGuild(payload: .init(name: guildName)).decode()
+        XCTAssertEqual(createGuild.name, guildName)
+
+        let newGuildName = "Test Guild Updated Name"
+        let updateGuild = try await client.updateGuild(
+            id: createGuild.id,
+            payload: .init(name: newGuildName)
+        ).decode()
+
+        XCTAssertEqual(updateGuild.id, createGuild.id)
+        XCTAssertEqual(updateGuild.name, newGuildName)
+
+        try await client.deleteGuild(id: createGuild.id).guardSuccess()
+    }
+
     func testGuildAndChannel() async throws {
         /// Get
         let guild = try await client.getGuild(

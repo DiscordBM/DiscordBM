@@ -510,7 +510,43 @@ public extension DiscordClient {
             queries: [("with_counts", withCounts?.description)]
         ))
     }
-    
+
+    /// https://discord.com/developers/docs/resources/guild#create-guild
+    @inlinable
+    func createGuild(
+        payload: RequestBody.CreateGuild
+    ) async throws -> DiscordClientResponse<Guild> {
+        let endpoint = APIEndpoint.createGuild
+        return try await self.send(
+            request: .init(to: endpoint),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild
+    @inlinable
+    func updateGuild(
+        id: String,
+        reason: String? = nil,
+        payload: RequestBody.ModifyGuild
+    ) async throws -> DiscordClientResponse<Guild> {
+        let endpoint = APIEndpoint.updateGuild(guildId: id)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#delete-guild
+    @inlinable
+    func deleteGuild(id: String) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.deleteGuild(guildId: id)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     /// https://discord.com/developers/docs/resources/guild#get-guild-roles
     @inlinable
     func listGuildRoles(id: String) async throws -> DiscordClientResponse<[Role]> {
@@ -529,6 +565,7 @@ public extension DiscordClient {
     /// but still should work fine if you actually needed it, because there are two similar
     /// functions down below for updating other types of channels, and those do have tests.
     /// https://discord.com/developers/docs/resources/channel#modify-channel
+    @inlinable
     func updateGroupDMChannel(
         id: String,
         reason: String? = nil,
@@ -545,6 +582,7 @@ public extension DiscordClient {
     }
 
     /// https://discord.com/developers/docs/resources/channel#modify-channel
+    @inlinable
     func updateGuildChannel(
         id: String,
         reason: String? = nil,
@@ -561,6 +599,7 @@ public extension DiscordClient {
     }
 
     /// https://discord.com/developers/docs/resources/channel#modify-channel
+    @inlinable
     func updateThreadChannel(
         id: String,
         reason: String? = nil,
@@ -577,6 +616,7 @@ public extension DiscordClient {
     }
 
     /// https://discord.com/developers/docs/resources/channel#deleteclose-channel
+    @inlinable
     func deleteChannel(
         id: String,
         reason: String? = nil
@@ -589,6 +629,7 @@ public extension DiscordClient {
     }
 
     /// https://discord.com/developers/docs/resources/guild#create-guild-channel
+    @inlinable
     func createGuildChannel(
         guildId: String,
         reason: String? = nil,
