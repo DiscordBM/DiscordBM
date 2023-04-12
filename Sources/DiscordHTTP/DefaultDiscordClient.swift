@@ -323,6 +323,7 @@ public struct DefaultDiscordClient: DiscordClient {
             request.body = .bytes(data)
             
             logger.debug("Will send a request to Discord", metadata: [
+                "body": .string(String(data: data, encoding: .utf8) ?? "nil"),
                 "url": .stringConvertible(
                     req.endpoint.urlDescription + req.queries.makeForURLQuery()
                 ),
@@ -384,15 +385,15 @@ public struct DefaultDiscordClient: DiscordClient {
                 requestId: requestId,
                 retriesSoFar: retryCounter
             )
-            
-            let body: HTTPClient.Body
+
             let contentType: String
+            let buffer: ByteBuffer
             if let multipart = try payload.encodeMultipart() {
                 contentType = "multipart/form-data; boundary=\(MultipartEncodingContainer.boundary)"
-                body = .byteBuffer(multipart)
+                buffer = multipart
             } else {
                 contentType = "application/json"
-                body = .bytes(try DiscordGlobalConfiguration.encoder.encode(payload))
+                buffer = ByteBuffer(data: try DiscordGlobalConfiguration.encoder.encode(payload))
             }
             var request = try HTTPClient.Request(
                 url: req.endpoint.url + req.queries.makeForURLQuery(),
@@ -405,9 +406,10 @@ public struct DefaultDiscordClient: DiscordClient {
                 request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
             }
             
-            request.body = body
+            request.body = .byteBuffer(buffer)
             
             logger.debug("Will send a request to Discord", metadata: [
+                "body": .string(String(buffer: buffer)),
                 "url": .stringConvertible(
                     req.endpoint.urlDescription + req.queries.makeForURLQuery()
                 ),
