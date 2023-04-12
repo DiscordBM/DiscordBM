@@ -58,7 +58,7 @@ class DiscordLoggerTests: XCTestCase {
         await waitFulfill(for: [expectation], timeout: 6)
         
         let anyPayload = self.client.payloads.first
-        let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+        let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         XCTAssertEqual(payload.content, "<@22222222> <@&33333333>")
         
         let embeds = try XCTUnwrap(payload.embeds)
@@ -137,7 +137,7 @@ class DiscordLoggerTests: XCTestCase {
 await waitFulfill(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
-        let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+        let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
         XCTAssertEqual(embeds.count, 1)
@@ -168,7 +168,7 @@ await waitFulfill(for: [expectation], timeout: 2)
 await waitFulfill(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
-        let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+        let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
         XCTAssertEqual(embeds.count, 1)
@@ -252,7 +252,7 @@ await waitFulfill(for: [expectation], timeout: 2)
 await waitFulfill(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
-        let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+        let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
         XCTAssertEqual(embeds.count, 1)
@@ -292,7 +292,7 @@ await waitFulfill(for: [expectation], timeout: 2)
 await waitFulfill(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
-        let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+        let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
         XCTAssertEqual(embeds.count, 1)
@@ -361,7 +361,7 @@ await waitFulfill(for: [expectation], timeout: 2)
         
         do {
             let anyPayload = payloads[0]
-            let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+            let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
             XCTAssertEqual(payload.content, "<@&99999999>")
             
             let embeds = try XCTUnwrap(payload.embeds)
@@ -386,7 +386,7 @@ await waitFulfill(for: [expectation], timeout: 2)
         
         do {
             let anyPayload = payloads[1]
-            let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+            let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
             XCTAssertEqual(payload.content, "")
             
             let embeds = try XCTUnwrap(payload.embeds)
@@ -402,7 +402,7 @@ await waitFulfill(for: [expectation], timeout: 2)
         
         do {
             let anyPayload = payloads[2]
-            let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+            let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
             XCTAssertEqual(payload.content, "")
             
             let embeds = try XCTUnwrap(payload.embeds)
@@ -454,7 +454,7 @@ await waitFulfill(for: [expectation], timeout: 2)
             /// Due to the `frequency`, we only should have 1 payload, which contains 4 embeds.
             XCTAssertEqual(payloads.count, 1)
             let anyPayload = payloads[0]
-            let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+            let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
             
             let embeds = try XCTUnwrap(payload.embeds)
             XCTAssertEqual(embeds.count, 4)
@@ -491,7 +491,7 @@ await waitFulfill(for: [expectation], timeout: 2)
             /// Due to the `frequency`, we only should have 1 payload, which contains 4 embeds.
             XCTAssertEqual(payloads.count, 1)
             let anyPayload = try XCTUnwrap(payloads.first)
-            let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+            let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
             
             let embeds = try XCTUnwrap(payload.embeds)
             XCTAssertEqual(embeds.count, 4)
@@ -577,7 +577,7 @@ await waitFulfill(for: [expectation], timeout: 2)
 await waitFulfill(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
-        let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+        let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
         XCTAssertEqual(embeds.count, 1)
@@ -614,7 +614,7 @@ await waitFulfill(for: [expectation], timeout: 2)
 await waitFulfill(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
-        let payload = try XCTUnwrap(anyPayload as? RequestBody.ExecuteWebhook)
+        let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
         XCTAssertEqual(embeds.count, 1)

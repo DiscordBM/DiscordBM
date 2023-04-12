@@ -132,7 +132,7 @@ public extension DiscordClient {
     func createInteractionResponse(
         id: String,
         token: String,
-        payload: RequestBody.InteractionResponse
+        payload: Payloads.InteractionResponse
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.createInteractionResponse(
             interactionId: id,
@@ -163,7 +163,7 @@ public extension DiscordClient {
     func updateOriginalInteractionResponse(
         appId: String? = nil,
         token: String,
-        payload: RequestBody.InteractionResponse.CallbackData
+        payload: Payloads.EditWebhookMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = APIEndpoint.updateOriginalInteractionResponse(
             applicationId: try requireAppId(appId),
@@ -190,7 +190,7 @@ public extension DiscordClient {
     func createFollowupMessage(
         appId: String? = nil,
         token: String,
-        payload: RequestBody.InteractionResponse
+        payload: Payloads.InteractionResponse
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.createFollowupMessage(
             applicationId: try requireAppId(appId),
@@ -224,7 +224,7 @@ public extension DiscordClient {
         appId: String? = nil,
         token: String,
         messageId: String,
-        payload: RequestBody.InteractionResponse
+        payload: Payloads.InteractionResponse
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.updateFollowupMessage(
             applicationId: try requireAppId(appId),
@@ -248,31 +248,28 @@ public extension DiscordClient {
         )
         return try await self.send(request: .init(to: endpoint))
     }
-    
-    /// The `channelId` could be a thread-id as well.
+
     /// https://discord.com/developers/docs/resources/channel#create-message
     @inlinable
     func createMessage(
         channelId: String,
-        payload: RequestBody.CreateMessage
+        payload: Payloads.CreateMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = APIEndpoint.createMessage(channelId: channelId)
         return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
-    
-    /// The `channelId` could be a thread-id as well.
+
     /// https://discord.com/developers/docs/resources/channel#edit-message
     @inlinable
     func updateMessage(
         channelId: String,
         messageId: String,
-        payload: RequestBody.EditMessage
+        payload: Payloads.EditMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = APIEndpoint.updateMessage(channelId: channelId, messageId: messageId)
         return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
-    
-    /// The `channelId` could be a thread-id as well.
+
     /// https://discord.com/developers/docs/resources/channel#delete-message
     @inlinable
     func deleteMessage(
@@ -304,7 +301,7 @@ public extension DiscordClient {
     @inlinable
     func createApplicationCommand(
         appId: String? = nil,
-        payload: RequestBody.ApplicationCommandCreate
+        payload: Payloads.ApplicationCommandCreate
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = APIEndpoint.createApplicationCommand(applicationId: try requireAppId(appId))
         return try await self.send(request: .init(to: endpoint), payload: payload)
@@ -328,7 +325,7 @@ public extension DiscordClient {
     func updateApplicationCommand(
         appId: String? = nil,
         commandId: String,
-        payload: RequestBody.ApplicationCommandEdit
+        payload: Payloads.ApplicationCommandEdit
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = APIEndpoint.updateApplicationCommand(
             applicationId: try requireAppId(appId),
@@ -354,7 +351,7 @@ public extension DiscordClient {
     @inlinable
     func bulkSetApplicationCommands(
         appId: String? = nil,
-        payload: [RequestBody.ApplicationCommandCreate]
+        payload: [Payloads.ApplicationCommandCreate]
     ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
         let endpoint = APIEndpoint.bulkSetApplicationCommands(
             applicationId: try requireAppId(appId)
@@ -384,7 +381,7 @@ public extension DiscordClient {
     func createGuildApplicationCommand(
         appId: String? = nil,
         guildId: String,
-        payload: RequestBody.ApplicationCommandCreate
+        payload: Payloads.ApplicationCommandCreate
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = APIEndpoint.createGuildApplicationCommand(
             applicationId: try requireAppId(appId),
@@ -414,7 +411,7 @@ public extension DiscordClient {
         appId: String? = nil,
         guildId: String,
         commandId: String,
-        payload: RequestBody.ApplicationCommandEdit
+        payload: Payloads.ApplicationCommandEdit
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = APIEndpoint.updateGuildApplicationCommand(
             applicationId: try requireAppId(appId),
@@ -444,7 +441,7 @@ public extension DiscordClient {
     func bulkSetGuildApplicationCommands(
         appId: String? = nil,
         guildId: String,
-        payload: [RequestBody.ApplicationCommandCreate]
+        payload: [Payloads.ApplicationCommandCreate]
     ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
         let endpoint = APIEndpoint.bulkSetGuildApplicationCommands(
             applicationId: try requireAppId(appId),
@@ -488,7 +485,7 @@ public extension DiscordClient {
         appId: String? = nil,
         guildId: String,
         commandId: String,
-        payload: RequestBody.EditApplicationCommandPermissions
+        payload: Payloads.EditApplicationCommandPermissions
     ) async throws -> DiscordClientResponse<GuildApplicationCommandPermissions> {
         let endpoint = APIEndpoint.setGuildApplicationCommandPermissions(
             applicationId: try requireAppId(appId),
@@ -514,7 +511,7 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/guild#create-guild
     @inlinable
     func createGuild(
-        payload: RequestBody.CreateGuild
+        payload: Payloads.CreateGuild
     ) async throws -> DiscordClientResponse<Guild> {
         let endpoint = APIEndpoint.createGuild
         return try await self.send(
@@ -528,7 +525,7 @@ public extension DiscordClient {
     func updateGuild(
         id: String,
         reason: String? = nil,
-        payload: RequestBody.ModifyGuild
+        payload: Payloads.ModifyGuild
     ) async throws -> DiscordClientResponse<Guild> {
         let endpoint = APIEndpoint.updateGuild(guildId: id)
         return try await self.send(
@@ -569,7 +566,7 @@ public extension DiscordClient {
     func updateGroupDMChannel(
         id: String,
         reason: String? = nil,
-        payload: RequestBody.ModifyGroupDMChannel
+        payload: Payloads.ModifyGroupDMChannel
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.updateChannel(channelId: id)
         return try await self.send(
@@ -586,7 +583,7 @@ public extension DiscordClient {
     func updateGuildChannel(
         id: String,
         reason: String? = nil,
-        payload: RequestBody.ModifyGuildChannel
+        payload: Payloads.ModifyGuildChannel
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.updateChannel(channelId: id)
         return try await self.send(
@@ -603,7 +600,7 @@ public extension DiscordClient {
     func updateThreadChannel(
         id: String,
         reason: String? = nil,
-        payload: RequestBody.ModifyThreadChannel
+        payload: Payloads.ModifyThreadChannel
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.updateChannel(channelId: id)
         return try await self.send(
@@ -633,7 +630,7 @@ public extension DiscordClient {
     func createGuildChannel(
         guildId: String,
         reason: String? = nil,
-        payload: RequestBody.CreateGuildChannel
+        payload: Payloads.CreateGuildChannel
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.createGuildChannel(guildId: guildId)
         return try await self.send(
@@ -657,7 +654,7 @@ public extension DiscordClient {
     func createGuildRole(
         guildId: String,
         reason: String? = nil,
-        payload: RequestBody.CreateGuildRole
+        payload: Payloads.CreateGuildRole
     ) async throws -> DiscordClientResponse<Role> {
         let endpoint = APIEndpoint.createGuildRole(guildId: guildId)
         return try await self.send(
@@ -912,7 +909,7 @@ public extension DiscordClient {
         let endpoint = APIEndpoint.createDm
         return try await self.send(
             request: .init(to: endpoint),
-            payload: RequestBody.CreateDM(recipient_id: recipient_id)
+            payload: Payloads.CreateDM(recipient_id: recipient_id)
         )
     }
     
@@ -922,7 +919,7 @@ public extension DiscordClient {
         channelId: String,
         messageId: String,
         reason: String? = nil,
-        payload: RequestBody.CreateThreadFromMessage
+        payload: Payloads.CreateThreadFromMessage
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.createThreadFromMessage(channelId: channelId, messageId: messageId)
         return try await self.send(
@@ -939,7 +936,7 @@ public extension DiscordClient {
     func createThread(
         channelId: String,
         reason: String? = nil,
-        payload: RequestBody.CreateThreadWithoutMessage
+        payload: Payloads.CreateThreadWithoutMessage
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.createThread(channelId: channelId)
         return try await self.send(
@@ -956,7 +953,7 @@ public extension DiscordClient {
     func startThreadInForumChannel(
         channelId: String,
         reason: String? = nil,
-        payload: RequestBody.CreateThreadInForumChannel
+        payload: Payloads.CreateThreadInForumChannel
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.createThreadInForumChannel(channelId: channelId)
         return try await self.send(
@@ -1113,7 +1110,7 @@ public extension DiscordClient {
     func createWebhook(
         channelId: String,
         reason: String? = nil,
-        payload: RequestBody.CreateWebhook
+        payload: Payloads.CreateWebhook
     ) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = APIEndpoint.createWebhook(channelId: channelId)
         return try await self.send(
@@ -1164,7 +1161,7 @@ public extension DiscordClient {
     func updateWebhook(
         id: String,
         reason: String? = nil,
-        payload: RequestBody.ModifyGuildWebhook
+        payload: Payloads.ModifyGuildWebhook
     ) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = APIEndpoint.updateWebhook(webhookId: id)
         return try await self.send(
@@ -1182,7 +1179,7 @@ public extension DiscordClient {
     func updateWebhook(
         address: WebhookAddress,
         reason: String? = nil,
-        payload: RequestBody.ModifyWebhook
+        payload: Payloads.ModifyWebhook
     ) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = APIEndpoint.updateWebhookByToken(
             webhookId: address.id,
@@ -1232,7 +1229,7 @@ public extension DiscordClient {
     func executeWebhook(
         address: WebhookAddress,
         threadId: String? = nil,
-        payload: RequestBody.ExecuteWebhook
+        payload: Payloads.ExecuteWebhook
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.executeWebhook(
             webhookId: address.id,
@@ -1254,7 +1251,7 @@ public extension DiscordClient {
     func executeWebhookWithResponse(
         address: WebhookAddress,
         threadId: String? = nil,
-        payload: RequestBody.ExecuteWebhook
+        payload: Payloads.ExecuteWebhook
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = APIEndpoint.executeWebhook(
             webhookId: address.id,
@@ -1300,7 +1297,7 @@ public extension DiscordClient {
         address: WebhookAddress,
         messageId: String,
         threadId: String? = nil,
-        payload: RequestBody.EditWebhookMessage
+        payload: Payloads.EditWebhookMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = APIEndpoint.updateWebhookMessage(
             webhookId: address.id,

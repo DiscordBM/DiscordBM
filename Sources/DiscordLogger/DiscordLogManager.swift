@@ -308,7 +308,7 @@ public actor DiscordLogManager {
         embeds: [Embed],
         address: WebhookAddress
     ) async throws {
-        let payload = RequestBody.ExecuteWebhook(
+        let payload = Payloads.ExecuteWebhook(
             content: content,
             embeds: embeds
         )

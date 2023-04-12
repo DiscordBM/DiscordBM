@@ -159,7 +159,7 @@ class DiscordModelsTests: XCTestCase {
     }
     
     func testImageData() throws {
-        typealias ImageData = RequestBody.ImageData
+        typealias ImageData = Payloads.ImageData
         let data = ByteBuffer(data: resource(name: "1kb.png"))
         
         do {

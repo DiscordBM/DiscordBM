@@ -1,7 +1,7 @@
 import Foundation
 import NIOFoundationCompat
 
-public enum RequestBody {
+public enum Payloads {
     
     public struct CreateDM: Sendable, Codable, ValidatablePayload {
         public var recipient_id: String
