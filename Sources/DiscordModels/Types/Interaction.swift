@@ -222,11 +222,11 @@ extension Interaction {
             public var style: Style
             public var label: String?
             public var emoji: PartialEmoji?
-            public var custom_id: String
+            public var custom_id: String?
             public var url: String?
             public var disabled: Bool?
 
-            public init(style: Style, label: String? = nil, emoji: PartialEmoji? = nil, custom_id: String, url: String? = nil, disabled: Bool? = nil) {
+            public init(style: Style, label: String? = nil, emoji: PartialEmoji? = nil, custom_id: String? = nil, url: String? = nil, disabled: Bool? = nil) {
                 self.style = style
                 self.label = label
                 self.emoji = emoji
@@ -350,7 +350,7 @@ extension Interaction {
             case mentionableSelect(SelectMenu)
             case channelSelect(ChannelSelectMenu)
 
-            public var customId: String {
+            public var customId: String? {
                 switch self {
                 case let .button(value):
                     return value.custom_id

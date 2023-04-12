@@ -105,6 +105,7 @@ public struct Guild: Sendable, Codable {
         case communityExpLargeUngated = "COMMUNITY_EXP_LARGE_UNGATED"
         case invitesDisabled = "INVITES_DISABLED"
         case applicationCommandPermissionsV2 = "APPLICATION_COMMAND_PERMISSIONS_V2"
+        case soundboard = "SOUNDBOARD"
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
