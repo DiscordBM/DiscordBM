@@ -353,7 +353,26 @@ extension Interaction {
             case roleSelect(SelectMenu)
             case mentionableSelect(SelectMenu)
             case channelSelect(ChannelSelectMenu)
-            
+
+            public var customId: String {
+                switch self {
+                case let .button(value):
+                    return value.custom_id
+                case let .stringSelect(value):
+                    return value.custom_id
+                case let .textInput(value):
+                    return value.custom_id
+                case let .userSelect(value):
+                    return value.custom_id
+                case let .roleSelect(value):
+                    return value.custom_id
+                case let .mentionableSelect(value):
+                    return value.custom_id
+                case let .channelSelect(value):
+                    return value.custom_id
+                }
+            }
+
             enum CodingKeys: String, CodingKey {
                 case type
             }
