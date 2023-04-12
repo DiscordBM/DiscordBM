@@ -106,10 +106,12 @@ Task {
     await bot.connect()
     
     /// Use `bot.client` to send requests to Discord.
-    try await bot.client.createMessage(
+    let response = try await bot.client.createMessage(
         channelId: CHANNEL_ID,
         payload: .init(content: "Hello Everybody!")
     )
+    /// Easily decode the reponse to the correct type.
+    let message = response.decode()
 }
 
 /// If you don't use libraries like Vapor that do this for you, 
