@@ -65,7 +65,7 @@ public struct Interaction: Sendable, Codable {
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-modal-submit-data-structure
     public struct ModalSubmit: Sendable, Codable {
         public var custom_id: String
-        public var components: [ActionRow.Component]
+        public var components: [ActionRow]
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data
@@ -220,7 +220,7 @@ extension Interaction {
             }
             
             public var style: Style
-            /// Discord docs says `custom_id` is optional, but I got
+            /// Discord docs says `label` is optional, but I got
             /// an error about it when I didn't provide it.
             public var label: String
             public var emoji: PartialEmoji?
@@ -323,15 +323,17 @@ extension Interaction {
             }
             
             public var custom_id: String
-            public var style: Style
-            public var label: String
+            /// Optional to receive, required to send, apparently.
+            public var style: Style?
+            /// Optional to receive, required to send, apparently.
+            public var label: String?
             public var min_length: Int?
             public var max_length: Int?
             public var required: Bool?
             public var value: String?
             public var placeholder: String?
-            
-            public init(custom_id: String, style: Interaction.ActionRow.TextInput.Style, label: String, min_length: Int? = nil, max_length: Int? = nil, required: Bool? = nil, value: String? = nil, placeholder: String? = nil) {
+
+            public init(custom_id: String, style: Style, label: String, min_length: Int? = nil, max_length: Int? = nil, required: Bool? = nil, value: String? = nil, placeholder: String? = nil) {
                 self.custom_id = custom_id
                 self.style = style
                 self.label = label
