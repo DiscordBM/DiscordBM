@@ -220,17 +220,13 @@ extension Interaction {
             }
             
             public var style: Style
-            /// Discord docs says `label` is optional, but I got
-            /// an error about it when I didn't provide it.
-            public var label: String
+            public var label: String?
             public var emoji: PartialEmoji?
-            /// Discord docs says `custom_id` is optional, but I got
-            /// an error about it when I didn't provide it.
             public var custom_id: String
             public var url: String?
             public var disabled: Bool?
-            
-            public init(style: Style, label: String, emoji: PartialEmoji? = nil, custom_id: String, url: String? = nil, disabled: Bool? = nil) {
+
+            public init(style: Style, label: String? = nil, emoji: PartialEmoji? = nil, custom_id: String, url: String? = nil, disabled: Bool? = nil) {
                 self.style = style
                 self.label = label
                 self.emoji = emoji
