@@ -319,9 +319,7 @@ extension Interaction {
             }
             
             public var custom_id: String
-            /// Optional to receive, required to send, apparently.
             public var style: Style?
-            /// Optional to receive, required to send, apparently.
             public var label: String?
             public var min_length: Int?
             public var max_length: Int?
@@ -329,7 +327,7 @@ extension Interaction {
             public var value: String?
             public var placeholder: String?
 
-            public init(custom_id: String, style: Style, label: String, min_length: Int? = nil, max_length: Int? = nil, required: Bool? = nil, value: String? = nil, placeholder: String? = nil) {
+            public init(custom_id: String, style: Style? = nil, label: String? = nil, min_length: Int? = nil, max_length: Int? = nil, required: Bool? = nil, value: String? = nil, placeholder: String? = nil) {
                 self.custom_id = custom_id
                 self.style = style
                 self.label = label
