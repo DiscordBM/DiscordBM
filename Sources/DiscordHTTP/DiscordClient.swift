@@ -913,6 +913,7 @@ public extension DiscordClient {
         )
     }
 
+    /// https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
     @inlinable
     func triggerTypingIndicator(channelId: String) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.triggerTypingIndicator(channelId: channelId)
