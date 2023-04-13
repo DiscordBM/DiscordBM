@@ -284,7 +284,7 @@ let cache = await DiscordCache(
 
 /// Access the cached stuff:
 let aGuild = await cache.guilds[GUILD_ID]
-print("Guild name is:", aGuild.name)
+print("Guild name is:", aGuild?.name ?? "nil")
 ```
   
 </details>
