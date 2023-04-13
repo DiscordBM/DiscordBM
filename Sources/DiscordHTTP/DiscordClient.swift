@@ -905,12 +905,18 @@ public extension DiscordClient {
     /// You can use this function to create a new **or** retrieve an existing DM channel.
     /// https://discord.com/developers/docs/resources/user#create-dm
     @inlinable
-    func createDm(recipient_id: String) async throws -> DiscordClientResponse<DiscordChannel> {
+    func createDm(recipientId: String) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.createDm
         return try await self.send(
             request: .init(to: endpoint),
-            payload: Payloads.CreateDM(recipient_id: recipient_id)
+            payload: Payloads.CreateDM(recipient_id: recipientId)
         )
+    }
+
+    @inlinable
+    func triggerTypingIndicator(channelId: String) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.triggerTypingIndicator(channelId: channelId)
+        return try await self.send(request: .init(to: endpoint))
     }
     
     /// https://discord.com/developers/docs/resources/channel#start-thread-from-message

@@ -61,7 +61,10 @@ class DiscordClientTests: XCTestCase {
                 messageId: message.id
             ).guardSuccess()
         }
-        
+
+        /// Trigger typing indicator
+        try await client.triggerTypingIndicator(channelId: Constants.channelId).guardSuccess()
+
         /// Create
         let text = "Testing! \(Date())"
         let message = try await client.createMessage(
@@ -559,7 +562,7 @@ class DiscordClientTests: XCTestCase {
     
     func testDMs() async throws {
         /// Create DM
-        let response = try await client.createDm(recipient_id: Constants.personalId).decode()
+        let response = try await client.createDm(recipientId: Constants.personalId).decode()
         
         XCTAssertEqual(response.type, .dm)
         let recipient = try XCTUnwrap(response.recipients?.first)

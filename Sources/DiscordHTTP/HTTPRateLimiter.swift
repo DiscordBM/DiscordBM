@@ -165,14 +165,15 @@ actor HTTPRateLimiter {
             case .true:
                 self.addGlobalRateLimitRecord()
                 return .true
-            case .false: return .false
-            case let .after(after):
-                /// Need to manually call `addGlobalRateLimitRecord()` when doing the request.
+            case .false:
                 logger.warning("Hit HTTP Bucket rate-limit.", metadata: [
                     "label": .string(label),
                     "endpointId": .stringConvertible(endpoint.id),
                     "bucket": .stringConvertible(bucket)
                 ])
+                return .false
+            case let .after(after):
+                /// Need to manually call `addGlobalRateLimitRecord()` when doing the request.
                 return .after(after)
             }
         } else {
