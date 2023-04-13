@@ -193,7 +193,10 @@ public struct MessageInteraction: Sendable, Codable {
 
 extension Interaction {
     /// https://discord.com/developers/docs/interactions/message-components#action-rows
-    public struct ActionRow: Sendable, Codable {
+    /// `ActionRow` is an attempt to simplify/beautify Discord's messy components.
+    /// Anything inside `ActionRow` must not be used on its own for decoding/encoding purposes.
+    /// For example you always need to use `[ActionRow]` instead of `[ActionRow.Component]`.
+    public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral {
         
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
         public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
@@ -338,7 +341,7 @@ extension Interaction {
                 self.placeholder = placeholder
             }
         }
-        
+
         public enum Component: Sendable, Codable {
             case button(Button)
             case stringSelect(StringSelectMenu)
@@ -470,6 +473,10 @@ extension Interaction {
         
         public init(components: [Component]) {
             self.components = components
+        }
+
+        public init(arrayLiteral elements: Component...) {
+            self.components = elements
         }
     }
 }
