@@ -10,7 +10,7 @@
 </p>
 
 ## Notable Features
-* Everything async/await. Full integration with the latest Server-Side Swift packages.
+* Everything with async/await. Full integration with the latest Server-Side Swift packages.
 * Connect to the Discord gateway and receive all events easily.
 * Send requests to the Discord API using library's Discord client.
 * Hard-typed APIs. All Gateway events and API responses have their own type and can be decoded easily.
