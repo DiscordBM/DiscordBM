@@ -328,8 +328,9 @@ if let aGuild = await cache.guilds[GUILD_ID] {
 <details>
   <summary> Click to expand </summary>
 
-`DiscordBM` has some best-effort functions for checking permissions and roles. 
-	
+`DiscordBM` has some best-effort functions for checking permissions and roles.   
+FYI, in interactions, the [member field](https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure) already contains the resolved permissions (`Interaction.member.permissions`).
+
 > **Warning**   
 > You need a `DiscordCache` with intents containing `.guilds` & `.guildMembers` and also `requestAllMembers: .enabled`.   
 
