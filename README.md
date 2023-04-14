@@ -315,10 +315,50 @@ let cache = await DiscordCache(
 )
 
 /// Access the cached stuff:
-let aGuild = await cache.guilds[GUILD_ID]
-print("Guild name is:", aGuild?.name ?? "nil")
+if let aGuild = await cache.guilds[GUILD_ID] {
+    print("Guild name is:", aGuild.name)
+} else {
+    print("Guild not found")
+}
 ```
   
+</details>
+
+### Checking Permissions & Roles
+<details>
+  <summary> Click to expand </summary>
+
+`DiscordBM` has some best-effort functions for checking permissions and roles. 
+	
+> **Warning**   
+> You need a `DiscordCache` with intents containing `.guilds` & `.guildMembers` and also `requestAllMembers: .enabled`.   
+
+```swift
+let cache: DiscordCache = DiscordCache_YOU_MADE_IN_PREVIOUS_STEPS
+
+/// Get the guild.
+guard let guild = await cache.guilds[GUILD_ID] else { return }
+
+/// Check if the user has `.viewChannel` & `.readMessageHistory` permissions in a channel.
+let hasPermission = guild.userHasPermissions(
+    userId: USER_ID,
+    channelId: CHANNEL_ID, 
+    permissions: [.viewChannel, .readMessageHistory]
+)
+
+/// Check if a user has the `.banMembers` guild-wide permission.
+let hasGuildPermission = guild.userHasGuildPermission(
+    userId: USER_ID,
+    permission: .banMembers
+)
+
+/// Check if a user has a role.
+let hasRole = guild.userHasRole(
+    userId: USER_ID,
+    roleId: ROLE_ID
+)
+```
+
 </details>
 
 ### React-To-Role
