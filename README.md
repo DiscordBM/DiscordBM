@@ -143,6 +143,38 @@ In [Discord developer portal](https://discord.com/developers/applications):
 
 </details>
 
+### Gateway Event Handler
+<details>
+  <summary> Click to expand </summary>
+  
+`DiscordBM` comes with a convenience protocol for hadling Gateway events.   
+With this protocol, you can define a seprate function for each Gateway event and keep your code clean.   
+```swift
+struct EventHandler: GatewayEventHandler {
+    let event: Gateway.Event
+
+    func onMessageCreate(_ payload: Gateway.MessageCreate) async {
+        /// Do what you want
+    }
+
+    func onInteractionCreate(_ payload: Interaction) async {
+        /// Do what you want
+    }
+
+    /// Use other functions you'd like ...
+}
+```
+Make sure you add the event handler to your `GatewayManager`/`bot`:
+```swift
+let bot: any GatewayManager = GatewayManager_YOU_MADE_IN_PREVIOUS_STEPS
+
+await bot.addEventHandler { event in
+    EventHandler(event: event).handle()
+}
+```
+
+</details>
+
 ### Sending Attachments
 <details>
   <summary> Click to expand </summary>
