@@ -1,9 +1,13 @@
 import Foundation
 import NIOFoundationCompat
 
+/// REST API payloads.
+///
+/// These types only need to be `Encodable`,
+/// unless we actually need them to be `Decodable` as well.
 public enum Payloads {
     
-    public struct CreateDM: Sendable, Codable, ValidatablePayload {
+    public struct CreateDM: Sendable, Encodable, ValidatablePayload {
         public var recipient_id: String
         
         @inlinable
@@ -16,7 +20,7 @@ public enum Payloads {
     
     /// An attachment object, but for sending.
     /// https://discord.com/developers/docs/resources/channel#attachment-object
-    public struct AttachmentSend: Sendable, Codable, ValidatablePayload {
+    public struct AttachmentSend: Sendable, Encodable, ValidatablePayload {
         /// When sending, `id` is the index of this attachment in the `files` you provide.
         public var id: String
         public var filename: String?
@@ -30,7 +34,7 @@ public enum Payloads {
         public var ephemeral: Bool?
         
         /// `index` is the index of this attachment in the `files` you provide.
-        public init(index: UInt, filename: String? = nil, description: String? = nil, content_type: String? = nil, size: Int? = nil, url: String? = nil, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil, ephemeral: Bool? = nil) {
+        public init(index: Int, filename: String? = nil, description: String? = nil, content_type: String? = nil, size: Int? = nil, url: String? = nil, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil, ephemeral: Bool? = nil) {
             self.id = "\(index)"
             self.filename = filename
             self.description = description
@@ -49,10 +53,10 @@ public enum Payloads {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object
-    public struct InteractionResponse: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+    public struct InteractionResponse: Sendable, MultipartEncodable, ValidatablePayload {
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+        public enum Kind: Int, Sendable, Encodable, ToleratesIntDecodeMarker {
             /// For ping-pong.
             case pong = 1
             /// Normal response.
@@ -70,7 +74,7 @@ public enum Payloads {
         }
 
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-messages
-        public struct Message: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+        public struct Message: Sendable, MultipartEncodable, ValidatablePayload {
             public var tts: Bool?
             public var content: String?
             public var embeds: [Embed]?
@@ -116,7 +120,7 @@ public enum Payloads {
         }
 
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-autocomplete
-        public struct Autocomplete: Sendable, Codable, ValidatablePayload {
+        public struct Autocomplete: Sendable, Encodable, ValidatablePayload {
             public var choices: [ApplicationCommand.Option.Choice]
 
             public init(choices: [ApplicationCommand.Option.Choice]) {
@@ -129,7 +133,7 @@ public enum Payloads {
         }
 
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-modal
-        public struct Modal: Sendable, Codable, ValidatablePayload {
+        public struct Modal: Sendable, Encodable, ValidatablePayload {
             public var custom_id: String
             public var title: String
             public var components: [Interaction.ActionRow]
@@ -146,7 +150,7 @@ public enum Payloads {
         }
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structure
-        public enum CallbackData: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+        public enum CallbackData: Sendable, MultipartEncodable, ValidatablePayload {
             case message(Message)
             case autocomplete(Autocomplete)
             case modal(Modal)
@@ -170,22 +174,6 @@ public enum Payloads {
                     autocomplete.validate()
                 case let .modal(modal):
                     modal.validate()
-                }
-            }
-
-            public init(from decoder: Decoder) throws {
-                let container = try decoder.singleValueContainer()
-                if let message = try? container.decode(Message.self) {
-                    self = .message(message)
-                } else if let autocomplete = try? container.decode(Autocomplete.self) {
-                    self = .autocomplete(autocomplete)
-                } else if let modal = try? container.decode(Modal.self) {
-                    self = .modal(modal)
-                } else {
-                    throw DecodingError.typeMismatch(Self.self, .init(
-                        codingPath: decoder.codingPath,
-                        debugDescription: "Could not decode '\(Self.self)'"
-                    ))
                 }
             }
 
@@ -257,7 +245,7 @@ public enum Payloads {
             .init(type: .modal, data: .modal(modal))
         }
     }
-    
+
     public struct ImageData: Sendable, Codable {
         public var file: RawFile
         
@@ -353,7 +341,7 @@ public enum Payloads {
     }
     
     /// https://discord.com/developers/docs/resources/channel#create-message-jsonform-params
-    public struct CreateMessage: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+    public struct CreateMessage: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var nonce: StringOrInt?
         public var tts: Bool?
@@ -424,7 +412,7 @@ public enum Payloads {
     }
     
     /// https://discord.com/developers/docs/resources/channel#edit-message-jsonform-params
-    public struct EditMessage: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+    public struct EditMessage: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var embeds: [Embed]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
@@ -473,7 +461,7 @@ public enum Payloads {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#execute-webhook-jsonform-params
-    public struct ExecuteWebhook: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+    public struct ExecuteWebhook: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var username: String?
         public var avatar_url: String?
@@ -538,7 +526,7 @@ public enum Payloads {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#create-webhook-json-params
-    public struct CreateWebhook: Sendable, Codable, ValidatablePayload {
+    public struct CreateWebhook: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var avatar: ImageData?
         
@@ -559,7 +547,7 @@ public enum Payloads {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
-    public struct ModifyWebhook: Sendable, Codable, ValidatablePayload {
+    public struct ModifyWebhook: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var avatar: ImageData?
         
@@ -572,7 +560,7 @@ public enum Payloads {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook-json-params
-    public struct ModifyGuildWebhook: Sendable, Codable, ValidatablePayload {
+    public struct ModifyGuildWebhook: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var avatar: ImageData?
         public var channel_id: String?
@@ -587,7 +575,7 @@ public enum Payloads {
     }
     
     /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message-jsonform-params
-    public struct EditWebhookMessage: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+    public struct EditWebhookMessage: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var embeds: [Embed]?
         public var allowed_mentions: DiscordChannel.AllowedMentions?
@@ -626,7 +614,7 @@ public enum Payloads {
         }
     }
     
-    public struct CreateThreadFromMessage: Sendable, Codable, ValidatablePayload {
+    public struct CreateThreadFromMessage: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
         public var rate_limit_per_user: Int?
@@ -652,7 +640,7 @@ public enum Payloads {
         }
     }
     
-    public struct CreateThreadWithoutMessage: Sendable, Codable, ValidatablePayload {
+    public struct CreateThreadWithoutMessage: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
         public var type: ThreadKind
@@ -684,10 +672,10 @@ public enum Payloads {
         }
     }
     
-    public struct CreateThreadInForumChannel: Sendable, Codable, ValidatablePayload {
+    public struct CreateThreadInForumChannel: Sendable, Encodable, ValidatablePayload {
         
         /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel-forum-thread-message-params-object
-        public struct ForumMessage: Sendable, Codable, MultipartEncodable, ValidatablePayload {
+        public struct ForumMessage: Sendable, MultipartEncodable, ValidatablePayload {
             public var content: String?
             public var embeds: [Embed]?
             public var allowed_mentions: DiscordChannel.AllowedMentions?
@@ -779,7 +767,7 @@ public enum Payloads {
         }
     }
     
-    public struct ApplicationCommandCreate: Sendable, Codable, ValidatablePayload {
+    public struct ApplicationCommandCreate: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var name_localizations: DiscordLocaleDict<String>?
         public var description: String?
@@ -829,7 +817,7 @@ public enum Payloads {
         }
     }
     
-    public struct ApplicationCommandEdit: Sendable, Codable, ValidatablePayload {
+    public struct ApplicationCommandEdit: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var name_localizations: DiscordLocaleDict<String>?
         public var description: String?
@@ -864,7 +852,7 @@ public enum Payloads {
         }
     }
     
-    public struct EditApplicationCommandPermissions: Sendable, Codable, ValidatablePayload {
+    public struct EditApplicationCommandPermissions: Sendable, Encodable, ValidatablePayload {
         public var permissions: [GuildApplicationCommandPermissions.Permission]
         
         public init(permissions: [GuildApplicationCommandPermissions.Permission]) {
@@ -875,7 +863,7 @@ public enum Payloads {
     }
 
     /// https://discord.com/developers/docs/resources/channel#modify-channel-json-params-group-dm
-    public struct ModifyGroupDMChannel: Sendable, Codable, ValidatablePayload {
+    public struct ModifyGroupDMChannel: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var icon: ImageData?
 
@@ -890,10 +878,10 @@ public enum Payloads {
     }
 
     /// https://discord.com/developers/docs/resources/channel#overwrite-object
-    public struct PartialChannelOverwrite: Sendable, Codable {
+    public struct PartialChannelOverwrite: Sendable, Encodable {
 
         /// https://discord.com/developers/docs/resources/channel#overwrite-object
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+        public enum Kind: Int, Sendable, Encodable, ToleratesIntDecodeMarker {
             case role = 0
             case member = 1
         }
@@ -912,7 +900,7 @@ public enum Payloads {
     }
 
     /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
-    public struct PartialForumTag: Sendable, Codable {
+    public struct PartialForumTag: Sendable, Encodable {
         public var id: String?
         public var name: String
         public var moderated: Bool?
@@ -929,7 +917,7 @@ public enum Payloads {
     }
 
     /// https://discord.com/developers/docs/resources/channel#modify-channel-json-params-guild-channel
-    public struct ModifyGuildChannel: Sendable, Codable, ValidatablePayload {
+    public struct ModifyGuildChannel: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var type: DiscordChannel.Kind?
         public var position: Int?
@@ -994,7 +982,7 @@ public enum Payloads {
     }
 
     /// https://discord.com/developers/docs/resources/channel#modify-channel-json-params-thread
-    public struct ModifyThreadChannel: Sendable, Codable, ValidatablePayload {
+    public struct ModifyThreadChannel: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var archived: Bool?
         public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
@@ -1034,7 +1022,7 @@ public enum Payloads {
     }
 
     /// https://discord.com/developers/docs/resources/guild#create-guild-channel-json-params
-    public struct CreateGuildChannel: Sendable, Codable, ValidatablePayload {
+    public struct CreateGuildChannel: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var type: DiscordChannel.Kind?
         public var position: Int?
@@ -1086,7 +1074,7 @@ public enum Payloads {
         }
     }
 
-    public struct CreateGuild: Sendable, Codable, ValidatablePayload {
+    public struct CreateGuild: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var icon: ImageData?
         public var verification_level: Guild.VerificationLevel?
@@ -1118,7 +1106,7 @@ public enum Payloads {
         }
     }
 
-    public struct ModifyGuild: Sendable, Codable, ValidatablePayload {
+    public struct ModifyGuild: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var verification_level: Guild.VerificationLevel?
         public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
