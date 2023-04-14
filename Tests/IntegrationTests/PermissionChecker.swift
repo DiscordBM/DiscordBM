@@ -59,18 +59,18 @@ class PermissionChecker: XCTestCase {
         let guild = try XCTUnwrap(_guild)
         
         /// The bot is `administrator` in the server.
-        XCTAssertTrue(guild.memberHasGuildPermission(
+        XCTAssertTrue(guild.userHasGuildPermission(
             userId: Constants.botId,
             permission: .administrator
         ))
         /// The bot does not have `manageEvents` perm, but is `administrator`,
         /// so in practice has the perm.
-        XCTAssertTrue(guild.memberHasGuildPermission(
+        XCTAssertTrue(guild.userHasGuildPermission(
             userId: Constants.botId,
             permission: .manageEvents
         ))
         /// The account does not have the perm at all.
-        XCTAssertFalse(guild.memberHasGuildPermission(
+        XCTAssertFalse(guild.userHasGuildPermission(
             userId: Constants.secondAccountId,
             permission: .manageRoles
         ))
@@ -120,7 +120,7 @@ class PermissionChecker: XCTestCase {
         ))
         /// The account has the perm in the guild, doesn't have it based on role-overwrite
         /// in the channel, but still has it based on member-overwrite in the channel.
-        XCTAssertTrue(guild.memberHasGuildPermission(
+        XCTAssertTrue(guild.userHasGuildPermission(
             userId: Constants.secondAccountId,
             permission: .manageWebhooks
         ))
@@ -131,7 +131,7 @@ class PermissionChecker: XCTestCase {
         ))
         /// The account has the perm in the guild, and has it based on role-overwrite
         /// in the channel, but doesn't have it based on member-overwrite in the channel.
-        XCTAssertTrue(guild.memberHasGuildPermission(
+        XCTAssertTrue(guild.userHasGuildPermission(
             userId: Constants.secondAccountId,
             permission: .manageThreads
         ))

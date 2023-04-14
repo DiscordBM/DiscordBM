@@ -21,7 +21,7 @@ import DiscordModels
 ///
 /// Make sure to actually use the type:
 /// ```
-/// let bot: any GatewayManager = YOUR_GATEWAY_MANAGER
+/// let bot: any GatewayManager = GatewayManager_YOU_MADE_IN_PREVIOUS_STEPS
 ///
 /// await bot.addEventHandler { event in
 ///     EventHandler(event: event).handle()

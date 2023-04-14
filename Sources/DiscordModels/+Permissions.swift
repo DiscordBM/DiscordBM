@@ -3,7 +3,7 @@ extension Gateway.GuildCreate {
     
     /// Whether or not a member has a permission in a guild and channel.
     /// Member must be of the same guild.
-    /// `channelId` could also be a thread-id.
+    /// This a best-effort function based on what Discord has documented.
     /// https://discord.com/developers/docs/topics/permissions#permission-overwrites
     public func memberHasPermissions(
         member: Guild.Member,
@@ -75,6 +75,7 @@ extension Gateway.GuildCreate {
     }
     
     /// Whether or not a user has a permission in a guild and channel.
+    /// This a best-effort function based on what Discord has documented.
     /// - NOTE: You should request all guild member from gateway before calling this function.
     /// `GatewayManager` has a `requestGuildMembersChunk(payload:)` function, for that.
     /// `DiscordCache` comes with a configuration option to request all guild members for you.
@@ -161,17 +162,17 @@ extension Gateway.GuildCreate {
         
         return false
     }
-    
+
     /// Member has permission in guild. Doesn't check for channel overwrites.
-    public func memberHasGuildPermission(userId: String, permission perm: Permission) -> Bool {
-        guard let member = self.member(withUserId: userId) else {
-            /// Don't even have access to the member.
-            return false
-        }
-        
+    /// This a best-effort function based on what Discord has documented.
+    public func memberHasGuildPermission(
+        member: Guild.Member,
+        userId: String,
+        permission perm: Permission
+    ) -> Bool {
         /// Guild owner has all permissions.
         if self.owner_id == userId { return true }
-        
+
         /// `administrator` perm is like the guild owner.
         if self.roles.contains(where: { role in
             role.permissions.values.contains(.administrator) &&
@@ -179,24 +180,38 @@ extension Gateway.GuildCreate {
         }) {
             return true
         }
-        
+
         /// Already checked for it.
         if perm == .administrator { return false }
-        
+
         /// Member has any roles that allow.
         for role in roles where member.roles.contains(role.id) {
             if role.permissions.values.contains(perm) {
                 return true
             }
         }
-        
+
         /// `@everyone` role allows.
         if let everyoneRole = self.roles.first(where: { $0.id == self.id }),
            everyoneRole.permissions.values.contains(perm) {
             return true
         }
-        
+
         return false
+    }
+
+    /// User has permission in guild. Doesn't check for channel overwrites.
+    /// This a best-effort function based on what Discord has documented.
+    public func userHasGuildPermission(userId: String, permission perm: Permission) -> Bool {
+        guard let member = self.member(withUserId: userId) else {
+            /// Don't even have access to the member.
+            return false
+        }
+        return self.memberHasGuildPermission(
+            member: member,
+            userId: userId,
+            permission: perm
+        )
     }
     
     /// Get member with the specified user id.
@@ -207,6 +222,7 @@ extension Gateway.GuildCreate {
     /// Check to see if a member has a role.
     /// The member object must belong to the guild.
     public func memberHasRole(member: Guild.Member, roleId: String) -> Bool {
+        /// `@everyone` role's id is equal to guild's id.
         if roleId == self.id {
             return true
         } else if member.roles.contains(roleId) {
