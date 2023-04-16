@@ -111,7 +111,7 @@ public enum DiscordUtils {
             .replacingOccurrences(of: #">"#, with: #"\>"#) /// Quotes
             .replacingOccurrences(of: #"<"#, with: #"\<"#) /// `<::>` ids like custom emojis
             .replacingOccurrences(of: #"`"#, with: #"\`"#) /// Code blocks
-            .replacingOccurrences(of: #"~"#, with: #"\~"#) /// Crosses the words
+            .replacingOccurrences(of: #"~"#, with: #"\~"#) /// Crosses words
             .replacingOccurrences(of: #"_"#, with: #"\_"#) /// Italic
             .replacingOccurrences(of: #"*"#, with: #"\*"#) /// Bold
             .replacingOccurrences(of: #":"#, with: #"\:"#) /// Emojis like `:key:`

@@ -138,35 +138,49 @@ public enum Payloads {
             public var title: String
             public var components: [Interaction.ActionRow]
 
-            public init(custom_id: String, title: String, components: [Interaction.ActionRow]) {
+            /// Discord docs says currently you can only send text-inputs.
+            /// To send other types of components, use a normal message's `components`:
+            /// `Payloads.InteractionResponse.Message(components: [...])`
+            /// Respectively, you can't send a text-input using a normal message's `components`.
+            public init(custom_id: String, title: String, textInputs: [Interaction.ActionRow.TextInput]) {
                 self.custom_id = custom_id
                 self.title = title
-                self.components = components
+                self.components = textInputs.map { [.textInput($0)] }
             }
 
             public func validate() -> [ValidationFailure] {
                 validateElementCountInRange(components, min: 1, max: 5, name: "components")
             }
         }
+
+        /// A container for message flags.
+        struct Flags: Sendable, Encodable, ValidatablePayload {
+            var flags: IntBitField<DiscordChannel.Message.Flag>?
+
+            init(isEphemeral: Bool) {
+                self.flags = isEphemeral ? [.ephemeral] : nil
+            }
+
+            func validate() -> [ValidationFailure] { }
+        }
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structure
-        public enum CallbackData: Sendable, MultipartEncodable, ValidatablePayload {
+        internal enum CallbackData: Sendable, MultipartEncodable, ValidatablePayload {
             case message(Message)
             case autocomplete(Autocomplete)
             case modal(Modal)
+            case flags(Flags)
 
-            public var files: [RawFile]? {
+            var files: [RawFile]? {
                 switch self {
                 case let .message(message):
                     return message.files
-                case .autocomplete:
-                    return nil
-                case .modal:
+                case .autocomplete, .modal, .flags:
                     return nil
                 }
             }
 
-            public func validate() -> [ValidationFailure] {
+            func validate() -> [ValidationFailure] {
                 switch self {
                 case let .message(message):
                     message.validate()
@@ -174,10 +188,13 @@ public enum Payloads {
                     autocomplete.validate()
                 case let .modal(modal):
                     modal.validate()
+                case .flags:
+                    /// For the result builder
+                    Optional<ValidationFailure>.none
                 }
             }
 
-            public func encode(to encoder: Encoder) throws {
+            func encode(to encoder: Encoder) throws {
                 var container = encoder.singleValueContainer()
                 switch self {
                 case let .message(message):
@@ -186,6 +203,8 @@ public enum Payloads {
                     try container.encode(autocomplete)
                 case let .modal(modal):
                     try container.encode(modal)
+                case let .flags(flags):
+                    try container.encode(flags)
                 }
             }
         }
@@ -196,7 +215,7 @@ public enum Payloads {
         }
         
         public var type: Kind
-        public var data: CallbackData?
+        internal var data: CallbackData?
         public var files: [RawFile]? {
             data?.files
         }
@@ -221,13 +240,25 @@ public enum Payloads {
         }
 
         /// Creates a response of type `Kind.deferredChannelMessageWithSource`.
-        public static func deferredChannelMessageWithSource(_ message: Message? = nil) -> Self {
-            .init(type: .deferredChannelMessageWithSource, data: message.map { .message($0) })
+        /// The `.ephemeral` message flag needs to be set here on a deferred message.
+        /// The main message's flags can't override this flag.
+        /// Discord barely mentions this behavior here: https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
+        public static func deferredChannelMessageWithSource(isEphemeral: Bool = false) -> Self {
+            .init(
+                type: .deferredChannelMessageWithSource,
+                data: .flags(.init(isEphemeral: isEphemeral))
+            )
         }
 
         /// Creates a response of type `Kind.deferredUpdateMessage`.
-        public static func deferredUpdateMessage(_ message: Message? = nil) -> Self {
-            .init(type: .deferredUpdateMessage, data: message.map { .message($0) })
+        /// The `.ephemeral` message flag needs to be set here on a deferred message.
+        /// The main message's flags can't override this flag.
+        /// Discord barely mentions this behavior here: https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
+        public static func deferredUpdateMessage(isEphemeral: Bool = false) -> Self {
+            .init(
+                type: .deferredUpdateMessage,
+                data: .flags(.init(isEphemeral: isEphemeral))
+            )
         }
 
         /// Creates a response of type `Kind.updateMessage`.
