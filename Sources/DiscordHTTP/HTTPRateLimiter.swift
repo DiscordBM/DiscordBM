@@ -29,6 +29,7 @@ actor HTTPRateLimiter {
                   let resetStr = headers.first(name: "x-ratelimit-reset"),
                   let reset = Double(resetStr)
             else { return nil }
+            /// `x-ratelimit-reset-after: [Double]` not used since `x-ratelimit-reset` is enough.
             self.bucket = bucket
             self.limit = limit
             self.remaining = remaining
@@ -93,7 +94,7 @@ actor HTTPRateLimiter {
         /// Check not locked
         if let lockedUntil = self.noRequestsUntil {
             if lockedUntil > Date() {
-                logger.error("HTTP rate-limiter has been locked for 10s due to invalid requests.", metadata: [
+                logger.error("HTTP rate-limiter has been locked for 10s due to invalid requests", metadata: [
                     "label": .string(label)
                 ])
                 return false
@@ -105,7 +106,7 @@ actor HTTPRateLimiter {
         let oneMinutelyId = self.currentMinutelyRateLimitId()
         if invalidRequestsIn1Minute.id == oneMinutelyId,
            invalidRequestsIn1Minute.count >= 500 {
-            logger.critical("Hit HTTP global invalid-requests limit. Will accept no requests for 10s to avoid getting ip-banned.", metadata: [
+            logger.critical("Hit HTTP global invalid-requests limit. Will accept no requests for 10s to avoid getting ip-banned", metadata: [
                 "label": .string(label)
             ])
             self.noRequestsUntil = Date().addingTimeInterval(10)
@@ -119,7 +120,7 @@ actor HTTPRateLimiter {
         let globalId = self.currentGlobalRateLimitId()
         if self.requestsThisSecond.id == globalId {
             if self.requestsThisSecond.count >= DiscordGlobalConfiguration.globalRateLimit {
-                logger.warning("Hit HTTP Global Rate-Limit.", metadata: [
+                logger.warning("Hit HTTP Global rate-limit", metadata: [
                     "label": .string(label)
                 ])
                 return false
@@ -166,7 +167,7 @@ actor HTTPRateLimiter {
                 self.addGlobalRateLimitRecord()
                 return .true
             case .false:
-                logger.warning("Hit HTTP Bucket rate-limit.", metadata: [
+                logger.warning("Hit HTTP Bucket rate-limit", metadata: [
                     "label": .string(label),
                     "endpointId": .stringConvertible(endpoint.id),
                     "bucket": .stringConvertible(bucket)

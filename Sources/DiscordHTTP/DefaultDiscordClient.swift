@@ -12,7 +12,7 @@ import Atomics
 private let rateLimiter = HTTPRateLimiter(label: "DiscordClientRateLimiter")
 
 //MARK: - DefaultDiscordClient
-public struct DefaultDiscordClient: DiscordClient {
+public struct DefaultDiscordClient: Sendable, DiscordClient {
     
     let client: HTTPClient
     public let token: Secret
@@ -66,6 +66,7 @@ public struct DefaultDiscordClient: DiscordClient {
         switch await rateLimiter.shouldRequest(to: endpoint) {
         case .true: return
         case .false:
+            /// `HTTPRateLimiter` already logs this
             throw DiscordHTTPError.rateLimited(url: "\(endpoint.urlDescription)")
         case let .after(after):
             /// If we make the request, we'll get 429-ed. So we can just assume the status is 429.
@@ -86,6 +87,16 @@ public struct DefaultDiscordClient: DiscordClient {
                 try await Task.sleep(nanoseconds: nanos)
                 await rateLimiter.addGlobalRateLimitRecord()
             } else {
+                logger.warning(
+                    "HTTP bucket is exhausted. Retry policy does not allow retry",
+                    metadata: [
+                        "solution": "Make requests slower or increase 'configuration.retryPolicy.backoff.basedOnHeaders.maxAllowed'",
+                        "wait-time": .stringConvertible(after),
+                        "retriesWithoutThis": .stringConvertible(retriesSoFar),
+                        "endpoint": .stringConvertible(endpoint.urlDescription),
+                        "request-id": .stringConvertible(requestId)
+                    ]
+                )
                 throw DiscordHTTPError.rateLimited(url: "\(endpoint.urlDescription)")
             }
         }
@@ -436,9 +447,9 @@ public struct DefaultDiscordClient: DiscordClient {
 }
 
 //MARK: - ClientConfiguration
-public struct ClientConfiguration {
+public struct ClientConfiguration: Sendable {
     
-    public struct CachingBehavior {
+    public struct CachingBehavior: Sendable {
         
         /// [ID: TTL]
         @usableFromInline
@@ -483,9 +494,9 @@ public struct ClientConfiguration {
         }
     }
     
-    public struct RetryPolicy {
+    public struct RetryPolicy: Sendable {
         
-        public indirect enum Backoff {
+        public indirect enum Backoff: Sendable {
             /// How many seconds.
             case constant(Double)
             /// `upToTimes` indicates how many times at maximum this should linearly increase
@@ -776,15 +787,8 @@ actor ClientCache {
     }
 }
 
-//MARK: Sendable
-extension DefaultDiscordClient: Sendable { }
-extension ClientConfiguration: Sendable { }
-extension ClientConfiguration.CachingBehavior: Sendable { }
-extension ClientConfiguration.RetryPolicy: Sendable { }
-extension ClientConfiguration.RetryPolicy.Backoff: Sendable { }
-
 //MARK: +HTTPHeaders
-extension HTTPHeaders {
+private extension HTTPHeaders {
     func resetOrRetryAfterHeaderValue() -> String? {
         self.first(name: "x-ratelimit-reset-after") ?? self.first(name: "retry-after")
     }
