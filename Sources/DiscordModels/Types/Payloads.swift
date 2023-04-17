@@ -289,7 +289,7 @@ public enum Payloads {
             guard let file = ImageData.decodeFromString(string) else {
                 throw DecodingError.dataCorrupted(.init(
                     codingPath: decoder.codingPath,
-                    debugDescription: "'\(string)' can't be decoded into a file"
+                    debugDescription: "'\(string)' can't be base64 decoded into a file"
                 ))
             }
             self.file = file

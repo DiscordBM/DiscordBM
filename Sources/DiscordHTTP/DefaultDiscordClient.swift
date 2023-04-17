@@ -57,7 +57,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
             configuration: configuration
         )
     }
-    
+
     func checkRateLimitsAllowRequest(
         to endpoint: AnyEndpoint,
         requestId: UInt,
@@ -66,7 +66,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
         switch await rateLimiter.shouldRequest(to: endpoint) {
         case .true: return
         case .false:
-            /// `HTTPRateLimiter` already logs this
+            /// `HTTPRateLimiter` already logs this.
             throw DiscordHTTPError.rateLimited(url: "\(endpoint.urlDescription)")
         case let .after(after):
             /// If we make the request, we'll get 429-ed. So we can just assume the status is 429.
@@ -447,26 +447,43 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
 }
 
 //MARK: - ClientConfiguration
+
+/// The configuration of `DefaultDiscordClient`.
 public struct ClientConfiguration: Sendable {
-    
+
+    /// How to cache Discord API responses.
     public struct CachingBehavior: Sendable {
         
         /// [ID: TTL]
         @usableFromInline
-        var storage = [CacheableEndpointIdentity: Double]()
-        /// This instance's default TTL (Time-To-Live) for all endpoints.
+        var apiEndpointsStorage = [CacheableAPIEndpointIdentity: Double]()
+        /// [ID: TTL]
         @usableFromInline
-        var defaultTTL: Double?
+        var cdnEndpointsStorage = [CDNEndpointIdentity: Double]()
+        /// This instance's default TTL (Time-To-Live) for API endpoints.
+        @usableFromInline
+        var apiEndpointsDefaultTTL: Double?
+        /// This instance's default TTL (Time-To-Live) for CDN endpoints.
+        @usableFromInline
+        var cdnEndpointsDefaultTTL: Double?
         @usableFromInline
         var isDisabled: Bool
         
         /// Uses the TTL in the `endpoints`. If not available, falls back to `defaultTTL`.
         /// Setting TTL to `0` in endpoints, disables caching for that endpoint.
         public static func custom(
-            defaultTTL: Double? = 5,
-            endpoints: [CacheableEndpointIdentity: Double]
+            apiEndpoints: [CacheableAPIEndpointIdentity: Double] = [:],
+            cdnEndpoints: [CDNEndpointIdentity: Double] = [:],
+            apiEndpointsDefaultTTL: Double? = 5,
+            cdnEndpointsDefaultTTL: Double? = nil
         ) -> CachingBehavior {
-            CachingBehavior(storage: endpoints, defaultTTL: defaultTTL, isDisabled: false)
+            CachingBehavior(
+                apiEndpointsStorage: apiEndpoints,
+                cdnEndpointsStorage: cdnEndpoints,
+                apiEndpointsDefaultTTL: apiEndpointsDefaultTTL,
+                cdnEndpointsDefaultTTL: cdnEndpointsDefaultTTL,
+                isDisabled: false
+            )
         }
         
         /// Caches all cacheable endpoints for 5 seconds,
@@ -475,10 +492,11 @@ public struct ClientConfiguration: Sendable {
             CachingBehavior.enabled(defaultTTL: 5)
         }
         
-        /// Caches all cacheable endpoints for the entered seconds,
+        /// Caches all cacheable API endpoints for the entered seconds,
         /// except for `getGateway` which is cached for an hour.
+        /// Doesn't cache CDN endpoints.
         public static func enabled(defaultTTL: Double) -> CachingBehavior {
-            CachingBehavior.custom(defaultTTL: defaultTTL, endpoints: [.api(.getGateway): 3600])
+            CachingBehavior.custom(apiEndpointsDefaultTTL: defaultTTL)
         }
         
         /// Doesn't allow caching at all.
@@ -489,13 +507,23 @@ public struct ClientConfiguration: Sendable {
         @inlinable
         func getTTL(for identity: CacheableEndpointIdentity) -> Double? {
             if self.isDisabled { return nil }
-            guard let ttl = self.storage[identity] else { return self.defaultTTL }
-            return ttl == 0 ? nil : ttl
+            switch identity {
+            case let .api(cacheableAPIEndpointIdentity):
+                guard let ttl = self.apiEndpointsStorage[cacheableAPIEndpointIdentity]
+                else { return self.apiEndpointsDefaultTTL }
+                return ttl == 0 ? nil : ttl
+            case let .cdn(cdnEndpointIdentity):
+                guard let ttl = self.cdnEndpointsStorage[cdnEndpointIdentity]
+                else { return self.cdnEndpointsDefaultTTL }
+                return ttl == 0 ? nil : ttl
+            }
         }
     }
-    
+
+    /// The policy to retry failed requests with.
     public struct RetryPolicy: Sendable {
-        
+
+        /// The backoff to apply before retrying failed requests.
         public indirect enum Backoff: Sendable {
             /// How many seconds.
             case constant(Double)
@@ -528,6 +556,10 @@ public struct ClientConfiguration: Sendable {
             /// - `retryIfGreater`: Retry or not, even if the header time is greater than
             ///  `maxAllowed`. If yes, the retry will happen after `maxAllowed` amount of time.
             /// - `else`: If the `Retry-After` header did not exist.
+            ///
+            /// NOTE: If `429 Too Many Requests` is included in the statuses list of `RetryPolicy`,
+            /// the `DefaultDiscordClient` can use `Backoff.basedOnHeaders` to try to recover from
+            /// request failures related to HTTP bucket exhaustion.
             case basedOnHeaders(
                 maxAllowed: Double?,
                 retryIfGreater: Bool = false,
@@ -579,26 +611,31 @@ public struct ClientConfiguration: Sendable {
             }
         }
         
-        var _statuses: Set<HTTPResponseStatus>
+        private var _statuses: Set<HTTPResponseStatus>
         
         public var statuses: Set<HTTPResponseStatus> {
             get { self._statuses }
             set {
+#if DEBUG
                 precondition(
                     newValue.allSatisfy({ $0.code >= 400 }),
                     "Status codes less than 400 don't need retrying. This could cause problems"
                 )
                 self._statuses = newValue
+#else
+                self._statuses = newValue.filter({ $0.code >= 400 })
+#endif
             }
         }
         
-        /// Max amount of times to retry any eligible requests.
+        /// Max amount of times to retry any eligible request.
         public var maxRetries: Int
         
         /// The backoff configuration, to wait a some amount of time _after_ a failed request.
+        /// Default to `.default`.
         public var backoff: Backoff?
         
-        /// Only retries status code 429, 500 and 502 once.
+        /// Only retries status code 429, 500 and 502, and only once.
         @inlinable
         public static var `default`: RetryPolicy {
             RetryPolicy()
@@ -635,6 +672,7 @@ public struct ClientConfiguration: Sendable {
     /// Ask `HTTPClient` to log when needed. Defaults to no logging.
     public var enableLoggingForRequests: Bool
     /// Retries failed requests based on this policy.
+    /// Defaults to `.default`.
     public var retryPolicy: RetryPolicy?
     /// Whether or not to perform validations for payloads, before sending.
     /// The point is to catch invalid payload without actually sending them to Discord.

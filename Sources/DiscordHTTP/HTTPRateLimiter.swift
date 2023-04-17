@@ -174,7 +174,8 @@ actor HTTPRateLimiter {
                 ])
                 return .false
             case let .after(after):
-                /// Need to manually call `addGlobalRateLimitRecord()` when doing the request.
+                /// Need to call `addGlobalRateLimitRecord()` when doing the request.
+                /// Also need to log necessary info to users, when e.g. we can't make the request.
                 return .after(after)
             }
         } else {
