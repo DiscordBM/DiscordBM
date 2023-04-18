@@ -1260,7 +1260,7 @@ class ReactToRoleTests: XCTestCase {
 
 private actor FakeGatewayManager: GatewayManager {
     nonisolated let client: DiscordClient
-    nonisolated let id: Int = 0
+    nonisolated let id: UInt = 0
     nonisolated let state: GatewayState = .stopped
     func connect() async { }
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async { }

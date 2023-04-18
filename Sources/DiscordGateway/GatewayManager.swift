@@ -14,7 +14,7 @@ public protocol GatewayManager: DiscordActor {
     /// The client to send requests to Discord with.
     nonisolated var client: any DiscordClient { get }
     /// This gateway manager's identifier.
-    nonisolated var id: Int { get }
+    nonisolated var id: UInt { get }
     /// The current state of the gateway manager.
     nonisolated var state: GatewayState { get }
     
