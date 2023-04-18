@@ -120,7 +120,7 @@ Task {
 /// RunLoop.current.run()
 ```
 > **Note**   
-> On a successful connection, you will **always** see a `NOTICE` log indicating `The connection is fully established`.   
+> On a successful connection, you will **always** see a `NOTICE` log indicating `connection is established`.   
 
 > **Note**   
 > By default, `DiscordBM` automatically handles HTTP rate-limits and you don't need to worry about them.
