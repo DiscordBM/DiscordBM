@@ -110,12 +110,12 @@ public enum DiscordUtils {
             .replacingOccurrences(of: #"|"#, with: #"\|"#) /// Makes invisible
             .replacingOccurrences(of: #">"#, with: #"\>"#) /// Quotes
             .replacingOccurrences(of: #"<"#, with: #"\<"#) /// `<::>` ids like custom emojis
-            .replacingOccurrences(of: #"["#, with: #"\["#) /// For Link Syntax `[]()`
-            .replacingOccurrences(of: ###"#"###, with: ###"\#"###) /// For Titles Like `### Title`
+            .replacingOccurrences(of: #"["#, with: #"\["#) /// Markdown link syntax (`[]()`)
+            .replacingOccurrences(of: ###"#"###, with: ###"\#"###) /// For titles, e.g. `### Title`
             .replacingOccurrences(of: #"`"#, with: #"\`"#) /// Code blocks
             .replacingOccurrences(of: #"~"#, with: #"\~"#) /// Crosses words
             .replacingOccurrences(of: #"_"#, with: #"\_"#) /// Italic
             .replacingOccurrences(of: #"*"#, with: #"\*"#) /// Bold
-            .replacingOccurrences(of: #":"#, with: #"\:"#) /// Emojis like `:key:`
+            .replacingOccurrences(of: #":"#, with: #"\:"#) /// Emojis, e.g. `:thumpsup:`
     }
 }

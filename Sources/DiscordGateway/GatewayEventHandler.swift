@@ -33,7 +33,15 @@ public protocol GatewayEventHandler: Sendable {
     /// To be executed before handling events.
     /// If returns `false`, the event won't be passed to the functions below anymore.
     func onEventHandlerStart() async -> Bool
-    
+
+    /// MARK: State-management data
+    func onHeartbeat(lastSequenceNumber: Int?) async
+    func onHello(_ payload: Gateway.Hello) async
+    func onReady(_ payload: Gateway.Ready) async
+    func onResumed() async
+    func onInvalidSession(canResume: Bool) async
+
+    /// MARK: Events
     func onChannelCreate(_ payload: DiscordChannel) async
     func onChannelUpdate(_ payload: DiscordChannel) async
     func onChannelDelete(_ payload: DiscordChannel) async
@@ -110,7 +118,12 @@ public extension GatewayEventHandler {
     
     @inlinable
     func onEventHandlerStart() async -> Bool { true }
-    
+
+    func onHeartbeat(lastSequenceNumber _: Int?) async { }
+    func onHello(_: Gateway.Hello) async { }
+    func onReady(_: Gateway.Ready) async { }
+    func onResumed() async { }
+    func onInvalidSession(canResume _: Bool) async { }
     func onChannelCreate(_: DiscordChannel) async { }
     func onChannelUpdate(_: DiscordChannel) async { }
     func onChannelDelete(_: DiscordChannel) async { }
@@ -182,9 +195,19 @@ extension GatewayEventHandler {
         guard await self.onEventHandlerStart() else { return }
         
         switch event.data {
-        case .none, .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession:
-            /// State management data, users don't need to touch these.
+        case .none, .resume, .identify:
+            /// Only sent, never received.
             break
+        case let .heartbeat(lastSequenceNumber):
+            await onHeartbeat(lastSequenceNumber: lastSequenceNumber)
+        case let .hello(hello):
+            await onHello(hello)
+        case let .ready(ready):
+            await onReady(ready)
+        case .resumed:
+            await onResumed()
+        case let .invalidSession(canResume):
+            await onInvalidSession(canResume: canResume)
         case let .channelCreate(payload):
             await onChannelCreate(payload)
         case let .channelUpdate(payload):
