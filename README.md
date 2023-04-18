@@ -5,7 +5,7 @@
         <img src="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
     </a>
     <a href="https://swift.org">
-        <img src="https://img.shields.io/badge/swift-5.6%20/%205.7%20/%205.8-brightgreen.svg" alt="Minimum Swift Version">
+        <img src="https://img.shields.io/badge/swift-5.8%20/%205.7%20/%205.6-brightgreen.svg" alt="Minimum Swift Version">
     </a>
 </p>
 
@@ -119,6 +119,11 @@ Task {
 /// Otherwise your executable will exit immediately after every run.
 /// RunLoop.current.run()
 ```
+> **Note**   
+> On a successful connection, you will **always** see a `INFO` log indicating `The connection is fully established`.   
+
+> **Note**   
+> By default, `DiscordBM` automatically handles Discord rate-limits and you don't even need to worry about them.
 
 ### Mindset
 The way you can make sense of the library is to think of it as a direct implementation of the Discord API.   
