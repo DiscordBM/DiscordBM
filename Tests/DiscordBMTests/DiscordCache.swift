@@ -66,7 +66,7 @@ class DiscordCacheTests: XCTestCase {
 
 private actor FakeGatewayManager: GatewayManager {
     nonisolated var client: DiscordClient { get { fatalError() } }
-    nonisolated let id: Int = 0
+    nonisolated let id: UInt = 0
     nonisolated let state: DiscordGateway.GatewayState = .stopped
     func connect() async { }
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async { }
