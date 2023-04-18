@@ -110,6 +110,8 @@ public enum DiscordUtils {
             .replacingOccurrences(of: #"|"#, with: #"\|"#) /// Makes invisible
             .replacingOccurrences(of: #">"#, with: #"\>"#) /// Quotes
             .replacingOccurrences(of: #"<"#, with: #"\<"#) /// `<::>` ids like custom emojis
+            .replacingOccurrences(of: #"["#, with: #"\["#) /// For Link Syntax `[]()`
+            .replacingOccurrences(of: ###"#"###, with: ###"\#"###) /// For Titles Like `### Title`
             .replacingOccurrences(of: #"`"#, with: #"\`"#) /// Code blocks
             .replacingOccurrences(of: #"~"#, with: #"\~"#) /// Crosses words
             .replacingOccurrences(of: #"_"#, with: #"\_"#) /// Italic
