@@ -120,10 +120,10 @@ Task {
 /// RunLoop.current.run()
 ```
 > **Note**   
-> On a successful connection, you will **always** see a `INFO` log indicating `The connection is fully established`.   
+> On a successful connection, you will **always** see a `NOTICE` log indicating `The connection is fully established`.   
 
 > **Note**   
-> By default, `DiscordBM` automatically handles Discord rate-limits and you don't even need to worry about them.
+> By default, `DiscordBM` automatically handles HTTP rate-limits and you don't need to worry about them.
 
 ### Mindset
 The way you can make sense of the library is to think of it as a direct implementation of the Discord API.   
