@@ -220,6 +220,72 @@ Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://g
 
 </details>
 
+### DiscordUtils
+<details>
+  <summary> Click to expand </summary>
+
+`DiscordBM` contains some utility functions for working with Discord's text-message format.   
+
+The mention helpers:
+```swift
+let userMention = DiscordUtils.userMention(id: USER_ID)
+let channelMention = DiscordUtils.channelMention(id: CHANNEL_ID)
+let roleMention = DiscordUtils.roleMention(id: ROLE_ID)
+let slashCommandMention = DiscordUtils.slashCommand(name: "help", id: COMMAND_ID)
+
+/// Then:
+
+/// Will look like `Hi @UserName!` in Discord
+let userMessage = "Hi \(userMention)!"
+
+/// Will look like `Welcome to #ChannelName!` in Discord
+let channelMessage = "Welcome to \(channelMention)!"
+
+/// Will look like `Hello @RoleName!` in Discord
+let roleMessage = "Hello \(roleMention)!"
+
+/// Will look like `Use this command: /help` in Discord
+let slashCommandMeessage = "Use this command: \(slashCommandMention)"
+```
+
+And the emoji helpers:
+```swift
+let emoji = DiscordUtils.customEmoji(name: "Peepo_Happy", id: EMOJI_ID)
+let animatedEmoji = DiscordUtils.customAnimatedEmoji(name: "Peepo_Money", id: EMOJI_ID)
+
+/// Then:
+
+/// Will look like `Are you happy now? EMOJI` where emoji is like https://cdn.discordapp.com/emojis/832181382595870730.webp
+let emojiMessage = "Are you happy now? \(emoji)"
+
+/// Will look like `Here comes the moneeeey EMOJI` where emoji is like https://cdn.discordapp.com/emojis/836533376285671424.gif
+let animatedEmojiMessage = "Here comes the moneeeey \(emojiMessage)"
+```
+
+Plus the **end-user-localized** timestamp helpers:
+```swift
+let timestamp = DiscordUtils.timestamp(date: Date())
+let anotherTimestamp = DiscordUtils.timestamp(unixTimestamp: 1 << 31, style: .relativeTime)
+
+/// Then:
+
+/// Will look like `Time when message was sent: 20 April 2021 16:20` in Discord
+let timestampMessage = "Time when message was sent: \(timestamp)"
+
+/// Will look like `I'm a time traveler. I will be born: in 15 years` in Discord
+let anotherTimestampMessage = "I'm a time traveler. I will be born: \(anotherTimestamp)"
+```
+
+And a function to escape special characters from user input.    
+For example if you type `**BOLD TEXT**` in Discord, it'll look like **BOLD TEXT**, but using this function, it'll instead look like the original `**BOLD TEXT**` input.
+```swift
+let escaped = DiscordUtils.escapingSpecialCharacters("**BOLD TEXT**")
+
+/// Will look like `Does this look bold to you?! **BOLD TEXT**` in Discord. Won't actually look bold.
+let escapedMessage = "Does this look bold to you?! \(escaped)"
+```
+</details>
+
 ### Discord Logger
 <details>
   <summary> Click to expand </summary>
