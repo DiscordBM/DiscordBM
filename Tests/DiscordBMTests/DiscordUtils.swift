@@ -108,7 +108,7 @@ class DiscordUtilsTests: XCTestCase {
         \> \~Not really \:\\(\~
         \|\| Just Kidding! \|\| LOL \| HEHE
         """#
-        let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
+        let escaped = DiscordUtils.escapingSpecialCharacters(text)
         XCTAssertEqual(escaped, expected)
     }
 }

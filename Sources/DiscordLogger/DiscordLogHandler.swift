@@ -131,7 +131,7 @@ public struct DiscordLogHandler: LogHandler {
 }
 
 private func prepare(_ text: String, maxCount: Int) -> String {
-    let escaped = DiscordUtils.escapingSpecialCharacters(text, forChannelType: .text)
+    let escaped = DiscordUtils.escapingSpecialCharacters(text)
     return String(escaped.unicodeScalars.maxCount(maxCount))
 }
 
