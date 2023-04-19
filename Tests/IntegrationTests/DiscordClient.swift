@@ -15,7 +15,9 @@ class DiscordClientTests: XCTestCase {
         self.client = DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
-            appId: Constants.botId
+            appId: Constants.botId,
+            /// For not failing tests
+            configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
         )
     }
     

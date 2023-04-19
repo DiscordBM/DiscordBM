@@ -16,7 +16,9 @@ class ReactToRoleTests: XCTestCase {
             httpClient: httpClient,
             token: Constants.token,
             /// Intentionally wrong so reaction-handler can take action on its own reaction
-            appId: "11111111"
+            appId: "11111111",
+            /// For not failing tests
+            configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
         )
         /// Remove roles with this name is there are any
         let guildRoles = try await client

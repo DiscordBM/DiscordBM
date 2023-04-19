@@ -94,17 +94,9 @@ public enum DiscordUtils {
         return "<t:\(unixTimestamp)\(style)>"
     }
     
-    /// The kind of channel for escaping characters.
-    public enum ChannelKind {
-        case text
-    }
-    
     /// Escapes the special characters in the text, for the specified channel type.
     @inlinable
-    public static func escapingSpecialCharacters(
-        _ text: String,
-        forChannelType: ChannelKind
-    ) -> String {
+    public static func escapingSpecialCharacters(_ text: String) -> String {
         text
             .replacingOccurrences(of: #"\"#, with: #"\\"#)
             .replacingOccurrences(of: #"|"#, with: #"\|"#) /// Makes invisible
