@@ -220,7 +220,7 @@ Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://g
 
 </details>
 
-### DiscordUtils
+### Discord Utils
 <details>
   <summary> Click to expand </summary>
 
