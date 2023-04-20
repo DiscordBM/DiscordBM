@@ -16,7 +16,7 @@ jobs:
           - swift:5.6-focal
           - swift:5.7-jammy
           - swift:5.8-jammy
-          - swiftlang/swift:nightly-main-jammy
+          - swiftlang/swift:nightly-5.9-jammy
     container: ${{ matrix.container }}
     runs-on: ubuntu-latest
     steps:
@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         xcode:
-          # - latest-stable
+          - latest-stable
           - latest
     runs-on: macos-12
     steps:
@@ -41,10 +41,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Run tests
-        run: |
-          swift test --filter DiscordBMTests \
-            -Xlinker -rpath \
-            -Xlinker $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.6/macosx
+        run: swift test --filter DiscordBMTests
 
   linux-integration:
     if: github.repository == 'MahdiBM/DiscordBM'
