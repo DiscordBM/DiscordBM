@@ -32,9 +32,11 @@ public enum Payloads {
         public var height: Int?
         public var width: Int?
         public var ephemeral: Bool?
+        public var duration_secs: Double?
+        public var waveform: String?
         
         /// `index` is the index of this attachment in the `files` you provide.
-        public init(index: Int, filename: String? = nil, description: String? = nil, content_type: String? = nil, size: Int? = nil, url: String? = nil, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil, ephemeral: Bool? = nil) {
+        public init(index: Int, filename: String? = nil, description: String? = nil, content_type: String? = nil, size: Int? = nil, url: String? = nil, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil, ephemeral: Bool? = nil, duration_secs: Double? = nil, waveform: String? = nil) {
             self.id = "\(index)"
             self.filename = filename
             self.description = description
@@ -45,6 +47,8 @@ public enum Payloads {
             self.height = height
             self.width = width
             self.ephemeral = ephemeral
+            self.duration_secs = duration_secs
+            self.waveform = waveform
         }
         
         public func validate() -> [ValidationFailure] {

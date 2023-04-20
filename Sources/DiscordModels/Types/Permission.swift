@@ -44,6 +44,7 @@ public enum Permission: Int, Sendable, Hashable, Codable {
     case moderateMembers = 40
     case viewCreatorMonetizationAnalytics = 41
     case useSoundboard = 42
+    case sendVoiceMessages = 46
 }
 
 /// https://discord.com/developers/docs/topics/permissions#role-object

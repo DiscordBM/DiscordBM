@@ -208,6 +208,7 @@ extension DiscordChannel {
             case loading = 7
             case failedToMentionSomeRolesInThread = 8
             case suppressNotifications = 12
+            case isVoiceMessage = 13
         }
         
         /// https://discord.com/developers/docs/resources/channel#channel-mention-object
@@ -230,6 +231,8 @@ extension DiscordChannel {
             public var height: Int?
             public var width: Int?
             public var ephemeral: Bool?
+            public var duration_secs: Double?
+            public var waveform: String?
         }
         
         /// https://discord.com/developers/docs/resources/channel#reaction-object
