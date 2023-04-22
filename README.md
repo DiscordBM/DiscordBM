@@ -105,13 +105,13 @@ Task {
     /// FYI, This will return _before_ the connection is fully established
     await bot.connect()
     
-    /// Use `bot.client` to send requests to Discord.
+    /// Use `bot.client` to send requests to Discord
     let response = try await bot.client.createMessage(
         channelId: CHANNEL_ID,
         payload: .init(content: "Hello Everybody!")
     )
-    /// Easily decode the reponse to the correct type.
-    let message = response.decode()
+    /// Easily decode the reponse to the correct type
+    let message = try response.decode()
 }
 
 /// If you don't use libraries like Vapor that do this for you, 
