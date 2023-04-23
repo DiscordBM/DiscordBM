@@ -522,16 +522,8 @@ Finally, add `import DiscordBM` to your source code.
 
 ## Versioning
 `DiscordBM` will try to follow Semantic Versioning 2.0.0, with exceptions.     
-These exceptions should not be a big deal depending on your code style, but might result in slight code breakage if you don't follow the instructions below.       
-* Adding enum cases.
-  * This is so `DiscordBM` can continue to add new cases to public enums in minor versions.
-  * If you care about code breakage, you can't use exhaustive switch statements.   
-    Either include `default:` in your switch statements, or use `if case`/`if case let`.
-  * See [this](https://forums.swift.org/t/extensible-enumerations-for-non-resilient-libraries/35900) for more info.
-* Passing initializers/functions as arguments, or directly using their signatures somehow else.
-  * This is so `DiscordBM` can continue to add new parameters to public initializers/functions in minor versions.   
-  * If you care about code breakage, you can't write code like `value.map(SomeDiscordBMType.init)`.   
-    Luckily, not many people do or need these stuff anyway.
+To keep `DiscordBM` up to date with Discord API changes, `DiscordBM` will _add_ any new properties to any types in minor versions, even if it's technically a breaking change.   
+This includes adding new cases to enums. If you want to try to avoid breaking changes, make sure you have a `default` case in your `switch` statements or use `if case let`/`if case`.
 
 ## Contribution & Support
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.   
