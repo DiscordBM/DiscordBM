@@ -13,6 +13,7 @@ private class ConfigurationStorage: @unchecked Sendable {
     static let shared = ConfigurationStorage()
 }
 
+/// A container for on-boot one-time-only configuration options.
 public enum DiscordGlobalConfiguration {
     /// Currently only 10 is supported.
     public static let apiVersion = 10

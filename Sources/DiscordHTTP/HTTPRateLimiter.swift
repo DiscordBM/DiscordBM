@@ -29,7 +29,7 @@ actor HTTPRateLimiter {
                   let resetStr = headers.first(name: "x-ratelimit-reset"),
                   let reset = Double(resetStr)
             else { return nil }
-            /// `x-ratelimit-reset-after: [Double]` not used since `x-ratelimit-reset` is enough.
+            /// `x-ratelimit-reset-after: Double` not used since `x-ratelimit-reset` is enough.
             self.bucket = bucket
             self.limit = limit
             self.remaining = remaining
@@ -146,7 +146,7 @@ actor HTTPRateLimiter {
     enum ShouldRequestResponse {
         case `true`
         case `false`
-        /// Need to wait some seconds
+        /// Need to wait some seconds if you want to make the request
         case after(Double)
     }
     

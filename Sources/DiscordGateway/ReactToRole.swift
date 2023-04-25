@@ -701,7 +701,7 @@ public actor ReactToRoleHandler {
 private extension Logger {
     func report(error: Error, function: String = #function, line: UInt = #line) {
         self.error("'ReactToRoleHandler' failed", metadata: [
-            "error": "\(error)"
+            "error": .string("\(error)")
         ], function: function, line: line)
     }
 }

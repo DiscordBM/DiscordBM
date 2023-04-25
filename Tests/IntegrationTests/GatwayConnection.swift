@@ -67,7 +67,7 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertEqual(ready.user.bot, true)
         
         /// The bot should not disconnect for 10s.
-        /// This is to make sure we are not getting invalid-session-ed immediately.
+        /// This is to make sure we aren't getting invalid-session-ed immediately.
         try await Task.sleep(nanoseconds: 10_000_000_000)
         
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
@@ -127,7 +127,7 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertEqual(ready.user.bot, true)
         
         /// The bot should not disconnect for 10s.
-        /// This is to make sure we are not getting invalid-session-ed immediately.
+        /// This is to make sure we aren't getting invalid-session-ed immediately.
         try await Task.sleep(nanoseconds: 10_000_000_000)
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
         
@@ -168,7 +168,7 @@ class GatewayConnectionTests: XCTestCase {
         await waitFulfill(for: [expectation], timeout: 10)
         
         /// Didn't find a way to properly verify these functions.
-        /// Here we just make the requests and make sure we don't get invalid-session-ed.
+        /// Here we just make the requests and make sure we aren't getting invalid-session-ed.
         await bot.requestGuildMembersChunk(payload: .init(
             guild_id: Constants.guildId
         ))
@@ -184,7 +184,7 @@ class GatewayConnectionTests: XCTestCase {
         ))
         
         /// To make sure it doesn't mess up other connections,
-        /// and to make sure we don't get invalid-session-ed.
+        /// and to make sure we aren't getting invalid-session-ed.
         try await Task.sleep(nanoseconds: 10_000_000_000)
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
         

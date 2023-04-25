@@ -47,7 +47,7 @@ actor SerialQueue {
             } catch {
                 DiscordGlobalConfiguration.makeLogger("DiscordSerialQueue").warning(
                     "Unexpected SerialQueue failure",
-                    metadata: [ "error": "\(error)"]
+                    metadata: ["error": .string("\(error)")]
                 )
                 return
             }

@@ -224,7 +224,7 @@ public actor BotGatewayManager: GatewayManager {
             self.configureWebSocket()
         }.whenFailure { [self] error in
             logger.error("WebSocket error while connecting to Discord", metadata: [
-                "error": "\(error)"
+                "error": .string("\(error)")
             ])
             self._state.store(.noConnection, ordering: .relaxed)
             Task { await self.connect() }
@@ -356,7 +356,7 @@ extension BotGatewayManager {
         logger.debug("Will try to get Discord gateway url")
         if self.sequenceNumber != nil, /// If can resume at all
            let gatewayURL = self.resumeGatewayURL {
-            logger.trace("Got Discord gateway url from `resumeGatewayURL`")
+            logger.trace("Got Discord gateway url from 'resumeGatewayURL'")
             return gatewayURL
         } else {
             /// If the bot is using shard-ing, we need to call a different endpoint
@@ -368,7 +368,11 @@ extension BotGatewayManager {
                 }
             } else {
                 if let gatewayBot = try? await client.getBotGateway().decode() {
-                    logger.trace("Got Discord gateway url from gateway-bot api call. Max concurrency: \(gatewayBot.session_start_limit.max_concurrency)")
+                    logger.trace("Got Discord gateway url from gateway-bot api call", metadata: [
+                        "max_concurrency": .stringConvertible(
+                            gatewayBot.session_start_limit.max_concurrency
+                        )
+                    ])
                     self.maxConcurrency = gatewayBot.session_start_limit.max_concurrency
                     return gatewayBot.url
                 }
@@ -436,7 +440,9 @@ extension BotGatewayManager {
     }
     
     private func processBinaryData(_ buffer: ByteBuffer, forConnectionWithId connectionId: UInt) {
-        self.logger.debug("Got text from websocket \(String(buffer: buffer))")
+        self.logger.debug("Got text from websocket", metadata: [
+            "text": .string(String(buffer: buffer))
+        ])
         guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
         let data = Data(buffer: buffer)
         do {
@@ -444,13 +450,17 @@ extension BotGatewayManager {
                 Gateway.Event.self,
                 from: data
             )
-            self.logger.debug("Decoded event: \(event)")
+            self.logger.debug("Decoded event", metadata: [
+                "event": .string("\(event)")
+            ])
             Task { await self.processEvent(event) }
             for onEvent in self.onEvents {
                 onEvent(event)
             }
         } catch {
-            self.logger.debug("Failed to decode event. Error: \(error)")
+            self.logger.debug("Failed to decode event", metadata: [
+                "error": .string("\(error)")
+            ])
             for onEventParseFailure in self.onEventParseFailures {
                 onEventParseFailure(error, buffer)
             }
@@ -528,17 +538,23 @@ extension BotGatewayManager {
         Task {
             await self.sleep(for: interval)
             guard self.connectionId.load(ordering: .relaxed) == connectionId else {
-                self.logger.trace("Canceled a ping task with connection id: \(connectionId)")
+                self.logger.trace("Canceled a ping task", metadata: [
+                    "connectionId": .stringConvertible(connectionId)
+                ])
                 return /// cancel
             }
-            self.logger.debug("Will send automatic ping for connection id: \(connectionId)")
+            self.logger.debug("Will send automatic ping", metadata: [
+                "connectionId": .stringConvertible(connectionId)
+            ])
             self.sendPing(forConnectionWithId: connectionId)
             self.setupPingTask(forConnectionWithId: connectionId, every: interval)
         }
     }
     
     private func sendPing(forConnectionWithId connectionId: UInt) {
-        logger.trace("Will ping for connection id \(connectionId)")
+        logger.trace("Will ping", metadata: [
+            "connectionId": .stringConvertible(connectionId)
+        ])
         self.send(payload: .init(
             opcode: .heartbeat,
             data: .heartbeat(lastSequenceNumber: self.sequenceNumber)
@@ -602,7 +618,7 @@ extension BotGatewayManager {
                         )
                     } catch {
                         self.logger.error("Could not send payload through websocket", metadata: [
-                            "error": "\(error)",
+                            "error": .string("\(error)"),
                             "payload": .string("\(payload)"),
                             "opcode": .stringConvertible(opcode),
                             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
@@ -665,7 +681,7 @@ extension BotGatewayManager {
             try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
         } catch {
             logger.warning("Task failed to sleep properly", metadata: [
-                "error": "\(error)"
+                "error": .string("\(error)")
             ])
         }
     }
