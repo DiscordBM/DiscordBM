@@ -108,6 +108,6 @@ public enum DiscordUtils {
             .replacingOccurrences(of: #"~"#, with: #"\~"#) /// Crosses words
             .replacingOccurrences(of: #"_"#, with: #"\_"#) /// Italic
             .replacingOccurrences(of: #"*"#, with: #"\*"#) /// Bold
-            .replacingOccurrences(of: #":"#, with: #"\:"#) /// Emojis, e.g. `:thumpsup:`
+            .replacingOccurrences(of: #":"#, with: #"\:"#) /// Emojis, e.g. `:thumbsup:`
     }
 }

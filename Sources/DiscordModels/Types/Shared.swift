@@ -614,7 +614,7 @@ public struct IntPair: Sendable, Codable {
         guard array.count == 2 else {
             throw DecodingError.dataCorrupted(.init(
                 codingPath: container.codingPath,
-                debugDescription: "Expected 2 integers in the array, found \(array.count)."
+                debugDescription: "Expected 2 integers in \(array.debugDescription)"
             ))
         }
         self.first = array[0]
@@ -725,7 +725,7 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
 }
 
 /// A type that will try to keep its content a secret when used with string interpolation.
-/// This is to stop leaking the token in the logs, for whatever reason.
+/// This is to stop leaking something like a token in somewhere like the logs.
 public struct Secret:
     Sendable,
     Codable,
@@ -745,7 +745,7 @@ public struct Secret:
     
     public var description: String {
         let count = value.count
-        let keepCount = count > 24 ? 6 : 0
+        let keepCount = count > 24 ? 4 : 0
         let dropped = value.dropLast(count - keepCount)
         return "\(dropped)****"
     }
@@ -772,11 +772,11 @@ public final class DereferenceBox<C>: Codable where C: Codable {
     }
     
     public init(from decoder: Decoder) throws {
-        value = try .init(from: decoder)
+        self.value = try .init(from: decoder)
     }
     
     public func encode(to encoder: Encoder) throws {
-        try value.encode(to: encoder)
+        try self.value.encode(to: encoder)
     }
 }
 

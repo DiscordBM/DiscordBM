@@ -240,7 +240,7 @@ extension DiscordChannel {
             public var count: Int
             public var me: Bool
             public var emoji: PartialEmoji
-            
+
             public init(count: Int, me: Bool, emoji: PartialEmoji) {
                 self.count = count
                 self.me = me
