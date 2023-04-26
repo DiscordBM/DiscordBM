@@ -643,7 +643,7 @@ public actor ReactToRoleHandler {
     
     func verify_populateReactions_start_react() async throws {
         /// Verify message exists
-        let message: Gateway.MessageCreate
+        let message: DiscordChannel.Message
         do {
             message = try await client.getMessage(
                 channelId: configuration.channelId,

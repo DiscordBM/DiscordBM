@@ -849,7 +849,7 @@ public extension DiscordClient {
         before: String? = nil,
         after: String? = nil,
         limit: Int? = nil
-    ) async throws -> DiscordClientResponse<[Gateway.MessageCreate]> {
+    ) async throws -> DiscordClientResponse<[DiscordChannel.Message]> {
         try checkMutuallyExclusive(queries: [
             ("around", around),
             ("before", before),
@@ -872,7 +872,7 @@ public extension DiscordClient {
     func getMessage(
         channelId: String,
         messageId: String
-    ) async throws -> DiscordClientResponse<Gateway.MessageCreate> {
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = APIEndpoint.getMessage(channelId: channelId, messageId: messageId)
         return try await self.send(request: .init(to: endpoint))
     }
