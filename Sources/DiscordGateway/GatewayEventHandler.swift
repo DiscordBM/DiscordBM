@@ -33,6 +33,7 @@ public protocol GatewayEventHandler: Sendable {
     /// To be executed before handling events.
     /// If returns `false`, the event won't be passed to the functions below anymore.
     func onEventHandlerStart() async -> Bool
+    func onEventHandlerEnd() async
 
     /// MARK: State-management data
     func onHeartbeat(lastSequenceNumber: Int?) async
@@ -118,6 +119,7 @@ public extension GatewayEventHandler {
     
     @inlinable
     func onEventHandlerStart() async -> Bool { true }
+    func onEventHandlerEnd() async { }
 
     func onHeartbeat(lastSequenceNumber _: Int?) async { }
     func onHello(_: Gateway.Hello) async { }
@@ -193,7 +195,7 @@ extension GatewayEventHandler {
     @inlinable
     func handleAsync() async {
         guard await self.onEventHandlerStart() else { return }
-        
+
         switch event.data {
         case .none, .resume, .identify:
             /// Only sent, never received.
@@ -333,5 +335,7 @@ extension GatewayEventHandler {
         case let .autoModerationActionExecution(payload):
             await onAutoModerationActionExecution(payload)
         }
+
+        await onEventHandlerEnd()
     }
 }
