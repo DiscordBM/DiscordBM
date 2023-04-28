@@ -85,39 +85,40 @@ let bot = BotGatewayManager(
 </details>
 
 ### Using The Gateway Manager
+> **Note**  
+> For your app's entry point, you should use a type with the [`@main` attirbute](https://www.hackingwithswift.com/swift/5.3/atmain) like below.    
+> You can also use contents of `EntryPoint.main()` in a `main.swift` file.    
 ```swift
-/// Make an instance like above
-let bot: BotGatewayManager = ...
+@main
+struct EntryPoint {
+    static func main() async throws {
+        /// Make an instance like above
+        let bot: BotGatewayManager = ...
 
-Task {
-    /// Add event handlers
-    /// You can also use the `GatewayEventHandler` protocol for more convenience
-    await bot.addEventHandler { event in
-        switch event.data {
-        case let .messageCreate(message):
-            print("GOT MESSAGE!", message)
-            /// Switch over other cases you have intents for and you care about
-        default: break
+        /// Tell the manager to connect to Discord.
+        /// FYI, This will return _before_ the connection is fully established
+        await bot.connect()
+
+        for await event in await bot.makeEventStream() {
+            switch event.data {
+            case let .messageCreate(message):
+                print("NEW MESSAGE!", message)
+		
+		/// Use `bot.client` to send requests to Discord
+                let response = try await bot.client.createMessage(
+                    channelId: message.channel_id,
+                    payload: .init(content: "Got a message: '\(message.content)'")
+                )
+                /// Easily decode the response to the correct type
+                let message = try response.decode()
+		
+                /// Switch over other cases you have intents for and you care about
+		/// Use the `GatewayEventHandler` protocol for more convenience (see below)
+            default: break
+            }
         }
     }
-    
-    /// Tell the manager to connect to Discord.
-    /// FYI, This will return _before_ the connection is fully established
-    await bot.connect()
-    
-    /// Use `bot.client` to send requests to Discord
-    let response = try await bot.client.createMessage(
-        channelId: CHANNEL_ID,
-        payload: .init(content: "Hello Everybody!")
-    )
-    /// Easily decode the reponse to the correct type
-    let message = try response.decode()
 }
-
-/// If you don't use libraries like Vapor that do this for you, 
-/// you'll need to uncomment this line and call it from a non-async context.
-/// Otherwise your executable will exit immediately after every run.
-/// RunLoop.current.run()
 ```
 > **Note**   
 > On a successful connection, you will **always** see a `NOTICE` log indicating `connection is established`.   
