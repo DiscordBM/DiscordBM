@@ -257,7 +257,16 @@ public actor BotGatewayManager: GatewayManager {
             data: .requestVoiceStateUpdate(payload)
         ), opcode: 10)
     }
-    
+
+    /// Makes an stream of Gateway events.
+    public func makeEventStream() -> AsyncStream<Gateway.Event> {
+        AsyncStream<Gateway.Event> { continuation in
+            self.onEvents.append { event in
+                continuation.yield(event)
+            }
+        }
+    }
+
     /// Adds a handler to be notified of events.
     public func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) {
         self.onEvents.append(handler)

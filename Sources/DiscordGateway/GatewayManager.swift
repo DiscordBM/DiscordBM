@@ -26,6 +26,8 @@ public protocol GatewayManager: DiscordActor {
     func updatePresence(payload: Gateway.Identify.Presence) async
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
     func updateVoiceState(payload: VoiceStateUpdate) async
+    /// Makes an stream of Gateway events.
+    func makeEventStream() async -> AsyncStream<Gateway.Event>
     /// Adds a handler to be notified of events.
     func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) async
     /// Adds a handler to be notified of event parsing failures.

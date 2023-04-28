@@ -139,7 +139,7 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertEqual(bot.state, .stopped)
     }
     
-    func testConnectGatewayRequests() async throws {
+    func testGatewayRequests() async throws {
         
         let bot = BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
@@ -190,6 +190,67 @@ class GatewayConnectionTests: XCTestCase {
         
         await bot.disconnect()
         
+        /// Make sure it is disconnected
+        try await Task.sleep(nanoseconds: 5_000_000_000)
+        XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
+        XCTAssertEqual(bot.state, .stopped)
+    }
+
+    func testGatewayEventStream() async throws {
+        let bot = BotGatewayManager(
+            eventLoopGroup: httpClient.eventLoopGroup,
+            httpClient: httpClient,
+            compression: false,
+            token: Constants.token,
+            appId: Constants.botId,
+            presence: .init(
+                activities: [.init(name: "Testing!", type: .competing)],
+                status: .invisible,
+                afk: false
+            ),
+            intents: Gateway.Intent.allCases
+        )
+
+        let expectation = expectation(description: "Connected")
+
+        let connectionInfo = ConnectionInfo()
+
+        let stream = await bot.makeEventStream()
+
+        Task {
+            for await event in stream {
+                if case let .ready(ready) = event.data {
+                    await connectionInfo.setReady(ready)
+                    expectation.fulfill()
+                } else if event.opcode == .hello {
+                    await connectionInfo.setDidHello()
+                } else if await connectionInfo.ready == nil {
+                    expectation.fulfill()
+                }
+            }
+        }
+
+        Task { await bot.connect() }
+        await waitFulfill(for: [expectation], timeout: 10)
+
+        let didHello = await connectionInfo.didHello
+        let _ready = await connectionInfo.ready
+        XCTAssertTrue(didHello)
+        let ready = try XCTUnwrap(_ready)
+        XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
+        XCTAssertEqual(ready.application.id, Constants.botId)
+        XCTAssertFalse(ready.session_id.isEmpty)
+        XCTAssertEqual(ready.user.id, Constants.botId)
+        XCTAssertEqual(ready.user.bot, true)
+
+        /// The bot should not disconnect for 10s.
+        /// This is to make sure we aren't getting invalid-session-ed immediately.
+        try await Task.sleep(nanoseconds: 10_000_000_000)
+
+        XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
+
+        await bot.disconnect()
+
         /// Make sure it is disconnected
         try await Task.sleep(nanoseconds: 5_000_000_000)
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
