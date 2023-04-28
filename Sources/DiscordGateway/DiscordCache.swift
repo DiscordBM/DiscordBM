@@ -342,9 +342,11 @@ public actor DiscordCache {
         self.itemsLimit = itemsLimit
         self.checkForLimitEvery = itemsLimit.calculateCheckForLimitEvery()
         self.storage = storage
-        
-        await gatewayManager.addEventHandler { event in
-            Task { await self.handleEvent(event) }
+
+        Task {
+            for await event in await gatewayManager.makeEventStream() {
+                self.handleEvent(event)
+            }
         }
     }
     

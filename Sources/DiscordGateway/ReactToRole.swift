@@ -269,8 +269,10 @@ public actor ReactToRoleHandler {
         self.configuration = configuration
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
-        await gatewayManager.addEventHandler { event in
-            Task { await self.handleEvent(event) }
+        Task {
+            for await event in await gatewayManager.makeEventStream() {
+                self.handleEvent(event)
+            }
         }
         try await self.verify_populateReactions_start_react()
     }
@@ -331,8 +333,10 @@ public actor ReactToRoleHandler {
         )
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
-        await gatewayManager.addEventHandler { event in
-            Task { await self.handleEvent(event) }
+        Task {
+            for await event in await gatewayManager.makeEventStream() {
+                self.handleEvent(event)
+            }
         }
         try await self.verify_populateReactions_start_react()
     }
@@ -392,8 +396,10 @@ public actor ReactToRoleHandler {
         )
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
-        await gatewayManager.addEventHandler { event in
-            Task { await self.handleEvent(event) }
+        Task {
+            for await event in await gatewayManager.makeEventStream() {
+                self.handleEvent(event)
+            }
         }
         try await self.verify_populateReactions_start_react()
     }
