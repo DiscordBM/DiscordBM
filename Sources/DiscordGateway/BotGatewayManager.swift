@@ -267,6 +267,15 @@ public actor BotGatewayManager: GatewayManager {
         }
     }
 
+    /// Makes an stream of Gateway event parse failures.
+    public func makeEventParseFailureStream() -> AsyncStream<(Error, ByteBuffer)> {
+        AsyncStream<(Error, ByteBuffer)> { continuation in
+            self.onEventParseFailures.append { error, buffer in
+                continuation.yield((error, buffer))
+            }
+        }
+    }
+
     /// Adds a handler to be notified of events.
     public func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) {
         self.onEvents.append(handler)

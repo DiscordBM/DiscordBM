@@ -28,6 +28,8 @@ public protocol GatewayManager: DiscordActor {
     func updateVoiceState(payload: VoiceStateUpdate) async
     /// Makes an stream of Gateway events.
     func makeEventStream() async -> AsyncStream<Gateway.Event>
+    /// Makes an stream of Gateway event parse failures.
+    func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)>
     /// Adds a handler to be notified of events.
     func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) async
     /// Adds a handler to be notified of event parsing failures.
@@ -38,6 +40,31 @@ public protocol GatewayManager: DiscordActor {
     func disconnect() async
 }
 
+extension GatewayManager {
+    /// Makes an stream of Gateway events.
+    public func makeEventStream() async -> AsyncStream<Gateway.Event> {
+        AsyncStream<Gateway.Event> { continuation in
+            Task {
+                await self.addEventHandler { event in
+                    continuation.yield(event)
+                }
+            }
+        }
+    }
+
+    /// Makes an stream of Gateway event parse failures.
+    public func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
+        AsyncStream<(Error, ByteBuffer)> { continuation in
+            Task {
+                await self.addEventParseFailureHandler { error, buffer in
+                    continuation.yield((error, buffer))
+                }
+            }
+        }
+    }
+}
+
+/// The state of a `GatewayManager`.
 public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
     case stopped
     case noConnection
