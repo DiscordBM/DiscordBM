@@ -271,8 +271,9 @@ public actor BotGatewayManager: GatewayManager {
             self.eventParseFailureContinuations.append(continuation)
         }
     }
-
+    
     /// Disconnects from Discord.
+    /// Doesn't end the event streams.
     public func disconnect() async {
         logger.debug("Will disconnect", metadata: [
             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
@@ -498,9 +499,23 @@ extension BotGatewayManager {
                     self._state.store(.stopped, ordering: .relaxed)
                     self.connectionId.wrappingIncrement(ordering: .relaxed)
                     self.logger.critical("Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/MahdiBM/DiscordBM/issues if you think this is a library issue")
+
+                    /// End streams
+                    for continuation in await self.eventStreamContinuations {
+                        continuation.finish()
+                    }
+                    for continuation in await self.eventParseFailureContinuations {
+                        continuation.finish()
+                    }
+                    await self.removeAllEventContinuations()
                 }
             }
         }
+    }
+
+    private func removeAllEventContinuations() {
+        self.eventStreamContinuations.removeAll()
+        self.eventParseFailureContinuations.removeAll()
     }
     
     private nonisolated  func getCloseCodeAndDescription(
