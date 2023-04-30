@@ -99,7 +99,12 @@ struct EntryPoint {
         /// FYI, This will return _before_ the connection is fully established
         await bot.connect()
 
-        for await event in await bot.makeEventStream() {
+        /// Get an `AsyncStream` of `Gateway.Event`s
+        let stream = await bot.makeEventStream()
+	
+	/// Handle each event in the stream
+	/// This stream will never end, therefore preventing your executable from exiting immediately
+        for await event in stream {
             switch event.data {
             case let .messageCreate(message):
                 print("NEW MESSAGE!", message)
