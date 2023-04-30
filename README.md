@@ -101,24 +101,24 @@ struct EntryPoint {
 
         /// Get an `AsyncStream` of `Gateway.Event`s
         let stream = await bot.makeEventStream()
-	
-	/// Handle each event in the stream
-	/// This stream will never end, therefore preventing your executable from exiting immediately
+
+        /// Handle each event in the stream
+        /// This stream will never end, therefore preventing your executable from exiting
         for await event in stream {
             switch event.data {
             case let .messageCreate(message):
                 print("NEW MESSAGE!", message)
-		
-		/// Use `bot.client` to send requests to Discord
+
+                /// Use `bot.client` to send requests to Discord
                 let response = try await bot.client.createMessage(
                     channelId: message.channel_id,
                     payload: .init(content: "Got a message: '\(message.content)'")
                 )
                 /// Easily decode the response to the correct type
                 let message = try response.decode()
-		
+
                 /// Switch over other cases you have intents for and you care about
-		/// Use the `GatewayEventHandler` protocol for more convenience (see below)
+                /// Use the `GatewayEventHandler` protocol for more convenience (see below)
             default: break
             }
         }
