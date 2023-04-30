@@ -1231,22 +1231,25 @@ class ReactToRoleTests: XCTestCase {
                 intents: Gateway.Intent.allCases
             )
         )
-        
-        let expectation = expectation(description: "Connected")
-        
-        await bot.addEventHandler { event in
-            if case .ready = event.data {
-                expectation.fulfill()
-            }
-        }
-        
+
         let cache = await DiscordCache(
             gatewayManager: bot,
             intents: .all,
             requestAllMembers: .enabledWithPresences
         )
         
-        Task { await bot.connect() }
+        let expectation = expectation(description: "Connected")
+
+        Task {
+            for await event in await bot.makeEventStream() {
+                if case .ready = event.data {
+                    expectation.fulfill()
+                }
+            }
+
+            await bot.connect()
+        }
+
         await waitFulfill(for: [expectation], timeout: 10)
         
         /// So cache is populated
@@ -1268,10 +1271,12 @@ private actor FakeGatewayManager: GatewayManager {
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async { }
     func updatePresence(payload: Gateway.Identify.Presence) async { }
     func updateVoiceState(payload: VoiceStateUpdate) async { }
-    func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) async { }
-    func addEventParseFailureHandler(
-        _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
-    ) async { }
+    func makeEventStream() async -> AsyncStream<Gateway.Event> {
+        AsyncStream<Gateway.Event> { _ in }
+    }
+    func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
+        AsyncStream<(Error, ByteBuffer)> { _ in }
+    }
     func disconnect() async { }
     
     init(client: DiscordClient) {

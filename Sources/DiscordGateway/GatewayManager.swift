@@ -30,38 +30,19 @@ public protocol GatewayManager: DiscordActor {
     func makeEventStream() async -> AsyncStream<Gateway.Event>
     /// Makes an stream of Gateway event parse failures.
     func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)>
-    /// Adds a handler to be notified of events.
-    func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) async
-    /// Adds a handler to be notified of event parsing failures.
-    func addEventParseFailureHandler(
-        _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
-    ) async
     /// Disconnects from Discord.
     func disconnect() async
 }
 
-extension GatewayManager {
-    /// Makes an stream of Gateway events.
-    public func makeEventStream() async -> AsyncStream<Gateway.Event> {
-        AsyncStream<Gateway.Event> { continuation in
-            Task {
-                await self.addEventHandler { event in
-                    continuation.yield(event)
-                }
-            }
-        }
-    }
+// FIXME: Remove when out of beta
+public extension GatewayManager {
+    @available(*, unavailable, message: "Use 'makeEventStream()' instead: 'for await event in await bot.makeEventStream() { /*handle event*/ }'")
+    func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) { }
 
-    /// Makes an stream of Gateway event parse failures.
-    public func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
-        AsyncStream<(Error, ByteBuffer)> { continuation in
-            Task {
-                await self.addEventParseFailureHandler { error, buffer in
-                    continuation.yield((error, buffer))
-                }
-            }
-        }
-    }
+    @available(*, unavailable, message: "Use 'makeEventParseFailureStream()' instead: 'for await (error, buffer) in await bot.makeEventParseFailureStream() { /*handle error & buffer*/ }'")
+    func addEventParseFailureHandler(
+        _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
+    ) { }
 }
 
 /// The state of a `GatewayManager`.

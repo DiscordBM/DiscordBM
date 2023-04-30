@@ -39,9 +39,8 @@ class GatewayConnectionTests: XCTestCase {
         let expectation = expectation(description: "Connected")
         
         let connectionInfo = ConnectionInfo()
-        
-        await bot.addEventHandler { event in
-            Task {
+        Task {
+            for await event in await bot.makeEventStream() {
                 if case let .ready(ready) = event.data {
                     await connectionInfo.setReady(ready)
                     expectation.fulfill()
@@ -51,9 +50,10 @@ class GatewayConnectionTests: XCTestCase {
                     expectation.fulfill()
                 }
             }
+
+            await bot.connect()
         }
-        
-        Task { await bot.connect() }
+
         await waitFulfill(for: [expectation], timeout: 10)
         
         let didHello = await connectionInfo.didHello
@@ -99,9 +99,9 @@ class GatewayConnectionTests: XCTestCase {
         let expectation = expectation(description: "Connected")
         
         let connectionInfo = ConnectionInfo()
-        
-        await bot.addEventHandler { event in
-            Task {
+
+        Task {
+            for await event in await bot.makeEventStream() {
                 if case let .ready(ready) = event.data {
                     await connectionInfo.setReady(ready)
                     expectation.fulfill()
@@ -111,9 +111,10 @@ class GatewayConnectionTests: XCTestCase {
                     expectation.fulfill()
                 }
             }
+
+            await bot.connect()
         }
-        
-        Task { await bot.connect() }
+
         await waitFulfill(for: [expectation], timeout: 10)
         
         let didHello = await connectionInfo.didHello
@@ -156,14 +157,16 @@ class GatewayConnectionTests: XCTestCase {
         )
         
         let expectation = expectation(description: "Connected")
-        
-        await bot.addEventHandler { event in
-            if case .ready = event.data {
-                expectation.fulfill()
+
+        Task {
+            for await event in await bot.makeEventStream() {
+                if case .ready = event.data {
+                    expectation.fulfill()
+                }
             }
+            
+            await bot.connect()
         }
-        
-        Task { await bot.connect() }
         
         await waitFulfill(for: [expectation], timeout: 10)
         

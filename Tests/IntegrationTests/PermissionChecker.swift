@@ -43,14 +43,17 @@ class PermissionChecker: XCTestCase {
         )
         
         let expectation = expectation(description: "Connected")
-        
-        await bot.addEventHandler { event in
-            if case .ready = event.data {
-                expectation.fulfill()
+
+        Task {
+            for await event in await bot.makeEventStream() {
+                if case .ready = event.data {
+                    expectation.fulfill()
+                }
             }
+            
+            await bot.connect()
         }
-        
-        Task { await bot.connect() }
+
         await waitFulfill(for: [expectation], timeout: 10)
         
         try await Task.sleep(nanoseconds: 10_000_000_000)

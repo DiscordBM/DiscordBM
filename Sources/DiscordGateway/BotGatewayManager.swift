@@ -21,9 +21,9 @@ public actor BotGatewayManager: GatewayManager {
         .wrappingIncrementThenLoad(ordering: .relaxed)
     let logger: Logger
     
-    //MARK: Event hooks
-    var onEvents: [(Gateway.Event) -> ()] = []
-    var onEventParseFailures: [(Error, ByteBuffer) -> ()] = []
+    //MARK: Event handlers
+    var eventStreamContinuations = [AsyncStream<Gateway.Event>.Continuation]()
+    var eventParseFailureContinuations = [AsyncStream<(Error, ByteBuffer)>.Continuation]()
     
     //MARK: Connection data
     nonisolated let identifyPayload: Gateway.Identify
@@ -261,33 +261,17 @@ public actor BotGatewayManager: GatewayManager {
     /// Makes an stream of Gateway events.
     public func makeEventStream() -> AsyncStream<Gateway.Event> {
         AsyncStream<Gateway.Event> { continuation in
-            self.onEvents.append { event in
-                continuation.yield(event)
-            }
+            self.eventStreamContinuations.append(continuation)
         }
     }
 
     /// Makes an stream of Gateway event parse failures.
     public func makeEventParseFailureStream() -> AsyncStream<(Error, ByteBuffer)> {
         AsyncStream<(Error, ByteBuffer)> { continuation in
-            self.onEventParseFailures.append { error, buffer in
-                continuation.yield((error, buffer))
-            }
+            self.eventParseFailureContinuations.append(continuation)
         }
     }
 
-    /// Adds a handler to be notified of events.
-    public func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) {
-        self.onEvents.append(handler)
-    }
-    
-    /// Adds a handler to be notified of event parsing failures.
-    public func addEventParseFailureHandler(
-        _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
-    ) {
-        self.onEventParseFailures.append(handler)
-    }
-    
     /// Disconnects from Discord.
     public func disconnect() async {
         logger.debug("Will disconnect", metadata: [
@@ -472,15 +456,15 @@ extension BotGatewayManager {
                 "event": .string("\(event)")
             ])
             Task { await self.processEvent(event) }
-            for onEvent in self.onEvents {
-                onEvent(event)
+            for continuation in self.eventStreamContinuations {
+                continuation.yield(event)
             }
         } catch {
             self.logger.debug("Failed to decode event", metadata: [
                 "error": .string("\(error)")
             ])
-            for onEventParseFailure in self.onEventParseFailures {
-                onEventParseFailure(error, buffer)
+            for continuation in self.eventParseFailureContinuations {
+                continuation.yield((error, buffer))
             }
         }
     }
