@@ -164,7 +164,7 @@ class GatewayConnectionTests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            
+
             await bot.connect()
         }
         
@@ -274,4 +274,10 @@ private actor ConnectionInfo {
     func setDidHello() {
         self.didHello = true
     }
+}
+
+/// This is just to have the compiler check and make sure the `GatewayEventHandler` protocol
+/// doesn't have any other no-default requirements other than `let event`.
+private struct EventHandler: GatewayEventHandler {
+    let event: Gateway.Event
 }
