@@ -12,12 +12,12 @@ class GatewayConnectionTests: XCTestCase {
         DiscordGlobalConfiguration.makeLogger = {
             Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
         }
-        self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+        self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
     }
     
-    override func tearDown() async throws {
+    deinit {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
-        try await httpClient.shutdown()
+        try! httpClient.syncShutdown()
     }
     
     func testConnect() async throws {
@@ -50,9 +50,12 @@ class GatewayConnectionTests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-
-            await bot.connect()
         }
+
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        Task { await bot.connect() }
 
         await waitFulfill(for: [expectation], timeout: 10)
         
@@ -111,9 +114,12 @@ class GatewayConnectionTests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-
-            await bot.connect()
         }
+
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        Task { await bot.connect() }
 
         await waitFulfill(for: [expectation], timeout: 10)
         
@@ -164,10 +170,13 @@ class GatewayConnectionTests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-
-            await bot.connect()
         }
-        
+
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        Task { await bot.connect() }
+
         await waitFulfill(for: [expectation], timeout: 10)
         
         /// Didn't find a way to properly verify these functions.
@@ -233,7 +242,11 @@ class GatewayConnectionTests: XCTestCase {
             }
         }
 
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(nanoseconds: 200_000_000)
+
         Task { await bot.connect() }
+
         await waitFulfill(for: [expectation], timeout: 10)
 
         let didHello = await connectionInfo.didHello

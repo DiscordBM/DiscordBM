@@ -70,7 +70,7 @@ public enum ValidationFailure: Sendable {
 
 extension Array where Element == ValidationFailure {
     /// Throws a `ValidationError` if any `ValidationFailure`s are available.
-    /// - Parameter model: The data to be reported for debugging in case of throwing.
+    /// - Parameter model: The data to be reported for debugging in case of throw.
     public func `throw`(model: any Sendable) throws {
         if !self.isEmpty {
             throw ValidationError(model: model, failures: self)

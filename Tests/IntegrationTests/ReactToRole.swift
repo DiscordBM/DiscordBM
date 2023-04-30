@@ -11,7 +11,7 @@ class ReactToRoleTests: XCTestCase {
     let roleName = "test-reaction-role"
     
     override func setUp() async throws {
-        self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+        self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
         self.client = DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
@@ -20,7 +20,7 @@ class ReactToRoleTests: XCTestCase {
             /// For not failing tests
             configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
         )
-        /// Remove roles with this name is there are any
+        /// Remove roles with this name if there are any
         let guildRoles = try await client
             .listGuildRoles(id: Constants.guildId)
             .decode()
@@ -33,9 +33,8 @@ class ReactToRoleTests: XCTestCase {
         }
     }
     
-    override func tearDown() async throws {
-        try await httpClient.shutdown()
-        self.client = nil
+    deinit {
+        try! httpClient.syncShutdown()
     }
     
     func testWithCache() async throws {
@@ -1108,7 +1107,9 @@ class ReactToRoleTests: XCTestCase {
             /// Verify assigned the role to itself
             let _guild = await cache.guilds[Constants.guildId]
             let guild = try XCTUnwrap(_guild)
-            let member = try XCTUnwrap(guild.members.first(where: { $0.user?.id == Constants.botId }))
+            let member = try XCTUnwrap(guild.members.first(where: {
+                $0.user?.id == Constants.botId
+            }))
             let roles = guild.roles.filter({ member.roles.contains($0.id) })
             let role = roles.first(where: { $0.name == roleName })
             XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
@@ -1246,9 +1247,12 @@ class ReactToRoleTests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-
-            await bot.connect()
         }
+
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        Task { await bot.connect() }
 
         await waitFulfill(for: [expectation], timeout: 10)
         
