@@ -1242,7 +1242,7 @@ class ReactToRoleTests: XCTestCase {
         let expectation = expectation(description: "Connected")
 
         Task {
-            for await event in await bot.makeEventStream() {
+            for await event in await bot.makeEventsStream() {
                 if case .ready = event.data {
                     expectation.fulfill()
                 }
@@ -1275,10 +1275,10 @@ private actor FakeGatewayManager: GatewayManager {
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async { }
     func updatePresence(payload: Gateway.Identify.Presence) async { }
     func updateVoiceState(payload: VoiceStateUpdate) async { }
-    func makeEventStream() async -> AsyncStream<Gateway.Event> {
+    func makeEventsStream() async -> AsyncStream<Gateway.Event> {
         AsyncStream<Gateway.Event> { _ in }
     }
-    func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
+    func makeEventsParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
         AsyncStream<(Error, ByteBuffer)> { _ in }
     }
     func disconnect() async { }

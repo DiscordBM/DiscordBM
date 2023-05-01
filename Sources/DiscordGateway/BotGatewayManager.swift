@@ -259,14 +259,14 @@ public actor BotGatewayManager: GatewayManager {
     }
 
     /// Makes an stream of Gateway events.
-    public func makeEventStream() -> AsyncStream<Gateway.Event> {
+    public func makeEventsStream() -> AsyncStream<Gateway.Event> {
         AsyncStream<Gateway.Event> { continuation in
             self.eventStreamContinuations.append(continuation)
         }
     }
 
     /// Makes an stream of Gateway event parse failures.
-    public func makeEventParseFailureStream() -> AsyncStream<(Error, ByteBuffer)> {
+    public func makeEventsParseFailureStream() -> AsyncStream<(Error, ByteBuffer)> {
         AsyncStream<(Error, ByteBuffer)> { continuation in
             self.eventParseFailureContinuations.append(continuation)
         }

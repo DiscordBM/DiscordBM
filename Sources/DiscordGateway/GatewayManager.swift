@@ -27,19 +27,30 @@ public protocol GatewayManager: DiscordActor {
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
     func updateVoiceState(payload: VoiceStateUpdate) async
     /// Makes an stream of Gateway events.
-    func makeEventStream() async -> AsyncStream<Gateway.Event>
+    func makeEventsStream() async -> AsyncStream<Gateway.Event>
     /// Makes an stream of Gateway event parse failures.
-    func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)>
+    func makeEventsParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)>
     /// Disconnects from Discord.
     func disconnect() async
 }
 
-// FIXME: Remove when out of beta
+// FIXME: These are to help users fix breaking changes easier.
+// Should remove these when the package is out of beta.
 public extension GatewayManager {
-    @available(*, unavailable, message: "Use 'makeEventStream()' instead: 'for await event in await bot.makeEventStream() { /*handle event*/ }'")
+    @available(*, unavailable, renamed: "makeEventsStream")
+    func makeEventStream() async -> AsyncStream<Gateway.Event> {
+        fatalError()
+    }
+
+    @available(*, unavailable, renamed: "makeEventsParseFailureStream")
+    func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
+        fatalError()
+    }
+
+    @available(*, unavailable, message: "Use 'makeEventsStream()' instead: 'for await event in await bot.makeEventsStream() { /*handle event*/ }'")
     func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) { }
 
-    @available(*, unavailable, message: "Use 'makeEventParseFailureStream()' instead: 'for await (error, buffer) in await bot.makeEventParseFailureStream() { /*handle error & buffer*/ }'")
+    @available(*, unavailable, message: "Use 'makeEventsParseFailureStream()' instead: 'for await (error, buffer) in await bot.makeEventsParseFailureStream() { /*handle error & buffer*/ }'")
     func addEventParseFailureHandler(
         _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
     ) { }

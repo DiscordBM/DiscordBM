@@ -40,7 +40,7 @@ class GatewayConnectionTests: XCTestCase {
         
         let connectionInfo = ConnectionInfo()
         Task {
-            for await event in await bot.makeEventStream() {
+            for await event in await bot.makeEventsStream() {
                 if case let .ready(ready) = event.data {
                     await connectionInfo.setReady(ready)
                     expectation.fulfill()
@@ -104,7 +104,7 @@ class GatewayConnectionTests: XCTestCase {
         let connectionInfo = ConnectionInfo()
 
         Task {
-            for await event in await bot.makeEventStream() {
+            for await event in await bot.makeEventsStream() {
                 if case let .ready(ready) = event.data {
                     await connectionInfo.setReady(ready)
                     expectation.fulfill()
@@ -165,7 +165,7 @@ class GatewayConnectionTests: XCTestCase {
         let expectation = expectation(description: "Connected")
 
         Task {
-            for await event in await bot.makeEventStream() {
+            for await event in await bot.makeEventsStream() {
                 if case .ready = event.data {
                     expectation.fulfill()
                 }
@@ -227,7 +227,7 @@ class GatewayConnectionTests: XCTestCase {
 
         let connectionInfo = ConnectionInfo()
 
-        let stream = await bot.makeEventStream()
+        let stream = await bot.makeEventsStream()
 
         Task {
             for await event in stream {

@@ -344,7 +344,7 @@ public actor DiscordCache {
         self.storage = storage
 
         Task {
-            for await event in await gatewayManager.makeEventStream() {
+            for await event in await gatewayManager.makeEventsStream() {
                 self.handleEvent(event)
             }
         }

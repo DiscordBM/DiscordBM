@@ -100,7 +100,7 @@ struct EntryPoint {
         await bot.connect()
 
         /// Get an `AsyncStream` of `Gateway.Event`s
-        let stream = await bot.makeEventStream()
+        let stream = await bot.makeEventsStream()
 
         /// Handle each event in the stream
         /// This stream will never end, therefore preventing your executable from exiting
@@ -179,7 +179,7 @@ Make sure you add the event handler to your `GatewayManager`/`bot`:
 ```swift
 let bot: any GatewayManager = GatewayManager_YOU_MADE_IN_PREVIOUS_STEPS
 
-for await event in await bot.makeEventStream() {
+for await event in await bot.makeEventsStream() {
     EventHandler(event: event).handle()
 }
 ```

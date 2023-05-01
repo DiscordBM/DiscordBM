@@ -72,10 +72,10 @@ private actor FakeGatewayManager: GatewayManager {
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async { }
     func updatePresence(payload: Gateway.Identify.Presence) async { }
     func updateVoiceState(payload: VoiceStateUpdate) async { }
-    func makeEventStream() async -> AsyncStream<Gateway.Event> {
+    func makeEventsStream() async -> AsyncStream<Gateway.Event> {
         AsyncStream<Gateway.Event> { _ in }
     }
-    func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
+    func makeEventsParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
         AsyncStream<(Error, ByteBuffer)> { _ in }
     }
     func disconnect() async { }

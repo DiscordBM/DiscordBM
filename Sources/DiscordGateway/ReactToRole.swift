@@ -270,7 +270,7 @@ public actor ReactToRoleHandler {
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
         Task {
-            for await event in await gatewayManager.makeEventStream() {
+            for await event in await gatewayManager.makeEventsStream() {
                 self.handleEvent(event)
             }
         }
@@ -334,7 +334,7 @@ public actor ReactToRoleHandler {
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
         Task {
-            for await event in await gatewayManager.makeEventStream() {
+            for await event in await gatewayManager.makeEventsStream() {
                 self.handleEvent(event)
             }
         }
@@ -397,7 +397,7 @@ public actor ReactToRoleHandler {
         self.onConfigurationChanged = onConfigurationChanged
         self.onLifecycleEnd = onLifecycleEnd
         Task {
-            for await event in await gatewayManager.makeEventStream() {
+            for await event in await gatewayManager.makeEventsStream() {
                 self.handleEvent(event)
             }
         }
