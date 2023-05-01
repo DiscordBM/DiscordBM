@@ -782,6 +782,71 @@ public final class DereferenceBox<C>: Codable where C: Codable {
 
 extension DereferenceBox: Sendable where C: Sendable { }
 
+public protocol _SnowflakeProtocol:
+    Sendable,
+    Codable,
+    Hashable,
+    CustomStringConvertible,
+    ExpressibleByStringLiteral {
+
+    var value: String { get }
+    init(_ value: String)
+}
+
+extension _SnowflakeProtocol {
+    public init(_ snowflake: any _SnowflakeProtocol) {
+        self.init(snowflake.value)
+    }
+
+    public init(from decoder: Decoder) throws {
+        try self.init(.init(from: decoder))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        try self.value.encode(to: encoder)
+    }
+
+    public init(stringLiteral value: String) {
+        self.init(value)
+    }
+}
+
+public struct Snowflake<Tag>: _SnowflakeProtocol {
+    public let value: String
+
+    public init(_ value: String) {
+        self.value = value
+    }
+
+    public var description: String {
+        "Snowflake<\(Swift._typeName(Tag.self, qualified: false))>(\(value))"
+    }
+}
+
+public struct AnySnowflake: _SnowflakeProtocol {
+    public let value: String
+
+    public init(_ value: String) {
+        self.value = value
+    }
+
+    public var description: String {
+        "AnySnowflake(\(value))"
+    }
+}
+
+public func == (lhs: any _SnowflakeProtocol, rhs: any _SnowflakeProtocol) -> Bool {
+    lhs.value == rhs.value
+}
+
+public func == (lhs: any _SnowflakeProtocol, rhs: String) -> Bool {
+    lhs.value == rhs
+}
+
+public func == (lhs: String, rhs: any _SnowflakeProtocol) -> Bool {
+    lhs == rhs.value
+}
+
 private extension Calendar {
     static let utc: Calendar = {
         var calendar = Calendar(identifier: .gregorian)

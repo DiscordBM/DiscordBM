@@ -633,7 +633,7 @@ await waitFulfill(for: [expectation], timeout: 2)
 
 private class FakeDiscordClient: DiscordClient, @unchecked Sendable {
     
-    let appId: String? = "11111111"
+    let appId: Snowflake<PartialApplication>? = "11111111"
     
     var expectation: XCTestExpectation?
     var payloads: [Any] = []

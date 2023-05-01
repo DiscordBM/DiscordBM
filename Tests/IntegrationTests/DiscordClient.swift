@@ -15,7 +15,7 @@ class DiscordClientTests: XCTestCase {
         self.client = DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
-            appId: Constants.botId,
+            appId: Snowflake(Constants.botId),
             /// For not failing tests
             configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
         )
@@ -115,7 +115,7 @@ class DiscordClientTests: XCTestCase {
             channelId: Constants.channelId,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[1]),
-            userId: Constants.botId
+            userId: Snowflake(Constants.botId)
         ).guardSuccess()
         
         let listMessageReactionsByEmojiResponse = try await client.listMessageReactionsByEmoji(
@@ -432,7 +432,8 @@ class DiscordClientTests: XCTestCase {
         
         /// Leave guild
         /// Can't leave guild so will just do a bad-request
-        let leaveGuild = try await client.leaveGuild(id: Constants.guildId + "1111")
+        let fakeGuildId = Snowflake<Guild>(Constants.guildId.value + "1111")
+        let leaveGuild = try await client.leaveGuild(id: fakeGuildId)
         
         XCTAssertEqual(leaveGuild.status, .badRequest)
 
@@ -660,7 +661,7 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         XCTAssertEqual(threadMemberWithMember.user_id, Constants.personalId)
-        XCTAssertNotNil(threadMemberWithMember.member.user?.id, Constants.personalId)
+        XCTAssertNotNil(threadMemberWithMember.member.user?.id, Constants.personalId.value)
         
         let allThreadMembers = try await client.listThreadMembers(threadId: thread.id).decode()
         
@@ -675,7 +676,7 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         XCTAssertEqual(allThreadMembersAfter.count, 1)
-        let otherUser = [Constants.personalId, Constants.botId].filter {
+        let otherUser = [Constants.personalId, Snowflake(Constants.botId)].filter {
             $0 != allThreadMembers[0].user_id!
         }
         XCTAssertEqual(allThreadMembersAfter.first?.user_id, otherUser[0])
@@ -736,7 +737,7 @@ class DiscordClientTests: XCTestCase {
         /// The message-id is the same as the thread id based on what Discord says
         try await client.deleteMessage(
             channelId: Constants.announcementsChannelId,
-            messageId: threadWithoutMessage.id
+            messageId: Snowflake(threadWithoutMessage.id)
         ).guardSuccess()
         
         let forumThreadName = "Forum thread test"
@@ -800,7 +801,7 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         XCTAssertTrue(webhook1.token?.isEmpty == false)
-        XCTAssertTrue(webhook1.id.isEmpty == false)
+        XCTAssertTrue(webhook1.id.value.isEmpty == false)
         XCTAssertTrue(webhook1.avatar?.isEmpty == false)
         XCTAssertEqual(webhook1.name, webhookName1)
         XCTAssertEqual(webhook1.guild_id, Constants.guildId)
@@ -814,7 +815,7 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         XCTAssertTrue(webhook2.token?.isEmpty == false)
-        XCTAssertTrue(webhook2.id.isEmpty == false)
+        XCTAssertTrue(webhook2.id.value.isEmpty == false)
         XCTAssertNil(webhook2.avatar)
         XCTAssertEqual(webhook2.name, webhookName2)
         XCTAssertEqual(webhook2.guild_id, Constants.guildId)
@@ -920,7 +921,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertTrue(range.contains(timestamp), "\(range) did not contain \(timestamp)")
         
         let text2 = "Testing! \(Date())"
-        let threadId = "1066278441256751114"
+        let threadId: Snowflake<DiscordChannel> = "1066278441256751114"
         let threadMessage = try await client.executeWebhookWithResponse(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             threadId: threadId,
@@ -1023,7 +1024,7 @@ class DiscordClientTests: XCTestCase {
         
 //        do {
 //            let file = try await client.getCDNUserBanner(
-//                userId: String,
+//                userId: Snowflake<DiscordUser>,
 //                banner: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
@@ -1056,14 +1057,14 @@ class DiscordClientTests: XCTestCase {
 //
 //        do {
 //            let file = try await client.getCDNApplicationIcon(
-//                appId: String, icon: String
+//                appId: Snowflake<PartialApplication>, icon: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
 //
 //        do {
 //            let file = try await client.getCDNApplicationCover(
-//                appId: String, cover: String
+//                appId: Snowflake<PartialApplication>, cover: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
@@ -1078,14 +1079,14 @@ class DiscordClientTests: XCTestCase {
         
 //        do {
 //            let file = try await client.getCDNAchievementIcon(
-//                appId: String, achievementId: String, icon: String
+//                appId: Snowflake<PartialApplication>, achievementId: String, icon: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
         
 //        do {
 //            let file = try await client.getCDNStorePageAsset(
-//                appId: String,
+//                appId: Snowflake<PartialApplication>,
 //                assetId: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
@@ -1129,7 +1130,7 @@ class DiscordClientTests: XCTestCase {
 //
 //        do {
 //            let file = try await client.getCDNGuildMemberBanner(
-//                guildId: String, userId: String, banner: String
+//                guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>, banner: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
@@ -1198,7 +1199,7 @@ class DiscordClientTests: XCTestCase {
         let client: any DiscordClient = DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
-            appId: Constants.botId,
+            appId: Snowflake(Constants.botId),
             configuration: .init(retryPolicy: nil)
         )
         
@@ -1252,7 +1253,7 @@ class DiscordClientTests: XCTestCase {
             let cacheClient: any DiscordClient = DefaultDiscordClient(
                 httpClient: httpClient,
                 token: Constants.token,
-                appId: Constants.botId,
+                appId: Snowflake(Constants.botId),
                 configuration: configuration
             )
             
@@ -1297,7 +1298,7 @@ class DiscordClientTests: XCTestCase {
             let cacheClient: any DiscordClient = DefaultDiscordClient(
                 httpClient: httpClient,
                 token: Constants.token,
-                appId: Constants.botId,
+                appId: Snowflake(Constants.botId),
                 configuration: configuration
             )
             
@@ -1336,7 +1337,7 @@ class DiscordClientTests: XCTestCase {
             let cacheClient: any DiscordClient = DefaultDiscordClient(
                 httpClient: httpClient,
                 token: Constants.token,
-                appId: Constants.botId,
+                appId: Snowflake(Constants.botId),
                 configuration: configuration
             )
             

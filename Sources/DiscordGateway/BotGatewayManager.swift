@@ -120,7 +120,7 @@ public actor BotGatewayManager: GatewayManager {
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
         compression: Bool = true,
-        appId: String? = nil,
+        appId: Snowflake<PartialApplication>? = nil,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
@@ -157,7 +157,7 @@ public actor BotGatewayManager: GatewayManager {
         maxFrameSize: Int =  1 << 31,
         compression: Bool = true,
         token: String,
-        appId: String? = nil,
+        appId: Snowflake<PartialApplication>? = nil,
         shard: IntPair? = nil,
         presence: Gateway.Identify.Presence? = nil,
         intents: [Gateway.Intent] = []

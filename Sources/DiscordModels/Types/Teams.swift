@@ -21,5 +21,5 @@ public struct Team: Sendable, Codable {
     public var id: String
     public var members: [Member]
     public var name: String
-    public var owner_user_id: String
+    public var owner_user_id: Snowflake<DiscordUser>
 }

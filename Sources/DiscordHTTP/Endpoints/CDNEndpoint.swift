@@ -1,33 +1,42 @@
+import DiscordModels
 import NIOHTTP1
 
 /// CDN Endpoints
 /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
 public enum CDNEndpoint: Endpoint {
-    case customEmoji(emojiId: String)
-    case guildIcon(guildId: String, icon: String)
-    case guildSplash(guildId: String, splash: String)
-    case guildDiscoverySplash(guildId: String, splash: String)
-    case guildBanner(guildId: String, banner: String)
-    case userBanner(userId: String, banner: String)
+    case customEmoji(emojiId: Snowflake<PartialEmoji>)
+    case guildIcon(guildId: Snowflake<Guild>, icon: String)
+    case guildSplash(guildId: Snowflake<Guild>, splash: String)
+    case guildDiscoverySplash(guildId: Snowflake<Guild>, splash: String)
+    case guildBanner(guildId: Snowflake<Guild>, banner: String)
+    case userBanner(userId: Snowflake<DiscordUser>, banner: String)
     case defaultUserAvatar(discriminator: String)
-    case userAvatar(userId: String, avatar: String)
-    case guildMemberAvatar(guildId: String, userId: String, avatar: String)
-    case applicationIcon(appId: String, icon: String)
-    case applicationCover(appId: String, cover: String)
-    case applicationAsset(appId: String, assetId: String)
-    case achievementIcon(appId: String, achievementId: String, icon: String)
-    case storePageAsset(appId: String, assetId: String)
+    case userAvatar(userId: Snowflake<DiscordUser>, avatar: String)
+    case guildMemberAvatar(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>, avatar: String)
+    case applicationIcon(appId: Snowflake<PartialApplication>, icon: String)
+    case applicationCover(appId: Snowflake<PartialApplication>, cover: String)
+    case applicationAsset(
+        appId: Snowflake<PartialApplication>,
+        assetId: Snowflake<Gateway.Activity.Assets>
+    )
+    case achievementIcon(appId: Snowflake<PartialApplication>, achievementId: String, icon: String)
+    case storePageAsset(appId: Snowflake<PartialApplication>, assetId: String)
     case stickerPackBanner(assetId: String)
-    case teamIcon(teamId: String, icon: String)
-    case sticker(stickerId: String)
-    case roleIcon(roleId: String, icon: String)
-    case guildScheduledEventCover(eventId: String, cover: String)
-    case guildMemberBanner(guildId: String, userId: String, banner: String)
+    case teamIcon(teamId: Snowflake<Team>, icon: String)
+    case sticker(stickerId: Snowflake<Sticker>)
+    case roleIcon(roleId: Snowflake<Role>, icon: String)
+    case guildScheduledEventCover(eventId: Snowflake<GuildScheduledEvent>, cover: String)
+    case guildMemberBanner(
+        guildId: Snowflake<Guild>,
+        userId: Snowflake<DiscordUser>,
+        banner: String
+    )
     
     var urlSuffix: String {
         let suffix: String
         switch self {
         case let .customEmoji(emojiId):
+            let emojiId = emojiId.value
             suffix = "emojis/\(emojiId)"
         case let .guildIcon(guildId, icon):
             suffix = "icons/\(guildId)/\(icon)"
@@ -125,45 +134,45 @@ public enum CDNEndpoint: Endpoint {
     public var parameters: [String] {
         switch self {
         case .customEmoji(let emojiId):
-            return [emojiId]
+            return [emojiId.value]
         case .guildIcon(let guildId, let icon):
-            return [guildId, icon]
+            return [guildId.value, icon]
         case .guildSplash(let guildId, let splash):
-            return [guildId, splash]
+            return [guildId.value, splash]
         case .guildDiscoverySplash(let guildId, let splash):
-            return [guildId, splash]
+            return [guildId.value, splash]
         case .guildBanner(let guildId, let banner):
-            return [guildId, banner]
+            return [guildId.value, banner]
         case .userBanner(let userId, let banner):
-            return [userId, banner]
+            return [userId.value, banner]
         case .defaultUserAvatar(let discriminator):
             return [discriminator]
         case .userAvatar(let userId, let avatar):
-            return [userId, avatar]
+            return [userId.value, avatar]
         case .guildMemberAvatar(let guildId, let userId, let avatar):
-            return [guildId, userId, avatar]
+            return [guildId.value, userId.value, avatar]
         case .applicationIcon(let appId, let icon):
-            return [appId, icon]
+            return [appId.value, icon]
         case .applicationCover(let appId, let cover):
-            return [appId, cover]
+            return [appId.value, cover]
         case .applicationAsset(let appId, let assetId):
-            return [appId, assetId]
+            return [appId.value, assetId.value]
         case .achievementIcon(let appId, let achievementId, let icon):
-            return [appId, achievementId, icon]
+            return [appId.value, achievementId, icon]
         case .storePageAsset(let appId, let assetId):
-            return [appId, assetId]
+            return [appId.value, assetId]
         case .stickerPackBanner(let assetId):
             return [assetId]
         case .teamIcon(let teamId, let icon):
-            return [teamId, icon]
+            return [teamId.value, icon]
         case .sticker(let stickerId):
-            return [stickerId]
+            return [stickerId.value]
         case .roleIcon(let roleId, let icon):
-            return [roleId, icon]
+            return [roleId.value, icon]
         case .guildScheduledEventCover(let eventId, let cover):
-            return [eventId, cover]
+            return [eventId.value, cover]
         case .guildMemberBanner(let guildId, let userId, let banner):
-            return [guildId, userId, banner]
+            return [guildId.value, userId.value, banner]
         }
     }
     

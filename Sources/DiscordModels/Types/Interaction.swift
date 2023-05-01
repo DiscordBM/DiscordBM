@@ -51,7 +51,7 @@ public struct Interaction: Sendable, Codable {
         public var type: Kind
         public var resolved: ResolvedData?
         public var options: [Option]?
-        public var guild_id: String?
+        public var guild_id: Snowflake<Guild>?
         public var target_id: String?
     }
     
@@ -76,11 +76,11 @@ public struct Interaction: Sendable, Codable {
     }
     
     public var id: String
-    public var application_id: String
+    public var application_id: Snowflake<PartialApplication>
     public var type: Kind
     public var data: Data?
-    public var guild_id: String?
-    public var channel_id: String?
+    public var guild_id: Snowflake<Guild>?
+    public var channel_id: Snowflake<DiscordChannel>?
     public var channel: DiscordChannel?
     public var member: Guild.Member?
     public var user: DiscordUser?
@@ -115,7 +115,10 @@ public struct Interaction: Sendable, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.id = try container.decode(String.self, forKey: .id)
-        self.application_id = try container.decode(String.self, forKey: .application_id)
+        self.application_id = try container.decode(
+            Snowflake<PartialApplication>.self,
+            forKey: .application_id
+        )
         self.type = try container.decode(Interaction.Kind.self, forKey: .type)
         switch self.type {
         case .applicationCommand, .applicationCommandAutocomplete: 
@@ -133,8 +136,11 @@ public struct Interaction: Sendable, Codable {
         case .ping:
             self.data = nil
         }
-        self.guild_id = try container.decodeIfPresent(String.self, forKey: .guild_id)
-        self.channel_id = try container.decodeIfPresent(String.self, forKey: .channel_id)
+        self.guild_id = try container.decodeIfPresent(Snowflake<Guild>.self, forKey: .guild_id)
+        self.channel_id = try container.decodeIfPresent(
+            Snowflake<DiscordChannel>.self,
+            forKey: .channel_id
+        )
         self.channel = try container.decodeIfPresent(DiscordChannel.self, forKey: .channel)
         self.member = try container.decodeIfPresent(Guild.Member.self, forKey: .member)
         self.user = try container.decodeIfPresent(DiscordUser.self, forKey: .user)

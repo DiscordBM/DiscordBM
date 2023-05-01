@@ -16,7 +16,7 @@ public struct Guild: Sendable, Codable {
         public var user: DiscordUser?
         public var nick: String?
         public var avatar: String?
-        public var roles: [String]
+        public var roles: [Snowflake<Role>]
         public var hoisted_role: String?
         public var joined_at: DiscordTimestamp
         public var premium_since: DiscordTimestamp?
@@ -137,7 +137,7 @@ public struct Guild: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-channel-structure
         public struct Channel: Sendable, Codable {
-            public var channel_id: String
+            public var channel_id: Snowflake<DiscordChannel>
             public var description: String
             public var emoji_id: String?
             public var emoji_name: String?
@@ -164,7 +164,7 @@ public struct Guild: Sendable, Codable {
         case anHour = 3600
     }
     
-    public var id: String
+    public var id: Snowflake<Guild>
     public var name: String
     public var icon: String?
     public var icon_hash: String?
@@ -175,10 +175,10 @@ public struct Guild: Sendable, Codable {
     public var permissions: StringBitField<Permission>?
     /// Deprecated
     public var region: String?
-    public var afk_channel_id: String?
+    public var afk_channel_id: Snowflake<DiscordChannel>?
     public var afk_timeout: AFKTimeout
     public var widget_enabled: Bool?
-    public var widget_channel_id: String?
+    public var widget_channel_id: Snowflake<DiscordChannel>?
     public var verification_level: VerificationLevel
     public var default_message_notifications: DefaultMessageNotificationLevel
     public var explicit_content_filter: ExplicitContentFilterLevel
@@ -186,11 +186,11 @@ public struct Guild: Sendable, Codable {
     public var emojis: [PartialEmoji]
     public var features: [Feature]
     public var mfa_level: MFALevel
-    public var application_id: String?
-    public var system_channel_id: String?
+    public var application_id: Snowflake<PartialApplication>?
+    public var system_channel_id: Snowflake<DiscordChannel>?
     public var system_channel_flags: IntBitField<SystemChannelFlag>
-    public var rules_channel_id: String?
-    public var safety_alerts_channel_id: String?
+    public var rules_channel_id: Snowflake<DiscordChannel>?
+    public var safety_alerts_channel_id: Snowflake<DiscordChannel>?
     public var max_presences: Int?
     public var max_members: Int?
     public var vanity_url_code: String?
@@ -199,7 +199,7 @@ public struct Guild: Sendable, Codable {
     public var premium_tier: PremiumTier
     public var premium_subscription_count: Int?
     public var preferred_locale: DiscordLocale
-    public var public_updates_channel_id: String?
+    public var public_updates_channel_id: Snowflake<DiscordChannel>?
     public var max_video_channel_users: Int?
     public var max_stage_video_channel_users: Int?
     public var approximate_member_count: Int?
@@ -214,7 +214,7 @@ public struct Guild: Sendable, Codable {
     public var application_command_counts: [String: Int]?
     public var embedded_activities: [Gateway.Activity]?
     public var version: Int?
-    public var guild_id: String?
+    public var guild_id: Snowflake<Guild>?
 }
 
 extension Guild {
@@ -251,10 +251,10 @@ public struct PartialGuild: Sendable, Codable {
     public var permissions: StringBitField<Permission>?
     /// Deprecated
     public var region: String?
-    public var afk_channel_id: String?
+    public var afk_channel_id: Snowflake<DiscordChannel>?
     public var afk_timeout: Int?
     public var widget_enabled: Bool?
-    public var widget_channel_id: String?
+    public var widget_channel_id: Snowflake<DiscordChannel>?
     public var verification_level: Guild.VerificationLevel?
     public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
     public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
@@ -262,11 +262,11 @@ public struct PartialGuild: Sendable, Codable {
     public var emojis: [PartialEmoji]?
     public var features: [Guild.Feature]?
     public var mfa_level: Guild.MFALevel?
-    public var application_id: String?
-    public var system_channel_id: String?
+    public var application_id: Snowflake<PartialApplication>?
+    public var system_channel_id: Snowflake<DiscordChannel>?
     public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>?
-    public var rules_channel_id: String?
-    public var safety_alerts_channel_id: String?
+    public var rules_channel_id: Snowflake<DiscordChannel>?
+    public var safety_alerts_channel_id: Snowflake<DiscordChannel>?
     public var max_presences: Int?
     public var max_members: Int?
     public var vanity_url_code: String?
@@ -275,7 +275,7 @@ public struct PartialGuild: Sendable, Codable {
     public var premium_tier: Guild.PremiumTier?
     public var premium_subscription_count: Int?
     public var preferred_locale: DiscordLocale?
-    public var public_updates_channel_id: String?
+    public var public_updates_channel_id: Snowflake<DiscordChannel>?
     public var max_video_channel_users: Int?
     public var max_stage_video_channel_users: Int?
     public var approximate_member_count: Int?
@@ -290,12 +290,12 @@ public struct PartialGuild: Sendable, Codable {
     public var application_command_counts: [String: Int]?
     public var embedded_activities: [Gateway.Activity]?
     public var version: Int?
-    public var guild_id: String?
+    public var guild_id: Snowflake<Guild>?
 }
 
 /// https://discord.com/developers/docs/resources/guild#unavailable-guild-object
 public struct UnavailableGuild: Sendable, Codable {
-    public var id: String
+    public var id: Snowflake<Guild>
     public var unavailable: Bool?
 }
 

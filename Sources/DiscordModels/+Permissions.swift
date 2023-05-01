@@ -7,8 +7,8 @@ extension Gateway.GuildCreate {
     /// https://discord.com/developers/docs/topics/permissions#permission-overwrites
     public func memberHasPermissions(
         member: Guild.Member,
-        userId: String,
-        channelId: String,
+        userId: Snowflake<DiscordUser>,
+        channelId: Snowflake<DiscordChannel>,
         permissions perms: [Permission]
     ) -> Bool {
         guard let channel = self.channels.first(where: { $0.id == channelId })
@@ -81,8 +81,8 @@ extension Gateway.GuildCreate {
     /// `DiscordCache` comes with a configuration option to request all guild members for you.
     /// https://discord.com/developers/docs/topics/permissions#permission-overwrites
     public func userHasPermissions(
-        userId: String,
-        channelId: String,
+        userId: Snowflake<DiscordUser>,
+        channelId: Snowflake<DiscordChannel>,
         permissions perms: [Permission]
     ) -> Bool {
         guard let member = self.member(withUserId: userId) else {
@@ -101,7 +101,7 @@ extension Gateway.GuildCreate {
     /// This only checks if the user actually has the permission itself.
     /// Doesn't guarantee the member has the abilities related to the permission _in practice_.
     private func _memberHasPermission(
-        userId: String,
+        userId: Snowflake<DiscordUser>,
         member: Guild.Member,
         channel: DiscordChannel,
         permission perm: Permission
@@ -114,7 +114,7 @@ extension Gateway.GuildCreate {
         
         for overwrite in (channel.permission_overwrites ?? []) {
             switch overwrite.type {
-            case .member where overwrite.id == userId:
+            case .member where overwrite.id == userId.value:
                 if overwrite.allow.values.contains(perm) {
                     /// Has the most priority at this point, we can just return immediately.
                     return true
@@ -122,7 +122,7 @@ extension Gateway.GuildCreate {
                 if overwrite.deny.values.contains(perm) {
                     memberOverwriteDenies = true
                 }
-            case .role where member.roles.contains(overwrite.id):
+            case .role where member.roles.contains(where: { $0 == overwrite.id }):
                 if overwrite.allow.values.contains(perm) {
                     roleOverwriteAllows = true
                 }
@@ -167,7 +167,7 @@ extension Gateway.GuildCreate {
     /// This a best-effort function based on what Discord has documented.
     public func memberHasGuildPermission(
         member: Guild.Member,
-        userId: String,
+        userId: Snowflake<DiscordUser>,
         permission perm: Permission
     ) -> Bool {
         /// Guild owner has all permissions.
@@ -202,7 +202,10 @@ extension Gateway.GuildCreate {
 
     /// User has permission in guild. Doesn't check for channel overwrites.
     /// This a best-effort function based on what Discord has documented.
-    public func userHasGuildPermission(userId: String, permission perm: Permission) -> Bool {
+    public func userHasGuildPermission(
+        userId: Snowflake<DiscordUser>,
+        permission perm: Permission
+    ) -> Bool {
         guard let member = self.member(withUserId: userId) else {
             /// Don't even have access to the member.
             return false
@@ -215,13 +218,13 @@ extension Gateway.GuildCreate {
     }
     
     /// Get member with the specified user id.
-    public func member(withUserId userId: String) -> Guild.Member? {
+    public func member(withUserId userId: Snowflake<DiscordUser>) -> Guild.Member? {
         self.members.first(where: { $0.user?.id == userId })
     }
     
     /// Check to see if a member has a role.
     /// The member object must belong to the guild.
-    public func memberHasRole(member: Guild.Member, roleId: String) -> Bool {
+    public func memberHasRole(member: Guild.Member, roleId: Snowflake<Role>) -> Bool {
         /// `@everyone` role's id is equal to guild's id.
         if roleId == self.id {
             return true
@@ -234,7 +237,7 @@ extension Gateway.GuildCreate {
     
     /// Check to see if a user has the roles.
     /// Returns false if user is not present in the members list of the guild.
-    public func userHasRole(userId: String, roleId: String) -> Bool {
+    public func userHasRole(userId: Snowflake<DiscordUser>, roleId: Snowflake<Role>) -> Bool {
         guard let member = self.member(withUserId: userId) else {
             return false
         }

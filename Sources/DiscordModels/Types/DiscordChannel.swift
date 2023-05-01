@@ -90,24 +90,24 @@ public struct DiscordChannel: Sendable, Codable {
         public var emoji_name: String?
     }
     
-    public var id: String
+    public var id: Snowflake<DiscordChannel>
     public var type: Kind
-    public var guild_id: String?
+    public var guild_id: Snowflake<Guild>?
     public var position: Int?
     public var permission_overwrites: [Overwrite]?
     public var name: String?
     public var topic: String?
     public var nsfw: Bool?
-    public var last_message_id: String?
+    public var last_message_id: Snowflake<DiscordChannel.Message>?
     public var bitrate: Int?
     public var user_limit: Int?
     public var rate_limit_per_user: Int?
     public var recipients: [DiscordUser]?
     public var icon: String?
     public var owner_id: String?
-    public var application_id: String?
+    public var application_id: Snowflake<PartialApplication>?
     public var manage: Bool?
-    public var parent_id: String?
+    public var parent_id: Snowflake<DiscordChannel>?
     public var last_pin_timestamp: DiscordTimestamp?
     public var rtc_region: String?
     public var video_quality_mode: VideoQualityMode?
@@ -139,12 +139,12 @@ extension DiscordChannel {
         
         /// https://discord.com/developers/docs/resources/channel#message-reference-object-message-reference-structure
         public struct MessageReference: Sendable, Codable {
-            public var message_id: String?
-            public var channel_id: String?
-            public var guild_id: String?
+            public var message_id: Snowflake<DiscordChannel.Message>?
+            public var channel_id: Snowflake<DiscordChannel>?
+            public var guild_id: Snowflake<Guild>?
             public var fail_if_not_exists: Bool?
             
-            public init(message_id: String? = nil, channel_id: String? = nil, guild_id: String? = nil, fail_if_not_exists: Bool? = nil) {
+            public init(message_id: Snowflake<DiscordChannel.Message>? = nil, channel_id: Snowflake<DiscordChannel>? = nil, guild_id: Snowflake<Guild>? = nil, fail_if_not_exists: Bool? = nil) {
                 self.message_id = message_id
                 self.channel_id = channel_id
                 self.guild_id = guild_id
@@ -214,7 +214,7 @@ extension DiscordChannel {
         /// https://discord.com/developers/docs/resources/channel#channel-mention-object
         public struct ChannelMention: Sendable, Codable {
             public var id: String
-            public var guild_id: String
+            public var guild_id: Snowflake<Guild>
             public var type: DiscordChannel.Kind
             public var name: String
         }
@@ -287,9 +287,9 @@ extension DiscordChannel {
             public var member: Guild.Member?
         }
         
-        public var id: String
-        public var channel_id: String
-        public var guild_id: String?
+        public var id: Snowflake<DiscordChannel.Message>
+        public var channel_id: Snowflake<DiscordChannel>
+        public var guild_id: Snowflake<Guild>?
         public var author: PartialUser?
         public var member: Guild.PartialMember?
         public var content: String
@@ -309,7 +309,7 @@ extension DiscordChannel {
         public var type: Kind
         public var activity: Activity?
         public var application: PartialApplication?
-        public var application_id: String?
+        public var application_id: Snowflake<PartialApplication>?
         public var message_reference: MessageReference?
         public var flags: IntBitField<Flag>?
         public var referenced_message: DereferenceBox<Message>?
@@ -326,8 +326,8 @@ extension DiscordChannel {
 extension DiscordChannel {
     /// Partial ``DiscordChannel.Message`` object.
     public struct PartialMessage: Sendable, Codable {
-        public var id: String
-        public var channel_id: String
+        public var id:  Snowflake<DiscordChannel.Message>
+        public var channel_id: Snowflake<DiscordChannel>
         public var author: PartialUser?
         public var content: String?
         public var timestamp: DiscordTimestamp?
@@ -346,7 +346,7 @@ extension DiscordChannel {
         public var type: DiscordChannel.Message.Kind?
         public var activity: DiscordChannel.Message.Activity?
         public var application: PartialApplication?
-        public var application_id: String?
+        public var application_id: Snowflake<PartialApplication>?
         public var message_reference: DiscordChannel.Message.MessageReference?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var referenced_message: DereferenceBox<PartialMessage>?
@@ -358,7 +358,7 @@ extension DiscordChannel {
         public var position: Int?
         public var role_subscription_data: RoleSubscriptionData?
         public var member: Guild.PartialMember?
-        public var guild_id: String?
+        public var guild_id: Snowflake<Guild>?
     }
 }
 
@@ -374,8 +374,8 @@ public struct ThreadMetadata: Sendable, Codable {
 
 /// https://discord.com/developers/docs/resources/channel#thread-member-object-thread-member-structure
 public struct ThreadMember: Sendable, Codable {
-    public var id: String?
-    public var user_id: String?
+    public var id: Snowflake<DiscordChannel>?
+    public var user_id: Snowflake<DiscordUser>?
     public var join_timestamp: DiscordTimestamp
     /// FIXME:
     /// The field is documented but doesn't say what exactly it is.
@@ -396,7 +396,7 @@ public struct ThreadMember: Sendable, Codable {
 /// https://discord.com/developers/docs/resources/channel#thread-member-object-thread-member-structure
 public struct ThreadMemberWithMember: Sendable, Codable {
     public var id: String?
-    public var user_id: String?
+    public var user_id: Snowflake<DiscordUser>?
     public var join_timestamp: DiscordTimestamp
     /// FIXME:
     /// The field is documented but doesn't say what exactly it is.

@@ -17,7 +17,7 @@ class DiscordCacheTests: XCTestCase {
         /// First 10 items must be kept like normal.
         for idx in 2...10 {
             await cache._tests_modifyStorage { storage in
-                storage.auditLogs["\(idx)"] = []
+                storage.auditLogs[AnySnowflake("\(idx)")] = []
             }
         }
         
@@ -29,7 +29,7 @@ class DiscordCacheTests: XCTestCase {
         /// The 11th item will trigger a check, and the first item will be removed.
         for idx in 11...11 {
             await cache._tests_modifyStorage { storage in
-                storage.auditLogs["\(idx)"] = []
+                storage.auditLogs[AnySnowflake("\(idx)")] = []
             }
         }
         
@@ -41,7 +41,7 @@ class DiscordCacheTests: XCTestCase {
         /// The 12-19th mutations won't trigger a check.
         for idx in 12...19 {
             await cache._tests_modifyStorage { storage in
-                storage.auditLogs["\(idx)"] = []
+                storage.auditLogs[AnySnowflake("\(idx)")] = []
             }
         }
         
@@ -53,7 +53,7 @@ class DiscordCacheTests: XCTestCase {
         /// The 20th mutation will trigger a check, and older items will be removed.
         for idx in 20...20 {
             await cache._tests_modifyStorage { storage in
-                storage.auditLogs["\(idx)"] = []
+                storage.auditLogs[AnySnowflake("\(idx)")] = []
             }
         }
         

@@ -62,7 +62,7 @@ public struct Role: Sendable, Codable {
 //        public var guild_connections: Null
     }
     
-    public var id: String
+    public var id: Snowflake<Role>
     public var name: String
     public var description: String?
     public var color: DiscordColor

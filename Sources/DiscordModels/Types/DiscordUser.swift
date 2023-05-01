@@ -29,7 +29,7 @@ public struct DiscordUser: Sendable, Codable {
         case activeDeveloper = 22
     }
     
-    public var id: String
+    public var id: Snowflake<DiscordUser>
     public var username: String
     public var discriminator: String
     public var avatar: String?
@@ -52,7 +52,7 @@ public struct DiscordUser: Sendable, Codable {
 /// A partial ``DiscordUser`` object.
 /// https://discord.com/developers/docs/resources/user#user-object-user-structure
 public struct PartialUser: Sendable, Codable {
-    public var id: String
+    public var id: Snowflake<DiscordUser>
     public var username: String?
     public var discriminator: String?
     public var avatar: String?

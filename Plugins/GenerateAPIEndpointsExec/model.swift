@@ -206,12 +206,6 @@ struct API: Decodable {
                     
                     enum Kind: String, Decodable {
                         case string
-                        
-                        var swiftTypeString: String {
-                            switch self {
-                            case .string: return "String"
-                            }
-                        }
                     }
                     
                     var type: Kind
@@ -242,8 +236,48 @@ struct API: Decodable {
                     return "case \(summary)"
                 } else {
                     let paths = pathParams.map { param -> String in
-                        let type = param.schema.type.swiftTypeString
                         let paramName = param.name.toCamelCase()
+                        let type: String
+                        switch param.schema.type {
+                        case .string:
+                            switch paramName {
+                            case "guildId":
+                                type = "Snowflake<Guild>"
+                            case "applicationId":
+                                type = "Snowflake<PartialApplication>"
+                            case "userId":
+                                type = "Snowflake<DiscordUser>"
+                            case "channelId":
+                                type = "Snowflake<DiscordChannel>"
+                            case "messageId":
+                                type = "Snowflake<DiscordChannel.Message>"
+                            case "roleId":
+                                type = "Snowflake<Role>"
+                            case "commandId":
+                                type = "Snowflake<ApplicationCommand>"
+                            case "integrationId":
+                                type = "Snowflake<Integration>"
+                            case "interactionId":
+                                type = "Snowflake<Interaction>"
+                            case "emojiId":
+                                type = "Snowflake<PartialEmoji>"
+                            case "ruleId":
+                                type = "Snowflake<AutoModerationRule>"
+                            case "stickerId":
+                                type = "Snowflake<Sticker>"
+                            case "guildScheduledEventId":
+                                type = "Snowflake<GuildScheduledEvent>"
+                            case "overwriteId":
+                                type = "AnySnowflake"
+                            case "webhookId":
+                                type = "Snowflake<Webhook>"
+                            case let name where name.hasSuffix("Id"):
+                                print("Unhandled ID type: '\(paramName)'")
+                                fatalError("Unhandled ID type: '\(paramName)'")
+                            default:
+                                type = "String"
+                            }
+                        }
                         return "\(paramName): \(type)"
                     }.joined(separator: ", ")
                     return "case \(summary)(\(paths))"
@@ -260,8 +294,7 @@ struct API: Decodable {
                     return ("case .\(summary):", [])
                 } else {
                     let paths = pathParams.map { param -> String in
-                        let paramName = param.name.toCamelCase()
-                        return paramName
+                        param.name.toCamelCase()
                     }
                     let pathsJoined = paths.joined(separator: ", ")
                     return ("case let .\(summary)(\(pathsJoined)):", paths)

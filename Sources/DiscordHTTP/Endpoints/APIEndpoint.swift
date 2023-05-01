@@ -4,6 +4,7 @@
 /// properly edit `/Plugins/GenerateAPIEndpointsExec/Resources/openapi.yml`, then trigger
 /// the `GenerateAPIEndpoints` plugin (right click on `DiscordBM` in the file navigator)
 
+import DiscordModels
 import NIOHTTP1
 
 public enum APIEndpoint: Endpoint {
@@ -11,61 +12,61 @@ public enum APIEndpoint: Endpoint {
     // MARK: AutoMod
     /// https://discord.com/developers/docs/resources/auto-moderation
     
-    case getAutoModerationRule(guildId: String, ruleId: String)
-    case listAutoModerationRules(guildId: String)
-    case createAutoModerationRule(guildId: String)
-    case updateAutoModerationRule(guildId: String, ruleId: String)
-    case deleteAutoModerationRule(guildId: String, ruleId: String)
+    case getAutoModerationRule(guildId: Snowflake<Guild>, ruleId: Snowflake<AutoModerationRule>)
+    case listAutoModerationRules(guildId: Snowflake<Guild>)
+    case createAutoModerationRule(guildId: Snowflake<Guild>)
+    case updateAutoModerationRule(guildId: Snowflake<Guild>, ruleId: Snowflake<AutoModerationRule>)
+    case deleteAutoModerationRule(guildId: Snowflake<Guild>, ruleId: Snowflake<AutoModerationRule>)
     
     // MARK: Audit Log
     /// https://discord.com/developers/docs/resources/audit-log
     
-    case listGuildAuditLogEntries(guildId: String)
+    case listGuildAuditLogEntries(guildId: Snowflake<Guild>)
     
     // MARK: Channels
     /// https://discord.com/developers/docs/resources/channel
     
-    case getChannel(channelId: String)
-    case listPinnedMessages(channelId: String)
-    case addGroupDmUser(channelId: String, userId: String)
-    case pinMessage(channelId: String, messageId: String)
-    case setChannelPermissionOverwrite(channelId: String, overwriteId: String)
+    case getChannel(channelId: Snowflake<DiscordChannel>)
+    case listPinnedMessages(channelId: Snowflake<DiscordChannel>)
+    case addGroupDmUser(channelId: Snowflake<DiscordChannel>, userId: Snowflake<DiscordUser>)
+    case pinMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
+    case setChannelPermissionOverwrite(channelId: Snowflake<DiscordChannel>, overwriteId: AnySnowflake)
     case createDm
-    case followChannel(channelId: String)
-    case triggerTypingIndicator(channelId: String)
-    case updateChannel(channelId: String)
-    case deleteChannel(channelId: String)
-    case deleteChannelPermissionOverwrite(channelId: String, overwriteId: String)
-    case deleteGroupDmUser(channelId: String, userId: String)
-    case unpinMessage(channelId: String, messageId: String)
+    case followChannel(channelId: Snowflake<DiscordChannel>)
+    case triggerTypingIndicator(channelId: Snowflake<DiscordChannel>)
+    case updateChannel(channelId: Snowflake<DiscordChannel>)
+    case deleteChannel(channelId: Snowflake<DiscordChannel>)
+    case deleteChannelPermissionOverwrite(channelId: Snowflake<DiscordChannel>, overwriteId: AnySnowflake)
+    case deleteGroupDmUser(channelId: Snowflake<DiscordChannel>, userId: Snowflake<DiscordUser>)
+    case unpinMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
     
     // MARK: Commands
     /// https://discord.com/developers/docs/interactions/application-commands
     
-    case getApplicationCommand(applicationId: String, commandId: String)
-    case getGuildApplicationCommand(applicationId: String, guildId: String, commandId: String)
-    case getGuildApplicationCommandPermissions(applicationId: String, guildId: String, commandId: String)
-    case listApplicationCommands(applicationId: String)
-    case listGuildApplicationCommandPermissions(applicationId: String, guildId: String)
-    case listGuildApplicationCommands(applicationId: String, guildId: String)
-    case bulkSetApplicationCommands(applicationId: String)
-    case bulkSetGuildApplicationCommands(applicationId: String, guildId: String)
-    case setGuildApplicationCommandPermissions(applicationId: String, guildId: String, commandId: String)
-    case createApplicationCommand(applicationId: String)
-    case createGuildApplicationCommand(applicationId: String, guildId: String)
-    case updateApplicationCommand(applicationId: String, commandId: String)
-    case updateGuildApplicationCommand(applicationId: String, guildId: String, commandId: String)
-    case deleteApplicationCommand(applicationId: String, commandId: String)
-    case deleteGuildApplicationCommand(applicationId: String, guildId: String, commandId: String)
+    case getApplicationCommand(applicationId: Snowflake<PartialApplication>, commandId: Snowflake<ApplicationCommand>)
+    case getGuildApplicationCommand(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>, commandId: Snowflake<ApplicationCommand>)
+    case getGuildApplicationCommandPermissions(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>, commandId: Snowflake<ApplicationCommand>)
+    case listApplicationCommands(applicationId: Snowflake<PartialApplication>)
+    case listGuildApplicationCommandPermissions(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>)
+    case listGuildApplicationCommands(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>)
+    case bulkSetApplicationCommands(applicationId: Snowflake<PartialApplication>)
+    case bulkSetGuildApplicationCommands(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>)
+    case setGuildApplicationCommandPermissions(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>, commandId: Snowflake<ApplicationCommand>)
+    case createApplicationCommand(applicationId: Snowflake<PartialApplication>)
+    case createGuildApplicationCommand(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>)
+    case updateApplicationCommand(applicationId: Snowflake<PartialApplication>, commandId: Snowflake<ApplicationCommand>)
+    case updateGuildApplicationCommand(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>, commandId: Snowflake<ApplicationCommand>)
+    case deleteApplicationCommand(applicationId: Snowflake<PartialApplication>, commandId: Snowflake<ApplicationCommand>)
+    case deleteGuildApplicationCommand(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>, commandId: Snowflake<ApplicationCommand>)
     
     // MARK: Emoji
     /// https://discord.com/developers/docs/resources/emoji
     
-    case getGuildEmoji(guildId: String, emojiId: String)
-    case listGuildEmojis(guildId: String)
-    case createGuildEmoji(guildId: String)
-    case updateGuildEmoji(guildId: String, emojiId: String)
-    case deleteGuildEmoji(guildId: String, emojiId: String)
+    case getGuildEmoji(guildId: Snowflake<Guild>, emojiId: Snowflake<PartialEmoji>)
+    case listGuildEmojis(guildId: Snowflake<Guild>)
+    case createGuildEmoji(guildId: Snowflake<Guild>)
+    case updateGuildEmoji(guildId: Snowflake<Guild>, emojiId: Snowflake<PartialEmoji>)
+    case deleteGuildEmoji(guildId: Snowflake<Guild>, emojiId: Snowflake<PartialEmoji>)
     
     // MARK: Gateway
     /// https://discord.com/developers/docs/topics/gateway
@@ -76,94 +77,94 @@ public enum APIEndpoint: Endpoint {
     // MARK: Guilds
     /// https://discord.com/developers/docs/resources/guild
     
-    case getGuild(guildId: String)
-    case getGuildBan(guildId: String, userId: String)
-    case getGuildOnboarding(guildId: String)
-    case getGuildPreview(guildId: String)
-    case getGuildVanityUrl(guildId: String)
-    case getGuildWelcomeScreen(guildId: String)
-    case getGuildWidget(guildId: String)
-    case getGuildWidgetPng(guildId: String)
-    case getGuildWidgetSettings(guildId: String)
-    case listGuildBans(guildId: String)
-    case listGuildChannels(guildId: String)
-    case listGuildIntegrations(guildId: String)
+    case getGuild(guildId: Snowflake<Guild>)
+    case getGuildBan(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
+    case getGuildOnboarding(guildId: Snowflake<Guild>)
+    case getGuildPreview(guildId: Snowflake<Guild>)
+    case getGuildVanityUrl(guildId: Snowflake<Guild>)
+    case getGuildWelcomeScreen(guildId: Snowflake<Guild>)
+    case getGuildWidget(guildId: Snowflake<Guild>)
+    case getGuildWidgetPng(guildId: Snowflake<Guild>)
+    case getGuildWidgetSettings(guildId: Snowflake<Guild>)
+    case listGuildBans(guildId: Snowflake<Guild>)
+    case listGuildChannels(guildId: Snowflake<Guild>)
+    case listGuildIntegrations(guildId: Snowflake<Guild>)
     case listOwnGuilds
-    case previewPruneGuild(guildId: String)
-    case banUserFromGuild(guildId: String, userId: String)
+    case previewPruneGuild(guildId: Snowflake<Guild>)
+    case banUserFromGuild(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
     case createGuild
-    case createGuildChannel(guildId: String)
-    case pruneGuild(guildId: String)
-    case setGuildMfaLevel(guildId: String)
-    case bulkUpdateGuildChannels(guildId: String)
-    case updateGuild(guildId: String)
-    case updateGuildWelcomeScreen(guildId: String)
-    case updateGuildWidgetSettings(guildId: String)
-    case deleteGuild(guildId: String)
-    case deleteGuildIntegration(guildId: String, integrationId: String)
-    case leaveGuild(guildId: String)
-    case unbanUserFromGuild(guildId: String, userId: String)
+    case createGuildChannel(guildId: Snowflake<Guild>)
+    case pruneGuild(guildId: Snowflake<Guild>)
+    case setGuildMfaLevel(guildId: Snowflake<Guild>)
+    case bulkUpdateGuildChannels(guildId: Snowflake<Guild>)
+    case updateGuild(guildId: Snowflake<Guild>)
+    case updateGuildWelcomeScreen(guildId: Snowflake<Guild>)
+    case updateGuildWidgetSettings(guildId: Snowflake<Guild>)
+    case deleteGuild(guildId: Snowflake<Guild>)
+    case deleteGuildIntegration(guildId: Snowflake<Guild>, integrationId: Snowflake<Integration>)
+    case leaveGuild(guildId: Snowflake<Guild>)
+    case unbanUserFromGuild(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
     
     // MARK: Guild Templates
     /// https://discord.com/developers/docs/resources/guild-template
     
     case getGuildTemplate(code: String)
-    case listGuildTemplates(guildId: String)
-    case syncGuildTemplate(guildId: String, code: String)
+    case listGuildTemplates(guildId: Snowflake<Guild>)
+    case syncGuildTemplate(guildId: Snowflake<Guild>, code: String)
     case createGuildFromTemplate(code: String)
-    case createGuildTemplate(guildId: String)
-    case updateGuildTemplate(guildId: String, code: String)
-    case deleteGuildTemplate(guildId: String, code: String)
+    case createGuildTemplate(guildId: Snowflake<Guild>)
+    case updateGuildTemplate(guildId: Snowflake<Guild>, code: String)
+    case deleteGuildTemplate(guildId: Snowflake<Guild>, code: String)
     
     // MARK: Interactions
     /// https://discord.com/developers/docs/interactions/receiving-and-responding
     
-    case getFollowupMessage(applicationId: String, interactionToken: String, messageId: String)
-    case getOriginalInteractionResponse(applicationId: String, interactionToken: String)
-    case createFollowupMessage(applicationId: String, interactionToken: String)
-    case createInteractionResponse(interactionId: String, interactionToken: String)
-    case updateFollowupMessage(applicationId: String, interactionToken: String, messageId: String)
-    case updateOriginalInteractionResponse(applicationId: String, interactionToken: String)
-    case deleteFollowupMessage(applicationId: String, interactionToken: String, messageId: String)
-    case deleteOriginalInteractionResponse(applicationId: String, interactionToken: String)
+    case getFollowupMessage(applicationId: Snowflake<PartialApplication>, interactionToken: String, messageId: Snowflake<DiscordChannel.Message>)
+    case getOriginalInteractionResponse(applicationId: Snowflake<PartialApplication>, interactionToken: String)
+    case createFollowupMessage(applicationId: Snowflake<PartialApplication>, interactionToken: String)
+    case createInteractionResponse(interactionId: Snowflake<Interaction>, interactionToken: String)
+    case updateFollowupMessage(applicationId: Snowflake<PartialApplication>, interactionToken: String, messageId: Snowflake<DiscordChannel.Message>)
+    case updateOriginalInteractionResponse(applicationId: Snowflake<PartialApplication>, interactionToken: String)
+    case deleteFollowupMessage(applicationId: Snowflake<PartialApplication>, interactionToken: String, messageId: Snowflake<DiscordChannel.Message>)
+    case deleteOriginalInteractionResponse(applicationId: Snowflake<PartialApplication>, interactionToken: String)
     
     // MARK: Invites
     /// https://discord.com/developers/docs/resources/invite
     
     case inviteResolve(code: String)
-    case listChannelInvites(channelId: String)
-    case listGuildInvites(guildId: String)
-    case createChannelInvite(channelId: String)
+    case listChannelInvites(channelId: Snowflake<DiscordChannel>)
+    case listGuildInvites(guildId: Snowflake<Guild>)
+    case createChannelInvite(channelId: Snowflake<DiscordChannel>)
     case inviteRevoke(code: String)
     
     // MARK: Members
     /// https://discord.com/developers/docs/resources/guild
     
-    case getGuildMember(guildId: String, userId: String)
-    case getOwnGuildMember(guildId: String)
-    case listGuildMembers(guildId: String)
-    case searchGuildMembers(guildId: String)
-    case addGuildMember(guildId: String, userId: String)
-    case updateGuildMember(guildId: String, userId: String)
-    case updateOwnGuildMember(guildId: String)
-    case deleteGuildMember(guildId: String, userId: String)
+    case getGuildMember(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
+    case getOwnGuildMember(guildId: Snowflake<Guild>)
+    case listGuildMembers(guildId: Snowflake<Guild>)
+    case searchGuildMembers(guildId: Snowflake<Guild>)
+    case addGuildMember(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
+    case updateGuildMember(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
+    case updateOwnGuildMember(guildId: Snowflake<Guild>)
+    case deleteGuildMember(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
     
     // MARK: Messages
     /// https://discord.com/developers/docs/resources/channel
     
-    case getMessage(channelId: String, messageId: String)
-    case listMessageReactionsByEmoji(channelId: String, messageId: String, emojiName: String)
-    case listMessages(channelId: String)
-    case addOwnMessageReaction(channelId: String, messageId: String, emojiName: String)
-    case bulkDeleteMessages(channelId: String)
-    case createMessage(channelId: String)
-    case crosspostMessage(channelId: String, messageId: String)
-    case updateMessage(channelId: String, messageId: String)
-    case deleteAllMessageReactions(channelId: String, messageId: String)
-    case deleteAllMessageReactionsByEmoji(channelId: String, messageId: String, emojiName: String)
-    case deleteMessage(channelId: String, messageId: String)
-    case deleteOwnMessageReaction(channelId: String, messageId: String, emojiName: String)
-    case deleteUserMessageReaction(channelId: String, messageId: String, emojiName: String, userId: String)
+    case getMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
+    case listMessageReactionsByEmoji(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>, emojiName: String)
+    case listMessages(channelId: Snowflake<DiscordChannel>)
+    case addOwnMessageReaction(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>, emojiName: String)
+    case bulkDeleteMessages(channelId: Snowflake<DiscordChannel>)
+    case createMessage(channelId: Snowflake<DiscordChannel>)
+    case crosspostMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
+    case updateMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
+    case deleteAllMessageReactions(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
+    case deleteAllMessageReactionsByEmoji(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>, emojiName: String)
+    case deleteMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
+    case deleteOwnMessageReaction(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>, emojiName: String)
+    case deleteUserMessageReaction(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>, emojiName: String, userId: Snowflake<DiscordUser>)
     
     // MARK: OAuth
     /// https://discord.com/developers/docs/topics/oauth2
@@ -173,103 +174,103 @@ public enum APIEndpoint: Endpoint {
     // MARK: Roles
     /// https://discord.com/developers/docs/resources/guild
     
-    case listGuildRoles(guildId: String)
-    case addGuildMemberRole(guildId: String, userId: String, roleId: String)
-    case createGuildRole(guildId: String)
-    case bulkUpdateGuildRoles(guildId: String)
-    case updateGuildRole(guildId: String, roleId: String)
-    case deleteGuildMemberRole(guildId: String, userId: String, roleId: String)
-    case deleteGuildRole(guildId: String, roleId: String)
+    case listGuildRoles(guildId: Snowflake<Guild>)
+    case addGuildMemberRole(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>, roleId: Snowflake<Role>)
+    case createGuildRole(guildId: Snowflake<Guild>)
+    case bulkUpdateGuildRoles(guildId: Snowflake<Guild>)
+    case updateGuildRole(guildId: Snowflake<Guild>, roleId: Snowflake<Role>)
+    case deleteGuildMemberRole(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>, roleId: Snowflake<Role>)
+    case deleteGuildRole(guildId: Snowflake<Guild>, roleId: Snowflake<Role>)
     
     // MARK: Role Connections
     /// https://discord.com/developers/docs/resources/user
     
-    case getApplicationRoleConnectionsMetadata(applicationId: String)
-    case getApplicationUserRoleConnection(applicationId: String)
-    case updateApplicationRoleConnectionsMetadata(applicationId: String)
-    case updateApplicationUserRoleConnection(applicationId: String)
+    case getApplicationRoleConnectionsMetadata(applicationId: Snowflake<PartialApplication>)
+    case getApplicationUserRoleConnection(applicationId: Snowflake<PartialApplication>)
+    case updateApplicationRoleConnectionsMetadata(applicationId: Snowflake<PartialApplication>)
+    case updateApplicationUserRoleConnection(applicationId: Snowflake<PartialApplication>)
     
     // MARK: Scheduled Events
     /// https://discord.com/developers/docs/resources/guild-scheduled-event
     
-    case getGuildScheduledEvent(guildId: String, guildScheduledEventId: String)
-    case listGuildScheduledEventUsers(guildId: String, guildScheduledEventId: String)
-    case listGuildScheduledEvents(guildId: String)
-    case createGuildScheduledEvent(guildId: String)
-    case updateGuildScheduledEvent(guildId: String, guildScheduledEventId: String)
-    case deleteGuildScheduledEvent(guildId: String, guildScheduledEventId: String)
+    case getGuildScheduledEvent(guildId: Snowflake<Guild>, guildScheduledEventId: Snowflake<GuildScheduledEvent>)
+    case listGuildScheduledEventUsers(guildId: Snowflake<Guild>, guildScheduledEventId: Snowflake<GuildScheduledEvent>)
+    case listGuildScheduledEvents(guildId: Snowflake<Guild>)
+    case createGuildScheduledEvent(guildId: Snowflake<Guild>)
+    case updateGuildScheduledEvent(guildId: Snowflake<Guild>, guildScheduledEventId: Snowflake<GuildScheduledEvent>)
+    case deleteGuildScheduledEvent(guildId: Snowflake<Guild>, guildScheduledEventId: Snowflake<GuildScheduledEvent>)
     
     // MARK: Stages
     /// https://discord.com/developers/docs/resources/stage-instance
     
-    case getStageInstance(channelId: String)
+    case getStageInstance(channelId: Snowflake<DiscordChannel>)
     case createStageInstance
-    case updateStageInstance(channelId: String)
-    case deleteStageInstance(channelId: String)
+    case updateStageInstance(channelId: Snowflake<DiscordChannel>)
+    case deleteStageInstance(channelId: Snowflake<DiscordChannel>)
     
     // MARK: Stickers
     /// https://discord.com/developers/docs/resources/sticker
     
-    case getGuildSticker(guildId: String, stickerId: String)
-    case getSticker(stickerId: String)
-    case listGuildStickers(guildId: String)
+    case getGuildSticker(guildId: Snowflake<Guild>, stickerId: Snowflake<Sticker>)
+    case getSticker(stickerId: Snowflake<Sticker>)
+    case listGuildStickers(guildId: Snowflake<Guild>)
     case listStickerPacks
-    case createGuildSticker(guildId: String)
-    case updateGuildSticker(guildId: String, stickerId: String)
-    case deleteGuildSticker(guildId: String, stickerId: String)
+    case createGuildSticker(guildId: Snowflake<Guild>)
+    case updateGuildSticker(guildId: Snowflake<Guild>, stickerId: Snowflake<Sticker>)
+    case deleteGuildSticker(guildId: Snowflake<Guild>, stickerId: Snowflake<Sticker>)
     
     // MARK: Threads
     /// https://discord.com/developers/docs/resources/channel
     
-    case getActiveGuildThreads(guildId: String)
-    case getThreadMember(channelId: String, userId: String)
-    case listOwnPrivateArchivedThreads(channelId: String)
-    case listPrivateArchivedThreads(channelId: String)
-    case listPublicArchivedThreads(channelId: String)
-    case listThreadMembers(channelId: String)
-    case addThreadMember(channelId: String, userId: String)
-    case joinThread(channelId: String)
-    case createThread(channelId: String)
-    case createThreadFromMessage(channelId: String, messageId: String)
-    case createThreadInForumChannel(channelId: String)
-    case deleteThreadMember(channelId: String, userId: String)
-    case leaveThread(channelId: String)
+    case getActiveGuildThreads(guildId: Snowflake<Guild>)
+    case getThreadMember(channelId: Snowflake<DiscordChannel>, userId: Snowflake<DiscordUser>)
+    case listOwnPrivateArchivedThreads(channelId: Snowflake<DiscordChannel>)
+    case listPrivateArchivedThreads(channelId: Snowflake<DiscordChannel>)
+    case listPublicArchivedThreads(channelId: Snowflake<DiscordChannel>)
+    case listThreadMembers(channelId: Snowflake<DiscordChannel>)
+    case addThreadMember(channelId: Snowflake<DiscordChannel>, userId: Snowflake<DiscordUser>)
+    case joinThread(channelId: Snowflake<DiscordChannel>)
+    case createThread(channelId: Snowflake<DiscordChannel>)
+    case createThreadFromMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
+    case createThreadInForumChannel(channelId: Snowflake<DiscordChannel>)
+    case deleteThreadMember(channelId: Snowflake<DiscordChannel>, userId: Snowflake<DiscordUser>)
+    case leaveThread(channelId: Snowflake<DiscordChannel>)
     
     // MARK: Users
     /// https://discord.com/developers/docs/resources/user
     
     case getOwnUser
-    case getUser(userId: String)
+    case getUser(userId: Snowflake<DiscordUser>)
     case listOwnConnections
     case updateOwnUser
     
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice#list-voice-regions
     
-    case listGuildVoiceRegions(guildId: String)
+    case listGuildVoiceRegions(guildId: Snowflake<Guild>)
     case listVoiceRegions
-    case updateSelfVoiceState(guildId: String)
-    case updateVoiceState(guildId: String, userId: String)
+    case updateSelfVoiceState(guildId: Snowflake<Guild>)
+    case updateVoiceState(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
     
     // MARK: Webhooks
     /// https://discord.com/developers/docs/resources/webhook
     
-    case getGuildWebhooks(guildId: String)
-    case getWebhook(webhookId: String)
-    case getWebhookByToken(webhookId: String, webhookToken: String)
-    case getWebhookMessage(webhookId: String, webhookToken: String, messageId: String)
-    case getWebhooksMessagesOriginal(webhookId: String, webhookToken: String)
-    case listChannelWebhooks(channelId: String)
-    case createWebhook(channelId: String)
-    case executeWebhook(webhookId: String, webhookToken: String)
-    case patchWebhooksMessagesOriginal(webhookId: String, webhookToken: String)
-    case updateWebhook(webhookId: String)
-    case updateWebhookByToken(webhookId: String, webhookToken: String)
-    case updateWebhookMessage(webhookId: String, webhookToken: String, messageId: String)
-    case deleteWebhook(webhookId: String)
-    case deleteWebhookByToken(webhookId: String, webhookToken: String)
-    case deleteWebhookMessage(webhookId: String, webhookToken: String, messageId: String)
-    case deleteWebhooksMessagesOriginal(webhookId: String, webhookToken: String)
+    case getGuildWebhooks(guildId: Snowflake<Guild>)
+    case getWebhook(webhookId: Snowflake<Webhook>)
+    case getWebhookByToken(webhookId: Snowflake<Webhook>, webhookToken: String)
+    case getWebhookMessage(webhookId: Snowflake<Webhook>, webhookToken: String, messageId: Snowflake<DiscordChannel.Message>)
+    case getWebhooksMessagesOriginal(webhookId: Snowflake<Webhook>, webhookToken: String)
+    case listChannelWebhooks(channelId: Snowflake<DiscordChannel>)
+    case createWebhook(channelId: Snowflake<DiscordChannel>)
+    case executeWebhook(webhookId: Snowflake<Webhook>, webhookToken: String)
+    case patchWebhooksMessagesOriginal(webhookId: Snowflake<Webhook>, webhookToken: String)
+    case updateWebhook(webhookId: Snowflake<Webhook>)
+    case updateWebhookByToken(webhookId: Snowflake<Webhook>, webhookToken: String)
+    case updateWebhookMessage(webhookId: Snowflake<Webhook>, webhookToken: String, messageId: Snowflake<DiscordChannel.Message>)
+    case deleteWebhook(webhookId: Snowflake<Webhook>)
+    case deleteWebhookByToken(webhookId: Snowflake<Webhook>, webhookToken: String)
+    case deleteWebhookMessage(webhookId: Snowflake<Webhook>, webhookToken: String, messageId: Snowflake<DiscordChannel.Message>)
+    case deleteWebhooksMessagesOriginal(webhookId: Snowflake<Webhook>, webhookToken: String)
 
     var urlPrefix: String {
         "https://discord.com/api/v\(DiscordGlobalConfiguration.apiVersion)/"
@@ -279,359 +280,590 @@ public enum APIEndpoint: Endpoint {
         let suffix: String
         switch self {
         case let .getAutoModerationRule(guildId, ruleId):
+            let guildId = guildId.value
+            let ruleId = ruleId.value
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .listAutoModerationRules(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/auto-moderation/rules"
         case let .createAutoModerationRule(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/auto-moderation/rules"
         case let .updateAutoModerationRule(guildId, ruleId):
+            let guildId = guildId.value
+            let ruleId = ruleId.value
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .deleteAutoModerationRule(guildId, ruleId):
+            let guildId = guildId.value
+            let ruleId = ruleId.value
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .listGuildAuditLogEntries(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/audit-logs"
         case let .getChannel(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)"
         case let .listPinnedMessages(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/pins"
         case let .addGroupDmUser(channelId, userId):
+            let channelId = channelId.value
+            let userId = userId.value
             suffix = "channels/\(channelId)/recipients/\(userId)"
         case let .pinMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/pins/\(messageId)"
         case let .setChannelPermissionOverwrite(channelId, overwriteId):
+            let channelId = channelId.value
+            let overwriteId = overwriteId.value
             suffix = "channels/\(channelId)/permissions/\(overwriteId)"
         case .createDm:
             suffix = "users/@me/channels"
         case let .followChannel(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/followers"
         case let .triggerTypingIndicator(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/typing"
         case let .updateChannel(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)"
         case let .deleteChannel(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)"
         case let .deleteChannelPermissionOverwrite(channelId, overwriteId):
+            let channelId = channelId.value
+            let overwriteId = overwriteId.value
             suffix = "channels/\(channelId)/permissions/\(overwriteId)"
         case let .deleteGroupDmUser(channelId, userId):
+            let channelId = channelId.value
+            let userId = userId.value
             suffix = "channels/\(channelId)/recipients/\(userId)"
         case let .unpinMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/pins/\(messageId)"
         case let .getApplicationCommand(applicationId, commandId):
+            let applicationId = applicationId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .getGuildApplicationCommand(applicationId, guildId, commandId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .getGuildApplicationCommandPermissions(applicationId, guildId, commandId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions"
         case let .listApplicationCommands(applicationId):
+            let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/commands"
         case let .listGuildApplicationCommandPermissions(applicationId, guildId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/permissions"
         case let .listGuildApplicationCommands(applicationId, guildId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .bulkSetApplicationCommands(applicationId):
+            let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/commands"
         case let .bulkSetGuildApplicationCommands(applicationId, guildId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .setGuildApplicationCommandPermissions(applicationId, guildId, commandId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions"
         case let .createApplicationCommand(applicationId):
+            let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/commands"
         case let .createGuildApplicationCommand(applicationId, guildId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .updateApplicationCommand(applicationId, commandId):
+            let applicationId = applicationId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .updateGuildApplicationCommand(applicationId, guildId, commandId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .deleteApplicationCommand(applicationId, commandId):
+            let applicationId = applicationId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .deleteGuildApplicationCommand(applicationId, guildId, commandId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .getGuildEmoji(guildId, emojiId):
+            let guildId = guildId.value
+            let emojiId = emojiId.value
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case let .listGuildEmojis(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/emojis"
         case let .createGuildEmoji(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/emojis"
         case let .updateGuildEmoji(guildId, emojiId):
+            let guildId = guildId.value
+            let emojiId = emojiId.value
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case let .deleteGuildEmoji(guildId, emojiId):
+            let guildId = guildId.value
+            let emojiId = emojiId.value
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case .getBotGateway:
             suffix = "gateway/bot"
         case .getGateway:
             suffix = "gateway"
         case let .getGuild(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)"
         case let .getGuildBan(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case let .getGuildOnboarding(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/onboarding"
         case let .getGuildPreview(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/preview"
         case let .getGuildVanityUrl(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/vanity-url"
         case let .getGuildWelcomeScreen(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/welcome-screen"
         case let .getGuildWidget(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/widget.json"
         case let .getGuildWidgetPng(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/widget.png"
         case let .getGuildWidgetSettings(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/widget"
         case let .listGuildBans(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/bans"
         case let .listGuildChannels(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/channels"
         case let .listGuildIntegrations(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/integrations"
         case .listOwnGuilds:
             suffix = "users/@me/guilds"
         case let .previewPruneGuild(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/prune"
         case let .banUserFromGuild(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case .createGuild:
             suffix = "guilds"
         case let .createGuildChannel(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/channels"
         case let .pruneGuild(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/prune"
         case let .setGuildMfaLevel(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/mfa"
         case let .bulkUpdateGuildChannels(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/channels"
         case let .updateGuild(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)"
         case let .updateGuildWelcomeScreen(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/welcome-screen"
         case let .updateGuildWidgetSettings(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/widget"
         case let .deleteGuild(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)"
         case let .deleteGuildIntegration(guildId, integrationId):
+            let guildId = guildId.value
+            let integrationId = integrationId.value
             suffix = "guilds/\(guildId)/integrations/\(integrationId)"
         case let .leaveGuild(guildId):
+            let guildId = guildId.value
             suffix = "users/@me/guilds/\(guildId)"
         case let .unbanUserFromGuild(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case let .getGuildTemplate(code):
             suffix = "guilds/templates/\(code)"
         case let .listGuildTemplates(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/templates"
         case let .syncGuildTemplate(guildId, code):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .createGuildFromTemplate(code):
             suffix = "guilds/templates/\(code)"
         case let .createGuildTemplate(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/templates"
         case let .updateGuildTemplate(guildId, code):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .deleteGuildTemplate(guildId, code):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .getFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = applicationId.value
+            let messageId = messageId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .getOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = applicationId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .createFollowupMessage(applicationId, interactionToken):
+            let applicationId = applicationId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)"
         case let .createInteractionResponse(interactionId, interactionToken):
+            let interactionId = interactionId.value
             suffix = "interactions/\(interactionId)/\(interactionToken)/callback"
         case let .updateFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = applicationId.value
+            let messageId = messageId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .updateOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = applicationId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = applicationId.value
+            let messageId = messageId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = applicationId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .inviteResolve(code):
             suffix = "invites/\(code)"
         case let .listChannelInvites(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/invites"
         case let .listGuildInvites(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/invites"
         case let .createChannelInvite(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/invites"
         case let .inviteRevoke(code):
             suffix = "invites/\(code)"
         case let .getGuildMember(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .getOwnGuildMember(guildId):
+            let guildId = guildId.value
             suffix = "users/@me/guilds/\(guildId)/member"
         case let .listGuildMembers(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/members"
         case let .searchGuildMembers(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/members/search"
         case let .addGuildMember(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .updateGuildMember(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .updateOwnGuildMember(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/members/@me"
         case let .deleteGuildMember(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .getMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .listMessageReactionsByEmoji(channelId, messageId, emojiName):
+            let channelId = channelId.value
+            let messageId = messageId.value
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)"
         case let .listMessages(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/messages"
         case let .addOwnMessageReaction(channelId, messageId, emojiName):
+            let channelId = channelId.value
+            let messageId = messageId.value
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me"
         case let .bulkDeleteMessages(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/messages/bulk-delete"
         case let .createMessage(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/messages"
         case let .crosspostMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)/crosspost"
         case let .updateMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .deleteAllMessageReactions(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions"
         case let .deleteAllMessageReactionsByEmoji(channelId, messageId, emojiName):
+            let channelId = channelId.value
+            let messageId = messageId.value
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)"
         case let .deleteMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
+            let channelId = channelId.value
+            let messageId = messageId.value
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me"
         case let .deleteUserMessageReaction(channelId, messageId, emojiName, userId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             let emojiName = emojiName.urlPathEncoded()
+            let userId = userId.value
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/\(userId)"
         case .getOwnOauth2Application:
             suffix = "oauth2/applications/@me"
         case let .listGuildRoles(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/roles"
         case let .addGuildMemberRole(guildId, userId, roleId):
+            let guildId = guildId.value
+            let userId = userId.value
+            let roleId = roleId.value
             suffix = "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .createGuildRole(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/roles"
         case let .bulkUpdateGuildRoles(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/roles"
         case let .updateGuildRole(guildId, roleId):
+            let guildId = guildId.value
+            let roleId = roleId.value
             suffix = "guilds/\(guildId)/roles/\(roleId)"
         case let .deleteGuildMemberRole(guildId, userId, roleId):
+            let guildId = guildId.value
+            let userId = userId.value
+            let roleId = roleId.value
             suffix = "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .deleteGuildRole(guildId, roleId):
+            let guildId = guildId.value
+            let roleId = roleId.value
             suffix = "guilds/\(guildId)/roles/\(roleId)"
         case let .getApplicationRoleConnectionsMetadata(applicationId):
+            let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .getApplicationUserRoleConnection(applicationId):
+            let applicationId = applicationId.value
             suffix = "users/@me/applications/\(applicationId)/role-connection"
         case let .updateApplicationRoleConnectionsMetadata(applicationId):
+            let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .updateApplicationUserRoleConnection(applicationId):
+            let applicationId = applicationId.value
             suffix = "users/@me/applications/\(applicationId)/role-connection"
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
+            let guildId = guildId.value
+            let guildScheduledEventId = guildScheduledEventId.value
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .listGuildScheduledEventUsers(guildId, guildScheduledEventId):
+            let guildId = guildId.value
+            let guildScheduledEventId = guildScheduledEventId.value
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)/users"
         case let .listGuildScheduledEvents(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/scheduled-events"
         case let .createGuildScheduledEvent(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/scheduled-events"
         case let .updateGuildScheduledEvent(guildId, guildScheduledEventId):
+            let guildId = guildId.value
+            let guildScheduledEventId = guildScheduledEventId.value
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .deleteGuildScheduledEvent(guildId, guildScheduledEventId):
+            let guildId = guildId.value
+            let guildScheduledEventId = guildScheduledEventId.value
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .getStageInstance(channelId):
+            let channelId = channelId.value
             suffix = "stage-instances/\(channelId)"
         case .createStageInstance:
             suffix = "stage-instances"
         case let .updateStageInstance(channelId):
+            let channelId = channelId.value
             suffix = "stage-instances/\(channelId)"
         case let .deleteStageInstance(channelId):
+            let channelId = channelId.value
             suffix = "stage-instances/\(channelId)"
         case let .getGuildSticker(guildId, stickerId):
+            let guildId = guildId.value
+            let stickerId = stickerId.value
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .getSticker(stickerId):
+            let stickerId = stickerId.value
             suffix = "stickers/\(stickerId)"
         case let .listGuildStickers(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/stickers"
         case .listStickerPacks:
             suffix = "sticker-packs"
         case let .createGuildSticker(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/stickers"
         case let .updateGuildSticker(guildId, stickerId):
+            let guildId = guildId.value
+            let stickerId = stickerId.value
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .deleteGuildSticker(guildId, stickerId):
+            let guildId = guildId.value
+            let stickerId = stickerId.value
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .getActiveGuildThreads(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/threads/active"
         case let .getThreadMember(channelId, userId):
+            let channelId = channelId.value
+            let userId = userId.value
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .listOwnPrivateArchivedThreads(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/users/@me/threads/archived/private"
         case let .listPrivateArchivedThreads(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/threads/archived/private"
         case let .listPublicArchivedThreads(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/threads/archived/public"
         case let .listThreadMembers(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/thread-members"
         case let .addThreadMember(channelId, userId):
+            let channelId = channelId.value
+            let userId = userId.value
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .joinThread(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/thread-members/@me"
         case let .createThread(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/threads"
         case let .createThreadFromMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)/threads"
         case let .createThreadInForumChannel(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/threads"
         case let .deleteThreadMember(channelId, userId):
+            let channelId = channelId.value
+            let userId = userId.value
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .leaveThread(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/thread-members/@me"
         case .getOwnUser:
             suffix = "users/@me"
         case let .getUser(userId):
+            let userId = userId.value
             suffix = "users/\(userId)"
         case .listOwnConnections:
             suffix = "users/@me/connections"
         case .updateOwnUser:
             suffix = "users/@me"
         case let .listGuildVoiceRegions(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/regions"
         case .listVoiceRegions:
             suffix = "voice/regions"
         case let .updateSelfVoiceState(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/voice-states/@me"
         case let .updateVoiceState(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/voice-states/\(userId)"
         case let .getGuildWebhooks(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/webhooks"
         case let .getWebhook(webhookId):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)"
         case let .getWebhookByToken(webhookId, webhookToken):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
+            let webhookId = webhookId.value
+            let messageId = messageId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .listChannelWebhooks(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/webhooks"
         case let .createWebhook(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/webhooks"
         case let .executeWebhook(webhookId, webhookToken):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .updateWebhook(webhookId):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)"
         case let .updateWebhookByToken(webhookId, webhookToken):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .updateWebhookMessage(webhookId, webhookToken, messageId):
+            let webhookId = webhookId.value
+            let messageId = messageId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .deleteWebhook(webhookId):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)"
         case let .deleteWebhookByToken(webhookId, webhookToken):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
+            let webhookId = webhookId.value
+            let messageId = messageId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         }
         return urlPrefix + suffix
@@ -641,368 +873,599 @@ public enum APIEndpoint: Endpoint {
         let suffix: String
         switch self {
         case let .getAutoModerationRule(guildId, ruleId):
+            let guildId = guildId.value
+            let ruleId = ruleId.value
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .listAutoModerationRules(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/auto-moderation/rules"
         case let .createAutoModerationRule(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/auto-moderation/rules"
         case let .updateAutoModerationRule(guildId, ruleId):
+            let guildId = guildId.value
+            let ruleId = ruleId.value
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .deleteAutoModerationRule(guildId, ruleId):
+            let guildId = guildId.value
+            let ruleId = ruleId.value
             suffix = "guilds/\(guildId)/auto-moderation/rules/\(ruleId)"
         case let .listGuildAuditLogEntries(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/audit-logs"
         case let .getChannel(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)"
         case let .listPinnedMessages(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/pins"
         case let .addGroupDmUser(channelId, userId):
+            let channelId = channelId.value
+            let userId = userId.value
             suffix = "channels/\(channelId)/recipients/\(userId)"
         case let .pinMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/pins/\(messageId)"
         case let .setChannelPermissionOverwrite(channelId, overwriteId):
+            let channelId = channelId.value
+            let overwriteId = overwriteId.value
             suffix = "channels/\(channelId)/permissions/\(overwriteId)"
         case .createDm:
             suffix = "users/@me/channels"
         case let .followChannel(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/followers"
         case let .triggerTypingIndicator(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/typing"
         case let .updateChannel(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)"
         case let .deleteChannel(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)"
         case let .deleteChannelPermissionOverwrite(channelId, overwriteId):
+            let channelId = channelId.value
+            let overwriteId = overwriteId.value
             suffix = "channels/\(channelId)/permissions/\(overwriteId)"
         case let .deleteGroupDmUser(channelId, userId):
+            let channelId = channelId.value
+            let userId = userId.value
             suffix = "channels/\(channelId)/recipients/\(userId)"
         case let .unpinMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/pins/\(messageId)"
         case let .getApplicationCommand(applicationId, commandId):
+            let applicationId = applicationId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .getGuildApplicationCommand(applicationId, guildId, commandId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .getGuildApplicationCommandPermissions(applicationId, guildId, commandId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions"
         case let .listApplicationCommands(applicationId):
+            let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/commands"
         case let .listGuildApplicationCommandPermissions(applicationId, guildId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/permissions"
         case let .listGuildApplicationCommands(applicationId, guildId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .bulkSetApplicationCommands(applicationId):
+            let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/commands"
         case let .bulkSetGuildApplicationCommands(applicationId, guildId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .setGuildApplicationCommandPermissions(applicationId, guildId, commandId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions"
         case let .createApplicationCommand(applicationId):
+            let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/commands"
         case let .createGuildApplicationCommand(applicationId, guildId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .updateApplicationCommand(applicationId, commandId):
+            let applicationId = applicationId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .updateGuildApplicationCommand(applicationId, guildId, commandId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .deleteApplicationCommand(applicationId, commandId):
+            let applicationId = applicationId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/commands/\(commandId)"
         case let .deleteGuildApplicationCommand(applicationId, guildId, commandId):
+            let applicationId = applicationId.value
+            let guildId = guildId.value
+            let commandId = commandId.value
             suffix = "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         case let .getGuildEmoji(guildId, emojiId):
+            let guildId = guildId.value
+            let emojiId = emojiId.value
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case let .listGuildEmojis(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/emojis"
         case let .createGuildEmoji(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/emojis"
         case let .updateGuildEmoji(guildId, emojiId):
+            let guildId = guildId.value
+            let emojiId = emojiId.value
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case let .deleteGuildEmoji(guildId, emojiId):
+            let guildId = guildId.value
+            let emojiId = emojiId.value
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
         case .getBotGateway:
             suffix = "gateway/bot"
         case .getGateway:
             suffix = "gateway"
         case let .getGuild(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)"
         case let .getGuildBan(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case let .getGuildOnboarding(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/onboarding"
         case let .getGuildPreview(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/preview"
         case let .getGuildVanityUrl(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/vanity-url"
         case let .getGuildWelcomeScreen(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/welcome-screen"
         case let .getGuildWidget(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/widget.json"
         case let .getGuildWidgetPng(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/widget.png"
         case let .getGuildWidgetSettings(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/widget"
         case let .listGuildBans(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/bans"
         case let .listGuildChannels(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/channels"
         case let .listGuildIntegrations(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/integrations"
         case .listOwnGuilds:
             suffix = "users/@me/guilds"
         case let .previewPruneGuild(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/prune"
         case let .banUserFromGuild(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case .createGuild:
             suffix = "guilds"
         case let .createGuildChannel(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/channels"
         case let .pruneGuild(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/prune"
         case let .setGuildMfaLevel(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/mfa"
         case let .bulkUpdateGuildChannels(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/channels"
         case let .updateGuild(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)"
         case let .updateGuildWelcomeScreen(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/welcome-screen"
         case let .updateGuildWidgetSettings(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/widget"
         case let .deleteGuild(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)"
         case let .deleteGuildIntegration(guildId, integrationId):
+            let guildId = guildId.value
+            let integrationId = integrationId.value
             suffix = "guilds/\(guildId)/integrations/\(integrationId)"
         case let .leaveGuild(guildId):
+            let guildId = guildId.value
             suffix = "users/@me/guilds/\(guildId)"
         case let .unbanUserFromGuild(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/bans/\(userId)"
         case let .getGuildTemplate(code):
             suffix = "guilds/templates/\(code)"
         case let .listGuildTemplates(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/templates"
         case let .syncGuildTemplate(guildId, code):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .createGuildFromTemplate(code):
             suffix = "guilds/templates/\(code)"
         case let .createGuildTemplate(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/templates"
         case let .updateGuildTemplate(guildId, code):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .deleteGuildTemplate(guildId, code):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/templates/\(code)"
         case let .getFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = applicationId.value
+            let messageId = messageId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .getOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = applicationId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .createFollowupMessage(applicationId, interactionToken):
+            let applicationId = applicationId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)"
         case let .createInteractionResponse(interactionId, interactionToken):
+            let interactionId = interactionId.value
             suffix = "interactions/\(interactionId)/\(interactionToken)/callback"
         case let .updateFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = applicationId.value
+            let messageId = messageId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .updateOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = applicationId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
+            let applicationId = applicationId.value
+            let messageId = messageId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
+            let applicationId = applicationId.value
             suffix = "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         case let .inviteResolve(code):
             suffix = "invites/\(code)"
         case let .listChannelInvites(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/invites"
         case let .listGuildInvites(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/invites"
         case let .createChannelInvite(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/invites"
         case let .inviteRevoke(code):
             suffix = "invites/\(code)"
         case let .getGuildMember(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .getOwnGuildMember(guildId):
+            let guildId = guildId.value
             suffix = "users/@me/guilds/\(guildId)/member"
         case let .listGuildMembers(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/members"
         case let .searchGuildMembers(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/members/search"
         case let .addGuildMember(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .updateGuildMember(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .updateOwnGuildMember(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/members/@me"
         case let .deleteGuildMember(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/members/\(userId)"
         case let .getMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .listMessageReactionsByEmoji(channelId, messageId, emojiName):
+            let channelId = channelId.value
+            let messageId = messageId.value
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)"
         case let .listMessages(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/messages"
         case let .addOwnMessageReaction(channelId, messageId, emojiName):
+            let channelId = channelId.value
+            let messageId = messageId.value
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me"
         case let .bulkDeleteMessages(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/messages/bulk-delete"
         case let .createMessage(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/messages"
         case let .crosspostMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)/crosspost"
         case let .updateMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .deleteAllMessageReactions(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions"
         case let .deleteAllMessageReactionsByEmoji(channelId, messageId, emojiName):
+            let channelId = channelId.value
+            let messageId = messageId.value
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)"
         case let .deleteMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)"
         case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
+            let channelId = channelId.value
+            let messageId = messageId.value
             let emojiName = emojiName.urlPathEncoded()
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me"
         case let .deleteUserMessageReaction(channelId, messageId, emojiName, userId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             let emojiName = emojiName.urlPathEncoded()
+            let userId = userId.value
             suffix = "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/\(userId)"
         case .getOwnOauth2Application:
             suffix = "oauth2/applications/@me"
         case let .listGuildRoles(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/roles"
         case let .addGuildMemberRole(guildId, userId, roleId):
+            let guildId = guildId.value
+            let userId = userId.value
+            let roleId = roleId.value
             suffix = "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .createGuildRole(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/roles"
         case let .bulkUpdateGuildRoles(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/roles"
         case let .updateGuildRole(guildId, roleId):
+            let guildId = guildId.value
+            let roleId = roleId.value
             suffix = "guilds/\(guildId)/roles/\(roleId)"
         case let .deleteGuildMemberRole(guildId, userId, roleId):
+            let guildId = guildId.value
+            let userId = userId.value
+            let roleId = roleId.value
             suffix = "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         case let .deleteGuildRole(guildId, roleId):
+            let guildId = guildId.value
+            let roleId = roleId.value
             suffix = "guilds/\(guildId)/roles/\(roleId)"
         case let .getApplicationRoleConnectionsMetadata(applicationId):
+            let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .getApplicationUserRoleConnection(applicationId):
+            let applicationId = applicationId.value
             suffix = "users/@me/applications/\(applicationId)/role-connection"
         case let .updateApplicationRoleConnectionsMetadata(applicationId):
+            let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .updateApplicationUserRoleConnection(applicationId):
+            let applicationId = applicationId.value
             suffix = "users/@me/applications/\(applicationId)/role-connection"
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
+            let guildId = guildId.value
+            let guildScheduledEventId = guildScheduledEventId.value
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .listGuildScheduledEventUsers(guildId, guildScheduledEventId):
+            let guildId = guildId.value
+            let guildScheduledEventId = guildScheduledEventId.value
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)/users"
         case let .listGuildScheduledEvents(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/scheduled-events"
         case let .createGuildScheduledEvent(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/scheduled-events"
         case let .updateGuildScheduledEvent(guildId, guildScheduledEventId):
+            let guildId = guildId.value
+            let guildScheduledEventId = guildScheduledEventId.value
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .deleteGuildScheduledEvent(guildId, guildScheduledEventId):
+            let guildId = guildId.value
+            let guildScheduledEventId = guildScheduledEventId.value
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
         case let .getStageInstance(channelId):
+            let channelId = channelId.value
             suffix = "stage-instances/\(channelId)"
         case .createStageInstance:
             suffix = "stage-instances"
         case let .updateStageInstance(channelId):
+            let channelId = channelId.value
             suffix = "stage-instances/\(channelId)"
         case let .deleteStageInstance(channelId):
+            let channelId = channelId.value
             suffix = "stage-instances/\(channelId)"
         case let .getGuildSticker(guildId, stickerId):
+            let guildId = guildId.value
+            let stickerId = stickerId.value
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .getSticker(stickerId):
+            let stickerId = stickerId.value
             suffix = "stickers/\(stickerId)"
         case let .listGuildStickers(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/stickers"
         case .listStickerPacks:
             suffix = "sticker-packs"
         case let .createGuildSticker(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/stickers"
         case let .updateGuildSticker(guildId, stickerId):
+            let guildId = guildId.value
+            let stickerId = stickerId.value
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .deleteGuildSticker(guildId, stickerId):
+            let guildId = guildId.value
+            let stickerId = stickerId.value
             suffix = "guilds/\(guildId)/stickers/\(stickerId)"
         case let .getActiveGuildThreads(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/threads/active"
         case let .getThreadMember(channelId, userId):
+            let channelId = channelId.value
+            let userId = userId.value
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .listOwnPrivateArchivedThreads(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/users/@me/threads/archived/private"
         case let .listPrivateArchivedThreads(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/threads/archived/private"
         case let .listPublicArchivedThreads(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/threads/archived/public"
         case let .listThreadMembers(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/thread-members"
         case let .addThreadMember(channelId, userId):
+            let channelId = channelId.value
+            let userId = userId.value
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .joinThread(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/thread-members/@me"
         case let .createThread(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/threads"
         case let .createThreadFromMessage(channelId, messageId):
+            let channelId = channelId.value
+            let messageId = messageId.value
             suffix = "channels/\(channelId)/messages/\(messageId)/threads"
         case let .createThreadInForumChannel(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/threads"
         case let .deleteThreadMember(channelId, userId):
+            let channelId = channelId.value
+            let userId = userId.value
             suffix = "channels/\(channelId)/thread-members/\(userId)"
         case let .leaveThread(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/thread-members/@me"
         case .getOwnUser:
             suffix = "users/@me"
         case let .getUser(userId):
+            let userId = userId.value
             suffix = "users/\(userId)"
         case .listOwnConnections:
             suffix = "users/@me/connections"
         case .updateOwnUser:
             suffix = "users/@me"
         case let .listGuildVoiceRegions(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/regions"
         case .listVoiceRegions:
             suffix = "voice/regions"
         case let .updateSelfVoiceState(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/voice-states/@me"
         case let .updateVoiceState(guildId, userId):
+            let guildId = guildId.value
+            let userId = userId.value
             suffix = "guilds/\(guildId)/voice-states/\(userId)"
         case let .getGuildWebhooks(guildId):
+            let guildId = guildId.value
             suffix = "guilds/\(guildId)/webhooks"
         case let .getWebhook(webhookId):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)"
         case let .getWebhookByToken(webhookId, webhookToken):
+            let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
+            let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
+            let messageId = messageId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
+            let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .listChannelWebhooks(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/webhooks"
         case let .createWebhook(channelId):
+            let channelId = channelId.value
             suffix = "channels/\(channelId)/webhooks"
         case let .executeWebhook(webhookId, webhookToken):
+            let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
+            let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .updateWebhook(webhookId):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)"
         case let .updateWebhookByToken(webhookId, webhookToken):
+            let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .updateWebhookMessage(webhookId, webhookToken, messageId):
+            let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
+            let messageId = messageId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .deleteWebhook(webhookId):
+            let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)"
         case let .deleteWebhookByToken(webhookId, webhookToken):
+            let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
+            let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
+            let messageId = messageId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
+            let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         }
@@ -1552,355 +2015,355 @@ public enum APIEndpoint: Endpoint {
     public var parameters: [String] {
         switch self {
         case let .getAutoModerationRule(guildId, ruleId):
-            return [guildId, ruleId]
+            return [guildId.value, ruleId.value]
         case let .listAutoModerationRules(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .createAutoModerationRule(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .updateAutoModerationRule(guildId, ruleId):
-            return [guildId, ruleId]
+            return [guildId.value, ruleId.value]
         case let .deleteAutoModerationRule(guildId, ruleId):
-            return [guildId, ruleId]
+            return [guildId.value, ruleId.value]
         case let .listGuildAuditLogEntries(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .getChannel(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .listPinnedMessages(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .addGroupDmUser(channelId, userId):
-            return [channelId, userId]
+            return [channelId.value, userId.value]
         case let .pinMessage(channelId, messageId):
-            return [channelId, messageId]
+            return [channelId.value, messageId.value]
         case let .setChannelPermissionOverwrite(channelId, overwriteId):
-            return [channelId, overwriteId]
+            return [channelId.value, overwriteId.value]
         case .createDm:
             return []
         case let .followChannel(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .triggerTypingIndicator(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .updateChannel(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .deleteChannel(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .deleteChannelPermissionOverwrite(channelId, overwriteId):
-            return [channelId, overwriteId]
+            return [channelId.value, overwriteId.value]
         case let .deleteGroupDmUser(channelId, userId):
-            return [channelId, userId]
+            return [channelId.value, userId.value]
         case let .unpinMessage(channelId, messageId):
-            return [channelId, messageId]
+            return [channelId.value, messageId.value]
         case let .getApplicationCommand(applicationId, commandId):
-            return [applicationId, commandId]
+            return [applicationId.value, commandId.value]
         case let .getGuildApplicationCommand(applicationId, guildId, commandId):
-            return [applicationId, guildId, commandId]
+            return [applicationId.value, guildId.value, commandId.value]
         case let .getGuildApplicationCommandPermissions(applicationId, guildId, commandId):
-            return [applicationId, guildId, commandId]
+            return [applicationId.value, guildId.value, commandId.value]
         case let .listApplicationCommands(applicationId):
-            return [applicationId]
+            return [applicationId.value]
         case let .listGuildApplicationCommandPermissions(applicationId, guildId):
-            return [applicationId, guildId]
+            return [applicationId.value, guildId.value]
         case let .listGuildApplicationCommands(applicationId, guildId):
-            return [applicationId, guildId]
+            return [applicationId.value, guildId.value]
         case let .bulkSetApplicationCommands(applicationId):
-            return [applicationId]
+            return [applicationId.value]
         case let .bulkSetGuildApplicationCommands(applicationId, guildId):
-            return [applicationId, guildId]
+            return [applicationId.value, guildId.value]
         case let .setGuildApplicationCommandPermissions(applicationId, guildId, commandId):
-            return [applicationId, guildId, commandId]
+            return [applicationId.value, guildId.value, commandId.value]
         case let .createApplicationCommand(applicationId):
-            return [applicationId]
+            return [applicationId.value]
         case let .createGuildApplicationCommand(applicationId, guildId):
-            return [applicationId, guildId]
+            return [applicationId.value, guildId.value]
         case let .updateApplicationCommand(applicationId, commandId):
-            return [applicationId, commandId]
+            return [applicationId.value, commandId.value]
         case let .updateGuildApplicationCommand(applicationId, guildId, commandId):
-            return [applicationId, guildId, commandId]
+            return [applicationId.value, guildId.value, commandId.value]
         case let .deleteApplicationCommand(applicationId, commandId):
-            return [applicationId, commandId]
+            return [applicationId.value, commandId.value]
         case let .deleteGuildApplicationCommand(applicationId, guildId, commandId):
-            return [applicationId, guildId, commandId]
+            return [applicationId.value, guildId.value, commandId.value]
         case let .getGuildEmoji(guildId, emojiId):
-            return [guildId, emojiId]
+            return [guildId.value, emojiId.value]
         case let .listGuildEmojis(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .createGuildEmoji(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .updateGuildEmoji(guildId, emojiId):
-            return [guildId, emojiId]
+            return [guildId.value, emojiId.value]
         case let .deleteGuildEmoji(guildId, emojiId):
-            return [guildId, emojiId]
+            return [guildId.value, emojiId.value]
         case .getBotGateway:
             return []
         case .getGateway:
             return []
         case let .getGuild(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .getGuildBan(guildId, userId):
-            return [guildId, userId]
+            return [guildId.value, userId.value]
         case let .getGuildOnboarding(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .getGuildPreview(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .getGuildVanityUrl(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .getGuildWelcomeScreen(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .getGuildWidget(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .getGuildWidgetPng(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .getGuildWidgetSettings(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .listGuildBans(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .listGuildChannels(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .listGuildIntegrations(guildId):
-            return [guildId]
+            return [guildId.value]
         case .listOwnGuilds:
             return []
         case let .previewPruneGuild(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .banUserFromGuild(guildId, userId):
-            return [guildId, userId]
+            return [guildId.value, userId.value]
         case .createGuild:
             return []
         case let .createGuildChannel(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .pruneGuild(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .setGuildMfaLevel(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .bulkUpdateGuildChannels(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .updateGuild(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .updateGuildWelcomeScreen(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .updateGuildWidgetSettings(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .deleteGuild(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .deleteGuildIntegration(guildId, integrationId):
-            return [guildId, integrationId]
+            return [guildId.value, integrationId.value]
         case let .leaveGuild(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .unbanUserFromGuild(guildId, userId):
-            return [guildId, userId]
+            return [guildId.value, userId.value]
         case let .getGuildTemplate(code):
             return [code]
         case let .listGuildTemplates(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .syncGuildTemplate(guildId, code):
-            return [guildId, code]
+            return [guildId.value, code]
         case let .createGuildFromTemplate(code):
             return [code]
         case let .createGuildTemplate(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .updateGuildTemplate(guildId, code):
-            return [guildId, code]
+            return [guildId.value, code]
         case let .deleteGuildTemplate(guildId, code):
-            return [guildId, code]
+            return [guildId.value, code]
         case let .getFollowupMessage(applicationId, interactionToken, messageId):
-            return [applicationId, interactionToken, messageId]
+            return [applicationId.value, interactionToken, messageId.value]
         case let .getOriginalInteractionResponse(applicationId, interactionToken):
-            return [applicationId, interactionToken]
+            return [applicationId.value, interactionToken]
         case let .createFollowupMessage(applicationId, interactionToken):
-            return [applicationId, interactionToken]
+            return [applicationId.value, interactionToken]
         case let .createInteractionResponse(interactionId, interactionToken):
-            return [interactionId, interactionToken]
+            return [interactionId.value, interactionToken]
         case let .updateFollowupMessage(applicationId, interactionToken, messageId):
-            return [applicationId, interactionToken, messageId]
+            return [applicationId.value, interactionToken, messageId.value]
         case let .updateOriginalInteractionResponse(applicationId, interactionToken):
-            return [applicationId, interactionToken]
+            return [applicationId.value, interactionToken]
         case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
-            return [applicationId, interactionToken, messageId]
+            return [applicationId.value, interactionToken, messageId.value]
         case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
-            return [applicationId, interactionToken]
+            return [applicationId.value, interactionToken]
         case let .inviteResolve(code):
             return [code]
         case let .listChannelInvites(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .listGuildInvites(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .createChannelInvite(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .inviteRevoke(code):
             return [code]
         case let .getGuildMember(guildId, userId):
-            return [guildId, userId]
+            return [guildId.value, userId.value]
         case let .getOwnGuildMember(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .listGuildMembers(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .searchGuildMembers(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .addGuildMember(guildId, userId):
-            return [guildId, userId]
+            return [guildId.value, userId.value]
         case let .updateGuildMember(guildId, userId):
-            return [guildId, userId]
+            return [guildId.value, userId.value]
         case let .updateOwnGuildMember(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .deleteGuildMember(guildId, userId):
-            return [guildId, userId]
+            return [guildId.value, userId.value]
         case let .getMessage(channelId, messageId):
-            return [channelId, messageId]
+            return [channelId.value, messageId.value]
         case let .listMessageReactionsByEmoji(channelId, messageId, emojiName):
-            return [channelId, messageId, emojiName]
+            return [channelId.value, messageId.value, emojiName]
         case let .listMessages(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .addOwnMessageReaction(channelId, messageId, emojiName):
-            return [channelId, messageId, emojiName]
+            return [channelId.value, messageId.value, emojiName]
         case let .bulkDeleteMessages(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .createMessage(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .crosspostMessage(channelId, messageId):
-            return [channelId, messageId]
+            return [channelId.value, messageId.value]
         case let .updateMessage(channelId, messageId):
-            return [channelId, messageId]
+            return [channelId.value, messageId.value]
         case let .deleteAllMessageReactions(channelId, messageId):
-            return [channelId, messageId]
+            return [channelId.value, messageId.value]
         case let .deleteAllMessageReactionsByEmoji(channelId, messageId, emojiName):
-            return [channelId, messageId, emojiName]
+            return [channelId.value, messageId.value, emojiName]
         case let .deleteMessage(channelId, messageId):
-            return [channelId, messageId]
+            return [channelId.value, messageId.value]
         case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
-            return [channelId, messageId, emojiName]
+            return [channelId.value, messageId.value, emojiName]
         case let .deleteUserMessageReaction(channelId, messageId, emojiName, userId):
-            return [channelId, messageId, emojiName, userId]
+            return [channelId.value, messageId.value, emojiName, userId.value]
         case .getOwnOauth2Application:
             return []
         case let .listGuildRoles(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .addGuildMemberRole(guildId, userId, roleId):
-            return [guildId, userId, roleId]
+            return [guildId.value, userId.value, roleId.value]
         case let .createGuildRole(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .bulkUpdateGuildRoles(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .updateGuildRole(guildId, roleId):
-            return [guildId, roleId]
+            return [guildId.value, roleId.value]
         case let .deleteGuildMemberRole(guildId, userId, roleId):
-            return [guildId, userId, roleId]
+            return [guildId.value, userId.value, roleId.value]
         case let .deleteGuildRole(guildId, roleId):
-            return [guildId, roleId]
+            return [guildId.value, roleId.value]
         case let .getApplicationRoleConnectionsMetadata(applicationId):
-            return [applicationId]
+            return [applicationId.value]
         case let .getApplicationUserRoleConnection(applicationId):
-            return [applicationId]
+            return [applicationId.value]
         case let .updateApplicationRoleConnectionsMetadata(applicationId):
-            return [applicationId]
+            return [applicationId.value]
         case let .updateApplicationUserRoleConnection(applicationId):
-            return [applicationId]
+            return [applicationId.value]
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
-            return [guildId, guildScheduledEventId]
+            return [guildId.value, guildScheduledEventId.value]
         case let .listGuildScheduledEventUsers(guildId, guildScheduledEventId):
-            return [guildId, guildScheduledEventId]
+            return [guildId.value, guildScheduledEventId.value]
         case let .listGuildScheduledEvents(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .createGuildScheduledEvent(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .updateGuildScheduledEvent(guildId, guildScheduledEventId):
-            return [guildId, guildScheduledEventId]
+            return [guildId.value, guildScheduledEventId.value]
         case let .deleteGuildScheduledEvent(guildId, guildScheduledEventId):
-            return [guildId, guildScheduledEventId]
+            return [guildId.value, guildScheduledEventId.value]
         case let .getStageInstance(channelId):
-            return [channelId]
+            return [channelId.value]
         case .createStageInstance:
             return []
         case let .updateStageInstance(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .deleteStageInstance(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .getGuildSticker(guildId, stickerId):
-            return [guildId, stickerId]
+            return [guildId.value, stickerId.value]
         case let .getSticker(stickerId):
-            return [stickerId]
+            return [stickerId.value]
         case let .listGuildStickers(guildId):
-            return [guildId]
+            return [guildId.value]
         case .listStickerPacks:
             return []
         case let .createGuildSticker(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .updateGuildSticker(guildId, stickerId):
-            return [guildId, stickerId]
+            return [guildId.value, stickerId.value]
         case let .deleteGuildSticker(guildId, stickerId):
-            return [guildId, stickerId]
+            return [guildId.value, stickerId.value]
         case let .getActiveGuildThreads(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .getThreadMember(channelId, userId):
-            return [channelId, userId]
+            return [channelId.value, userId.value]
         case let .listOwnPrivateArchivedThreads(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .listPrivateArchivedThreads(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .listPublicArchivedThreads(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .listThreadMembers(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .addThreadMember(channelId, userId):
-            return [channelId, userId]
+            return [channelId.value, userId.value]
         case let .joinThread(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .createThread(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .createThreadFromMessage(channelId, messageId):
-            return [channelId, messageId]
+            return [channelId.value, messageId.value]
         case let .createThreadInForumChannel(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .deleteThreadMember(channelId, userId):
-            return [channelId, userId]
+            return [channelId.value, userId.value]
         case let .leaveThread(channelId):
-            return [channelId]
+            return [channelId.value]
         case .getOwnUser:
             return []
         case let .getUser(userId):
-            return [userId]
+            return [userId.value]
         case .listOwnConnections:
             return []
         case .updateOwnUser:
             return []
         case let .listGuildVoiceRegions(guildId):
-            return [guildId]
+            return [guildId.value]
         case .listVoiceRegions:
             return []
         case let .updateSelfVoiceState(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .updateVoiceState(guildId, userId):
-            return [guildId, userId]
+            return [guildId.value, userId.value]
         case let .getGuildWebhooks(guildId):
-            return [guildId]
+            return [guildId.value]
         case let .getWebhook(webhookId):
-            return [webhookId]
+            return [webhookId.value]
         case let .getWebhookByToken(webhookId, webhookToken):
-            return [webhookId, webhookToken]
+            return [webhookId.value, webhookToken]
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
-            return [webhookId, webhookToken, messageId]
+            return [webhookId.value, webhookToken, messageId.value]
         case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
-            return [webhookId, webhookToken]
+            return [webhookId.value, webhookToken]
         case let .listChannelWebhooks(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .createWebhook(channelId):
-            return [channelId]
+            return [channelId.value]
         case let .executeWebhook(webhookId, webhookToken):
-            return [webhookId, webhookToken]
+            return [webhookId.value, webhookToken]
         case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
-            return [webhookId, webhookToken]
+            return [webhookId.value, webhookToken]
         case let .updateWebhook(webhookId):
-            return [webhookId]
+            return [webhookId.value]
         case let .updateWebhookByToken(webhookId, webhookToken):
-            return [webhookId, webhookToken]
+            return [webhookId.value, webhookToken]
         case let .updateWebhookMessage(webhookId, webhookToken, messageId):
-            return [webhookId, webhookToken, messageId]
+            return [webhookId.value, webhookToken, messageId.value]
         case let .deleteWebhook(webhookId):
-            return [webhookId]
+            return [webhookId.value]
         case let .deleteWebhookByToken(webhookId, webhookToken):
-            return [webhookId, webhookToken]
+            return [webhookId.value, webhookToken]
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
-            return [webhookId, webhookToken, messageId]
+            return [webhookId.value, webhookToken, messageId.value]
         case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
-            return [webhookId, webhookToken]
+            return [webhookId.value, webhookToken]
         }
     }
 
@@ -2087,355 +2550,355 @@ public enum APIEndpoint: Endpoint {
     public var description: String {
         switch self {
         case let .getAutoModerationRule(guildId, ruleId):
-            return "getAutoModerationRule(guildId: \(guildId), ruleId: \(ruleId))"
+            return "getAutoModerationRule(guildId.value: \(guildId.value), ruleId.value: \(ruleId.value))"
         case let .listAutoModerationRules(guildId):
-            return "listAutoModerationRules(guildId: \(guildId))"
+            return "listAutoModerationRules(guildId.value: \(guildId.value))"
         case let .createAutoModerationRule(guildId):
-            return "createAutoModerationRule(guildId: \(guildId))"
+            return "createAutoModerationRule(guildId.value: \(guildId.value))"
         case let .updateAutoModerationRule(guildId, ruleId):
-            return "updateAutoModerationRule(guildId: \(guildId), ruleId: \(ruleId))"
+            return "updateAutoModerationRule(guildId.value: \(guildId.value), ruleId.value: \(ruleId.value))"
         case let .deleteAutoModerationRule(guildId, ruleId):
-            return "deleteAutoModerationRule(guildId: \(guildId), ruleId: \(ruleId))"
+            return "deleteAutoModerationRule(guildId.value: \(guildId.value), ruleId.value: \(ruleId.value))"
         case let .listGuildAuditLogEntries(guildId):
-            return "listGuildAuditLogEntries(guildId: \(guildId))"
+            return "listGuildAuditLogEntries(guildId.value: \(guildId.value))"
         case let .getChannel(channelId):
-            return "getChannel(channelId: \(channelId))"
+            return "getChannel(channelId.value: \(channelId.value))"
         case let .listPinnedMessages(channelId):
-            return "listPinnedMessages(channelId: \(channelId))"
+            return "listPinnedMessages(channelId.value: \(channelId.value))"
         case let .addGroupDmUser(channelId, userId):
-            return "addGroupDmUser(channelId: \(channelId), userId: \(userId))"
+            return "addGroupDmUser(channelId.value: \(channelId.value), userId.value: \(userId.value))"
         case let .pinMessage(channelId, messageId):
-            return "pinMessage(channelId: \(channelId), messageId: \(messageId))"
+            return "pinMessage(channelId.value: \(channelId.value), messageId.value: \(messageId.value))"
         case let .setChannelPermissionOverwrite(channelId, overwriteId):
-            return "setChannelPermissionOverwrite(channelId: \(channelId), overwriteId: \(overwriteId))"
+            return "setChannelPermissionOverwrite(channelId.value: \(channelId.value), overwriteId.value: \(overwriteId.value))"
         case .createDm:
             return "createDm"
         case let .followChannel(channelId):
-            return "followChannel(channelId: \(channelId))"
+            return "followChannel(channelId.value: \(channelId.value))"
         case let .triggerTypingIndicator(channelId):
-            return "triggerTypingIndicator(channelId: \(channelId))"
+            return "triggerTypingIndicator(channelId.value: \(channelId.value))"
         case let .updateChannel(channelId):
-            return "updateChannel(channelId: \(channelId))"
+            return "updateChannel(channelId.value: \(channelId.value))"
         case let .deleteChannel(channelId):
-            return "deleteChannel(channelId: \(channelId))"
+            return "deleteChannel(channelId.value: \(channelId.value))"
         case let .deleteChannelPermissionOverwrite(channelId, overwriteId):
-            return "deleteChannelPermissionOverwrite(channelId: \(channelId), overwriteId: \(overwriteId))"
+            return "deleteChannelPermissionOverwrite(channelId.value: \(channelId.value), overwriteId.value: \(overwriteId.value))"
         case let .deleteGroupDmUser(channelId, userId):
-            return "deleteGroupDmUser(channelId: \(channelId), userId: \(userId))"
+            return "deleteGroupDmUser(channelId.value: \(channelId.value), userId.value: \(userId.value))"
         case let .unpinMessage(channelId, messageId):
-            return "unpinMessage(channelId: \(channelId), messageId: \(messageId))"
+            return "unpinMessage(channelId.value: \(channelId.value), messageId.value: \(messageId.value))"
         case let .getApplicationCommand(applicationId, commandId):
-            return "getApplicationCommand(applicationId: \(applicationId), commandId: \(commandId))"
+            return "getApplicationCommand(applicationId.value: \(applicationId.value), commandId.value: \(commandId.value))"
         case let .getGuildApplicationCommand(applicationId, guildId, commandId):
-            return "getGuildApplicationCommand(applicationId: \(applicationId), guildId: \(guildId), commandId: \(commandId))"
+            return "getGuildApplicationCommand(applicationId.value: \(applicationId.value), guildId.value: \(guildId.value), commandId.value: \(commandId.value))"
         case let .getGuildApplicationCommandPermissions(applicationId, guildId, commandId):
-            return "getGuildApplicationCommandPermissions(applicationId: \(applicationId), guildId: \(guildId), commandId: \(commandId))"
+            return "getGuildApplicationCommandPermissions(applicationId.value: \(applicationId.value), guildId.value: \(guildId.value), commandId.value: \(commandId.value))"
         case let .listApplicationCommands(applicationId):
-            return "listApplicationCommands(applicationId: \(applicationId))"
+            return "listApplicationCommands(applicationId.value: \(applicationId.value))"
         case let .listGuildApplicationCommandPermissions(applicationId, guildId):
-            return "listGuildApplicationCommandPermissions(applicationId: \(applicationId), guildId: \(guildId))"
+            return "listGuildApplicationCommandPermissions(applicationId.value: \(applicationId.value), guildId.value: \(guildId.value))"
         case let .listGuildApplicationCommands(applicationId, guildId):
-            return "listGuildApplicationCommands(applicationId: \(applicationId), guildId: \(guildId))"
+            return "listGuildApplicationCommands(applicationId.value: \(applicationId.value), guildId.value: \(guildId.value))"
         case let .bulkSetApplicationCommands(applicationId):
-            return "bulkSetApplicationCommands(applicationId: \(applicationId))"
+            return "bulkSetApplicationCommands(applicationId.value: \(applicationId.value))"
         case let .bulkSetGuildApplicationCommands(applicationId, guildId):
-            return "bulkSetGuildApplicationCommands(applicationId: \(applicationId), guildId: \(guildId))"
+            return "bulkSetGuildApplicationCommands(applicationId.value: \(applicationId.value), guildId.value: \(guildId.value))"
         case let .setGuildApplicationCommandPermissions(applicationId, guildId, commandId):
-            return "setGuildApplicationCommandPermissions(applicationId: \(applicationId), guildId: \(guildId), commandId: \(commandId))"
+            return "setGuildApplicationCommandPermissions(applicationId.value: \(applicationId.value), guildId.value: \(guildId.value), commandId.value: \(commandId.value))"
         case let .createApplicationCommand(applicationId):
-            return "createApplicationCommand(applicationId: \(applicationId))"
+            return "createApplicationCommand(applicationId.value: \(applicationId.value))"
         case let .createGuildApplicationCommand(applicationId, guildId):
-            return "createGuildApplicationCommand(applicationId: \(applicationId), guildId: \(guildId))"
+            return "createGuildApplicationCommand(applicationId.value: \(applicationId.value), guildId.value: \(guildId.value))"
         case let .updateApplicationCommand(applicationId, commandId):
-            return "updateApplicationCommand(applicationId: \(applicationId), commandId: \(commandId))"
+            return "updateApplicationCommand(applicationId.value: \(applicationId.value), commandId.value: \(commandId.value))"
         case let .updateGuildApplicationCommand(applicationId, guildId, commandId):
-            return "updateGuildApplicationCommand(applicationId: \(applicationId), guildId: \(guildId), commandId: \(commandId))"
+            return "updateGuildApplicationCommand(applicationId.value: \(applicationId.value), guildId.value: \(guildId.value), commandId.value: \(commandId.value))"
         case let .deleteApplicationCommand(applicationId, commandId):
-            return "deleteApplicationCommand(applicationId: \(applicationId), commandId: \(commandId))"
+            return "deleteApplicationCommand(applicationId.value: \(applicationId.value), commandId.value: \(commandId.value))"
         case let .deleteGuildApplicationCommand(applicationId, guildId, commandId):
-            return "deleteGuildApplicationCommand(applicationId: \(applicationId), guildId: \(guildId), commandId: \(commandId))"
+            return "deleteGuildApplicationCommand(applicationId.value: \(applicationId.value), guildId.value: \(guildId.value), commandId.value: \(commandId.value))"
         case let .getGuildEmoji(guildId, emojiId):
-            return "getGuildEmoji(guildId: \(guildId), emojiId: \(emojiId))"
+            return "getGuildEmoji(guildId.value: \(guildId.value), emojiId.value: \(emojiId.value))"
         case let .listGuildEmojis(guildId):
-            return "listGuildEmojis(guildId: \(guildId))"
+            return "listGuildEmojis(guildId.value: \(guildId.value))"
         case let .createGuildEmoji(guildId):
-            return "createGuildEmoji(guildId: \(guildId))"
+            return "createGuildEmoji(guildId.value: \(guildId.value))"
         case let .updateGuildEmoji(guildId, emojiId):
-            return "updateGuildEmoji(guildId: \(guildId), emojiId: \(emojiId))"
+            return "updateGuildEmoji(guildId.value: \(guildId.value), emojiId.value: \(emojiId.value))"
         case let .deleteGuildEmoji(guildId, emojiId):
-            return "deleteGuildEmoji(guildId: \(guildId), emojiId: \(emojiId))"
+            return "deleteGuildEmoji(guildId.value: \(guildId.value), emojiId.value: \(emojiId.value))"
         case .getBotGateway:
             return "getBotGateway"
         case .getGateway:
             return "getGateway"
         case let .getGuild(guildId):
-            return "getGuild(guildId: \(guildId))"
+            return "getGuild(guildId.value: \(guildId.value))"
         case let .getGuildBan(guildId, userId):
-            return "getGuildBan(guildId: \(guildId), userId: \(userId))"
+            return "getGuildBan(guildId.value: \(guildId.value), userId.value: \(userId.value))"
         case let .getGuildOnboarding(guildId):
-            return "getGuildOnboarding(guildId: \(guildId))"
+            return "getGuildOnboarding(guildId.value: \(guildId.value))"
         case let .getGuildPreview(guildId):
-            return "getGuildPreview(guildId: \(guildId))"
+            return "getGuildPreview(guildId.value: \(guildId.value))"
         case let .getGuildVanityUrl(guildId):
-            return "getGuildVanityUrl(guildId: \(guildId))"
+            return "getGuildVanityUrl(guildId.value: \(guildId.value))"
         case let .getGuildWelcomeScreen(guildId):
-            return "getGuildWelcomeScreen(guildId: \(guildId))"
+            return "getGuildWelcomeScreen(guildId.value: \(guildId.value))"
         case let .getGuildWidget(guildId):
-            return "getGuildWidget(guildId: \(guildId))"
+            return "getGuildWidget(guildId.value: \(guildId.value))"
         case let .getGuildWidgetPng(guildId):
-            return "getGuildWidgetPng(guildId: \(guildId))"
+            return "getGuildWidgetPng(guildId.value: \(guildId.value))"
         case let .getGuildWidgetSettings(guildId):
-            return "getGuildWidgetSettings(guildId: \(guildId))"
+            return "getGuildWidgetSettings(guildId.value: \(guildId.value))"
         case let .listGuildBans(guildId):
-            return "listGuildBans(guildId: \(guildId))"
+            return "listGuildBans(guildId.value: \(guildId.value))"
         case let .listGuildChannels(guildId):
-            return "listGuildChannels(guildId: \(guildId))"
+            return "listGuildChannels(guildId.value: \(guildId.value))"
         case let .listGuildIntegrations(guildId):
-            return "listGuildIntegrations(guildId: \(guildId))"
+            return "listGuildIntegrations(guildId.value: \(guildId.value))"
         case .listOwnGuilds:
             return "listOwnGuilds"
         case let .previewPruneGuild(guildId):
-            return "previewPruneGuild(guildId: \(guildId))"
+            return "previewPruneGuild(guildId.value: \(guildId.value))"
         case let .banUserFromGuild(guildId, userId):
-            return "banUserFromGuild(guildId: \(guildId), userId: \(userId))"
+            return "banUserFromGuild(guildId.value: \(guildId.value), userId.value: \(userId.value))"
         case .createGuild:
             return "createGuild"
         case let .createGuildChannel(guildId):
-            return "createGuildChannel(guildId: \(guildId))"
+            return "createGuildChannel(guildId.value: \(guildId.value))"
         case let .pruneGuild(guildId):
-            return "pruneGuild(guildId: \(guildId))"
+            return "pruneGuild(guildId.value: \(guildId.value))"
         case let .setGuildMfaLevel(guildId):
-            return "setGuildMfaLevel(guildId: \(guildId))"
+            return "setGuildMfaLevel(guildId.value: \(guildId.value))"
         case let .bulkUpdateGuildChannels(guildId):
-            return "bulkUpdateGuildChannels(guildId: \(guildId))"
+            return "bulkUpdateGuildChannels(guildId.value: \(guildId.value))"
         case let .updateGuild(guildId):
-            return "updateGuild(guildId: \(guildId))"
+            return "updateGuild(guildId.value: \(guildId.value))"
         case let .updateGuildWelcomeScreen(guildId):
-            return "updateGuildWelcomeScreen(guildId: \(guildId))"
+            return "updateGuildWelcomeScreen(guildId.value: \(guildId.value))"
         case let .updateGuildWidgetSettings(guildId):
-            return "updateGuildWidgetSettings(guildId: \(guildId))"
+            return "updateGuildWidgetSettings(guildId.value: \(guildId.value))"
         case let .deleteGuild(guildId):
-            return "deleteGuild(guildId: \(guildId))"
+            return "deleteGuild(guildId.value: \(guildId.value))"
         case let .deleteGuildIntegration(guildId, integrationId):
-            return "deleteGuildIntegration(guildId: \(guildId), integrationId: \(integrationId))"
+            return "deleteGuildIntegration(guildId.value: \(guildId.value), integrationId.value: \(integrationId.value))"
         case let .leaveGuild(guildId):
-            return "leaveGuild(guildId: \(guildId))"
+            return "leaveGuild(guildId.value: \(guildId.value))"
         case let .unbanUserFromGuild(guildId, userId):
-            return "unbanUserFromGuild(guildId: \(guildId), userId: \(userId))"
+            return "unbanUserFromGuild(guildId.value: \(guildId.value), userId.value: \(userId.value))"
         case let .getGuildTemplate(code):
             return "getGuildTemplate(code: \(code))"
         case let .listGuildTemplates(guildId):
-            return "listGuildTemplates(guildId: \(guildId))"
+            return "listGuildTemplates(guildId.value: \(guildId.value))"
         case let .syncGuildTemplate(guildId, code):
-            return "syncGuildTemplate(guildId: \(guildId), code: \(code))"
+            return "syncGuildTemplate(guildId.value: \(guildId.value), code: \(code))"
         case let .createGuildFromTemplate(code):
             return "createGuildFromTemplate(code: \(code))"
         case let .createGuildTemplate(guildId):
-            return "createGuildTemplate(guildId: \(guildId))"
+            return "createGuildTemplate(guildId.value: \(guildId.value))"
         case let .updateGuildTemplate(guildId, code):
-            return "updateGuildTemplate(guildId: \(guildId), code: \(code))"
+            return "updateGuildTemplate(guildId.value: \(guildId.value), code: \(code))"
         case let .deleteGuildTemplate(guildId, code):
-            return "deleteGuildTemplate(guildId: \(guildId), code: \(code))"
+            return "deleteGuildTemplate(guildId.value: \(guildId.value), code: \(code))"
         case let .getFollowupMessage(applicationId, interactionToken, messageId):
-            return "getFollowupMessage(applicationId: \(applicationId), interactionToken: \(interactionToken), messageId: \(messageId))"
+            return "getFollowupMessage(applicationId.value: \(applicationId.value), interactionToken: \(interactionToken), messageId.value: \(messageId.value))"
         case let .getOriginalInteractionResponse(applicationId, interactionToken):
-            return "getOriginalInteractionResponse(applicationId: \(applicationId), interactionToken: \(interactionToken))"
+            return "getOriginalInteractionResponse(applicationId.value: \(applicationId.value), interactionToken: \(interactionToken))"
         case let .createFollowupMessage(applicationId, interactionToken):
-            return "createFollowupMessage(applicationId: \(applicationId), interactionToken: \(interactionToken))"
+            return "createFollowupMessage(applicationId.value: \(applicationId.value), interactionToken: \(interactionToken))"
         case let .createInteractionResponse(interactionId, interactionToken):
-            return "createInteractionResponse(interactionId: \(interactionId), interactionToken: \(interactionToken))"
+            return "createInteractionResponse(interactionId.value: \(interactionId.value), interactionToken: \(interactionToken))"
         case let .updateFollowupMessage(applicationId, interactionToken, messageId):
-            return "updateFollowupMessage(applicationId: \(applicationId), interactionToken: \(interactionToken), messageId: \(messageId))"
+            return "updateFollowupMessage(applicationId.value: \(applicationId.value), interactionToken: \(interactionToken), messageId.value: \(messageId.value))"
         case let .updateOriginalInteractionResponse(applicationId, interactionToken):
-            return "updateOriginalInteractionResponse(applicationId: \(applicationId), interactionToken: \(interactionToken))"
+            return "updateOriginalInteractionResponse(applicationId.value: \(applicationId.value), interactionToken: \(interactionToken))"
         case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
-            return "deleteFollowupMessage(applicationId: \(applicationId), interactionToken: \(interactionToken), messageId: \(messageId))"
+            return "deleteFollowupMessage(applicationId.value: \(applicationId.value), interactionToken: \(interactionToken), messageId.value: \(messageId.value))"
         case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
-            return "deleteOriginalInteractionResponse(applicationId: \(applicationId), interactionToken: \(interactionToken))"
+            return "deleteOriginalInteractionResponse(applicationId.value: \(applicationId.value), interactionToken: \(interactionToken))"
         case let .inviteResolve(code):
             return "inviteResolve(code: \(code))"
         case let .listChannelInvites(channelId):
-            return "listChannelInvites(channelId: \(channelId))"
+            return "listChannelInvites(channelId.value: \(channelId.value))"
         case let .listGuildInvites(guildId):
-            return "listGuildInvites(guildId: \(guildId))"
+            return "listGuildInvites(guildId.value: \(guildId.value))"
         case let .createChannelInvite(channelId):
-            return "createChannelInvite(channelId: \(channelId))"
+            return "createChannelInvite(channelId.value: \(channelId.value))"
         case let .inviteRevoke(code):
             return "inviteRevoke(code: \(code))"
         case let .getGuildMember(guildId, userId):
-            return "getGuildMember(guildId: \(guildId), userId: \(userId))"
+            return "getGuildMember(guildId.value: \(guildId.value), userId.value: \(userId.value))"
         case let .getOwnGuildMember(guildId):
-            return "getOwnGuildMember(guildId: \(guildId))"
+            return "getOwnGuildMember(guildId.value: \(guildId.value))"
         case let .listGuildMembers(guildId):
-            return "listGuildMembers(guildId: \(guildId))"
+            return "listGuildMembers(guildId.value: \(guildId.value))"
         case let .searchGuildMembers(guildId):
-            return "searchGuildMembers(guildId: \(guildId))"
+            return "searchGuildMembers(guildId.value: \(guildId.value))"
         case let .addGuildMember(guildId, userId):
-            return "addGuildMember(guildId: \(guildId), userId: \(userId))"
+            return "addGuildMember(guildId.value: \(guildId.value), userId.value: \(userId.value))"
         case let .updateGuildMember(guildId, userId):
-            return "updateGuildMember(guildId: \(guildId), userId: \(userId))"
+            return "updateGuildMember(guildId.value: \(guildId.value), userId.value: \(userId.value))"
         case let .updateOwnGuildMember(guildId):
-            return "updateOwnGuildMember(guildId: \(guildId))"
+            return "updateOwnGuildMember(guildId.value: \(guildId.value))"
         case let .deleteGuildMember(guildId, userId):
-            return "deleteGuildMember(guildId: \(guildId), userId: \(userId))"
+            return "deleteGuildMember(guildId.value: \(guildId.value), userId.value: \(userId.value))"
         case let .getMessage(channelId, messageId):
-            return "getMessage(channelId: \(channelId), messageId: \(messageId))"
+            return "getMessage(channelId.value: \(channelId.value), messageId.value: \(messageId.value))"
         case let .listMessageReactionsByEmoji(channelId, messageId, emojiName):
-            return "listMessageReactionsByEmoji(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
+            return "listMessageReactionsByEmoji(channelId.value: \(channelId.value), messageId.value: \(messageId.value), emojiName: \(emojiName))"
         case let .listMessages(channelId):
-            return "listMessages(channelId: \(channelId))"
+            return "listMessages(channelId.value: \(channelId.value))"
         case let .addOwnMessageReaction(channelId, messageId, emojiName):
-            return "addOwnMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
+            return "addOwnMessageReaction(channelId.value: \(channelId.value), messageId.value: \(messageId.value), emojiName: \(emojiName))"
         case let .bulkDeleteMessages(channelId):
-            return "bulkDeleteMessages(channelId: \(channelId))"
+            return "bulkDeleteMessages(channelId.value: \(channelId.value))"
         case let .createMessage(channelId):
-            return "createMessage(channelId: \(channelId))"
+            return "createMessage(channelId.value: \(channelId.value))"
         case let .crosspostMessage(channelId, messageId):
-            return "crosspostMessage(channelId: \(channelId), messageId: \(messageId))"
+            return "crosspostMessage(channelId.value: \(channelId.value), messageId.value: \(messageId.value))"
         case let .updateMessage(channelId, messageId):
-            return "updateMessage(channelId: \(channelId), messageId: \(messageId))"
+            return "updateMessage(channelId.value: \(channelId.value), messageId.value: \(messageId.value))"
         case let .deleteAllMessageReactions(channelId, messageId):
-            return "deleteAllMessageReactions(channelId: \(channelId), messageId: \(messageId))"
+            return "deleteAllMessageReactions(channelId.value: \(channelId.value), messageId.value: \(messageId.value))"
         case let .deleteAllMessageReactionsByEmoji(channelId, messageId, emojiName):
-            return "deleteAllMessageReactionsByEmoji(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
+            return "deleteAllMessageReactionsByEmoji(channelId.value: \(channelId.value), messageId.value: \(messageId.value), emojiName: \(emojiName))"
         case let .deleteMessage(channelId, messageId):
-            return "deleteMessage(channelId: \(channelId), messageId: \(messageId))"
+            return "deleteMessage(channelId.value: \(channelId.value), messageId.value: \(messageId.value))"
         case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
-            return "deleteOwnMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName))"
+            return "deleteOwnMessageReaction(channelId.value: \(channelId.value), messageId.value: \(messageId.value), emojiName: \(emojiName))"
         case let .deleteUserMessageReaction(channelId, messageId, emojiName, userId):
-            return "deleteUserMessageReaction(channelId: \(channelId), messageId: \(messageId), emojiName: \(emojiName), userId: \(userId))"
+            return "deleteUserMessageReaction(channelId.value: \(channelId.value), messageId.value: \(messageId.value), emojiName: \(emojiName), userId.value: \(userId.value))"
         case .getOwnOauth2Application:
             return "getOwnOauth2Application"
         case let .listGuildRoles(guildId):
-            return "listGuildRoles(guildId: \(guildId))"
+            return "listGuildRoles(guildId.value: \(guildId.value))"
         case let .addGuildMemberRole(guildId, userId, roleId):
-            return "addGuildMemberRole(guildId: \(guildId), userId: \(userId), roleId: \(roleId))"
+            return "addGuildMemberRole(guildId.value: \(guildId.value), userId.value: \(userId.value), roleId.value: \(roleId.value))"
         case let .createGuildRole(guildId):
-            return "createGuildRole(guildId: \(guildId))"
+            return "createGuildRole(guildId.value: \(guildId.value))"
         case let .bulkUpdateGuildRoles(guildId):
-            return "bulkUpdateGuildRoles(guildId: \(guildId))"
+            return "bulkUpdateGuildRoles(guildId.value: \(guildId.value))"
         case let .updateGuildRole(guildId, roleId):
-            return "updateGuildRole(guildId: \(guildId), roleId: \(roleId))"
+            return "updateGuildRole(guildId.value: \(guildId.value), roleId.value: \(roleId.value))"
         case let .deleteGuildMemberRole(guildId, userId, roleId):
-            return "deleteGuildMemberRole(guildId: \(guildId), userId: \(userId), roleId: \(roleId))"
+            return "deleteGuildMemberRole(guildId.value: \(guildId.value), userId.value: \(userId.value), roleId.value: \(roleId.value))"
         case let .deleteGuildRole(guildId, roleId):
-            return "deleteGuildRole(guildId: \(guildId), roleId: \(roleId))"
+            return "deleteGuildRole(guildId.value: \(guildId.value), roleId.value: \(roleId.value))"
         case let .getApplicationRoleConnectionsMetadata(applicationId):
-            return "getApplicationRoleConnectionsMetadata(applicationId: \(applicationId))"
+            return "getApplicationRoleConnectionsMetadata(applicationId.value: \(applicationId.value))"
         case let .getApplicationUserRoleConnection(applicationId):
-            return "getApplicationUserRoleConnection(applicationId: \(applicationId))"
+            return "getApplicationUserRoleConnection(applicationId.value: \(applicationId.value))"
         case let .updateApplicationRoleConnectionsMetadata(applicationId):
-            return "updateApplicationRoleConnectionsMetadata(applicationId: \(applicationId))"
+            return "updateApplicationRoleConnectionsMetadata(applicationId.value: \(applicationId.value))"
         case let .updateApplicationUserRoleConnection(applicationId):
-            return "updateApplicationUserRoleConnection(applicationId: \(applicationId))"
+            return "updateApplicationUserRoleConnection(applicationId.value: \(applicationId.value))"
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
-            return "getGuildScheduledEvent(guildId: \(guildId), guildScheduledEventId: \(guildScheduledEventId))"
+            return "getGuildScheduledEvent(guildId.value: \(guildId.value), guildScheduledEventId.value: \(guildScheduledEventId.value))"
         case let .listGuildScheduledEventUsers(guildId, guildScheduledEventId):
-            return "listGuildScheduledEventUsers(guildId: \(guildId), guildScheduledEventId: \(guildScheduledEventId))"
+            return "listGuildScheduledEventUsers(guildId.value: \(guildId.value), guildScheduledEventId.value: \(guildScheduledEventId.value))"
         case let .listGuildScheduledEvents(guildId):
-            return "listGuildScheduledEvents(guildId: \(guildId))"
+            return "listGuildScheduledEvents(guildId.value: \(guildId.value))"
         case let .createGuildScheduledEvent(guildId):
-            return "createGuildScheduledEvent(guildId: \(guildId))"
+            return "createGuildScheduledEvent(guildId.value: \(guildId.value))"
         case let .updateGuildScheduledEvent(guildId, guildScheduledEventId):
-            return "updateGuildScheduledEvent(guildId: \(guildId), guildScheduledEventId: \(guildScheduledEventId))"
+            return "updateGuildScheduledEvent(guildId.value: \(guildId.value), guildScheduledEventId.value: \(guildScheduledEventId.value))"
         case let .deleteGuildScheduledEvent(guildId, guildScheduledEventId):
-            return "deleteGuildScheduledEvent(guildId: \(guildId), guildScheduledEventId: \(guildScheduledEventId))"
+            return "deleteGuildScheduledEvent(guildId.value: \(guildId.value), guildScheduledEventId.value: \(guildScheduledEventId.value))"
         case let .getStageInstance(channelId):
-            return "getStageInstance(channelId: \(channelId))"
+            return "getStageInstance(channelId.value: \(channelId.value))"
         case .createStageInstance:
             return "createStageInstance"
         case let .updateStageInstance(channelId):
-            return "updateStageInstance(channelId: \(channelId))"
+            return "updateStageInstance(channelId.value: \(channelId.value))"
         case let .deleteStageInstance(channelId):
-            return "deleteStageInstance(channelId: \(channelId))"
+            return "deleteStageInstance(channelId.value: \(channelId.value))"
         case let .getGuildSticker(guildId, stickerId):
-            return "getGuildSticker(guildId: \(guildId), stickerId: \(stickerId))"
+            return "getGuildSticker(guildId.value: \(guildId.value), stickerId.value: \(stickerId.value))"
         case let .getSticker(stickerId):
-            return "getSticker(stickerId: \(stickerId))"
+            return "getSticker(stickerId.value: \(stickerId.value))"
         case let .listGuildStickers(guildId):
-            return "listGuildStickers(guildId: \(guildId))"
+            return "listGuildStickers(guildId.value: \(guildId.value))"
         case .listStickerPacks:
             return "listStickerPacks"
         case let .createGuildSticker(guildId):
-            return "createGuildSticker(guildId: \(guildId))"
+            return "createGuildSticker(guildId.value: \(guildId.value))"
         case let .updateGuildSticker(guildId, stickerId):
-            return "updateGuildSticker(guildId: \(guildId), stickerId: \(stickerId))"
+            return "updateGuildSticker(guildId.value: \(guildId.value), stickerId.value: \(stickerId.value))"
         case let .deleteGuildSticker(guildId, stickerId):
-            return "deleteGuildSticker(guildId: \(guildId), stickerId: \(stickerId))"
+            return "deleteGuildSticker(guildId.value: \(guildId.value), stickerId.value: \(stickerId.value))"
         case let .getActiveGuildThreads(guildId):
-            return "getActiveGuildThreads(guildId: \(guildId))"
+            return "getActiveGuildThreads(guildId.value: \(guildId.value))"
         case let .getThreadMember(channelId, userId):
-            return "getThreadMember(channelId: \(channelId), userId: \(userId))"
+            return "getThreadMember(channelId.value: \(channelId.value), userId.value: \(userId.value))"
         case let .listOwnPrivateArchivedThreads(channelId):
-            return "listOwnPrivateArchivedThreads(channelId: \(channelId))"
+            return "listOwnPrivateArchivedThreads(channelId.value: \(channelId.value))"
         case let .listPrivateArchivedThreads(channelId):
-            return "listPrivateArchivedThreads(channelId: \(channelId))"
+            return "listPrivateArchivedThreads(channelId.value: \(channelId.value))"
         case let .listPublicArchivedThreads(channelId):
-            return "listPublicArchivedThreads(channelId: \(channelId))"
+            return "listPublicArchivedThreads(channelId.value: \(channelId.value))"
         case let .listThreadMembers(channelId):
-            return "listThreadMembers(channelId: \(channelId))"
+            return "listThreadMembers(channelId.value: \(channelId.value))"
         case let .addThreadMember(channelId, userId):
-            return "addThreadMember(channelId: \(channelId), userId: \(userId))"
+            return "addThreadMember(channelId.value: \(channelId.value), userId.value: \(userId.value))"
         case let .joinThread(channelId):
-            return "joinThread(channelId: \(channelId))"
+            return "joinThread(channelId.value: \(channelId.value))"
         case let .createThread(channelId):
-            return "createThread(channelId: \(channelId))"
+            return "createThread(channelId.value: \(channelId.value))"
         case let .createThreadFromMessage(channelId, messageId):
-            return "createThreadFromMessage(channelId: \(channelId), messageId: \(messageId))"
+            return "createThreadFromMessage(channelId.value: \(channelId.value), messageId.value: \(messageId.value))"
         case let .createThreadInForumChannel(channelId):
-            return "createThreadInForumChannel(channelId: \(channelId))"
+            return "createThreadInForumChannel(channelId.value: \(channelId.value))"
         case let .deleteThreadMember(channelId, userId):
-            return "deleteThreadMember(channelId: \(channelId), userId: \(userId))"
+            return "deleteThreadMember(channelId.value: \(channelId.value), userId.value: \(userId.value))"
         case let .leaveThread(channelId):
-            return "leaveThread(channelId: \(channelId))"
+            return "leaveThread(channelId.value: \(channelId.value))"
         case .getOwnUser:
             return "getOwnUser"
         case let .getUser(userId):
-            return "getUser(userId: \(userId))"
+            return "getUser(userId.value: \(userId.value))"
         case .listOwnConnections:
             return "listOwnConnections"
         case .updateOwnUser:
             return "updateOwnUser"
         case let .listGuildVoiceRegions(guildId):
-            return "listGuildVoiceRegions(guildId: \(guildId))"
+            return "listGuildVoiceRegions(guildId.value: \(guildId.value))"
         case .listVoiceRegions:
             return "listVoiceRegions"
         case let .updateSelfVoiceState(guildId):
-            return "updateSelfVoiceState(guildId: \(guildId))"
+            return "updateSelfVoiceState(guildId.value: \(guildId.value))"
         case let .updateVoiceState(guildId, userId):
-            return "updateVoiceState(guildId: \(guildId), userId: \(userId))"
+            return "updateVoiceState(guildId.value: \(guildId.value), userId.value: \(userId.value))"
         case let .getGuildWebhooks(guildId):
-            return "getGuildWebhooks(guildId: \(guildId))"
+            return "getGuildWebhooks(guildId.value: \(guildId.value))"
         case let .getWebhook(webhookId):
-            return "getWebhook(webhookId: \(webhookId))"
+            return "getWebhook(webhookId.value: \(webhookId.value))"
         case let .getWebhookByToken(webhookId, webhookToken):
-            return "getWebhookByToken(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+            return "getWebhookByToken(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
-            return "getWebhookMessage(webhookId: \(webhookId), webhookToken: \(webhookToken), messageId: \(messageId))"
+            return "getWebhookMessage(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken), messageId.value: \(messageId.value))"
         case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
-            return "getWebhooksMessagesOriginal(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+            return "getWebhooksMessagesOriginal(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         case let .listChannelWebhooks(channelId):
-            return "listChannelWebhooks(channelId: \(channelId))"
+            return "listChannelWebhooks(channelId.value: \(channelId.value))"
         case let .createWebhook(channelId):
-            return "createWebhook(channelId: \(channelId))"
+            return "createWebhook(channelId.value: \(channelId.value))"
         case let .executeWebhook(webhookId, webhookToken):
-            return "executeWebhook(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+            return "executeWebhook(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
-            return "patchWebhooksMessagesOriginal(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+            return "patchWebhooksMessagesOriginal(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         case let .updateWebhook(webhookId):
-            return "updateWebhook(webhookId: \(webhookId))"
+            return "updateWebhook(webhookId.value: \(webhookId.value))"
         case let .updateWebhookByToken(webhookId, webhookToken):
-            return "updateWebhookByToken(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+            return "updateWebhookByToken(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         case let .updateWebhookMessage(webhookId, webhookToken, messageId):
-            return "updateWebhookMessage(webhookId: \(webhookId), webhookToken: \(webhookToken), messageId: \(messageId))"
+            return "updateWebhookMessage(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken), messageId.value: \(messageId.value))"
         case let .deleteWebhook(webhookId):
-            return "deleteWebhook(webhookId: \(webhookId))"
+            return "deleteWebhook(webhookId.value: \(webhookId.value))"
         case let .deleteWebhookByToken(webhookId, webhookToken):
-            return "deleteWebhookByToken(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+            return "deleteWebhookByToken(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
-            return "deleteWebhookMessage(webhookId: \(webhookId), webhookToken: \(webhookToken), messageId: \(messageId))"
+            return "deleteWebhookMessage(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken), messageId.value: \(messageId.value))"
         case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
-            return "deleteWebhooksMessagesOriginal(webhookId: \(webhookId), webhookToken: \(webhookToken))"
+            return "deleteWebhooksMessagesOriginal(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         }
     }
 }

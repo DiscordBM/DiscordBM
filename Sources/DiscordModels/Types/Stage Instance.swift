@@ -9,8 +9,8 @@ public struct StageInstance: Sendable, Codable {
     }
     
     public var id: String
-    public var guild_id: String
-    public var channel_id: String
+    public var guild_id: Snowflake<Guild>
+    public var channel_id: Snowflake<DiscordChannel>
     public var topic: String
     public var privacy_level: PrivacyLevel
     public var discoverable_disabled: Bool

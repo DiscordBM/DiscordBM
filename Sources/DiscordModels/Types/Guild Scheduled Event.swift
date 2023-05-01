@@ -28,8 +28,8 @@ public struct GuildScheduledEvent: Sendable, Codable {
     }
     
     public var id: String
-    public var guild_id: String
-    public var channel_id: String?
+    public var guild_id: Snowflake<Guild>
+    public var channel_id: Snowflake<DiscordChannel>?
     public var creator_id: String?
     public var name: String
     public var description: String?
@@ -45,5 +45,5 @@ public struct GuildScheduledEvent: Sendable, Codable {
     public var image: String?
     public var sku_ids: [String]?
     /// Only for Gateway `guildScheduledEventUserAdd` events.
-    public var user_ids: [String]?
+    public var user_ids: [Snowflake<DiscordUser>]?
 }

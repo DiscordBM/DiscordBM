@@ -10,20 +10,22 @@ import OrderedCollections
 @dynamicMemberLookup
 public actor DiscordCache {
     
-    public enum StringChoice: Sendable, ExpressibleByArrayLiteral {
+    public enum SnowflakeChoice<Tag>: Sendable, ExpressibleByArrayLiteral {
         case all
         case none
-        case some(Set<String>)
+        case some(Set<Snowflake<Tag>>)
         
         public init(arrayLiteral elements: String...) {
-            self = .some(Set(elements))
+            let guildIds = elements.map(Snowflake<Tag>.init)
+            self = .some(Set(guildIds))
         }
         
         public init<S>(_ elements: S) where S: Sequence, S.Element == String {
-            self = .some(.init(elements))
+            let guildIds = elements.map(Snowflake<Tag>.init)
+            self = .some(Set(guildIds))
         }
         
-        func contains(_ value: String) -> Bool {
+        func contains(_ value: Snowflake<Tag>) -> Bool {
             switch self {
             case .all: return true
             case .none: return false
@@ -55,15 +57,15 @@ public actor DiscordCache {
     public enum RequestMembers: Sendable {
         case disabled
         /// Only requests members.
-        case enabled(guilds: StringChoice = .all)
+        case enabled(guilds: SnowflakeChoice<Guild> = .all)
         /// Requests all members as well as their presences.
-        case enabledWithPresences(guilds: StringChoice = .all)
+        case enabledWithPresences(guilds: SnowflakeChoice<Guild> = .all)
         
         public static var enabled: RequestMembers { .enabled() }
         
         public static var enabledWithPresences: RequestMembers { .enabledWithPresences() }
         
-        func isEnabled(for guildId: String) -> Bool {
+        func isEnabled(for guildId: Snowflake<Guild>) -> Bool {
             switch self {
             case .disabled: return false
             case let .enabled(guilds), let .enabledWithPresences(guilds):
@@ -71,7 +73,7 @@ public actor DiscordCache {
             }
         }
         
-        func wantsPresences(for guildId: String) -> Bool {
+        func wantsPresences(for guildId: Snowflake<Guild>) -> Bool {
             switch self {
             case .disabled, .enabled: return false
             case let .enabledWithPresences(guilds):
@@ -87,27 +89,27 @@ public actor DiscordCache {
         /// Caches messages, replaces edited messages with the new message,
         /// removes deleted messages from storage.
         case normal(
-            guilds: StringChoice = .all,
-            channels: StringChoice = .all
+            guilds: SnowflakeChoice<Guild> = .all,
+            channels: SnowflakeChoice<DiscordChannel> = .all
         )
         /// Caches messages, replaces edited messages with the new message,
         /// moves deleted messages to another property of the storage.
         case saveDeleted(
-            guilds: StringChoice = .all,
-            channels: StringChoice = .all
+            guilds: SnowflakeChoice<Guild> = .all,
+            channels: SnowflakeChoice<DiscordChannel> = .all
         )
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, removes deleted messages from storage.
         case saveEditHistory(
-            guilds: StringChoice = .all,
-            channels: StringChoice = .all
+            guilds: SnowflakeChoice<Guild> = .all,
+            channels: SnowflakeChoice<DiscordChannel> = .all
         )
         /// Caches messages, replaces edited messages with the new message but moves old messages
         /// to another property of the storage, moves deleted messages to another property of
         /// the storage.
         case saveEditHistoryAndDeleted(
-            guilds: StringChoice = .all,
-            channels: StringChoice = .all
+            guilds: SnowflakeChoice<Guild> = .all,
+            channels: SnowflakeChoice<DiscordChannel> = .all
         )
         
         public static var normal: MessageCachingPolicy { .normal() }
@@ -120,30 +122,42 @@ public actor DiscordCache {
             .saveEditHistoryAndDeleted()
         }
         
-        func shouldSave(guildId: String?, channelId: String) -> Bool {
+        func shouldSave(
+            guildId: Snowflake<Guild>?,
+            channelId: Snowflake<DiscordChannel>
+        ) -> Bool {
             switch self {
             case let .normal(guilds, channels),
                 let .saveDeleted(guilds, channels),
                 let .saveEditHistory(guilds, channels),
                 let .saveEditHistoryAndDeleted(guilds, channels):
-                return guildId.map { guilds.contains($0) } ?? channels.contains(channelId)
+                let guildContains = guildId.map { guilds.contains($0) } ?? false
+                return guildContains || channels.contains(channelId)
             }
         }
         
-        func shouldSaveDeleted(guildId: String?, channelId: String) -> Bool {
+        func shouldSaveDeleted(
+            guildId: Snowflake<Guild>?,
+            channelId: Snowflake<DiscordChannel>
+        ) -> Bool {
             switch self {
             case let .saveDeleted(guilds, channels),
                 let .saveEditHistoryAndDeleted(guilds, channels):
-                return guildId.map { guilds.contains($0) } ?? channels.contains(channelId)
+                let guildContains = guildId.map { guilds.contains($0) } ?? false
+                return guildContains || channels.contains(channelId)
             case .normal, .saveEditHistory: return false
             }
         }
         
-        func shouldSaveHistory(guildId: String?, channelId: String) -> Bool {
+        func shouldSaveHistory(
+            guildId: Snowflake<Guild>?,
+            channelId: Snowflake<DiscordChannel>
+        ) -> Bool {
             switch self {
             case let .saveEditHistory(guilds, channels),
                 let .saveEditHistoryAndDeleted(guilds, channels):
-                return guildId.map { guilds.contains($0) } ?? channels.contains(channelId)
+                let guildContains = guildId.map { guilds.contains($0) } ?? false
+                return  guildContains || channels.contains(channelId)
             case .normal, .saveDeleted: return false
             }
         }
@@ -209,10 +223,10 @@ public actor DiscordCache {
     public struct Storage: @unchecked Sendable, Codable {
         
         public struct InviteID: Sendable, Codable, Hashable {
-            public var guildId: String?
-            public var channelId: String
+            public var guildId: Snowflake<Guild>?
+            public var channelId: Snowflake<DiscordChannel>
             
-            public init(guildId: String? = nil, channelId: String) {
+            public init(guildId: Snowflake<Guild>? = nil, channelId: Snowflake<DiscordChannel>) {
                 self.guildId = guildId
                 self.channelId = channelId
             }
@@ -222,48 +236,48 @@ public actor DiscordCache {
         /// so we can remove the oldest items.
         
         /// `[GuildID: Guild]`
-        public var guilds: [String: Gateway.GuildCreate] = [:]
+        public var guilds: [Snowflake<Guild>: Gateway.GuildCreate] = [:]
         /// `[ChannelID: Channel]`
         /// Non-guild channels.
-        public var channels: [String: DiscordChannel] = [:]
+        public var channels: [Snowflake<DiscordChannel>: DiscordChannel] = [:]
         /// `[GuildID or TargetID or ""]: [Entry]]`
         /// `""` is used for entries that don't have a `guild_id`/`target_id`, if any.
-        public var auditLogs: OrderedDictionary<String, [AuditLog.Entry]> = [:]
+        public var auditLogs: OrderedDictionary<AnySnowflake, [AuditLog.Entry]> = [:]
         /// `[GuildID: [Integration]]`
-        public var integrations: OrderedDictionary<String, [Integration]> = [:]
+        public var integrations: OrderedDictionary<Snowflake<Guild>, [Integration]> = [:]
         /// `[InviteID: [Invite]]`
         public var invites: OrderedDictionary<InviteID, [Gateway.InviteCreate]> = [:]
         /// `[ChannelID: [Message]]`
-        public var messages: OrderedDictionary<String, [Gateway.MessageCreate]> = [:]
+        public var messages: OrderedDictionary<Snowflake<DiscordChannel>, [Gateway.MessageCreate]> = [:]
         /// `[ChannelID: [MessageID: [EditedMessage]]]`
         /// It's `[EditedMessage]` because it will keep all edited versions of a message.
         /// This does not keep the most recent message, which is available in `messages`.
-        public var editedMessages: OrderedDictionary<String, [String: [Gateway.MessageCreate]]> = [:]
+        public var editedMessages: OrderedDictionary<Snowflake<DiscordChannel>, [Snowflake<DiscordChannel.Message>: [Gateway.MessageCreate]]> = [:]
         /// `[ChannelID: [MessageID: [DeletedMessage]]]`
         /// It's `[DeletedMessage]` because it might have the edited versions of the message too.
-        public var deletedMessages: OrderedDictionary<String, [String: [Gateway.MessageCreate]]> = [:]
+        public var deletedMessages: OrderedDictionary<Snowflake<DiscordChannel>, [Snowflake<DiscordChannel.Message>: [Gateway.MessageCreate]]> = [:]
         /// `[GuildID: [Rule]]`
-        public var autoModerationRules: OrderedDictionary<String, [AutoModerationRule]> = [:]
+        public var autoModerationRules: OrderedDictionary<Snowflake<Guild>, [AutoModerationRule]> = [:]
         /// `[GuildID: [ActionExecution]]`
-        public var autoModerationExecutions: OrderedDictionary<String, [AutoModerationActionExecution]> = [:]
+        public var autoModerationExecutions: OrderedDictionary<Snowflake<Guild>, [AutoModerationActionExecution]> = [:]
         /// `[CommandID (or ApplicationID): Permissions]`
         public var applicationCommandPermissions: OrderedDictionary<String, GuildApplicationCommandPermissions> = [:]
         /// The current bot-application.
         public var application: PartialApplication?
         /// The current bot user.
         public var botUser: DiscordUser?
-        
+
         public init(
-            guilds: [String: Gateway.GuildCreate] = [:],
-            channels: [String: DiscordChannel] = [:],
-            auditLogs: OrderedDictionary<String, [AuditLog.Entry]> = [:],
-            integrations: OrderedDictionary<String, [Integration]> = [:],
+            guilds: [Snowflake<Guild>: Gateway.GuildCreate] = [:],
+            channels: [Snowflake<DiscordChannel>: DiscordChannel] = [:],
+            auditLogs: OrderedDictionary<AnySnowflake, [AuditLog.Entry]> = [:],
+            integrations: OrderedDictionary<Snowflake<Guild>, [Integration]> = [:],
             invites: OrderedDictionary<InviteID, [Gateway.InviteCreate]> = [:],
-            messages: OrderedDictionary<String, [Gateway.MessageCreate]> = [:],
-            editedMessages: OrderedDictionary<String, [String: [Gateway.MessageCreate]]> = [:],
-            deletedMessages: OrderedDictionary<String, [String: [Gateway.MessageCreate]]> = [:],
-            autoModerationRules: OrderedDictionary<String, [AutoModerationRule]> = [:],
-            autoModerationExecutions: OrderedDictionary<String, [AutoModerationActionExecution]> = [:],
+            messages: OrderedDictionary<Snowflake<DiscordChannel>, [Gateway.MessageCreate]> = [:],
+            editedMessages: OrderedDictionary<Snowflake<DiscordChannel>, [Snowflake<DiscordChannel.Message>: [Gateway.MessageCreate]]> = [:],
+            deletedMessages: OrderedDictionary<Snowflake<DiscordChannel>, [Snowflake<DiscordChannel.Message>: [Gateway.MessageCreate]]> = [:],
+            autoModerationRules: OrderedDictionary<Snowflake<Guild>, [AutoModerationRule]> = [:],
+            autoModerationExecutions: OrderedDictionary<Snowflake<Guild>, [AutoModerationActionExecution]> = [:],
             applicationCommandPermissions: OrderedDictionary<String, GuildApplicationCommandPermissions> = [:],
             application: PartialApplication? = nil,
             botUser: DiscordUser? = nil
@@ -418,7 +432,7 @@ public actor DiscordCache {
                        self.intents.contains(.guilds),
                        let forumIdx = self.guilds[guildId]?.channels
                         .firstIndex(where: { $0.id == parentId }) {
-                        self.guilds[guildId]?.channels[forumIdx].last_message_id = channel.id
+                        self.guilds[guildId]?.channels[forumIdx].last_message_id = .init(channel.id)
                     }
                 } else {
                     self.guilds[guildId]?.threads.append(channel)
@@ -430,7 +444,7 @@ public actor DiscordCache {
                 if channel.type == .guildForum,
                    let parentId = channel.parent_id,
                    self.intents.contains(.guilds) {
-                    self.channels[parentId]?.last_message_id = channel.id
+                    self.channels[parentId]?.last_message_id = .init(channel.id)
                 }
             }
         case let .threadUpdate(channel):
@@ -607,7 +621,9 @@ public actor DiscordCache {
                 self.guilds[user.guild_id]!.guild_scheduled_events[idx].user_count! -= 1
             }
         case let .guildAuditLogEntryCreate(log):
-            self.auditLogs[log.guild_id ?? log.target_id ?? "", default: []].append(log)
+            let guildId = log.guild_id.map(AnySnowflake.init)
+            let targetId = log.target_id.map(AnySnowflake.init)
+            self.auditLogs[guildId ?? targetId ?? AnySnowflake(""), default: []].append(log)
         case let .integrationCreate(integration), let .integrationUpdate(integration):
             if let idx = self.integrations[integration.guild_id]?
                 .firstIndex(where: { $0.id == integration.id }) {

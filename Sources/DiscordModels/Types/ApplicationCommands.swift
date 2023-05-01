@@ -116,10 +116,10 @@ public struct ApplicationCommand: Sendable, Codable {
         }
     }
     
-    public var id: String
+    public var id: Snowflake<ApplicationCommand>
     public var type: Kind?
-    public var application_id: String
-    public var guild_id: String?
+    public var application_id: Snowflake<PartialApplication>
+    public var guild_id: Snowflake<Guild>?
     public var name: String
     public var name_localizations: DiscordLocaleDict<String>?
     public var name_localized: String? /// Only for endpoints like get-application-commands
@@ -158,7 +158,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
         
         /// Read `helpAnchor` for help about each error case.
         public enum ConversionError: LocalizedError {
-            case couldNotConvertToInteger(String)
+            case couldNotConvertToInteger(Snowflake<Guild>)
             
             public var errorDescription: String? {
                 switch self {
@@ -169,32 +169,32 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
             
             public var helpAnchor: String? {
                 switch self {
-                case let .couldNotConvertToInteger(string):
-                    return "Couldn't convert \(string.debugDescription) to an integer"
+                case let .couldNotConvertToInteger(id):
+                    return "Couldn't convert \(id.value.debugDescription) to an integer"
                 }
             }
         }
         
         public static func allChannels(
-            inGuildWithId guildId: String,
+            inGuildWithId guildId: Snowflake<Guild>,
             permission: Bool
         ) throws -> Self {
-            guard let guildNumber = Int(guildId) else {
+            guard let guildNumber = Int(guildId.value) else {
                 throw ConversionError.couldNotConvertToInteger(guildId)
             }
             return self.init(type: .channel, permission: permission, id: "\(guildNumber - 1)")
         }
         
         public static func allMembers(
-            inGuildWithId guildId: String,
+            inGuildWithId guildId: Snowflake<Guild>,
             permission: Bool
         ) throws -> Self {
-            self.init(type: .user, permission: permission, id: guildId)
+            self.init(type: .user, permission: permission, id: guildId.value)
         }
     }
     
     public var permissions: [Permission]
     public var id: String
-    public var guild_id: String
-    public var application_id: String
+    public var guild_id: Snowflake<Guild>
+    public var application_id: Snowflake<PartialApplication>
 }

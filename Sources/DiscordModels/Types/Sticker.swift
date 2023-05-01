@@ -24,7 +24,7 @@ public struct Sticker: Sendable, Codable {
     public var type: Kind
     public var format_type: FormatKind
     public var available: Bool?
-    public var guild_id: String?
+    public var guild_id: Snowflake<Guild>?
     public var user: DiscordUser?
     public var sort_value: Int?
     public var version: Int?
