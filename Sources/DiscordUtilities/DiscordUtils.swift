@@ -101,7 +101,7 @@ public enum DiscordUtils {
             .replacingOccurrences(of: #"\"#, with: #"\\"#)
             .replacingOccurrences(of: #"|"#, with: #"\|"#) /// Makes invisible
             .replacingOccurrences(of: #">"#, with: #"\>"#) /// Quotes
-            .replacingOccurrences(of: #"@"#, with: #"\@"#) /// `@everyone`
+            .replacingOccurrences(of: #"@"#, with: #"\@"#) /// `@everyone`. Not 100% effective
             .replacingOccurrences(of: #"<"#, with: #"\<"#) /// `<::>` ids like custom emojis
             .replacingOccurrences(of: #"["#, with: #"\["#) /// Markdown link syntax (`[]()`)
             .replacingOccurrences(of: ###"#"###, with: ###"\#"###) /// For titles, e.g. `### Title`

@@ -9,9 +9,9 @@ class DiscordClientTests: XCTestCase {
     
     var httpClient: HTTPClient!
     var client: (any DiscordClient)!
-    
+
     override func setUp() async throws {
-        self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+        self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
         self.client = DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
@@ -20,11 +20,11 @@ class DiscordClientTests: XCTestCase {
             configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
         )
     }
-    
-    override func tearDown() async throws {
-        try await httpClient.shutdown()
+
+    deinit {
+        try! httpClient.syncShutdown()
     }
-    
+
     /// Just here so you know.
     /// We can't initiate interactions with automations (not officially at least), so can't test.
     func testInteractions() { }

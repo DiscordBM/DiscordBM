@@ -12,12 +12,12 @@ class GatewayConnectionTests: XCTestCase {
         DiscordGlobalConfiguration.makeLogger = {
             Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
         }
-        self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+        self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
     }
     
-    override func tearDown() async throws {
+    deinit {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
-        try await httpClient.shutdown()
+        try! httpClient.syncShutdown()
     }
     
     func testConnect() async throws {
@@ -39,9 +39,8 @@ class GatewayConnectionTests: XCTestCase {
         let expectation = expectation(description: "Connected")
         
         let connectionInfo = ConnectionInfo()
-        
-        await bot.addEventHandler { event in
-            Task {
+        Task {
+            for await event in await bot.makeEventsStream() {
                 if case let .ready(ready) = event.data {
                     await connectionInfo.setReady(ready)
                     expectation.fulfill()
@@ -52,8 +51,12 @@ class GatewayConnectionTests: XCTestCase {
                 }
             }
         }
-        
+
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(nanoseconds: 200_000_000)
+
         Task { await bot.connect() }
+
         await waitFulfill(for: [expectation], timeout: 10)
         
         let didHello = await connectionInfo.didHello
@@ -99,9 +102,9 @@ class GatewayConnectionTests: XCTestCase {
         let expectation = expectation(description: "Connected")
         
         let connectionInfo = ConnectionInfo()
-        
-        await bot.addEventHandler { event in
-            Task {
+
+        Task {
+            for await event in await bot.makeEventsStream() {
                 if case let .ready(ready) = event.data {
                     await connectionInfo.setReady(ready)
                     expectation.fulfill()
@@ -112,8 +115,12 @@ class GatewayConnectionTests: XCTestCase {
                 }
             }
         }
-        
+
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(nanoseconds: 200_000_000)
+
         Task { await bot.connect() }
+
         await waitFulfill(for: [expectation], timeout: 10)
         
         let didHello = await connectionInfo.didHello
@@ -156,15 +163,20 @@ class GatewayConnectionTests: XCTestCase {
         )
         
         let expectation = expectation(description: "Connected")
-        
-        await bot.addEventHandler { event in
-            if case .ready = event.data {
-                expectation.fulfill()
+
+        Task {
+            for await event in await bot.makeEventsStream() {
+                if case .ready = event.data {
+                    expectation.fulfill()
+                }
             }
         }
-        
+
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(nanoseconds: 200_000_000)
+
         Task { await bot.connect() }
-        
+
         await waitFulfill(for: [expectation], timeout: 10)
         
         /// Didn't find a way to properly verify these functions.
@@ -215,7 +227,7 @@ class GatewayConnectionTests: XCTestCase {
 
         let connectionInfo = ConnectionInfo()
 
-        let stream = await bot.makeEventStream()
+        let stream = await bot.makeEventsStream()
 
         Task {
             for await event in stream {
@@ -230,7 +242,11 @@ class GatewayConnectionTests: XCTestCase {
             }
         }
 
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(nanoseconds: 200_000_000)
+
         Task { await bot.connect() }
+
         await waitFulfill(for: [expectation], timeout: 10)
 
         let didHello = await connectionInfo.didHello
@@ -271,4 +287,10 @@ private actor ConnectionInfo {
     func setDidHello() {
         self.didHello = true
     }
+}
+
+/// This is just to have the compiler check and make sure the `GatewayEventHandler` protocol
+/// doesn't have any other no-default requirements other than `let event`.
+private struct EventHandler: GatewayEventHandler {
+    let event: Gateway.Event
 }

@@ -23,7 +23,7 @@ import DiscordModels
 /// ```
 /// let bot: any GatewayManager = GatewayManager_YOU_MADE_IN_PREVIOUS_STEPS
 ///
-/// for await event in await bot.makeEventStream() {
+/// for await event in await bot.makeEventsStream() {
 ///     EventHandler(event: event).handle()
 /// }
 /// ```

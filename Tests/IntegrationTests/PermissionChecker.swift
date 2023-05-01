@@ -11,12 +11,15 @@ class PermissionChecker: XCTestCase {
         DiscordGlobalConfiguration.makeLogger = {
             Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
         }
-        self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+        self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
     }
     
     override func tearDown() async throws {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
-        try await httpClient.shutdown()
+    }
+
+    deinit {
+        try! httpClient.syncShutdown()
     }
     
     /// Checks to see if the permission checker functions work properly.
@@ -43,17 +46,24 @@ class PermissionChecker: XCTestCase {
         )
         
         let expectation = expectation(description: "Connected")
-        
-        await bot.addEventHandler { event in
-            if case .ready = event.data {
-                expectation.fulfill()
+
+        Task {
+            for await event in await bot.makeEventsStream() {
+                if case .ready = event.data {
+                    expectation.fulfill()
+                }
             }
         }
+
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(nanoseconds: 200_000_000)
         
         Task { await bot.connect() }
+
         await waitFulfill(for: [expectation], timeout: 10)
-        
-        try await Task.sleep(nanoseconds: 10_000_000_000)
+
+        /// For cache to get populated
+        try await Task.sleep(nanoseconds: 5_000_000_000)
         
         let _guild = await cache.guilds[Constants.guildId]
         let guild = try XCTUnwrap(_guild)

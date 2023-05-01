@@ -27,41 +27,33 @@ public protocol GatewayManager: DiscordActor {
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
     func updateVoiceState(payload: VoiceStateUpdate) async
     /// Makes an stream of Gateway events.
-    func makeEventStream() async -> AsyncStream<Gateway.Event>
+    func makeEventsStream() async -> AsyncStream<Gateway.Event>
     /// Makes an stream of Gateway event parse failures.
-    func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)>
-    /// Adds a handler to be notified of events.
-    func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) async
-    /// Adds a handler to be notified of event parsing failures.
-    func addEventParseFailureHandler(
-        _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
-    ) async
+    func makeEventsParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)>
     /// Disconnects from Discord.
     func disconnect() async
 }
 
-extension GatewayManager {
-    /// Makes an stream of Gateway events.
-    public func makeEventStream() async -> AsyncStream<Gateway.Event> {
-        AsyncStream<Gateway.Event> { continuation in
-            Task {
-                await self.addEventHandler { event in
-                    continuation.yield(event)
-                }
-            }
-        }
+// FIXME: These are to help users fix breaking changes easier.
+// Should remove these when the package is out of beta.
+public extension GatewayManager {
+    @available(*, unavailable, renamed: "makeEventsStream")
+    func makeEventStream() async -> AsyncStream<Gateway.Event> {
+        fatalError()
     }
 
-    /// Makes an stream of Gateway event parse failures.
-    public func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
-        AsyncStream<(Error, ByteBuffer)> { continuation in
-            Task {
-                await self.addEventParseFailureHandler { error, buffer in
-                    continuation.yield((error, buffer))
-                }
-            }
-        }
+    @available(*, unavailable, renamed: "makeEventsParseFailureStream")
+    func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
+        fatalError()
     }
+
+    @available(*, unavailable, message: "Use 'makeEventsStream()' instead: 'for await event in await bot.makeEventsStream() { /*handle event*/ }'")
+    func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) { }
+
+    @available(*, unavailable, message: "Use 'makeEventsParseFailureStream()' instead: 'for await (error, buffer) in await bot.makeEventsParseFailureStream() { /*handle error & buffer*/ }'")
+    func addEventParseFailureHandler(
+        _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
+    ) { }
 }
 
 /// The state of a `GatewayManager`.
