@@ -116,10 +116,10 @@ public struct ApplicationCommand: Sendable, Codable {
         }
     }
     
-    public var id: String
+    public var id: ApplicationCommandSnowflake
     public var type: Kind?
-    public var application_id: String
-    public var guild_id: String?
+    public var application_id: ApplicationSnowflake
+    public var guild_id: GuildSnowflake?
     public var name: String
     public var name_localizations: DiscordLocaleDict<String>?
     public var name_localized: String? /// Only for endpoints like get-application-commands
@@ -133,7 +133,7 @@ public struct ApplicationCommand: Sendable, Codable {
     public var version: String?
 }
 
-/// https://discord.com/developers/docs/topics/gateway-events#application-command-permissions-update
+/// https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-guild-application-command-permissions-structure
 public struct GuildApplicationCommandPermissions: Sendable, Codable {
     
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-application-command-permissions-structure
@@ -148,9 +148,9 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
         
         public var type: Kind
         public var permission: Bool
-        public var id: String
+        public var id: AnySnowflake
         
-        public init(type: Kind, permission: Bool, id: String) {
+        public init(type: Kind, permission: Bool, id: AnySnowflake) {
             self.type = type
             self.permission = permission
             self.id = id
@@ -158,7 +158,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
         
         /// Read `helpAnchor` for help about each error case.
         public enum ConversionError: LocalizedError {
-            case couldNotConvertToInteger(String)
+            case couldNotConvertToInteger(GuildSnowflake)
             
             public var errorDescription: String? {
                 switch self {
@@ -169,32 +169,36 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
             
             public var helpAnchor: String? {
                 switch self {
-                case let .couldNotConvertToInteger(string):
-                    return "Couldn't convert \(string.debugDescription) to an integer"
+                case let .couldNotConvertToInteger(id):
+                    return "Couldn't convert \(id.value.debugDescription) to an integer"
                 }
             }
         }
         
         public static func allChannels(
-            inGuildWithId guildId: String,
+            inGuildWithId guildId: GuildSnowflake,
             permission: Bool
         ) throws -> Self {
-            guard let guildNumber = Int(guildId) else {
+            guard let guildNumber = Int(guildId.value) else {
                 throw ConversionError.couldNotConvertToInteger(guildId)
             }
-            return self.init(type: .channel, permission: permission, id: "\(guildNumber - 1)")
+            return self.init(
+                type: .channel,
+                permission: permission,
+                id: AnySnowflake("\(guildNumber - 1)")
+            )
         }
         
         public static func allMembers(
-            inGuildWithId guildId: String,
+            inGuildWithId guildId: GuildSnowflake,
             permission: Bool
         ) throws -> Self {
-            self.init(type: .user, permission: permission, id: guildId)
+            self.init(type: .user, permission: permission, id: AnySnowflake(guildId))
         }
     }
     
     public var permissions: [Permission]
-    public var id: String
-    public var guild_id: String
-    public var application_id: String
+    public var id: AnySnowflake
+    public var guild_id: GuildSnowflake
+    public var application_id: ApplicationSnowflake
 }

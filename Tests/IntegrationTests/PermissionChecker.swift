@@ -30,7 +30,7 @@ class PermissionChecker: XCTestCase {
             httpClient: httpClient,
             compression: false,
             token: Constants.token,
-            appId: Constants.botId,
+            appId: Snowflake(Constants.botId),
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,
@@ -70,13 +70,13 @@ class PermissionChecker: XCTestCase {
         
         /// The bot is `administrator` in the server.
         XCTAssertTrue(guild.userHasGuildPermission(
-            userId: Constants.botId,
+            userId: Snowflake(Constants.botId),
             permission: .administrator
         ))
         /// The bot does not have `manageEvents` perm, but is `administrator`,
         /// so in practice has the perm.
         XCTAssertTrue(guild.userHasGuildPermission(
-            userId: Constants.botId,
+            userId: Snowflake(Constants.botId),
             permission: .manageEvents
         ))
         /// The account does not have the perm at all.

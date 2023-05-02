@@ -27,7 +27,7 @@ class GatewayConnectionTests: XCTestCase {
             httpClient: httpClient,
             compression: false,
             token: Constants.token,
-            appId: Constants.botId,
+            appId: Snowflake(Constants.botId),
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,
@@ -64,7 +64,7 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertTrue(didHello)
         let ready = try XCTUnwrap(_ready)
         XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
-        XCTAssertEqual(ready.application.id, Constants.botId)
+        XCTAssertEqual(ready.application.id, Snowflake(Constants.botId))
         XCTAssertFalse(ready.session_id.isEmpty)
         XCTAssertEqual(ready.user.id, Constants.botId)
         XCTAssertEqual(ready.user.bot, true)
@@ -90,7 +90,7 @@ class GatewayConnectionTests: XCTestCase {
             httpClient: httpClient,
             compression: true,
             token: Constants.token,
-            appId: Constants.botId,
+            appId: Snowflake(Constants.botId),
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,
@@ -128,7 +128,7 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertTrue(didHello)
         let ready = try XCTUnwrap(_ready)
         XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
-        XCTAssertEqual(ready.application.id, Constants.botId)
+        XCTAssertEqual(ready.application.id, Snowflake(Constants.botId))
         XCTAssertFalse(ready.session_id.isEmpty)
         XCTAssertEqual(ready.user.id, Constants.botId)
         XCTAssertEqual(ready.user.bot, true)
@@ -153,7 +153,7 @@ class GatewayConnectionTests: XCTestCase {
             httpClient: httpClient,
             compression: true,
             token: Constants.token,
-            appId: Constants.botId,
+            appId: Snowflake(Constants.botId),
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,
@@ -214,7 +214,7 @@ class GatewayConnectionTests: XCTestCase {
             httpClient: httpClient,
             compression: false,
             token: Constants.token,
-            appId: Constants.botId,
+            appId: Snowflake(Constants.botId),
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,
@@ -254,7 +254,7 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertTrue(didHello)
         let ready = try XCTUnwrap(_ready)
         XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
-        XCTAssertEqual(ready.application.id, Constants.botId)
+        XCTAssertEqual(ready.application.id, Snowflake(Constants.botId))
         XCTAssertFalse(ready.session_id.isEmpty)
         XCTAssertEqual(ready.user.id, Constants.botId)
         XCTAssertEqual(ready.user.bot, true)

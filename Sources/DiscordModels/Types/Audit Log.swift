@@ -259,7 +259,7 @@ public struct AuditLog: Sendable, Codable {
             case memberBanRemove
             case memberUpdate
             case memberRoleUpdate
-            case memberMove(channel_id: String, count: String)
+            case memberMove(channel_id: ChannelSnowflake, count: String)
             case memberDisconnect(count: String)
             case botAdd
             case roleCreate
@@ -274,16 +274,16 @@ public struct AuditLog: Sendable, Codable {
             case emojiCreate
             case emojiUpdate
             case emojiDelete
-            case messageDelete(channel_id: String, count: String)
+            case messageDelete(channel_id: ChannelSnowflake, count: String)
             case messageBulkDelete(count: String)
-            case messagePin(channel_id: String)
-            case messageUnpin(channel_id: String)
+            case messagePin(channel_id: ChannelSnowflake)
+            case messageUnpin(channel_id: ChannelSnowflake)
             case integrationCreate
             case integrationUpdate
             case integrationDelete
-            case stageInstanceCreate(channel_id: String)
-            case stageInstanceUpdate(channel_id: String)
-            case stageInstanceDelete(channel_id: String)
+            case stageInstanceCreate(channel_id: ChannelSnowflake)
+            case stageInstanceUpdate(channel_id: ChannelSnowflake)
+            case stageInstanceDelete(channel_id: ChannelSnowflake)
             case stickerCreate
             case stickerUpdate
             case stickerDelete
@@ -293,7 +293,7 @@ public struct AuditLog: Sendable, Codable {
             case threadCreate
             case threadUpdate
             case threadDelete
-            case applicationCommandPermissionUpdate(application_id: String)
+            case applicationCommandPermissionUpdate(application_id: ApplicationSnowflake)
             case autoModerationRuleCreate
             case autoModerationRuleUpdate
             case autoModerationRuleDelete
@@ -356,7 +356,7 @@ public struct AuditLog: Sendable, Codable {
             public struct AutoModerationInfo: Sendable, Codable {
                 public var auto_moderation_rule_name: String
                 public var auto_moderation_rule_trigger_type: AutoModerationRule.TriggerKind
-                public var channel_id: String
+                public var channel_id: ChannelSnowflake
                 
                 public init(from decoder: Decoder) throws {
                     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -377,7 +377,10 @@ public struct AuditLog: Sendable, Codable {
                             debugDescription: "Can't decode from value: '\(triggerType)'"
                         ))
                     }
-                    self.channel_id = try container.decode(String.self, forKey: .channel_id)
+                    self.channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
                 }
                 
                 enum CodingKeys: CodingKey {
@@ -449,7 +452,10 @@ public struct AuditLog: Sendable, Codable {
                 case .memberRoleUpdate: self = .memberRoleUpdate
                 case .memberMove:
                     let container = try optionsNestedContainer()
-                    let channel_id = try container.decode(String.self, forKey: .channel_id)
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
                     let count = try container.decode(String.self, forKey: .count)
                     self = .memberMove(channel_id: channel_id, count: count)
                 case .memberDisconnect:
@@ -471,7 +477,10 @@ public struct AuditLog: Sendable, Codable {
                 case .emojiDelete: self = .emojiDelete
                 case .messageDelete:
                     let container = try optionsNestedContainer()
-                    let channel_id = try container.decode(String.self, forKey: .channel_id)
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
                     let count = try container.decode(String.self, forKey: .count)
                     self = .messageDelete(channel_id: channel_id, count: count)
                 case .messageBulkDelete:
@@ -480,26 +489,41 @@ public struct AuditLog: Sendable, Codable {
                     self = .messageBulkDelete(count: count)
                 case .messagePin:
                     let container = try optionsNestedContainer()
-                    let channel_id = try container.decode(String.self, forKey: .channel_id)
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
                     self = .messagePin(channel_id: channel_id)
                 case .messageUnpin:
                     let container = try optionsNestedContainer()
-                    let channel_id = try container.decode(String.self, forKey: .channel_id)
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
                     self = .messageUnpin(channel_id: channel_id)
                 case .integrationCreate: self = .integrationCreate
                 case .integrationUpdate: self = .integrationUpdate
                 case .integrationDelete: self = .integrationDelete
                 case .stageInstanceCreate:
                     let container = try optionsNestedContainer()
-                    let channel_id = try container.decode(String.self, forKey: .channel_id)
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
                     self = .stageInstanceCreate(channel_id: channel_id)
                 case .stageInstanceUpdate:
                     let container = try optionsNestedContainer()
-                    let channel_id = try container.decode(String.self, forKey: .channel_id)
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
                     self = .stageInstanceUpdate(channel_id: channel_id)
                 case .stageInstanceDelete:
                     let container = try optionsNestedContainer()
-                    let channel_id = try container.decode(String.self, forKey: .channel_id)
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
                     self = .stageInstanceDelete(channel_id: channel_id)
                 case .stickerCreate: self = .stickerCreate
                 case .stickerUpdate: self = .stickerUpdate
@@ -512,7 +536,10 @@ public struct AuditLog: Sendable, Codable {
                 case .threadDelete: self = .threadDelete
                 case .applicationCommandPermissionUpdate:
                     let container = try optionsNestedContainer()
-                    let application_id = try container.decode(String.self, forKey: .application_id)
+                    let application_id = try container.decode(
+                        ApplicationSnowflake.self,
+                        forKey: .application_id
+                    )
                     self = .applicationCommandPermissionUpdate(application_id: application_id)
                 case .autoModerationRuleCreate: self = .autoModerationRuleCreate
                 case .autoModerationRuleUpdate: self = .autoModerationRuleUpdate
@@ -625,11 +652,11 @@ public struct AuditLog: Sendable, Codable {
             }
         }
         
-        public var guild_id: String?
-        public var target_id: String?
+        public var guild_id: GuildSnowflake?
+        public var target_id: AnySnowflake?
         public var changes: [Change]?
-        public var user_id: String?
-        public var id: String
+        public var user_id: UserSnowflake?
+        public var id: AuditLogEntrySnowflake
         public var action: Action
         public var reason: String?
         
@@ -644,11 +671,14 @@ public struct AuditLog: Sendable, Codable {
         
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
-            self.guild_id = try container.decodeIfPresent(String.self, forKey: .guild_id)
-            self.target_id = try container.decodeIfPresent(String.self, forKey: .target_id)
+            self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
+            self.target_id = try container.decodeIfPresent(AnySnowflake.self, forKey: .target_id)
             self.changes = try container.decodeIfPresent([Change].self, forKey: .changes)
-            self.user_id = try container.decodeIfPresent(String.self, forKey: .user_id)
-            self.id = try container.decode(String.self, forKey: .id)
+            self.user_id = try container.decodeIfPresent(
+                UserSnowflake.self,
+                forKey: .user_id
+            )
+            self.id = try container.decode(AuditLogEntrySnowflake.self, forKey: .id)
             self.action = try Action(from: decoder)
             self.reason = try container.decodeIfPresent(String.self, forKey: .reason)
         }

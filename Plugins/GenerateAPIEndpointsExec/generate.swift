@@ -23,7 +23,7 @@ var urlPrefix: String {
 }
 """
 
-let noEncodeParamSuffixes = ["Id", "code", "Token"]
+let noEncodeParamSuffixes = ["code", "Token"]
 
 let _url = grouped.flatMap(\.value).map { info in
     let (name, params) = info.info.makeIterativeCase()
@@ -45,7 +45,9 @@ let _url = grouped.flatMap(\.value).map { info in
         fatalError("'\(split.joined())' did not start with a slash '/'")
     }
     let paramsEncoded = params.compactMap { param -> String? in
-        if noEncodeParamSuffixes.contains(where: { param.hasSuffix($0) }) {
+        if param.hasSuffix("Id") {
+            return #"let \#(param) = \#(param).value"#
+        } else if noEncodeParamSuffixes.contains(where: { param.hasSuffix($0) }) {
             return nil
         } else {
             return #"let \#(param) = \#(param).urlPathEncoded()"#
@@ -89,7 +91,9 @@ let _urlDescription = grouped.flatMap(\.value).map { info in
         fatalError("'\(split.joined())' did not start with a slash '/'")
     }
     let paramsEncoded = params.compactMap { param -> String? in
-        if param == webhookTokenParam {
+        if param.hasSuffix("Id") {
+            return #"let \#(param) = \#(param).value"#
+        } else if param == webhookTokenParam {
             return #"let \#(param) = \#(param).urlPathEncoded().hash"#
         } else if noEncodeParamSuffixes.contains(where: { param.hasSuffix($0) }) {
             return nil
@@ -152,7 +156,14 @@ public var requiresAuthorizationHeader: Bool {
 """
 
 let _parameters = grouped.flatMap(\.value).map { info -> String in
-    let (name, params) = info.info.makeIterativeCase()
+    let (name, _params) = info.info.makeIterativeCase()
+    let params = _params.map { param in
+        if param.hasSuffix("Id") {
+            return "\(param).value"
+        } else {
+            return param
+        }
+    }
     let ret = "return [\(params.joined(separator: ", "))]"
     return name + "\n" + ret.indent()
 }.joined(separator: "\n")
@@ -166,7 +177,14 @@ public var parameters: [String] {
 """
 
 let _description = grouped.flatMap(\.value).map { info -> String in
-    let (name, params) = info.info.makeIterativeCase()
+    let (name, _params) = info.info.makeIterativeCase()
+    let params = _params.map { param in
+        if param.hasSuffix("Id") {
+            return "\(param).value"
+        } else {
+            return param
+        }
+    }
     let rawName = info.info.summary.toCamelCase()
     let paramsDescription = params.map {
         #"\#($0): \(\#($0))"#
@@ -251,6 +269,7 @@ let result = """
 /// properly edit `/Plugins/GenerateAPIEndpointsExec/Resources/openapi.yml`, then trigger
 /// the `GenerateAPIEndpoints` plugin (right click on `DiscordBM` in the file navigator)
 
+import DiscordModels
 import NIOHTTP1
 
 public enum APIEndpoint: Endpoint {

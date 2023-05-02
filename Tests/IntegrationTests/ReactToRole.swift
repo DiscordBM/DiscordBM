@@ -975,7 +975,7 @@ class ReactToRoleTests: XCTestCase {
             requestAllMembers: .enabledWithPresences
         )
         
-        let invalidMessageId = "1073288867911100000"
+        let invalidMessageId: MessageSnowflake = "1073288867911100000"
         
         /// With cache
         do {

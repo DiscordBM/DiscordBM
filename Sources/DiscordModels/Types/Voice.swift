@@ -1,9 +1,9 @@
 
-/// https://discord.com/developers/docs/topics/gateway-events#update-voice-state-gateway-voice-state-update-structure
+/// https://discord.com/developers/docs/resources/voice#voice-state-object-voice-state-structure
 public struct VoiceState: Sendable, Codable {
-    public var guild_id: String
-    public var channel_id: String?
-    public var user_id: String
+    public var guild_id: GuildSnowflake
+    public var channel_id: ChannelSnowflake?
+    public var user_id: UserSnowflake
     public var member: Guild.Member?
     public var session_id: String
     public var deaf: Bool
@@ -16,10 +16,10 @@ public struct VoiceState: Sendable, Codable {
     public var request_to_speak_timestamp: DiscordTimestamp?
 }
 
-/// https://discord.com/developers/docs/topics/gateway-events#update-voice-state-gateway-voice-state-update-structure
+/// https://discord.com/developers/docs/resources/voice#voice-state-object-voice-state-structure
 public struct PartialVoiceState: Sendable, Codable {
-    public var channel_id: String?
-    public var user_id: String
+    public var channel_id: ChannelSnowflake?
+    public var user_id: UserSnowflake
     public var member: Guild.Member?
     public var session_id: String
     public var deaf: Bool
@@ -49,13 +49,18 @@ public struct PartialVoiceState: Sendable, Codable {
 
 /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state-gateway-voice-state-update-structure
 public struct VoiceStateUpdate: Sendable, Codable {
-    public var guild_id: String
-    public var channel_id: String?
+    public var guild_id: GuildSnowflake
+    public var channel_id: ChannelSnowflake?
     public var self_deaf: Bool
     public var self_mute: Bool
     
     /// For Gateway Voice-State update.
-    public init(guildId: String, channelId: String? = nil, selfMute: Bool, selfDeaf: Bool) {
+    public init(
+        guildId: GuildSnowflake,
+        channelId: ChannelSnowflake? = nil,
+        selfMute: Bool,
+        selfDeaf: Bool
+    ) {
         self.guild_id = guildId
         self.channel_id = channelId
         self.self_mute = selfMute

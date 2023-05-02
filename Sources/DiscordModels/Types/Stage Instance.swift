@@ -8,11 +8,11 @@ public struct StageInstance: Sendable, Codable {
         case guildOnly = 2
     }
     
-    public var id: String
-    public var guild_id: String
-    public var channel_id: String
+    public var id: StageInstanceSnowflake
+    public var guild_id: GuildSnowflake
+    public var channel_id: ChannelSnowflake
     public var topic: String
     public var privacy_level: PrivacyLevel
     public var discoverable_disabled: Bool
-    public var guild_scheduled_event_id: String?
+    public var guild_scheduled_event_id: GuildScheduledEventSnowflake?
 }

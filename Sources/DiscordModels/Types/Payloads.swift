@@ -8,10 +8,10 @@ import NIOFoundationCompat
 public enum Payloads {
     
     public struct CreateDM: Sendable, Encodable, ValidatablePayload {
-        public var recipient_id: String
+        public var recipient_id: UserSnowflake
         
         @inlinable
-        public init(recipient_id: String) {
+        public init(recipient_id: UserSnowflake) {
             self.recipient_id = recipient_id
         }
         
@@ -594,9 +594,9 @@ public enum Payloads {
     public struct ModifyGuildWebhook: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var avatar: ImageData?
-        public var channel_id: String?
+        public var channel_id: ChannelSnowflake?
         
-        public init(name: String, avatar: ImageData? = nil, channel_id: String? = nil) {
+        public init(name: String, avatar: ImageData? = nil, channel_id: ChannelSnowflake? = nil) {
             self.name = name
             self.avatar = avatar
             self.channel_id = channel_id
@@ -917,12 +917,12 @@ public enum Payloads {
             case member = 1
         }
 
-        public var id: String
+        public var id: AnySnowflake
         public var type: Kind
         public var allow: StringBitField<Permission>?
         public var deny: StringBitField<Permission>?
 
-        public init(id: String, type: Kind, allow: [Permission]? = nil, deny: [Permission]? = nil) {
+        public init(id: AnySnowflake, type: Kind, allow: [Permission]? = nil, deny: [Permission]? = nil) {
             self.id = id
             self.type = type
             self.allow = allow.map { .init($0) }
@@ -932,13 +932,13 @@ public enum Payloads {
 
     /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
     public struct PartialForumTag: Sendable, Encodable {
-        public var id: String?
+        public var id: ForumTagSnowflake?
         public var name: String
         public var moderated: Bool?
-        public var emoji_id: String?
+        public var emoji_id: EmojiSnowflake?
         public var emoji_name: String?
 
-        public init(id: String? = nil, name: String, moderated: Bool? = nil, emoji_id: String? = nil, emoji_name: String? = nil) {
+        public init(id: ForumTagSnowflake? = nil, name: String, moderated: Bool? = nil, emoji_id: EmojiSnowflake? = nil, emoji_name: String? = nil) {
             self.id = id
             self.name = name
             self.moderated = moderated
@@ -958,7 +958,7 @@ public enum Payloads {
         public var bitrate: Int?
         public var user_limit: Int?
         public var permission_overwrites: [PartialChannelOverwrite]?
-        public var parent_id: String?
+        public var parent_id: AnySnowflake?
         public var rtc_region: String?
         public var video_quality_mode: DiscordChannel.VideoQualityMode?
         public var default_auto_archive_duration: DiscordChannel.AutoArchiveDuration?
@@ -969,7 +969,7 @@ public enum Payloads {
         public var default_sort_order: DiscordChannel.SortOrder?
         public var default_forum_layout: DiscordChannel.ForumLayout?
 
-        public init(name: String? = nil, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: String? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, flags: [DiscordChannel.Flag]? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_thread_rate_limit_per_user: Int? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
+        public init(name: String? = nil, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, flags: [DiscordChannel.Flag]? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_thread_rate_limit_per_user: Int? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
             self.name = name
             self.type = type
             self.position = position
@@ -1063,7 +1063,7 @@ public enum Payloads {
         public var bitrate: Int?
         public var user_limit: Int?
         public var permission_overwrites: [PartialChannelOverwrite]?
-        public var parent_id: String?
+        public var parent_id: AnySnowflake?
         public var rtc_region: String?
         public var video_quality_mode: DiscordChannel.VideoQualityMode?
         public var default_auto_archive_duration: DiscordChannel.AutoArchiveDuration?
@@ -1071,7 +1071,7 @@ public enum Payloads {
         public var default_reaction_emoji: DiscordChannel.DefaultReaction?
         public var default_sort_order: DiscordChannel.SortOrder?
 
-        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: String? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, flags: [DiscordChannel.Flag]? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_thread_rate_limit_per_user: Int? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
+        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, flags: [DiscordChannel.Flag]? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_thread_rate_limit_per_user: Int? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
             self.name = name
             self.type = type
             self.position = position
@@ -1113,12 +1113,12 @@ public enum Payloads {
         public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
         public var roles: [Role]?
         public var channels: [DiscordChannel]?
-        public var afk_channel_id: String?
+        public var afk_channel_id: ChannelSnowflake?
         public var afk_timeout: Guild.AFKTimeout?
-        public var system_channel_id: String?
+        public var system_channel_id: ChannelSnowflake?
         public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>?
 
-        public init(name: String, icon: ImageData? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, roles: [Role]? = nil, channels: [DiscordChannel]? = nil, afk_channel_id: String? = nil, afk_timeout: Guild.AFKTimeout? = nil, system_channel_id: String? = nil, system_channel_flags: [Guild.SystemChannelFlag]? = nil) {
+        public init(name: String, icon: ImageData? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, roles: [Role]? = nil, channels: [DiscordChannel]? = nil, afk_channel_id: ChannelSnowflake? = nil, afk_timeout: Guild.AFKTimeout? = nil, system_channel_id: ChannelSnowflake? = nil, system_channel_flags: [Guild.SystemChannelFlag]? = nil) {
             self.name = name
             self.icon = icon
             self.verification_level = verification_level
@@ -1142,23 +1142,23 @@ public enum Payloads {
         public var verification_level: Guild.VerificationLevel?
         public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
         public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
-        public var afk_channel_id: String?
+        public var afk_channel_id: ChannelSnowflake?
         public var afk_timeout: Guild.AFKTimeout?
         public var icon: ImageData?
-        public var owner_id: String?
+        public var owner_id: UserSnowflake?
         public var splash: ImageData?
         public var discovery_splash: ImageData?
         public var banner: ImageData?
-        public var system_channel_id: String?
+        public var system_channel_id: ChannelSnowflake?
         public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>?
-        public var rules_channel_id: String?
-        public var public_updates_channel_id: String?
+        public var rules_channel_id: ChannelSnowflake?
+        public var public_updates_channel_id: ChannelSnowflake?
         public var preferred_locale: DiscordLocale?
         public var features: [Guild.Feature]?
         public var description: String?
         public var premium_progress_bar_enabled: Bool?
 
-        public init(name: String? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, afk_channel_id: String? = nil, afk_timeout: Guild.AFKTimeout? = nil, icon: ImageData? = nil, owner_id: String? = nil, splash: ImageData? = nil, discovery_splash: ImageData? = nil, banner: ImageData? = nil, system_channel_id: String? = nil, system_channel_flags: [Guild.SystemChannelFlag]? = nil, rules_channel_id: String? = nil, public_updates_channel_id: String? = nil, preferred_locale: DiscordLocale? = nil, features: [Guild.Feature]? = nil, description: String? = nil, premium_progress_bar_enabled: Bool? = nil) {
+        public init(name: String? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, afk_channel_id: ChannelSnowflake? = nil, afk_timeout: Guild.AFKTimeout? = nil, icon: ImageData? = nil, owner_id: UserSnowflake? = nil, splash: ImageData? = nil, discovery_splash: ImageData? = nil, banner: ImageData? = nil, system_channel_id: ChannelSnowflake? = nil, system_channel_flags: [Guild.SystemChannelFlag]? = nil, rules_channel_id: ChannelSnowflake? = nil, public_updates_channel_id: ChannelSnowflake? = nil, preferred_locale: DiscordLocale? = nil, features: [Guild.Feature]? = nil, description: String? = nil, premium_progress_bar_enabled: Bool? = nil) {
             self.name = name
             self.verification_level = verification_level
             self.default_message_notifications = default_message_notifications

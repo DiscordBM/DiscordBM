@@ -15,8 +15,8 @@ public struct Sticker: Sendable, Codable {
         case lottie = 3
     }
     
-    public var id: String
-    public var pack_id: String?
+    public var id: StickerSnowflake
+    public var pack_id: StickerPackSnowflake?
     public var name: String
     public var description: String?
     public var tags: String
@@ -24,7 +24,7 @@ public struct Sticker: Sendable, Codable {
     public var type: Kind
     public var format_type: FormatKind
     public var available: Bool?
-    public var guild_id: String?
+    public var guild_id: GuildSnowflake?
     public var user: DiscordUser?
     public var sort_value: Int?
     public var version: Int?
@@ -32,7 +32,11 @@ public struct Sticker: Sendable, Codable {
 
 /// https://discord.com/developers/docs/resources/sticker#sticker-item-object
 public struct StickerItem: Sendable, Codable {
-    public var id: String
+    public var id: StickerSnowflake
     public var name: String
     public var format_type: Sticker.FormatKind
 }
+
+/// https://discord.com/developers/docs/resources/sticker#sticker-pack-object-sticker-pack-structure
+/// To be implemented
+public struct StickerPack: Sendable, Codable { }

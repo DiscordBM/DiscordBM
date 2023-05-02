@@ -3,9 +3,9 @@ import Foundation
 /// An Emoji with all fields marked as optional.
 /// https://discord.com/developers/docs/resources/emoji#emoji-object
 public struct PartialEmoji: Sendable, Codable {
-    public var id: String?
+    public var id: EmojiSnowflake?
     public var name: String?
-    public var roles: [String]?
+    public var roles: [RoleSnowflake]?
     public var user: DiscordUser?
     public var require_colons: Bool?
     public var managed: Bool?
@@ -13,7 +13,7 @@ public struct PartialEmoji: Sendable, Codable {
     public var available: Bool?
     public var version: Int?
     
-    public init(id: String? = nil, name: String? = nil, roles: [String]? = nil, user: DiscordUser? = nil, require_colons: Bool? = nil, managed: Bool? = nil, animated: Bool? = nil, available: Bool? = nil, version: Int? = nil) {
+    public init(id: EmojiSnowflake? = nil, name: String? = nil, roles: [RoleSnowflake]? = nil, user: DiscordUser? = nil, require_colons: Bool? = nil, managed: Bool? = nil, animated: Bool? = nil, available: Bool? = nil, version: Int? = nil) {
         self.id = id
         self.name = name
         self.roles = roles
@@ -31,7 +31,7 @@ public struct Reaction: Sendable, Hashable, Codable {
     
     private enum Base: Sendable, Codable, Hashable {
         case unicodeEmoji(String)
-        case guildEmoji(name: String?, id: String)
+        case guildEmoji(name: String?, id: EmojiSnowflake)
     }
     
     private let base: Base
@@ -39,7 +39,7 @@ public struct Reaction: Sendable, Hashable, Codable {
     public var urlPathDescription: String {
         switch self.base {
         case let .unicodeEmoji(emoji): return emoji
-        case let .guildEmoji(name, id): return "\(name ?? ""):\(id)"
+        case let .guildEmoji(name, id): return "\(name ?? ""):\(id.value)"
         }
     }
     
@@ -96,7 +96,7 @@ public struct Reaction: Sendable, Hashable, Codable {
     }
     
     /// Custom discord guild emoji.
-    public static func guildEmoji(name: String?, id: String) -> Reaction {
+    public static func guildEmoji(name: String?, id: EmojiSnowflake) -> Reaction {
         Reaction(base: .guildEmoji(name: name, id: id))
     }
     

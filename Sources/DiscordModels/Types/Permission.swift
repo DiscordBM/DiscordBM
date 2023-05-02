@@ -52,17 +52,18 @@ public struct Role: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/permissions#role-object-role-tags-structure
     public struct Tags: Sendable, Codable {
-        public var bot_id: String?
-        public var integration_id: String?
+        public var bot_id: UserSnowflake?
+        public var integration_id: IntegrationSnowflake?
         public var premium_subscriber: Bool?
-        public var subscription_listing_id: String?
+        // FXIME: use `Snowflake<Type>` instead
+        public var subscription_listing_id: AnySnowflake?
         /// These two fields have a weird null-or-not-present value
         /// which `Decodable` can't easily decode.
 //        public var available_for_purchase: Null
 //        public var guild_connections: Null
     }
     
-    public var id: String
+    public var id: RoleSnowflake
     public var name: String
     public var description: String?
     public var color: DiscordColor

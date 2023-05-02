@@ -17,49 +17,49 @@ class DiscordCacheTests: XCTestCase {
         /// First 10 items must be kept like normal.
         for idx in 2...10 {
             await cache._tests_modifyStorage { storage in
-                storage.auditLogs["\(idx)"] = []
+                storage.auditLogs[AnySnowflake("\(idx)")] = []
             }
         }
         
         do {
             let auditLogs = await cache.storage.auditLogs
-            XCTAssertEqual(auditLogs.keys.map(\.description), (1...10).map(\.description))
+            XCTAssertEqual(auditLogs.keys.map(\.value.description), (1...10).map(\.description))
         }
         
         /// The 11th item will trigger a check, and the first item will be removed.
         for idx in 11...11 {
             await cache._tests_modifyStorage { storage in
-                storage.auditLogs["\(idx)"] = []
+                storage.auditLogs[AnySnowflake("\(idx)")] = []
             }
         }
         
         do {
             let auditLogs = await cache.storage.auditLogs
-            XCTAssertEqual(auditLogs.keys.map(\.description), (2...11).map(\.description))
+            XCTAssertEqual(auditLogs.keys.map(\.value.description), (2...11).map(\.description))
         }
         
         /// The 12-19th mutations won't trigger a check.
         for idx in 12...19 {
             await cache._tests_modifyStorage { storage in
-                storage.auditLogs["\(idx)"] = []
+                storage.auditLogs[AnySnowflake("\(idx)")] = []
             }
         }
         
         do {
             let auditLogs = await cache.storage.auditLogs
-            XCTAssertEqual(auditLogs.keys.map(\.description), (2...19).map(\.description))
+            XCTAssertEqual(auditLogs.keys.map(\.value.description), (2...19).map(\.description))
         }
         
         /// The 20th mutation will trigger a check, and older items will be removed.
         for idx in 20...20 {
             await cache._tests_modifyStorage { storage in
-                storage.auditLogs["\(idx)"] = []
+                storage.auditLogs[AnySnowflake("\(idx)")] = []
             }
         }
         
         do {
             let auditLogs = await cache.storage.auditLogs
-            XCTAssertEqual(auditLogs.keys.map(\.description), (11...20).map(\.description))
+            XCTAssertEqual(auditLogs.keys.map(\.value.description), (11...20).map(\.description))
         }
     }
 }
