@@ -819,139 +819,6 @@ public protocol SnowflakeProtocol:
     init(_ value: String)
 }
 
-/// The parsed info of a snowflake.
-public struct SnowflakeInfo: Sendable {
-
-    /// Read `helpAnchor` for help about each error case.
-    public enum Error: LocalizedError {
-        case fieldTooBig(_ name: String, value: String, max: Int)
-        case fieldTooSmall(_ name: String, value: String, min: UInt64)
-
-        public var errorDescription: String? {
-            switch self {
-            case let .fieldTooBig(name, value, max):
-                return "fieldTooBig(\(name), value: \(value), max: \(max))"
-            case let .fieldTooSmall(name, value, min):
-                return "fieldTooSmall(\(name), value: \(value), min: \(min))"
-            }
-        }
-
-        public var helpAnchor: String? {
-            switch self {
-            case let .fieldTooBig(name, value, max):
-                return "Entered field '\(name)' is bigger than expected. It has a value of '\(value)', but max accepted is '\(max)'"
-            case let .fieldTooSmall(name, value, min):
-                return "Entered field '\(name)' is smaller than expected. It has a value of '\(value)', but min accepted is '\(min)'"
-            }
-        }
-    }
-
-    /// Time since epoch, in milli-seconds, when the snowflake was created.
-    public var timestamp: UInt64
-    /// The internal unique id of the worker that created the snowflake.
-    public var workerId: UInt8
-    /// The internal unique id of the process that created the snowflake.
-    public var processId: UInt8
-    /// The sequence number of the snowflake in the millisecond when it was created.
-    public var sequenceNumber: UInt16
-
-    /// The timestamp converted to `Date`.
-    public var date: Date {
-        Date(timeIntervalSince1970: Double(self.timestamp) / 1_000)
-    }
-
-    static let discordEpochConstant: UInt64 = 1_420_070_400_000
-
-    /// - Parameters:
-    ///   - timestamp: Time since epoch, in milli-seconds, when the snowflake was created.
-    ///   - workerId: The internal unique id of the worker that created the snowflake.
-    ///   - processId: The internal unique id of the process that created the snowflake.
-    ///   - sequenceNumber: The sequence number of the snowflake in the millisecond when it was created.
-    ///
-    ///   Throws `SnowflakeInfo.Error`
-    public init(timestamp: UInt64, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) throws {
-        guard timestamp <= (1 << 42) else {
-            throw Error.fieldTooBig("timestamp", value: "\(timestamp)", max: 1 << 42)
-        }
-        guard workerId <= (1 << 5) else {
-            throw Error.fieldTooBig("workerId", value: "\(workerId)", max: 1 << 5)
-        }
-        guard processId <= (1 << 5) else {
-            throw Error.fieldTooBig("processId", value: "\(processId)", max: 1 << 5)
-        }
-        guard sequenceNumber <= (1 << 12) else {
-            throw Error.fieldTooBig("sequenceNumber", value: "\(sequenceNumber)", max: 1 << 12)
-        }
-
-        self.timestamp = timestamp
-        self.workerId = workerId
-        self.processId = processId
-        self.sequenceNumber = sequenceNumber
-    }
-
-    /// - Parameters:
-    ///   - date: Time date when the snowflake was created.
-    ///   - workerId: The internal unique id of the worker that created the snowflake.
-    ///   - processId: The internal unique id of the process that created the snowflake.
-    ///   - sequenceNumber: The sequence number of the snowflake in the millisecond when it was created.
-    ///
-    ///   Throws `SnowflakeInfo.Error`
-    public init(date: Date, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) throws {
-        guard date.timeIntervalSince1970 >= Double(SnowflakeInfo.discordEpochConstant / 1_000) else {
-            throw Error.fieldTooSmall("date", value: "\(date.timeIntervalSince1970)", min: SnowflakeInfo.discordEpochConstant)
-        }
-
-        let timeSince1970 = UInt64(date.timeIntervalSince1970)
-        guard timeSince1970 < (1 << 42 / 1_000) else {
-            throw Error.fieldTooBig("date", value: "\(timeSince1970)", max: (1 << 42 / 1_000))
-        }
-
-        self.timestamp = UInt64(date.timeIntervalSince1970 * 1_000)
-        
-        guard timestamp < (1 << 42) else {
-            let max = (1 << 42 / 1_000) - 1
-            throw Error.fieldTooBig("date", value: "\(timestamp)", max: max)
-        }
-        guard workerId <= (1 << 5) else {
-            throw Error.fieldTooBig("workerId", value: "\(workerId)", max: 1 << 5)
-        }
-        guard processId <= (1 << 5) else {
-            throw Error.fieldTooBig("processId", value: "\(processId)", max: 1 << 5)
-        }
-        guard sequenceNumber <= (1 << 12) else {
-            throw Error.fieldTooBig("sequenceNumber", value: "\(sequenceNumber)", max: 1 << 12)
-        }
-
-        self.workerId = workerId
-        self.processId = processId
-        self.sequenceNumber = sequenceNumber
-    }
-
-    internal static func makeFake(date: Date) throws -> SnowflakeInfo {
-        try SnowflakeInfo(date: date, workerId: 0, processId: 0, sequenceNumber: 0)
-    }
-
-    internal init? (from snowflake: String) {
-        guard let value = UInt64(snowflake) else { return nil }
-        self.timestamp = (value >> 22) + SnowflakeInfo.discordEpochConstant
-        self.workerId = UInt8((value >> 17) & 0x1F)
-        self.processId = UInt8((value >> 12) & 0x1F)
-        self.sequenceNumber = UInt16(value & 0xFFF)
-    }
-
-    internal init? (from snowflake: any SnowflakeProtocol) {
-        self.init(from: snowflake.value)
-    }
-
-    internal func toSnowflake<S: SnowflakeProtocol>(as type: S.Type = S.self) -> S {
-        let timestamp = (self.timestamp - SnowflakeInfo.discordEpochConstant) << 22
-        let workerId = UInt64(self.workerId) << 17
-        let processId = UInt64(self.processId) << 12
-        let value = timestamp | workerId | processId | UInt64(self.sequenceNumber)
-        return S("\(value)")
-    }
-}
-
 extension SnowflakeProtocol {
     /// Initializes a snowflake from another snowflake.
     public init(_ snowflake: any SnowflakeProtocol) {
@@ -997,7 +864,7 @@ extension SnowflakeProtocol {
     }
 }
 
-/// Use the `Snowflake` typealiases instead. e.g. `Snowflake<DiscordUser>` ❌, `UserSnowflake` ✅.
+/// Use the `Snowflake` type-aliases instead. e.g. `Snowflake<DiscordUser>` ❌, `UserSnowflake` ✅.
 public struct Snowflake<Tag>: SnowflakeProtocol {
     public let value: String
 
@@ -1094,6 +961,139 @@ public typealias AssetsSnowflake = Snowflake<Gateway.Activity.Assets>
 
 /// Convenience type-alias for `Snowflake<IntegrationAccount>`
 public typealias IntegrationAccountSnowflake = Snowflake<IntegrationAccount>
+
+/// The parsed info of a snowflake.
+public struct SnowflakeInfo: Sendable {
+
+    /// Read `helpAnchor` for help about each error case.
+    public enum Error: LocalizedError {
+        case fieldTooBig(_ name: String, value: String, max: Int)
+        case fieldTooSmall(_ name: String, value: String, min: UInt64)
+
+        public var errorDescription: String? {
+            switch self {
+            case let .fieldTooBig(name, value, max):
+                return "fieldTooBig(\(name), value: \(value), max: \(max))"
+            case let .fieldTooSmall(name, value, min):
+                return "fieldTooSmall(\(name), value: \(value), min: \(min))"
+            }
+        }
+
+        public var helpAnchor: String? {
+            switch self {
+            case let .fieldTooBig(name, value, max):
+                return "Entered field '\(name)' is bigger than expected. It has a value of '\(value)', but max accepted is '\(max)'"
+            case let .fieldTooSmall(name, value, min):
+                return "Entered field '\(name)' is smaller than expected. It has a value of '\(value)', but min accepted is '\(min)'"
+            }
+        }
+    }
+
+    /// Time since epoch, in milli-seconds, when the snowflake was created.
+    public var timestamp: UInt64
+    /// The internal unique id of the worker that created the snowflake.
+    public var workerId: UInt8
+    /// The internal unique id of the process that created the snowflake.
+    public var processId: UInt8
+    /// The sequence number of the snowflake in the millisecond when it was created.
+    public var sequenceNumber: UInt16
+
+    /// The timestamp converted to `Date`.
+    public var date: Date {
+        Date(timeIntervalSince1970: Double(self.timestamp) / 1_000)
+    }
+
+    static let discordEpochConstant: UInt64 = 1_420_070_400_000
+
+    /// - Parameters:
+    ///   - timestamp: Time since epoch, in milli-seconds, when the snowflake was created.
+    ///   - workerId: The internal unique id of the worker that created the snowflake.
+    ///   - processId: The internal unique id of the process that created the snowflake.
+    ///   - sequenceNumber: The sequence number of the snowflake in the millisecond when it was created.
+    ///
+    ///   Throws `SnowflakeInfo.Error`
+    public init(timestamp: UInt64, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) throws {
+        guard timestamp <= (1 << 42) else {
+            throw Error.fieldTooBig("timestamp", value: "\(timestamp)", max: 1 << 42)
+        }
+        guard workerId <= (1 << 5) else {
+            throw Error.fieldTooBig("workerId", value: "\(workerId)", max: 1 << 5)
+        }
+        guard processId <= (1 << 5) else {
+            throw Error.fieldTooBig("processId", value: "\(processId)", max: 1 << 5)
+        }
+        guard sequenceNumber <= (1 << 12) else {
+            throw Error.fieldTooBig("sequenceNumber", value: "\(sequenceNumber)", max: 1 << 12)
+        }
+
+        self.timestamp = timestamp
+        self.workerId = workerId
+        self.processId = processId
+        self.sequenceNumber = sequenceNumber
+    }
+
+    /// - Parameters:
+    ///   - date: Time date when the snowflake was created.
+    ///   - workerId: The internal unique id of the worker that created the snowflake.
+    ///   - processId: The internal unique id of the process that created the snowflake.
+    ///   - sequenceNumber: The sequence number of the snowflake in the millisecond when it was created.
+    ///
+    ///   Throws `SnowflakeInfo.Error`
+    public init(date: Date, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) throws {
+        guard date.timeIntervalSince1970 >= Double(SnowflakeInfo.discordEpochConstant / 1_000) else {
+            throw Error.fieldTooSmall("date", value: "\(date.timeIntervalSince1970)", min: SnowflakeInfo.discordEpochConstant)
+        }
+
+        let timeSince1970 = UInt64(date.timeIntervalSince1970)
+        guard timeSince1970 < (1 << 42 / 1_000) else {
+            throw Error.fieldTooBig("date", value: "\(timeSince1970)", max: (1 << 42 / 1_000))
+        }
+
+        self.timestamp = UInt64(date.timeIntervalSince1970 * 1_000)
+
+        guard timestamp < (1 << 42) else {
+            let max = (1 << 42 / 1_000) - 1
+            throw Error.fieldTooBig("date", value: "\(timestamp)", max: max)
+        }
+        guard workerId <= (1 << 5) else {
+            throw Error.fieldTooBig("workerId", value: "\(workerId)", max: 1 << 5)
+        }
+        guard processId <= (1 << 5) else {
+            throw Error.fieldTooBig("processId", value: "\(processId)", max: 1 << 5)
+        }
+        guard sequenceNumber <= (1 << 12) else {
+            throw Error.fieldTooBig("sequenceNumber", value: "\(sequenceNumber)", max: 1 << 12)
+        }
+
+        self.workerId = workerId
+        self.processId = processId
+        self.sequenceNumber = sequenceNumber
+    }
+
+    internal static func makeFake(date: Date) throws -> SnowflakeInfo {
+        try SnowflakeInfo(date: date, workerId: 0, processId: 0, sequenceNumber: 0)
+    }
+
+    internal init? (from snowflake: String) {
+        guard let value = UInt64(snowflake) else { return nil }
+        self.timestamp = (value >> 22) + SnowflakeInfo.discordEpochConstant
+        self.workerId = UInt8((value >> 17) & 0x1F)
+        self.processId = UInt8((value >> 12) & 0x1F)
+        self.sequenceNumber = UInt16(value & 0xFFF)
+    }
+
+    internal init? (from snowflake: any SnowflakeProtocol) {
+        self.init(from: snowflake.value)
+    }
+
+    internal func toSnowflake<S: SnowflakeProtocol>(as type: S.Type = S.self) -> S {
+        let timestamp = (self.timestamp - SnowflakeInfo.discordEpochConstant) << 22
+        let workerId = UInt64(self.workerId) << 17
+        let processId = UInt64(self.processId) << 12
+        let value = timestamp | workerId | processId | UInt64(self.sequenceNumber)
+        return S("\(value)")
+    }
+}
 
 //MARK: +Calendar
 

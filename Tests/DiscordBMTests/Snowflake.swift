@@ -3,8 +3,6 @@ import DiscordModels
 import XCTest
 
 class SnowflakeTests: XCTestCase {
-    #warning("make AnySnowflake assignable to Snowflake")
-
     let messageSnowflake: MessageSnowflake = "1030118727418646629"
 
     func testSnowflakeParse() throws {
@@ -18,7 +16,7 @@ class SnowflakeTests: XCTestCase {
         XCTAssertEqual(snowflakeInfo.sequenceNumber, 101)
         XCTAssertEqual(snowflakeInfo.date.description, "2022-10-13 14:04:03 +0000")
 
-        let snowflake: AnySnowflake = AnySnowflake(info: snowflakeInfo)
+        let snowflake = AnySnowflake(info: snowflakeInfo)
         XCTAssertTrue(snowflake == messageSnowflake, "\(snowflake) was not equal to \(messageSnowflake)")
     }
 
