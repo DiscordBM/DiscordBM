@@ -3,7 +3,7 @@ import DiscordModels
 import XCTest
 
 class SnowflakeTests: XCTestCase {
-
+    #warning("add edge-case tests")
     func testSnowflakeParse() throws {
         let anySnowflake: AnySnowflake = "1030118727418646629"
 
