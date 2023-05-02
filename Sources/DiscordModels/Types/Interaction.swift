@@ -36,6 +36,15 @@ public struct Interaction: Sendable, Codable {
             public var messages: [MessageSnowflake: DiscordChannel.PartialMessage]?
             public var attachments: [AttachmentSnowflake: DiscordChannel.Message.Attachment]?
 
+            enum CodingKeys: CodingKey {
+                case users
+                case members
+                case roles
+                case channels
+                case messages
+                case attachments
+            }
+
             public init(from decoder: Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -57,6 +66,29 @@ public struct Interaction: Sendable, Codable {
                 self.channels = try decode(forKey: .channels)
                 self.messages = try decode(forKey: .messages)
                 self.attachments = try decode(forKey: .attachments)
+            }
+
+            public func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+
+                /// `JSONEncoder` has a special-case encoding for dictionaries of `[String: some Encodable]`.
+                /// We need to trigger that special-case, so we need to encode the values
+                /// with keys of type `String`.
+                func encode<K, E>(_ dict: [K: E]?, forKey key: CodingKeys) throws
+                where K: SnowflakeProtocol, E: Encodable {
+                    let transformed = dict?.map { key, value -> (String, E) in
+                        return (key.value, value)
+                    }
+                    let stringDict: [String: E]? = transformed.map { .init(uniqueKeysWithValues: $0) }
+                    try container.encode(stringDict, forKey: key)
+                }
+
+                try encode(self.users, forKey: .users)
+                try encode(self.members, forKey: .members)
+                try encode(self.roles, forKey: .roles)
+                try encode(self.channels, forKey: .channels)
+                try encode(self.messages, forKey: .messages)
+                try encode(self.attachments, forKey: .attachments)
             }
         }
         

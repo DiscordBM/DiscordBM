@@ -269,7 +269,12 @@ class DiscordModelsTests: XCTestCase {
         """
         let data = Data(json.utf8)
         let decoder = JSONDecoder()
-        _ = try decoder.decode(Interaction.ApplicationCommand.ResolvedData.self, from: data)
+        let decoded = try decoder.decode(Interaction.ApplicationCommand.ResolvedData.self, from: data)
+
+        let encoder = JSONEncoder()
+        let encoded = try encoder.encode(decoded)
+
+        _ = try decoder.decode(Interaction.ApplicationCommand.ResolvedData.self, from: encoded)
     }
 
     func testCollectionContainsAnything() throws {
