@@ -261,7 +261,7 @@ public actor DiscordCache {
         /// `[GuildID: [ActionExecution]]`
         public var autoModerationExecutions: OrderedDictionary<Snowflake<Guild>, [AutoModerationActionExecution]> = [:]
         /// `[CommandID (or ApplicationID): Permissions]`
-        public var applicationCommandPermissions: OrderedDictionary<String, GuildApplicationCommandPermissions> = [:]
+        public var applicationCommandPermissions: OrderedDictionary<AnySnowflake, GuildApplicationCommandPermissions> = [:]
         /// The current bot-application.
         public var application: PartialApplication?
         /// The current bot user.
@@ -278,7 +278,7 @@ public actor DiscordCache {
             deletedMessages: OrderedDictionary<Snowflake<DiscordChannel>, [Snowflake<DiscordChannel.Message>: [Gateway.MessageCreate]]> = [:],
             autoModerationRules: OrderedDictionary<Snowflake<Guild>, [AutoModerationRule]> = [:],
             autoModerationExecutions: OrderedDictionary<Snowflake<Guild>, [AutoModerationActionExecution]> = [:],
-            applicationCommandPermissions: OrderedDictionary<String, GuildApplicationCommandPermissions> = [:],
+            applicationCommandPermissions: OrderedDictionary<AnySnowflake, GuildApplicationCommandPermissions> = [:],
             application: PartialApplication? = nil,
             botUser: DiscordUser? = nil
         ) {
@@ -444,7 +444,7 @@ public actor DiscordCache {
                 if channel.type == .guildForum,
                    let parentId = channel.parent_id,
                    self.intents.contains(.guilds) {
-                    self.channels[parentId]?.last_message_id = .init(channel.id)
+                    self.channels[Snowflake(parentId)]?.last_message_id = .init(channel.id)
                 }
             }
         case let .threadUpdate(channel):
@@ -472,11 +472,12 @@ public actor DiscordCache {
             }
             /// Remove unavailable threads
             let allParents = Set(syncList.threads.compactMap(\.parent_id))
-            let parentsOfRemovedThreads = syncList.channel_ids?
-                .filter({ !allParents.contains($0) }) ?? []
+            let parentsOfRemovedThreads = syncList.channel_ids?.filter { channelId in
+                !allParents.contains(where: { $0 == channelId })
+            } ?? []
             guild?.threads.removeAll {
                 guard let parentId = $0.parent_id else { return false }
-                return parentsOfRemovedThreads.contains(parentId)
+                return parentsOfRemovedThreads.contains(where: { $0 == parentId })
             }
             /// Append the new threads
             guild?.threads.append(contentsOf: syncList.threads)

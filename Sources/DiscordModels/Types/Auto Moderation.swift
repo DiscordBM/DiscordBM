@@ -133,10 +133,10 @@ public struct AutoModerationRule: Sendable, Codable {
         }
     }
     
-    public var id: String
+    public var id: Snowflake<AutoModerationRule>
     public var guild_id: Snowflake<Guild>
     public var name: String
-    public var creator_id: String
+    public var creator_id: Snowflake<DiscordUser>
     public var event_type: EventKind
     public var trigger_type: TriggerKind
     public var trigger_metadata: TriggerMetadata
@@ -150,7 +150,7 @@ public struct AutoModerationRule: Sendable, Codable {
 public struct AutoModerationActionExecution: Sendable, Codable {
     public var guild_id: Snowflake<Guild>
     public var action: AutoModerationRule.Action
-    public var rule_id: String
+    public var rule_id: Snowflake<AutoModerationRule>
     public var rule_trigger_type: AutoModerationRule.TriggerKind
     public var user_id: Snowflake<DiscordUser>
     public var channel_id: Snowflake<DiscordChannel>?

@@ -13,12 +13,12 @@ public struct Team: Sendable, Codable {
         
         public var membership_state: State
         public var permissions: [String]
-        public var team_id: String?
+        public var team_id: Snowflake<Team>?
         public var user: PartialUser
     }
     
     public var icon: String?
-    public var id: String
+    public var id: Snowflake<Team>
     public var members: [Member]
     public var name: String
     public var owner_user_id: Snowflake<DiscordUser>

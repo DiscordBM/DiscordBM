@@ -2,6 +2,7 @@ import Foundation
 
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
 /// The same as what the Discord API docs call "partial channel".
+/// Also the same as a "thread object".
 public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
@@ -72,10 +73,10 @@ public struct DiscordChannel: Sendable, Codable {
 
     /// https://discord.com/developers/docs/resources/channel#default-reaction-object-default-reaction-structure
     public struct DefaultReaction: Sendable, Codable {
-        public var emoji_id: String?
+        public var emoji_id: Snowflake<PartialEmoji>?
         public var emoji_name: String?
 
-        public init(emoji_id: String? = nil, emoji_name: String? = nil) {
+        public init(emoji_id: Snowflake<PartialEmoji>? = nil, emoji_name: String? = nil) {
             self.emoji_id = emoji_id
             self.emoji_name = emoji_name
         }
@@ -83,10 +84,10 @@ public struct DiscordChannel: Sendable, Codable {
 
     /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
     public struct ForumTag: Sendable, Codable {
-        public var id: String
+        public var id: Snowflake<ForumTag>
         public var name: String
         public var moderated: Bool
-        public var emoji_id: String?
+        public var emoji_id: Snowflake<PartialEmoji>?
         public var emoji_name: String?
     }
     
@@ -104,10 +105,10 @@ public struct DiscordChannel: Sendable, Codable {
     public var rate_limit_per_user: Int?
     public var recipients: [DiscordUser]?
     public var icon: String?
-    public var owner_id: String?
+    public var owner_id: Snowflake<DiscordUser>?
     public var application_id: Snowflake<PartialApplication>?
     public var manage: Bool?
-    public var parent_id: Snowflake<DiscordChannel>?
+    public var parent_id: AnySnowflake?
     public var last_pin_timestamp: DiscordTimestamp?
     public var rtc_region: String?
     public var video_quality_mode: VideoQualityMode?
@@ -213,7 +214,7 @@ extension DiscordChannel {
         
         /// https://discord.com/developers/docs/resources/channel#channel-mention-object
         public struct ChannelMention: Sendable, Codable {
-            public var id: String
+            public var id: Snowflake<DiscordChannel>
             public var guild_id: Snowflake<Guild>
             public var type: DiscordChannel.Kind
             public var name: String
@@ -221,7 +222,7 @@ extension DiscordChannel {
         
         /// https://discord.com/developers/docs/resources/channel#attachment-object
         public struct Attachment: Sendable, Codable {
-            public var id: String
+            public var id: Snowflake<Attachment>
             public var filename: String
             public var description: String?
             public var content_type: String?
@@ -260,13 +261,14 @@ extension DiscordChannel {
             }
             
             public var type: Kind
-            public var party_id: String?
+            // FIXME: Don't have the type to use `Snowflake<Type>` instead
+            public var party_id: AnySnowflake?
         }
         
         /// A ``DiscordUser`` with an extra `member` field.
         /// https://discord.com/developers/docs/resources/user#user-object-user-structure
         public struct MentionUser: Sendable, Codable {
-            public var id: String
+            public var id: Snowflake<DiscordUser>
             public var username: String
             public var discriminator: String
             public var avatar: String?
@@ -305,7 +307,7 @@ extension DiscordChannel {
         public var reactions: [Reaction]?
         public var nonce: StringOrInt?
         public var pinned: Bool
-        public var webhook_id: String?
+        public var webhook_id: Snowflake<Webhook>?
         public var type: Kind
         public var activity: Activity?
         public var application: PartialApplication?
@@ -342,7 +344,7 @@ extension DiscordChannel {
         public var reactions: [DiscordChannel.Message.Reaction]?
         public var nonce: StringOrInt?
         public var pinned: Bool?
-        public var webhook_id: String?
+        public var webhook_id: Snowflake<Webhook>?
         public var type: DiscordChannel.Message.Kind?
         public var activity: DiscordChannel.Message.Activity?
         public var application: PartialApplication?
@@ -395,7 +397,7 @@ public struct ThreadMember: Sendable, Codable {
 /// For a limited amount of endpoints which return the `member` object too.
 /// https://discord.com/developers/docs/resources/channel#thread-member-object-thread-member-structure
 public struct ThreadMemberWithMember: Sendable, Codable {
-    public var id: String?
+    public var id: Snowflake<DiscordChannel>?
     public var user_id: Snowflake<DiscordUser>?
     public var join_timestamp: DiscordTimestamp
     /// FIXME:
@@ -582,9 +584,8 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
     public var provider: Provider?
     public var author: Author?
     public var fields: [Field]?
-    public var reference_id: String?
     
-    public init(title: String? = nil, type: Embed.Kind? = nil, description: String? = nil, url: String? = nil, timestamp: Date? = nil, color: DiscordColor? = nil, footer: Embed.Footer? = nil, image: Embed.Media? = nil, thumbnail: Embed.Media? = nil, video: Embed.Media? = nil, provider: Embed.Provider? = nil, author: Embed.Author? = nil, fields: [Embed.Field]? = nil, reference_id: String? = nil) {
+    public init(title: String? = nil, type: Embed.Kind? = nil, description: String? = nil, url: String? = nil, timestamp: Date? = nil, color: DiscordColor? = nil, footer: Embed.Footer? = nil, image: Embed.Media? = nil, thumbnail: Embed.Media? = nil, video: Embed.Media? = nil, provider: Embed.Provider? = nil, author: Embed.Author? = nil, fields: [Embed.Field]? = nil) {
         self.title = title
         self.type = type
         self.description = description
@@ -598,7 +599,6 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         self.provider = provider
         self.author = author
         self.fields = fields
-        self.reference_id = reference_id
     }
     
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
@@ -628,7 +628,8 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
 
 /// https://discord.com/developers/docs/resources/channel#role-subscription-data-object-role-subscription-data-object-structure
 public struct RoleSubscriptionData: Sendable, Codable {
-    public var role_subscription_listing_id: String
+    // FIXME: use `Snowflake<Type>` instead
+    public var role_subscription_listing_id: AnySnowflake
     public var tier_name: String
     public var total_months_subscribed: Int
     public var is_renewal: Bool

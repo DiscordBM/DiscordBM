@@ -653,7 +653,7 @@ public struct AuditLog: Sendable, Codable {
         }
         
         public var guild_id: Snowflake<Guild>?
-        public var target_id: String?
+        public var target_id: AnySnowflake?
         public var changes: [Change]?
         public var user_id: Snowflake<DiscordUser>?
         public var id: Snowflake<AuditLog.Entry>
@@ -672,7 +672,7 @@ public struct AuditLog: Sendable, Codable {
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self.guild_id = try container.decodeIfPresent(Snowflake<Guild>.self, forKey: .guild_id)
-            self.target_id = try container.decodeIfPresent(String.self, forKey: .target_id)
+            self.target_id = try container.decodeIfPresent(AnySnowflake.self, forKey: .target_id)
             self.changes = try container.decodeIfPresent([Change].self, forKey: .changes)
             self.user_id = try container.decodeIfPresent(
                 Snowflake<DiscordUser>.self,

@@ -1,5 +1,5 @@
 
-/// https://discord.com/developers/docs/topics/gateway-events#update-voice-state-gateway-voice-state-update-structure
+/// https://discord.com/developers/docs/resources/voice#voice-state-object-voice-state-structure
 public struct VoiceState: Sendable, Codable {
     public var guild_id: Snowflake<Guild>
     public var channel_id: Snowflake<DiscordChannel>?
@@ -16,7 +16,7 @@ public struct VoiceState: Sendable, Codable {
     public var request_to_speak_timestamp: DiscordTimestamp?
 }
 
-/// https://discord.com/developers/docs/topics/gateway-events#update-voice-state-gateway-voice-state-update-structure
+/// https://discord.com/developers/docs/resources/voice#voice-state-object-voice-state-structure
 public struct PartialVoiceState: Sendable, Codable {
     public var channel_id: Snowflake<DiscordChannel>?
     public var user_id: Snowflake<DiscordUser>

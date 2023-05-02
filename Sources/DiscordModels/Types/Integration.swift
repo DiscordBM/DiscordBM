@@ -16,12 +16,12 @@ public struct Integration: Sendable, Codable {
         case kick = 1
     }
     
-    public var id: String
+    public var id: Snowflake<Integration>
     public var name: String
     public var type: Kind
     public var enabled: Bool
     public var syncing: Bool?
-    public var role_id: String?
+    public var role_id: Snowflake<Role>?
     public var enable_emoticons: Bool?
     public var expire_behavior: ExpireBehavior?
     public var expire_grace_period: Int?
@@ -55,12 +55,12 @@ public struct Integration: Sendable, Codable {
 
 /// https://discord.com/developers/docs/resources/guild#integration-object
 public struct PartialIntegration: Sendable, Codable {
-    public var id: String
+    public var id: Snowflake<Integration>
     public var name: String?
     public var type: Integration.Kind?
     public var enabled: Bool?
     public var syncing: Bool?
-    public var role_id: String?
+    public var role_id: Snowflake<Role>?
     public var enable_emoticons: Bool?
     public var expire_behavior: Integration.ExpireBehavior?
     public var expire_grace_period: Int?

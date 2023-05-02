@@ -139,7 +139,7 @@ public struct Guild: Sendable, Codable {
         public struct Channel: Sendable, Codable {
             public var channel_id: Snowflake<DiscordChannel>
             public var description: String
-            public var emoji_id: String?
+            public var emoji_id: Snowflake<PartialEmoji>?
             public var emoji_name: String?
         }
         
@@ -240,14 +240,14 @@ extension Guild {
 
 /// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
 public struct PartialGuild: Sendable, Codable {
-    public var id: String
+    public var id: Snowflake<Guild>
     public var name: String?
     public var icon: String?
     public var icon_hash: String?
     public var splash: String?
     public var discovery_splash: String?
     public var owner: Bool?
-    public var owner_id: String?
+    public var owner_id: Snowflake<DiscordUser>?
     public var permissions: StringBitField<Permission>?
     /// Deprecated
     public var region: String?
@@ -301,20 +301,15 @@ public struct UnavailableGuild: Sendable, Codable {
 
 /// https://discord.com/developers/docs/resources/guild#integration-account-object
 public struct IntegrationAccount: Sendable, Codable {
-    public var id: String
+    public var id: Snowflake<IntegrationAccount>
     public var name: String
 }
 
 /// https://discord.com/developers/docs/resources/guild#integration-application-object-integration-application-structure
 public struct IntegrationApplication: Sendable, Codable {
-    public var id: String
+    public var id: Snowflake<PartialApplication>
     public var name: String
     public var icon: String?
     public var description: String
-    public var summary: String?
-    public var type: Int?
     public var bot: DiscordUser?
-    public var primary_sku_id: String?
-    public var cover_image: String?
-    public var scopes: [OAuth2Scope]?
 }

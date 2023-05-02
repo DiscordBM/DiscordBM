@@ -35,7 +35,7 @@ public struct PartialApplication: Sendable, Codable {
     public var verify_key: String?
     public var team: Team?
     public var guild_id: Snowflake<Guild>?
-    public var primary_sku_id: String?
+    public var primary_sku_id: AnySnowflake?
     public var slug: String?
     public var cover_image: String?
     public var flags: IntBitField<Flag>?

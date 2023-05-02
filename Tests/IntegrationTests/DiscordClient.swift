@@ -1159,7 +1159,7 @@ class DiscordClientTests: XCTestCase {
             XCTAssertGreaterThan(attachment.size, 20_000)
             XCTAssertEqual(attachment.height, 210)
             XCTAssertEqual(attachment.width, 1200)
-            XCTAssertFalse(attachment.id.isEmpty)
+            XCTAssertFalse(attachment.id.value.isEmpty)
             XCTAssertFalse(attachment.url.isEmpty)
             XCTAssertFalse(attachment.proxy_url.isEmpty)
         }

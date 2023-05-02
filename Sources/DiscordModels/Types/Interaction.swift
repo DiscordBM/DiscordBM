@@ -21,20 +21,20 @@ public struct Interaction: Sendable, Codable {
             /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
             /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
             public struct PartialChannel: Sendable, Codable {
-                public var id: String
+                public var id: Snowflake<DiscordChannel>
                 public var type: DiscordChannel.Kind
                 public var name: String?
                 public var permissions: StringBitField<Permission>?
-                public var parent_id: String?
+                public var parent_id: AnySnowflake?
                 public var thread_metadata: ThreadMetadata?
             }
 
-            public var users: [String: DiscordUser]?
-            public var members: [String: Guild.PartialMember]?
-            public var roles: [String: Role]?
-            public var channels: [String: PartialChannel]?
-            public var messages: [String: DiscordChannel.PartialMessage]?
-            public var attachments: [String: DiscordChannel.Message.Attachment]?
+            public var users: [Snowflake<DiscordUser>: DiscordUser]?
+            public var members: [Snowflake<DiscordUser>: Guild.PartialMember]?
+            public var roles: [Snowflake<Role>: Role]?
+            public var channels: [Snowflake<DiscordChannel>: PartialChannel]?
+            public var messages: [Snowflake<DiscordChannel.Message>: DiscordChannel.PartialMessage]?
+            public var attachments: [Snowflake<DiscordChannel.Message.Attachment>: DiscordChannel.Message.Attachment]?
         }
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
@@ -46,13 +46,13 @@ public struct Interaction: Sendable, Codable {
             public var focused: Bool?
         }
         
-        public var id: String
+        public var id: Snowflake<ApplicationCommand>
         public var name: String
         public var type: Kind
         public var resolved: ResolvedData?
         public var options: [Option]?
         public var guild_id: Snowflake<Guild>?
-        public var target_id: String?
+        public var target_id: AnySnowflake?
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-message-component-data-structure
@@ -75,7 +75,7 @@ public struct Interaction: Sendable, Codable {
         case modalSubmit(ModalSubmit)
     }
     
-    public var id: String
+    public var id: Snowflake<Interaction>
     public var application_id: Snowflake<PartialApplication>
     public var type: Kind
     public var data: Data?
@@ -114,7 +114,7 @@ public struct Interaction: Sendable, Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        self.id = try container.decode(String.self, forKey: .id)
+        self.id = try container.decode(Snowflake<Interaction>.self, forKey: .id)
         self.application_id = try container.decode(
             Snowflake<PartialApplication>.self,
             forKey: .application_id

@@ -593,7 +593,7 @@ public struct Gateway: Sendable, Codable {
         public var id: Snowflake<DiscordChannel>
         public var type: DiscordChannel.Kind
         public var guild_id: Snowflake<Guild>?
-        public var parent_id: String?
+        public var parent_id: AnySnowflake?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#thread-list-sync-thread-list-sync-event-fields
@@ -881,7 +881,7 @@ public struct Gateway: Sendable, Codable {
     /// This is used for guild-scheduled-event-user add and remove events.
     /// https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-add-guild-scheduled-event-user-add-event-fields
     public struct GuildScheduledEventUser: Sendable, Codable {
-        public var guild_scheduled_event_id: String
+        public var guild_scheduled_event_id: Snowflake<GuildScheduledEvent>
         public var user_id: Snowflake<DiscordUser>
         public var guild_id: Snowflake<Guild>
     }
@@ -890,12 +890,12 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#integration-create
     /// https://discord.com/developers/docs/resources/guild#integration-object
     public struct IntegrationCreate: Sendable, Codable {
-        public var id: String
+        public var id: Snowflake<Integration>
         public var name: String
         public var type: Integration.Kind
         public var enabled: Bool
         public var syncing: Bool?
-        public var role_id: String?
+        public var role_id: Snowflake<Role>?
         public var enable_emoticons: Bool?
         public var expire_behavior: Integration.ExpireBehavior?
         public var expire_grace_period: Int?
@@ -911,7 +911,7 @@ public struct Gateway: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/gateway-events#integration-delete-integration-delete-event-fields
     public struct IntegrationDelete: Sendable, Codable {
-        public var id: String
+        public var id: Snowflake<Integration>
         public var guild_id: Snowflake<Guild>
         public var application_id: Snowflake<PartialApplication>?
     }
@@ -965,7 +965,7 @@ public struct Gateway: Sendable, Codable {
         public var reactions: [DiscordChannel.Message.Reaction]?
         public var nonce: StringOrInt?
         public var pinned: Bool
-        public var webhook_id: String?
+        public var webhook_id: Snowflake<Webhook>?
         public var type: DiscordChannel.Message.Kind
         public var activity: DiscordChannel.Message.Activity?
         public var application: PartialApplication?
@@ -1180,10 +1180,10 @@ public struct Gateway: Sendable, Codable {
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-emoji
         public struct ActivityEmoji: Sendable, Codable {
             public var name: String
-            public var id: String?
+            public var id: Snowflake<PartialEmoji>?
             public var animated: Bool?
             
-            public init(name: String, id: String? = nil, animated: Bool? = nil) {
+            public init(name: String, id: Snowflake<PartialEmoji>? = nil, animated: Bool? = nil) {
                 self.name = name
                 self.id = id
                 self.animated = animated
@@ -1266,7 +1266,6 @@ public struct Gateway: Sendable, Codable {
         public var name: String?
         public var type: Kind?
         public var url: String?
-        public var id: Snowflake<Gateway.Activity>?
         public var created_at: Int?
         public var timestamps: Timestamps?
         public var application_id: Snowflake<PartialApplication>?
@@ -1274,17 +1273,12 @@ public struct Gateway: Sendable, Codable {
         public var state: String?
         public var emoji: ActivityEmoji?
         public var party: Party?
-        public var party_id: String?
         public var assets: Assets?
         public var secrets: Secrets?
         public var instance: Bool?
         public var flags: IntBitField<Flag>?
         public var buttons: [Button]?
-        public var sync_id: String?
-        public var session_id: String?
-        public var platform: String?
-        public var supported_platforms: [String]?
-        
+
         /// Bots are only able to send `name`, `type`, and optionally `url`.
         public init(name: String, type: Kind, url: String? = nil) {
             self.name = name

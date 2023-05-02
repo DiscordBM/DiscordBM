@@ -27,10 +27,10 @@ public struct GuildScheduledEvent: Sendable, Codable {
         public var location: String?
     }
     
-    public var id: String
+    public var id: Snowflake<GuildScheduledEvent>
     public var guild_id: Snowflake<Guild>
     public var channel_id: Snowflake<DiscordChannel>?
-    public var creator_id: String?
+    public var creator_id: Snowflake<DiscordUser>?
     public var name: String
     public var description: String?
     public var scheduled_start_time: DiscordTimestamp
@@ -38,12 +38,12 @@ public struct GuildScheduledEvent: Sendable, Codable {
     public var privacy_level: PrivacyLevel
     public var status: Status
     public var entity_type: EntityKind
-    public var entity_id: String?
+    // FIXME: use `Snowflake<Type>` instead
+    public var entity_id: AnySnowflake?
     public var entity_metadata: EntityMetadata?
     public var creator: DiscordUser?
     public var user_count: Int?
     public var image: String?
-    public var sku_ids: [String]?
     /// Only for Gateway `guildScheduledEventUserAdd` events.
     public var user_ids: [Snowflake<DiscordUser>]?
 }
