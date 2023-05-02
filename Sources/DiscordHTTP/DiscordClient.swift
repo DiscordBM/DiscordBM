@@ -1373,14 +1373,20 @@ public extension DiscordClient {
     
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNGuildIcon(guildId: Snowflake<Guild>, icon: String) async throws -> DiscordCDNResponse {
+    func getCDNGuildIcon(
+        guildId: Snowflake<Guild>,
+        icon: String
+    ) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.guildIcon(guildId: guildId, icon: icon)
         return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
     }
     
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNGuildSplash(guildId: Snowflake<Guild>, splash: String) async throws -> DiscordCDNResponse {
+    func getCDNGuildSplash(
+        guildId: Snowflake<Guild>,
+        splash: String
+    ) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.guildSplash(guildId: guildId, splash: splash)
         return try await self.send(request: .init(to: endpoint), fallbackFileName: splash)
     }
@@ -1498,7 +1504,7 @@ public extension DiscordClient {
     @inlinable
     func getCDNAchievementIcon(
         appId: Snowflake<PartialApplication>,
-        achievementId: String,
+        achievementId: AnySnowflake,
         icon: String
     ) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.achievementIcon(
@@ -1517,9 +1523,15 @@ public extension DiscordClient {
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNStorePageAsset(appId: Snowflake<PartialApplication>, assetId: String) async throws -> DiscordCDNResponse {
+    func getCDNStorePageAsset(
+        appId: Snowflake<PartialApplication>,
+        assetId: Snowflake<Gateway.Activity.Assets>
+    ) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.storePageAsset(appId: appId, assetId: assetId)
-        return try await self.send(request: .init(to: endpoint), fallbackFileName: assetId)
+        return try await self.send(
+            request: .init(to: endpoint),
+            fallbackFileName: assetId.value
+        )
     }
     
     /// Untested function.
@@ -1530,9 +1542,14 @@ public extension DiscordClient {
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNStickerPackBanner(assetId: String) async throws -> DiscordCDNResponse {
+    func getCDNStickerPackBanner(
+        assetId: Snowflake<Gateway.Activity.Assets>
+    ) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.stickerPackBanner(assetId: assetId)
-        return try await self.send(request: .init(to: endpoint), fallbackFileName: assetId)
+        return try await self.send(
+            request: .init(to: endpoint),
+            fallbackFileName: assetId.value
+        )
     }
     
     /// Untested function.

@@ -19,9 +19,18 @@ public enum CDNEndpoint: Endpoint {
         appId: Snowflake<PartialApplication>,
         assetId: Snowflake<Gateway.Activity.Assets>
     )
-    case achievementIcon(appId: Snowflake<PartialApplication>, achievementId: String, icon: String)
-    case storePageAsset(appId: Snowflake<PartialApplication>, assetId: String)
-    case stickerPackBanner(assetId: String)
+    /// FIXME: `achievementId` should be of type `Snowflake<Achievement>` but
+    /// `DiscordBM` doesn't yet have the `Achievement` type.
+    case achievementIcon(
+        appId: Snowflake<PartialApplication>,
+        achievementId: AnySnowflake,
+        icon: String
+    )
+    case storePageAsset(
+        appId: Snowflake<PartialApplication>,
+        assetId: Snowflake<Gateway.Activity.Assets>
+    )
+    case stickerPackBanner(assetId: Snowflake<Gateway.Activity.Assets>)
     case teamIcon(teamId: Snowflake<Team>, icon: String)
     case sticker(stickerId: Snowflake<Sticker>)
     case roleIcon(roleId: Snowflake<Role>, icon: String)
@@ -36,46 +45,45 @@ public enum CDNEndpoint: Endpoint {
         let suffix: String
         switch self {
         case let .customEmoji(emojiId):
-            let emojiId = emojiId.value
-            suffix = "emojis/\(emojiId)"
+            suffix = "emojis/\(emojiId.value)"
         case let .guildIcon(guildId, icon):
-            suffix = "icons/\(guildId)/\(icon)"
+            suffix = "icons/\(guildId.value)/\(icon)"
         case let .guildSplash(guildId, splash):
-            suffix = "splashes/\(guildId)/\(splash)"
+            suffix = "splashes/\(guildId.value)/\(splash)"
         case let .guildDiscoverySplash(guildId, splash):
-            suffix = "discovery-splashes/\(guildId)/\(splash)"
+            suffix = "discovery-splashes/\(guildId.value)/\(splash)"
         case let .guildBanner(guildId, banner):
-            suffix = "banners/\(guildId)/\(banner)"
+            suffix = "banners/\(guildId.value)/\(banner)"
         case let .userBanner(userId, banner):
-            suffix = "banners/\(userId)/\(banner)"
+            suffix = "banners/\(userId.value)/\(banner)"
         case let .defaultUserAvatar(discriminator):
             suffix = "embed/avatars/\(discriminator).png" /// Needs `.png`
         case let .userAvatar(userId, avatar):
-            suffix = "avatars/\(userId)/\(avatar)"
+            suffix = "avatars/\(userId.value)/\(avatar)"
         case let .guildMemberAvatar(guildId, userId, avatar):
-            suffix = "guilds/\(guildId)/users/\(userId)/avatars/\(avatar)"
+            suffix = "guilds/\(guildId.value)/users/\(userId.value)/avatars/\(avatar)"
         case let .applicationIcon(appId, icon):
-            suffix = "app-icons/\(appId)/\(icon)"
+            suffix = "app-icons/\(appId.value)/\(icon)"
         case let .applicationCover(appId, cover):
-            suffix = "app-icons/\(appId)/\(cover)"
+            suffix = "app-icons/\(appId.value)/\(cover)"
         case let .applicationAsset(appId, assetId):
-            suffix = "app-assets/\(appId)/\(assetId)"
+            suffix = "app-assets/\(appId.value)/\(assetId.value)"
         case let .achievementIcon(appId, achievementId, icon):
-            suffix = "app-assets/\(appId)/achievements/\(achievementId)/icons/\(icon)"
+            suffix = "app-assets/\(appId.value)/achievements/\(achievementId.value)/icons/\(icon)"
         case let .storePageAsset(appId, assetId):
-            suffix = "app-assets/\(appId)/store/\(assetId)"
+            suffix = "app-assets/\(appId.value)/store/\(assetId.value)"
         case let .stickerPackBanner(assetId):
-            suffix = "app-assets/710982414301790216/store/\(assetId)"
+            suffix = "app-assets/710982414301790216/store/\(assetId.value)"
         case let .teamIcon(teamId, icon):
-            suffix = "team-icons/\(teamId)/\(icon)"
+            suffix = "team-icons/\(teamId.value)/\(icon)"
         case let .sticker(stickerId):
-            suffix = "stickers/\(stickerId).png" /// Needs `.png`
+            suffix = "stickers/\(stickerId.value).png" /// Needs `.png`
         case let .roleIcon(roleId, icon):
-            suffix = "role-icons/\(roleId)/\(icon)"
+            suffix = "role-icons/\(roleId.value)/\(icon)"
         case let .guildScheduledEventCover(eventId, cover):
-            suffix = "guild-events/\(eventId)/\(cover)"
+            suffix = "guild-events/\(eventId.value)/\(cover)"
         case let .guildMemberBanner(guildId, userId, banner):
-            suffix = "guilds/\(guildId)/users/\(userId)/banners/\(banner)"
+            suffix = "guilds/\(guildId.value)/users/\(userId.value)/banners/\(banner)"
         }
         return suffix.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? suffix
     }
@@ -158,11 +166,11 @@ public enum CDNEndpoint: Endpoint {
         case .applicationAsset(let appId, let assetId):
             return [appId.value, assetId.value]
         case .achievementIcon(let appId, let achievementId, let icon):
-            return [appId.value, achievementId, icon]
+            return [appId.value, achievementId.value, icon]
         case .storePageAsset(let appId, let assetId):
-            return [appId.value, assetId]
+            return [appId.value, assetId.value]
         case .stickerPackBanner(let assetId):
-            return [assetId]
+            return [assetId.value]
         case .teamIcon(let teamId, let icon):
             return [teamId.value, icon]
         case .sticker(let stickerId):
