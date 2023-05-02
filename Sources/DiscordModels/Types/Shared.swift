@@ -865,6 +865,15 @@ extension SnowflakeProtocol {
 }
 
 /// Use the `Snowflake` type-aliases instead. e.g. `Snowflake<DiscordUser>` ❌, `UserSnowflake` ✅.
+/// This type is expressible by string literal. This means the following code is valid:
+/// ```
+/// let snowflake: ChannelSnowflake = "192839184848484"
+/// ```
+/// If you really need to, you can convert other snowflakes to each other:
+/// ```
+/// let appId: ApplicationSnowflake = "192839184848484"
+/// let botId: UserSnowflake = Snowflake(appId)
+/// ```
 public struct Snowflake<Tag>: SnowflakeProtocol {
     public let value: String
 
@@ -878,6 +887,15 @@ public struct Snowflake<Tag>: SnowflakeProtocol {
 }
 
 /// Type-erased snowflake.
+/// This type is expressible by string literal. This means the following code is valid:
+/// ```
+/// let snowflake: AnySnowflake = "192839184848484"
+/// ```
+/// If you really need to, you can convert other snowflakes to each other:
+/// ```
+/// let appId: AnySnowflake = "192839184848484"
+/// let botId: UserSnowflake = Snowflake(appId)
+/// ```
 public struct AnySnowflake: SnowflakeProtocol {
     public let value: String
 
