@@ -10,15 +10,15 @@ public struct Webhook: Sendable, Codable {
         case application = 3
     }
     
-    public var id: Snowflake<Webhook>
+    public var id: WebhookSnowflake
     public var type: Kind
-    public var guild_id: Snowflake<Guild>?
-    public var channel_id: Snowflake<DiscordChannel>?
+    public var guild_id: GuildSnowflake?
+    public var channel_id: ChannelSnowflake?
     public var user: DiscordUser?
     public var name: String?
     public var avatar: String?
     public var token: String?
-    public var application_id: Snowflake<PartialApplication>?
+    public var application_id: ApplicationSnowflake?
     public var source_guild: PartialGuild?
     public var source_channel: DiscordChannel?
     public var url: String?
@@ -46,12 +46,12 @@ public struct WebhookAddress: Sendable, Hashable {
         }
     }
     
-    public var id: Snowflake<Webhook>
+    public var id: WebhookSnowflake
     public var token: String
     
     /// For example if webhook url is https://discord.com/api/webhooks/1066284436045439037/dSs4nFhjpxcOh6HWD_5QJaq ,
     /// Then id is `1066284436045439037` and token is `dSs4nFhjpxcOh6HWD_5QJaq`.
-    public static func deconstructed(id: Snowflake<Webhook>, token: String) -> WebhookAddress {
+    public static func deconstructed(id: WebhookSnowflake, token: String) -> WebhookAddress {
         WebhookAddress(id: id, token: token)
     }
     

@@ -242,35 +242,35 @@ struct API: Decodable {
                         case .string:
                             switch paramName {
                             case "guildId":
-                                type = "Snowflake<Guild>"
+                                type = "GuildSnowflake"
                             case "applicationId":
-                                type = "Snowflake<PartialApplication>"
+                                type = "ApplicationSnowflake"
                             case "userId":
-                                type = "Snowflake<DiscordUser>"
+                                type = "UserSnowflake"
                             case "channelId":
-                                type = "Snowflake<DiscordChannel>"
+                                type = "ChannelSnowflake"
                             case "messageId":
-                                type = "Snowflake<DiscordChannel.Message>"
+                                type = "MessageSnowflake"
                             case "roleId":
-                                type = "Snowflake<Role>"
+                                type = "RoleSnowflake"
                             case "commandId":
-                                type = "Snowflake<ApplicationCommand>"
+                                type = "ApplicationCommandSnowflake"
                             case "integrationId":
-                                type = "Snowflake<Integration>"
+                                type = "IntegrationSnowflake"
                             case "interactionId":
-                                type = "Snowflake<Interaction>"
+                                type = "InteractionSnowflake"
                             case "emojiId":
-                                type = "Snowflake<PartialEmoji>"
+                                type = "EmojiSnowflake"
                             case "ruleId":
-                                type = "Snowflake<AutoModerationRule>"
+                                type = "RuleSnowflake"
                             case "stickerId":
-                                type = "Snowflake<Sticker>"
+                                type = "StickerSnowflake"
                             case "guildScheduledEventId":
-                                type = "Snowflake<GuildScheduledEvent>"
+                                type = "GuildScheduledEventSnowflake"
                             case "overwriteId":
                                 type = "AnySnowflake"
                             case "webhookId":
-                                type = "Snowflake<Webhook>"
+                                type = "WebhookSnowflake"
                             case let name where name.hasSuffix("Id"):
                                 print("Unhandled ID type: '\(paramName)'")
                                 fatalError("Unhandled ID type: '\(paramName)'")

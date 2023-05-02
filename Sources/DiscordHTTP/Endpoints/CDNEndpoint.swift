@@ -4,40 +4,40 @@ import NIOHTTP1
 /// CDN Endpoints
 /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
 public enum CDNEndpoint: Endpoint {
-    case customEmoji(emojiId: Snowflake<PartialEmoji>)
-    case guildIcon(guildId: Snowflake<Guild>, icon: String)
-    case guildSplash(guildId: Snowflake<Guild>, splash: String)
-    case guildDiscoverySplash(guildId: Snowflake<Guild>, splash: String)
-    case guildBanner(guildId: Snowflake<Guild>, banner: String)
-    case userBanner(userId: Snowflake<DiscordUser>, banner: String)
+    case customEmoji(emojiId: EmojiSnowflake)
+    case guildIcon(guildId: GuildSnowflake, icon: String)
+    case guildSplash(guildId: GuildSnowflake, splash: String)
+    case guildDiscoverySplash(guildId: GuildSnowflake, splash: String)
+    case guildBanner(guildId: GuildSnowflake, banner: String)
+    case userBanner(userId: UserSnowflake, banner: String)
     case defaultUserAvatar(discriminator: String)
-    case userAvatar(userId: Snowflake<DiscordUser>, avatar: String)
-    case guildMemberAvatar(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>, avatar: String)
-    case applicationIcon(appId: Snowflake<PartialApplication>, icon: String)
-    case applicationCover(appId: Snowflake<PartialApplication>, cover: String)
+    case userAvatar(userId: UserSnowflake, avatar: String)
+    case guildMemberAvatar(guildId: GuildSnowflake, userId: UserSnowflake, avatar: String)
+    case applicationIcon(appId: ApplicationSnowflake, icon: String)
+    case applicationCover(appId: ApplicationSnowflake, cover: String)
     case applicationAsset(
-        appId: Snowflake<PartialApplication>,
-        assetId: Snowflake<Gateway.Activity.Assets>
+        appId: ApplicationSnowflake,
+        assetId: AssetsSnowflake
     )
     /// FIXME: `achievementId` should be of type `Snowflake<Achievement>` but
     /// `DiscordBM` doesn't yet have the `Achievement` type.
     case achievementIcon(
-        appId: Snowflake<PartialApplication>,
+        appId: ApplicationSnowflake,
         achievementId: AnySnowflake,
         icon: String
     )
     case storePageAsset(
-        appId: Snowflake<PartialApplication>,
-        assetId: Snowflake<Gateway.Activity.Assets>
+        appId: ApplicationSnowflake,
+        assetId: AssetsSnowflake
     )
-    case stickerPackBanner(assetId: Snowflake<Gateway.Activity.Assets>)
-    case teamIcon(teamId: Snowflake<Team>, icon: String)
-    case sticker(stickerId: Snowflake<Sticker>)
-    case roleIcon(roleId: Snowflake<Role>, icon: String)
-    case guildScheduledEventCover(eventId: Snowflake<GuildScheduledEvent>, cover: String)
+    case stickerPackBanner(assetId: AssetsSnowflake)
+    case teamIcon(teamId: TeamSnowflake, icon: String)
+    case sticker(stickerId: StickerSnowflake)
+    case roleIcon(roleId: RoleSnowflake, icon: String)
+    case guildScheduledEventCover(eventId: GuildScheduledEventSnowflake, cover: String)
     case guildMemberBanner(
-        guildId: Snowflake<Guild>,
-        userId: Snowflake<DiscordUser>,
+        guildId: GuildSnowflake,
+        userId: UserSnowflake,
         banner: String
     )
     

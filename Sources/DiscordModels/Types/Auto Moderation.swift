@@ -35,7 +35,7 @@ public struct AutoModerationRule: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object
     public enum Action: Sendable, Codable, ValidatablePayload {
         case blockMessage(customMessage: String?)
-        case sendAlertMessage(channelId: Snowflake<DiscordChannel>)
+        case sendAlertMessage(channelId: ChannelSnowflake)
         case timeout(durationSeconds: Int)
         
         private enum CodingKeys: String, CodingKey {
@@ -69,7 +69,7 @@ public struct AutoModerationRule: Sendable, Codable {
                 let channelId = try container.nestedContainer(
                     keyedBy: SendAlertMessageCodingKeys.self,
                     forKey: .metadata
-                ).decode(Snowflake<DiscordChannel>.self, forKey: .channel_id)
+                ).decode(ChannelSnowflake.self, forKey: .channel_id)
                 self = .sendAlertMessage(channelId: channelId)
             case 3:
                 let durationSeconds = try container.nestedContainer(
@@ -133,10 +133,10 @@ public struct AutoModerationRule: Sendable, Codable {
         }
     }
     
-    public var id: Snowflake<AutoModerationRule>
-    public var guild_id: Snowflake<Guild>
+    public var id: RuleSnowflake
+    public var guild_id: GuildSnowflake
     public var name: String
-    public var creator_id: Snowflake<DiscordUser>
+    public var creator_id: UserSnowflake
     public var event_type: EventKind
     public var trigger_type: TriggerKind
     public var trigger_metadata: TriggerMetadata
@@ -148,14 +148,14 @@ public struct AutoModerationRule: Sendable, Codable {
 
 /// https://discord.com/developers/docs/topics/gateway-events#auto-moderation-action-execution-auto-moderation-action-execution-event-fields
 public struct AutoModerationActionExecution: Sendable, Codable {
-    public var guild_id: Snowflake<Guild>
+    public var guild_id: GuildSnowflake
     public var action: AutoModerationRule.Action
-    public var rule_id: Snowflake<AutoModerationRule>
+    public var rule_id: RuleSnowflake
     public var rule_trigger_type: AutoModerationRule.TriggerKind
-    public var user_id: Snowflake<DiscordUser>
-    public var channel_id: Snowflake<DiscordChannel>?
-    public var message_id: Snowflake<DiscordChannel.Message>?
-    public var alert_system_message_id: Snowflake<DiscordChannel.Message>?
+    public var user_id: UserSnowflake
+    public var channel_id: ChannelSnowflake?
+    public var message_id: MessageSnowflake?
+    public var alert_system_message_id: MessageSnowflake?
     public var content: String?
     public var matched_keyword: String?
     public var matched_content: String?

@@ -116,10 +116,10 @@ public struct ApplicationCommand: Sendable, Codable {
         }
     }
     
-    public var id: Snowflake<ApplicationCommand>
+    public var id: ApplicationCommandSnowflake
     public var type: Kind?
-    public var application_id: Snowflake<PartialApplication>
-    public var guild_id: Snowflake<Guild>?
+    public var application_id: ApplicationSnowflake
+    public var guild_id: GuildSnowflake?
     public var name: String
     public var name_localizations: DiscordLocaleDict<String>?
     public var name_localized: String? /// Only for endpoints like get-application-commands
@@ -158,7 +158,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
         
         /// Read `helpAnchor` for help about each error case.
         public enum ConversionError: LocalizedError {
-            case couldNotConvertToInteger(Snowflake<Guild>)
+            case couldNotConvertToInteger(GuildSnowflake)
             
             public var errorDescription: String? {
                 switch self {
@@ -176,7 +176,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
         }
         
         public static func allChannels(
-            inGuildWithId guildId: Snowflake<Guild>,
+            inGuildWithId guildId: GuildSnowflake,
             permission: Bool
         ) throws -> Self {
             guard let guildNumber = Int(guildId.value) else {
@@ -190,7 +190,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
         }
         
         public static func allMembers(
-            inGuildWithId guildId: Snowflake<Guild>,
+            inGuildWithId guildId: GuildSnowflake,
             permission: Bool
         ) throws -> Self {
             self.init(type: .user, permission: permission, id: AnySnowflake(guildId))
@@ -199,6 +199,6 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
     
     public var permissions: [Permission]
     public var id: AnySnowflake
-    public var guild_id: Snowflake<Guild>
-    public var application_id: Snowflake<PartialApplication>
+    public var guild_id: GuildSnowflake
+    public var application_id: ApplicationSnowflake
 }

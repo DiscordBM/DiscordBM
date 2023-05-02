@@ -41,8 +41,8 @@ public actor DiscordLogManager {
         
         /// ID of a user or a role to be mentioned.
         public enum Mention {
-            case user(Snowflake<DiscordUser>)
-            case role(Snowflake<Role>)
+            case user(UserSnowflake)
+            case role(RoleSnowflake)
             case combined([Mention])
             
             public static func combined(_ mentions: Mention...) -> Mention {

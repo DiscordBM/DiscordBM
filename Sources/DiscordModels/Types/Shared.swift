@@ -4,6 +4,8 @@ import Foundation
 @preconcurrency import Foundation
 #endif
 
+//MARK: - StringIntDoubleBool
+
 /// To dynamically decode/encode String or Int or Double or Bool.
 public enum StringIntDoubleBool: Sendable, Codable {
     case string(String)
@@ -49,6 +51,8 @@ public enum StringIntDoubleBool: Sendable, Codable {
     }
 }
 
+//MARK: - StringOrInt
+
 /// To dynamically decode/encode String or Int.
 public enum StringOrInt: Sendable, Codable {
     case string(String)
@@ -82,6 +86,8 @@ public enum StringOrInt: Sendable, Codable {
     }
 }
 
+//MARK: - IntOrDouble
+
 public enum IntOrDouble: Sendable, Codable {
     case int(Int)
     case double(Double)
@@ -106,6 +112,8 @@ public enum IntOrDouble: Sendable, Codable {
         }
     }
 }
+
+//MARK: - DiscordLocale
 
 /// https://discord.com/developers/docs/reference#locales
 public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecodeMarker {
@@ -140,6 +148,8 @@ public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecodeMarke
     case chineseTaiwan = "zh-TW"
     case korean = "ko"
 }
+
+//MARK: - DiscordLocaleDict
 
 /// A container to decode/encode `[DiscordLocale: String]`,
 /// because Discord doesn't like how Codable decode/encodes `[DiscordLocale: String]`.
@@ -318,6 +328,8 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
 
 extension DiscordLocaleDict: Sendable where C: Sendable { }
 
+//MARK: - DiscordTimestamp
+
 /// A timestamp that decode/encodes itself how Discord expects.
 public struct DiscordTimestamp: Codable {
     
@@ -461,6 +473,8 @@ extension DiscordTimestamp: Sendable { }
 extension DiscordTimestamp: @unchecked Sendable { }
 #endif
 
+//MARK: - Bitfield
+
 /// A protocol for bit-fields.
 public protocol BitField: ExpressibleByArrayLiteral {
     associatedtype R: RawRepresentable where R: Hashable, R.RawValue == Int
@@ -603,6 +617,8 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
 
 extension StringBitField: Sendable where R: Sendable { }
 
+//MARK: - IntPair
+
 /// An array consisting of two integers.
 public struct IntPair: Sendable, Codable {
     public var first: Int
@@ -625,6 +641,8 @@ public struct IntPair: Sendable, Codable {
         try [first, second].encode(to: encoder)
     }
 }
+
+//MARK: - TolerantDecodeDate
 
 /// A ``Date`` and ``DiscordTimestamp`` that tolerates decode failures.
 public struct TolerantDecodeDate: Codable {
@@ -656,6 +674,8 @@ extension TolerantDecodeDate: Sendable { }
 #else
 extension TolerantDecodeDate: @unchecked Sendable { }
 #endif
+
+//MARK: - DiscordColor
 
 /// A dynamic color type that decode/encodes itself as an integer which Discord expects.
 public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLiteral {
@@ -724,6 +744,8 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
     }
 }
 
+//MARK: - Secret
+
 /// A type that will try to keep its content a secret when used with string interpolation.
 /// This is to stop leaking something like a token in somewhere like the logs.
 public struct Secret:
@@ -763,6 +785,8 @@ public struct Secret:
     }
 }
 
+//MARK: - DereferenceBox
+
 /// A class so we can use the same type recursively in itself.
 public final class DereferenceBox<C>: Codable where C: Codable {
     public let value: C
@@ -782,7 +806,46 @@ public final class DereferenceBox<C>: Codable where C: Codable {
 
 extension DereferenceBox: Sendable where C: Sendable { }
 
+//MARK: - Snowflake
+
+public protocol SnowflakeProtocol:
+    Sendable,
+    Codable,
+    Hashable,
+    CustomStringConvertible,
+    ExpressibleByStringLiteral {
+
+    var value: String { get }
+    init(_ value: String)
+}
+
+/// The parsed info of a snowflake.
 public struct SnowflakeInfo: Sendable {
+
+    /// Read `helpAnchor` for help about each error case.
+    public enum Error: LocalizedError {
+        case fieldTooBig(_ name: String, value: String, max: Int)
+        case fieldTooSmall(_ name: String, value: String, min: UInt64)
+
+        public var errorDescription: String? {
+            switch self {
+            case let .fieldTooBig(name, value, max):
+                return "fieldTooBig(\(name), value: \(value), max: \(max))"
+            case let .fieldTooSmall(name, value, min):
+                return "fieldTooSmall(\(name), value: \(value), min: \(min))"
+            }
+        }
+
+        public var helpAnchor: String? {
+            switch self {
+            case let .fieldTooBig(name, value, max):
+                return "Entered field '\(name)' is bigger than expected. It has a value of '\(value)', but max accepted is '\(max)'"
+            case let .fieldTooSmall(name, value, min):
+                return "Entered field '\(name)' is smaller than expected. It has a value of '\(value)', but min accepted is '\(min)'"
+            }
+        }
+    }
+
     /// Time since epoch, in milli-seconds, when the snowflake was created.
     public var timestamp: UInt64
     /// The internal unique id of the worker that created the snowflake.
@@ -804,7 +867,22 @@ public struct SnowflakeInfo: Sendable {
     ///   - workerId: The internal unique id of the worker that created the snowflake.
     ///   - processId: The internal unique id of the process that created the snowflake.
     ///   - sequenceNumber: The sequence number of the snowflake in the millisecond when it was created.
-    public init(timestamp: UInt64, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) {
+    ///
+    ///   Throws `SnowflakeInfo.Error`
+    public init(timestamp: UInt64, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) throws {
+        guard timestamp <= (1 << 42) else {
+            throw Error.fieldTooBig("timestamp", value: "\(timestamp)", max: 1 << 42)
+        }
+        guard workerId <= (1 << 5) else {
+            throw Error.fieldTooBig("workerId", value: "\(workerId)", max: 1 << 5)
+        }
+        guard processId <= (1 << 5) else {
+            throw Error.fieldTooBig("processId", value: "\(processId)", max: 1 << 5)
+        }
+        guard sequenceNumber <= (1 << 12) else {
+            throw Error.fieldTooBig("sequenceNumber", value: "\(sequenceNumber)", max: 1 << 12)
+        }
+
         self.timestamp = timestamp
         self.workerId = workerId
         self.processId = processId
@@ -816,15 +894,41 @@ public struct SnowflakeInfo: Sendable {
     ///   - workerId: The internal unique id of the worker that created the snowflake.
     ///   - processId: The internal unique id of the process that created the snowflake.
     ///   - sequenceNumber: The sequence number of the snowflake in the millisecond when it was created.
-    public init(date: Date, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) {
-        self.timestamp = UInt64(date.timeIntervalSince1970 * 1_000)
+    ///
+    ///   Throws `SnowflakeInfo.Error`
+    public init(date: Date, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) throws {
+        guard date.timeIntervalSince1970 >= Double(SnowflakeInfo.discordEpochConstant / 1_000) else {
+            throw Error.fieldTooSmall("date", value: "\(date.timeIntervalSince1970)", min: SnowflakeInfo.discordEpochConstant)
+        }
+
+        let timeSince1970 = UInt64(date.timeIntervalSince1970)
+        guard timeSince1970 < (1 << 42 / 1_000) else {
+            throw Error.fieldTooBig("date", value: "\(timeSince1970)", max: (1 << 42 / 1_000))
+        }
+
+        self.timestamp = timeSince1970 * 1_000
+        
+        guard timestamp < (1 << 42) else {
+            let max = (1 << 42 / 1_000) - 1
+            throw Error.fieldTooBig("date", value: "\(timestamp)", max: max)
+        }
+        guard workerId <= (1 << 5) else {
+            throw Error.fieldTooBig("workerId", value: "\(workerId)", max: 1 << 5)
+        }
+        guard processId <= (1 << 5) else {
+            throw Error.fieldTooBig("processId", value: "\(processId)", max: 1 << 5)
+        }
+        guard sequenceNumber <= (1 << 12) else {
+            throw Error.fieldTooBig("sequenceNumber", value: "\(sequenceNumber)", max: 1 << 12)
+        }
+
         self.workerId = workerId
         self.processId = processId
         self.sequenceNumber = sequenceNumber
     }
 
-    internal static func makeFake(date: Date) -> SnowflakeInfo {
-        SnowflakeInfo(date: date, workerId: 0, processId: 0, sequenceNumber: 0)
+    internal static func makeFake(date: Date) throws -> SnowflakeInfo {
+        try SnowflakeInfo(date: date, workerId: 0, processId: 0, sequenceNumber: 0)
     }
 
     internal init? (from snowflake: String) {
@@ -848,17 +952,6 @@ public struct SnowflakeInfo: Sendable {
     }
 }
 
-public protocol SnowflakeProtocol:
-    Sendable,
-    Codable,
-    Hashable,
-    CustomStringConvertible,
-    ExpressibleByStringLiteral {
-
-    var value: String { get }
-    init(_ value: String)
-}
-
 extension SnowflakeProtocol {
     /// Initializes a snowflake from another snowflake.
     public init(_ snowflake: any SnowflakeProtocol) {
@@ -867,6 +960,17 @@ extension SnowflakeProtocol {
 
     public init(from decoder: Decoder) throws {
         try self.init(.init(from: decoder))
+#if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
+        if self.parse() == nil {
+            DiscordGlobalConfiguration.makeDecodeLogger("SnowflakeProtocol").warning(
+                "Could not parse a snowflake", metadata: [
+                    "type": "\(Self.self)",
+                    "decoder": "\(decoder)",
+                    "decoded": "\(self.value)"
+                ]
+            )
+        }
+#endif
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -888,11 +992,12 @@ extension SnowflakeProtocol {
     }
 
     /// Makes a fake snowflake.
-    public static func makeFake(date: Date = Date()) -> Self {
-        self.init(info: SnowflakeInfo.makeFake(date: date))
+    public static func makeFake(date: Date = Date()) throws -> Self {
+        try self.init(info: SnowflakeInfo.makeFake(date: date))
     }
 }
 
+/// Use the `Snowflake` typealiases instead. e.g. `Snowflake<DiscordUser>` ❌, `UserSnowflake` ✅.
 public struct Snowflake<Tag>: SnowflakeProtocol {
     public let value: String
 
@@ -905,6 +1010,7 @@ public struct Snowflake<Tag>: SnowflakeProtocol {
     }
 }
 
+/// Type-erased snowflake.
 public struct AnySnowflake: SnowflakeProtocol {
     public let value: String
 
@@ -920,6 +1026,76 @@ public struct AnySnowflake: SnowflakeProtocol {
 public func == (lhs: any SnowflakeProtocol, rhs: any SnowflakeProtocol) -> Bool {
     lhs.value == rhs.value
 }
+
+//MARK: Snowflake convenience type-aliases
+
+/// Convenience type-alias for `Snowflake<Guild>`
+public typealias GuildSnowflake = Snowflake<Guild>
+
+/// Convenience type-alias for `Snowflake<DiscordChannel>`
+public typealias ChannelSnowflake = Snowflake<DiscordChannel>
+
+/// Convenience type-alias for `Snowflake<DiscordChannel.Message>`
+public typealias MessageSnowflake = Snowflake<DiscordChannel.Message>
+
+/// Convenience type-alias for `Snowflake<DiscordUser>`
+public typealias UserSnowflake = Snowflake<DiscordUser>
+
+/// Convenience type-alias for `Snowflake<PartialApplication>`
+public typealias ApplicationSnowflake = Snowflake<PartialApplication>
+
+/// Convenience type-alias for `Snowflake<PartialEmoji>`
+public typealias EmojiSnowflake = Snowflake<PartialEmoji>
+
+/// Convenience type-alias for `Snowflake<Sticker>`
+public typealias StickerSnowflake = Snowflake<Sticker>
+
+/// Convenience type-alias for `Snowflake<Role>`
+public typealias RoleSnowflake = Snowflake<Role>
+
+/// Convenience type-alias for `Snowflake<AutoModerationRule>`
+public typealias RuleSnowflake = Snowflake<AutoModerationRule>
+
+/// Convenience type-alias for `Snowflake<StickerPack>`
+public typealias StickerPackSnowflake = Snowflake<StickerPack>
+
+/// Convenience type-alias for `Snowflake<Webhook>`
+public typealias WebhookSnowflake = Snowflake<Webhook>
+
+/// Convenience type-alias for `Snowflake<GuildScheduledEvent>`
+public typealias GuildScheduledEventSnowflake = Snowflake<GuildScheduledEvent>
+
+/// Convenience type-alias for `Snowflake<ApplicationCommand>`
+public typealias ApplicationCommandSnowflake = Snowflake<ApplicationCommand>
+
+/// Convenience type-alias for `Snowflake<Interaction>`
+public typealias InteractionSnowflake = Snowflake<Interaction>
+
+/// Convenience type-alias for `Snowflake<Integration>`
+public typealias IntegrationSnowflake = Snowflake<Integration>
+
+/// Convenience type-alias for `Snowflake<AuditLog.Entry>`
+public typealias AuditLogEntrySnowflake = Snowflake<AuditLog.Entry>
+
+/// Convenience type-alias for `Snowflake<DiscordChannel.Message.Attachment>`
+public typealias AttachmentSnowflake = Snowflake<DiscordChannel.Message.Attachment>
+
+/// Convenience type-alias for `Snowflake<DiscordChannel.ForumTag>`
+public typealias ForumTagSnowflake = Snowflake<DiscordChannel.ForumTag>
+
+/// Convenience type-alias for `Snowflake<Team>`
+public typealias TeamSnowflake = Snowflake<Team>
+
+/// Convenience type-alias for `Snowflake<StageInstance>`
+public typealias StageInstanceSnowflake = Snowflake<StageInstance>
+
+/// Convenience type-alias for `Snowflake<Gateway.Activity.Assets>`
+public typealias AssetsSnowflake = Snowflake<Gateway.Activity.Assets>
+
+/// Convenience type-alias for `Snowflake<IntegrationAccount>`
+public typealias IntegrationAccountSnowflake = Snowflake<IntegrationAccount>
+
+//MARK: +Calendar
 
 private extension Calendar {
     static let utc: Calendar = {

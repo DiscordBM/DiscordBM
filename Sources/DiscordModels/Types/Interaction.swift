@@ -21,7 +21,7 @@ public struct Interaction: Sendable, Codable {
             /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
             /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
             public struct PartialChannel: Sendable, Codable {
-                public var id: Snowflake<DiscordChannel>
+                public var id: ChannelSnowflake
                 public var type: DiscordChannel.Kind
                 public var name: String?
                 public var permissions: StringBitField<Permission>?
@@ -29,12 +29,12 @@ public struct Interaction: Sendable, Codable {
                 public var thread_metadata: ThreadMetadata?
             }
 
-            public var users: [Snowflake<DiscordUser>: DiscordUser]?
-            public var members: [Snowflake<DiscordUser>: Guild.PartialMember]?
-            public var roles: [Snowflake<Role>: Role]?
-            public var channels: [Snowflake<DiscordChannel>: PartialChannel]?
-            public var messages: [Snowflake<DiscordChannel.Message>: DiscordChannel.PartialMessage]?
-            public var attachments: [Snowflake<DiscordChannel.Message.Attachment>: DiscordChannel.Message.Attachment]?
+            public var users: [UserSnowflake: DiscordUser]?
+            public var members: [UserSnowflake: Guild.PartialMember]?
+            public var roles: [RoleSnowflake: Role]?
+            public var channels: [ChannelSnowflake: PartialChannel]?
+            public var messages: [MessageSnowflake: DiscordChannel.PartialMessage]?
+            public var attachments: [AttachmentSnowflake: DiscordChannel.Message.Attachment]?
         }
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
@@ -46,12 +46,12 @@ public struct Interaction: Sendable, Codable {
             public var focused: Bool?
         }
         
-        public var id: Snowflake<ApplicationCommand>
+        public var id: ApplicationCommandSnowflake
         public var name: String
         public var type: Kind
         public var resolved: ResolvedData?
         public var options: [Option]?
-        public var guild_id: Snowflake<Guild>?
+        public var guild_id: GuildSnowflake?
         public var target_id: AnySnowflake?
     }
     
@@ -75,12 +75,12 @@ public struct Interaction: Sendable, Codable {
         case modalSubmit(ModalSubmit)
     }
     
-    public var id: Snowflake<Interaction>
-    public var application_id: Snowflake<PartialApplication>
+    public var id: InteractionSnowflake
+    public var application_id: ApplicationSnowflake
     public var type: Kind
     public var data: Data?
-    public var guild_id: Snowflake<Guild>?
-    public var channel_id: Snowflake<DiscordChannel>?
+    public var guild_id: GuildSnowflake?
+    public var channel_id: ChannelSnowflake?
     public var channel: DiscordChannel?
     public var member: Guild.Member?
     public var user: DiscordUser?
@@ -114,9 +114,9 @@ public struct Interaction: Sendable, Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        self.id = try container.decode(Snowflake<Interaction>.self, forKey: .id)
+        self.id = try container.decode(InteractionSnowflake.self, forKey: .id)
         self.application_id = try container.decode(
-            Snowflake<PartialApplication>.self,
+            ApplicationSnowflake.self,
             forKey: .application_id
         )
         self.type = try container.decode(Interaction.Kind.self, forKey: .type)
@@ -136,9 +136,9 @@ public struct Interaction: Sendable, Codable {
         case .ping:
             self.data = nil
         }
-        self.guild_id = try container.decodeIfPresent(Snowflake<Guild>.self, forKey: .guild_id)
+        self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
         self.channel_id = try container.decodeIfPresent(
-            Snowflake<DiscordChannel>.self,
+            ChannelSnowflake.self,
             forKey: .channel_id
         )
         self.channel = try container.decodeIfPresent(DiscordChannel.self, forKey: .channel)

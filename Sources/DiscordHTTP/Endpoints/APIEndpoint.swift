@@ -12,61 +12,61 @@ public enum APIEndpoint: Endpoint {
     // MARK: AutoMod
     /// https://discord.com/developers/docs/resources/auto-moderation
     
-    case getAutoModerationRule(guildId: Snowflake<Guild>, ruleId: Snowflake<AutoModerationRule>)
-    case listAutoModerationRules(guildId: Snowflake<Guild>)
-    case createAutoModerationRule(guildId: Snowflake<Guild>)
-    case updateAutoModerationRule(guildId: Snowflake<Guild>, ruleId: Snowflake<AutoModerationRule>)
-    case deleteAutoModerationRule(guildId: Snowflake<Guild>, ruleId: Snowflake<AutoModerationRule>)
+    case getAutoModerationRule(guildId: GuildSnowflake, ruleId: RuleSnowflake)
+    case listAutoModerationRules(guildId: GuildSnowflake)
+    case createAutoModerationRule(guildId: GuildSnowflake)
+    case updateAutoModerationRule(guildId: GuildSnowflake, ruleId: RuleSnowflake)
+    case deleteAutoModerationRule(guildId: GuildSnowflake, ruleId: RuleSnowflake)
     
     // MARK: Audit Log
     /// https://discord.com/developers/docs/resources/audit-log
     
-    case listGuildAuditLogEntries(guildId: Snowflake<Guild>)
+    case listGuildAuditLogEntries(guildId: GuildSnowflake)
     
     // MARK: Channels
     /// https://discord.com/developers/docs/resources/channel
     
-    case getChannel(channelId: Snowflake<DiscordChannel>)
-    case listPinnedMessages(channelId: Snowflake<DiscordChannel>)
-    case addGroupDmUser(channelId: Snowflake<DiscordChannel>, userId: Snowflake<DiscordUser>)
-    case pinMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
-    case setChannelPermissionOverwrite(channelId: Snowflake<DiscordChannel>, overwriteId: AnySnowflake)
+    case getChannel(channelId: ChannelSnowflake)
+    case listPinnedMessages(channelId: ChannelSnowflake)
+    case addGroupDmUser(channelId: ChannelSnowflake, userId: UserSnowflake)
+    case pinMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
+    case setChannelPermissionOverwrite(channelId: ChannelSnowflake, overwriteId: AnySnowflake)
     case createDm
-    case followChannel(channelId: Snowflake<DiscordChannel>)
-    case triggerTypingIndicator(channelId: Snowflake<DiscordChannel>)
-    case updateChannel(channelId: Snowflake<DiscordChannel>)
-    case deleteChannel(channelId: Snowflake<DiscordChannel>)
-    case deleteChannelPermissionOverwrite(channelId: Snowflake<DiscordChannel>, overwriteId: AnySnowflake)
-    case deleteGroupDmUser(channelId: Snowflake<DiscordChannel>, userId: Snowflake<DiscordUser>)
-    case unpinMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
+    case followChannel(channelId: ChannelSnowflake)
+    case triggerTypingIndicator(channelId: ChannelSnowflake)
+    case updateChannel(channelId: ChannelSnowflake)
+    case deleteChannel(channelId: ChannelSnowflake)
+    case deleteChannelPermissionOverwrite(channelId: ChannelSnowflake, overwriteId: AnySnowflake)
+    case deleteGroupDmUser(channelId: ChannelSnowflake, userId: UserSnowflake)
+    case unpinMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
     
     // MARK: Commands
     /// https://discord.com/developers/docs/interactions/application-commands
     
-    case getApplicationCommand(applicationId: Snowflake<PartialApplication>, commandId: Snowflake<ApplicationCommand>)
-    case getGuildApplicationCommand(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>, commandId: Snowflake<ApplicationCommand>)
-    case getGuildApplicationCommandPermissions(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>, commandId: Snowflake<ApplicationCommand>)
-    case listApplicationCommands(applicationId: Snowflake<PartialApplication>)
-    case listGuildApplicationCommandPermissions(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>)
-    case listGuildApplicationCommands(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>)
-    case bulkSetApplicationCommands(applicationId: Snowflake<PartialApplication>)
-    case bulkSetGuildApplicationCommands(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>)
-    case setGuildApplicationCommandPermissions(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>, commandId: Snowflake<ApplicationCommand>)
-    case createApplicationCommand(applicationId: Snowflake<PartialApplication>)
-    case createGuildApplicationCommand(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>)
-    case updateApplicationCommand(applicationId: Snowflake<PartialApplication>, commandId: Snowflake<ApplicationCommand>)
-    case updateGuildApplicationCommand(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>, commandId: Snowflake<ApplicationCommand>)
-    case deleteApplicationCommand(applicationId: Snowflake<PartialApplication>, commandId: Snowflake<ApplicationCommand>)
-    case deleteGuildApplicationCommand(applicationId: Snowflake<PartialApplication>, guildId: Snowflake<Guild>, commandId: Snowflake<ApplicationCommand>)
+    case getApplicationCommand(applicationId: ApplicationSnowflake, commandId: ApplicationCommandSnowflake)
+    case getGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: ApplicationCommandSnowflake)
+    case getGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: ApplicationCommandSnowflake)
+    case listApplicationCommands(applicationId: ApplicationSnowflake)
+    case listGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
+    case listGuildApplicationCommands(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
+    case bulkSetApplicationCommands(applicationId: ApplicationSnowflake)
+    case bulkSetGuildApplicationCommands(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
+    case setGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: ApplicationCommandSnowflake)
+    case createApplicationCommand(applicationId: ApplicationSnowflake)
+    case createGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
+    case updateApplicationCommand(applicationId: ApplicationSnowflake, commandId: ApplicationCommandSnowflake)
+    case updateGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: ApplicationCommandSnowflake)
+    case deleteApplicationCommand(applicationId: ApplicationSnowflake, commandId: ApplicationCommandSnowflake)
+    case deleteGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: ApplicationCommandSnowflake)
     
     // MARK: Emoji
     /// https://discord.com/developers/docs/resources/emoji
     
-    case getGuildEmoji(guildId: Snowflake<Guild>, emojiId: Snowflake<PartialEmoji>)
-    case listGuildEmojis(guildId: Snowflake<Guild>)
-    case createGuildEmoji(guildId: Snowflake<Guild>)
-    case updateGuildEmoji(guildId: Snowflake<Guild>, emojiId: Snowflake<PartialEmoji>)
-    case deleteGuildEmoji(guildId: Snowflake<Guild>, emojiId: Snowflake<PartialEmoji>)
+    case getGuildEmoji(guildId: GuildSnowflake, emojiId: EmojiSnowflake)
+    case listGuildEmojis(guildId: GuildSnowflake)
+    case createGuildEmoji(guildId: GuildSnowflake)
+    case updateGuildEmoji(guildId: GuildSnowflake, emojiId: EmojiSnowflake)
+    case deleteGuildEmoji(guildId: GuildSnowflake, emojiId: EmojiSnowflake)
     
     // MARK: Gateway
     /// https://discord.com/developers/docs/topics/gateway
@@ -77,94 +77,94 @@ public enum APIEndpoint: Endpoint {
     // MARK: Guilds
     /// https://discord.com/developers/docs/resources/guild
     
-    case getGuild(guildId: Snowflake<Guild>)
-    case getGuildBan(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
-    case getGuildOnboarding(guildId: Snowflake<Guild>)
-    case getGuildPreview(guildId: Snowflake<Guild>)
-    case getGuildVanityUrl(guildId: Snowflake<Guild>)
-    case getGuildWelcomeScreen(guildId: Snowflake<Guild>)
-    case getGuildWidget(guildId: Snowflake<Guild>)
-    case getGuildWidgetPng(guildId: Snowflake<Guild>)
-    case getGuildWidgetSettings(guildId: Snowflake<Guild>)
-    case listGuildBans(guildId: Snowflake<Guild>)
-    case listGuildChannels(guildId: Snowflake<Guild>)
-    case listGuildIntegrations(guildId: Snowflake<Guild>)
+    case getGuild(guildId: GuildSnowflake)
+    case getGuildBan(guildId: GuildSnowflake, userId: UserSnowflake)
+    case getGuildOnboarding(guildId: GuildSnowflake)
+    case getGuildPreview(guildId: GuildSnowflake)
+    case getGuildVanityUrl(guildId: GuildSnowflake)
+    case getGuildWelcomeScreen(guildId: GuildSnowflake)
+    case getGuildWidget(guildId: GuildSnowflake)
+    case getGuildWidgetPng(guildId: GuildSnowflake)
+    case getGuildWidgetSettings(guildId: GuildSnowflake)
+    case listGuildBans(guildId: GuildSnowflake)
+    case listGuildChannels(guildId: GuildSnowflake)
+    case listGuildIntegrations(guildId: GuildSnowflake)
     case listOwnGuilds
-    case previewPruneGuild(guildId: Snowflake<Guild>)
-    case banUserFromGuild(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
+    case previewPruneGuild(guildId: GuildSnowflake)
+    case banUserFromGuild(guildId: GuildSnowflake, userId: UserSnowflake)
     case createGuild
-    case createGuildChannel(guildId: Snowflake<Guild>)
-    case pruneGuild(guildId: Snowflake<Guild>)
-    case setGuildMfaLevel(guildId: Snowflake<Guild>)
-    case bulkUpdateGuildChannels(guildId: Snowflake<Guild>)
-    case updateGuild(guildId: Snowflake<Guild>)
-    case updateGuildWelcomeScreen(guildId: Snowflake<Guild>)
-    case updateGuildWidgetSettings(guildId: Snowflake<Guild>)
-    case deleteGuild(guildId: Snowflake<Guild>)
-    case deleteGuildIntegration(guildId: Snowflake<Guild>, integrationId: Snowflake<Integration>)
-    case leaveGuild(guildId: Snowflake<Guild>)
-    case unbanUserFromGuild(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
+    case createGuildChannel(guildId: GuildSnowflake)
+    case pruneGuild(guildId: GuildSnowflake)
+    case setGuildMfaLevel(guildId: GuildSnowflake)
+    case bulkUpdateGuildChannels(guildId: GuildSnowflake)
+    case updateGuild(guildId: GuildSnowflake)
+    case updateGuildWelcomeScreen(guildId: GuildSnowflake)
+    case updateGuildWidgetSettings(guildId: GuildSnowflake)
+    case deleteGuild(guildId: GuildSnowflake)
+    case deleteGuildIntegration(guildId: GuildSnowflake, integrationId: IntegrationSnowflake)
+    case leaveGuild(guildId: GuildSnowflake)
+    case unbanUserFromGuild(guildId: GuildSnowflake, userId: UserSnowflake)
     
     // MARK: Guild Templates
     /// https://discord.com/developers/docs/resources/guild-template
     
     case getGuildTemplate(code: String)
-    case listGuildTemplates(guildId: Snowflake<Guild>)
-    case syncGuildTemplate(guildId: Snowflake<Guild>, code: String)
+    case listGuildTemplates(guildId: GuildSnowflake)
+    case syncGuildTemplate(guildId: GuildSnowflake, code: String)
     case createGuildFromTemplate(code: String)
-    case createGuildTemplate(guildId: Snowflake<Guild>)
-    case updateGuildTemplate(guildId: Snowflake<Guild>, code: String)
-    case deleteGuildTemplate(guildId: Snowflake<Guild>, code: String)
+    case createGuildTemplate(guildId: GuildSnowflake)
+    case updateGuildTemplate(guildId: GuildSnowflake, code: String)
+    case deleteGuildTemplate(guildId: GuildSnowflake, code: String)
     
     // MARK: Interactions
     /// https://discord.com/developers/docs/interactions/receiving-and-responding
     
-    case getFollowupMessage(applicationId: Snowflake<PartialApplication>, interactionToken: String, messageId: Snowflake<DiscordChannel.Message>)
-    case getOriginalInteractionResponse(applicationId: Snowflake<PartialApplication>, interactionToken: String)
-    case createFollowupMessage(applicationId: Snowflake<PartialApplication>, interactionToken: String)
-    case createInteractionResponse(interactionId: Snowflake<Interaction>, interactionToken: String)
-    case updateFollowupMessage(applicationId: Snowflake<PartialApplication>, interactionToken: String, messageId: Snowflake<DiscordChannel.Message>)
-    case updateOriginalInteractionResponse(applicationId: Snowflake<PartialApplication>, interactionToken: String)
-    case deleteFollowupMessage(applicationId: Snowflake<PartialApplication>, interactionToken: String, messageId: Snowflake<DiscordChannel.Message>)
-    case deleteOriginalInteractionResponse(applicationId: Snowflake<PartialApplication>, interactionToken: String)
+    case getFollowupMessage(applicationId: ApplicationSnowflake, interactionToken: String, messageId: MessageSnowflake)
+    case getOriginalInteractionResponse(applicationId: ApplicationSnowflake, interactionToken: String)
+    case createFollowupMessage(applicationId: ApplicationSnowflake, interactionToken: String)
+    case createInteractionResponse(interactionId: InteractionSnowflake, interactionToken: String)
+    case updateFollowupMessage(applicationId: ApplicationSnowflake, interactionToken: String, messageId: MessageSnowflake)
+    case updateOriginalInteractionResponse(applicationId: ApplicationSnowflake, interactionToken: String)
+    case deleteFollowupMessage(applicationId: ApplicationSnowflake, interactionToken: String, messageId: MessageSnowflake)
+    case deleteOriginalInteractionResponse(applicationId: ApplicationSnowflake, interactionToken: String)
     
     // MARK: Invites
     /// https://discord.com/developers/docs/resources/invite
     
     case inviteResolve(code: String)
-    case listChannelInvites(channelId: Snowflake<DiscordChannel>)
-    case listGuildInvites(guildId: Snowflake<Guild>)
-    case createChannelInvite(channelId: Snowflake<DiscordChannel>)
+    case listChannelInvites(channelId: ChannelSnowflake)
+    case listGuildInvites(guildId: GuildSnowflake)
+    case createChannelInvite(channelId: ChannelSnowflake)
     case inviteRevoke(code: String)
     
     // MARK: Members
     /// https://discord.com/developers/docs/resources/guild
     
-    case getGuildMember(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
-    case getOwnGuildMember(guildId: Snowflake<Guild>)
-    case listGuildMembers(guildId: Snowflake<Guild>)
-    case searchGuildMembers(guildId: Snowflake<Guild>)
-    case addGuildMember(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
-    case updateGuildMember(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
-    case updateOwnGuildMember(guildId: Snowflake<Guild>)
-    case deleteGuildMember(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
+    case getGuildMember(guildId: GuildSnowflake, userId: UserSnowflake)
+    case getOwnGuildMember(guildId: GuildSnowflake)
+    case listGuildMembers(guildId: GuildSnowflake)
+    case searchGuildMembers(guildId: GuildSnowflake)
+    case addGuildMember(guildId: GuildSnowflake, userId: UserSnowflake)
+    case updateGuildMember(guildId: GuildSnowflake, userId: UserSnowflake)
+    case updateOwnGuildMember(guildId: GuildSnowflake)
+    case deleteGuildMember(guildId: GuildSnowflake, userId: UserSnowflake)
     
     // MARK: Messages
     /// https://discord.com/developers/docs/resources/channel
     
-    case getMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
-    case listMessageReactionsByEmoji(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>, emojiName: String)
-    case listMessages(channelId: Snowflake<DiscordChannel>)
-    case addOwnMessageReaction(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>, emojiName: String)
-    case bulkDeleteMessages(channelId: Snowflake<DiscordChannel>)
-    case createMessage(channelId: Snowflake<DiscordChannel>)
-    case crosspostMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
-    case updateMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
-    case deleteAllMessageReactions(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
-    case deleteAllMessageReactionsByEmoji(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>, emojiName: String)
-    case deleteMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
-    case deleteOwnMessageReaction(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>, emojiName: String)
-    case deleteUserMessageReaction(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>, emojiName: String, userId: Snowflake<DiscordUser>)
+    case getMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
+    case listMessageReactionsByEmoji(channelId: ChannelSnowflake, messageId: MessageSnowflake, emojiName: String)
+    case listMessages(channelId: ChannelSnowflake)
+    case addOwnMessageReaction(channelId: ChannelSnowflake, messageId: MessageSnowflake, emojiName: String)
+    case bulkDeleteMessages(channelId: ChannelSnowflake)
+    case createMessage(channelId: ChannelSnowflake)
+    case crosspostMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
+    case updateMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
+    case deleteAllMessageReactions(channelId: ChannelSnowflake, messageId: MessageSnowflake)
+    case deleteAllMessageReactionsByEmoji(channelId: ChannelSnowflake, messageId: MessageSnowflake, emojiName: String)
+    case deleteMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
+    case deleteOwnMessageReaction(channelId: ChannelSnowflake, messageId: MessageSnowflake, emojiName: String)
+    case deleteUserMessageReaction(channelId: ChannelSnowflake, messageId: MessageSnowflake, emojiName: String, userId: UserSnowflake)
     
     // MARK: OAuth
     /// https://discord.com/developers/docs/topics/oauth2
@@ -174,103 +174,103 @@ public enum APIEndpoint: Endpoint {
     // MARK: Roles
     /// https://discord.com/developers/docs/resources/guild
     
-    case listGuildRoles(guildId: Snowflake<Guild>)
-    case addGuildMemberRole(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>, roleId: Snowflake<Role>)
-    case createGuildRole(guildId: Snowflake<Guild>)
-    case bulkUpdateGuildRoles(guildId: Snowflake<Guild>)
-    case updateGuildRole(guildId: Snowflake<Guild>, roleId: Snowflake<Role>)
-    case deleteGuildMemberRole(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>, roleId: Snowflake<Role>)
-    case deleteGuildRole(guildId: Snowflake<Guild>, roleId: Snowflake<Role>)
+    case listGuildRoles(guildId: GuildSnowflake)
+    case addGuildMemberRole(guildId: GuildSnowflake, userId: UserSnowflake, roleId: RoleSnowflake)
+    case createGuildRole(guildId: GuildSnowflake)
+    case bulkUpdateGuildRoles(guildId: GuildSnowflake)
+    case updateGuildRole(guildId: GuildSnowflake, roleId: RoleSnowflake)
+    case deleteGuildMemberRole(guildId: GuildSnowflake, userId: UserSnowflake, roleId: RoleSnowflake)
+    case deleteGuildRole(guildId: GuildSnowflake, roleId: RoleSnowflake)
     
     // MARK: Role Connections
     /// https://discord.com/developers/docs/resources/user
     
-    case getApplicationRoleConnectionsMetadata(applicationId: Snowflake<PartialApplication>)
-    case getApplicationUserRoleConnection(applicationId: Snowflake<PartialApplication>)
-    case updateApplicationRoleConnectionsMetadata(applicationId: Snowflake<PartialApplication>)
-    case updateApplicationUserRoleConnection(applicationId: Snowflake<PartialApplication>)
+    case getApplicationRoleConnectionsMetadata(applicationId: ApplicationSnowflake)
+    case getApplicationUserRoleConnection(applicationId: ApplicationSnowflake)
+    case updateApplicationRoleConnectionsMetadata(applicationId: ApplicationSnowflake)
+    case updateApplicationUserRoleConnection(applicationId: ApplicationSnowflake)
     
     // MARK: Scheduled Events
     /// https://discord.com/developers/docs/resources/guild-scheduled-event
     
-    case getGuildScheduledEvent(guildId: Snowflake<Guild>, guildScheduledEventId: Snowflake<GuildScheduledEvent>)
-    case listGuildScheduledEventUsers(guildId: Snowflake<Guild>, guildScheduledEventId: Snowflake<GuildScheduledEvent>)
-    case listGuildScheduledEvents(guildId: Snowflake<Guild>)
-    case createGuildScheduledEvent(guildId: Snowflake<Guild>)
-    case updateGuildScheduledEvent(guildId: Snowflake<Guild>, guildScheduledEventId: Snowflake<GuildScheduledEvent>)
-    case deleteGuildScheduledEvent(guildId: Snowflake<Guild>, guildScheduledEventId: Snowflake<GuildScheduledEvent>)
+    case getGuildScheduledEvent(guildId: GuildSnowflake, guildScheduledEventId: GuildScheduledEventSnowflake)
+    case listGuildScheduledEventUsers(guildId: GuildSnowflake, guildScheduledEventId: GuildScheduledEventSnowflake)
+    case listGuildScheduledEvents(guildId: GuildSnowflake)
+    case createGuildScheduledEvent(guildId: GuildSnowflake)
+    case updateGuildScheduledEvent(guildId: GuildSnowflake, guildScheduledEventId: GuildScheduledEventSnowflake)
+    case deleteGuildScheduledEvent(guildId: GuildSnowflake, guildScheduledEventId: GuildScheduledEventSnowflake)
     
     // MARK: Stages
     /// https://discord.com/developers/docs/resources/stage-instance
     
-    case getStageInstance(channelId: Snowflake<DiscordChannel>)
+    case getStageInstance(channelId: ChannelSnowflake)
     case createStageInstance
-    case updateStageInstance(channelId: Snowflake<DiscordChannel>)
-    case deleteStageInstance(channelId: Snowflake<DiscordChannel>)
+    case updateStageInstance(channelId: ChannelSnowflake)
+    case deleteStageInstance(channelId: ChannelSnowflake)
     
     // MARK: Stickers
     /// https://discord.com/developers/docs/resources/sticker
     
-    case getGuildSticker(guildId: Snowflake<Guild>, stickerId: Snowflake<Sticker>)
-    case getSticker(stickerId: Snowflake<Sticker>)
-    case listGuildStickers(guildId: Snowflake<Guild>)
+    case getGuildSticker(guildId: GuildSnowflake, stickerId: StickerSnowflake)
+    case getSticker(stickerId: StickerSnowflake)
+    case listGuildStickers(guildId: GuildSnowflake)
     case listStickerPacks
-    case createGuildSticker(guildId: Snowflake<Guild>)
-    case updateGuildSticker(guildId: Snowflake<Guild>, stickerId: Snowflake<Sticker>)
-    case deleteGuildSticker(guildId: Snowflake<Guild>, stickerId: Snowflake<Sticker>)
+    case createGuildSticker(guildId: GuildSnowflake)
+    case updateGuildSticker(guildId: GuildSnowflake, stickerId: StickerSnowflake)
+    case deleteGuildSticker(guildId: GuildSnowflake, stickerId: StickerSnowflake)
     
     // MARK: Threads
     /// https://discord.com/developers/docs/resources/channel
     
-    case getActiveGuildThreads(guildId: Snowflake<Guild>)
-    case getThreadMember(channelId: Snowflake<DiscordChannel>, userId: Snowflake<DiscordUser>)
-    case listOwnPrivateArchivedThreads(channelId: Snowflake<DiscordChannel>)
-    case listPrivateArchivedThreads(channelId: Snowflake<DiscordChannel>)
-    case listPublicArchivedThreads(channelId: Snowflake<DiscordChannel>)
-    case listThreadMembers(channelId: Snowflake<DiscordChannel>)
-    case addThreadMember(channelId: Snowflake<DiscordChannel>, userId: Snowflake<DiscordUser>)
-    case joinThread(channelId: Snowflake<DiscordChannel>)
-    case createThread(channelId: Snowflake<DiscordChannel>)
-    case createThreadFromMessage(channelId: Snowflake<DiscordChannel>, messageId: Snowflake<DiscordChannel.Message>)
-    case createThreadInForumChannel(channelId: Snowflake<DiscordChannel>)
-    case deleteThreadMember(channelId: Snowflake<DiscordChannel>, userId: Snowflake<DiscordUser>)
-    case leaveThread(channelId: Snowflake<DiscordChannel>)
+    case getActiveGuildThreads(guildId: GuildSnowflake)
+    case getThreadMember(channelId: ChannelSnowflake, userId: UserSnowflake)
+    case listOwnPrivateArchivedThreads(channelId: ChannelSnowflake)
+    case listPrivateArchivedThreads(channelId: ChannelSnowflake)
+    case listPublicArchivedThreads(channelId: ChannelSnowflake)
+    case listThreadMembers(channelId: ChannelSnowflake)
+    case addThreadMember(channelId: ChannelSnowflake, userId: UserSnowflake)
+    case joinThread(channelId: ChannelSnowflake)
+    case createThread(channelId: ChannelSnowflake)
+    case createThreadFromMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
+    case createThreadInForumChannel(channelId: ChannelSnowflake)
+    case deleteThreadMember(channelId: ChannelSnowflake, userId: UserSnowflake)
+    case leaveThread(channelId: ChannelSnowflake)
     
     // MARK: Users
     /// https://discord.com/developers/docs/resources/user
     
     case getOwnUser
-    case getUser(userId: Snowflake<DiscordUser>)
+    case getUser(userId: UserSnowflake)
     case listOwnConnections
     case updateOwnUser
     
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice#list-voice-regions
     
-    case listGuildVoiceRegions(guildId: Snowflake<Guild>)
+    case listGuildVoiceRegions(guildId: GuildSnowflake)
     case listVoiceRegions
-    case updateSelfVoiceState(guildId: Snowflake<Guild>)
-    case updateVoiceState(guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>)
+    case updateSelfVoiceState(guildId: GuildSnowflake)
+    case updateVoiceState(guildId: GuildSnowflake, userId: UserSnowflake)
     
     // MARK: Webhooks
     /// https://discord.com/developers/docs/resources/webhook
     
-    case getGuildWebhooks(guildId: Snowflake<Guild>)
-    case getWebhook(webhookId: Snowflake<Webhook>)
-    case getWebhookByToken(webhookId: Snowflake<Webhook>, webhookToken: String)
-    case getWebhookMessage(webhookId: Snowflake<Webhook>, webhookToken: String, messageId: Snowflake<DiscordChannel.Message>)
-    case getWebhooksMessagesOriginal(webhookId: Snowflake<Webhook>, webhookToken: String)
-    case listChannelWebhooks(channelId: Snowflake<DiscordChannel>)
-    case createWebhook(channelId: Snowflake<DiscordChannel>)
-    case executeWebhook(webhookId: Snowflake<Webhook>, webhookToken: String)
-    case patchWebhooksMessagesOriginal(webhookId: Snowflake<Webhook>, webhookToken: String)
-    case updateWebhook(webhookId: Snowflake<Webhook>)
-    case updateWebhookByToken(webhookId: Snowflake<Webhook>, webhookToken: String)
-    case updateWebhookMessage(webhookId: Snowflake<Webhook>, webhookToken: String, messageId: Snowflake<DiscordChannel.Message>)
-    case deleteWebhook(webhookId: Snowflake<Webhook>)
-    case deleteWebhookByToken(webhookId: Snowflake<Webhook>, webhookToken: String)
-    case deleteWebhookMessage(webhookId: Snowflake<Webhook>, webhookToken: String, messageId: Snowflake<DiscordChannel.Message>)
-    case deleteWebhooksMessagesOriginal(webhookId: Snowflake<Webhook>, webhookToken: String)
+    case getGuildWebhooks(guildId: GuildSnowflake)
+    case getWebhook(webhookId: WebhookSnowflake)
+    case getWebhookByToken(webhookId: WebhookSnowflake, webhookToken: String)
+    case getWebhookMessage(webhookId: WebhookSnowflake, webhookToken: String, messageId: MessageSnowflake)
+    case getWebhooksMessagesOriginal(webhookId: WebhookSnowflake, webhookToken: String)
+    case listChannelWebhooks(channelId: ChannelSnowflake)
+    case createWebhook(channelId: ChannelSnowflake)
+    case executeWebhook(webhookId: WebhookSnowflake, webhookToken: String)
+    case patchWebhooksMessagesOriginal(webhookId: WebhookSnowflake, webhookToken: String)
+    case updateWebhook(webhookId: WebhookSnowflake)
+    case updateWebhookByToken(webhookId: WebhookSnowflake, webhookToken: String)
+    case updateWebhookMessage(webhookId: WebhookSnowflake, webhookToken: String, messageId: MessageSnowflake)
+    case deleteWebhook(webhookId: WebhookSnowflake)
+    case deleteWebhookByToken(webhookId: WebhookSnowflake, webhookToken: String)
+    case deleteWebhookMessage(webhookId: WebhookSnowflake, webhookToken: String, messageId: MessageSnowflake)
+    case deleteWebhooksMessagesOriginal(webhookId: WebhookSnowflake, webhookToken: String)
 
     var urlPrefix: String {
         "https://discord.com/api/v\(DiscordGlobalConfiguration.apiVersion)/"

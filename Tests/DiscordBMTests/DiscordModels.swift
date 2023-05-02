@@ -177,7 +177,7 @@ class DiscordModelsTests: XCTestCase {
     
     func testWebhookAddress() throws {
         let webhookUrl = "https://discord.com/api/webhooks/1066287437724266536/dSmCyqTEGP1lBnpWJAVU-CgQy4s3GRXpzKIeHs0ApHm62FngQZPn7kgaOyaiZe6E5wl_"
-        let expectedId: Snowflake<Webhook> = "1066287437724266536"
+        let expectedId: WebhookSnowflake = "1066287437724266536"
         let expectedToken = "dSmCyqTEGP1lBnpWJAVU-CgQy4s3GRXpzKIeHs0ApHm62FngQZPn7kgaOyaiZe6E5wl_"
         
         let address1 = try WebhookAddress.url(webhookUrl)

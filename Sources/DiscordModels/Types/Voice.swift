@@ -1,9 +1,9 @@
 
 /// https://discord.com/developers/docs/resources/voice#voice-state-object-voice-state-structure
 public struct VoiceState: Sendable, Codable {
-    public var guild_id: Snowflake<Guild>
-    public var channel_id: Snowflake<DiscordChannel>?
-    public var user_id: Snowflake<DiscordUser>
+    public var guild_id: GuildSnowflake
+    public var channel_id: ChannelSnowflake?
+    public var user_id: UserSnowflake
     public var member: Guild.Member?
     public var session_id: String
     public var deaf: Bool
@@ -18,8 +18,8 @@ public struct VoiceState: Sendable, Codable {
 
 /// https://discord.com/developers/docs/resources/voice#voice-state-object-voice-state-structure
 public struct PartialVoiceState: Sendable, Codable {
-    public var channel_id: Snowflake<DiscordChannel>?
-    public var user_id: Snowflake<DiscordUser>
+    public var channel_id: ChannelSnowflake?
+    public var user_id: UserSnowflake
     public var member: Guild.Member?
     public var session_id: String
     public var deaf: Bool
@@ -49,15 +49,15 @@ public struct PartialVoiceState: Sendable, Codable {
 
 /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state-gateway-voice-state-update-structure
 public struct VoiceStateUpdate: Sendable, Codable {
-    public var guild_id: Snowflake<Guild>
-    public var channel_id: Snowflake<DiscordChannel>?
+    public var guild_id: GuildSnowflake
+    public var channel_id: ChannelSnowflake?
     public var self_deaf: Bool
     public var self_mute: Bool
     
     /// For Gateway Voice-State update.
     public init(
-        guildId: Snowflake<Guild>,
-        channelId: Snowflake<DiscordChannel>? = nil,
+        guildId: GuildSnowflake,
+        channelId: ChannelSnowflake? = nil,
         selfMute: Bool,
         selfDeaf: Bool
     ) {

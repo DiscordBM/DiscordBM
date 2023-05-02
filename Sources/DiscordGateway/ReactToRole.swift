@@ -14,12 +14,12 @@ public actor ReactToRoleHandler {
     public struct Configuration: Sendable, Codable {
         public let id: UUID
         public var createRole: Payloads.CreateGuildRole
-        public let guildId: Snowflake<Guild>
-        public let channelId: Snowflake<DiscordChannel>
-        public let messageId: Snowflake<DiscordChannel.Message>
+        public let guildId: GuildSnowflake
+        public let channelId: ChannelSnowflake
+        public let messageId: MessageSnowflake
         public let reactions: Set<Reaction>
         public let grantOnStart: Bool
-        public fileprivate(set) var roleId: Snowflake<Role>?
+        public fileprivate(set) var roleId: RoleSnowflake?
         
         /// - Parameters:
         ///   - id: The unique id of this configuration.
@@ -37,12 +37,12 @@ public actor ReactToRoleHandler {
         public init(
             id: UUID = UUID(),
             createRole: Payloads.CreateGuildRole,
-            guildId: Snowflake<Guild>,
-            channelId: Snowflake<DiscordChannel>,
-            messageId: Snowflake<DiscordChannel.Message>,
+            guildId: GuildSnowflake,
+            channelId: ChannelSnowflake,
+            messageId: MessageSnowflake,
             reactions: Set<Reaction>,
             grantOnStart: Bool = false,
-            roleId: Snowflake<Role>? = nil
+            roleId: RoleSnowflake? = nil
         ) {
             self.id = id
             self.createRole = createRole
@@ -63,11 +63,11 @@ public actor ReactToRoleHandler {
     /// Read `helpAnchor` for help about each error case.
     public enum Error: LocalizedError {
         case messageIsInaccessible(
-            messageId: Snowflake<DiscordChannel.Message>,
-            channelId: Snowflake<DiscordChannel>,
+            messageId: MessageSnowflake,
+            channelId: ChannelSnowflake,
             previousError: Swift.Error
         )
-        case roleIsInaccessible(id: Snowflake<Role>, previousError: Swift.Error?)
+        case roleIsInaccessible(id: RoleSnowflake, previousError: Swift.Error?)
         
         public var errorDescription: String? {
             switch self {
@@ -93,14 +93,14 @@ public actor ReactToRoleHandler {
         let cache: DiscordCache?
         let client: any DiscordClient
         let logger: Logger
-        let guildId: Snowflake<Guild>
+        let guildId: GuildSnowflake
         let guildMembersEnabled: Bool
         
         init(
             cache: DiscordCache?,
             client: any DiscordClient,
             logger: Logger,
-            guildId: Snowflake<Guild>
+            guildId: GuildSnowflake
         ) {
             self.cache = cache
             self.client = client
@@ -118,7 +118,7 @@ public actor ReactToRoleHandler {
             }
         }
         
-        func getRole(id: Snowflake<Role>) async throws -> Role {
+        func getRole(id: RoleSnowflake) async throws -> Role {
             if let cache = cacheWithIntents(.guilds) {
                 if let role = await cache.guilds[guildId]?.roles.first(where: { $0.id == id }) {
                     return role
@@ -185,7 +185,7 @@ public actor ReactToRoleHandler {
         }
         
         /// Defaults to `true` if it can't know.
-        func memberHasRole(roleId: Snowflake<Role>, userId: Snowflake<DiscordUser>) async -> Bool {
+        func memberHasRole(roleId: RoleSnowflake, userId: UserSnowflake) async -> Bool {
             if self.guildMembersEnabled,
                let cache = cacheWithIntents(.guilds, .guildMembers) {
                 let guild = await cache.guilds[guildId]
@@ -223,7 +223,7 @@ public actor ReactToRoleHandler {
     var logger: Logger
     /// Used to remove role from members only if they have no remaining acceptable reaction
     /// the message. Also assign role only if this is their first acceptable reaction.
-    var currentReactions: [Reaction: Set<Snowflake<DiscordUser>>] = [:]
+    var currentReactions: [Reaction: Set<UserSnowflake>] = [:]
     /// To avoid role-creation race-conditions
     var lockedCreatingRole = false
     private(set) public var state = State.created
@@ -306,9 +306,9 @@ public actor ReactToRoleHandler {
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
         role: Payloads.CreateGuildRole,
-        guildId: Snowflake<Guild>,
-        channelId: Snowflake<DiscordChannel>,
-        messageId: Snowflake<DiscordChannel.Message>,
+        guildId: GuildSnowflake,
+        channelId: ChannelSnowflake,
+        messageId: MessageSnowflake,
         grantOnStart: Bool = false,
         reactions: Set<Reaction>,
         onConfigurationChanged: (@Sendable (Configuration) async -> Void)? = nil,
@@ -363,10 +363,10 @@ public actor ReactToRoleHandler {
     public init(
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
-        existingRoleId: Snowflake<Role>,
-        guildId: Snowflake<Guild>,
-        channelId: Snowflake<DiscordChannel>,
-        messageId: Snowflake<DiscordChannel.Message>,
+        existingRoleId: RoleSnowflake,
+        guildId: GuildSnowflake,
+        channelId: ChannelSnowflake,
+        messageId: MessageSnowflake,
         grantOnStart: Bool = false,
         reactions: Set<Reaction>,
         onConfigurationChanged: (@Sendable (Configuration) async -> Void)? = nil,
@@ -480,7 +480,7 @@ public actor ReactToRoleHandler {
         }
     }
     
-    func checkAndRemoveRoleFromUser(emoji: PartialEmoji, userId: Snowflake<DiscordUser>) {
+    func checkAndRemoveRoleFromUser(emoji: PartialEmoji, userId: UserSnowflake) {
         Task {
             do {
                 let emojiReaction = try Reaction(emoji: emoji)
@@ -560,7 +560,7 @@ public actor ReactToRoleHandler {
         }
     }
     
-    func getRoleId() async -> Snowflake<Role>? {
+    func getRoleId() async -> RoleSnowflake? {
         if let roleId = self.configuration.roleId {
             return roleId
         } else {
@@ -569,7 +569,7 @@ public actor ReactToRoleHandler {
         }
     }
     
-    func addRoleToMember(userId: Snowflake<DiscordUser>) async {
+    func addRoleToMember(userId: UserSnowflake) async {
         guard userId.value != client.appId?.value else { return }
         guard let roleId = await getRoleId() else {
             self.logger.warning("Can't get a role to grant the member", metadata: [
@@ -580,7 +580,7 @@ public actor ReactToRoleHandler {
         await self.addRoleToMember(roleId: roleId, userId: userId)
     }
     
-    func addRoleToMember(roleId: Snowflake<Role>, userId: Snowflake<DiscordUser>) async {
+    func addRoleToMember(roleId: RoleSnowflake, userId: UserSnowflake) async {
         do {
             try await client.addGuildMemberRole(
                 guildId: self.configuration.guildId,
@@ -635,7 +635,7 @@ public actor ReactToRoleHandler {
         }
     }
     
-    func removeRoleFromMember(userId: Snowflake<DiscordUser>) async {
+    func removeRoleFromMember(userId: UserSnowflake) async {
         guard userId.value != client.appId?.value,
               let roleId = self.configuration.roleId
         else { return }
@@ -680,7 +680,7 @@ public actor ReactToRoleHandler {
         if configuration.grantOnStart,
            let roleId = await self.getRoleId() {
             let users = self.currentReactions.values
-                .reduce(into: Set<Snowflake<DiscordUser>>(), { $0.formUnion($1) })
+                .reduce(into: Set<UserSnowflake>(), { $0.formUnion($1) })
             for user in users {
                 if await !requestHandler.memberHasRole(roleId: roleId, userId: user) {
                     await self.addRoleToMember(roleId: roleId, userId: user)

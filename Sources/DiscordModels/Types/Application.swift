@@ -22,7 +22,7 @@ public struct PartialApplication: Sendable, Codable {
         public var permissions: StringBitField<Permission>
     }
     
-    public var id: Snowflake<PartialApplication>
+    public var id: ApplicationSnowflake
     public var name: String?
     public var icon: String?
     public var description: String?
@@ -34,7 +34,7 @@ public struct PartialApplication: Sendable, Codable {
     public var owner: PartialUser?
     public var verify_key: String?
     public var team: Team?
-    public var guild_id: Snowflake<Guild>?
+    public var guild_id: GuildSnowflake?
     public var primary_sku_id: AnySnowflake?
     public var slug: String?
     public var cover_image: String?

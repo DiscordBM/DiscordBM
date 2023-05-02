@@ -432,7 +432,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Leave guild
         /// Can't leave guild so will just do a bad-request
-        let fakeGuildId = Snowflake<Guild>(Constants.guildId.value + "1111")
+        let fakeGuildId = GuildSnowflake(Constants.guildId.value + "1111")
         let leaveGuild = try await client.leaveGuild(id: fakeGuildId)
         
         XCTAssertEqual(leaveGuild.status, .badRequest)
@@ -921,7 +921,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertTrue(range.contains(timestamp), "\(range) did not contain \(timestamp)")
         
         let text2 = "Testing! \(Date())"
-        let threadId: Snowflake<DiscordChannel> = "1066278441256751114"
+        let threadId: ChannelSnowflake = "1066278441256751114"
         let threadMessage = try await client.executeWebhookWithResponse(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             threadId: threadId,
@@ -1024,7 +1024,7 @@ class DiscordClientTests: XCTestCase {
         
 //        do {
 //            let file = try await client.getCDNUserBanner(
-//                userId: Snowflake<DiscordUser>,
+//                userId: UserSnowflake,
 //                banner: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
@@ -1057,14 +1057,14 @@ class DiscordClientTests: XCTestCase {
 //
 //        do {
 //            let file = try await client.getCDNApplicationIcon(
-//                appId: Snowflake<PartialApplication>, icon: String
+//                appId: ApplicationSnowflake, icon: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
 //
 //        do {
 //            let file = try await client.getCDNApplicationCover(
-//                appId: Snowflake<PartialApplication>, cover: String
+//                appId: ApplicationSnowflake, cover: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
@@ -1079,14 +1079,14 @@ class DiscordClientTests: XCTestCase {
         
 //        do {
 //            let file = try await client.getCDNAchievementIcon(
-//                appId: Snowflake<PartialApplication>, achievementId: String, icon: String
+//                appId: ApplicationSnowflake, achievementId: String, icon: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }
         
 //        do {
 //            let file = try await client.getCDNStorePageAsset(
-//                appId: Snowflake<PartialApplication>,
+//                appId: ApplicationSnowflake,
 //                assetId: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
@@ -1130,7 +1130,7 @@ class DiscordClientTests: XCTestCase {
 //
 //        do {
 //            let file = try await client.getCDNGuildMemberBanner(
-//                guildId: Snowflake<Guild>, userId: Snowflake<DiscordUser>, banner: String
+//                guildId: GuildSnowflake, userId: UserSnowflake, banner: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 10)
 //        }

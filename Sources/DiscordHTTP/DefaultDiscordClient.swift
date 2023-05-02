@@ -1,3 +1,4 @@
+import DiscordModels
 import Foundation
 import AsyncHTTPClient
 import Logging
@@ -16,7 +17,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
     
     let client: HTTPClient
     public let token: Secret
-    public let appId: Snowflake<PartialApplication>?
+    public let appId: ApplicationSnowflake?
     let configuration: ClientConfiguration
     let cache: ClientCache?
     let logger = DiscordGlobalConfiguration.makeLogger("DefaultDiscordClient")
@@ -27,7 +28,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
     public init(
         httpClient: HTTPClient,
         token: Secret,
-        appId: Snowflake<PartialApplication>?,
+        appId: ApplicationSnowflake?,
         configuration: ClientConfiguration = .init()
     ) {
         self.client = httpClient
@@ -47,7 +48,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
     public init(
         httpClient: HTTPClient,
         token: String,
-        appId: Snowflake<PartialApplication>?,
+        appId: ApplicationSnowflake?,
         configuration: ClientConfiguration = .init()
     ) {
         self.init(

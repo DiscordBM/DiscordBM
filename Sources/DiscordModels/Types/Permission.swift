@@ -52,8 +52,8 @@ public struct Role: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/permissions#role-object-role-tags-structure
     public struct Tags: Sendable, Codable {
-        public var bot_id: Snowflake<DiscordUser>?
-        public var integration_id: Snowflake<Integration>?
+        public var bot_id: UserSnowflake?
+        public var integration_id: IntegrationSnowflake?
         public var premium_subscriber: Bool?
         // FXIME: use `Snowflake<Type>` instead
         public var subscription_listing_id: AnySnowflake?
@@ -63,7 +63,7 @@ public struct Role: Sendable, Codable {
 //        public var guild_connections: Null
     }
     
-    public var id: Snowflake<Role>
+    public var id: RoleSnowflake
     public var name: String
     public var description: String?
     public var color: DiscordColor
