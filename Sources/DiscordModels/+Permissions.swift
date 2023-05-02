@@ -114,7 +114,7 @@ extension Gateway.GuildCreate {
         
         for overwrite in (channel.permission_overwrites ?? []) {
             switch overwrite.type {
-            case .member where overwrite.id == userId.value:
+            case .member where overwrite.id == userId:
                 if overwrite.allow.values.contains(perm) {
                     /// Has the most priority at this point, we can just return immediately.
                     return true

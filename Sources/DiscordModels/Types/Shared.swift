@@ -701,7 +701,7 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
               (0..<256).contains(green),
               (0..<256).contains(blue)
         else { return nil }
-        self.value = (red << 16) + (green << 8) + blue
+        self.value = red << 16 | green << 8 | blue
     }
     
     public init? (hex: String) {
@@ -782,7 +782,73 @@ public final class DereferenceBox<C>: Codable where C: Codable {
 
 extension DereferenceBox: Sendable where C: Sendable { }
 
-public protocol _SnowflakeProtocol:
+public struct SnowflakeInfo: Sendable {
+    /// Time since epoch, in milli-seconds, when the snowflake was created.
+    public var timestamp: UInt64
+    /// The internal unique id of the worker that created the snowflake.
+    public var workerId: UInt8
+    /// The internal unique id of the process that created the snowflake.
+    public var processId: UInt8
+    /// The sequence number of the snowflake in the millisecond when it was created.
+    public var sequenceNumber: UInt16
+
+    /// The timestamp converted to `Date`.
+    public var date: Date {
+        Date(timeIntervalSince1970: Double(self.timestamp) / 1_000)
+    }
+
+    static let discordEpochConstant: UInt64 = 1_420_070_400_000
+
+    /// - Parameters:
+    ///   - timestamp: Time since epoch, in milli-seconds, when the snowflake was created.
+    ///   - workerId: The internal unique id of the worker that created the snowflake.
+    ///   - processId: The internal unique id of the process that created the snowflake.
+    ///   - sequenceNumber: The sequence number of the snowflake in the millisecond when it was created.
+    public init(timestamp: UInt64, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) {
+        self.timestamp = timestamp
+        self.workerId = workerId
+        self.processId = processId
+        self.sequenceNumber = sequenceNumber
+    }
+
+    /// - Parameters:
+    ///   - date: Time date when the snowflake was created.
+    ///   - workerId: The internal unique id of the worker that created the snowflake.
+    ///   - processId: The internal unique id of the process that created the snowflake.
+    ///   - sequenceNumber: The sequence number of the snowflake in the millisecond when it was created.
+    public init(date: Date, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) {
+        self.timestamp = UInt64(date.timeIntervalSince1970 * 1_000)
+        self.workerId = workerId
+        self.processId = processId
+        self.sequenceNumber = sequenceNumber
+    }
+
+    internal static func makeFake(date: Date) -> SnowflakeInfo {
+        SnowflakeInfo(date: date, workerId: 0, processId: 0, sequenceNumber: 0)
+    }
+
+    internal init? (from snowflake: String) {
+        guard let value = UInt64(snowflake) else { return nil }
+        self.timestamp = (value >> 22) + SnowflakeInfo.discordEpochConstant
+        self.workerId = UInt8((value >> 17) & 0x1F)
+        self.processId = UInt8((value >> 12) & 0x1F)
+        self.sequenceNumber = UInt16(value & 0xFFF)
+    }
+
+    internal init? (from snowflake: any SnowflakeProtocol) {
+        self.init(from: snowflake.value)
+    }
+
+    internal func toSnowflake<S: SnowflakeProtocol>(as type: S.Type = S.self) -> S {
+        let timestamp = (self.timestamp - SnowflakeInfo.discordEpochConstant) << 22
+        let workerId = UInt64(self.workerId) << 17
+        let processId = UInt64(self.processId) << 12
+        let value = timestamp | workerId | processId | UInt64(self.sequenceNumber)
+        return S("\(value)")
+    }
+}
+
+public protocol SnowflakeProtocol:
     Sendable,
     Codable,
     Hashable,
@@ -793,8 +859,9 @@ public protocol _SnowflakeProtocol:
     init(_ value: String)
 }
 
-extension _SnowflakeProtocol {
-    public init(_ snowflake: any _SnowflakeProtocol) {
+extension SnowflakeProtocol {
+    /// Initializes a snowflake from another snowflake.
+    public init(_ snowflake: any SnowflakeProtocol) {
         self.init(snowflake.value)
     }
 
@@ -809,9 +876,24 @@ extension _SnowflakeProtocol {
     public init(stringLiteral value: String) {
         self.init(value)
     }
+
+    /// Initializes a snowflake from a `SnowflakeInfo`.
+    public init(info: SnowflakeInfo) {
+        self = info.toSnowflake()
+    }
+
+    /// Parses the snowflake to `SnowflakeInfo`.
+    public func parse() -> SnowflakeInfo? {
+        SnowflakeInfo(from: self.value)
+    }
+
+    /// Makes a fake snowflake.
+    public static func makeFake(date: Date = Date()) -> Self {
+        self.init(info: SnowflakeInfo.makeFake(date: date))
+    }
 }
 
-public struct Snowflake<Tag>: _SnowflakeProtocol {
+public struct Snowflake<Tag>: SnowflakeProtocol {
     public let value: String
 
     public init(_ value: String) {
@@ -823,7 +905,7 @@ public struct Snowflake<Tag>: _SnowflakeProtocol {
     }
 }
 
-public struct AnySnowflake: _SnowflakeProtocol {
+public struct AnySnowflake: SnowflakeProtocol {
     public let value: String
 
     public init(_ value: String) {
@@ -835,16 +917,8 @@ public struct AnySnowflake: _SnowflakeProtocol {
     }
 }
 
-public func == (lhs: any _SnowflakeProtocol, rhs: any _SnowflakeProtocol) -> Bool {
+public func == (lhs: any SnowflakeProtocol, rhs: any SnowflakeProtocol) -> Bool {
     lhs.value == rhs.value
-}
-
-public func == (lhs: any _SnowflakeProtocol, rhs: String) -> Bool {
-    lhs.value == rhs
-}
-
-public func == (lhs: String, rhs: any _SnowflakeProtocol) -> Bool {
-    lhs == rhs.value
 }
 
 private extension Calendar {

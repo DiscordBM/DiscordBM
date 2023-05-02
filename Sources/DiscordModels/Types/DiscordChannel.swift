@@ -29,7 +29,7 @@ public struct DiscordChannel: Sendable, Codable {
             case member = 1
         }
         
-        public var id: String
+        public var id: AnySnowflake
         public var type: Kind
         public var allow: StringBitField<Permission>
         public var deny: StringBitField<Permission>

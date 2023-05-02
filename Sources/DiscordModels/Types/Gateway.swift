@@ -668,7 +668,7 @@ public struct Gateway: Sendable, Codable {
         public var splash: String?
         public var discovery_splash: String?
         public var owner: Bool?
-        public var owner_id: String
+        public var owner_id: Snowflake<DiscordUser>
         public var permissions: StringBitField<Permission>?
         /// Deprecated
         public var region: String?
@@ -873,7 +873,7 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#guild-role-delete
     public struct GuildRoleDelete: Sendable, Codable {
         public var guild_id: Snowflake<Guild>
-        public var role_id: String
+        public var role_id: Snowflake<Role>
         public var version: Int?
     }
     

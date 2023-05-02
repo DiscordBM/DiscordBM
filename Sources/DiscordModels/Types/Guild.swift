@@ -171,7 +171,7 @@ public struct Guild: Sendable, Codable {
     public var splash: String?
     public var discovery_splash: String?
     public var owner: Bool?
-    public var owner_id: String
+    public var owner_id: Snowflake<DiscordUser>
     public var permissions: StringBitField<Permission>?
     /// Deprecated
     public var region: String?
