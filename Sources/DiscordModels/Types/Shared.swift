@@ -906,7 +906,7 @@ public struct SnowflakeInfo: Sendable {
             throw Error.fieldTooBig("date", value: "\(timeSince1970)", max: (1 << 42 / 1_000))
         }
 
-        self.timestamp = timeSince1970 * 1_000
+        self.timestamp = UInt64(date.timeIntervalSince1970 * 1_000)
         
         guard timestamp < (1 << 42) else {
             let max = (1 << 42 / 1_000) - 1
