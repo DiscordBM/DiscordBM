@@ -157,7 +157,7 @@ public var requiresAuthorizationHeader: Bool {
 
 let _parameters = grouped.flatMap(\.value).map { info -> String in
     let (name, _params) = info.info.makeIterativeCase()
-    let params = _params.map { param -> String in
+    let params = _params.map { param in
         if param.hasSuffix("Id") {
             return "\(param).value"
         } else {
@@ -178,7 +178,7 @@ public var parameters: [String] {
 
 let _description = grouped.flatMap(\.value).map { info -> String in
     let (name, _params) = info.info.makeIterativeCase()
-    let params = _params.map { param -> String in
+    let params = _params.map { param in
         if param.hasSuffix("Id") {
             return "\(param).value"
         } else {
