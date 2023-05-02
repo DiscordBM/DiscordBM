@@ -35,6 +35,29 @@ public struct Interaction: Sendable, Codable {
             public var channels: [ChannelSnowflake: PartialChannel]?
             public var messages: [MessageSnowflake: DiscordChannel.PartialMessage]?
             public var attachments: [AttachmentSnowflake: DiscordChannel.Message.Attachment]?
+
+            public init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+
+                /// `JSONDecoder` has a special-case decoding for dictionaries of `[String: some Decodable]`.
+                /// We need to trigger that special-case, so we need to first decode the values
+                /// to keys of `String`, then transform that `String` to the actual `Key` type.
+                func decode<K, V>(forKey key: CodingKeys) throws -> [K: V]?
+                where K: SnowflakeProtocol, V: Decodable {
+                    let decoded = try container.decodeIfPresent([String: V].self, forKey: key)
+                    let transformed = decoded?.map { key, value -> (K, V) in
+                        return (K(key), value)
+                    }
+                    return transformed.map { .init(uniqueKeysWithValues: $0) }
+                }
+
+                self.users = try decode(forKey: .users)
+                self.members = try decode(forKey: .members)
+                self.roles = try decode(forKey: .roles)
+                self.channels = try decode(forKey: .channels)
+                self.messages = try decode(forKey: .messages)
+                self.attachments = try decode(forKey: .attachments)
+            }
         }
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
