@@ -2,15 +2,7 @@ import Atomics
 import DiscordModels
 import struct NIOCore.ByteBuffer
 
-#if swift(>=5.7)
-/// If you're seeing the **Cannot find type 'AnyActor' in scope** error,
-/// you need to update to Xcode 14.1 or higher. Sorry, this a known Xcode issue.
-public protocol DiscordActor: AnyActor { }
-#else /// Swift `5.6` doesn't have `AnyActor`.
-public protocol DiscordActor: Sendable, AnyObject { }
-#endif
-
-public protocol GatewayManager: DiscordActor {
+public protocol GatewayManager: AnyActor {
     /// The client to send requests to Discord with.
     nonisolated var client: any DiscordClient { get }
     /// This gateway manager's identifier.
