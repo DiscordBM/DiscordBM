@@ -63,33 +63,6 @@ public final class WebSocket: @unchecked Sendable {
     public func onBinary(_ callback: @escaping (WebSocket, ByteBuffer) -> ()) {
         self.onBinaryCallback = callback
     }
-    
-    public func onPong(_ callback: @escaping (WebSocket) -> ()) {
-        self.onPongCallback = callback
-    }
-
-    public func onPing(_ callback: @escaping (WebSocket) -> ()) {
-        self.onPingCallback = callback
-    }
-
-    /// If set, this will trigger automatic pings on the connection. If ping is not answered before
-    /// the next ping is sent, then the WebSocket will be presumed inactive and will be closed
-    /// automatically.
-    /// These pings can also be used to keep the WebSocket alive if there is some other timeout
-    /// mechanism shutting down inactive connections, such as a Load Balancer deployed in
-    /// front of the server.
-    public var pingInterval: TimeAmount? {
-        didSet {
-            if pingInterval != nil {
-                if scheduledTimeoutTask == nil {
-                    waitingForPong = false
-                    self.pingAndScheduleNextTimeoutTask()
-                }
-            } else {
-                scheduledTimeoutTask?.cancel()
-            }
-        }
-    }
 
     public func send<S>(_ text: S, promise: EventLoopPromise<Void>? = nil)
         where S: Collection, S.Element == Character
@@ -101,27 +74,22 @@ public final class WebSocket: @unchecked Sendable {
 
     }
 
-    public func send(_ binary: [UInt8], promise: EventLoopPromise<Void>? = nil) {
-        self.send(raw: binary, opcode: .binary, fin: true, promise: promise)
-    }
-
-    public func sendPing(promise: EventLoopPromise<Void>? = nil) {
-        self.send(
-            raw: Data(),
-            opcode: .ping,
-            fin: true,
-            promise: promise
-        )
-    }
-
     public func send<Data>(
         raw data: Data,
         opcode: WebSocketOpcode,
+        fin: Bool = true
+    ) async throws where Data: DataProtocol {
+        let promise = eventLoop.makePromise(of: Void.self)
+        self.send(raw: data, opcode: opcode, fin: fin, promise: promise)
+        try await promise.futureResult.get()
+    }
+
+    func send<Data>(
+        raw data: Data,
+        opcode: WebSocketOpcode,
         fin: Bool = true,
-        promise: EventLoopPromise<Void>? = nil
-    )
-        where Data: DataProtocol
-    {
+        promise: EventLoopPromise<Void>?
+    ) where Data: DataProtocol {
         var buffer = channel.allocator.buffer(capacity: data.count)
         buffer.writeBytes(data)
         let frame = WebSocketFrame(
@@ -133,13 +101,17 @@ public final class WebSocket: @unchecked Sendable {
         self.channel.writeAndFlush(frame, promise: promise)
     }
 
-    public func close(code: WebSocketErrorCode = .goingAway) -> EventLoopFuture<Void> {
+    public func close(code: WebSocketErrorCode = .goingAway) async throws {
+        try await self.close(code: code).get()
+    }
+
+    func close(code: WebSocketErrorCode = .goingAway) -> EventLoopFuture<Void> {
         let promise = self.eventLoop.makePromise(of: Void.self)
         self.close(code: code, promise: promise)
         return promise.futureResult
     }
 
-    public func close(
+    func close(
         code: WebSocketErrorCode = .goingAway,
         promise: EventLoopPromise<Void>?
     ) {
@@ -283,33 +255,6 @@ public final class WebSocket: @unchecked Sendable {
             default: break
             }
             self.frameSequence = nil
-        }
-    }
-    
-    @Sendable
-    private func pingAndScheduleNextTimeoutTask() {
-        guard channel.isActive, let pingInterval = pingInterval else {
-            return
-        }
-
-        if waitingForPong {
-            // We never received a pong from our last ping, so the connection has timed out
-            let promise = self.eventLoop.makePromise(of: Void.self)
-            self.close(code: .unknown(1006), promise: promise)
-            promise.futureResult.whenComplete { _ in
-                // Usually, closing a WebSocket is done by sending the close frame and waiting
-                // for the peer to respond with their close frame. We are in a timeout situation,
-                // so the other side likely will never send the close frame. We just close the
-                // channel ourselves.
-                self.channel.close(mode: .all, promise: nil)
-            }
-        } else {
-            self.sendPing()
-            self.waitingForPong = true
-            self.scheduledTimeoutTask = self.eventLoop.scheduleTask(
-                deadline: .now() + pingInterval,
-                self.pingAndScheduleNextTimeoutTask
-            )
         }
     }
 

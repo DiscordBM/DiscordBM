@@ -332,8 +332,6 @@ extension BotGatewayManager {
             await self.connect()
         case let .hello(hello):
             logger.debug("Received 'hello'")
-            /// Disable websocket-kit automatic pings
-            self.ws?.pingInterval = nil
             self.setupPingTask(
                 forConnectionWithId: self.connectionId.load(ordering: .relaxed),
                 every: .milliseconds(Int64(hello.heartbeat_interval))
@@ -687,10 +685,14 @@ extension BotGatewayManager {
     
     private nonisolated func closeWebSocket(ws: WebSocket?) {
         logger.debug("Will possibly close a web-socket")
-        ws?.close().whenFailure {
-            self.logger.warning("Connection close error", metadata: [
-                "error": "\($0)"
-            ])
+        Task {
+            do {
+                try await ws?.close()
+            } catch {
+                self.logger.warning("Connection close error", metadata: [
+                    "error": .string("\(error)")
+                ])
+            }
         }
     }
     
