@@ -951,7 +951,7 @@ public typealias WebhookSnowflake = Snowflake<Webhook>
 public typealias GuildScheduledEventSnowflake = Snowflake<GuildScheduledEvent>
 
 /// Convenience type-alias for `Snowflake<ApplicationCommand>`
-public typealias ApplicationCommandSnowflake = Snowflake<ApplicationCommand>
+public typealias CommandSnowflake = Snowflake<ApplicationCommand>
 
 /// Convenience type-alias for `Snowflake<Interaction>`
 public typealias InteractionSnowflake = Snowflake<Interaction>

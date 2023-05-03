@@ -313,7 +313,7 @@ public extension DiscordClient {
     @inlinable
     func getApplicationCommand(
         appId: ApplicationSnowflake? = nil,
-        commandId: ApplicationCommandSnowflake
+        commandId: CommandSnowflake
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = APIEndpoint.getApplicationCommand(
             applicationId: try requireAppId(appId),
@@ -326,7 +326,7 @@ public extension DiscordClient {
     @inlinable
     func updateApplicationCommand(
         appId: ApplicationSnowflake? = nil,
-        commandId: ApplicationCommandSnowflake,
+        commandId: CommandSnowflake,
         payload: Payloads.ApplicationCommandEdit
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = APIEndpoint.updateApplicationCommand(
@@ -340,7 +340,7 @@ public extension DiscordClient {
     @inlinable
     func deleteApplicationCommand(
         appId: ApplicationSnowflake? = nil,
-        commandId: ApplicationCommandSnowflake
+        commandId: CommandSnowflake
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteApplicationCommand(
             applicationId: try requireAppId(appId),
@@ -397,7 +397,7 @@ public extension DiscordClient {
     func getGuildApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
-        commandId: ApplicationCommandSnowflake
+        commandId: CommandSnowflake
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = APIEndpoint.getGuildApplicationCommand(
             applicationId: try requireAppId(appId),
@@ -412,7 +412,7 @@ public extension DiscordClient {
     func updateGuildApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
-        commandId: ApplicationCommandSnowflake,
+        commandId: CommandSnowflake,
         payload: Payloads.ApplicationCommandEdit
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
         let endpoint = APIEndpoint.updateGuildApplicationCommand(
@@ -428,7 +428,7 @@ public extension DiscordClient {
     func deleteGuildApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
-        commandId: ApplicationCommandSnowflake
+        commandId: CommandSnowflake
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteGuildApplicationCommand(
             applicationId: try requireAppId(appId),
@@ -470,7 +470,7 @@ public extension DiscordClient {
     func getGuildApplicationCommandPermissions(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
-        commandId: ApplicationCommandSnowflake
+        commandId: CommandSnowflake
     ) async throws -> DiscordClientResponse<GuildApplicationCommandPermissions> {
         let endpoint = APIEndpoint.getGuildApplicationCommandPermissions(
             applicationId: try requireAppId(appId),
@@ -486,7 +486,7 @@ public extension DiscordClient {
     func setGuildApplicationCommandPermissions(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
-        commandId: ApplicationCommandSnowflake,
+        commandId: CommandSnowflake,
         payload: Payloads.EditApplicationCommandPermissions
     ) async throws -> DiscordClientResponse<GuildApplicationCommandPermissions> {
         let endpoint = APIEndpoint.setGuildApplicationCommandPermissions(

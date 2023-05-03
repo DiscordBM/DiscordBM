@@ -101,7 +101,7 @@ public struct Interaction: Sendable, Codable {
             public var focused: Bool?
         }
         
-        public var id: ApplicationCommandSnowflake
+        public var id: CommandSnowflake
         public var name: String
         public var type: Kind
         public var resolved: ResolvedData?

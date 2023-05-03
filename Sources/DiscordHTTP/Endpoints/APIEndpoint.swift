@@ -43,21 +43,21 @@ public enum APIEndpoint: Endpoint {
     // MARK: Commands
     /// https://discord.com/developers/docs/interactions/application-commands
     
-    case getApplicationCommand(applicationId: ApplicationSnowflake, commandId: ApplicationCommandSnowflake)
-    case getGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: ApplicationCommandSnowflake)
-    case getGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: ApplicationCommandSnowflake)
+    case getApplicationCommand(applicationId: ApplicationSnowflake, commandId: CommandSnowflake)
+    case getGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: CommandSnowflake)
+    case getGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: CommandSnowflake)
     case listApplicationCommands(applicationId: ApplicationSnowflake)
     case listGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
     case listGuildApplicationCommands(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
     case bulkSetApplicationCommands(applicationId: ApplicationSnowflake)
     case bulkSetGuildApplicationCommands(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
-    case setGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: ApplicationCommandSnowflake)
+    case setGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: CommandSnowflake)
     case createApplicationCommand(applicationId: ApplicationSnowflake)
     case createGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
-    case updateApplicationCommand(applicationId: ApplicationSnowflake, commandId: ApplicationCommandSnowflake)
-    case updateGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: ApplicationCommandSnowflake)
-    case deleteApplicationCommand(applicationId: ApplicationSnowflake, commandId: ApplicationCommandSnowflake)
-    case deleteGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: ApplicationCommandSnowflake)
+    case updateApplicationCommand(applicationId: ApplicationSnowflake, commandId: CommandSnowflake)
+    case updateGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: CommandSnowflake)
+    case deleteApplicationCommand(applicationId: ApplicationSnowflake, commandId: CommandSnowflake)
+    case deleteGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: CommandSnowflake)
     
     // MARK: Emoji
     /// https://discord.com/developers/docs/resources/emoji

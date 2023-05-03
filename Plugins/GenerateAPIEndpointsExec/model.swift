@@ -254,7 +254,7 @@ struct API: Decodable {
                             case "roleId":
                                 type = "RoleSnowflake"
                             case "commandId":
-                                type = "ApplicationCommandSnowflake"
+                                type = "CommandSnowflake"
                             case "integrationId":
                                 type = "IntegrationSnowflake"
                             case "interactionId":

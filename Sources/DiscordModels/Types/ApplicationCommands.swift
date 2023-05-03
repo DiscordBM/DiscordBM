@@ -116,7 +116,7 @@ public struct ApplicationCommand: Sendable, Codable {
         }
     }
     
-    public var id: ApplicationCommandSnowflake
+    public var id: CommandSnowflake
     public var type: Kind?
     public var application_id: ApplicationSnowflake
     public var guild_id: GuildSnowflake?
