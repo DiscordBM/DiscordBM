@@ -301,7 +301,8 @@ public struct UnavailableGuild: Sendable, Codable {
 
 /// https://discord.com/developers/docs/resources/guild#integration-account-object
 public struct IntegrationAccount: Sendable, Codable {
-    public var id: IntegrationAccountSnowflake
+    /// Not a snowflake.
+    public var id: String
     public var name: String
 }
 

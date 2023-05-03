@@ -977,9 +977,6 @@ public typealias StageInstanceSnowflake = Snowflake<StageInstance>
 /// Convenience type-alias for `Snowflake<Gateway.Activity.Assets>`
 public typealias AssetsSnowflake = Snowflake<Gateway.Activity.Assets>
 
-/// Convenience type-alias for `Snowflake<IntegrationAccount>`
-public typealias IntegrationAccountSnowflake = Snowflake<IntegrationAccount>
-
 /// The parsed info of a snowflake.
 public struct SnowflakeInfo: Sendable {
 
