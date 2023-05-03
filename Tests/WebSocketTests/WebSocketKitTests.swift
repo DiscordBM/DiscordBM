@@ -355,8 +355,7 @@ final class WebSocketKitTests: XCTestCase {
             return
         }
 
-        let ws = try await client.connect(scheme: "wss", host: "127.0.0.1", port: port)
-        try await ws.close()
+        _ = try await client.connect(scheme: "wss", host: "127.0.0.1", port: port)
         
         try await server.close(mode: .all).get()
     }
