@@ -45,6 +45,20 @@ jobs:
       - name: Run tests
         run: swift test --filter DiscordBMTests
 
+  linux-websocket:
+    strategy:
+      fail-fast: false
+      matrix:
+        container:
+          - swift:5.8-jammy
+    container: ${{ matrix.container }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out package
+        uses: actions/checkout@v3
+      - name: Run tests
+        run: swift test --filter WebSocketTests
+
   linux-integration:
     if: github.repository == 'MahdiBM/DiscordBM'
     strategy:

@@ -6,7 +6,7 @@ class DiscordColorTests: XCTestCase {
     func testInitFromRGB() throws {
         let color = try XCTUnwrap(DiscordColor(red: 100, green: 67, blue: 188))
         XCTAssertEqual(color.value, 6_570_940)
-        let rgb = color.asRGB
+        let rgb = color.asRGB()
         XCTAssertEqual(rgb.red, 100)
         XCTAssertEqual(rgb.green, 67)
         XCTAssertEqual(rgb.blue, 188)
@@ -16,7 +16,7 @@ class DiscordColorTests: XCTestCase {
         let color = try XCTUnwrap(DiscordColor(hex: "#A0B9FF"))
         try XCTAssertEqual(color.value, XCTUnwrap(DiscordColor(hex: "A0B9FF")).value)
         XCTAssertEqual(color.value, 10_533_375)
-        let hex = color.asHex
+        let hex = color.asHex()
         XCTAssertEqual(hex, "#A0B9FF")
     }
     

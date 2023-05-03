@@ -467,11 +467,7 @@ public struct DiscordTimestamp: Codable {
     }
 }
 
-#if swift(>=5.7)
 extension DiscordTimestamp: Sendable { }
-#else
-extension DiscordTimestamp: @unchecked Sendable { }
-#endif
 
 //MARK: - Bitfield
 
@@ -669,11 +665,7 @@ public struct TolerantDecodeDate: Codable {
     }
 }
 
-#if swift(>=5.7)
 extension TolerantDecodeDate: Sendable { }
-#else
-extension TolerantDecodeDate: @unchecked Sendable { }
-#endif
 
 //MARK: - DiscordColor
 
@@ -690,14 +682,14 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
     public static let green = DiscordColor(_unsafeValue: 65280)
     public static let blue = DiscordColor(_unsafeValue: 255)
     
-    public var asRGB: (red: Int, green: Int, blue: Int) {
+    public func asRGB() -> (red: Int, green: Int, blue: Int) {
         let red = value >> 16
-        let green = (value & 0x00FF00) >> 8
+        let green = (value >> 8) & 0x00FF
         let blue = value & 0x0000FF
         return (red, green, blue)
     }
     
-    public var asHex: String {
+    public func asHex() -> String {
         "#" + String(self.value, radix: 16, uppercase: true)
     }
     

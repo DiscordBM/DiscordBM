@@ -21,11 +21,8 @@ public final class WebSocket: @unchecked Sendable {
 
     private let channel: Channel
 
-    private var onTextCallback: ((WebSocket, String) -> ())?
-    private var onTextBufferCallback: (WebSocket, ByteBuffer) -> ()
-    private var onBinaryCallback: (WebSocket, ByteBuffer) -> ()
-    private var onPongCallback: (WebSocket) -> ()
-    private var onPingCallback: (WebSocket) -> ()
+    private var onTextBufferCallback: (ByteBuffer) -> ()
+    private var onBinaryCallback: (ByteBuffer) -> ()
 
     private var frameSequence: WebSocketFrameSequence?
 
@@ -41,37 +38,37 @@ public final class WebSocket: @unchecked Sendable {
             self.decompressor = Decompression.Decompressor()
             try self.decompressor?.initializeDecoder(encoding: decompression.algorithm)
         }
-        self.onTextCallback = { _, _ in }
-        self.onTextBufferCallback = { _, _ in }
-        self.onBinaryCallback = { _, _ in }
-        self.onPongCallback = { _ in }
-        self.onPingCallback = { _ in }
+        self.onTextBufferCallback = { _ in }
+        self.onBinaryCallback = { _ in }
         self.waitingForPong = false
         self.waitingForClose = false
         self.scheduledTimeoutTask = nil
     }
 
-    public func onText(_ callback: @escaping (WebSocket, String) -> ()) {
-        self.onTextCallback = callback
-    }
-
     /// The same as `onText`, but with raw data instead of the decoded `String`.
-    public func onTextBuffer(_ callback: @escaping (WebSocket, ByteBuffer) -> ()) {
+    public func onTextBuffer(_ callback: @escaping (ByteBuffer) -> ()) {
         self.onTextBufferCallback = callback
     }
 
-    public func onBinary(_ callback: @escaping (WebSocket, ByteBuffer) -> ()) {
+    public func onBinary(_ callback: @escaping (ByteBuffer) -> ()) {
         self.onBinaryCallback = callback
     }
 
-    public func send<S>(_ text: S, promise: EventLoopPromise<Void>? = nil)
+    public func send<S>(_ text: S) async throws
+    where S: Collection, S.Element == Character
+    {
+        let promise = channel.eventLoop.makePromise(of: Void.self)
+        self.send(text, promise: promise)
+        try await promise.futureResult.get()
+    }
+
+    func send<S>(_ text: S, promise: EventLoopPromise<Void>? = nil)
         where S: Collection, S.Element == Character
     {
         let string = String(text)
         var buffer = channel.allocator.buffer(capacity: text.count)
         buffer.writeString(string)
         self.send(raw: buffer.readableBytesView, opcode: .text, fin: true, promise: promise)
-
     }
 
     public func send<Data>(
@@ -179,7 +176,6 @@ public final class WebSocket: @unchecked Sendable {
                 if let maskingKey = maskingKey {
                     frameData.webSocketUnmask(maskingKey)
                 }
-                self.onPingCallback(self)
                 self.send(
                     raw: frameData.readableBytesView,
                     opcode: .pong,
@@ -197,7 +193,6 @@ public final class WebSocket: @unchecked Sendable {
                     frameData.webSocketUnmask(maskingKey)
                 }
                 self.waitingForPong = false
-                self.onPongCallback(self)
             } else {
                 self.close(code: .protocolError, promise: nil)
             }
@@ -237,19 +232,16 @@ public final class WebSocket: @unchecked Sendable {
                         var buffer = ByteBuffer()
                         try decompressor!.decompress(part: &frameSequence.buffer, buffer: &buffer)
                         
-                        self.onBinaryCallback(self, buffer)
+                        self.onBinaryCallback(buffer)
                     } catch {
                         self.close(code: .protocolError, promise: nil)
                         return
                     }
                 } else {
-                    self.onBinaryCallback(self, frameSequence.buffer)
+                    self.onBinaryCallback(frameSequence.buffer)
                 }
             case .text:
-                if let callback = self.onTextCallback {
-                    callback(self, String(buffer: frameSequence.buffer))
-                }
-                self.onTextBufferCallback(self, frameSequence.buffer)
+                self.onTextBufferCallback(frameSequence.buffer)
             case .ping, .pong:
                 assertionFailure("Control frames never have a frameSequence")
             default: break

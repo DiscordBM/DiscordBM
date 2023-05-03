@@ -16,7 +16,7 @@ extension WebSocket {
         )
     }
 
-    public static func connect(
+    static func connect(
         to url: URL,
         headers: HTTPHeaders = [:],
         configuration: WebSocketClient.Configuration = .init(),
@@ -35,7 +35,7 @@ extension WebSocket {
         )
     }
 
-    public static func connect(
+    static func connect(
         scheme: String = "ws",
         host: String,
         port: Int = 80,

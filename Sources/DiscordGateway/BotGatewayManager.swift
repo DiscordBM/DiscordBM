@@ -431,11 +431,11 @@ extension BotGatewayManager {
     
     private func setupOnText(forConnectionWithId connectionId: UInt) {
         if compression {
-            self.ws?.onBinary { _, buffer in
+            self.ws?.onBinary { buffer in
                 self.processBinaryData(buffer, forConnectionWithId: connectionId)
             }
         } else {
-            self.ws?.onTextBuffer { _, buffer in
+            self.ws?.onTextBuffer { buffer in
                 self.processBinaryData(buffer, forConnectionWithId: connectionId)
             }
         }

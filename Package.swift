@@ -155,6 +155,10 @@ let package = Package(
             dependencies: ["DiscordBM"]
         ),
         .testTarget(
+            name: "WebSocketTests",
+            dependencies: ["DiscordWebSocket"]
+        ),
+        .testTarget(
             name: "IntegrationTests",
             dependencies: ["DiscordBM"]
         ),

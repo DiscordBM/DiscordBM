@@ -8,7 +8,7 @@ import NIOTransportServices
 import Atomics
 
 public final class WebSocketClient: @unchecked Sendable {
-    public enum Error: Swift.Error, LocalizedError {
+    public enum Error: LocalizedError {
         case invalidURL
         case invalidResponseStatus(HTTPResponseHead)
         case alreadyShutdown
