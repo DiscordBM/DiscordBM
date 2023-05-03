@@ -33,7 +33,6 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-atomics.git", from: "1.1.0"),
         .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.3"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
-        /// `WebSocketKit` dependencies
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.23.0"),
         .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.15.0"),
     ],
@@ -72,7 +71,7 @@ let package = Package(
             dependencies: [
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                "WebSocketKitFork",
+                "DiscordWebSocket",
                 "DiscordHTTP",
             ],
             swiftSettings: swiftSettings
@@ -127,25 +126,23 @@ let package = Package(
             resources: [.copy("Resources/openapi.yml")],
             swiftSettings: swiftSettings
         ),
-        /// `WebSocketKit` will be replaced as soon as changes are final and merged in
-        /// Vapor's `WebSocketKit`. This is just a copy-paste of that library.
-            .target(
-                name: "WebSocketKitFork",
-                dependencies: [
-                    "CZlib",
-                    .product(name: "NIO", package: "swift-nio"),
-                    .product(name: "NIOCore", package: "swift-nio"),
-                    .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
-                    .product(name: "NIOFoundationCompat", package: "swift-nio"),
-                    .product(name: "NIOHTTP1", package: "swift-nio"),
-                    .product(name: "NIOSSL", package: "swift-nio-ssl"),
-                    .product(name: "NIOWebSocket", package: "swift-nio"),
-                    .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
-                    .product(name: "Atomics", package: "swift-atomics")
-                ],
-                swiftSettings: swiftSettings
-            ),
-        /// `WebSocketKit` dependency
+        /// Vapor's `WebSocketKit` with modifications to fit `DiscordBM` better.
+        .target(
+            name: "DiscordWebSocket",
+            dependencies: [
+                "CZlib",
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
+                .product(name: "NIOFoundationCompat", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                .product(name: "NIOWebSocket", package: "swift-nio"),
+                .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
+                .product(name: "Atomics", package: "swift-atomics")
+            ],
+            swiftSettings: swiftSettings
+        ),
         .target(
             name: "CZlib",
             dependencies: [],

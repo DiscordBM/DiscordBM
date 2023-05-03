@@ -4,40 +4,11 @@ import NIOWebSocket
 extension WebSocket {
     public static func client(
         on channel: Channel,
-        onUpgrade: @Sendable @escaping (WebSocket) -> ()
-    ) -> EventLoopFuture<Void> {
-        return self.handle(on: channel, as: .client, decompression: nil, onUpgrade: onUpgrade)
-    }
-    
-    public static func client(
-        on channel: Channel,
-        decompression: Decompression.Configuration?,
-        onUpgrade: @escaping (WebSocket) -> ()
-    ) -> EventLoopFuture<Void> {
-        return self.handle(on: channel, as: .client, decompression: decompression, onUpgrade: onUpgrade)
-    }
-
-    public static func server(
-        on channel: Channel,
-        onUpgrade: @Sendable @escaping (WebSocket) -> ()
-    ) -> EventLoopFuture<Void> {
-        return self.handle(on: channel, as: .server, decompression: nil, onUpgrade: onUpgrade)
-    }
-
-    private static func handle(
-        on channel: Channel,
-        as type: PeerType,
-        decompression: Decompression.Configuration?,
-        onUpgrade: @escaping (WebSocket) -> ()
-    ) -> EventLoopFuture<Void> {
-        do {
-            let webSocket = try WebSocket(channel: channel, type: type, decompression: decompression)
-            return channel.pipeline.addHandler(WebSocketHandler(webSocket: webSocket)).map { _ in
-                onUpgrade(webSocket)
-            }
-        } catch {
-            return channel.pipeline.eventLoop.makeFailedFuture(error)
-        }
+        decompression: Decompression.Configuration?
+    ) async throws -> WebSocket {
+        let webSocket = try WebSocket(channel: channel, decompression: decompression)
+        try await channel.pipeline.addHandler(WebSocketHandler(webSocket: webSocket)).get()
+        return webSocket
     }
 }
 

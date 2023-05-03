@@ -6,11 +6,6 @@ import Foundation
 import NIOFoundationCompat
 
 public final class WebSocket: @unchecked Sendable {
-    enum PeerType {
-        case server
-        case client
-    }
-
     public var eventLoop: EventLoop {
         return channel.eventLoop
     }
@@ -33,7 +28,6 @@ public final class WebSocket: @unchecked Sendable {
     private var onPingCallback: (WebSocket) -> ()
 
     private var frameSequence: WebSocketFrameSequence?
-    private let type: PeerType
 
     private var decompressor: Decompression.Decompressor?
 
@@ -41,9 +35,8 @@ public final class WebSocket: @unchecked Sendable {
     private var waitingForClose: Bool
     private var scheduledTimeoutTask: Scheduled<Void>?
 
-    init(channel: Channel, type: PeerType, decompression: Decompression.Configuration?) throws {
+    init(channel: Channel, decompression: Decompression.Configuration?) throws {
         self.channel = channel
-        self.type = type
         if let decompression = decompression {
             self.decompressor = Decompression.Decompressor()
             try self.decompressor?.initializeDecoder(encoding: decompression.algorithm)
@@ -178,16 +171,11 @@ public final class WebSocket: @unchecked Sendable {
     }
 
     func makeMaskKey() -> WebSocketMaskingKey? {
-        switch type {
-        case .client:
-            var bytes: [UInt8] = []
-            for _ in 0..<4 {
-                bytes.append(.random(in: .min ..< .max))
-            }
-            return WebSocketMaskingKey(bytes)
-        case .server:
-            return nil
+        var bytes: [UInt8] = []
+        for _ in 0..<4 {
+            bytes.append(.random(in: .min ..< .max))
         }
+        return WebSocketMaskingKey(bytes)
     }
 
     func handle(incoming frame: WebSocketFrame) {

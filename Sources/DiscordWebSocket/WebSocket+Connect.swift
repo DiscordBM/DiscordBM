@@ -3,18 +3,16 @@ extension WebSocket {
         to url: String,
         headers: HTTPHeaders = [:],
         configuration: WebSocketClient.Configuration = .init(),
-        on eventLoopGroup: EventLoopGroup,
-        onUpgrade: /* @Sendable */ @escaping (WebSocket) -> ()
-    ) -> EventLoopFuture<Void> {
+        on eventLoopGroup: EventLoopGroup
+    ) async throws -> WebSocket {
         guard let url = URL(string: url) else {
-            return eventLoopGroup.next().makeFailedFuture(WebSocketClient.Error.invalidURL)
+            throw WebSocketClient.Error.invalidURL
         }
-        return self.connect(
+        return try await self.connect(
             to: url,
             headers: headers,
             configuration: configuration,
-            on: eventLoopGroup,
-            onUpgrade: onUpgrade
+            on: eventLoopGroup
         )
     }
 
@@ -22,11 +20,10 @@ extension WebSocket {
         to url: URL,
         headers: HTTPHeaders = [:],
         configuration: WebSocketClient.Configuration = .init(),
-        on eventLoopGroup: EventLoopGroup,
-        onUpgrade: @escaping (WebSocket) -> ()
-    ) -> EventLoopFuture<Void> {
+        on eventLoopGroup: EventLoopGroup
+    ) async throws -> WebSocket {
         let scheme = url.scheme ?? "ws"
-        return self.connect(
+        return try await self.connect(
             scheme: scheme,
             host: url.host ?? "localhost",
             port: url.port ?? (scheme == "wss" ? 443 : 80),
@@ -34,8 +31,7 @@ extension WebSocket {
             query: url.query,
             headers: headers,
             configuration: configuration,
-            on: eventLoopGroup,
-            onUpgrade: onUpgrade
+            on: eventLoopGroup
         )
     }
 
@@ -47,10 +43,9 @@ extension WebSocket {
         query: String? = nil,
         headers: HTTPHeaders = [:],
         configuration: WebSocketClient.Configuration = .init(),
-        on eventLoopGroup: EventLoopGroup,
-        onUpgrade: @escaping (WebSocket) -> ()
-    ) -> EventLoopFuture<Void> {
-        return WebSocketClient(
+        on eventLoopGroup: EventLoopGroup
+    ) async throws -> WebSocket {
+        return try await WebSocketClient(
             eventLoopGroupProvider: .shared(eventLoopGroup),
             configuration: configuration
         ).connect(
@@ -59,8 +54,7 @@ extension WebSocket {
             port: port,
             path: path,
             query: query,
-            headers: headers,
-            onUpgrade: onUpgrade
+            headers: headers
         )
     }
 }

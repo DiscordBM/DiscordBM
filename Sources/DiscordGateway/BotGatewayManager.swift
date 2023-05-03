@@ -1,4 +1,4 @@
-import WebSocketKitFork
+import DiscordWebSocket
 import Foundation
 import AsyncHTTPClient
 import Atomics
@@ -213,16 +213,17 @@ public actor BotGatewayManager: GatewayManager {
             configuration.decompression = .enabled
         }
         logger.trace("Will try to connect to Discord through web-socket")
-        WebSocket.connect(
-            to: gatewayURL + urlSuffix,
-            configuration: configuration,
-            on: eventLoopGroup
-        ) { ws in
+        do {
+            let ws = try await WebSocket.connect(
+                to: gatewayURL + urlSuffix,
+                configuration: configuration,
+                on: eventLoopGroup
+            )
             self.logger.debug("Connected to Discord through web-socket. Will configure")
             self.closeWebSocket(ws: self.ws)
             self.ws = ws
             self.configureWebSocket()
-        }.whenFailure { [self] error in
+        } catch {
             logger.error("WebSocket error while connecting to Discord", metadata: [
                 "error": .string("\(error)")
             ])
