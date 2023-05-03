@@ -39,7 +39,7 @@ let bot = BotGatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,
     token: YOUR_BOT_TOKEN,
-    appId: YOUR_APP_ID,
+    appId: Snowflake(YOUR_APP_ID),
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
         activities: [.init(name: "Fortnite", type: .game)], 
@@ -70,7 +70,7 @@ let bot = BotGatewayManager(
     eventLoopGroup: app.eventLoopGroup,
     httpClient: app.http.client.shared,
     token: YOUR_BOT_TOKEN,
-    appId: YOUR_APP_ID,
+    appId: Snowflake(YOUR_APP_ID),
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
         activities: [.init(name: "Fortnite", type: .game)],

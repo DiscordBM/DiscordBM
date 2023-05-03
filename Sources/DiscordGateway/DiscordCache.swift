@@ -15,9 +15,8 @@ public actor DiscordCache {
         case none
         case some(Set<Snowflake<Tag>>)
         
-        public init(arrayLiteral elements: String...) {
-            let guildIds = elements.map(Snowflake<Tag>.init)
-            self = .some(Set(guildIds))
+        public init(arrayLiteral elements: Snowflake<Tag>...) {
+            self = .some(Set(elements))
         }
         
         public init<S>(_ elements: S) where S: Sequence, S.Element == String {
