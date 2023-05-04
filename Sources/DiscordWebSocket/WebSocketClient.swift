@@ -70,8 +70,7 @@ public final class WebSocketClient: @unchecked Sendable {
         path: String = "/",
         query: String? = nil,
         headers: HTTPHeaders = [:],
-        onText: @Sendable @escaping (ByteBuffer) -> () = { _ in },
-        onBinary: @Sendable @escaping (ByteBuffer) -> () = { _ in },
+        onBuffer: @Sendable @escaping (ByteBuffer) -> () = { _ in },
         onClose: @Sendable @escaping (WebSocket) -> () = { _ in }
     ) async throws -> WebSocket {
         try await withCheckedThrowingContinuation { continuation in
@@ -103,8 +102,7 @@ public final class WebSocketClient: @unchecked Sendable {
                                 let webSocket = try await WebSocket.client(
                                     on: channel,
                                     decompression: self.configuration.decompression,
-                                    onText: onText,
-                                    onBinary: onBinary,
+                                    onBuffer: onBuffer,
                                     onClose: onClose
                                 )
                                 continuation.resume(returning: webSocket)

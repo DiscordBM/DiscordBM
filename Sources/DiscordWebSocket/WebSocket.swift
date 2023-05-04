@@ -22,8 +22,7 @@ public final class WebSocket: @unchecked Sendable {
 
     private let channel: Channel
 
-    private var onTextCallback: (ByteBuffer) -> ()
-    private var onBinaryCallback: (ByteBuffer) -> ()
+    private var onBufferCallback: (ByteBuffer) -> ()
 
     private var frameSequence: WebSocketFrameSequence?
 
@@ -36,8 +35,7 @@ public final class WebSocket: @unchecked Sendable {
     init(
         channel: Channel,
         decompression: Decompression.Configuration?,
-        onText: @Sendable @escaping (ByteBuffer) -> (),
-        onBinary: @Sendable @escaping (ByteBuffer) -> (),
+        onBuffer: @Sendable @escaping (ByteBuffer) -> (),
         onClose: @Sendable @escaping (WebSocket) -> ()
     ) throws {
         self.channel = channel
@@ -45,8 +43,7 @@ public final class WebSocket: @unchecked Sendable {
             self.decompressor = Decompression.Decompressor()
             try self.decompressor?.initializeDecoder(encoding: decompression.algorithm)
         }
-        self.onTextCallback = onText
-        self.onBinaryCallback = onBinary
+        self.onBufferCallback = onBuffer
         self.waitingForPong = false
         self.waitingForClose = false
         self.scheduledTimeoutTask = nil
@@ -55,12 +52,12 @@ public final class WebSocket: @unchecked Sendable {
 
     /// For tests compatibility
     func onText(_ callback: @escaping (ByteBuffer) -> ()) {
-        self.onTextCallback = callback
+        self.onBufferCallback = callback
     }
 
     /// For tests compatibility
     func onBinary(_ callback: @escaping (ByteBuffer) -> ()) {
-        self.onBinaryCallback = callback
+        self.onBufferCallback = callback
     }
 
     public func send<S>(_ text: S) async throws
@@ -241,16 +238,16 @@ public final class WebSocket: @unchecked Sendable {
                         var buffer = ByteBuffer()
                         try decompressor!.decompress(part: &frameSequence.buffer, buffer: &buffer)
                         
-                        self.onBinaryCallback(buffer)
+                        self.onBufferCallback(buffer)
                     } catch {
                         self.close(code: .protocolError, promise: nil)
                         return
                     }
                 } else {
-                    self.onBinaryCallback(frameSequence.buffer)
+                    self.onBufferCallback(frameSequence.buffer)
                 }
             case .text:
-                self.onTextCallback(frameSequence.buffer)
+                self.onBufferCallback(frameSequence.buffer)
             case .ping, .pong:
                 assertionFailure("Control frames never have a frameSequence")
             default: break

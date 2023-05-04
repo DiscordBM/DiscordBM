@@ -225,8 +225,7 @@ public actor BotGatewayManager: GatewayManager {
                 to: gatewayURL + urlSuffix,
                 configuration: configuration,
                 on: eventLoopGroup,
-                onText: onBuffer,
-                onBinary: onBuffer,
+                onBuffer: onBuffer,
                 onClose: onClose
             )
             self.logger.debug("Connected to Discord through web-socket. Will configure")
