@@ -95,7 +95,12 @@ let package = Package(
             ],
             swiftSettings: swiftSettings
         ),
-        .target(name: "DiscordUtilities"),
+        .target(
+            name: "DiscordUtilities",
+            dependencies: [
+                "DiscordModels"
+            ]
+        ),
         .target(
             name: "DiscordAuth",
             dependencies: [

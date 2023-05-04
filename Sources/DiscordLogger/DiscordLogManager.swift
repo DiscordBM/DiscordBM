@@ -52,9 +52,9 @@ public actor DiscordLogManager {
             func toMentionStrings() -> [String] {
                 switch self {
                 case let .user(id):
-                    return [DiscordUtils.userMention(id: id.value)]
+                    return [DiscordUtils.mention(id: id)]
                 case let .role(id):
-                    return [DiscordUtils.roleMention(id: id.value)]
+                    return [DiscordUtils.mention(id: id)]
                 case let .combined(mentions):
                     return mentions.flatMap { $0.toMentionStrings() }
                 }
