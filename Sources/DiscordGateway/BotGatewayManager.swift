@@ -214,15 +214,22 @@ public actor BotGatewayManager: GatewayManager {
         }
         logger.trace("Will try to connect to Discord through web-socket")
         do {
+            let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
+            let onBuffer: @Sendable (ByteBuffer) -> Void = { buffer in
+                Task { await self.processBinaryData(buffer, forConnectionWithId: connectionId) }
+            }
             let ws = try await WebSocket.connect(
                 to: gatewayURL + urlSuffix,
                 configuration: configuration,
-                on: eventLoopGroup
+                on: eventLoopGroup,
+                onText: onBuffer,
+                onBinary: onBuffer
             )
             self.logger.debug("Connected to Discord through web-socket. Will configure")
             self.closeWebSocket(ws: self.ws)
             self.ws = ws
-            self.configureWebSocket()
+            self.setupOnClose(forConnectionWithId: connectionId)
+            self._state.store(.configured, ordering: .relaxed)
         } catch {
             logger.error("WebSocket error while connecting to Discord", metadata: [
                 "error": .string("\(error)")
@@ -297,7 +304,6 @@ public actor BotGatewayManager: GatewayManager {
 extension BotGatewayManager {
     private func configureWebSocket() {
         let connId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
-        self.setupOnText(forConnectionWithId: connId)
         self.setupOnClose(forConnectionWithId: connId)
         self._state.store(.configured, ordering: .relaxed)
     }
@@ -427,18 +433,6 @@ extension BotGatewayManager {
             data: .identify(identifyPayload)
         )
         self.send(payload: identify)
-    }
-    
-    private func setupOnText(forConnectionWithId connectionId: UInt) {
-        if compression {
-            self.ws?.onBinary { buffer in
-                self.processBinaryData(buffer, forConnectionWithId: connectionId)
-            }
-        } else {
-            self.ws?.onTextBuffer { buffer in
-                self.processBinaryData(buffer, forConnectionWithId: connectionId)
-            }
-        }
     }
     
     private func processBinaryData(_ buffer: ByteBuffer, forConnectionWithId connectionId: UInt) {

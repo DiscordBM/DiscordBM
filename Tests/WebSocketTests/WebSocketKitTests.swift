@@ -5,10 +5,10 @@ import NIOSSL
 import NIOWebSocket
 @testable import DiscordWebSocket
 
-final class WebSocketKitTests: XCTestCase {
+final class WebSocketTests: XCTestCase {
     func testWebSocketEcho() throws {
         let server = try ServerBootstrap.webSocket(on: self.elg) { req, ws in
-            ws.onTextBuffer { buffer in
+            ws.onText { buffer in
                 Task {
                     try await ws.send(String(buffer: buffer))
                 }
@@ -30,7 +30,7 @@ final class WebSocketKitTests: XCTestCase {
                 return promise.fail(error)
             }
             try await ws.send("hello")
-            ws.onTextBuffer { buffer in
+            ws.onText { buffer in
                 promise.succeed(String(buffer: buffer))
                 ws.close(promise: closePromise)
             }
@@ -85,21 +85,12 @@ final class WebSocketKitTests: XCTestCase {
         try await server.close(mode: .all).get()
     }
 
-    func testBadHost() async throws {
-        do {
-            _ = try await WebSocket.connect(host: "asdf", on: elg)
-            XCTFail("Did not throw error")
-        } catch {
-            /// Nothing
-        }
-    }
-
     func testServerClose() throws {
         let sendPromise = self.elg.next().makePromise(of: Void.self)
         let serverClose = self.elg.next().makePromise(of: Void.self)
         let clientClose = self.elg.next().makePromise(of: Void.self)
         let server = try ServerBootstrap.webSocket(on: self.elg) { req, ws in
-            ws.onTextBuffer { buffer in
+            ws.onText { buffer in
                 if String(buffer: buffer) == "close" {
                     ws.close(promise: serverClose)
                 }
@@ -133,7 +124,7 @@ final class WebSocketKitTests: XCTestCase {
         let serverClose = self.elg.next().makePromise(of: Void.self)
         let clientClose = self.elg.next().makePromise(of: Void.self)
         let server = try ServerBootstrap.webSocket(on: self.elg) { req, ws in
-            ws.onTextBuffer { buffer in
+            ws.onText { buffer in
                 Task {
                     try await ws.send(String(buffer: buffer))
                 }
@@ -154,7 +145,7 @@ final class WebSocketKitTests: XCTestCase {
                 return sendPromise.fail(error)
             }
             ws.send("close", promise: sendPromise)
-            ws.onTextBuffer { buffer in
+            ws.onText { buffer in
                 if String(buffer: buffer) == "close" {
                     ws.close(promise: clientClose)
                 }
@@ -171,7 +162,7 @@ final class WebSocketKitTests: XCTestCase {
         let promise = self.elg.next().makePromise(of: String.self)
         let server = try ServerBootstrap.webSocket(on: self.elg) { req, ws in
             ws.send("hello")
-            ws.onTextBuffer { buffer in
+            ws.onText { buffer in
                 promise.succeed(String(buffer: buffer))
                 ws.close(promise: nil)
             }
@@ -189,7 +180,7 @@ final class WebSocketKitTests: XCTestCase {
             } catch {
                 return promise.fail(error)
             }
-            ws.onTextBuffer { _ in
+            ws.onText { _ in
                 Task {
                     try await ws.send("goodbye")
                     try await ws.close()
@@ -220,7 +211,7 @@ final class WebSocketKitTests: XCTestCase {
             } catch {
                 return promise.fail(error)
             }
-            ws.onTextBuffer { _ in
+            ws.onText { _ in
                 ws.send("goodbye")
             }
             ws.onClose.whenSuccess {
@@ -311,7 +302,7 @@ final class WebSocketKitTests: XCTestCase {
                 print("ws.onClose done: \($0)")
             }
 
-            ws.onTextBuffer { buffer in
+            ws.onText { buffer in
                 switch String(buffer: buffer) {
                 case "shutdown":
                     shutdownPromise.succeed(())

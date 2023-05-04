@@ -21,7 +21,7 @@ public final class WebSocket: @unchecked Sendable {
 
     private let channel: Channel
 
-    private var onTextBufferCallback: (ByteBuffer) -> ()
+    private var onTextCallback: (ByteBuffer) -> ()
     private var onBinaryCallback: (ByteBuffer) -> ()
 
     private var frameSequence: WebSocketFrameSequence?
@@ -32,22 +32,26 @@ public final class WebSocket: @unchecked Sendable {
     private var waitingForClose: Bool
     private var scheduledTimeoutTask: Scheduled<Void>?
 
-    init(channel: Channel, decompression: Decompression.Configuration?) throws {
+    init(
+        channel: Channel,
+        decompression: Decompression.Configuration?,
+        onText: @escaping (ByteBuffer) -> (),
+        onBinary: @escaping (ByteBuffer) -> ()
+    ) throws {
         self.channel = channel
         if let decompression = decompression {
             self.decompressor = Decompression.Decompressor()
             try self.decompressor?.initializeDecoder(encoding: decompression.algorithm)
         }
-        self.onTextBufferCallback = { _ in }
-        self.onBinaryCallback = { _ in }
+        self.onTextCallback = onText
+        self.onBinaryCallback = onBinary
         self.waitingForPong = false
         self.waitingForClose = false
         self.scheduledTimeoutTask = nil
     }
 
-    /// The same as `onText`, but with raw data instead of the decoded `String`.
-    public func onTextBuffer(_ callback: @escaping (ByteBuffer) -> ()) {
-        self.onTextBufferCallback = callback
+    public func onText(_ callback: @escaping (ByteBuffer) -> ()) {
+        self.onTextCallback = callback
     }
 
     public func onBinary(_ callback: @escaping (ByteBuffer) -> ()) {
@@ -241,7 +245,7 @@ public final class WebSocket: @unchecked Sendable {
                     self.onBinaryCallback(frameSequence.buffer)
                 }
             case .text:
-                self.onTextBufferCallback(frameSequence.buffer)
+                self.onTextCallback(frameSequence.buffer)
             case .ping, .pong:
                 assertionFailure("Control frames never have a frameSequence")
             default: break

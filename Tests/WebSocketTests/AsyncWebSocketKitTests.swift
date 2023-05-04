@@ -8,7 +8,7 @@ import DiscordWebSocket
 final class AsyncWebSocketKitTests: XCTestCase {
     func testWebSocketEcho() async throws {
         let server = try await ServerBootstrap.webSocket(on: self.elg) { req, ws in
-            ws.onTextBuffer { buffer in
+            ws.onText { buffer in
                 Task {
                     try await ws.send(String(buffer: buffer))
                 }
@@ -26,7 +26,7 @@ final class AsyncWebSocketKitTests: XCTestCase {
             do {
                 let ws = try await WebSocket.connect(to: "ws://localhost:\(port)", on: self.elg)
                 try await ws.send("hello")
-                ws.onTextBuffer { buffer in
+                ws.onText { buffer in
                     promise.succeed(String(buffer: buffer))
                     Task {
                         do {

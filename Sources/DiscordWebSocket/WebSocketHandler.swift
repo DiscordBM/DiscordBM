@@ -4,9 +4,16 @@ import NIOWebSocket
 extension WebSocket {
     public static func client(
         on channel: Channel,
-        decompression: Decompression.Configuration?
+        decompression: Decompression.Configuration?,
+        onText: @Sendable @escaping (ByteBuffer) -> () = { _ in },
+        onBinary: @Sendable @escaping (ByteBuffer) -> () = { _ in }
     ) async throws -> WebSocket {
-        let webSocket = try WebSocket(channel: channel, decompression: decompression)
+        let webSocket = try WebSocket(
+            channel: channel,
+            decompression: decompression,
+            onText: onText,
+            onBinary: onBinary
+        )
         try await channel.pipeline.addHandler(WebSocketHandler(webSocket: webSocket)).get()
         return webSocket
     }

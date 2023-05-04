@@ -63,13 +63,15 @@ public final class WebSocketClient: @unchecked Sendable {
         self.configuration = configuration
     }
 
-    public func connect(
+    func connect(
         scheme: String,
         host: String,
         port: Int,
         path: String = "/",
         query: String? = nil,
-        headers: HTTPHeaders = [:]
+        headers: HTTPHeaders = [:],
+        onText: @Sendable @escaping (ByteBuffer) -> () = { _ in },
+        onBinary: @Sendable @escaping (ByteBuffer) -> () = { _ in }
     ) async throws -> WebSocket {
         try await withCheckedThrowingContinuation { continuation in
             assert(["ws", "wss"].contains(scheme))
@@ -99,7 +101,9 @@ public final class WebSocketClient: @unchecked Sendable {
                             channel.eventLoop.makeFutureWithTask {
                                 let webSocket = try await WebSocket.client(
                                     on: channel,
-                                    decompression: self.configuration.decompression
+                                    decompression: self.configuration.decompression,
+                                    onText: onText,
+                                    onBinary: onBinary
                                 )
                                 continuation.resume(returning: webSocket)
                             }
