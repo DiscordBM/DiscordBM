@@ -204,14 +204,7 @@ public final class WebSocket: @unchecked Sendable {
             }
         case .text, .binary:
             // create a new frame sequence or use existing
-            var frameSequence: WebSocketFrameSequence
-            if let existing = self.frameSequence {
-                frameSequence = existing
-            } else {
-                frameSequence = WebSocketFrameSequence(type: frame.opcode)
-            }
-            
-            // append this frame and update the sequence
+            var frameSequence = self.frameSequence ?? WebSocketFrameSequence(type: frame.opcode)
             frameSequence.append(frame)
             self.frameSequence = frameSequence
         case .continuation:
@@ -229,10 +222,11 @@ public final class WebSocket: @unchecked Sendable {
         }
 
         // if this frame was final and we have a non-nil frame sequence,
-        // output it to the websocket and clear storage
+        // output it to the web-socket and clear storage
         if var frameSequence = self.frameSequence, frame.fin {
             switch frameSequence.type {
             case .binary:
+                /// Can't use `if let` because it'll copy the `decompressor`.
                 if decompressor != nil {
                     do {
                         var buffer = ByteBuffer()

@@ -8,15 +8,19 @@ final class HTTPInitialRequestHandler: Sendable, ChannelInboundHandler, Removabl
     let host: String
     let path: String
     let query: String?
-    let decompression: Decompression.Configuration?
     let headers: HTTPHeaders
     let upgradePromise: EventLoopPromise<Void>
 
-    init(host: String, path: String, query: String?, decompression: Decompression.Configuration?, headers: HTTPHeaders, upgradePromise: EventLoopPromise<Void>) {
+    init(
+        host: String,
+        path: String,
+        query: String?,
+        headers: HTTPHeaders,
+        upgradePromise: EventLoopPromise<Void>
+    ) {
         self.host = host
         self.path = path
         self.query = query
-        self.decompression = decompression
         self.headers = headers
         self.upgradePromise = upgradePromise
     }

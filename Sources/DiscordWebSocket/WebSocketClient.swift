@@ -83,7 +83,6 @@ public final class WebSocketClient: @unchecked Sendable {
                         host: host,
                         path: path,
                         query: query,
-                        decompression: self.configuration.decompression,
                         headers: headers,
                         upgradePromise: upgradePromise
                     )
