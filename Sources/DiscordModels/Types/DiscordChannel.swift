@@ -575,7 +575,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
     public var type: Kind?
     public var description: String?
     public var url: String?
-    public var timestamp: TolerantDecodeDate? = nil
+    public var timestamp: DiscordTimestamp?
     public var color: DiscordColor?
     public var footer: Footer?
     public var image: Media?
@@ -584,23 +584,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
     public var provider: Provider?
     public var author: Author?
     public var fields: [Field]?
-    
-    public init(title: String? = nil, type: Embed.Kind? = nil, description: String? = nil, url: String? = nil, timestamp: Date? = nil, color: DiscordColor? = nil, footer: Embed.Footer? = nil, image: Embed.Media? = nil, thumbnail: Embed.Media? = nil, video: Embed.Media? = nil, provider: Embed.Provider? = nil, author: Embed.Author? = nil, fields: [Embed.Field]? = nil) {
-        self.title = title
-        self.type = type
-        self.description = description
-        self.url = url
-        self.timestamp = timestamp.map { .init(date: $0) }
-        self.color = color
-        self.footer = footer
-        self.image = image
-        self.thumbnail = thumbnail
-        self.video = video
-        self.provider = provider
-        self.author = author
-        self.fields = fields
-    }
-    
+
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
     public var contentLength: Int {
         let fields = fields?.reduce(into: 0) {
@@ -611,6 +595,22 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         fields +
         (footer?.text.unicodeScalars.count ?? 0) +
         (author?.name.unicodeScalars.count ?? 0)
+    }
+    
+    public init(title: String? = nil, type: Embed.Kind? = nil, description: String? = nil, url: String? = nil, timestamp: Date? = nil, color: DiscordColor? = nil, footer: Embed.Footer? = nil, image: Embed.Media? = nil, thumbnail: Embed.Media? = nil, video: Embed.Media? = nil, provider: Embed.Provider? = nil, author: Embed.Author? = nil, fields: [Embed.Field]? = nil) {
+        self.title = title
+        self.type = type
+        self.description = description
+        self.url = url
+        self.timestamp = timestamp.map { DiscordTimestamp(date: $0) }
+        self.color = color
+        self.footer = footer
+        self.image = image
+        self.thumbnail = thumbnail
+        self.video = video
+        self.provider = provider
+        self.author = author
+        self.fields = fields
     }
     
     public func validate() -> [ValidationFailure] {

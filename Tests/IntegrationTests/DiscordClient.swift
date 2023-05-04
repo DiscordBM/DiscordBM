@@ -977,7 +977,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertNoThrow(try delete2.guardSuccess())
     }
     
-    /// Couldn't find test-cases for some of the functions
+    /// Couldn't find test-cases for the commented functions
     func testCDN() async throws {
         do {
             let file = try await client.getCDNCustomEmoji(
@@ -1180,8 +1180,11 @@ class DiscordClientTests: XCTestCase {
             
             XCTAssertEqual(response.content, "Multipart message!")
             XCTAssertEqual(response.attachments.count, 0)
-            
-            let image = try XCTUnwrap(response.embeds.first?.image)
+
+            let embed = try XCTUnwrap(response.embeds.first)
+            XCTAssertNotNil(embed.timestamp)
+
+            let image = try XCTUnwrap(embed.image)
             XCTAssertEqual(image.height, 210)
             XCTAssertEqual(image.width, 1200)
             XCTAssertFalse(image.url.asString.isEmpty)

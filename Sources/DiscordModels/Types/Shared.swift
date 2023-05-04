@@ -358,6 +358,10 @@ public struct DiscordTimestamp: Codable {
     }
     
     public var date: Date
+
+    public init(date: Date) {
+        self.date = date
+    }
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
@@ -445,7 +449,7 @@ public struct DiscordTimestamp: Codable {
             let description = "\(int)"
             let zeroCount = length - description.count
             if zeroCount > 0 {
-                return Array(repeating: "0", count: zeroCount) + description
+                return String(repeating: "0", count: zeroCount) + description
             } else {
                 return description
             }
@@ -638,35 +642,6 @@ public struct IntPair: Sendable, Codable {
     }
 }
 
-//MARK: - TolerantDecodeDate
-
-/// A ``Date`` and ``DiscordTimestamp`` that tolerates decode failures.
-public struct TolerantDecodeDate: Codable {
-    
-    public var date: Date
-    
-    public init(date: Date) {
-        self.date = date
-    }
-    
-    public init(from decoder: Decoder) throws {
-        if let date = try? decoder.singleValueContainer().decode(Date.self) {
-            self.date = date
-        } else {
-            self.date = try DiscordTimestamp(from: decoder).date
-        }
-    }
-    
-    private static let formatter = ISO8601DateFormatter()
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(Self.formatter.string(from: self.date))
-    }
-}
-
-extension TolerantDecodeDate: Sendable { }
-
 //MARK: - DiscordColor
 
 /// A dynamic color type that decode/encodes itself as an integer which Discord expects.
@@ -842,7 +817,7 @@ extension SnowflakeProtocol {
 
     /// Initializes a snowflake from a `SnowflakeInfo`.
     public init(info: SnowflakeInfo) {
-        self = info.toSnowflake()
+        self = info.toSnowflake(as: Self.self)
     }
 
     /// Parses the snowflake to `SnowflakeInfo`.
@@ -874,7 +849,7 @@ public struct Snowflake<Tag>: SnowflakeProtocol {
     }
 
     public var description: String {
-        "Snowflake<\(Swift._typeName(Tag.self, qualified: false))>(\(value))"
+        #"Snowflake<\#(Swift._typeName(Tag.self, qualified: false))>("\#(value)")"#
     }
 }
 
@@ -896,7 +871,7 @@ public struct AnySnowflake: SnowflakeProtocol {
     }
 
     public var description: String {
-        "AnySnowflake(\(value))"
+        #"AnySnowflake("\#(value)")"#
     }
 }
 
@@ -1093,7 +1068,7 @@ public struct SnowflakeInfo: Sendable {
         self.init(from: snowflake.value)
     }
 
-    internal func toSnowflake<S: SnowflakeProtocol>(as type: S.Type = S.self) -> S {
+    internal func toSnowflake<S: SnowflakeProtocol>(as type: S.Type) -> S {
         let timestamp = (self.timestamp - SnowflakeInfo.discordEpochConstant) << 22
         let workerId = UInt64(self.workerId) << 17
         let processId = UInt64(self.processId) << 12
