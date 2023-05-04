@@ -12,7 +12,7 @@ public actor BotGatewayManager: GatewayManager {
     let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
-    /// Max frame size we accept to receive through the websocket connection.
+    /// Max frame size we accept to receive through the web-socket connection.
     nonisolated let maxFrameSize: Int
     /// Generator of `BotGatewayManager` ids.
     static let idGenerator = ManagedAtomic(UInt(0))
@@ -21,7 +21,7 @@ public actor BotGatewayManager: GatewayManager {
         .wrappingIncrementThenLoad(ordering: .relaxed)
     let logger: Logger
     
-    //MARK: Event handlers
+    //MARK: Event streams
     var eventStreamContinuations = [AsyncStream<Gateway.Event>.Continuation]()
     var eventParseFailureContinuations = [AsyncStream<(Error, ByteBuffer)>.Continuation]()
     
@@ -323,7 +323,7 @@ extension BotGatewayManager {
         
         switch event.data {
         case let .invalidSession(canResume):
-            logger.warning("Got invalid session. Will try to reconnect", metadata: [
+            logger.warning("Got invalid session. Will try to reconnect or resume", metadata: [
                 "canResume": .stringConvertible(canResume)
             ])
             if !canResume {
@@ -501,7 +501,7 @@ extension BotGatewayManager {
         self.eventParseFailureContinuations.removeAll()
     }
     
-    private nonisolated  func getCloseCodeAndDescription(
+    private nonisolated func getCloseCodeAndDescription(
         of ws: WebSocket
     ) -> (WebSocketErrorCode?, String) {
         let code = ws.closeCode
@@ -659,9 +659,8 @@ extension BotGatewayManager {
                 /// Wait 2 seconds for each bucket index.
                 /// These 2 seconds is nothing scientific.
                 /// Optimally we should implement managing all shards of a bot together
-                /// so we can know when shards connect and can start the new bucket, but
-                /// that doesn't seem easy as shards might be running outside only 1
-                /// process and we won't be able to manage them easily.
+                /// so we can know when shards connect and can start the new bucket, but that
+                /// comes with complications as shards might be running on more than 1 process.
                 await self.sleep(for: .seconds(Int64(bucketIndex) * 2))
             }
         }
