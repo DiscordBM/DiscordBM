@@ -71,7 +71,8 @@ public final class WebSocketClient: @unchecked Sendable {
         query: String? = nil,
         headers: HTTPHeaders = [:],
         onText: @Sendable @escaping (ByteBuffer) -> () = { _ in },
-        onBinary: @Sendable @escaping (ByteBuffer) -> () = { _ in }
+        onBinary: @Sendable @escaping (ByteBuffer) -> () = { _ in },
+        onClose: @Sendable @escaping (WebSocket) -> () = { _ in }
     ) async throws -> WebSocket {
         try await withCheckedThrowingContinuation { continuation in
             assert(["ws", "wss"].contains(scheme))
@@ -103,7 +104,8 @@ public final class WebSocketClient: @unchecked Sendable {
                                     on: channel,
                                     decompression: self.configuration.decompression,
                                     onText: onText,
-                                    onBinary: onBinary
+                                    onBinary: onBinary,
+                                    onClose: onClose
                                 )
                                 continuation.resume(returning: webSocket)
                             }

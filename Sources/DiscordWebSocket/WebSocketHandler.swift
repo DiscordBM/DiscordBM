@@ -6,13 +6,15 @@ extension WebSocket {
         on channel: Channel,
         decompression: Decompression.Configuration?,
         onText: @Sendable @escaping (ByteBuffer) -> () = { _ in },
-        onBinary: @Sendable @escaping (ByteBuffer) -> () = { _ in }
+        onBinary: @Sendable @escaping (ByteBuffer) -> () = { _ in },
+        onClose: @Sendable @escaping (WebSocket) -> () = { _ in }
     ) async throws -> WebSocket {
         let webSocket = try WebSocket(
             channel: channel,
             decompression: decompression,
             onText: onText,
-            onBinary: onBinary
+            onBinary: onBinary,
+            onClose: onClose
         )
         try await channel.pipeline.addHandler(WebSocketHandler(webSocket: webSocket)).get()
         return webSocket

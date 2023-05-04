@@ -218,20 +218,23 @@ public actor BotGatewayManager: GatewayManager {
             let onBuffer: @Sendable (ByteBuffer) -> Void = { buffer in
                 Task { await self.processBinaryData(buffer, forConnectionWithId: connectionId) }
             }
+            let onClose: @Sendable (WebSocket) -> Void = { ws in
+                Task { await self.setupOnClose(ws: ws, forConnectionWithId: connectionId) }
+            }
             let ws = try await WebSocket.connect(
                 to: gatewayURL + urlSuffix,
                 configuration: configuration,
                 on: eventLoopGroup,
                 onText: onBuffer,
-                onBinary: onBuffer
+                onBinary: onBuffer,
+                onClose: onClose
             )
             self.logger.debug("Connected to Discord through web-socket. Will configure")
             self.closeWebSocket(ws: self.ws)
             self.ws = ws
-            self.setupOnClose(forConnectionWithId: connectionId)
             self._state.store(.configured, ordering: .relaxed)
         } catch {
-            logger.error("WebSocket error while connecting to Discord", metadata: [
+            logger.error("web-socket error while connecting to Discord", metadata: [
                 "error": .string("\(error)")
             ])
             self._state.store(.noConnection, ordering: .relaxed)
@@ -302,12 +305,6 @@ public actor BotGatewayManager: GatewayManager {
 }
 
 extension BotGatewayManager {
-    private func configureWebSocket() {
-        let connId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
-        self.setupOnClose(forConnectionWithId: connId)
-        self._state.store(.configured, ordering: .relaxed)
-    }
-    
     private func processEvent(_ event: Gateway.Event) async {
         if let sequenceNumber = event.sequenceNumber {
             self.sequenceNumber = sequenceNumber
@@ -463,45 +460,38 @@ extension BotGatewayManager {
         }
     }
     
-    private func setupOnClose(forConnectionWithId connectionId: UInt) {
-        guard let ws = self.ws else {
-            logger.error("Cannot setup web-socket on-close because there are no active web-sockets. This is an issue in the library, please report: https://github.com/MahdiBM/DiscordBM/issues")
-            return
-        }
-        ws.onClose.whenComplete { [weak self] _ in
-            guard let `self` = self else { return }
-            self.logger.debug("Received connection close notification for a web-socket")
-            guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-            Task {
-                let (code, codeDesc) = self.getCloseCodeAndDescription(of: ws)
-                let isDebugLevelCode = [.goingAway, nil, .unexpectedServerError].contains(code)
-                self.logger.log(
-                    level: isDebugLevelCode ? .debug : .warning,
-                    "Received connection close notification. Will try to reconnect",
-                    metadata: [
-                        "code": .string(codeDesc),
-                        "closedConnectionId": .stringConvertible(
-                            self.connectionId.load(ordering: .relaxed)
-                        )
-                    ]
-                )
-                if self.canTryReconnect(code: ws.closeCode) {
-                    self._state.store(.noConnection, ordering: .relaxed)
-                    await self.connect()
-                } else {
-                    self._state.store(.stopped, ordering: .relaxed)
-                    self.connectionId.wrappingIncrement(ordering: .relaxed)
-                    self.logger.critical("Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/MahdiBM/DiscordBM/issues if you think this is a library issue")
+    private func setupOnClose(ws: WebSocket, forConnectionWithId connectionId: UInt) {
+        self.logger.debug("Received connection close notification for a web-socket")
+        guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
+        Task {
+            let (code, codeDesc) = self.getCloseCodeAndDescription(of: ws)
+            let isDebugLevelCode = [.goingAway, nil, .unexpectedServerError].contains(code)
+            self.logger.log(
+                level: isDebugLevelCode ? .debug : .warning,
+                "Received connection close notification. Will try to reconnect",
+                metadata: [
+                    "code": .string(codeDesc),
+                    "closedConnectionId": .stringConvertible(
+                        self.connectionId.load(ordering: .relaxed)
+                    )
+                ]
+            )
+            if self.canTryReconnect(code: ws.closeCode) {
+                self._state.store(.noConnection, ordering: .relaxed)
+                await self.connect()
+            } else {
+                self._state.store(.stopped, ordering: .relaxed)
+                self.connectionId.wrappingIncrement(ordering: .relaxed)
+                self.logger.critical("Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/MahdiBM/DiscordBM/issues if you think this is a library issue")
 
-                    /// End streams
-                    for continuation in await self.eventStreamContinuations {
-                        continuation.finish()
-                    }
-                    for continuation in await self.eventParseFailureContinuations {
-                        continuation.finish()
-                    }
-                    await self.removeAllEventContinuations()
+                /// End streams
+                for continuation in self.eventStreamContinuations {
+                    continuation.finish()
                 }
+                for continuation in self.eventParseFailureContinuations {
+                    continuation.finish()
+                }
+                self.removeAllEventContinuations()
             }
         }
     }

@@ -15,7 +15,8 @@ public final class WebSocket: @unchecked Sendable {
     }
     public private(set) var closeCode: WebSocketErrorCode?
 
-    public var onClose: EventLoopFuture<Void> {
+    /// For tests compatibility
+    var onClose: EventLoopFuture<Void> {
         self.channel.closeFuture
     }
 
@@ -35,8 +36,9 @@ public final class WebSocket: @unchecked Sendable {
     init(
         channel: Channel,
         decompression: Decompression.Configuration?,
-        onText: @escaping (ByteBuffer) -> (),
-        onBinary: @escaping (ByteBuffer) -> ()
+        onText: @Sendable @escaping (ByteBuffer) -> (),
+        onBinary: @Sendable @escaping (ByteBuffer) -> (),
+        onClose: @Sendable @escaping (WebSocket) -> ()
     ) throws {
         self.channel = channel
         if let decompression = decompression {
@@ -48,13 +50,16 @@ public final class WebSocket: @unchecked Sendable {
         self.waitingForPong = false
         self.waitingForClose = false
         self.scheduledTimeoutTask = nil
+        self.channel.closeFuture.whenComplete { _ in onClose(self) }
     }
 
-    public func onText(_ callback: @escaping (ByteBuffer) -> ()) {
+    /// For tests compatibility
+    func onText(_ callback: @escaping (ByteBuffer) -> ()) {
         self.onTextCallback = callback
     }
 
-    public func onBinary(_ callback: @escaping (ByteBuffer) -> ()) {
+    /// For tests compatibility
+    func onBinary(_ callback: @escaping (ByteBuffer) -> ()) {
         self.onBinaryCallback = callback
     }
 

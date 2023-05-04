@@ -2,9 +2,8 @@ import XCTest
 import NIO
 import NIOHTTP1
 import NIOWebSocket
-import DiscordWebSocket
+@testable import DiscordWebSocket
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 final class AsyncWebSocketKitTests: XCTestCase {
     func testWebSocketEcho() async throws {
         let server = try await ServerBootstrap.webSocket(on: self.elg) { req, ws in

@@ -5,7 +5,8 @@ extension WebSocket {
         configuration: WebSocketClient.Configuration = .init(),
         on eventLoopGroup: EventLoopGroup,
         onText: @Sendable @escaping (ByteBuffer) -> () = { _ in },
-        onBinary: @Sendable @escaping (ByteBuffer) -> () = { _ in }
+        onBinary: @Sendable @escaping (ByteBuffer) -> () = { _ in },
+        onClose: @Sendable @escaping (WebSocket) -> () = { _ in }
     ) async throws -> WebSocket {
         guard let url = URL(string: url) else {
             throw WebSocketClient.Error.invalidURL
@@ -22,7 +23,8 @@ extension WebSocket {
             query: url.query,
             headers: headers,
             onText: onText,
-            onBinary: onBinary
+            onBinary: onBinary,
+            onClose: onClose
         )
     }
 }
