@@ -6,7 +6,7 @@ class SnowflakeTests: XCTestCase {
     let messageSnowflake: MessageSnowflake = "1030118727418646629"
 
     func testSnowflakeParse() throws {
-        XCTAssertEqual(messageSnowflake.description, "Snowflake<Message>(1030118727418646629)")
+        XCTAssertEqual(messageSnowflake.description, #"Snowflake<Message>("1030118727418646629")"#)
 
         let snowflakeInfo = try XCTUnwrap(messageSnowflake.parse())
 
