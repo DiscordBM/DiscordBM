@@ -233,9 +233,9 @@ Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://g
 
 The mention helpers:
 ```swift
-let userMention = DiscordUtils.userMention(id: <#User ID#>)
-let channelMention = DiscordUtils.channelMention(id: <#Channel ID#>)
-let roleMention = DiscordUtils.roleMention(id: <#Role ID#>)
+let userMention = DiscordUtils.mention(id: <#User ID of type UserSnowflake#>)
+let channelMention = DiscordUtils.mention(id: <#Channel ID of type ChannelSnowflake#>)
+let roleMention = DiscordUtils.mention(id: <#Role ID of type RoleSnowflake#>)
 let slashCommandMention = DiscordUtils.slashCommand(name: "help", id: <#Command ID#>)
 
 /// Then:
