@@ -38,8 +38,8 @@ let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
 let bot = BotGatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,
-    token: YOUR_BOT_TOKEN,
-    appId: Snowflake(YOUR_APP_ID),
+    token: <#Your Bot Token#>,
+    appId: Snowflake(<#Your App ID#>),
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
         activities: [.init(name: "Fortnite", type: .game)], 
@@ -65,7 +65,7 @@ See the [GatewayConnection tests](https://github.com/MahdiBM/DiscordBM/blob/main
 import DiscordBM
 import Vapor
 
-let app: Application = YOUR_VAPOR_APPLICATION
+let app: Application = <#Your Vapor Application#>
 let bot = BotGatewayManager(
     eventLoopGroup: app.eventLoopGroup,
     httpClient: app.http.client.shared,
@@ -93,7 +93,7 @@ let bot = BotGatewayManager(
 struct EntryPoint {
     static func main() async throws {
         /// Make an instance like above
-        let bot: BotGatewayManager = ...
+        let bot: BotGatewayManager = <#GatewayManager You Made In Previous Steps#>
 
         /// Tell the manager to connect to Discord.
         /// This will return after the web-socket connection is established, which might take some seconds
@@ -177,7 +177,7 @@ struct EventHandler: GatewayEventHandler {
 ```
 Make sure you add the event handler to your `GatewayManager`/`bot`:
 ```swift
-let bot: any GatewayManager = GatewayManager_YOU_MADE_IN_PREVIOUS_STEPS
+let bot: any GatewayManager = <#GatewayManager You Made In Previous Steps#>
 
 for await event in await bot.makeEventsStream() {
     EventHandler(event: event).handle()
@@ -195,11 +195,11 @@ However, `DiscordBM` still supports sending files directly.
 ```swift
 Task {
     /// Raw data of anything like an image
-    let image: ByteBuffer = ...
+    let image: ByteBuffer = <#Your Image Buffer#>
     
     /// Example 1
     try await bot.client.createMessage(
-        channelId: CHANNEL_ID,
+        channelId: <#Channel ID#>,
         payload: .init(
             content: "A message with an attachment!",
             files: [.init(data: image, filename: "pic.png")],
@@ -210,7 +210,7 @@ Task {
     
     /// Example 2
     try await bot.client.createMessage(
-        channelId: CHANNEL_ID,
+        channelId: <#Channel ID#>,
         payload: .init(
             embeds: [.init(
                 title: "An embed with an attachment!",
@@ -234,10 +234,10 @@ Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://g
 
 The mention helpers:
 ```swift
-let userMention = DiscordUtils.userMention(id: USER_ID)
-let channelMention = DiscordUtils.channelMention(id: CHANNEL_ID)
-let roleMention = DiscordUtils.roleMention(id: ROLE_ID)
-let slashCommandMention = DiscordUtils.slashCommand(name: "help", id: COMMAND_ID)
+let userMention = DiscordUtils.userMention(id: <#User ID#>)
+let channelMention = DiscordUtils.channelMention(id: <#Channel ID#>)
+let roleMention = DiscordUtils.roleMention(id: <#Role ID#>)
+let slashCommandMention = DiscordUtils.slashCommand(name: "help", id: <#Command ID#>)
 
 /// Then:
 
@@ -256,8 +256,8 @@ let slashCommandMeessage = "Use this command: \(slashCommandMention)"
 
 And the emoji helpers:
 ```swift
-let emoji = DiscordUtils.customEmoji(name: "Peepo_Happy", id: EMOJI_ID)
-let animatedEmoji = DiscordUtils.customAnimatedEmoji(name: "Peepo_Money", id: EMOJI_ID)
+let emoji = DiscordUtils.customEmoji(name: "Peepo_Happy", id: <#Emoji ID#>)
+let animatedEmoji = DiscordUtils.customAnimatedEmoji(name: "Peepo_Money", id: <#Emoji ID#>)
 
 /// Then:
 
@@ -303,7 +303,7 @@ import Logging
 
 /// Configure the Discord Logging Manager.
 DiscordGlobalConfiguration.logManager = DiscordLogManager(
-    httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS
+    httpClient: <#HTTPClient You Made In Previous Steps#>
 )
 
 /// Bootstrap the `LoggingSystem`. After this, all your `Logger`s will automagically start using `DiscordLogHandler`.
@@ -311,7 +311,7 @@ DiscordGlobalConfiguration.logManager = DiscordLogManager(
 await LoggingSystem.bootstrapWithDiscordLogger(
     /// The address to send the logs to. 
     /// You can easily create a webhook using Discord client apps.
-    address: try .url(WEBHOOK_URL),
+    address: try .url(<#Your Webhook URL#>),
     makeMainLogHandler: StreamLogHandler.standardOutput(label:metadataProvider:)
 )
 
@@ -324,10 +324,10 @@ Read `DiscordLogManager.Configuration.init` documentation for full info.
 
 ```swift
 DiscordGlobalConfiguration.logManager = DiscordLogManager(
-    httpClient: HTTP_CLIENT_YOU_MADE_IN_PREVIOUS_STEPS,
+    httpClient: <#HTTPClient You Made In Previous Steps#>,
     configuration: .init(
         aliveNotice: .init(
-            address: try .url(WEBHOOK_URL),
+            address: try .url(<#Your Webhook URL#>),
             /// If nil, DiscordLogger will only send 1 "I'm alive" notice, on boot.
             /// If not nil, it will send a "I'm alive" notice every this-amount too. 
             interval: nil,
@@ -377,7 +377,7 @@ logger.critical("CRITICAL PROBLEM. ABOUT TO EXPLODE 💥")
 ```swift
 let cache = await DiscordCache(
     /// The `GatewayManager`/`bot` to cache the events from. 
-    gatewayManager: GatewayManager_YOU_MADE_IN_PREVIOUS_STEPS,
+    gatewayManager: <#GatewayManager You Made In Previous Steps#>,
     /// What intents to cache their related Gateway events. 
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
@@ -392,7 +392,7 @@ let cache = await DiscordCache(
 )
 
 /// Access the cached stuff:
-if let aGuild = await cache.guilds[GUILD_ID] {
+if let aGuild = await cache.guilds[<#Guild ID#>] {
     print("Guild name is:", aGuild.name)
 } else {
     print("Guild not found")
@@ -412,28 +412,28 @@ FYI, in interactions, the [member field](https://discord.com/developers/docs/res
 > You need a `DiscordCache` with intents containing `.guilds` & `.guildMembers` and also `requestAllMembers: .enabled`.   
 
 ```swift
-let cache: DiscordCache = DiscordCache_YOU_MADE_IN_PREVIOUS_STEPS
+let cache: DiscordCache = <#DiscordCache You Made In Previous Steps#>
 
 /// Get the guild.
-guard let guild = await cache.guilds[GUILD_ID] else { return }
+guard let guild = await cache.guilds[<#Guild ID#>] else { return }
 
 /// Check if the user has `.viewChannel` & `.readMessageHistory` permissions in a channel.
 let hasPermission = guild.userHasPermissions(
-    userId: USER_ID,
-    channelId: CHANNEL_ID, 
+    userId: <#User ID#>,
+    channelId: <#Channel ID#>, 
     permissions: [.viewChannel, .readMessageHistory]
 )
 
 /// Check if a user has the `.banMembers` guild-wide permission.
 let hasGuildPermission = guild.userHasGuildPermission(
-    userId: USER_ID,
+    userId: <#User ID#>,
     permission: .banMembers
 )
 
 /// Check if a user has a role.
 let hasRole = guild.userHasRole(
-    userId: USER_ID,
-    roleId: ROLE_ID
+    userId: <#User ID#>,
+    roleId: <#Role ID#>
 )
 ```
 
@@ -447,7 +447,7 @@ let hasRole = guild.userHasRole(
 
 ```swift
 let handler = try await ReactToRoleHandler(
-    gatewayManager: GatewayManager_YOU_MADE_IN_PREVIOUS_STEPS,
+    gatewayManager: <#GatewayManager You Made In Previous Steps#>,
     /// Your DiscordCache. This is not necessary (you can pass `nil`)
     /// Only helpful if the cache has `guilds` and/or `guildMembers` intents enabled
     cache: cache,
@@ -456,9 +456,9 @@ let handler = try await ReactToRoleHandler(
         name: "cool-gang",
         color: .green
     ),
-    guildId: THE_GUILD_ID_OF_THE_MESSAGE_YOU_CREATED,
-    channelId: THE_CHANNEL_ID_OF_THE_MESSAGE_YOU_CREATED,
-    messageId: THE_MESSAGE_ID_OF_THE_MESSAGE_YOU_CREATED,
+    guildId: <#Guild ID of The Message You Created#>,
+    channelId: <#Channel ID of The Message You Created#>,
+    messageId: <#Message ID of The Message You Created#>,
     /// The list of reactions to get the role for
     reactions: [.unicodeEmoji("🐔")]
 )
