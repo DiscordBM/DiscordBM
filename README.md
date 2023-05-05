@@ -1,11 +1,11 @@
-![DiscordBM](https://user-images.githubusercontent.com/54685446/201329617-9fd91ab0-35c2-42c2-8963-47b68c6a490a.png)
-
 <p align="center">
-	<a href="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml">
+    <img src="https://user-images.githubusercontent.com/54685446/201329617-9fd91ab0-35c2-42c2-8963-47b68c6a490a.png" alt="DiscordBM">
+    <br>
+    <a href="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml">
         <img src="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
     </a>
     <a href="https://swift.org">
-        <img src="https://img.shields.io/badge/swift-5.8%20/%205.7-brightgreen.svg" alt="Minimum Swift Version">
+        <img src="https://img.shields.io/badge/swift-5.8%20/%205.7-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
 </p>
 
@@ -86,8 +86,7 @@ let bot = BotGatewayManager(
 
 ### Using The Gateway Manager
 > **Note**  
-> For your app's entry point, you should use a type with the [`@main` attirbute](https://www.hackingwithswift.com/swift/5.3/atmain) like below.    
-> You can also use contents of `EntryPoint.main()` in a `main.swift` file.    
+> For your app's entry point, you should use a type with the [`@main` attribute](https://www.hackingwithswift.com/swift/5.3/atmain) like below.    
 ```swift
 @main
 struct EntryPoint {
@@ -516,7 +515,7 @@ add the following line to the dependencies in your `Package.swift` file:
 .package(url: "https://github.com/MahdiBM/DiscordBM", from: "1.0.0-beta.1"),
 ```
 
-Include `"DiscordBM"` as a dependency for your targets:
+Include `DiscordBM` as a dependency for your targets:
 
 ```swift
 .target(name: "<target>", dependencies: [
