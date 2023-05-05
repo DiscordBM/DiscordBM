@@ -233,11 +233,11 @@ public actor BotGatewayManager: GatewayManager {
             self.ws = ws
             self._state.store(.configured, ordering: .relaxed)
         } catch {
-            logger.error("web-socket error while connecting to Discord", metadata: [
+            logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
                 "error": .string("\(error)")
             ])
             self._state.store(.noConnection, ordering: .relaxed)
-            Task { await self.connect() }
+            await self.connect()
         }
     }
     

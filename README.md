@@ -96,7 +96,7 @@ struct EntryPoint {
         let bot: BotGatewayManager = ...
 
         /// Tell the manager to connect to Discord.
-        /// FYI, This will return _before_ the connection is fully established
+        /// This will return after the web-socket connection is established, which might take some seconds
         await bot.connect()
 
         /// Get an `AsyncStream` of `Gateway.Event`s
