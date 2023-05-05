@@ -2,76 +2,35 @@ name: tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-on: 
-  push:
-    branches: 
-      - "main"
-  pull_request:
-    branches: 
-      - "*"
+on:
+  pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
+  push: { branches: [ main ] }
 
 jobs:
-  linux-unit:
-    strategy:
-      fail-fast: false
-      matrix:
-        container:
-          - swift:5.7-focal
-          - swift:5.8-jammy
-          - swiftlang/swift:nightly-5.9-jammy
-    container: ${{ matrix.container }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out package
-        uses: actions/checkout@v3
-      - name: Run tests
-        run: swift test --filter DiscordBMTests
-
-  macos-unit:
-    strategy:
-      fail-fast: false
-      matrix:
-        xcode:
-          - latest-stable
-          - latest
-    runs-on: macos-12
-    steps:
-      - name: Select latest available Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: ${{ matrix.xcode }}
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Run tests
-        run: swift test --filter DiscordBMTests
-
-  linux-websocket:
-    strategy:
-      fail-fast: false
-      matrix:
-        container:
-          - swift:5.8-jammy
-    container: ${{ matrix.container }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out package
-        uses: actions/checkout@v3
-      - name: Run tests
-        run: swift test --filter WebSocketTests
-
-  linux-integration:
-    if: github.repository == 'MahdiBM/DiscordBM'
-    strategy:
-      fail-fast: false
-      matrix:
-        container:
-          - swift:5.8-jammy
-    container: ${{ matrix.container }}
-    runs-on: ubuntu-latest
+  main-tests:
+    uses: vapor/ci/.github/workflows/run-unit-tests.yml@reusable-workflows
+    with:
+      with_coverage: true
+      with_tsan: true
+      with_public_api_check: true
+      coverage_ignores: '^/Tests/|/Plugins/|/Sources/CZlib/|/Sources/DiscordWebSocket/'
+      test_filter: '^DiscordBMTests'
+  websocket-tests:
+    uses: vapor/ci/.github/workflows/run-unit-tests.yml@reusable-workflows
+    with:
+      with_coverage: true
+      with_tsan: true
+      with_public_api_check: false
+      coverage_ignores: '^/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(Auth|BM|Core|Gateway|HTTP|Logger|Models|Utilities)/'
+      test_filter: '^WebSocketTests'
+  integration-tests:
+    if: ${{ github.repository == 'MahdiBM/DiscordBM' && !(github.event.pull_request.draft || false) }}
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+    runs-on: ubuntu-latest
+    container: swift-5.8-jammy
     steps:
       - name: Check out package
         uses: actions/checkout@v3
       - name: Run tests
-        run: swift test --filter IntegrationTests
+        run: swift test --filter IntegrationTests --sanitize=thread
