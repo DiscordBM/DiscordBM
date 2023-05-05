@@ -3,9 +3,11 @@
 import PackageDescription
 
 let swiftSettings: [SwiftSetting] = [
-    // Versioned Releases Can't use this flag?! So can't commit this flag to git.
+    /// Versioned releases can't use this flag?! So can't commit this flag to git.
+    /// `DiscordBM` passes the `complete` level.
+    ///
     /// `minimal` / `targeted` / `complete`
-    //            .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
+//    .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
 ]
 
 let package = Package(
@@ -135,7 +137,6 @@ let package = Package(
         .target(
             name: "DiscordWebSocket",
             dependencies: [
-                "CZlib",
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
@@ -144,7 +145,8 @@ let package = Package(
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "NIOWebSocket", package: "swift-nio"),
                 .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
-                .product(name: "Atomics", package: "swift-atomics")
+                .product(name: "Atomics", package: "swift-atomics"),
+                "CZlib"
             ],
             swiftSettings: swiftSettings
         ),
