@@ -93,7 +93,7 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
     
     public var multipart: MultipartPart? {
         var part = MultipartPart(headers: [:], body: .init(self.data.readableBytesView))
-        if let type = type {
+        if let type {
             part.headers.add(name: "Content-Type", value: type)
         }
         part.headers.add(name: "Content-Disposition", value: #"form-data; filename="\#(self.filename)""#)
@@ -113,7 +113,7 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
                 return (split[0], split[1])
             }
             let filename = parts.first(where: { ["filename", "filename*"].contains($0.key) })
-            if let filename = filename {
+            if let filename {
                 self.filename = String(filename.value)
             } else {
                 return nil

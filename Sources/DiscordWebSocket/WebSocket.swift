@@ -39,7 +39,7 @@ public final class WebSocket: @unchecked Sendable {
         onClose: @Sendable @escaping (WebSocket) -> ()
     ) throws {
         self.channel = channel
-        if let decompression = decompression {
+        if let decompression {
             self.decompressor = Decompression.Decompressor()
             try self.decompressor?.initializeDecoder(encoding: decompression.algorithm)
         }
@@ -163,8 +163,7 @@ public final class WebSocket: @unchecked Sendable {
                 // peer asking for close, confirm and close output side channel
                 let promise = self.eventLoop.makePromise(of: Void.self)
                 var data = frame.data
-                let maskingKey = frame.maskKey
-                if let maskingKey = maskingKey {
+                if let maskingKey = frame.maskKey {
                     data.webSocketUnmask(maskingKey)
                 }
                 self.close(
@@ -178,8 +177,7 @@ public final class WebSocket: @unchecked Sendable {
         case .ping:
             if frame.fin {
                 var frameData = frame.data
-                let maskingKey = frame.maskKey
-                if let maskingKey = maskingKey {
+                if let maskingKey = frame.maskKey {
                     frameData.webSocketUnmask(maskingKey)
                 }
                 self.send(
@@ -193,11 +191,6 @@ public final class WebSocket: @unchecked Sendable {
             }
         case .pong:
             if frame.fin {
-                var frameData = frame.data
-                let maskingKey = frame.maskKey
-                if let maskingKey = maskingKey {
-                    frameData.webSocketUnmask(maskingKey)
-                }
                 self.waitingForPong = false
             } else {
                 self.close(code: .protocolError, promise: nil)

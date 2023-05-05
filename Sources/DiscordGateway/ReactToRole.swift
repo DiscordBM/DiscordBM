@@ -110,7 +110,7 @@ public actor ReactToRoleHandler {
         }
         
         func cacheWithIntents(_ intents: Gateway.Intent...) -> DiscordCache? {
-            if let cache = cache,
+            if let cache,
                intents.allSatisfy({ cache.intents.contains($0) }) {
                 return cache
             } else {

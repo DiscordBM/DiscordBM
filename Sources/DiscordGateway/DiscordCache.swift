@@ -684,7 +684,7 @@ public actor DiscordCache {
                     guildId: message.guild_id,
                     channelId: message.channel_id
                 ),
-                   let deleted = deleted {
+                   let deleted {
                     if messageCachingPolicy.shouldSaveHistory(
                         guildId: message.guild_id,
                         channelId: message.channel_id

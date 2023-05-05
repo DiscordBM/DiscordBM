@@ -590,7 +590,7 @@ extension BotGatewayManager {
         self.sendQueue.perform { [weak self] in
             guard let self = self else { return }
             Task {
-                if let connectionId = connectionId,
+                if let connectionId,
                    self.connectionId.load(ordering: .relaxed) != connectionId {
                     return
                 }
@@ -651,7 +651,7 @@ extension BotGatewayManager {
     private func waitInShardQueueIfNeeded() async {
         if isFirstConnection,
            let shard = identifyPayload.shard,
-           let maxConcurrency = maxConcurrency {
+           let maxConcurrency {
             isFirstConnection = false
             let bucketIndex = shard.first / maxConcurrency
             if bucketIndex > 0 {

@@ -119,7 +119,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
         /// Since the `ClientCache` is shared and another `DiscordClient` could have
         /// had added a response to it, at least make sure that this
         /// `DiscordClient` should be using any caching at all for the endpoint.
-        guard let identity = identity,
+        guard let identity,
               self.configuration.cachingBehavior.getTTL(for: identity) != nil
         else { return nil }
         return await cache?.get(item: .init(
@@ -135,11 +135,11 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
         parameters: [String],
         queries: [(String, String?)]
     ) async {
-        guard let identity = identity,
+        guard let identity,
               (200..<300).contains(response.status.code),
               let ttl = self.configuration.cachingBehavior.getTTL(for: identity)
         else { return }
-        if let cache = cache {
+        if let cache {
             logger.debug("Saved response in cache", metadata: [
                 "endpointIdentity": .stringConvertible(identity),
                 "queries": .stringConvertible(queries)
@@ -182,7 +182,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
             "retriesWithoutThis": .stringConvertible(retriesSoFar),
             "waitSecondsBeforeRetry": .stringConvertible(retryWait ?? 0)
         ])
-        if let retryWait = retryWait {
+        if let retryWait {
             try await Task.sleep(nanoseconds: UInt64(retryWait * 1_000_000_000))
         }
         retriesSoFar += 1

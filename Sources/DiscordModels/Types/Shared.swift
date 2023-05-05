@@ -290,7 +290,7 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
                 (key: DiscordLocale.chineseTaiwan, value: self.chineseTaiwan),
                 (key: DiscordLocale.korean, value: self.korean),
             ].compactMap { key, value -> (key: DiscordLocale, value: C)? in
-                if let value = value {
+                if let value {
                     return (key, value)
                 } else {
                     return nil
@@ -311,7 +311,7 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
     }
     
     public init? (_ elements: [DiscordLocale: C]?) {
-        guard let elements = elements else { return nil }
+        guard let elements else { return nil }
         self.values = elements
     }
     

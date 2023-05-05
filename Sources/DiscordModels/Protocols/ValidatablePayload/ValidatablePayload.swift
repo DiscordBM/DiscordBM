@@ -21,7 +21,11 @@ extension ValidatablePayload {
     }
     
     @inlinable
-    func validateCharacterCountDoesNotExceed(_ value: String?, max: Int, name: String) -> ValidationFailure? {
+    func validateCharacterCountDoesNotExceed(
+        _ value: String?,
+        max: Int,
+        name: String
+    ) -> ValidationFailure? {
         guard value?.unicodeScalars.count ?? 0 <= max else {
             return ValidationFailure.tooManyCharacters(name: name, max: max)
         }
@@ -38,8 +42,13 @@ extension ValidatablePayload {
     }
 
     @inlinable
-    func validateCharacterCountInRangeOrNil(_ value: String?, min: Int, max: Int, name: String) -> ValidationFailure? {
-        guard let value = value else { return nil }
+    func validateCharacterCountInRangeOrNil(
+        _ value: String?,
+        min: Int,
+        max: Int,
+        name: String
+    ) -> ValidationFailure? {
+        guard let value else { return nil }
         let count = value.unicodeScalars.count
         guard min <= count, count <= max else {
             return ValidationFailure.characterCountOutOfRange(name: name, min: min, max: max)
@@ -68,7 +77,12 @@ extension ValidatablePayload {
     }
 
     @inlinable
-    func validateElementCountInRange<T>(_ array: Array<T>?, min: Int, max: Int, name: String) -> ValidationFailure? {
+    func validateElementCountInRange<T>(
+        _ array: Array<T>?,
+        min: Int,
+        max: Int,
+        name: String
+    ) -> ValidationFailure? {
         let count = array?.count ?? 0
         guard min <= count, count <= max else {
             return ValidationFailure.elementCountOutOfRange(name: name, min: min, max: max)
@@ -100,7 +114,7 @@ extension ValidatablePayload {
         values: [String],
         reason: String
     ) -> ValidationFailure? {
-        if let value = value,
+        if let value,
            values.contains(where: { value.localizedCaseInsensitiveContains($0) }) {
             return ValidationFailure.containsProhibitedValues(
                 name: name,
@@ -141,7 +155,7 @@ extension ValidatablePayload {
         max: N,
         name: String
     ) -> ValidationFailure? {
-        if let number = number {
+        if let number {
             guard number >= min, number <= max else {
                 return ValidationFailure.numberOutOfRange(
                     name: name,
