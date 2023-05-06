@@ -12,6 +12,8 @@ class ConfigurationStorage: @unchecked Sendable {
 }
 
 extension DiscordGlobalConfiguration {
+    /// Mostly to satisfy thread sanitizer in tests
+    /// This realistically shouldn't need any synchronizations
 #if DEBUG
     private static let queue = DispatchQueue(label: "DiscordBM.logManager")
 
