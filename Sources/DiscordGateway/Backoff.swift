@@ -24,9 +24,9 @@ actor Backoff {
     }
     
     /// Returns `nil` if can perform immediately,
-    /// otherwise `TimeAmount` to wait before attempting to perform.
+    /// otherwise `Duration` to wait before attempting to perform.
     /// Assumes you will definitely perform the task after calling this.
-    func canPerformIn() -> TimeAmount? {
+    func canPerformIn() -> Duration? {
         let tryCount = self.tryCount
         let previousTry = self.previousTry
         self.tryCount += 1

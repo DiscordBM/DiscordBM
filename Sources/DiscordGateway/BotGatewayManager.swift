@@ -4,7 +4,6 @@ import AsyncHTTPClient
 import Atomics
 import Logging
 import enum NIOWebSocket.WebSocketErrorCode
-import struct NIOCore.TimeAmount
 
 public actor BotGatewayManager: GatewayManager {
     
@@ -190,7 +189,7 @@ public actor BotGatewayManager: GatewayManager {
         /// Guard we're attempting to connect too fast
         if let connectIn = await connectionBackoff.canPerformIn() {
             logger.warning("Cannot try to connect immediately due to backoff", metadata: [
-                "wait-milliseconds": .stringConvertible(connectIn.nanoseconds / 1_000_000)
+                "wait-time": .stringConvertible(connectIn)
             ])
             await self.sleep(for: connectIn)
         }
@@ -521,10 +520,10 @@ extension BotGatewayManager {
     
     private func setupPingTask(
         forConnectionWithId connectionId: UInt,
-        every interval: TimeAmount
+        every duration: Duration
     ) {
         Task {
-            await self.sleep(for: interval)
+            await self.sleep(for: duration)
             guard self.connectionId.load(ordering: .relaxed) == connectionId else {
                 self.logger.trace("Canceled a ping task", metadata: [
                     "connectionId": .stringConvertible(connectionId)
@@ -535,7 +534,7 @@ extension BotGatewayManager {
                 "connectionId": .stringConvertible(connectionId)
             ])
             self.sendPing(forConnectionWithId: connectionId)
-            self.setupPingTask(forConnectionWithId: connectionId, every: interval)
+            self.setupPingTask(forConnectionWithId: connectionId, every: duration)
         }
     }
     
@@ -667,9 +666,9 @@ extension BotGatewayManager {
         }
     }
     
-    private func sleep(for time: TimeAmount) async {
+    private func sleep(for duration: Duration) async {
         do {
-            try await Task.sleep(nanoseconds: UInt64(time.nanoseconds))
+            try await Task.sleep(for: duration)
         } catch {
             logger.warning("Task failed to sleep properly", metadata: [
                 "error": .string("\(error)")
