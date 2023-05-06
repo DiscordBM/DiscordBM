@@ -600,14 +600,15 @@ class DiscordLoggerTests: XCTestCase {
             }
             return ["simple-trace-id": .string(traceID)]
         }
+        
+        /// To make TSan happy
+        try await Task.sleep(nanoseconds: 500_000_000)
+
         await LoggingSystem.bootstrapWithDiscordLogger(
             address: try .url(webhookUrl),
             metadataProvider: simpleTraceIDMetadataProvider,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
-
-        /// So things settle (?!)
-        try await Task.sleep(nanoseconds: 500_000_000)
         
         let logger = Logger(label: "test")
         
