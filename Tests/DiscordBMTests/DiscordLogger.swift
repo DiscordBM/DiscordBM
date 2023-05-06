@@ -511,7 +511,7 @@ await waitFulfill(for: [expectation], timeout: 2)
     func testDoesNotExceedDiscordLengthLimits() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
-            configuration: .init(frequency: .seconds(.max))
+            configuration: .init(frequency: .seconds(3600))
         )
         
         let chars = #"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\_*"#.map { $0 }
