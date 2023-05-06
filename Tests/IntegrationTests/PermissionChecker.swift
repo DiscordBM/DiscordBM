@@ -56,14 +56,14 @@ class PermissionChecker: XCTestCase {
         }
 
         /// To make sure these 2 `Task`s are triggered in order
-        try await Task.sleep(nanoseconds: 200_000_000)
+        try await Task.sleep(for: .milliseconds(200))
         
         Task { await bot.connect() }
 
         await waitFulfill(for: [expectation], timeout: 10)
 
         /// For cache to get populated
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         let _guild = await cache.guilds[Constants.guildId]
         let guild = try XCTUnwrap(_guild)
@@ -154,6 +154,6 @@ class PermissionChecker: XCTestCase {
         await bot.disconnect()
         
         /// Wait 5 seconds to make sure it doesn't mess up the next tests due to Discord limits.
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
 }

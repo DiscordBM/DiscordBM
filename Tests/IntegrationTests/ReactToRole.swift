@@ -71,7 +71,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         /// Configuration must have been changed and populated with the role id
         do {
@@ -92,7 +92,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify assigned the role to itself
@@ -112,7 +112,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -132,7 +132,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role
@@ -145,7 +145,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Wait for the property below to be updated if needed
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         
         /// Lifecycle still not ended
         do {
@@ -160,7 +160,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the gateway event is sent and processed
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// After message is deleted, lifecycle is ended
         do {
@@ -171,7 +171,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testNoCache() async throws {
@@ -216,7 +216,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         /// Configuration must have been changed and populated with the role id
         do {
@@ -237,7 +237,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify assigned the role to itself
@@ -262,7 +262,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -282,7 +282,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role
@@ -295,7 +295,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Wait for the property below to be updated if needed
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         
         /// Lifecycle still not ended
         do {
@@ -310,7 +310,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the gateway event is sent and processed
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// After message is deleted, lifecycle is ended
         do {
@@ -321,7 +321,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testMultipleReactions() async throws {
@@ -359,7 +359,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         do {
             /// Verify reacted to `reaction1`
@@ -406,7 +406,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still has the role although 1 of the 2 reactions has been removed
@@ -424,7 +424,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still has the role
@@ -447,7 +447,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify does not have the role anymore
@@ -466,7 +466,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify has the role again because reacted again
@@ -485,7 +485,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still has the role
@@ -504,7 +504,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still has the role
@@ -523,7 +523,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify does not have the role anymore because both reactions removed
@@ -543,7 +543,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testGrantOnStart() async throws {
@@ -581,7 +581,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         do {
             /// Verify reacted
@@ -614,7 +614,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -637,7 +637,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         // To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role because the handler is stopped
@@ -654,7 +654,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(runningState, .running)
         
         // To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify has the role now, although the reaction was there even when handler restarted
@@ -674,7 +674,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testInitializerAcceptingConfiguration() async throws {
@@ -720,7 +720,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         /// Configuration must have been changed and populated with the role id
         do {
@@ -758,7 +758,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -778,7 +778,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role
@@ -791,7 +791,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Wait for the property below to be updated if needed
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         
         /// Lifecycle still not ended
         do {
@@ -806,7 +806,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the gateway event is sent and processed
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// After message is deleted, lifecycle is ended
         do {
@@ -817,7 +817,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testInitializerWithExistingRole() async throws {
@@ -864,7 +864,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         /// Configuration not must be changed because we already provided the role-id
         do {
@@ -885,7 +885,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify assigned the role to itself
@@ -905,7 +905,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -925,7 +925,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role
@@ -938,7 +938,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Wait for the property below to be updated if needed
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         
         /// Lifecycle still not ended
         do {
@@ -953,7 +953,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the gateway event is sent and processed
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// After message is deleted, lifecycle is ended
         do {
@@ -964,7 +964,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testMessageIsInvalid() async throws {
@@ -1080,7 +1080,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         /// Configuration must have been changed and populated with the role id
         do {
@@ -1101,7 +1101,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify assigned the role to itself
@@ -1123,7 +1123,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -1148,7 +1148,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role
@@ -1173,7 +1173,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(runningState, .running)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify re-assigned the role to itself
@@ -1186,7 +1186,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Wait for the property below to be updated if needed
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         
         /// Lifecycle still not ended
         do {
@@ -1201,7 +1201,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// So the gateway event is sent and processed
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// After message is deleted, lifecycle is ended
         do {
@@ -1212,7 +1212,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func makeBotAndCache(
@@ -1250,14 +1250,14 @@ class ReactToRoleTests: XCTestCase {
         }
 
         /// To make sure these 2 `Task`s are triggered in order
-        try await Task.sleep(nanoseconds: 200_000_000)
+        try await Task.sleep(for: .milliseconds(200))
 
         Task { await bot.connect() }
 
         await waitFulfill(for: [expectation], timeout: 10)
         
         /// So cache is populated
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         return (bot, cache)
     }

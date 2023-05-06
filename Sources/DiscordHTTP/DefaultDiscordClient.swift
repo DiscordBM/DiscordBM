@@ -85,7 +85,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
                     ]
                 )
                 let nanos = UInt64(after * 1_000_000_000)
-                try await Task.sleep(nanoseconds: nanos)
+                try await Task.sleep(for: .nanoseconds(nanos))
                 await rateLimiter.addGlobalRateLimitRecord()
             } else {
                 logger.warning(
@@ -159,7 +159,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
         DiscordHTTPResponse(
             _response: try await self.client.execute(
                 request: request,
-                deadline: .now() + configuration.requestTimeout,
+                deadline: .now() + configuration.requestTimeoutAmount,
                 logger: configuration.enableLoggingForRequests
                 ? DiscordGlobalConfiguration.makeLogger("DBM+HTTPClient")
                 : Logger(label: "DBM-no-op-logger", factory: SwiftLogNoOpLogHandler.init)
@@ -183,7 +183,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
             "waitSecondsBeforeRetry": .stringConvertible(retryWait ?? 0)
         ])
         if let retryWait {
-            try await Task.sleep(nanoseconds: UInt64(retryWait * 1_000_000_000))
+            try await Task.sleep(for: .nanoseconds(UInt64(retryWait * 1_000_000_000)))
         }
         retriesSoFar += 1
         logger.trace("Will retry a request right now", metadata: [
@@ -668,8 +668,20 @@ public struct ClientConfiguration: Sendable {
     /// The behavior used for caching requests.
     /// Due to how it works, you shouldn't use `CachingBehavior`s with different TTLs for the same bot-token.
     public let cachingBehavior: CachingBehavior
+    var requestTimeoutAmount: TimeAmount
     /// How much for the `HTTPClient` to wait for a connection before failing.
-    public var requestTimeout: TimeAmount
+    public var requestTimeout: Duration {
+        get {
+            .nanoseconds(self.requestTimeoutAmount.nanoseconds)
+        }
+        set {
+            let comps = newValue.components
+            let seconds = comps.seconds * 1_000_000_000
+            let attos = comps.attoseconds / 1_000_000_000
+            let nanos = seconds + attos
+            self.requestTimeoutAmount = .nanoseconds(nanos)
+        }
+    }
     /// Ask `HTTPClient` to log when needed. Defaults to no logging.
     public var enableLoggingForRequests: Bool
     /// Retries failed requests based on this policy.
@@ -707,16 +719,18 @@ public struct ClientConfiguration: Sendable {
     ///    in the payload. This all works based on Discord docs' validation notes.
     public init(
         cachingBehavior: CachingBehavior = .disabled,
-        requestTimeout: TimeAmount = .seconds(30),
+        requestTimeout: Duration = .seconds(30),
         enableLoggingForRequests: Bool = false,
         retryPolicy: RetryPolicy? = .default,
         performValidations: Bool = true
     ) {
         self.cachingBehavior = cachingBehavior
-        self.requestTimeout = requestTimeout
         self.enableLoggingForRequests = enableLoggingForRequests
         self.retryPolicy = retryPolicy
         self.performValidations = performValidations
+
+        self.requestTimeoutAmount = .zero
+        self.requestTimeout = requestTimeout
     }
 }
 
@@ -814,7 +828,7 @@ actor ClientCache {
     
     private func collectGarbage() async {
         /// Quit in case of task cancelation.
-        guard (try? await Task.sleep(nanoseconds: 60 * 1_000_000_000)) != nil else { return }
+        guard (try? await Task.sleep(for: .seconds(60))) != nil else { return }
         let now = Date().timeIntervalSince1970
         for (item, expirationDate) in self.timeTable {
             if expirationDate < now {

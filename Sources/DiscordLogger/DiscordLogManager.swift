@@ -12,7 +12,7 @@ public actor DiscordLogManager {
         
         public struct AliveNotice: Sendable {
             let address: WebhookAddress
-            let interval: TimeAmount?
+            let interval: Duration?
             let message: String
             let color: DiscordColor
             let initialNoticeMentions: [String]
@@ -26,7 +26,7 @@ public actor DiscordLogManager {
             ///   Useful to be notified of app-boots when you update your app or when it crashes.
             public init(
                 address: WebhookAddress,
-                interval: TimeAmount?,
+                interval: Duration?,
                 message: String = "Alive Notice!",
                 color: DiscordColor = .blue,
                 initialNoticeMention: Mention
@@ -61,7 +61,7 @@ public actor DiscordLogManager {
             }
         }
         
-        let frequency: TimeAmount
+        let frequency: Duration
         let aliveNotice: AliveNotice?
         let mentions: [Logger.Level: [String]]
         let colors: [Logger.Level: DiscordColor]
@@ -83,7 +83,7 @@ public actor DiscordLogManager {
         ///   - disabledInDebug: Whether or not to disable logging in DEBUG.
         ///   - maxStoredLogsCount: If there are more logs than this count, the log manager will start removing the oldest un-sent logs to reduce memory consumption.
         public init(
-            frequency: TimeAmount = .seconds(10),
+            frequency: Duration = .seconds(10),
             aliveNotice: AliveNotice? = nil,
             mentions: [Logger.Level: Mention] = [:],
             colors: [Logger.Level: DiscordColor] = [
@@ -211,10 +211,9 @@ public actor DiscordLogManager {
 #endif
         if let aliveNotice = configuration.aliveNotice,
            let interval = aliveNotice.interval {
-            let nanos = UInt64(interval.nanoseconds)
-            
+
             @Sendable func send() async throws {
-                try await Task.sleep(nanoseconds: nanos)
+                try await Task.sleep(for: interval)
                 await sendAliveNotice(config: aliveNotice, isFirstNotice: false)
                 try await send()
             }
@@ -241,10 +240,9 @@ public actor DiscordLogManager {
 #if DEBUG
         if configuration.disabledInDebug { return }
 #endif
-        let nanos = UInt64(configuration.frequency.nanoseconds)
         
         @Sendable func send() async throws {
-            try await Task.sleep(nanoseconds: nanos)
+            try await Task.sleep(for: configuration.frequency)
             try await performLogSend(address: address)
             try await send()
         }

@@ -1245,7 +1245,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertLessThan(rateLimitedErrors.load(ordering: .relaxed), count)
         
         /// Waiting 10 seconds to make sure the next tests don't get rate-limited
-        try await Task.sleep(nanoseconds: 10_000_000_000)
+        try await Task.sleep(for: .seconds(10))
     }
     
     func testCachingInPractice() async throws {
@@ -1289,7 +1289,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Because `ClientCache`s are shared across different `DefaultDiscordClient`s.
         /// This is to make sure the last test doesn't have impact on the next tests.
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// Caching enabled, but with exception, so disabled
         do {
@@ -1362,7 +1362,7 @@ class DiscordClientTests: XCTestCase {
             /// I think the command-addition takes effect a second or so later, so we need to
             /// wait a second before we try to delete the command, otherwise Discord might
             /// think the command doesn't exist and return 404.
-            try await Task.sleep(nanoseconds: 1_000_000_000)
+            try await Task.sleep(for: .seconds(1))
             
             let deletionResponse = try await cacheClient.deleteApplicationCommand(
                 commandId: command.id
@@ -1400,7 +1400,7 @@ private actor Container {
     
     func waitForCounter() async {
         Task {
-            try await Task.sleep(nanoseconds: 10_000_000_000)
+            try await Task.sleep(for: .seconds(10))
             if waiter != nil {
                 waiter?.resume()
                 waiter = nil
