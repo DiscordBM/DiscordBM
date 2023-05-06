@@ -20,7 +20,7 @@ extension DiscordGlobalConfiguration {
     /// and has to get rid of that value.
     /// Does not include decode errors.
     /// This is supposed to be only used by the library author.
-    /// Enabling the flag is discouraged as it'll be too spammy.
+    /// Enabling the logger is discouraged as it'll be too spammy.
     static func makeDecodeLogger(_ label: String) -> Logger {
 #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
             var logger = DiscordGlobalConfiguration.makeLogger(label)

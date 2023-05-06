@@ -135,7 +135,7 @@ class DiscordLoggerTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
-await waitFulfill(for: [expectation], timeout: 2)
+        await waitFulfill(for: [expectation], timeout: 2)
         
         let anyPayload = self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
