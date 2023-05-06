@@ -338,10 +338,13 @@ await waitFulfill(for: [expectation], timeout: 2)
             level: .debug,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
-        
+
+        /// To make sure the "Alive Notice" goes first
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
         logger.log(level: .critical, "Testing! 1")
         
-        try await Task.sleep(nanoseconds: 4_000_000_000)
+        try await Task.sleep(nanoseconds: 3_000_000_000)
         
         logger.log(level: .debug, "Testing! 2")
         
@@ -508,7 +511,7 @@ await waitFulfill(for: [expectation], timeout: 2)
     func testDoesNotExceedDiscordLengthLimits() async throws {
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
-            configuration: .init(frequency: .seconds(60))
+            configuration: .init(frequency: .seconds(.max))
         )
         
         let chars = #"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\_*"#.map { $0 }
