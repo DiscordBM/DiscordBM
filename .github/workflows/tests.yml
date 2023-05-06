@@ -13,7 +13,7 @@ jobs:
       with_coverage: true
       with_tsan: true
       with_public_api_check: true
-      coverage_ignores: '^/Tests/|/Plugins/|/Sources/CZlib/|/Sources/DiscordWebSocket/'
+      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/|/Sources/DiscordWebSocket/'
       test_filter: '^DiscordBMTests'
   websocket-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@reusable-workflows
@@ -21,7 +21,7 @@ jobs:
       with_coverage: true
       with_tsan: false
       with_public_api_check: false
-      coverage_ignores: '^/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(Auth|BM|Core|Gateway|HTTP|Logger|Models|Utilities)/'
+      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(Auth|BM|Core|Gateway|HTTP|Logger|Models|Utilities)/'
       test_filter: '^WebSocketTests'
   integration-tests:
     if: ${{ github.event_name == 'push' || (github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id && !github.event.pull_request.draft) }}
