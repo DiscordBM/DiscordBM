@@ -17,12 +17,10 @@ extension DiscordGlobalConfiguration {
     /// You must initialize this, if you want to use `DiscordLogHandler`.
     public static var logManager: DiscordLogManager {
         get {
-            lock.withLock {
-                guard let logManager = ConfigurationStorage.shared.logManager else {
-                    fatalError("Need to configure the log-manager using 'DiscordGlobalConfiguration.logManager = DiscordLogManager(...)'")
-                }
-                return logManager
+            guard let logManager = ConfigurationStorage.shared.logManager else {
+                fatalError("Need to configure the log-manager using 'DiscordGlobalConfiguration.logManager = DiscordLogManager(...)'")
             }
+            return logManager
         }
         set {
             lock.withLock {

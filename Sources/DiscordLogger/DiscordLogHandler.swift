@@ -18,9 +18,9 @@ public struct DiscordLogHandler: LogHandler {
     /// See `LogHandler.logLevel`.
     public var logLevel: Logger.Level
     /// `logManager` does the actual heavy-lifting and communicates with Discord.
-    static let logManager: DiscordLogManager = {
+    var logManager: DiscordLogManager {
         DiscordGlobalConfiguration.logManager
-    }()
+    }
     
     init(
         label: String,
@@ -91,7 +91,7 @@ public struct DiscordLogHandler: LogHandler {
         function: String,
         line: UInt
     ) { 
-        let config = Self.logManager.configuration
+        let config = logManager.configuration
         
         if config.disabledLogLevels.contains(level) { return }
         
@@ -128,7 +128,7 @@ public struct DiscordLogHandler: LogHandler {
             )
         )
         
-        Task { await Self.logManager.include(address: address, embed: embed, level: level) }
+        Task { await logManager.include(address: address, embed: embed, level: level) }
     }
 }
 
