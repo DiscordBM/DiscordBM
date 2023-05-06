@@ -18,7 +18,9 @@ public struct DiscordLogHandler: LogHandler {
     /// See `LogHandler.logLevel`.
     public var logLevel: Logger.Level
     /// `logManager` does the actual heavy-lifting and communicates with Discord.
-    var logManager: DiscordLogManager { DiscordGlobalConfiguration.logManager }
+    var logManager: DiscordLogManager {
+        DiscordGlobalConfiguration.logManager
+    }
     
     init(
         label: String,

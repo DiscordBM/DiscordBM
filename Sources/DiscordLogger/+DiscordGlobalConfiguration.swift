@@ -1,4 +1,7 @@
 import DiscordCore
+#if DEBUG
+import Foundation
+#endif
 
 /// The point of this storage is to disable Sendable warnings when using
 /// `-strict-concurrency=complete`
@@ -9,6 +12,29 @@ class ConfigurationStorage: @unchecked Sendable {
 }
 
 extension DiscordGlobalConfiguration {
+    /// Mostly to satisfy thread sanitizer in tests
+    /// This realistically shouldn't need any synchronizations
+#if DEBUG
+    private static let queue = DispatchQueue(label: "DiscordBM.logManager")
+
+    /// The manager of logging to Discord.
+    /// You must initialize this, if you want to use `DiscordLogHandler`.
+    public static var logManager: DiscordLogManager {
+        get {
+            queue.sync {
+                guard let logManager = ConfigurationStorage.shared.logManager else {
+                    fatalError("Need to configure the log-manager using 'DiscordGlobalConfiguration.logManager = DiscordLogManager(...)'")
+                }
+                return logManager
+            }
+        }
+        set {
+            queue.sync {
+                ConfigurationStorage.shared.logManager = newValue
+            }
+        }
+    }
+#else
     /// The manager of logging to Discord.
     /// You must initialize this, if you want to use `DiscordLogHandler`.
     public static var logManager: DiscordLogManager {
@@ -18,6 +44,9 @@ extension DiscordGlobalConfiguration {
             }
             return logManager
         }
-        set { ConfigurationStorage.shared.logManager = newValue }
+        set {
+            ConfigurationStorage.shared.logManager = newValue
+        }
     }
+#endif
 }
