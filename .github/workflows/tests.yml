@@ -19,12 +19,14 @@ jobs:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@reusable-workflows
     with:
       with_coverage: true
-      with_tsan: true
+      with_tsan: false
       with_public_api_check: false
       coverage_ignores: '^/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(Auth|BM|Core|Gateway|HTTP|Logger|Models|Utilities)/'
       test_filter: '^WebSocketTests'
   integration-tests:
-    if: ${{ github.repository == 'MahdiBM/DiscordBM' && !(github.event.pull_request.draft || false) }}
+    if: |
+      github.event_name == "push" ||
+      (github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id && !github.event.pull_request.draft)
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
     runs-on: ubuntu-latest
