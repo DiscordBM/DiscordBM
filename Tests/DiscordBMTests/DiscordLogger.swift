@@ -3,6 +3,7 @@ import DiscordHTTP
 import DiscordUtilities
 @testable import Logging
 import NIOHTTP1
+import NIOConcurrencyHelpers
 import XCTest
 
 class DiscordLoggerTests: XCTestCase {
@@ -634,7 +635,8 @@ await waitFulfill(for: [expectation], timeout: 2)
 private class FakeDiscordClient: DiscordClient, @unchecked Sendable {
     
     let appId: ApplicationSnowflake? = "11111111"
-    
+
+    let lock = NIOLock()
     var expectation: XCTestExpectation?
     var payloads: [Any] = []
     
@@ -653,10 +655,12 @@ private class FakeDiscordClient: DiscordClient, @unchecked Sendable {
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
-        payloads.append(payload)
-        expectation?.fulfill()
-        expectation = nil
-        return DiscordHTTPResponse(host: "discord.com", status: .ok, version: .http1_1)
+        lock.withLock {
+            payloads.append(payload)
+            expectation?.fulfill()
+            expectation = nil
+            return DiscordHTTPResponse(host: "discord.com", status: .ok, version: .http1_1)
+        }
     }
 }
 
