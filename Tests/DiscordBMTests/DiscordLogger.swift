@@ -607,7 +607,7 @@ class DiscordLoggerTests: XCTestCase {
         )
 
         /// So things settle (?!)
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(nanoseconds: 500_000_000)
         
         let logger = Logger(label: "test")
         
