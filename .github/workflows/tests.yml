@@ -24,9 +24,7 @@ jobs:
       coverage_ignores: '^/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(Auth|BM|Core|Gateway|HTTP|Logger|Models|Utilities)/'
       test_filter: '^WebSocketTests'
   integration-tests:
-    if: |
-      github.event_name == "push" ||
-      (github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id && !github.event.pull_request.draft)
+    if: ${{ github.event_name == "push" || (github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id && !github.event.pull_request.draft) }}
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
     runs-on: ubuntu-latest
