@@ -318,7 +318,7 @@ await waitFulfill(for: [expectation], timeout: 2)
         DiscordGlobalConfiguration.logManager = DiscordLogManager(
             client: self.client,
             configuration: .init(
-                frequency: .milliseconds(700),
+                frequency: .seconds(1),
                 aliveNotice: .init(
                     address: try .url(webhookUrl),
                     interval: .seconds(6),
@@ -340,31 +340,30 @@ await waitFulfill(for: [expectation], timeout: 2)
         )
 
         /// To make sure the "Alive Notice" goes first
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(nanoseconds: 800_000_000)
 
         logger.log(level: .critical, "Testing! 1")
         
-        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         
         logger.log(level: .debug, "Testing! 2")
-        
-        try await Task.sleep(nanoseconds: 1_000_000_000)
-        
+
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+
         let expectation = XCTestExpectation(description: "log")
         self.client.expectation = expectation
         await waitFulfill(for: [expectation], timeout: 10)
-        
-        let payloads = self.client.payloads
+
+        let payloads = try XCTUnwrap(self.client.payloads as? [Payloads.ExecuteWebhook])
         if payloads.count != 3 {
-            XCTFail("Expected 4 payloads, but found \(payloads.count): \(payloads)")
+            XCTFail("Expected 3 payloads, but found \(payloads.count): \(payloads)")
             return
         }
         
         let tolerance = 1.25
         
         do {
-            let anyPayload = payloads[0]
-            let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
+            let payload = payloads[0]
             XCTAssertEqual(payload.content, "<@&99999999>")
             
             let embeds = try XCTUnwrap(payload.embeds)
@@ -388,8 +387,7 @@ await waitFulfill(for: [expectation], timeout: 2)
         }
         
         do {
-            let anyPayload = payloads[1]
-            let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
+            let payload = payloads[1]
             XCTAssertEqual(payload.content, "")
             
             let embeds = try XCTUnwrap(payload.embeds)
@@ -404,8 +402,7 @@ await waitFulfill(for: [expectation], timeout: 2)
         }
         
         do {
-            let anyPayload = payloads[2]
-            let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
+            let payload = payloads[2]
             XCTAssertEqual(payload.content, "")
             
             let embeds = try XCTUnwrap(payload.embeds)
