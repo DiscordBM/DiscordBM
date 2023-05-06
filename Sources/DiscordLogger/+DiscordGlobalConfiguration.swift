@@ -10,9 +10,6 @@ class ConfigurationStorage: @unchecked Sendable {
 }
 
 extension DiscordGlobalConfiguration {
-    /// Thread sanitizer thinks there is a data race possibility, so we use a lock to make it happy.
-    private static let lock = NIOLock()
-
     /// The manager of logging to Discord.
     /// You must initialize this, if you want to use `DiscordLogHandler`.
     public static var logManager: DiscordLogManager {
@@ -23,9 +20,7 @@ extension DiscordGlobalConfiguration {
             return logManager
         }
         set {
-            lock.withLock {
-                ConfigurationStorage.shared.logManager = newValue
-            }
+            ConfigurationStorage.shared.logManager = newValue
         }
     }
 }

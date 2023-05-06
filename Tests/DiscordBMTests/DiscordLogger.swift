@@ -54,11 +54,11 @@ class DiscordLoggerTests: XCTestCase {
         logger.log(level: .warning, "Testing! 4")
         
         let expectation = XCTestExpectation(description: "log")
-        self.client.expectation = expectation
+        await self.client.setExpectation(to: expectation)
         
         await waitFulfill(for: [expectation], timeout: 6)
         
-        let anyPayload = self.client.payloads.first
+        let anyPayload = await self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         XCTAssertEqual(payload.content, "<@22222222> <@&33333333>")
         
@@ -134,10 +134,10 @@ class DiscordLoggerTests: XCTestCase {
         logger.log(level: .trace, "Testing!", metadata: ["a": "b"])
         
         let expectation = XCTestExpectation(description: "log")
-        self.client.expectation = expectation
+        await self.client.setExpectation(to: expectation)
         await waitFulfill(for: [expectation], timeout: 2)
         
-        let anyPayload = self.client.payloads.first
+        let anyPayload = await self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
@@ -165,10 +165,10 @@ class DiscordLoggerTests: XCTestCase {
         logger.log(level: .info, "Testing! 2")
         
         let expectation = XCTestExpectation(description: "log")
-        self.client.expectation = expectation
+        await self.client.setExpectation(to: expectation)
         await waitFulfill(for: [expectation], timeout: 2)
         
-        let anyPayload = self.client.payloads.first
+        let anyPayload = await self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
@@ -228,8 +228,9 @@ class DiscordLoggerTests: XCTestCase {
         logger.log(level: .info, "Testing!")
         
         try await Task.sleep(nanoseconds: 2_000_000_000)
-        
-        XCTAssertEqual(self.client.payloads.count, 0)
+
+        let payloads = await self.client.payloads
+        XCTAssertEqual(payloads.count, 0)
     }
     
     func testExtraMetadata_noticeLevel() async throws {
@@ -249,10 +250,10 @@ class DiscordLoggerTests: XCTestCase {
         logger.log(level: .info, "Testing!")
         
         let expectation = XCTestExpectation(description: "log")
-        self.client.expectation = expectation
+        await self.client.setExpectation(to: expectation)
         await waitFulfill(for: [expectation], timeout: 2)
         
-        let anyPayload = self.client.payloads.first
+        let anyPayload = await self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
@@ -289,10 +290,10 @@ class DiscordLoggerTests: XCTestCase {
         logger.log(level: .warning, "Testing!")
         
         let expectation = XCTestExpectation(description: "log")
-        self.client.expectation = expectation
+        await self.client.setExpectation(to: expectation)
         await waitFulfill(for: [expectation], timeout: 2)
         
-        let anyPayload = self.client.payloads.first
+        let anyPayload = await self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
@@ -352,10 +353,11 @@ class DiscordLoggerTests: XCTestCase {
         try await Task.sleep(nanoseconds: 2_000_000_000)
 
         let expectation = XCTestExpectation(description: "log")
-        self.client.expectation = expectation
+        await self.client.setExpectation(to: expectation)
         await waitFulfill(for: [expectation], timeout: 10)
 
-        let payloads = try XCTUnwrap(self.client.payloads as? [Payloads.ExecuteWebhook])
+        let _payloads = await self.client.payloads
+        let payloads = try XCTUnwrap(_payloads as? [Payloads.ExecuteWebhook])
         if payloads.count != 3 {
             XCTFail("Expected 3 payloads, but found \(payloads.count): \(payloads)")
             return
@@ -447,11 +449,11 @@ class DiscordLoggerTests: XCTestCase {
             logger.log(level: .critical, "Testing! 3")
             
             let expectation = XCTestExpectation(description: "log-1")
-            self.client.expectation = expectation
+            await self.client.setExpectation(to: expectation)
             
             await waitFulfill(for: [expectation], timeout: 3)
             
-            let payloads = self.client.payloads
+            let payloads = await self.client.payloads
             /// Due to the `frequency`, we only should have 1 payload, which contains 4 embeds.
             XCTAssertEqual(payloads.count, 1)
             let anyPayload = payloads[0]
@@ -465,7 +467,7 @@ class DiscordLoggerTests: XCTestCase {
                 XCTAssertTrue(title.hasSuffix("\(idx)"), "\(title) did not have suffix \(idx)")
             }
             
-            self.client.payloads = []
+            await self.client.discardPayloads()
         }
         
         do {
@@ -484,11 +486,11 @@ class DiscordLoggerTests: XCTestCase {
             logger.log(level: .debug, "Testing! 7")
             
             let expectation = XCTestExpectation(description: "log-2")
-            self.client.expectation = expectation
+            await self.client.setExpectation(to: expectation)
             
             await waitFulfill(for: [expectation], timeout: 3)
             
-            let payloads = self.client.payloads
+            let payloads = await self.client.payloads
             /// Due to the `frequency`, we only should have 1 payload, which contains 4 embeds.
             XCTAssertEqual(payloads.count, 1)
             let anyPayload = try XCTUnwrap(payloads.first)
@@ -574,10 +576,10 @@ class DiscordLoggerTests: XCTestCase {
         logger.log(level: .error, "Testing!")
         
         let expectation = XCTestExpectation(description: "log")
-        self.client.expectation = expectation
+        await self.client.setExpectation(to: expectation)
         await waitFulfill(for: [expectation], timeout: 2)
         
-        let anyPayload = self.client.payloads.first
+        let anyPayload = await self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
@@ -603,6 +605,9 @@ class DiscordLoggerTests: XCTestCase {
             metadataProvider: simpleTraceIDMetadataProvider,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
+
+        /// So things settle (?!)
+        try await Task.sleep(nanoseconds: 1_000_000_000)
         
         let logger = Logger(label: "test")
         
@@ -611,10 +616,10 @@ class DiscordLoggerTests: XCTestCase {
         }
         
         let expectation = XCTestExpectation(description: "log")
-        self.client.expectation = expectation
+        await self.client.setExpectation(to: expectation)
         await waitFulfill(for: [expectation], timeout: 2)
         
-        let anyPayload = self.client.payloads.first
+        let anyPayload = await self.client.payloads.first
         let payload = try XCTUnwrap(anyPayload as? Payloads.ExecuteWebhook)
         
         let embeds = try XCTUnwrap(payload.embeds)
@@ -632,13 +637,20 @@ class DiscordLoggerTests: XCTestCase {
     }
 }
 
-private class FakeDiscordClient: DiscordClient, @unchecked Sendable {
+private actor FakeDiscordClient: DiscordClient, @unchecked Sendable {
     
-    let appId: ApplicationSnowflake? = "11111111"
+    nonisolated let appId: ApplicationSnowflake? = "11111111"
 
-    let lock = NIOLock()
     var expectation: XCTestExpectation?
     var payloads: [Any] = []
+
+    func setExpectation(to expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+
+    func discardPayloads() {
+        self.payloads.removeAll()
+    }
     
     func send(request: DiscordHTTPRequest) async throws -> DiscordHTTPResponse {
         fatalError()
@@ -655,12 +667,10 @@ private class FakeDiscordClient: DiscordClient, @unchecked Sendable {
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse {
-        lock.withLock {
-            payloads.append(payload)
-            expectation?.fulfill()
-            expectation = nil
-            return DiscordHTTPResponse(host: "discord.com", status: .ok, version: .http1_1)
-        }
+        payloads.append(payload)
+        expectation?.fulfill()
+        expectation = nil
+        return DiscordHTTPResponse(host: "discord.com", status: .ok, version: .http1_1)
     }
 }
 
