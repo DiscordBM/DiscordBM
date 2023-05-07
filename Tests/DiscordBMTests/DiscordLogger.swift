@@ -1,8 +1,6 @@
 @testable import DiscordLogger
-import DiscordHTTP
-import DiscordUtilities
 @testable import Logging
-import NIO
+import DiscordHTTP
 import XCTest
 
 class DiscordLoggerTests: XCTestCase {
@@ -43,13 +41,13 @@ class DiscordLoggerTests: XCTestCase {
         )
         logger.log(level: .trace, "Testing!")
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 50_000_000)
+        try await Task.sleep(for: .milliseconds(50))
         logger.log(level: .notice, "Testing! 2")
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 50_000_000)
+        try await Task.sleep(for: .milliseconds(50))
         logger.log(level: .notice, "Testing! 3", metadata: ["1": "2"])
         /// To make sure logs arrive in order.
-        try await Task.sleep(nanoseconds: 50_000_000)
+        try await Task.sleep(for: .milliseconds(50))
         logger.log(level: .warning, "Testing! 4")
         
         let expectation = XCTestExpectation(description: "log")
@@ -194,7 +192,7 @@ class DiscordLoggerTests: XCTestCase {
         )
         for idx in (0..<150) {
             /// To keep the order.
-            try await Task.sleep(nanoseconds: 50_000_000)
+            try await Task.sleep(for: .milliseconds(50))
             logger.log(level: .error, "Testing! \(idx)")
         }
         
@@ -225,8 +223,8 @@ class DiscordLoggerTests: XCTestCase {
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .info, "Testing!")
-        
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+
+        try await Task.sleep(for: .seconds(2))
 
         let payloads = await self.client.payloads
         XCTAssertEqual(payloads.count, 0)
@@ -341,15 +339,15 @@ class DiscordLoggerTests: XCTestCase {
         )
 
         /// To make sure the "Alive Notice" goes first
-        try await Task.sleep(nanoseconds: 800_000_000)
+        try await Task.sleep(for: .milliseconds(800))
 
         logger.log(level: .critical, "Testing! 1")
         
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         logger.log(level: .debug, "Testing! 2")
 
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
 
         let expectation = XCTestExpectation(description: "log")
         await self.client.setExpectation(to: expectation)
@@ -435,15 +433,15 @@ class DiscordLoggerTests: XCTestCase {
         do {
             logger.log(level: .critical, "Testing! 0")
             
-            try await Task.sleep(nanoseconds: 1_150_000_000)
+            try await Task.sleep(for: .milliseconds(1_150))
             
             logger.log(level: .critical, "Testing! 1")
             
-            try await Task.sleep(nanoseconds: 1_150_000_000)
+            try await Task.sleep(for: .milliseconds(1_150))
             
             logger.log(level: .critical, "Testing! 2")
             
-            try await Task.sleep(nanoseconds: 1_150_000_000)
+            try await Task.sleep(for: .milliseconds(1_150))
             
             logger.log(level: .critical, "Testing! 3")
             
@@ -472,15 +470,15 @@ class DiscordLoggerTests: XCTestCase {
         do {
             logger.log(level: .debug, "Testing! 4")
             
-            try await Task.sleep(nanoseconds: 1_150_000_000)
+            try await Task.sleep(for: .milliseconds(1_150))
             
             logger.log(level: .debug, "Testing! 5")
             
-            try await Task.sleep(nanoseconds: 1_150_000_000)
+            try await Task.sleep(for: .milliseconds(1_150))
             
             logger.log(level: .debug, "Testing! 6")
             
-            try await Task.sleep(nanoseconds: 1_150_000_000)
+            try await Task.sleep(for: .milliseconds(1_150))
             
             logger.log(level: .debug, "Testing! 7")
             
@@ -537,14 +535,14 @@ class DiscordLoggerTests: XCTestCase {
         }
         
         /// Wait for the log-manager to start basically.
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         for _ in 0..<30 {
             logger.log(level: randomLevel(), longMessage(), metadata: longMetadata())
         }
         
         /// To make sure the logs make it to the log-manager's storage.
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         let all = await DiscordGlobalConfiguration.logManager._tests_getLogs()[address]!
         XCTAssertEqual(all.count, 30)

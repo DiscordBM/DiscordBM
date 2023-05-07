@@ -53,7 +53,7 @@ class GatewayConnectionTests: XCTestCase {
         }
 
         /// To make sure these 2 `Task`s are triggered in order
-        try await Task.sleep(nanoseconds: 200_000_000)
+        try await Task.sleep(for: .milliseconds(200))
 
         Task { await bot.connect() }
 
@@ -71,14 +71,14 @@ class GatewayConnectionTests: XCTestCase {
         
         /// The bot should not disconnect for 10s.
         /// This is to make sure we aren't getting invalid-session-ed immediately.
-        try await Task.sleep(nanoseconds: 10_000_000_000)
+        try await Task.sleep(for: .seconds(10))
         
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
         
         await bot.disconnect()
         
         /// Make sure it is disconnected
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
         XCTAssertEqual(bot.state, .stopped)
     }
@@ -117,7 +117,7 @@ class GatewayConnectionTests: XCTestCase {
         }
 
         /// To make sure these 2 `Task`s are triggered in order
-        try await Task.sleep(nanoseconds: 200_000_000)
+        try await Task.sleep(for: .milliseconds(200))
 
         Task { await bot.connect() }
 
@@ -135,13 +135,13 @@ class GatewayConnectionTests: XCTestCase {
         
         /// The bot should not disconnect for 10s.
         /// This is to make sure we aren't getting invalid-session-ed immediately.
-        try await Task.sleep(nanoseconds: 10_000_000_000)
+        try await Task.sleep(for: .seconds(10))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
         
         await bot.disconnect()
         
         /// Make sure it is disconnected
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
         XCTAssertEqual(bot.state, .stopped)
     }
@@ -173,7 +173,7 @@ class GatewayConnectionTests: XCTestCase {
         }
 
         /// To make sure these 2 `Task`s are triggered in order
-        try await Task.sleep(nanoseconds: 200_000_000)
+        try await Task.sleep(for: .milliseconds(200))
 
         Task { await bot.connect() }
 
@@ -197,13 +197,13 @@ class GatewayConnectionTests: XCTestCase {
         
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we aren't getting invalid-session-ed.
-        try await Task.sleep(nanoseconds: 10_000_000_000)
+        try await Task.sleep(for: .seconds(10))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
         
         await bot.disconnect()
         
         /// Make sure it is disconnected
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
         XCTAssertEqual(bot.state, .stopped)
     }
@@ -243,7 +243,7 @@ class GatewayConnectionTests: XCTestCase {
         }
 
         /// To make sure these 2 `Task`s are triggered in order
-        try await Task.sleep(nanoseconds: 200_000_000)
+        try await Task.sleep(for: .milliseconds(200))
 
         Task { await bot.connect() }
 
@@ -261,14 +261,14 @@ class GatewayConnectionTests: XCTestCase {
 
         /// The bot should not disconnect for 10s.
         /// This is to make sure we aren't getting invalid-session-ed immediately.
-        try await Task.sleep(nanoseconds: 10_000_000_000)
+        try await Task.sleep(for: .seconds(10))
 
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
 
         await bot.disconnect()
 
         /// Make sure it is disconnected
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
         XCTAssertEqual(bot.state, .stopped)
     }

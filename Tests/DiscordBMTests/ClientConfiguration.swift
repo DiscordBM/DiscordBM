@@ -1,6 +1,5 @@
 @testable import DiscordHTTP
 import XCTest
-import struct NIOCore.TimeAmount
 import struct NIOHTTP1.HTTPHeaders
 
 class ClientConfigurationTests: XCTestCase {
@@ -378,7 +377,7 @@ class ClientConfigurationTests: XCTestCase {
                 queries: []
             )
             await cache.add(response: response, item: item, ttl: 1.5)
-            try await Task.sleep(nanoseconds: 1_500_000_000)
+            try await Task.sleep(for: .milliseconds(1_500))
             let fromCache = await cache.get(item: item)
             XCTAssertNil(fromCache)
         }

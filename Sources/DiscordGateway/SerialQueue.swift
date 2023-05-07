@@ -5,17 +5,17 @@ import Logging
 actor SerialQueue {
     
     var lastSend: Date
-    let waitTime: TimeAmount
+    let waitTime: Duration
     
-    init(waitTime: TimeAmount) {
+    init(waitTime: Duration) {
         /// Setting `lastSend` to sometime in the past that is not way too far.
-        let waitSeconds = Double(waitTime.nanoseconds) / 1_000_000_000
+        let waitSeconds = waitTime.asTimeInterval
         self.lastSend = Date().addingTimeInterval(-waitSeconds * 2)
         self.waitTime = waitTime
     }
     
     func reset() {
-        let waitSeconds = Double(waitTime.nanoseconds) / 1_000_000_000
+        let waitSeconds = waitTime.asTimeInterval
         self.lastSend = Date().addingTimeInterval(-waitSeconds * 2)
     }
     
@@ -32,7 +32,7 @@ actor SerialQueue {
         }
     }
     
-    private func canPerformIn() -> TimeAmount? {
+    private func canPerformIn() -> Duration? {
         let now = Date().timeIntervalSince1970
         let past = now - self.lastSend.timeIntervalSince1970
         let pastNanos = Int64(past * 1_000_000_000)
@@ -40,10 +40,10 @@ actor SerialQueue {
         return waitMore > 0 ? .nanoseconds(waitMore) : nil
     }
     
-    private func queueTask(_ task: @escaping @Sendable () -> Void, in wait: TimeAmount) {
+    private func queueTask(_ task: @escaping @Sendable () -> Void, in wait: Duration) {
         Task {
             do {
-                try await Task.sleep(nanoseconds: UInt64(wait.nanoseconds))
+                try await Task.sleep(for: wait)
             } catch {
                 DiscordGlobalConfiguration.makeLogger("DiscordSerialQueue").warning(
                     "Unexpected SerialQueue failure",
@@ -53,5 +53,20 @@ actor SerialQueue {
             }
             self.perform(task)
         }
+    }
+}
+
+private extension Duration {
+    var asTimeInterval: TimeInterval {
+        let comps = self.components
+        let attos = Double(comps.attoseconds) / 1_000_000_000_000_000_000
+        return Double(comps.seconds) + attos
+    }
+
+    var nanoseconds: Int64 {
+        let comps = self.components
+        let seconds = comps.seconds * 1_000_000_000
+        let attos = comps.attoseconds / 1_000_000_000
+        return seconds + attos
     }
 }

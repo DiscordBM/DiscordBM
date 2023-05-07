@@ -56,14 +56,14 @@ class PermissionChecker: XCTestCase {
         }
 
         /// To make sure these 2 `Task`s are triggered in order
-        try await Task.sleep(nanoseconds: 200_000_000)
+        try await Task.sleep(for: .milliseconds(200))
         
         Task { await bot.connect() }
 
         await waitFulfill(for: [expectation], timeout: 10)
 
         /// For cache to get populated
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         let _guild = await cache.guilds[Constants.guildId]
         let guild = try XCTUnwrap(_guild)
@@ -88,44 +88,44 @@ class PermissionChecker: XCTestCase {
         /// so in practice doesn't have the perm.
         XCTAssertFalse(guild.userHasPermissions(
             userId: Constants.secondAccountId,
-            channelId: Constants.perm1ChannelId,
+            channelId: Constants.Channels.perm1.id,
             permissions: [.manageChannels]
         ))
         /// The account has the perm.
         XCTAssertTrue(guild.userHasPermissions(
             userId: Constants.secondAccountId,
-            channelId: Constants.perm2ChannelId,
+            channelId: Constants.Channels.perm2.id,
             permissions: [.viewChannel]
         ))
         /// The account doesn't have the perm.
         XCTAssertFalse(guild.userHasPermissions(
             userId: Constants.secondAccountId,
-            channelId: Constants.perm2ChannelId,
+            channelId: Constants.Channels.perm2.id,
             permissions: [.sendMessages]
         ))
         /// The account doesn't has the perm but doesn't have the `sendMessages` perm,
         ///  which blocks this specific perm in practice.
         XCTAssertFalse(guild.userHasPermissions(
             userId: Constants.secondAccountId,
-            channelId: Constants.perm2ChannelId,
+            channelId: Constants.Channels.perm2.id,
             permissions: [.embedLinks]
         ))
         /// The account has all the permissions.
         XCTAssertTrue(guild.userHasPermissions(
             userId: Constants.secondAccountId,
-            channelId: Constants.perm3ChannelId,
+            channelId: Constants.Channels.perm3.id,
             permissions: [.viewChannel, .manageChannels, .createInstantInvite, .useExternalStickers]
         ))
         /// The account has all the permissions but one.
         XCTAssertFalse(guild.userHasPermissions(
             userId: Constants.secondAccountId,
-            channelId: Constants.perm3ChannelId,
+            channelId: Constants.Channels.perm3.id,
             permissions: [.viewChannel, .manageChannels, .sendTtsMessages, .useExternalStickers]
         ))
         /// The account has the permission thanks to a member-perm-overwrite.
         XCTAssertTrue(guild.userHasPermissions(
             userId: Constants.secondAccountId,
-            channelId: Constants.perm3ChannelId,
+            channelId: Constants.Channels.perm3.id,
             permissions: [.useExternalEmojis]
         ))
         /// The account has the perm in the guild, doesn't have it based on role-overwrite
@@ -136,7 +136,7 @@ class PermissionChecker: XCTestCase {
         ))
         XCTAssertTrue(guild.userHasPermissions(
             userId: Constants.secondAccountId,
-            channelId: Constants.perm3ChannelId,
+            channelId: Constants.Channels.perm3.id,
             permissions: [.manageWebhooks]
         ))
         /// The account has the perm in the guild, and has it based on role-overwrite
@@ -147,13 +147,13 @@ class PermissionChecker: XCTestCase {
         ))
         XCTAssertFalse(guild.userHasPermissions(
             userId: Constants.secondAccountId,
-            channelId: Constants.perm3ChannelId,
+            channelId: Constants.Channels.perm3.id,
             permissions: [.manageThreads]
         ))
         
         await bot.disconnect()
         
         /// Wait 5 seconds to make sure it doesn't mess up the next tests due to Discord limits.
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
 }

@@ -816,16 +816,19 @@ extension SnowflakeProtocol {
     }
 
     /// Initializes a snowflake from a `SnowflakeInfo`.
+    @inlinable
     public init(info: SnowflakeInfo) {
         self = info.toSnowflake(as: Self.self)
     }
 
     /// Parses the snowflake to `SnowflakeInfo`.
+    @inlinable
     public func parse() -> SnowflakeInfo? {
         SnowflakeInfo(from: self.value)
     }
 
     /// Makes a fake snowflake.
+    @inlinable
     public static func makeFake(date: Date = Date()) throws -> Self {
         try self.init(info: SnowflakeInfo.makeFake(date: date))
     }
@@ -1052,10 +1055,12 @@ public struct SnowflakeInfo: Sendable {
         self.sequenceNumber = sequenceNumber
     }
 
+    @inlinable
     internal static func makeFake(date: Date) throws -> SnowflakeInfo {
         try SnowflakeInfo(date: date, workerId: 0, processId: 0, sequenceNumber: 0)
     }
 
+    @usableFromInline
     internal init? (from snowflake: String) {
         guard let value = UInt64(snowflake) else { return nil }
         self.timestamp = (value >> 22) + SnowflakeInfo.discordEpochConstant
@@ -1064,10 +1069,12 @@ public struct SnowflakeInfo: Sendable {
         self.sequenceNumber = UInt16(value & 0xFFF)
     }
 
+    @inlinable
     internal init? (from snowflake: any SnowflakeProtocol) {
         self.init(from: snowflake.value)
     }
 
+    @usableFromInline
     internal func toSnowflake<S: SnowflakeProtocol>(as type: S.Type) -> S {
         let timestamp = (self.timestamp - SnowflakeInfo.discordEpochConstant) << 22
         let workerId = UInt64(self.workerId) << 17

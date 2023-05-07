@@ -14,7 +14,7 @@ class SerialQueueTests: XCTestCase {
             }
         }
         
-        try! await Task.sleep(nanoseconds: 20_000_000)
+        try! await Task.sleep(for: .milliseconds(20))
         XCTAssertEqual(number.load(ordering: .relaxed), 1)
     }
     
@@ -30,7 +30,7 @@ class SerialQueueTests: XCTestCase {
             }
         }
         
-        try! await Task.sleep(nanoseconds: 2_250_000_000)
+        try! await Task.sleep(for: .milliseconds(2_250))
         
         let times = await container.times
         
@@ -56,7 +56,7 @@ class SerialQueueTests: XCTestCase {
             }
         }
         
-        try! await Task.sleep(nanoseconds: 1_600_000_000)
+        try! await Task.sleep(for: .milliseconds(1_600))
         
         let times = await container.times
         

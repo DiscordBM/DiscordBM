@@ -42,7 +42,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -59,7 +59,7 @@ class ReactToRoleTests: XCTestCase {
                 color: .green
             ),
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             reactions: [reaction],
             onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
@@ -71,7 +71,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         /// Configuration must have been changed and populated with the role id
         do {
@@ -81,7 +81,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Verify reacted
         let reactionUsers = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).decode()
@@ -92,7 +92,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify assigned the role to itself
@@ -106,13 +106,13 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction, check if role is removed
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -126,13 +126,13 @@ class ReactToRoleTests: XCTestCase {
         
         /// Create an unrelated reaction, must not be granted the role
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role
@@ -145,7 +145,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Wait for the property below to be updated if needed
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         
         /// Lifecycle still not ended
         do {
@@ -155,12 +155,12 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete message
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
         /// So the gateway event is sent and processed
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// After message is deleted, lifecycle is ended
         do {
@@ -171,7 +171,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testNoCache() async throws {
@@ -182,7 +182,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -204,7 +204,7 @@ class ReactToRoleTests: XCTestCase {
                 mentionable: nil
             ),
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             reactions: [reaction],
             onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
@@ -216,7 +216,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         /// Configuration must have been changed and populated with the role id
         do {
@@ -226,7 +226,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Verify reacted
         let reactionUsers = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).decode()
@@ -237,7 +237,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify assigned the role to itself
@@ -256,13 +256,13 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction, check if role is removed
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -276,13 +276,13 @@ class ReactToRoleTests: XCTestCase {
         
         /// Create an unrelated reaction, must not be granted the role
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role
@@ -295,7 +295,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Wait for the property below to be updated if needed
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         
         /// Lifecycle still not ended
         do {
@@ -305,12 +305,12 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete message
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
         /// So the gateway event is sent and processed
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// After message is deleted, lifecycle is ended
         do {
@@ -321,7 +321,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testMultipleReactions() async throws {
@@ -329,7 +329,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -349,7 +349,7 @@ class ReactToRoleTests: XCTestCase {
                 mentionable: nil
             ),
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             reactions: [reaction1, reaction2]
         )
@@ -359,12 +359,12 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         do {
             /// Verify reacted to `reaction1`
             let reactionUsers = try await client.listMessageReactionsByEmoji(
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: reactionMessageId,
                 emoji: reaction1
             ).decode()
@@ -378,7 +378,7 @@ class ReactToRoleTests: XCTestCase {
         do {
             /// Verify reacted to `reaction2`
             let reactionUsers = try await client.listMessageReactionsByEmoji(
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: reactionMessageId,
                 emoji: reaction2
             ).decode()
@@ -400,13 +400,13 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction1
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still has the role although 1 of the 2 reactions has been removed
@@ -419,12 +419,12 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteAllMessageReactions(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still has the role
@@ -447,7 +447,7 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify does not have the role anymore
@@ -460,13 +460,13 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction2
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify has the role again because reacted again
@@ -479,13 +479,13 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction1
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still has the role
@@ -498,13 +498,13 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteAllMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction1
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still has the role
@@ -517,13 +517,13 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction2
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify does not have the role anymore because both reactions removed
@@ -536,14 +536,14 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testGrantOnStart() async throws {
@@ -551,7 +551,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -570,7 +570,7 @@ class ReactToRoleTests: XCTestCase {
                 mentionable: nil
             ),
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             grantOnStart: true,
             reactions: [reaction]
@@ -581,12 +581,12 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         do {
             /// Verify reacted
             let reactionUsers = try await client.listMessageReactionsByEmoji(
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: reactionMessageId,
                 emoji: reaction
             ).decode()
@@ -608,13 +608,13 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
         
         /// To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -631,13 +631,13 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(stoppedState, .stopped)
         
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
         
         // To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role because the handler is stopped
@@ -654,7 +654,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(runningState, .running)
         
         // To make sure cache receives the events
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify has the role now, although the reaction was there even when handler restarted
@@ -667,14 +667,14 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testInitializerAcceptingConfiguration() async throws {
@@ -682,7 +682,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -706,7 +706,7 @@ class ReactToRoleTests: XCTestCase {
                     mentionable: nil
                 ),
                 guildId: Constants.guildId,
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: reactionMessageId,
                 reactions: [reaction],
                 roleId: nil
@@ -720,7 +720,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         /// Configuration must have been changed and populated with the role id
         do {
@@ -730,7 +730,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Verify reacted
         let reactionUsers = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).decode()
@@ -752,13 +752,13 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction, check if role is removed
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -772,13 +772,13 @@ class ReactToRoleTests: XCTestCase {
         
         /// Create an unrelated reaction, must not be granted the role
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role
@@ -791,7 +791,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Wait for the property below to be updated if needed
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         
         /// Lifecycle still not ended
         do {
@@ -801,12 +801,12 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete message
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
         /// So the gateway event is sent and processed
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// After message is deleted, lifecycle is ended
         do {
@@ -817,7 +817,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testInitializerWithExistingRole() async throws {
@@ -825,7 +825,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -852,7 +852,7 @@ class ReactToRoleTests: XCTestCase {
             cache: cache,
             existingRoleId: role.id,
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             reactions: [reaction],
             onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
@@ -864,7 +864,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         /// Configuration not must be changed because we already provided the role-id
         do {
@@ -874,7 +874,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Verify reacted
         let reactionUsers = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).decode()
@@ -885,7 +885,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify assigned the role to itself
@@ -899,13 +899,13 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction, check if role is removed
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -919,13 +919,13 @@ class ReactToRoleTests: XCTestCase {
         
         /// Create an unrelated reaction, must not be granted the role
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role
@@ -938,7 +938,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Wait for the property below to be updated if needed
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         
         /// Lifecycle still not ended
         do {
@@ -948,12 +948,12 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete message
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
         /// So the gateway event is sent and processed
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// After message is deleted, lifecycle is ended
         do {
@@ -964,7 +964,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func testMessageIsInvalid() async throws {
@@ -992,7 +992,7 @@ class ReactToRoleTests: XCTestCase {
                     mentionable: nil
                 ),
                 guildId: Constants.guildId,
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: invalidMessageId,
                 reactions: [.unicodeEmoji("😜")]
             )
@@ -1001,7 +1001,7 @@ class ReactToRoleTests: XCTestCase {
             switch error as? ReactToRoleHandler.Error {
             case .messageIsInaccessible(
                 messageId: invalidMessageId,
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 previousError: DiscordHTTPError.badStatusCode(_)):
                 break /// Expected error
             default:
@@ -1024,7 +1024,7 @@ class ReactToRoleTests: XCTestCase {
                     mentionable: nil
                 ),
                 guildId: Constants.guildId,
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: invalidMessageId,
                 reactions: [.unicodeEmoji("😜")]
             )
@@ -1033,7 +1033,7 @@ class ReactToRoleTests: XCTestCase {
             switch error as? ReactToRoleHandler.Error {
             case .messageIsInaccessible(
                 messageId: invalidMessageId,
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 previousError: DiscordHTTPError.badStatusCode(_)):
                 break /// Expected error
             default:
@@ -1047,7 +1047,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -1068,7 +1068,7 @@ class ReactToRoleTests: XCTestCase {
                 mentionable: nil
             ),
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             reactions: [reaction],
             onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
@@ -1080,7 +1080,7 @@ class ReactToRoleTests: XCTestCase {
         /// try to take action on its own reaction, and give itself the role.
         
         /// To make sure the handler has enough time
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         /// Configuration must have been changed and populated with the role id
         do {
@@ -1090,7 +1090,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Verify reacted
         let reactionUsers = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).decode()
@@ -1101,7 +1101,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(user.id, Constants.botId)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify assigned the role to itself
@@ -1117,13 +1117,13 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction, check if role is removed
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify doesn't have the role anymore
@@ -1142,13 +1142,13 @@ class ReactToRoleTests: XCTestCase {
         
         /// Create the reaction again, must not be granted the role
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify still doesn't have the role
@@ -1162,7 +1162,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction again
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
@@ -1173,7 +1173,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(runningState, .running)
         
         /// So the cache is updated with the new member info
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         do {
             /// Verify re-assigned the role to itself
@@ -1186,7 +1186,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Wait for the property below to be updated if needed
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         
         /// Lifecycle still not ended
         do {
@@ -1196,12 +1196,12 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete message
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
         /// So the gateway event is sent and processed
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         
         /// After message is deleted, lifecycle is ended
         do {
@@ -1212,7 +1212,7 @@ class ReactToRoleTests: XCTestCase {
         await bot.disconnect()
         
         /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
     }
     
     func makeBotAndCache(
@@ -1250,14 +1250,14 @@ class ReactToRoleTests: XCTestCase {
         }
 
         /// To make sure these 2 `Task`s are triggered in order
-        try await Task.sleep(nanoseconds: 200_000_000)
+        try await Task.sleep(for: .milliseconds(200))
 
         Task { await bot.connect() }
 
         await waitFulfill(for: [expectation], timeout: 10)
         
         /// So cache is populated
-        try await Task.sleep(nanoseconds: 5_000_000_000)
+        try await Task.sleep(for: .seconds(5))
         
         return (bot, cache)
     }
