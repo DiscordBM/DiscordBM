@@ -31,9 +31,10 @@ extension DiscordGlobalConfiguration {
     }
 }
 
-/// Mostly to satisfy thread sanitizer in tests
-/// This realistically shouldn't need any synchronizations
+// MARK: To satisfy thread sanitizer in tests. Doesn't actually need any synchronizations.
+#if DEBUG
 private let queue = DispatchQueue(label: "DiscordBM.logManager")
+#endif
 
 private func syncedInDebug<T>(block: () -> (T)) -> T {
 #if DEBUG
