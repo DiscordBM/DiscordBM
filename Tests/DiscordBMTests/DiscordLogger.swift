@@ -592,7 +592,7 @@ class DiscordLoggerTests: XCTestCase {
         let eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1).next()
 
         eventLoop.execute {
-            DiscordGlobalConfiguration.testingLogManager = DiscordLogManager(
+            DiscordGlobalConfiguration.logManager = DiscordLogManager(
                 client: self.client,
                 configuration: .init(frequency: .milliseconds(100))
             )
