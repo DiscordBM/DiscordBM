@@ -105,6 +105,8 @@ class HTTPRateLimiterTests: XCTestCase {
     }
     
     func testBucketAllowsButGlobalRateLimit() async throws {
+        let start = Date()
+
         for _ in 0..<49 {
             _ = await rateLimiter.shouldRequest(to: endpoint)
         }
@@ -114,13 +116,18 @@ class HTTPRateLimiterTests: XCTestCase {
             let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
             XCTAssertEqual(shouldRequest, .true)
         }
-        
+
+        let end = Date()
+
         /// Now 50 invalid requests, so should NOT allow requests.
         do {
+            let diff = end.timeIntervalSince1970 - start.timeIntervalSince1970
+            let lessThan1min = diff < 60
+            
             let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
-            XCTAssertEqual(shouldRequest, .false)
+            XCTAssertEqual(shouldRequest, lessThan1min ? .false : .true)
         }
-        
+
         /// Interactions endpoints are not limited by the global rate limit, so should allow requests.
         do {
             let shouldRequest = await rateLimiter.shouldRequest(to: interactionEndpoint)
