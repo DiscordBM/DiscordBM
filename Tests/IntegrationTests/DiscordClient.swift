@@ -54,7 +54,7 @@ class DiscordClientTests: XCTestCase {
         /// Cleanup: Get channel messages and delete messages by the bot itself, if any
         /// Makes this test resilient to failing because it has failed the last time
         let allOldMessages = try await client.listMessages(
-            channelId: Constants.channelId
+            channelId: Constants.Channels.general.id
         ).decode()
         
         for message in allOldMessages where message.author?.id == Constants.botId {
@@ -65,22 +65,22 @@ class DiscordClientTests: XCTestCase {
         }
 
         /// Trigger typing indicator
-        try await client.triggerTypingIndicator(channelId: Constants.channelId).guardSuccess()
+        try await client.triggerTypingIndicator(channelId: Constants.Channels.general.id).guardSuccess()
 
         /// Create
         let text = "Testing! \(Date())"
         let message = try await client.createMessage(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             payload: .init(content: text)
         ).decode()
         
         XCTAssertEqual(message.content, text)
-        XCTAssertEqual(message.channel_id, Constants.channelId)
+        XCTAssertEqual(message.channel_id, Constants.Channels.general.id)
         
         /// Edit
         let newText = "Edit Testing! \(Date())"
         let edited = try await client.updateMessage(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             messageId: message.id,
             payload: .init(embeds: [
                 .init(description: newText)
@@ -89,13 +89,13 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertEqual(edited.content, text)
         XCTAssertEqual(edited.embeds.first?.description, newText)
-        XCTAssertEqual(edited.channel_id, Constants.channelId)
+        XCTAssertEqual(edited.channel_id, Constants.Channels.general.id)
         
         /// Add 4 Reactions
         let reactions = ["🚀", "🤠", "👀", "❤️"]
         for reaction in reactions {
             let reactionResponse = try await client.addOwnMessageReaction(
-                channelId: Constants.channelId,
+                channelId: Constants.Channels.general.id,
                 messageId: message.id,
                 emoji: .unicodeEmoji(reaction)
             )
@@ -104,7 +104,7 @@ class DiscordClientTests: XCTestCase {
         }
         
         let deleteOwnMessageReactionResponse = try await client.deleteOwnMessageReaction(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[0])
         )
@@ -112,14 +112,14 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(deleteOwnMessageReactionResponse.status, .noContent)
         
         try await client.deleteUserMessageReaction(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[1]),
             userId: Snowflake(Constants.botId)
         ).guardSuccess()
         
         let listMessageReactionsByEmojiResponse = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[2])
         ).decode()
@@ -130,7 +130,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(reactionUser.id, Constants.botId)
         
         let deleteAllMessageReactionsByEmojiResponse = try await client.deleteAllMessageReactionsByEmoji(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[2])
         )
@@ -138,7 +138,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(deleteAllMessageReactionsByEmojiResponse.status, .noContent)
         
         let deleteAllMessageReactionsResponse = try await client.deleteAllMessageReactions(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             messageId: message.id
         )
         
@@ -146,7 +146,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Get the message again
         let retrievedMessage = try await client.getMessage(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             messageId: message.id
         ).decode()
         
@@ -158,7 +158,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Get channel messages
         let allMessages = try await client.listMessages(
-            channelId: Constants.channelId
+            channelId: Constants.Channels.general.id
         ).decode()
         
         XCTAssertGreaterThan(allMessages.count, 2)
@@ -168,7 +168,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Get channel messages with `limit == 2`
         let allMessagesLimit = try await client.listMessages(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             limit: 2
         ).decode()
         
@@ -176,7 +176,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Get channel messages with `after`
         let allMessagesAfter = try await client.listMessages(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             after: allMessages[1].id
         ).decode()
         
@@ -184,7 +184,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Get channel messages with `before`
         let allMessagesBefore = try await client.listMessages(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             before: allMessages[2].id
         ).decode()
         
@@ -192,7 +192,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Get channel messages with `around`
         let allMessagesAround = try await client.listMessages(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             around: allMessages[1].id
         ).decode()
         
@@ -200,7 +200,7 @@ class DiscordClientTests: XCTestCase {
         
         /// Delete
         let deletionResponse = try await client.deleteMessage(
-            channelId: Constants.channelId,
+            channelId: Constants.Channels.general.id,
             messageId: message.id,
             reason: "Random reason " + UUID().uuidString
         )
@@ -586,13 +586,13 @@ class DiscordClientTests: XCTestCase {
         
         /// Create a message for creating a thread
         let message = try await client.createMessage(
-            channelId: Constants.threadsChannelId,
+            channelId: Constants.Channels.threads.id,
             payload: .init(content: "Thread-test Message")
         ).decode()
         
         /// Create Thread
         let thread = try await client.createThreadFromMessage(
-            channelId: Constants.threadsChannelId,
+            channelId: Constants.Channels.threads.id,
             messageId: message.id,
             reason: "Testing!",
             payload: .init(
@@ -676,7 +676,7 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         XCTAssertEqual(allThreadMembersAfter.count, 1)
-        let otherUser = [Constants.personalId, Snowflake(Constants.botId)].filter {
+        let otherUser = [Constants.personalId, Constants.botId].filter {
             $0 != allThreadMembers[0].user_id!
         }
         XCTAssertEqual(allThreadMembersAfter.first?.user_id, otherUser[0])
@@ -712,12 +712,12 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(threadMembersRemoved.first?.user_id, Constants.botId)
         
         try await client.deleteMessage(
-            channelId: Constants.threadsChannelId,
+            channelId: Constants.Channels.threads.id,
             messageId: message.id
         ).guardSuccess()
         
         let threadWithoutMessage = try await client.createThread(
-            channelId: Constants.announcementsChannelId,
+            channelId: Constants.Channels.announcements.id,
             reason: "Testing without message thread",
             payload: .init(
                 name: "Thread test without message",
@@ -729,20 +729,20 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         _ = try await client.listPublicArchivedThreads(
-            channelId: Constants.announcementsChannelId,
+            channelId: Constants.Channels.announcements.id,
             before: Date(),
             limit: 2
         ).decode()
         
         /// The message-id is the same as the thread id based on what Discord says
         try await client.deleteMessage(
-            channelId: Constants.announcementsChannelId,
+            channelId: Constants.Channels.announcements.id,
             messageId: Snowflake(threadWithoutMessage.id)
         ).guardSuccess()
         
         let forumThreadName = "Forum thread test"
         let forumThread = try await client.startThreadInForumChannel(
-            channelId: Constants.forumChannelId,
+            channelId: Constants.Channels.forum.id,
             reason: "Forum channel thread testing",
             payload: .init(
                 name: forumThreadName,
@@ -756,19 +756,19 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(forumThread.name, forumThreadName)
         
         try await client.listPublicArchivedThreads(
-            channelId: Constants.threadsChannelId,
+            channelId: Constants.Channels.threads.id,
             before: Date().addingTimeInterval(-60),
             limit: 2
         ).guardSuccess()
         
         try await client.listPrivateArchivedThreads(
-            channelId: Constants.threadsChannelId,
+            channelId: Constants.Channels.threads.id,
             before: Date().addingTimeInterval(-3_600),
             limit: 2
         ).guardSuccess()
         
         try await client.listOwnPrivateArchivedThreads(
-            channelId: Constants.threadsChannelId,
+            channelId: Constants.Channels.threads.id,
             limit: 2
         ).guardSuccess()
     }
@@ -793,7 +793,7 @@ class DiscordClientTests: XCTestCase {
         let webhookName1 = "TestWebhook1"
         
         let webhook1 = try await client.createWebhook(
-            channelId: Constants.webhooksChannelId,
+            channelId: Constants.Channels.webhooks.id,
             payload: .init(
                 name: webhookName1,
                 avatar: .init(file: .init(data: image1, filename: "DiscordBM.png"))
@@ -805,12 +805,12 @@ class DiscordClientTests: XCTestCase {
         XCTAssertTrue(webhook1.avatar?.isEmpty == false)
         XCTAssertEqual(webhook1.name, webhookName1)
         XCTAssertEqual(webhook1.guild_id, Constants.guildId)
-        XCTAssertEqual(webhook1.channel_id, Constants.webhooksChannelId)
+        XCTAssertEqual(webhook1.channel_id, Constants.Channels.webhooks.id)
         
         let webhookName2 = "TestWebhook2"
         
         let webhook2 = try await client.createWebhook(
-            channelId: Constants.webhooksChannelId,
+            channelId: Constants.Channels.webhooks.id,
             payload: .init(name: webhookName2)
         ).decode()
         
@@ -819,7 +819,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertNil(webhook2.avatar)
         XCTAssertEqual(webhook2.name, webhookName2)
         XCTAssertEqual(webhook2.guild_id, Constants.guildId)
-        XCTAssertEqual(webhook2.channel_id, Constants.webhooksChannelId)
+        XCTAssertEqual(webhook2.channel_id, Constants.Channels.webhooks.id)
         
         let webhook1Token = try XCTUnwrap(webhook1.token)
         let webhook2Token = try XCTUnwrap(webhook2.token)
@@ -835,7 +835,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(getWebhookByToken.token, webhook2.token)
         
         let channelWebhooks = try await client.listChannelWebhooks(
-            channelId: Constants.webhooksChannelId
+            channelId: Constants.Channels.webhooks.id
         ).decode()
         
         XCTAssertEqual(channelWebhooks.count, 2)
@@ -872,7 +872,7 @@ class DiscordClientTests: XCTestCase {
             payload: .init(
                 name: webhookNewName1,
                 avatar: .init(file: .init(data: image2, filename: "1kb.png")),
-                channel_id: Constants.webhooks2ChannelId
+                channel_id: Constants.Channels.webhooks2.id
             )
         ).decode()
         
@@ -882,7 +882,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertNotEqual(modify1.avatar, webhook1.avatar)
         XCTAssertEqual(modify1.name, webhookNewName1)
         XCTAssertEqual(modify1.guild_id, Constants.guildId)
-        XCTAssertEqual(modify1.channel_id, Constants.webhooks2ChannelId)
+        XCTAssertEqual(modify1.channel_id, Constants.Channels.webhooks2.id)
         
         let webhookNewName2 = "WebhookTestNew2"
         let modify2 = try await client.updateWebhook(
@@ -895,7 +895,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertNil(modify2.avatar)
         XCTAssertEqual(modify2.name, webhookNewName2)
         XCTAssertEqual(modify2.guild_id, Constants.guildId)
-        XCTAssertEqual(modify2.channel_id, Constants.webhooksChannelId)
+        XCTAssertEqual(modify2.channel_id, Constants.Channels.webhooks.id)
         
         let noContentResponse = try await client.executeWebhook(
             address: .deconstructed(id: webhook1.id, token: webhook1Token),
@@ -913,7 +913,7 @@ class DiscordClientTests: XCTestCase {
             )
         ).decode()
         
-        XCTAssertEqual(message.channel_id, Constants.webhooks2ChannelId)
+        XCTAssertEqual(message.channel_id, Constants.Channels.webhooks2.id)
         XCTAssertEqual(message.content, text)
         XCTAssertEqual(message.embeds.first?.title, "Hey")
         let timestamp = try XCTUnwrap(message.embeds.first?.timestamp?.date).timeIntervalSince1970
@@ -1141,7 +1141,7 @@ class DiscordClientTests: XCTestCase {
         
         do {
             let response = try await client.createMessage(
-                channelId: Constants.spamChannelId,
+                channelId: Constants.Channels.spam.id,
                 payload: .init(
                     content: "Multipart message!",
                     files: [.init(data: image, filename: "discordbm.png")],
@@ -1166,7 +1166,7 @@ class DiscordClientTests: XCTestCase {
         
         do {
             let response = try await client.createMessage(
-                channelId: Constants.spamChannelId,
+                channelId: Constants.Channels.spam.id,
                 payload: .init(
                     content: "Multipart message!",
                     embeds: [.init(
@@ -1213,7 +1213,7 @@ class DiscordClientTests: XCTestCase {
                 isFirstRequest.store(false, ordering: .relaxed)
                 do {
                     _ = try await client.createMessage(
-                        channelId: Constants.spamChannelId,
+                        channelId: Constants.Channels.spam.id,
                         payload: .init(content: content)
                     ).decode()
                     await container.increaseCounter()

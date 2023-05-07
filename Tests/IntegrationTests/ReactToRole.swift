@@ -42,7 +42,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -59,7 +59,7 @@ class ReactToRoleTests: XCTestCase {
                 color: .green
             ),
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             reactions: [reaction],
             onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
@@ -81,7 +81,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Verify reacted
         let reactionUsers = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).decode()
@@ -106,7 +106,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction, check if role is removed
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
@@ -126,7 +126,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Create an unrelated reaction, must not be granted the role
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
         ).guardSuccess()
@@ -155,7 +155,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete message
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
@@ -182,7 +182,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -204,7 +204,7 @@ class ReactToRoleTests: XCTestCase {
                 mentionable: nil
             ),
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             reactions: [reaction],
             onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
@@ -226,7 +226,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Verify reacted
         let reactionUsers = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).decode()
@@ -256,7 +256,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction, check if role is removed
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
@@ -276,7 +276,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Create an unrelated reaction, must not be granted the role
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
         ).guardSuccess()
@@ -305,7 +305,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete message
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
@@ -329,7 +329,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -349,7 +349,7 @@ class ReactToRoleTests: XCTestCase {
                 mentionable: nil
             ),
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             reactions: [reaction1, reaction2]
         )
@@ -364,7 +364,7 @@ class ReactToRoleTests: XCTestCase {
         do {
             /// Verify reacted to `reaction1`
             let reactionUsers = try await client.listMessageReactionsByEmoji(
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: reactionMessageId,
                 emoji: reaction1
             ).decode()
@@ -378,7 +378,7 @@ class ReactToRoleTests: XCTestCase {
         do {
             /// Verify reacted to `reaction2`
             let reactionUsers = try await client.listMessageReactionsByEmoji(
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: reactionMessageId,
                 emoji: reaction2
             ).decode()
@@ -400,7 +400,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction1
         ).guardSuccess()
@@ -419,7 +419,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteAllMessageReactions(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
@@ -460,7 +460,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction2
         ).guardSuccess()
@@ -479,7 +479,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction1
         ).guardSuccess()
@@ -498,7 +498,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteAllMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction1
         ).guardSuccess()
@@ -517,7 +517,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction2
         ).guardSuccess()
@@ -536,7 +536,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
@@ -551,7 +551,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -570,7 +570,7 @@ class ReactToRoleTests: XCTestCase {
                 mentionable: nil
             ),
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             grantOnStart: true,
             reactions: [reaction]
@@ -586,7 +586,7 @@ class ReactToRoleTests: XCTestCase {
         do {
             /// Verify reacted
             let reactionUsers = try await client.listMessageReactionsByEmoji(
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: reactionMessageId,
                 emoji: reaction
             ).decode()
@@ -608,7 +608,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
@@ -631,7 +631,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(stoppedState, .stopped)
         
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
@@ -667,7 +667,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
@@ -682,7 +682,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -706,7 +706,7 @@ class ReactToRoleTests: XCTestCase {
                     mentionable: nil
                 ),
                 guildId: Constants.guildId,
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: reactionMessageId,
                 reactions: [reaction],
                 roleId: nil
@@ -730,7 +730,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Verify reacted
         let reactionUsers = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).decode()
@@ -752,7 +752,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction, check if role is removed
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
@@ -772,7 +772,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Create an unrelated reaction, must not be granted the role
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
         ).guardSuccess()
@@ -801,7 +801,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete message
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
@@ -825,7 +825,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -852,7 +852,7 @@ class ReactToRoleTests: XCTestCase {
             cache: cache,
             existingRoleId: role.id,
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             reactions: [reaction],
             onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
@@ -874,7 +874,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Verify reacted
         let reactionUsers = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).decode()
@@ -899,7 +899,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction, check if role is removed
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
@@ -919,7 +919,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Create an unrelated reaction, must not be granted the role
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
         ).guardSuccess()
@@ -948,7 +948,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete message
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
@@ -992,7 +992,7 @@ class ReactToRoleTests: XCTestCase {
                     mentionable: nil
                 ),
                 guildId: Constants.guildId,
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: invalidMessageId,
                 reactions: [.unicodeEmoji("😜")]
             )
@@ -1001,7 +1001,7 @@ class ReactToRoleTests: XCTestCase {
             switch error as? ReactToRoleHandler.Error {
             case .messageIsInaccessible(
                 messageId: invalidMessageId,
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 previousError: DiscordHTTPError.badStatusCode(_)):
                 break /// Expected error
             default:
@@ -1024,7 +1024,7 @@ class ReactToRoleTests: XCTestCase {
                     mentionable: nil
                 ),
                 guildId: Constants.guildId,
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 messageId: invalidMessageId,
                 reactions: [.unicodeEmoji("😜")]
             )
@@ -1033,7 +1033,7 @@ class ReactToRoleTests: XCTestCase {
             switch error as? ReactToRoleHandler.Error {
             case .messageIsInaccessible(
                 messageId: invalidMessageId,
-                channelId: Constants.reactionChannelId,
+                channelId: Constants.Channels.reaction.id,
                 previousError: DiscordHTTPError.badStatusCode(_)):
                 break /// Expected error
             default:
@@ -1047,7 +1047,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Make the reaction message
         let reactionMessageId = try await client.createMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             payload: .init(content: "React-To-Role test message!")
         ).decode().id
         
@@ -1068,7 +1068,7 @@ class ReactToRoleTests: XCTestCase {
                 mentionable: nil
             ),
             guildId: Constants.guildId,
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             reactions: [reaction],
             onConfigurationChanged: { _ in Task { await hookInfo.setConfigurationChanged() } },
@@ -1090,7 +1090,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Verify reacted
         let reactionUsers = try await client.listMessageReactionsByEmoji(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).decode()
@@ -1117,7 +1117,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction, check if role is removed
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
@@ -1142,7 +1142,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Create the reaction again, must not be granted the role
         try await client.addOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
@@ -1162,7 +1162,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete the reaction again
         try await client.deleteOwnMessageReaction(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
         ).guardSuccess()
@@ -1196,7 +1196,7 @@ class ReactToRoleTests: XCTestCase {
         
         /// Delete message
         try await client.deleteMessage(
-            channelId: Constants.reactionChannelId,
+            channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId
         ).guardSuccess()
         
