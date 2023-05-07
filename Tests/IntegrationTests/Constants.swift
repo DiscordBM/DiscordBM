@@ -13,11 +13,11 @@ enum Constants {
     static let guildId: GuildSnowflake = "1036881950696288277"
     static let guildName = "DiscordBM Test Server"
 
-    static let botId: UserSnowflake = "1030118727418646629"
-    static let botName = "DisBMLibTestBot"
-
     static let personalId: UserSnowflake = "290483761559240704"
     static let personalName = "Mahdi BM"
+
+    static let botId: UserSnowflake = "1030118727418646629"
+    static let botName = "DisBMLibTestBot"
 
     static let secondAccountId: UserSnowflake = "966330655069843457"
 
