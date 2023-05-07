@@ -589,14 +589,10 @@ class DiscordLoggerTests: XCTestCase {
     }
     
     func testMetadataProviders() async throws {
-        let eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1).next()
-
-        eventLoop.execute {
-            DiscordGlobalConfiguration.logManager = DiscordLogManager(
-                client: self.client,
-                configuration: .init(frequency: .milliseconds(100))
-            )
-        }
+        DiscordGlobalConfiguration.logManager = DiscordLogManager(
+            client: self.client,
+            configuration: .init(frequency: .milliseconds(100))
+        )
 
         let simpleTraceIDMetadataProvider = Logger.MetadataProvider {
             guard let traceID = TraceNamespace.simpleTraceID else {
@@ -605,13 +601,11 @@ class DiscordLoggerTests: XCTestCase {
             return ["simple-trace-id": .string(traceID)]
         }
 
-        try await eventLoop.makeFutureWithTask {
-            await LoggingSystem.bootstrapWithDiscordLogger(
-                address: try .url(self.webhookUrl),
-                metadataProvider: simpleTraceIDMetadataProvider,
-                makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
-            )
-        }.get()
+        await LoggingSystem.bootstrapWithDiscordLogger(
+            address: try .url(self.webhookUrl),
+            metadataProvider: simpleTraceIDMetadataProvider,
+            makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
+        )
         
         let logger = Logger(label: "test")
         

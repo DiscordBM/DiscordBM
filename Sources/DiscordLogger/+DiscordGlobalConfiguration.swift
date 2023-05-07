@@ -16,13 +16,31 @@ extension DiscordGlobalConfiguration {
     /// You must initialize this, if you want to use `DiscordLogHandler`.
     public static var logManager: DiscordLogManager {
         get {
-            guard let logManager = ConfigurationStorage.shared.logManager else {
-                fatalError("Need to configure the log-manager using 'DiscordGlobalConfiguration.logManager = DiscordLogManager(...)'")
+            possiblySynced {
+                guard let logManager = ConfigurationStorage.shared.logManager else {
+                    fatalError("Need to configure the log-manager using 'DiscordGlobalConfiguration.logManager = DiscordLogManager(...)'")
+                }
+                return logManager
             }
-            return logManager
         }
         set {
-            ConfigurationStorage.shared.logManager = newValue
+            possiblySynced {
+                ConfigurationStorage.shared.logManager = newValue
+            }
         }
     }
+}
+
+/// Mostly to satisfy thread sanitizer in tests
+/// This realistically shouldn't need any synchronizations
+private let queue = DispatchQueue(label: "DiscordBM.logManager")
+
+private func possiblySynced<T>(block: () -> (T)) -> T {
+#if DEBUG
+    queue.sync {
+        block()
+    }
+#else
+    block()
+#endif
 }
