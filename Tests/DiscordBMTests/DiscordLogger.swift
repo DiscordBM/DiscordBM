@@ -1,9 +1,6 @@
 @testable import DiscordLogger
-import DiscordHTTP
-import DiscordUtilities
 @testable import Logging
-import NIOHTTP1
-import NIOConcurrencyHelpers
+import DiscordHTTP
 import XCTest
 
 class DiscordLoggerTests: XCTestCase {
@@ -226,7 +223,7 @@ class DiscordLoggerTests: XCTestCase {
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )
         logger.log(level: .info, "Testing!")
-        
+
         try await Task.sleep(for: .seconds(2))
 
         let payloads = await self.client.payloads
@@ -594,18 +591,16 @@ class DiscordLoggerTests: XCTestCase {
             client: self.client,
             configuration: .init(frequency: .milliseconds(100))
         )
+
         let simpleTraceIDMetadataProvider = Logger.MetadataProvider {
             guard let traceID = TraceNamespace.simpleTraceID else {
                 return [:]
             }
             return ["simple-trace-id": .string(traceID)]
         }
-        
-        /// To make TSan happy
-        try await Task.sleep(for: .milliseconds(500))
 
         await LoggingSystem.bootstrapWithDiscordLogger(
-            address: try .url(webhookUrl),
+            address: try .url(self.webhookUrl),
             metadataProvider: simpleTraceIDMetadataProvider,
             makeMainLogHandler: { _, _ in SwiftLogNoOpLogHandler() }
         )

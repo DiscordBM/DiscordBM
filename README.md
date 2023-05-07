@@ -11,7 +11,7 @@
 
 ## Notable Features
 * Everything with async/await. Full integration with the latest Server-Side Swift packages.
-* Connect to the Discord gateway and receive all events easily.
+* Connect to the Discord Gateway and receive all events easily.
 * Send requests to the Discord API using library's Discord client.
 * Hard-typed APIs. All Gateway events and API responses have their own type and can be decoded easily.
 * Abstractions for easier testability.
@@ -22,7 +22,7 @@ Penny is available [here](https://github.com/vapor/penny-bot) and you can find `
 
 ## How To Use
   
-> If you're using `DiscordBM` on macOS Ventura (on either Xcode or VSCode), make sure you have **Xcode 14.1 or above**. Lower Xcode 14 versions have known issues that cause a lot of problems for libraries.    
+> Make sure you have **Xcode 14.1 or above**. Lower Xcode 14 versions have known issues that cause problems for libraries.    
 
 ### Initializing a Gateway Manager On Your Own
 
@@ -94,8 +94,9 @@ struct EntryPoint {
         /// Make an instance like above
         let bot: BotGatewayManager = <#GatewayManager You Made In Previous Steps#>
 
-        /// Tell the manager to connect to Discord.
-        /// This will return after the web-socket connection is established, which might take some seconds
+        /// Tell the manager to connect to Discord
+        /// Might take a few seconds, or even minutes under bad network connections
+        /// Use a `Task { }` if you don't care or you don't want to wait
         await bot.connect()
 
         /// Get an `AsyncStream` of `Gateway.Event`s
@@ -141,7 +142,7 @@ In most cases, the library doesn't try to abstract away Discord's stuff.
   
 > **Warning**   
 > `DiscordBM` is still in beta so new releases can come with breaking changes.   
-> **Read the release notes** to fix the breaking changes that you encounter and become aware of new features.
+> [**Read the release notes**](https://github.com/MahdiBM/DiscordBM/releases) to fix the breaking changes that you encounter and become aware of new features.
 
 ### Bot Token And App ID
 <details>
@@ -157,7 +158,7 @@ In [Discord developer portal](https://discord.com/developers/applications):
 <details>
   <summary> Click to expand </summary>
   
-`DiscordBM` comes with a convenience protocol for hadling Gateway events.   
+`DiscordBM` comes with a convenience protocol for handling Gateway events.   
 With this protocol, you can define a seprate function for each Gateway event and keep your code clean.   
 ```swift
 struct EventHandler: GatewayEventHandler {
@@ -174,7 +175,7 @@ struct EventHandler: GatewayEventHandler {
     /// Use other functions you'd like ...
 }
 ```
-Make sure you add the event handler to your `GatewayManager`/`bot`:
+Make sure you use the event handler for handling events:
 ```swift
 let bot: any GatewayManager = <#GatewayManager You Made In Previous Steps#>
 
