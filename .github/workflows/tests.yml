@@ -13,7 +13,7 @@ jobs:
       with_coverage: true
       with_tsan: true
       with_public_api_check: true
-      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(WebSocket|Gateway|HTTP)/'
+      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/|/Sources/DiscordWebSocket/'
       test_filter: '^DiscordBMTests'
   websocket-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@reusable-workflows
