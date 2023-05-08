@@ -13,7 +13,7 @@ jobs:
       with_coverage: true
       with_tsan: true
       with_public_api_check: true
-      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/|/Sources/DiscordWebSocket/'
+      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(WebSocket|Gateway|HTTP)/'
       test_filter: '^DiscordBMTests'
   websocket-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@reusable-workflows
@@ -34,3 +34,10 @@ jobs:
         uses: actions/checkout@v3
       - name: Run tests
         run: swift test --filter IntegrationTests --sanitize=thread
+      - name: Upload code coverage
+        uses: vapor/swift-codecov-action@v0.2
+        with:
+          ignore_paths: '/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(WebSocket|Auth|BM|Core|Logger|Models|Utilities)/'
+          cc_env_vars: 'SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH'
+          cc_fail_ci_if_error: false
+
