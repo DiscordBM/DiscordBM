@@ -33,4 +33,11 @@ jobs:
       - name: Check out package
         uses: actions/checkout@v3
       - name: Run tests
-        run: swift test --filter IntegrationTests --sanitize=thread
+        run: swift test --filter IntegrationTests --sanitize=thread --enable-code-coverage
+      - name: Upload code coverage
+        uses: vapor/swift-codecov-action@v0.2
+        with:
+          ignore_paths: '/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(WebSocket|Auth|BM|Core|Logger|Models|Utilities)/'
+          cc_env_vars: 'SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH'
+          cc_fail_ci_if_error: false
+
