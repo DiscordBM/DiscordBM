@@ -182,8 +182,6 @@ public struct Guild: Sendable, Codable {
     public var owner: Bool?
     public var owner_id: UserSnowflake
     public var permissions: StringBitField<Permission>?
-    /// Deprecated
-    public var region: String?
     public var afk_channel_id: ChannelSnowflake?
     public var afk_timeout: AFKTimeout
     public var widget_enabled: Bool?
@@ -258,8 +256,6 @@ public struct PartialGuild: Sendable, Codable {
     public var owner: Bool?
     public var owner_id: UserSnowflake?
     public var permissions: StringBitField<Permission>?
-    /// Deprecated
-    public var region: String?
     public var afk_channel_id: ChannelSnowflake?
     public var afk_timeout: Int?
     public var widget_enabled: Bool?

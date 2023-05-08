@@ -670,8 +670,6 @@ public struct Gateway: Sendable, Codable {
         public var owner: Bool?
         public var owner_id: UserSnowflake
         public var permissions: StringBitField<Permission>?
-        /// Deprecated
-        public var region: String?
         public var afk_channel_id: ChannelSnowflake?
         public var afk_timeout: Guild.AFKTimeout
         public var widget_enabled: Bool?
@@ -735,7 +733,6 @@ public struct Gateway: Sendable, Codable {
             self.owner = new.owner
             self.owner_id = new.owner_id
             self.permissions = new.permissions
-            self.region = new.region
             self.afk_channel_id = new.afk_channel_id
             self.afk_timeout = new.afk_timeout
             self.widget_enabled = new.widget_enabled

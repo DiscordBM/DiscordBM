@@ -75,8 +75,8 @@ extension DiscordClient {
     /// For compiler warnings
     @available(*, deprecated, message: "App id must be optional otherwise there is no point")
     @usableFromInline
-    func requireAppId(_ : String) throws -> String {
-        fatalError()
+    func requireAppId(_ appId: String) throws -> String {
+        return appId
     }
     
     @usableFromInline
