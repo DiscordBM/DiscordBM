@@ -88,6 +88,7 @@ public struct Guild: Sendable, Codable {
         case news = "NEWS"
         case partnered = "PARTNERED"
         case previewEnabled = "PREVIEW_ENABLED"
+        case raidAlertsDisabled = "RAID_ALERTS_DISABLED"
         case roleIcons = "ROLE_ICONS"
         case roleSubscriptionsAvailableForPurchase = "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE"
         case roleSubscriptionsEnabled = "ROLE_SUBSCRIPTIONS_ENABLED"
@@ -100,7 +101,6 @@ public struct Guild: Sendable, Codable {
         /// These ones are not mentioned in the Discord docs.
         /// Might not even be valid anymore.
 //        case commerce = "COMMERCE"
-//        case raidAlertsDisabled = "RAID_ALERTS_DISABLED"
 //        case privateThreads = "PRIVATE_THREADS"
 //        case sevenDayThreadArchive = "SEVEN_DAY_THREAD_ARCHIVE"
 //        case threeDayThreadArchive = "THREE_DAY_THREAD_ARCHIVE"
