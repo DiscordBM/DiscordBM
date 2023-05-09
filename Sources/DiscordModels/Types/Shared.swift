@@ -749,10 +749,7 @@ public struct Secret:
     }
     
     public var debugDescription: String {
-        let count = value.count
-        let keepCount = count > 24 ? 4 : 0
-        let dropped = value.dropLast(count - keepCount)
-        return #"Secret("\#(dropped.debugDescription)****")"#
+        self.description
     }
     
     public init(from decoder: Decoder) throws {

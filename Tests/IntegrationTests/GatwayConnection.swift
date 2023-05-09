@@ -37,7 +37,7 @@ class GatewayConnectionTests: XCTestCase {
             intents: Gateway.Intent.allCases
         )
         
-        let expectation = expectation(description: "Connected")
+        let expectation = Expectation(description: "Connected")
         
         let connectionInfo = ConnectionInfo()
         Task {
@@ -100,7 +100,7 @@ class GatewayConnectionTests: XCTestCase {
             intents: Gateway.Intent.allCases
         )
         
-        let expectation = expectation(description: "Connected")
+        let expectation = Expectation(description: "Connected")
         
         let connectionInfo = ConnectionInfo()
 
@@ -148,8 +148,8 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertEqual(bot.state, .stopped)
     }
 
-    func connectWithShard(shard: IntPair) -> XCTestExpectation {
-        let exp = expectation(description: "ConnectForShard:\(shard)")
+    func connectWithShard(shard: IntPair) -> Expectation {
+        let exp = Expectation(description: "ConnectForShard:\(shard)")
 
         Task {
             let bot = BotGatewayManager(
@@ -167,7 +167,7 @@ class GatewayConnectionTests: XCTestCase {
                 intents: Gateway.Intent.allCases
             )
 
-            let expectation = expectation(description: "Connected:\(shard)")
+            let expectation = Expectation(description: "Connected:\(shard)")
 
             let connectionInfo = ConnectionInfo()
 
@@ -189,7 +189,7 @@ class GatewayConnectionTests: XCTestCase {
 
             Task { await bot.connect() }
 
-            let extraTimeForShard = Double(shard.first * 10)
+            let extraTimeForShard = Double(shard.first * 15)
             await waitFulfill(for: [expectation], timeout: 10 + extraTimeForShard)
 
             let didHello = await connectionInfo.didHello
@@ -221,20 +221,31 @@ class GatewayConnectionTests: XCTestCase {
     }
 
     func testUsingShards() async throws {
+        /// To make sure the calling the getBotGateway endpoint simultaneously
+        /// doesn't make the first shard so slow that its test fails.
+        ///
+        /// Not a bad idea to do in a real app with too many shards, either. The reason why
+        /// this helps is that the `DiscordClient` always caches the getBotGateway endpoint.
+        try await DefaultDiscordClient(
+            httpClient: httpClient,
+            token: Constants.token,
+            appId: Snowflake(Constants.botId)
+        ).getBotGateway().guardSuccess()
+
         let shardCount = 16
 
-        var expectations = [XCTestExpectation]()
+        var expectations = [Expectation]()
 
         for idx in (0..<shardCount) {
             let exp = connectWithShard(shard: .init(idx, shardCount))
             expectations.append(exp)
         }
 
-        await waitFulfill(for: expectations, timeout: Double(shardCount * 25))
+        await waitFulfill(for: expectations, timeout: Double(shardCount * 20))
     }
 
     func testGatewayStopsOnInvalidToken() async throws {
-        let criticalLogExpectation = XCTestExpectation(description: "criticalLogExpectation")
+        let criticalLogExpectation = Expectation(description: "criticalLogExpectation")
         let logHandler = TestingLogHandler(expectation: criticalLogExpectation)
 
         DiscordGlobalConfiguration.makeLogger = { label in
@@ -255,7 +266,7 @@ class GatewayConnectionTests: XCTestCase {
             intents: Gateway.Intent.allCases
         )
 
-        let expectation = expectation(description: "Connected")
+        let expectation = Expectation(description: "Connected")
 
         let didReceiveAnythingOtherThanHello = ManagedAtomic(false)
 
@@ -310,7 +321,7 @@ class GatewayConnectionTests: XCTestCase {
             intents: Gateway.Intent.allCases
         )
         
-        let expectation = expectation(description: "Connected")
+        let expectation = Expectation(description: "Connected")
 
         Task {
             for await event in await bot.makeEventsStream() {
@@ -380,7 +391,7 @@ private struct EventHandler: GatewayEventHandler {
 
 /// Fulfills the expectation on the first log.
 private class TestingLogHandler: @unchecked Sendable, LogHandler {
-    var expectation: XCTestExpectation?
+    var expectation: Expectation?
     let queue = DispatchQueue(label: "TestingLogHandler")
 
     private var messages: [String] = []
@@ -392,7 +403,7 @@ private class TestingLogHandler: @unchecked Sendable, LogHandler {
         set { }
     }
 
-    init(expectation: XCTestExpectation) {
+    init(expectation: Expectation) {
         self.expectation = expectation
     }
 

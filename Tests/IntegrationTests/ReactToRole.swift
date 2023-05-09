@@ -1239,7 +1239,7 @@ class ReactToRoleTests: XCTestCase {
             requestAllMembers: .enabledWithPresences
         )
         
-        let expectation = expectation(description: "Connected")
+        let expectation = Expectation(description: "Connected")
 
         Task {
             for await event in await bot.makeEventsStream() {
