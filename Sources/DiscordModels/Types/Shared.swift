@@ -620,10 +620,14 @@ extension StringBitField: Sendable where R: Sendable { }
 //MARK: - IntPair
 
 /// An array consisting of two integers.
-public struct IntPair: Sendable, Codable {
+public struct IntPair: Sendable, Codable, CustomStringConvertible {
     public var first: Int
     public var second: Int
-    
+
+    public var description: String {
+        "(\(self.first), \(self.second))"
+    }
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let array = try container.decode([Int].self)
