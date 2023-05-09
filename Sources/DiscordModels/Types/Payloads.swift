@@ -20,7 +20,7 @@ public enum Payloads {
     
     /// An attachment object, but for sending.
     /// https://discord.com/developers/docs/resources/channel#attachment-object
-    public struct AttachmentSend: Sendable, Encodable, ValidatablePayload {
+    public struct Attachment: Sendable, Encodable, ValidatablePayload {
         /// When sending, `id` is the index of this attachment in the `files` you provide.
         public var id: String
         public var filename: String?
@@ -51,6 +51,40 @@ public enum Payloads {
             validateCharacterCountDoesNotExceed(description, max: 1_024, name: "description")
         }
     }
+
+    /// A allowed-mentions object, but for sending.
+    /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
+    public struct AllowedMentions: Sendable, Codable, ValidatablePayload {
+        public var parse: [DiscordChannel.AllowedMentions.Kind]?
+        public var roles: [RoleSnowflake]?
+        public var users: [UserSnowflake]?
+        public var replied_user: Bool?
+
+        /// What to be mentioned.
+        /// - Parameters:
+        ///   - parse: What general type of mentions to be allowed.
+        ///     If empty, nothing will be allowed by this field (empty != `nil`).
+        ///     Doesn't stop other fields from allowing mentions.
+        ///   - roles: What roles to be allowed to be mentioned.
+        ///   - users: What users to be allowed to be mentioned.
+        ///   - replied_user: Allow to mention the replied user.
+        public init(
+            parse: [DiscordChannel.AllowedMentions.Kind]? = nil,
+            roles: [RoleSnowflake]? = nil,
+            users: [UserSnowflake]? = nil,
+            replied_user: Bool? = nil
+        ) {
+            self.parse = parse
+            self.roles = roles
+            self.users = users
+            self.replied_user = replied_user
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateElementCountDoesNotExceed(roles, max: 100, name: "roles")
+            validateElementCountDoesNotExceed(users, max: 100, name: "users")
+        }
+    }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object
     public struct InteractionResponse: Sendable, MultipartEncodable, ValidatablePayload {
@@ -78,10 +112,10 @@ public enum Payloads {
             public var tts: Bool?
             public var content: String?
             public var embeds: [Embed]?
-            public var allowedMentions: DiscordChannel.AllowedMentions?
+            public var allowedMentions: AllowedMentions?
             public var flags: IntBitField<DiscordChannel.Message.Flag>?
             public var components: [Interaction.ActionRow]?
-            public var attachments: [AttachmentSend]?
+            public var attachments: [Attachment]?
             public var files: [RawFile]?
 
             enum CodingKeys: String, CodingKey {
@@ -94,7 +128,7 @@ public enum Payloads {
                 case attachments
             }
 
-            public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: DiscordChannel.AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [AttachmentSend]? = nil, files: [RawFile]? = nil) {
+            public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [Attachment]? = nil, files: [RawFile]? = nil) {
                 self.tts = tts
                 self.content = content
                 self.embeds = embeds
@@ -377,12 +411,12 @@ public enum Payloads {
         public var nonce: StringOrInt?
         public var tts: Bool?
         public var embeds: [Embed]?
-        public var allowed_mentions: DiscordChannel.AllowedMentions?
+        public var allowed_mentions: AllowedMentions?
         public var message_reference: DiscordChannel.Message.MessageReference?
         public var components: [Interaction.ActionRow]?
         public var sticker_ids: [String]?
         public var files: [RawFile]?
-        public var attachments: [AttachmentSend]?
+        public var attachments: [Attachment]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         
         enum CodingKeys: String, CodingKey {
@@ -398,7 +432,7 @@ public enum Payloads {
             case flags
         }
         
-        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: DiscordChannel.AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
+        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
             self.content = content
             self.nonce = nonce
             self.tts = tts
@@ -447,10 +481,10 @@ public enum Payloads {
         public var content: String?
         public var embeds: [Embed]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
-        public var allowed_mentions: DiscordChannel.AllowedMentions?
+        public var allowed_mentions: AllowedMentions?
         public var components: [Interaction.ActionRow]?
         public var files: [RawFile]?
-        public var attachments: [AttachmentSend]?
+        public var attachments: [Attachment]?
         
         enum CodingKeys: String, CodingKey {
             case content
@@ -461,7 +495,7 @@ public enum Payloads {
             case attachments
         }
         
-        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [DiscordChannel.Message.Flag]? = nil, allowed_mentions: DiscordChannel.AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [AttachmentSend]? = nil) {
+        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [DiscordChannel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil) {
             self.content = content
             self.embeds = embeds
             self.flags = flags.map { .init($0) }
@@ -498,10 +532,10 @@ public enum Payloads {
         public var avatar_url: String?
         public var tts: Bool?
         public var embeds: [Embed]?
-        public var allowed_mentions: DiscordChannel.AllowedMentions?
+        public var allowed_mentions: AllowedMentions?
         public var components: [Interaction.ActionRow]?
         public var files: [RawFile]?
-        public var attachments: [AttachmentSend]?
+        public var attachments: [Attachment]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var thread_name: String?
         
@@ -518,7 +552,7 @@ public enum Payloads {
             case thread_name
         }
         
-        public init(content: String? = nil, username: String? = nil, avatar_url: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: DiscordChannel.AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [AttachmentSend]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, thread_name: String? = nil) {
+        public init(content: String? = nil, username: String? = nil, avatar_url: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, thread_name: String? = nil) {
             self.content = content
             self.username = username
             self.avatar_url = avatar_url
@@ -609,10 +643,10 @@ public enum Payloads {
     public struct EditWebhookMessage: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var embeds: [Embed]?
-        public var allowed_mentions: DiscordChannel.AllowedMentions?
+        public var allowed_mentions: AllowedMentions?
         public var components: [Interaction.ActionRow]?
         public var files: [RawFile]?
-        public var attachments: [AttachmentSend]?
+        public var attachments: [Attachment]?
         
         enum CodingKeys: String, CodingKey {
             case content
@@ -622,7 +656,7 @@ public enum Payloads {
             case attachments
         }
         
-        public init(content: String? = nil, embeds: [Embed]? = nil, allowed_mentions: DiscordChannel.AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [AttachmentSend]? = nil) {
+        public init(content: String? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil) {
             self.content = content
             self.embeds = embeds
             self.allowed_mentions = allowed_mentions
@@ -709,11 +743,11 @@ public enum Payloads {
         public struct ForumMessage: Sendable, MultipartEncodable, ValidatablePayload {
             public var content: String?
             public var embeds: [Embed]?
-            public var allowed_mentions: DiscordChannel.AllowedMentions?
+            public var allowed_mentions: AllowedMentions?
             public var components: [Interaction.ActionRow]?
             public var sticker_ids: [String]?
             public var files: [RawFile]?
-            public var attachments: [AttachmentSend]?
+            public var attachments: [Attachment]?
             public var flags: IntBitField<DiscordChannel.Message.Flag>?
             
             enum CodingKeys: String, CodingKey {
@@ -726,7 +760,7 @@ public enum Payloads {
                 case flags
             }
             
-            public init(content: String? = nil, embeds: [Embed]? = nil, allowed_mentions: DiscordChannel.AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [AttachmentSend]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
+            public init(content: String? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
                 self.content = content
                 self.embeds = embeds
                 self.allowed_mentions = allowed_mentions

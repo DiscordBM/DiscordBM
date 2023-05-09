@@ -832,6 +832,7 @@ extension SnowflakeProtocol {
     }
 
     /// Makes a fake snowflake.
+    /// - Parameter date: The date when this snowflake is supposed to have been created at.
     @inlinable
     public static func makeFake(date: Date = Date()) throws -> Self {
         try self.init(info: SnowflakeInfo.makeFake(date: date))
@@ -843,7 +844,7 @@ extension SnowflakeProtocol {
 /// ```
 /// let snowflake: ChannelSnowflake = "192839184848484"
 /// ```
-/// If you really need to, you can convert other snowflakes to each other:
+/// If you really need to, you can convert snowflakes to each other:
 /// ```
 /// let appId: ApplicationSnowflake = "192839184848484"
 /// let botId: UserSnowflake = Snowflake(appId)
@@ -865,7 +866,7 @@ public struct Snowflake<Tag>: SnowflakeProtocol {
 /// ```
 /// let snowflake: AnySnowflake = "192839184848484"
 /// ```
-/// If you really need to, you can convert other snowflakes to each other:
+/// If you really need to, you can convert snowflakes to each other:
 /// ```
 /// let appId: AnySnowflake = "192839184848484"
 /// let botId: UserSnowflake = Snowflake(appId)
@@ -1059,6 +1060,8 @@ public struct SnowflakeInfo: Sendable {
         self.sequenceNumber = sequenceNumber
     }
 
+    /// Makes a fake snowflake.
+    /// - Parameter date: The date when this snowflake is supposed to have been created at.
     @inlinable
     internal static func makeFake(date: Date) throws -> SnowflakeInfo {
         try SnowflakeInfo(date: date, workerId: 0, processId: 0, sequenceNumber: 0)

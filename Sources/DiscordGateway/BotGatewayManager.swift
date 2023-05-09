@@ -463,7 +463,7 @@ extension BotGatewayManager {
         guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
         Task {
             let (code, codeDesc) = self.getCloseCodeAndDescription(of: ws)
-            let isDebugLevelCode = [.goingAway, nil, .unexpectedServerError].contains(code)
+            let isDebugLevelCode = [nil, .goingAway, .unexpectedServerError].contains(code)
             self.logger.log(
                 level: isDebugLevelCode ? .debug : .warning,
                 "Received connection close notification. Will try to reconnect",

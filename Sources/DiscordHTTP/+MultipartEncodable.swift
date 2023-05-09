@@ -11,7 +11,7 @@ extension MultipartEncodable {
     /// Throws encoding errors.
     func encodeMultipart() throws -> ByteBuffer? {
         guard let files = self.files, !files.isEmpty else { return nil }
-        var buffer = allocator.buffer(capacity: 1024)
+        var buffer = allocator.buffer(capacity: 1_024)
         let payload = MultipartEncodingContainer(
             payload_json: try .init(from: self),
             files: files

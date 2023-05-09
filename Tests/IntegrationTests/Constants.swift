@@ -21,6 +21,8 @@ enum Constants {
 
     static let secondAccountId: UserSnowflake = "966330655069843457"
 
+    static let serverEmojiId: EmojiSnowflake = "1073704788400820324"
+
     enum Channels: ChannelSnowflake {
         case general = "1036881951463833612"
         case spam = "1038138527877181542"

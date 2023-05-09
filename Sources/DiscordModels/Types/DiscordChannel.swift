@@ -76,8 +76,13 @@ public struct DiscordChannel: Sendable, Codable {
         public var emoji_id: EmojiSnowflake?
         public var emoji_name: String?
 
-        public init(emoji_id: EmojiSnowflake? = nil, emoji_name: String? = nil) {
+        public init(emoji_id: EmojiSnowflake? = nil) {
             self.emoji_id = emoji_id
+            self.emoji_name = nil
+        }
+
+        public init(emoji_name: String? = nil) {
+            self.emoji_id = nil
             self.emoji_name = emoji_name
         }
     }
@@ -419,7 +424,7 @@ public enum ThreadKind: Int, Sendable, Codable {
 
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
-    public struct AllowedMentions: Sendable, Codable, ValidatablePayload {
+    public struct AllowedMentions: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
         public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
@@ -429,21 +434,9 @@ extension DiscordChannel {
         }
         
         public var parse: [Kind]
-        public var roles: [String]
-        public var users: [String]
+        public var roles: [RoleSnowflake]
+        public var users: [UserSnowflake]
         public var replied_user: Bool
-        
-        public init(parse: [Kind], roles: [String], users: [String], replied_user: Bool) {
-            self.parse = parse
-            self.roles = roles
-            self.users = users
-            self.replied_user = replied_user
-        }
-        
-        public func validate() -> [ValidationFailure] {
-            validateElementCountDoesNotExceed(roles, max: 100, name: "roles")
-            validateElementCountDoesNotExceed(users, max: 100, name: "users")
-        }
     }
 }
 

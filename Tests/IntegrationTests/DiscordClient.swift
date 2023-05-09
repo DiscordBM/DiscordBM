@@ -68,10 +68,27 @@ class DiscordClientTests: XCTestCase {
         try await client.triggerTypingIndicator(channelId: Constants.Channels.general.id).guardSuccess()
 
         /// Create
-        let text = "Testing! \(Date())"
+        let userMention = DiscordUtils.mention(id: Constants.personalId)
+        let text = "Testing! \(Date()) \(userMention)"
         let message = try await client.createMessage(
             channelId: Constants.Channels.general.id,
-            payload: .init(content: text)
+            payload: .init(
+                content: text,
+                /// Allowed mention doesn't allow mentioning any users.
+                allowed_mentions: .init(
+                    /// `parse` doesn't allow user mentions.
+                    parse: [.roles],
+                    /// `users` overrides what `parse` says, to allow to mention me.
+                    users: [Constants.personalId]
+                ),
+                /// Reply to a non-existent message
+                message_reference: .init(
+                    message_id: .makeFake(),
+                    channel_id: Constants.Channels.general.id,
+                    guild_id: Constants.guildId,
+                    fail_if_not_exists: false
+                )
+            )
         ).decode()
         
         XCTAssertEqual(message.content, text)
@@ -82,9 +99,13 @@ class DiscordClientTests: XCTestCase {
         let edited = try await client.updateMessage(
             channelId: Constants.Channels.general.id,
             messageId: message.id,
-            payload: .init(embeds: [
-                .init(description: newText)
-            ])
+            payload: .init(embeds: [.init(
+                description: newText,
+                provider: .init(
+                    name: "MahdiBM",
+                    url: "https://mahdibm.com"
+                )
+            )])
         ).decode()
         
         XCTAssertEqual(edited.content, text)
@@ -197,7 +218,8 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         XCTAssertEqual(allMessagesAround.count, 3)
-        
+
+        XCTAssertTrue(message.type.isDeletable)
         /// Delete
         let deletionResponse = try await client.deleteMessage(
             channelId: Constants.Channels.general.id,
@@ -243,7 +265,14 @@ class DiscordClientTests: XCTestCase {
         let commandName2 = "test-command-2"
         let command2 = try await client.updateApplicationCommand(
             commandId: command1.id,
-            payload: .init(name: commandName2)
+            payload: .init(
+                name: commandName2,
+                options: [.init(
+                    type: .string,
+                    name: "test-option",
+                    description: "test-option description"
+                )]
+            )
         ).decode()
         
         XCTAssertEqual(command2.name, commandName2)
@@ -441,7 +470,10 @@ class DiscordClientTests: XCTestCase {
         let createChannel = try await client.createGuildChannel(
             guildId: Constants.guildId,
             reason: "Testing",
-            payload: .init(name: "Test-Create-Channel")
+            payload: .init(
+                name: "Test-Create-Channel",
+                default_reaction_emoji: .init(emoji_name: "🐥")
+            )
         ).decode()
 
         /// Get channel
@@ -452,7 +484,10 @@ class DiscordClientTests: XCTestCase {
         let topic = "Test Topic"
         let updateChannel = try await client.updateGuildChannel(
             id: createChannel.id,
-            payload: .init(topic: topic)
+            payload: .init(
+                topic: topic,
+                default_reaction_emoji: .init(emoji_id: Constants.serverEmojiId)
+            )
         ).decode()
 
         XCTAssertEqual(updateChannel.id, createChannel.id)
