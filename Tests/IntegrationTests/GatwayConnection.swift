@@ -58,7 +58,7 @@ class GatewayConnectionTests: XCTestCase {
 
         Task { await bot.connect() }
 
-        await waitFulfill(for: [expectation], timeout: 10)
+        await waitFulfillment(of: [expectation], timeout: 10)
         
         let didHello = await connectionInfo.didHello
         let _ready = await connectionInfo.ready
@@ -122,7 +122,7 @@ class GatewayConnectionTests: XCTestCase {
 
         Task { await bot.connect() }
 
-        await waitFulfill(for: [expectation], timeout: 10)
+        await waitFulfillment(of: [expectation], timeout: 10)
         
         let didHello = await connectionInfo.didHello
         let _ready = await connectionInfo.ready
@@ -190,7 +190,7 @@ class GatewayConnectionTests: XCTestCase {
             Task { await bot.connect() }
 
             let extraTimeForShard = Double(shard.first * 15)
-            await waitFulfill(for: [expectation], timeout: 10 + extraTimeForShard)
+            await waitFulfillment(of: [expectation], timeout: 10 + extraTimeForShard)
 
             let didHello = await connectionInfo.didHello
             let _ready = await connectionInfo.ready
@@ -241,7 +241,7 @@ class GatewayConnectionTests: XCTestCase {
             expectations.append(exp)
         }
 
-        await waitFulfill(for: expectations, timeout: Double(shardCount * 20))
+        await waitFulfillment(of: expectations, timeout: Double(shardCount * 20))
     }
 
     func testGatewayStopsOnInvalidToken() async throws {
@@ -285,7 +285,7 @@ class GatewayConnectionTests: XCTestCase {
 
         Task { await bot.connect() }
 
-        await waitFulfill(for: [expectation, criticalLogExpectation], timeout: 10)
+        await waitFulfillment(of: [expectation, criticalLogExpectation], timeout: 10)
 
         /// We sent an invalid token so Discord shouldn't even respond to us.
         XCTAssertFalse(didReceiveAnythingOtherThanHello.load(ordering: .relaxed))
@@ -336,7 +336,7 @@ class GatewayConnectionTests: XCTestCase {
 
         Task { await bot.connect() }
 
-        await waitFulfill(for: [expectation], timeout: 10)
+        await waitFulfillment(of: [expectation], timeout: 10)
         
         /// Didn't find a way to properly verify these functions.
         /// Here we just make the requests and make sure we aren't getting invalid-session-ed.

@@ -653,8 +653,8 @@ extension BotGatewayManager {
            let maxConcurrency {
             await Self.shardManager.waitForOtherShards(shard: shard, maxConcurrency: maxConcurrency)
             /// Wait a little bit more. Nothing scientific but seems to make Discord happy `¯\_(ツ)_/¯`.
-            /// Waits 250 milliseconds more per each total amount of shards.
-            await self.sleep(for: .milliseconds(shard.second * 250))
+            let more = (shard.second / maxConcurrency) * 250
+            await self.sleep(for: .milliseconds(more))
         }
     }
     

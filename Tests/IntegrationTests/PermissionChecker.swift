@@ -60,7 +60,7 @@ class PermissionChecker: XCTestCase {
         
         Task { await bot.connect() }
 
-        await waitFulfill(for: [expectation], timeout: 10)
+        await waitFulfillment(of: [expectation], timeout: 10)
 
         /// For cache to get populated
         try await Task.sleep(for: .seconds(5))

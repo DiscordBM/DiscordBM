@@ -1254,7 +1254,7 @@ class ReactToRoleTests: XCTestCase {
 
         Task { await bot.connect() }
 
-        await waitFulfill(for: [expectation], timeout: 10)
+        await waitFulfillment(of: [expectation], timeout: 10)
         
         /// So cache is populated
         try await Task.sleep(for: .seconds(5))
