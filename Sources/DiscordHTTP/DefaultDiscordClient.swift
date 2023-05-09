@@ -19,7 +19,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
     public let token: Secret
     public let appId: ApplicationSnowflake?
     let configuration: ClientConfiguration
-    let cache: ClientCache?
+    let cache: ClientCache
     let logger = DiscordGlobalConfiguration.makeLogger("DefaultDiscordClient")
     
     private static let requestIdGenerator = ManagedAtomic(UInt(0))
@@ -35,13 +35,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
         self.token = token
         self.appId = appId
         self.configuration = configuration
-        if configuration.cachingBehavior.isDisabled {
-            self.cache = nil
-        } else {
-            /// So each token has its own cache, because
-            /// answers might be different for different tokens.
-            self.cache = ClientCacheStorage.shared.cache(for: token)
-        }
+        self.cache = ClientCacheStorage.shared.cache(for: token)
     }
     
     /// If you provide no app id, you'll need to pass it to some functions on call site.
@@ -122,7 +116,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
         guard let identity,
               self.configuration.cachingBehavior.getTTL(for: identity) != nil
         else { return nil }
-        return await cache?.get(item: .init(
+        return await cache.get(item: .init(
             identity: identity,
             parameters: parameters,
             queries: queries
@@ -139,20 +133,18 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
               (200..<300).contains(response.status.code),
               let ttl = self.configuration.cachingBehavior.getTTL(for: identity)
         else { return }
-        if let cache {
-            logger.debug("Saved response in cache", metadata: [
-                "endpointIdentity": .stringConvertible(identity),
-                "queries": .stringConvertible(queries)
-            ])
-            await cache.add(
-                response: response,
-                item: .init(
-                    identity: identity,
-                    parameters: parameters,
-                    queries: queries
-                ), ttl: ttl
-            )
-        }
+        await cache.add(
+            response: response,
+            item: .init(
+                identity: identity,
+                parameters: parameters,
+                queries: queries
+            ), ttl: ttl
+        )
+        logger.debug("Saved response in cache", metadata: [
+            "endpointIdentity": .stringConvertible(identity),
+            "queries": .stringConvertible(queries)
+        ])
     }
     
     func execute(_ request: HTTPClient.Request) async throws -> DiscordHTTPResponse {
@@ -467,11 +459,30 @@ public struct ClientConfiguration: Sendable {
         /// This instance's default TTL (Time-To-Live) for CDN endpoints.
         @usableFromInline
         var cdnEndpointsDefaultTTL: Double?
-        @usableFromInline
-        var isDisabled: Bool
-        
-        /// Uses the TTL in the `endpoints`. If not available, falls back to `defaultTTL`.
+
+        init(
+            apiEndpointsStorage: [CacheableAPIEndpointIdentity: Double] = [:],
+            cdnEndpointsStorage: [CDNEndpointIdentity: Double] = [:],
+            apiEndpointsDefaultTTL: Double? = nil,
+            cdnEndpointsDefaultTTL: Double? = nil
+        ) {
+            self.apiEndpointsStorage = apiEndpointsStorage
+            self.cdnEndpointsStorage = cdnEndpointsStorage
+            self.apiEndpointsDefaultTTL = apiEndpointsDefaultTTL
+            self.cdnEndpointsDefaultTTL = cdnEndpointsDefaultTTL
+
+            /// Necessary for `BotGatewayManager`.
+            /// Users realistically shouldn't need to call these endpoints anyway.
+            /// Even if they do want to call these endpoints, the value Discord sends is
+            /// already cached value, so this caching behavior shouldn't cause any problems.
+            self.apiEndpointsStorage.updateValue(120, forKey: .getGateway)
+            self.apiEndpointsStorage.updateValue(120, forKey: .getBotGateway)
+        }
+
+        /// Uses the TTL in the 'endpoints'. If not available, falls back to `defaultTTL`.
         /// Setting TTL to `0` in endpoints, disables caching for that endpoint.
+        /// NOTE: Caching behavior for `getGateway` and `getBotGateway` api endpoints
+        /// can't be modified by users.
         public static func custom(
             apiEndpoints: [CacheableAPIEndpointIdentity: Double] = [:],
             cdnEndpoints: [CDNEndpointIdentity: Double] = [:],
@@ -482,8 +493,7 @@ public struct ClientConfiguration: Sendable {
                 apiEndpointsStorage: apiEndpoints,
                 cdnEndpointsStorage: cdnEndpoints,
                 apiEndpointsDefaultTTL: apiEndpointsDefaultTTL,
-                cdnEndpointsDefaultTTL: cdnEndpointsDefaultTTL,
-                isDisabled: false
+                cdnEndpointsDefaultTTL: cdnEndpointsDefaultTTL
             )
         }
         
@@ -494,7 +504,6 @@ public struct ClientConfiguration: Sendable {
         }
         
         /// Caches all cacheable API endpoints for the entered seconds,
-        /// except for `getGateway` which is cached for an hour.
         /// Doesn't cache CDN endpoints.
         public static func enabled(defaultTTL: Double) -> CachingBehavior {
             CachingBehavior.custom(apiEndpointsDefaultTTL: defaultTTL)
@@ -502,12 +511,11 @@ public struct ClientConfiguration: Sendable {
         
         /// Doesn't allow caching at all.
         public static var disabled: CachingBehavior {
-            CachingBehavior(isDisabled: true)
+            CachingBehavior()
         }
         
         @inlinable
         func getTTL(for identity: CacheableEndpointIdentity) -> Double? {
-            if self.isDisabled { return nil }
             switch identity {
             case let .api(cacheableAPIEndpointIdentity):
                 guard let ttl = self.apiEndpointsStorage[cacheableAPIEndpointIdentity]

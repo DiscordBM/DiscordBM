@@ -110,9 +110,9 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     /// Makes sure the response is a success response, or tries to find a `JSONError`
     /// so you have a chance to process the error and try to recover.
     ///
-    /// Returns `none` if the response is a success response.
-    /// Returns `jsonError` if it's a recognizable error.
-    /// Otherwise returns `badStatusCode`.
+    /// Returns `.none` if the response is a success response.
+    /// Returns `.jsonError` if it's a recognizable error.
+    /// Otherwise returns `.badStatusCode`.
     ///
     /// The `JSONError` does not contain the full Discord error response.
     /// For manual debugging, it's better to directly read the contents of the response:
@@ -169,9 +169,9 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
     /// Makes sure the response is a success response, or tries to find a `JSONError`
     /// so you have a chance to process the error and try to recover.
     ///
-    /// Returns `none` if the response is a success response.
-    /// Returns `jsonError` if it's a recognizable error.
-    /// Otherwise returns `badStatusCode`.
+    /// Returns `.none` if the response is a success response.
+    /// Returns `.jsonError` if it's a recognizable error.
+    /// Otherwise returns `.badStatusCode`.
     ///
     /// The `JSONError` does not contain the full Discord error response.
     /// For manual debugging, it's better to directly read the contents of the response:

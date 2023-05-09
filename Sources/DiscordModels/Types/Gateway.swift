@@ -455,7 +455,7 @@ public struct Gateway: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/gateway-events#identify-identify-connection-properties
         public struct ConnectionProperties: Sendable, Codable {
-            public let os: String = {
+            public var os: String = {
 #if os(macOS)
                 return "macOS"
 #elseif os(Linux)
@@ -471,17 +471,11 @@ public struct Gateway: Sendable, Codable {
 #elseif os(Android)
                 return "Android"
 #else
-                return "Unknown-OS"
+                return "Unknown"
 #endif
             }()
-            public let browser = "DiscordBM"
-            public let device = "DiscordBM"
-            
-            enum CodingKeys: String, CodingKey {
-                case os = "$os"
-                case browser = "$browser"
-                case device = "$device"
-            }
+            public var browser = "DiscordBM"
+            public var device = "DiscordBM"
         }
         
         /// https://discord.com/developers/docs/topics/gateway-events#update-presence-gateway-presence-update-structure
@@ -500,11 +494,12 @@ public struct Gateway: Sendable, Codable {
         }
         
         public var token: Secret
-        public var properties = ConnectionProperties()
+        /// Not public to make sure the correct info is sent to Discord.
+        var properties = ConnectionProperties()
         /// DiscordBM supports the better `Transport Compression`, but not `Payload Compression`.
         /// Setting this to `true` will only cause problems.
         /// Instead, use the `compression` parameter in the `BotGatewayManager` initializer.
-        public var compress: Bool?
+        var compress: Bool?
         public var large_threshold: Int?
         public var shard: IntPair?
         public var presence: Presence?

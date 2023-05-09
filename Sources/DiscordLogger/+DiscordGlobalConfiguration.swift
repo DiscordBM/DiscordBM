@@ -36,7 +36,7 @@ extension DiscordGlobalConfiguration {
 private let queue = DispatchQueue(label: "DiscordBM.logManager")
 #endif
 
-private func syncedInDebug<T>(block: () -> (T)) -> T {
+private func syncedInDebug<T>(block: @Sendable () -> (T)) -> T {
 #if DEBUG
     queue.sync {
         block()

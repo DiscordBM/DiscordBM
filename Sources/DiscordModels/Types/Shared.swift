@@ -628,6 +628,11 @@ public struct IntPair: Sendable, Codable, CustomStringConvertible {
         "(\(self.first), \(self.second))"
     }
 
+    public init(_ first: Int, _ second: Int) {
+        self.first = first
+        self.second = second
+    }
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let array = try container.decode([Int].self)
@@ -740,11 +745,14 @@ public struct Secret:
         let count = value.count
         let keepCount = count > 24 ? 4 : 0
         let dropped = value.dropLast(count - keepCount)
-        return "\(dropped)****"
+        return #"Secret("\#(dropped)****")"#
     }
     
     public var debugDescription: String {
-        "\(self)".debugDescription
+        let count = value.count
+        let keepCount = count > 24 ? 4 : 0
+        let dropped = value.dropLast(count - keepCount)
+        return #"Secret("\#(dropped.debugDescription)****")"#
     }
     
     public init(from decoder: Decoder) throws {

@@ -3,6 +3,7 @@ import Foundation
 import AsyncHTTPClient
 import Atomics
 import Logging
+import DiscordModels
 import enum NIOWebSocket.WebSocketErrorCode
 
 public actor BotGatewayManager: GatewayManager {
@@ -55,8 +56,8 @@ public actor BotGatewayManager: GatewayManager {
     var resumeGatewayURL: String? = nil
     
     //MARK: Shard-ing
+    private static let shardManager = ShardManager()
     var maxConcurrency: Int? = nil
-    var isFirstConnection = true
     
     //MARK: Compression
     let compression: Bool
@@ -295,7 +296,6 @@ public actor BotGatewayManager: GatewayManager {
         }
         self.connectionId.wrappingIncrement(ordering: .relaxed)
         self._state.store(.stopped, ordering: .relaxed)
-        self.isFirstConnection = true
         await connectionBackoff.resetTryCount()
         await self.sendQueue.reset()
         self.closeWebSocket(ws: self.ws)
@@ -392,7 +392,7 @@ extension BotGatewayManager {
             self.sendResume(sessionId: sessionId, sequenceNumber: lastSequenceNumber)
         } else {
             logger.debug("Can't resume last Discord connection. Will identify", metadata: [
-                "sessionId_length": .stringConvertible(self.sessionId?.count ?? -1),
+                "sessionId": .stringConvertible(self.sessionId ?? "nil"),
                 "lastSequenceNumber": .stringConvertible(self.sequenceNumber ?? -1)
             ])
             await self.sendIdentify()
@@ -599,6 +599,10 @@ extension BotGatewayManager {
                 
                 if let ws = await self.ws {
                     do {
+                        self.logger.trace("Will send a payload", metadata: [
+                            "payload": .string("\(payload)"),
+                            "opcode": .stringConvertible(opcode)
+                        ])
                         try await ws.send(
                             raw: data,
                             opcode: .init(encodedWebSocketOpcode: opcode)!
@@ -634,22 +638,23 @@ extension BotGatewayManager {
         await connectionBackoff.resetTryCount()
         self.unsuccessfulPingsCount = 0
         await self.sendQueue.reset()
+        if let shard = self.identifyPayload.shard,
+           let maxConcurrency = self.maxConcurrency {
+            await Self.shardManager.connected(shard: shard, maxConcurrency: maxConcurrency)
+        }
     }
-    
+
+    /// Discord says: "you must start the shard buckets in "order". That means that you can start shard 0 -> shard 15 concurrently, and then you can start shard 16 -> shard 31."
+    /// https://discord.com/developers/docs/topics/gateway#sharding
+    ///
+    /// This shard-ing logic can't handle out-of-process shards.
     private func waitInShardQueueIfNeeded() async {
-        if isFirstConnection,
-           let shard = identifyPayload.shard,
+        if let shard = self.identifyPayload.shard,
            let maxConcurrency {
-            isFirstConnection = false
-            let bucketIndex = shard.first / maxConcurrency
-            if bucketIndex > 0 {
-                /// Wait 2 seconds for each bucket index.
-                /// These 2 seconds is nothing scientific.
-                /// Optimally we should implement managing all shards of a bot together
-                /// so we can know when shards connect and can start the new bucket, but that
-                /// comes with complications as shards might be running on more than 1 process.
-                await self.sleep(for: .seconds(Int64(bucketIndex) * 2))
-            }
+            await Self.shardManager.waitForOtherShards(shard: shard, maxConcurrency: maxConcurrency)
+            /// Wait a little bit more. Nothing scientific but seems to make Discord happy `¯\_(ツ)_/¯`.
+            /// Waits 250 milliseconds more per each total amount of shards.
+            await self.sleep(for: .milliseconds(shard.second * 250))
         }
     }
     
@@ -673,6 +678,47 @@ extension BotGatewayManager {
             logger.warning("Task failed to sleep properly", metadata: [
                 "error": .string("\(error)")
             ])
+        }
+    }
+}
+
+private actor ShardManager {
+    /// [BucketIndex: Continuations]
+    var waiters = [Int: [CheckedContinuation<Void, Never>]]()
+    var connectedShards = Set<Int>()
+
+    func waitForOtherShards(shard: IntPair, maxConcurrency: Int) async {
+        let bucketIndex = shard.first / maxConcurrency
+        if bucketIndex == 0 {
+            return
+        } else {
+            /// If other shards are already connected, return immediately.
+            let lastBucketIndex = bucketIndex - 1
+            let start = lastBucketIndex * maxConcurrency
+            let end = start + maxConcurrency
+            let inBuckets = start..<end
+            if inBuckets.allSatisfy({ self.connectedShards.contains($0) }) {
+                return
+            } else {
+                /// If other shards are **not** already connected, wait.
+                await withCheckedContinuation {
+                    self.waiters[bucketIndex, default: []].append($0)
+                }
+            }
+        }
+    }
+
+    func connected(shard: IntPair, maxConcurrency: Int) {
+        self.connectedShards.insert(shard.first)
+        let bucketIndex = shard.first / maxConcurrency
+        let start = bucketIndex * maxConcurrency
+        let end = start + maxConcurrency
+        let inBuckets = start..<end
+        if inBuckets.allSatisfy({ self.connectedShards.contains($0) }) {
+            /// All shards in bucket have connected. Tell the waiters of the next bucket index.
+            for waiter in waiters[bucketIndex + 1] ?? [] {
+                waiter.resume()
+            }
         }
     }
 }
