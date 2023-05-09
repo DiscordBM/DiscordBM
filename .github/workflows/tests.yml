@@ -37,7 +37,7 @@ jobs:
       - name: Upload code coverage
         uses: vapor/swift-codecov-action@v0.2
         with:
-          ignore_paths: '/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(WebSocket|Auth|BM|Core|Logger|Models|Utilities)/'
+          ignore_paths: '/Tests/|/Plugins/|/Sources/CZlib/|/Sources/Discord(WebSocket|Auth|BM|Core|Logger|Utilities)/'
           cc_env_vars: 'SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH'
           cc_fail_ci_if_error: false
 

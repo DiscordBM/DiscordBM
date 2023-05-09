@@ -7,7 +7,6 @@ import MultipartKit
 private class ConfigurationStorage: @unchecked Sendable {
     var decoder: any DiscordDecoder = JSONDecoder()
     var encoder: any DiscordEncoder = JSONEncoder()
-    var multipartEncoder: any DiscordMultipartEncoder = FormDataEncoder()
     var makeLogger: @Sendable (String) -> Logger = { Logger(label: $0) }
     
     static let shared = ConfigurationStorage()
@@ -26,13 +25,6 @@ public enum DiscordGlobalConfiguration {
     public static var encoder: any DiscordEncoder {
         get { ConfigurationStorage.shared.encoder }
         set { ConfigurationStorage.shared.encoder = newValue }
-    }
-    /// The global encoder to encode Multipart forms with.
-    /// I don't think it's easy to get it working with another encoder because it uses
-    /// some `MultipartKit` types.
-    public static var multipartEncoder: any DiscordMultipartEncoder {
-        get { ConfigurationStorage.shared.multipartEncoder }
-        set { ConfigurationStorage.shared.multipartEncoder = newValue }
     }
     /// Function to make loggers with. You can override it with your own logger.
     /// The `String` argument represents the label of the logger.
@@ -55,10 +47,3 @@ public protocol DiscordEncoder {
 }
 
 extension JSONEncoder: DiscordEncoder { }
-
-//MARK: DiscordMultipartEncoder
-public protocol DiscordMultipartEncoder {
-    func encode<E: Encodable>(_: E, boundary: String, into: inout ByteBuffer) throws
-}
-
-extension FormDataEncoder: DiscordMultipartEncoder { }

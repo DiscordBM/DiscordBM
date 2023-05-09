@@ -16,7 +16,7 @@ extension MultipartEncodable {
             payload_json: try .init(from: self),
             files: files
         )
-        try DiscordGlobalConfiguration.multipartEncoder.encode(
+        try FormDataEncoder().encode(
             payload,
             boundary: MultipartEncodingContainer.boundary,
             into: &buffer
