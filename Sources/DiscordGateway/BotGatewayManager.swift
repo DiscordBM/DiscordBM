@@ -650,11 +650,13 @@ extension BotGatewayManager {
     /// This shard-ing logic can't handle out-of-process shards.
     private func waitInShardQueueIfNeeded() async {
         if let shard = self.identifyPayload.shard,
-           let maxConcurrency {
+           let maxConcurrency,
+           /// Just to mitigate a possible crash, otherwise shouldn't happen at all.
+           maxConcurrency != 0 {
             await Self.shardManager.waitForOtherShards(shard: shard, maxConcurrency: maxConcurrency)
             /// Wait a little bit more.
             /// Nothing scientific but seems to make Discord happy `¯\_(ツ)_/¯`.
-            let more = (shard.second / maxConcurrency) * 250
+            let more = (shard.second / maxConcurrency) * 500
             await self.sleep(for: .milliseconds(more))
         }
     }
@@ -681,12 +683,6 @@ extension BotGatewayManager {
             ])
         }
     }
-
-#if DEBUG
-    static func _tests_initializeShardManager() {
-        _ = Self.shardManager
-    }
-#endif
 }
 
 private actor ShardManager {

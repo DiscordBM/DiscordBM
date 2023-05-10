@@ -3,33 +3,34 @@ import XCTest
 
 /// XCTest's own `XCTestExpectation` is waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaay too flaky on linux.
 actor Expectation {
+
+    enum State: String {
+        case started
+        case failed
+        case done
+    }
+
     nonisolated let description: String
-    private var fulfilled = false
+    private var state = State.started
     private var fulfillment: (@Sendable () -> Void)? = nil
 
     init(description: String) {
         self.description = description
     }
 
-    nonisolated func fulfill(
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) {
+    nonisolated func fulfill(file: StaticString = #filePath, line: UInt = #line) {
         Task { await self._fulfill(file: file, line: line) }
     }
 
-    private func _fulfill(
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) async {
-        if self.fulfilled {
+    private func _fulfill(file: StaticString = #filePath, line: UInt = #line) async {
+        if self.state != .started {
             XCTFail(
-                "Expectation '\(self.description)' was already fulfilled",
+                "Expectation '\(self.description)' was already fulfilled with state: \(self.state)",
                 file: file,
                 line: line
             )
         } else {
-            self.fulfilled = true
+            self.state = .done
             self.fulfillment?()
         }
     }
@@ -38,11 +39,14 @@ actor Expectation {
         Task { await self._onFulfillment(block: block) }
     }
 
-    private func _onFulfillment(block: @Sendable @escaping () -> Void) async {
-        if self.fulfilled {
+    private func _onFulfillment(block: @Sendable @escaping () -> Void) {
+        switch self.state {
+        case .done:
             block()
-        } else {
+        case .started:
             self.fulfillment = block
+        case .failed:
+            break
         }
     }
 }
@@ -63,13 +67,15 @@ extension XCTestCase {
             let left = expectations
                 .enumerated()
                 .filter { !indices.contains($0.offset) }
+                .map(\.element.description)
             if !left.isEmpty {
+                /// End the continuation so the tests don't hang.
+                storage.endContinuation()
                 XCTFail(
                     "Some expectations failed to resolve in \(timeout) seconds: \(left)",
                     file: file,
                     line: line
                 )
-                storage.endContinuation()
             }
         }
 
@@ -84,6 +90,7 @@ extension XCTestCase {
                         .filter { !indices.contains($0.offset) }
                     if left.isEmpty {
                         task.cancel()
+                        /// End the continuation and notify the waiter.
                         storage.endContinuation()
                     }
                 }

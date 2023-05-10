@@ -189,8 +189,8 @@ class GatewayConnectionTests: XCTestCase {
 
             Task { await bot.connect() }
 
-            let extraTimeForShard = Double(shard.first * 15)
-            await waitFulfillment(of: [expectation], timeout: 10 + extraTimeForShard)
+            let timeout = Double((shard.first + 1) * 20)
+            await waitFulfillment(of: [expectation], timeout: timeout)
 
             let didHello = await connectionInfo.didHello
             let _ready = await connectionInfo.ready
@@ -232,10 +232,7 @@ class GatewayConnectionTests: XCTestCase {
             appId: Snowflake(Constants.botId)
         ).getBotGateway().guardSuccess()
 
-        /// Just to init the variable
-        BotGatewayManager._tests_initializeShardManager()
-
-        let shardCount = 8
+        let shardCount = 16
 
         var expectations = [Expectation]()
 
@@ -245,7 +242,7 @@ class GatewayConnectionTests: XCTestCase {
             )
         }
 
-        await waitFulfillment(of: expectations, timeout: Double(shardCount * 20))
+        await waitFulfillment(of: expectations, timeout: Double(shardCount * 25))
     }
 
     func testGatewayStopsOnInvalidToken() async throws {
