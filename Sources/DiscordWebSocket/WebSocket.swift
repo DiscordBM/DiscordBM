@@ -104,17 +104,17 @@ public final class WebSocket: @unchecked Sendable {
         self.channel.writeAndFlush(frame, promise: promise)
     }
 
-    public func close(code: WebSocketErrorCode = .goingAway) async throws {
-        try await self.close(code: code).get()
+    public func close(code: WebSocketErrorCode = .goingAway) {
+        _ = self.closeWithFuture(code: code)
     }
 
-    func close(code: WebSocketErrorCode = .goingAway) -> EventLoopFuture<Void> {
+    func closeWithFuture(code: WebSocketErrorCode = .goingAway) -> EventLoopFuture<Void> {
         let promise = self.eventLoop.makePromise(of: Void.self)
-        self.close(code: code, promise: promise)
+        self.closeWithFuture(code: code, promise: promise)
         return promise.futureResult
     }
 
-    func close(
+    func closeWithFuture(
         code: WebSocketErrorCode = .goingAway,
         promise: EventLoopPromise<Void>?
     ) {
@@ -166,7 +166,7 @@ public final class WebSocket: @unchecked Sendable {
                 if let maskingKey = frame.maskKey {
                     data.webSocketUnmask(maskingKey)
                 }
-                self.close(
+                self.closeWithFuture(
                     code: data.readWebSocketErrorCode() ?? .unknown(1005),
                     promise: promise
                 )
@@ -187,13 +187,13 @@ public final class WebSocket: @unchecked Sendable {
                     promise: nil
                 )
             } else {
-                self.close(code: .protocolError, promise: nil)
+                self.closeWithFuture(code: .protocolError, promise: nil)
             }
         case .pong:
             if frame.fin {
                 self.waitingForPong = false
             } else {
-                self.close(code: .protocolError, promise: nil)
+                self.closeWithFuture(code: .protocolError, promise: nil)
             }
         case .text, .binary:
             // create a new frame sequence or use existing
@@ -207,7 +207,7 @@ public final class WebSocket: @unchecked Sendable {
                 frameSequence.append(frame)
                 self.frameSequence = frameSequence
             } else {
-                self.close(code: .protocolError, promise: nil)
+                self.closeWithFuture(code: .protocolError, promise: nil)
             }
         default:
             // We ignore all other frames.
@@ -227,7 +227,7 @@ public final class WebSocket: @unchecked Sendable {
                         
                         self.onBufferCallback(buffer)
                     } catch {
-                        self.close(code: .protocolError, promise: nil)
+                        self.closeWithFuture(code: .protocolError, promise: nil)
                         return
                     }
                 } else {

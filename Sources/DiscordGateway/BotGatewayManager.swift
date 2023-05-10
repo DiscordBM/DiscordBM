@@ -663,15 +663,7 @@ extension BotGatewayManager {
     
     private nonisolated func closeWebSocket(ws: WebSocket?) {
         logger.debug("Will possibly close a web-socket")
-        Task {
-            do {
-                try await ws?.close()
-            } catch {
-                self.logger.warning("Connection close error", metadata: [
-                    "error": .string("\(error)")
-                ])
-            }
-        }
+        ws?.close()
     }
     
     private func sleep(for duration: Duration) async {
