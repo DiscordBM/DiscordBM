@@ -305,7 +305,7 @@ extension DiscordChannel {
         public var tts: Bool
         public var mention_everyone: Bool
         public var mentions: [MentionUser]
-        public var mention_roles: [String]
+        public var mention_roles: [RoleSnowflake]
         public var mention_channels: [ChannelMention]?
         public var attachments: [Attachment]
         public var embeds: [Embed]
@@ -342,7 +342,7 @@ extension DiscordChannel {
         public var tts: Bool?
         public var mention_everyone: Bool?
         public var mentions: [Message.MentionUser]?
-        public var mention_roles: [String]?
+        public var mention_roles: [RoleSnowflake]?
         public var mention_channels: [DiscordChannel.Message.ChannelMention]?
         public var attachments: [DiscordChannel.Message.Attachment]?
         public var embeds: [Embed]?

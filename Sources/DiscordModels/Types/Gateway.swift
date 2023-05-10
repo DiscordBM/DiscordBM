@@ -950,7 +950,7 @@ public struct Gateway: Sendable, Codable {
         public var edited_timestamp: DiscordTimestamp?
         public var tts: Bool
         public var mention_everyone: Bool
-        public var mention_roles: [String]
+        public var mention_roles: [RoleSnowflake]
         public var mention_channels: [DiscordChannel.Message.ChannelMention]?
         public var attachments: [DiscordChannel.Message.Attachment]
         public var embeds: [Embed]
