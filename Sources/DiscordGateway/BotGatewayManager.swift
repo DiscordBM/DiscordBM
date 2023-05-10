@@ -56,7 +56,6 @@ public actor BotGatewayManager: GatewayManager {
     var resumeGatewayURL: String? = nil
     
     //MARK: Shard-ing
-    private static let shardManager = ShardManager()
     var maxConcurrency: Int? = nil
     
     //MARK: Compression
@@ -638,7 +637,10 @@ extension BotGatewayManager {
         await self.sendQueue.reset()
         if let shard = self.identifyPayload.shard,
            let maxConcurrency = self.maxConcurrency {
-            await Self.shardManager.connected(shard: shard, maxConcurrency: maxConcurrency)
+            await ShardManager.shared.connected(
+                shard: shard,
+                maxConcurrency: maxConcurrency
+            )
         }
     }
 
@@ -651,7 +653,10 @@ extension BotGatewayManager {
            let maxConcurrency,
            /// Just to mitigate a possible crash, otherwise shouldn't happen at all.
            maxConcurrency != 0 {
-            await Self.shardManager.waitForOtherShards(shard: shard, maxConcurrency: maxConcurrency)
+            await ShardManager.shared.waitForOtherShards(
+                shard: shard,
+                maxConcurrency: maxConcurrency
+            )
             /// Wait a little bit more.
             /// Nothing scientific but seems to make Discord happy `¯\_(ツ)_/¯`.
             let more = (shard.second / maxConcurrency) * 500
@@ -675,47 +680,6 @@ extension BotGatewayManager {
             logger.warning("Task failed to sleep properly", metadata: [
                 "error": .string("\(error)")
             ])
-        }
-    }
-}
-
-private actor ShardManager {
-    /// [BucketIndex: Continuations]
-    private var waiters = [Int: [CheckedContinuation<Void, Never>]]()
-    private var connectedShards = Set<Int>()
-
-    func waitForOtherShards(shard: IntPair, maxConcurrency: Int) async {
-        let bucketIndex = shard.first / maxConcurrency
-        if bucketIndex == 0 {
-            return
-        } else {
-            /// If other shards are already connected, return immediately.
-            let lastBucketIndex = bucketIndex - 1
-            let start = lastBucketIndex * maxConcurrency
-            let end = start + maxConcurrency
-            let inBuckets = start..<end
-            if inBuckets.allSatisfy({ self.connectedShards.contains($0) }) {
-                return
-            } else {
-                /// If other shards are **not** already connected, wait.
-                await withCheckedContinuation {
-                    self.waiters[bucketIndex, default: []].append($0)
-                }
-            }
-        }
-    }
-
-    func connected(shard: IntPair, maxConcurrency: Int) {
-        self.connectedShards.insert(shard.first)
-        let bucketIndex = shard.first / maxConcurrency
-        let start = bucketIndex * maxConcurrency
-        let end = start + maxConcurrency
-        let inBuckets = start..<end
-        if inBuckets.allSatisfy({ self.connectedShards.contains($0) }) {
-            /// All shards in bucket have connected. Tell the waiters of the next bucket index.
-            for waiter in self.waiters[bucketIndex + 1] ?? [] {
-                waiter.resume()
-            }
         }
     }
 }
