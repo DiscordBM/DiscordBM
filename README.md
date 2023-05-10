@@ -4,6 +4,9 @@
     <a href="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml">
         <img src="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
     </a>
+    <a href="https://codecov.io/gh/MahdiBM/DiscordBM">
+        <img src="https://codecov.io/gh/MahdiBM/DiscordBM/branch/main/graph/badge.svg?token=P4DYX2FWYT" alt="Codecov">
+    </a>
     <a href="https://swift.org">
         <img src="https://img.shields.io/badge/swift-5.8%20/%205.7-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
