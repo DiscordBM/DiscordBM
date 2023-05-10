@@ -52,7 +52,7 @@ private final class WebSocketHandler: ChannelInboundHandler {
         } else {
             errorCode = .unexpectedServerError
         }
-        _ = webSocket.close(code: errorCode)
+        _ = webSocket.closeWithFuture(code: errorCode)
 
         // We always forward the error on to let others see it.
         context.fireErrorCaught(error)
@@ -60,7 +60,7 @@ private final class WebSocketHandler: ChannelInboundHandler {
 
     func channelInactive(context: ChannelHandlerContext) {
         let closedAbnormally = WebSocketErrorCode.unknown(1006)
-        _ = webSocket.close(code: closedAbnormally)
+        _ = webSocket.closeWithFuture(code: closedAbnormally)
 
         // We always forward the error on to let others see it.
         context.fireChannelInactive()

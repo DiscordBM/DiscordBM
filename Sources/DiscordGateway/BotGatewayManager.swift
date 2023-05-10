@@ -56,8 +56,8 @@ public actor BotGatewayManager: GatewayManager {
     var resumeGatewayURL: String? = nil
     
     //MARK: Shard-ing
-    private static let shardManager = ShardManager()
     var maxConcurrency: Int? = nil
+    var shardConnectedOnceBefore = false
     
     //MARK: Compression
     let compression: Bool
@@ -110,8 +110,7 @@ public actor BotGatewayManager: GatewayManager {
     ///   - httpClient: A `HTTPClient`.
     ///   - clientConfiguration: Configuration of the `DiscordClient`.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
-    ///   - compression: Enables transport compression for less network bandwidth usage
-    ///    but more CPU load.
+    ///   - compression: Enables transport compression for less network bandwidth usage.
     ///   - appId: Your Discord application id.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
@@ -122,9 +121,9 @@ public actor BotGatewayManager: GatewayManager {
         compression: Bool = true,
         appId: ApplicationSnowflake? = nil,
         identifyPayload: Gateway.Identify
-    ) {
+    ) async {
         self.eventLoopGroup = eventLoopGroup
-        self.client = DefaultDiscordClient(
+        self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: identifyPayload.token,
             appId: appId,
@@ -143,8 +142,7 @@ public actor BotGatewayManager: GatewayManager {
     ///   - httpClient: A `HTTPClient`.
     ///   - clientConfiguration: Configuration of the `DiscordClient`.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
-    ///   - compression: Enables transport compression for less network bandwidth usage
-    ///    but more CPU load.
+    ///   - compression: Enables transport compression for less network bandwidth usage.
     ///   - token: Your Discord bot-token.
     ///   - appId: Your Discord application id.
     ///   - shard: What shard this Manager is representing, incase you use shard-ing at all.
@@ -161,10 +159,10 @@ public actor BotGatewayManager: GatewayManager {
         shard: IntPair? = nil,
         presence: Gateway.Identify.Presence? = nil,
         intents: [Gateway.Intent] = []
-    ) {
+    ) async {
         let token = Secret(token)
         self.eventLoopGroup = eventLoopGroup
-        self.client = DefaultDiscordClient(
+        self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: token,
             appId: appId,
@@ -299,6 +297,14 @@ public actor BotGatewayManager: GatewayManager {
         await connectionBackoff.resetTryCount()
         await self.sendQueue.reset()
         self.closeWebSocket(ws: self.ws)
+        if let shard = self.identifyPayload.shard,
+           let maxConcurrency = self.maxConcurrency {
+            self.shardConnectedOnceBefore = false
+            await ShardManager.shared.disconnected(
+                shard: shard,
+                maxConcurrency: maxConcurrency
+            )
+        }
     }
 }
 
@@ -639,8 +645,13 @@ extension BotGatewayManager {
         self.unsuccessfulPingsCount = 0
         await self.sendQueue.reset()
         if let shard = self.identifyPayload.shard,
-           let maxConcurrency = self.maxConcurrency {
-            await Self.shardManager.connected(shard: shard, maxConcurrency: maxConcurrency)
+           let maxConcurrency = self.maxConcurrency,
+           !self.shardConnectedOnceBefore {
+            self.shardConnectedOnceBefore = true
+            await ShardManager.shared.connected(
+                shard: shard,
+                maxConcurrency: maxConcurrency
+            )
         }
     }
 
@@ -650,24 +661,27 @@ extension BotGatewayManager {
     /// This shard-ing logic can't handle out-of-process shards.
     private func waitInShardQueueIfNeeded() async {
         if let shard = self.identifyPayload.shard,
-           let maxConcurrency {
-            await Self.shardManager.waitForOtherShards(shard: shard, maxConcurrency: maxConcurrency)
-            /// Wait a little bit more. Nothing scientific but seems to make Discord happy `¯\_(ツ)_/¯`.
-            let more = (shard.second / maxConcurrency) * 250
+           let maxConcurrency,
+           /// Just to mitigate a possible crash, otherwise shouldn't happen at all.
+           maxConcurrency != 0,
+           !self.shardConnectedOnceBefore {
+            await ShardManager.shared.waitForOtherShards(
+                shard: shard,
+                maxConcurrency: maxConcurrency
+            )
+            /// Wait a little bit more.
+            /// Nothing scientific but seems to make Discord happy `¯\_(ツ)_/¯`.
+            let more = (shard.second / maxConcurrency) * 500
             await self.sleep(for: .milliseconds(more))
         }
     }
     
     private nonisolated func closeWebSocket(ws: WebSocket?) {
         logger.debug("Will possibly close a web-socket")
-        Task {
-            do {
-                try await ws?.close()
-            } catch {
-                self.logger.warning("Connection close error", metadata: [
-                    "error": .string("\(error)")
-                ])
-            }
+        ws?.closeWithFuture().whenFailure { error in
+            self.logger.warning("Couldn't close a web-socket properly", metadata: [
+                "error": .string("\(error)")
+            ])
         }
     }
     
@@ -678,47 +692,6 @@ extension BotGatewayManager {
             logger.warning("Task failed to sleep properly", metadata: [
                 "error": .string("\(error)")
             ])
-        }
-    }
-}
-
-private actor ShardManager {
-    /// [BucketIndex: Continuations]
-    var waiters = [Int: [CheckedContinuation<Void, Never>]]()
-    var connectedShards = Set<Int>()
-
-    func waitForOtherShards(shard: IntPair, maxConcurrency: Int) async {
-        let bucketIndex = shard.first / maxConcurrency
-        if bucketIndex == 0 {
-            return
-        } else {
-            /// If other shards are already connected, return immediately.
-            let lastBucketIndex = bucketIndex - 1
-            let start = lastBucketIndex * maxConcurrency
-            let end = start + maxConcurrency
-            let inBuckets = start..<end
-            if inBuckets.allSatisfy({ self.connectedShards.contains($0) }) {
-                return
-            } else {
-                /// If other shards are **not** already connected, wait.
-                await withCheckedContinuation {
-                    self.waiters[bucketIndex, default: []].append($0)
-                }
-            }
-        }
-    }
-
-    func connected(shard: IntPair, maxConcurrency: Int) {
-        self.connectedShards.insert(shard.first)
-        let bucketIndex = shard.first / maxConcurrency
-        let start = bucketIndex * maxConcurrency
-        let end = start + maxConcurrency
-        let inBuckets = start..<end
-        if inBuckets.allSatisfy({ self.connectedShards.contains($0) }) {
-            /// All shards in bucket have connected. Tell the waiters of the next bucket index.
-            for waiter in waiters[bucketIndex + 1] ?? [] {
-                waiter.resume()
-            }
         }
     }
 }

@@ -35,7 +35,7 @@ import AsyncHTTPClient
 
 let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
 
-let bot = BotGatewayManager(
+let bot = await BotGatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,
     token: <#Your Bot Token#>,
@@ -66,7 +66,7 @@ import DiscordBM
 import Vapor
 
 let app: Application = <#Your Vapor Application#>
-let bot = BotGatewayManager(
+let bot = await BotGatewayManager(
     eventLoopGroup: app.eventLoopGroup,
     httpClient: app.http.client.shared,
     token: YOUR_BOT_TOKEN,
@@ -302,7 +302,7 @@ import DiscordLogger
 import Logging
 
 /// Configure the Discord Logging Manager.
-DiscordGlobalConfiguration.logManager = DiscordLogManager(
+DiscordGlobalConfiguration.logManager = await DiscordLogManager(
     httpClient: <#HTTPClient You Made In Previous Steps#>
 )
 
@@ -323,7 +323,7 @@ Here is an example of a decently-configured `DiscordLogManager`:
 Read `DiscordLogManager.Configuration.init` documentation for full info.
 
 ```swift
-DiscordGlobalConfiguration.logManager = DiscordLogManager(
+DiscordGlobalConfiguration.logManager = await DiscordLogManager(
     httpClient: <#HTTPClient You Made In Previous Steps#>,
     configuration: .init(
         aliveNotice: .init(

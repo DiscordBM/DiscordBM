@@ -2,8 +2,6 @@ import DiscordModels
 import Foundation
 import AsyncHTTPClient
 import Logging
-import struct NIOPosix.NIOConnectionError
-import NIOConcurrencyHelpers
 import NIOHTTP1
 import NIOCore
 import Atomics
@@ -30,12 +28,12 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
         token: Secret,
         appId: ApplicationSnowflake?,
         configuration: ClientConfiguration = .init()
-    ) {
+    ) async {
         self.client = httpClient
         self.token = token
         self.appId = appId
         self.configuration = configuration
-        self.cache = ClientCacheStorage.shared.cache(for: token)
+        self.cache = await ClientCacheStorage.shared.cache(for: token)
     }
     
     /// If you provide no app id, you'll need to pass it to some functions on call site.
@@ -44,8 +42,8 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
         token: String,
         appId: ApplicationSnowflake?,
         configuration: ClientConfiguration = .init()
-    ) {
-        self.init(
+    ) async {
+        await self.init(
             httpClient: httpClient,
             token: Secret(token),
             appId: appId,
@@ -743,19 +741,16 @@ public struct ClientConfiguration: Sendable {
 }
 
 //MARK: - ClientCacheStorage
-private final class ClientCacheStorage {
+private actor ClientCacheStorage {
     
     /// [Token: ClientCache]
     private var storage = [String: ClientCache]()
-    private let lock = NIOLock()
     
     private init() { }
     
     static let shared = ClientCacheStorage()
-    
+
     func cache(for token: Secret) -> ClientCache {
-        self.lock.lock()
-        defer { self.lock.unlock() }
         let token = token.value
         if let cache = self.storage[token] {
             return cache

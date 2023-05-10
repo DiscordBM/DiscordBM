@@ -139,10 +139,10 @@ public actor DiscordLogManager {
     public init(
         httpClient: HTTPClient,
         configuration: Configuration = Configuration()
-    ) {
+    ) async {
         /// Will only ever send requests to a webhook endpoint
         /// which doesn't need/use neither `token` nor `appId`.
-        self.client = DefaultDiscordClient(httpClient: httpClient, token: "", appId: nil)
+        self.client = await DefaultDiscordClient(httpClient: httpClient, token: "", appId: nil)
         self.configuration = configuration
         Task { [weak self] in await self?.startAliveNotices() }
     }

@@ -32,7 +32,7 @@ final class WebSocketTests: XCTestCase {
             try await ws.send("hello")
             ws.onText { buffer in
                 promise.succeed(String(buffer: buffer))
-                ws.close(promise: closePromise)
+                ws.closeWithFuture(promise: closePromise)
             }
         }
         try XCTAssertEqual(promise.futureResult.wait(), "hello")
@@ -72,7 +72,7 @@ final class WebSocketTests: XCTestCase {
                 XCTFail("ws received unknown string: \(string)")
             }
             if receivedDeflatedStrings.count == deflatedData.count {
-                ws.close(promise: closePromise)
+                ws.closeWithFuture(promise: closePromise)
             }
         }
         
@@ -92,7 +92,7 @@ final class WebSocketTests: XCTestCase {
         let server = try ServerBootstrap.webSocket(on: self.elg) { req, ws in
             ws.onText { buffer in
                 if String(buffer: buffer) == "close" {
-                    ws.close(promise: serverClose)
+                    ws.closeWithFuture(promise: serverClose)
                 }
             }
         }.bind(host: "localhost", port: 0).wait()
@@ -147,7 +147,7 @@ final class WebSocketTests: XCTestCase {
             ws.send("close", promise: sendPromise)
             ws.onText { buffer in
                 if String(buffer: buffer) == "close" {
-                    ws.close(promise: clientClose)
+                    ws.closeWithFuture(promise: clientClose)
                 }
             }
         }
@@ -164,7 +164,7 @@ final class WebSocketTests: XCTestCase {
             ws.send("hello")
             ws.onText { buffer in
                 promise.succeed(String(buffer: buffer))
-                ws.close(promise: nil)
+                ws.closeWithFuture(promise: nil)
             }
         }.bind(host: "localhost", port: 0).wait()
 
@@ -183,7 +183,7 @@ final class WebSocketTests: XCTestCase {
             ws.onText { _ in
                 Task {
                     try await ws.send("goodbye")
-                    try await ws.close()
+                    try await ws.closeWithFuture().get()
                 }
             }
         }
@@ -196,7 +196,7 @@ final class WebSocketTests: XCTestCase {
         let promise = self.elg.next().makePromise(of: WebSocketErrorCode.self)
 
         let server = try ServerBootstrap.webSocket(on: self.elg) { req, ws in
-            ws.close(code: .normalClosure, promise: nil)
+            ws.closeWithFuture(code: .normalClosure, promise: nil)
         }.bind(host: "localhost", port: 0).wait()
 
         guard let port = server.localAddress?.port else {
@@ -233,7 +233,7 @@ final class WebSocketTests: XCTestCase {
         let server = try ServerBootstrap.webSocket(on: self.elg) { req, ws in
             promiseAuth.succeed(req.headers.first(name: "Auth")!)
             promiseNoContentLength.succeed(req.headers.contains(name: "content-length"))
-            ws.close(promise: nil)
+            ws.closeWithFuture(promise: nil)
         }.bind(host: "localhost", port: 0).wait()
 
         guard let port = server.localAddress?.port else {
@@ -248,7 +248,7 @@ final class WebSocketTests: XCTestCase {
                     headers: ["Auth": "supersecretsauce"],
                     on: self.elg
                 )
-                try await ws.close()
+                try await ws.closeWithFuture().get()
             } catch {
                 promiseAuth.fail(error)
             }
@@ -264,7 +264,7 @@ final class WebSocketTests: XCTestCase {
 
         let server = try ServerBootstrap.webSocket(on: self.elg) { req, ws in
             promise.succeed(req.uri)
-            ws.close(promise: nil)
+            ws.closeWithFuture(promise: nil)
         }.bind(host: "localhost", port: 0).wait()
 
         guard let port = server.localAddress?.port else {
@@ -278,7 +278,7 @@ final class WebSocketTests: XCTestCase {
                     to: "ws://localhost:\(port)?foo=bar&bar=baz",
                     on: self.elg
                 )
-                try await ws.close()
+                try await ws.closeWithFuture().get()
             } catch {
                 promise.fail(error)
             }
@@ -307,7 +307,7 @@ final class WebSocketTests: XCTestCase {
                 case "shutdown":
                     shutdownPromise.succeed(())
                 case "close":
-                    ws.close().whenComplete {
+                    ws.closeWithFuture().whenComplete {
                         print("ws.close() done \($0)")
                     }
                 default:
@@ -328,7 +328,7 @@ final class WebSocketTests: XCTestCase {
     
     func testIPWithTLS() async throws {
         let server = try await ServerBootstrap.webSocket(on: self.elg, tls: true) { req, ws in
-            _ = ws.close()
+            _ = ws.closeWithFuture()
         }.bind(host: "127.0.0.1", port: 0).get()
 
         var tlsConfiguration = TLSConfiguration.makeClientConfiguration()

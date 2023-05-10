@@ -25,7 +25,7 @@ class PermissionChecker: XCTestCase {
     /// Checks to see if the permission checker functions work properly.
     func testCheckPermissions() async throws {
         
-        let bot = BotGatewayManager(
+        let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             compression: false,

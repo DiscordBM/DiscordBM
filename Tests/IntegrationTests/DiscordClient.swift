@@ -12,7 +12,7 @@ class DiscordClientTests: XCTestCase {
 
     override func setUp() async throws {
         self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
-        self.client = DefaultDiscordClient(
+        self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
             appId: Snowflake(Constants.botId),
@@ -1234,7 +1234,7 @@ class DiscordClientTests: XCTestCase {
         let count = 50
         let container = Container(targetCounter: count)
         
-        let client: any DiscordClient = DefaultDiscordClient(
+        let client: any DiscordClient = await DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
             appId: Snowflake(Constants.botId),
@@ -1288,7 +1288,7 @@ class DiscordClientTests: XCTestCase {
         do {
             let cachingBehavior = ClientConfiguration.CachingBehavior.enabled(defaultTTL: 2)
             let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
-            let cacheClient: any DiscordClient = DefaultDiscordClient(
+            let cacheClient: any DiscordClient = await DefaultDiscordClient(
                 httpClient: httpClient,
                 token: Constants.token,
                 appId: Snowflake(Constants.botId),
@@ -1333,7 +1333,7 @@ class DiscordClientTests: XCTestCase {
                 apiEndpointsDefaultTTL: 2
             )
             let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
-            let cacheClient: any DiscordClient = DefaultDiscordClient(
+            let cacheClient: any DiscordClient = await DefaultDiscordClient(
                 httpClient: httpClient,
                 token: Constants.token,
                 appId: Snowflake(Constants.botId),
@@ -1372,7 +1372,7 @@ class DiscordClientTests: XCTestCase {
         /// Caching disabled
         do {
             let configuration = ClientConfiguration(cachingBehavior: .disabled)
-            let cacheClient: any DiscordClient = DefaultDiscordClient(
+            let cacheClient: any DiscordClient = await DefaultDiscordClient(
                 httpClient: httpClient,
                 token: Constants.token,
                 appId: Snowflake(Constants.botId),

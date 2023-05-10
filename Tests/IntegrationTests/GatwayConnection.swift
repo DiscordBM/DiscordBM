@@ -23,7 +23,7 @@ class GatewayConnectionTests: XCTestCase {
     
     func testConnect() async throws {
         
-        let bot = BotGatewayManager(
+        let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             compression: false,
@@ -86,7 +86,7 @@ class GatewayConnectionTests: XCTestCase {
     
     func testConnectWithCompression() async throws {
         
-        let bot = BotGatewayManager(
+        let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             compression: true,
@@ -152,7 +152,9 @@ class GatewayConnectionTests: XCTestCase {
         let exp = Expectation(description: "ConnectForShard:\(shard)")
 
         Task {
-            let bot = BotGatewayManager(
+            defer { exp.fulfill() }
+            
+            let bot = await BotGatewayManager(
                 eventLoopGroup: self.httpClient.eventLoopGroup,
                 httpClient: self.httpClient,
                 compression: true,
@@ -189,8 +191,8 @@ class GatewayConnectionTests: XCTestCase {
 
             Task { await bot.connect() }
 
-            let extraTimeForShard = Double(shard.first * 15)
-            await waitFulfillment(of: [expectation], timeout: 10 + extraTimeForShard)
+            let timeout = Double((shard.first + 1) * 20)
+            await waitFulfillment(of: [expectation], timeout: timeout)
 
             let didHello = await connectionInfo.didHello
             let _ready = await connectionInfo.ready
@@ -213,8 +215,6 @@ class GatewayConnectionTests: XCTestCase {
             try await Task.sleep(for: .seconds(5))
             XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
             XCTAssertEqual(bot.state, .stopped)
-            
-            exp.fulfill()
         }
 
         return exp
@@ -232,16 +232,21 @@ class GatewayConnectionTests: XCTestCase {
             appId: Snowflake(Constants.botId)
         ).getBotGateway().guardSuccess()
 
+        /// Just to make sure it is initialized
+        /// So thread sanitizer doesn't show a warning
+        _ = ShardManager.shared
+
         let shardCount = 16
 
         var expectations = [Expectation]()
 
         for idx in (0..<shardCount) {
-            let exp = connectWithShard(shard: .init(idx, shardCount))
-            expectations.append(exp)
+            expectations.append(
+                connectWithShard(shard: .init(idx, shardCount))
+            )
         }
 
-        await waitFulfillment(of: expectations, timeout: Double(shardCount * 20))
+        await waitFulfillment(of: expectations, timeout: Double(shardCount * 25))
     }
 
     func testGatewayStopsOnInvalidToken() async throws {
@@ -252,7 +257,7 @@ class GatewayConnectionTests: XCTestCase {
             Logger(label: label, factory: { _ in logHandler })
         }
 
-        let bot = BotGatewayManager(
+        let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             compression: false,
@@ -307,7 +312,7 @@ class GatewayConnectionTests: XCTestCase {
 
     func testGatewayRequests() async throws {
         
-        let bot = BotGatewayManager(
+        let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             compression: true,
