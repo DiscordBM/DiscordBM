@@ -298,7 +298,9 @@ public actor DiscordCache {
     }
     
     /// The gateway manager that this `DiscordCache` instance caches from.
-    let gatewayManager: any GatewayManager
+    let gatewayManagers: [any GatewayManager]
+    /// The possible gateway manager that has the guild-members intent.
+    var guildMembersGatewayManager: BotGatewayManager?
     /// What intents to cache their related Gateway events.
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
@@ -345,9 +347,9 @@ public actor DiscordCache {
         itemsLimit: ItemsLimit = .default,
         storage: Storage = Storage()
     ) async {
-        self.gatewayManager = gatewayManager
-        self.intents = DiscordCache.calculateIntentsIntersection(
-            gatewayManager: gatewayManager,
+        self.gatewayManagers = [gatewayManager]
+        (self.intents, self.guildMembersGatewayManager) = DiscordCache.calculateIntentsIntersection(
+            gatewayManagers: gatewayManagers,
             intents: intents
         )
         self.requestMembers = requestAllMembers
@@ -359,6 +361,47 @@ public actor DiscordCache {
         Task {
             for await event in await gatewayManager.makeEventsStream() {
                 self.handleEvent(event)
+            }
+        }
+    }
+
+    /// - Parameters:
+    ///   - gatewayManagers: The gateway managers that this `DiscordCache` instance caches from.
+    ///     Multiple gateway managers are only useful if you're using shard-ing in the same process.
+    ///   - intents: What intents to cache their related Gateway events.
+    ///     This does not affect what events you receive from Discord.
+    ///     The intents you enter here must have been enabled in your `GatewayManager`.
+    ///   - requestAllMembers: In big guilds/servers, Discord only sends your own member/presence
+    ///     info by default. You need to request the rest of the members, which is what this
+    ///     parameter specifies. Must have `guildMembers` and `guildPresences` intents enabled
+    ///     depending on what you want.
+    ///   - messageCachingPolicy: How to cache messages.
+    ///   - itemsLimit: Keeps the storage from using too much memory. Removes the oldest items.
+    ///   - storage: The storage of cached stuff. You usually don't need to provide this parameter.
+    public init(
+        gatewayManagers: [any GatewayManager],
+        intents: Intents,
+        requestAllMembers: RequestMembers,
+        messageCachingPolicy: MessageCachingPolicy = .normal,
+        itemsLimit: ItemsLimit = .default,
+        storage: Storage = Storage()
+    ) async {
+        self.gatewayManagers = gatewayManagers
+        (self.intents, self.guildMembersGatewayManager) = DiscordCache.calculateIntentsIntersection(
+            gatewayManagers: gatewayManagers,
+            intents: intents
+        )
+        self.requestMembers = requestAllMembers
+        self.messageCachingPolicy = messageCachingPolicy
+        self.itemsLimit = itemsLimit
+        self.checkForLimitEvery = itemsLimit.calculateCheckForLimitEvery()
+        self.storage = storage
+
+        for gatewayManager in gatewayManagers {
+            Task {
+                for await event in await gatewayManager.makeEventsStream() {
+                    self.handleEvent(event)
+                }
             }
         }
     }
@@ -375,7 +418,7 @@ public actor DiscordCache {
             self.guilds[guildCreate.id] = guildCreate
             if requestMembers.isEnabled(for: guildCreate.id) {
                 Task {
-                    await gatewayManager.requestGuildMembersChunk(payload: .init(
+                    await guildMembersGatewayManager?.requestGuildMembersChunk(payload: .init(
                         guild_id: guildCreate.id,
                         query: "",
                         limit: 0,
@@ -925,31 +968,35 @@ public actor DiscordCache {
             }
         }
     }
-    
+
     static func calculateIntentsIntersection(
-        gatewayManager manager: any GatewayManager,
+        gatewayManagers managers: [any GatewayManager],
         intents: Intents
-    ) -> Intents {
-        if let managerIntents = (manager as? BotGatewayManager)?.identifyPayload.intents.values {
-            switch intents {
-            case .all:
-                return .some(managerIntents)
-            case let .some(intents):
-                let extraIntents = intents.filter {
-                    !managerIntents.contains($0)
+    ) -> (intents: Intents, guildMembersGatewayManager: BotGatewayManager?)  {
+        var intentsSum = Set<Gateway.Intent>()
+        var guildMembersGatewayManager: BotGatewayManager?
+
+        for manager in managers {
+            if let botGatewayManager = manager as? BotGatewayManager {
+                let managerIntents = botGatewayManager.identifyPayload.intents.values
+
+                if managerIntents.contains(.guildMembers) {
+                    guildMembersGatewayManager = botGatewayManager
                 }
-                if !extraIntents.isEmpty {
-                    DiscordGlobalConfiguration.makeLogger("DiscordCache").warning(
-                        "'DiscordCache' contains intents that are not present in the 'BotGatewayManager'. This might cause events of some requested intents to not be cached", metadata: [
-                            "extraIntents": .stringConvertible(extraIntents)
-                        ]
-                    )
+
+                switch intents {
+                case .all:
+                    intentsSum.formUnion(managerIntents)
+                case let .some(intents):
+                    intentsSum.formUnion(intents.intersection(managerIntents))
                 }
-                return .some(intents.intersection(managerIntents))
+            } else {
+                /// If a `GatewayManager` is not a `BotGatewayManager`, quit.
+                return (intents, nil)
             }
-        } else {
-            return intents
         }
+
+        return (.some(intentsSum), guildMembersGatewayManager)
     }
     
 #if DEBUG

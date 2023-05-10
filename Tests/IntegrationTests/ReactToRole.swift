@@ -1,4 +1,4 @@
-import DiscordGateway
+@testable import DiscordGateway
 import AsyncHTTPClient
 import Logging
 import struct NIOCore.ByteBuffer
@@ -974,7 +974,7 @@ class ReactToRoleTests: XCTestCase {
             intents: .all,
             requestAllMembers: .enabledWithPresences
         )
-        
+
         let invalidMessageId: MessageSnowflake = "1073288867911100000"
         
         /// With cache
@@ -1237,6 +1237,15 @@ class ReactToRoleTests: XCTestCase {
             gatewayManager: bot,
             intents: .all,
             requestAllMembers: .enabledWithPresences
+        )
+
+        /// One unrelated test.
+        /// This tests that `DiscordCache` correctly populates `guildMembersGatewayManager`.
+        let _guildMembersGatewayManager = await cache.guildMembersGatewayManager
+        let guildMembersGatewayManager = try XCTUnwrap(_guildMembersGatewayManager)
+        XCTAssertEqual(
+            ObjectIdentifier(guildMembersGatewayManager),
+            ObjectIdentifier(bot)
         )
         
         let expectation = Expectation(description: "Connected")
