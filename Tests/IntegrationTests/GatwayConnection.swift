@@ -6,23 +6,23 @@ import Foundation
 import XCTest
 
 class GatewayConnectionTests: XCTestCase {
-    
+
     var httpClient: HTTPClient!
-    
+
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
             Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
         }
         self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
     }
-    
+
     deinit {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
         try! httpClient.syncShutdown()
     }
-    
+
     func testConnect() async throws {
-        
+
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
@@ -36,9 +36,9 @@ class GatewayConnectionTests: XCTestCase {
             ),
             intents: Gateway.Intent.allCases
         )
-        
+
         let expectation = Expectation(description: "Connected")
-        
+
         let connectionInfo = ConnectionInfo()
         Task {
             for await event in await bot.makeEventsStream() {
@@ -69,15 +69,15 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertFalse(ready.session_id.isEmpty)
         XCTAssertEqual(ready.user.id, Constants.botId)
         XCTAssertEqual(ready.user.bot, true)
-        
+
         /// The bot should not disconnect for 10s.
         /// This is to make sure we aren't getting invalid-session-ed immediately.
         try await Task.sleep(for: .seconds(10))
         
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
-        
+
         await bot.disconnect()
-        
+
         /// Make sure it is disconnected
         try await Task.sleep(for: .seconds(5))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
@@ -85,7 +85,7 @@ class GatewayConnectionTests: XCTestCase {
     }
     
     func testConnectWithCompression() async throws {
-        
+
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
@@ -99,7 +99,7 @@ class GatewayConnectionTests: XCTestCase {
             ),
             intents: Gateway.Intent.allCases
         )
-        
+
         let expectation = Expectation(description: "Connected")
         
         let connectionInfo = ConnectionInfo()
@@ -133,15 +133,15 @@ class GatewayConnectionTests: XCTestCase {
         XCTAssertFalse(ready.session_id.isEmpty)
         XCTAssertEqual(ready.user.id, Constants.botId)
         XCTAssertEqual(ready.user.bot, true)
-        
+
         /// The bot should not disconnect for 120s.
         /// This is to make sure we aren't getting invalid-session-ed immediately.
         /// Also to check that ping-ponging works.
         try await Task.sleep(for: .seconds(120))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
-        
+
         await bot.disconnect()
-        
+
         /// Make sure it is disconnected
         try await Task.sleep(for: .seconds(5))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
@@ -153,7 +153,7 @@ class GatewayConnectionTests: XCTestCase {
 
         Task {
             defer { exp.fulfill() }
-            
+
             let bot = await BotGatewayManager(
                 eventLoopGroup: self.httpClient.eventLoopGroup,
                 httpClient: self.httpClient,
@@ -311,7 +311,7 @@ class GatewayConnectionTests: XCTestCase {
     }
 
     func testGatewayRequests() async throws {
-        
+
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
@@ -325,7 +325,7 @@ class GatewayConnectionTests: XCTestCase {
             ),
             intents: Gateway.Intent.allCases
         )
-        
+
         let expectation = Expectation(description: "Connected")
 
         Task {
@@ -358,14 +358,14 @@ class GatewayConnectionTests: XCTestCase {
             selfMute: true,
             selfDeaf: false
         ))
-        
+
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we aren't getting invalid-session-ed.
         try await Task.sleep(for: .seconds(10))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
-        
+
         await bot.disconnect()
-        
+
         /// Make sure it is disconnected
         try await Task.sleep(for: .seconds(5))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
@@ -376,9 +376,9 @@ class GatewayConnectionTests: XCTestCase {
 private actor ConnectionInfo {
     var ready: Gateway.Ready? = nil
     var didHello = false
-    
+
     init() { }
-    
+
     func setReady(_ ready: Gateway.Ready) {
         self.ready = ready
     }
