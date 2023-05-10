@@ -232,6 +232,10 @@ class GatewayConnectionTests: XCTestCase {
             appId: Snowflake(Constants.botId)
         ).getBotGateway().guardSuccess()
 
+        /// Just to make sure it is initialized
+        /// So thread sanitizer doesn't show a warning
+        _ = ShardManager.shared
+
         let shardCount = 16
 
         var expectations = [Expectation]()
