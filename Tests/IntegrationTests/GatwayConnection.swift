@@ -23,7 +23,7 @@ class GatewayConnectionTests: XCTestCase {
     
     func testConnect() async throws {
         
-        let bot = BotGatewayManager(
+        let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             compression: false,
@@ -86,7 +86,7 @@ class GatewayConnectionTests: XCTestCase {
     
     func testConnectWithCompression() async throws {
         
-        let bot = BotGatewayManager(
+        let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             compression: true,
@@ -152,7 +152,9 @@ class GatewayConnectionTests: XCTestCase {
         let exp = Expectation(description: "ConnectForShard:\(shard)")
 
         Task {
-            let bot = BotGatewayManager(
+            defer { exp.fulfill() }
+            
+            let bot = await BotGatewayManager(
                 eventLoopGroup: self.httpClient.eventLoopGroup,
                 httpClient: self.httpClient,
                 compression: true,
@@ -213,8 +215,6 @@ class GatewayConnectionTests: XCTestCase {
             try await Task.sleep(for: .seconds(5))
             XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
             XCTAssertEqual(bot.state, .stopped)
-            
-            exp.fulfill()
         }
 
         return exp
@@ -253,7 +253,7 @@ class GatewayConnectionTests: XCTestCase {
             Logger(label: label, factory: { _ in logHandler })
         }
 
-        let bot = BotGatewayManager(
+        let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             compression: false,
@@ -308,7 +308,7 @@ class GatewayConnectionTests: XCTestCase {
 
     func testGatewayRequests() async throws {
         
-        let bot = BotGatewayManager(
+        let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             compression: true,

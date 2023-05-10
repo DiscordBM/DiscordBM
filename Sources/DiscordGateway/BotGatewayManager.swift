@@ -110,8 +110,7 @@ public actor BotGatewayManager: GatewayManager {
     ///   - httpClient: A `HTTPClient`.
     ///   - clientConfiguration: Configuration of the `DiscordClient`.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
-    ///   - compression: Enables transport compression for less network bandwidth usage
-    ///    but more CPU load.
+    ///   - compression: Enables transport compression for less network bandwidth usage.
     ///   - appId: Your Discord application id.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
@@ -122,9 +121,9 @@ public actor BotGatewayManager: GatewayManager {
         compression: Bool = true,
         appId: ApplicationSnowflake? = nil,
         identifyPayload: Gateway.Identify
-    ) {
+    ) async {
         self.eventLoopGroup = eventLoopGroup
-        self.client = DefaultDiscordClient(
+        self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: identifyPayload.token,
             appId: appId,
@@ -143,8 +142,7 @@ public actor BotGatewayManager: GatewayManager {
     ///   - httpClient: A `HTTPClient`.
     ///   - clientConfiguration: Configuration of the `DiscordClient`.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
-    ///   - compression: Enables transport compression for less network bandwidth usage
-    ///    but more CPU load.
+    ///   - compression: Enables transport compression for less network bandwidth usage.
     ///   - token: Your Discord bot-token.
     ///   - appId: Your Discord application id.
     ///   - shard: What shard this Manager is representing, incase you use shard-ing at all.
@@ -161,10 +159,10 @@ public actor BotGatewayManager: GatewayManager {
         shard: IntPair? = nil,
         presence: Gateway.Identify.Presence? = nil,
         intents: [Gateway.Intent] = []
-    ) {
+    ) async {
         let token = Secret(token)
         self.eventLoopGroup = eventLoopGroup
-        self.client = DefaultDiscordClient(
+        self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: token,
             appId: appId,

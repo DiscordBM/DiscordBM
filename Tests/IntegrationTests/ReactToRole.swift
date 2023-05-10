@@ -12,7 +12,7 @@ class ReactToRoleTests: XCTestCase {
     
     override func setUp() async throws {
         self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
-        self.client = DefaultDiscordClient(
+        self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
             /// Intentionally wrong so reaction-handler can take action on its own reaction
