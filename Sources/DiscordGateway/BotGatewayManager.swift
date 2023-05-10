@@ -652,7 +652,8 @@ extension BotGatewayManager {
         if let shard = self.identifyPayload.shard,
            let maxConcurrency {
             await Self.shardManager.waitForOtherShards(shard: shard, maxConcurrency: maxConcurrency)
-            /// Wait a little bit more. Nothing scientific but seems to make Discord happy `¯\_(ツ)_/¯`.
+            /// Wait a little bit more.
+            /// Nothing scientific but seems to make Discord happy `¯\_(ツ)_/¯`.
             let more = (shard.second / maxConcurrency) * 250
             await self.sleep(for: .milliseconds(more))
         }
@@ -680,12 +681,18 @@ extension BotGatewayManager {
             ])
         }
     }
+
+#if DEBUG
+    static func _tests_initializeShardManager() {
+        _ = Self.shardManager
+    }
+#endif
 }
 
 private actor ShardManager {
     /// [BucketIndex: Continuations]
-    var waiters = [Int: [CheckedContinuation<Void, Never>]]()
-    var connectedShards = Set<Int>()
+    private var waiters = [Int: [CheckedContinuation<Void, Never>]]()
+    private var connectedShards = Set<Int>()
 
     func waitForOtherShards(shard: IntPair, maxConcurrency: Int) async {
         let bucketIndex = shard.first / maxConcurrency
@@ -716,7 +723,7 @@ private actor ShardManager {
         let inBuckets = start..<end
         if inBuckets.allSatisfy({ self.connectedShards.contains($0) }) {
             /// All shards in bucket have connected. Tell the waiters of the next bucket index.
-            for waiter in waiters[bucketIndex + 1] ?? [] {
+            for waiter in self.waiters[bucketIndex + 1] ?? [] {
                 waiter.resume()
             }
         }

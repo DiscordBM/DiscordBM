@@ -232,6 +232,9 @@ class GatewayConnectionTests: XCTestCase {
             appId: Snowflake(Constants.botId)
         ).getBotGateway().guardSuccess()
 
+        /// Just to init the variable
+        BotGatewayManager._tests_initializeShardManager()
+
         let shardCount = 8
 
         var expectations = [Expectation]()
