@@ -57,6 +57,7 @@ public actor BotGatewayManager: GatewayManager {
     
     //MARK: Shard-ing
     var maxConcurrency: Int? = nil
+    var shardConnectedOnceBefore = false
     
     //MARK: Compression
     let compression: Bool
@@ -296,6 +297,14 @@ public actor BotGatewayManager: GatewayManager {
         await connectionBackoff.resetTryCount()
         await self.sendQueue.reset()
         self.closeWebSocket(ws: self.ws)
+        if let shard = self.identifyPayload.shard,
+           let maxConcurrency = self.maxConcurrency {
+            self.shardConnectedOnceBefore = false
+            await ShardManager.shared.disconnected(
+                shard: shard,
+                maxConcurrency: maxConcurrency
+            )
+        }
     }
 }
 
@@ -636,7 +645,9 @@ extension BotGatewayManager {
         self.unsuccessfulPingsCount = 0
         await self.sendQueue.reset()
         if let shard = self.identifyPayload.shard,
-           let maxConcurrency = self.maxConcurrency {
+           let maxConcurrency = self.maxConcurrency,
+           !self.shardConnectedOnceBefore {
+            self.shardConnectedOnceBefore = true
             await ShardManager.shared.connected(
                 shard: shard,
                 maxConcurrency: maxConcurrency
@@ -652,7 +663,8 @@ extension BotGatewayManager {
         if let shard = self.identifyPayload.shard,
            let maxConcurrency,
            /// Just to mitigate a possible crash, otherwise shouldn't happen at all.
-           maxConcurrency != 0 {
+           maxConcurrency != 0,
+           !self.shardConnectedOnceBefore {
             await ShardManager.shared.waitForOtherShards(
                 shard: shard,
                 maxConcurrency: maxConcurrency

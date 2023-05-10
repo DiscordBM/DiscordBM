@@ -9,6 +9,7 @@ actor ShardManager {
 
     static let shared = ShardManager()
 
+    /// Wait until the other required shards have connected.
     func waitForOtherShards(shard: IntPair, maxConcurrency: Int) async {
         let bucketIndex = shard.first / maxConcurrency
         if bucketIndex == 0 {
@@ -30,6 +31,7 @@ actor ShardManager {
         }
     }
 
+    /// To be used when a shard has received "ready".
     func connected(shard: IntPair, maxConcurrency: Int) {
         self.connectedShards.insert(shard.first)
         let bucketIndex = shard.first / maxConcurrency
@@ -42,5 +44,10 @@ actor ShardManager {
                 waiter.resume()
             }
         }
+    }
+
+    /// To be used when a shard is manually disconnected.
+    func disconnected(shard: IntPair, maxConcurrency _: Int) {
+        self.connectedShards.remove(shard.first)
     }
 }
