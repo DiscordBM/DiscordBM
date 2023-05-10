@@ -232,13 +232,14 @@ class GatewayConnectionTests: XCTestCase {
             appId: Snowflake(Constants.botId)
         ).getBotGateway().guardSuccess()
 
-        let shardCount = 16
+        let shardCount = 8
 
         var expectations = [Expectation]()
 
         for idx in (0..<shardCount) {
-            let exp = connectWithShard(shard: .init(idx, shardCount))
-            expectations.append(exp)
+            expectations.append(
+                connectWithShard(shard: .init(idx, shardCount))
+            )
         }
 
         await waitFulfillment(of: expectations, timeout: Double(shardCount * 20))

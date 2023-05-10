@@ -54,7 +54,7 @@ private actor Indices {
 
     func appending(_ index: Int) -> [Int] {
         self.value.append(index)
-        return value
+        return self.value
     }
 }
 
@@ -68,7 +68,7 @@ extension XCTestCase {
     ) async {
         let fulfilledIndices = Indices()
 
-        let task = Task {
+        let task = Task(priority: .high) {
             try await Task.sleep(for: .nanoseconds(Int(timeout * 1_000_000_000)))
             let indices = await fulfilledIndices.value
             let left = expectations
