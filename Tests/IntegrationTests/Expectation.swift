@@ -2,30 +2,26 @@ import Foundation
 import XCTest
 
 /// XCTest's own `XCTestExpectation` is waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaay too flaky on linux.
-class Expectation {
+actor Expectation {
     nonisolated let description: String
     private var fulfilled = false
     private var fulfillment: (@Sendable () -> Void)? = nil
-    let queue: DispatchQueue
 
     init(description: String) {
         self.description = description
-        self.queue = DispatchQueue(label: "QueueForExpectation:\(description)")
     }
 
-    func fulfill(
+    nonisolated func fulfill(
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        queue.sync {
-            self._fulfill(file: file, line: line)
-        }
+        Task { await self._fulfill(file: file, line: line) }
     }
 
     private func _fulfill(
         file: StaticString = #filePath,
         line: UInt = #line
-    ) {
+    ) async {
         if self.fulfilled {
             XCTFail(
                 "Expectation '\(self.description)' was already fulfilled",
@@ -39,37 +35,14 @@ class Expectation {
     }
 
     nonisolated func onFulfillment(block: @Sendable @escaping () -> Void) {
-        queue.sync {
-            self._onFulfillment(block: block)
-        }
+        Task { await self._onFulfillment(block: block) }
     }
 
-    private func _onFulfillment(block: @Sendable @escaping () -> Void) {
+    private func _onFulfillment(block: @Sendable @escaping () -> Void) async {
         if self.fulfilled {
             block()
         } else {
             self.fulfillment = block
-        }
-    }
-}
-
-// MARK: - Indices
-private class Indices {
-    private var value: [Int] = []
-    let queue = DispatchQueue(label: "ExpectationIndicesQueue")
-
-    init() { }
-
-    func get() -> [Int] {
-        queue.sync {
-            self.value
-        }
-    }
-
-    func appending(_ index: Int) -> [Int] {
-        queue.sync {
-            self.value.append(index)
-            return self.value
         }
     }
 }
@@ -82,11 +55,11 @@ extension XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) async {
-        let fulfilledIndices = Indices()
+        let storage = FulfillmentStorage()
 
-        let task = Task(priority: .high) {
+        let task = Task {
             try await Task.sleep(for: .nanoseconds(Int(timeout * 1_000_000_000)))
-            let indices = fulfilledIndices.get()
+            let indices = storage.getIndices()
             let left = expectations
                 .enumerated()
                 .filter { !indices.contains($0.offset) }
@@ -96,21 +69,67 @@ extension XCTestCase {
                     file: file,
                     line: line
                 )
+                storage.endContinuation()
             }
         }
 
-        await withCheckedContinuation { (cont: CheckedContinuation<(), Never>) in
+        await withCheckedContinuation { (_cont: CheckedContinuation<(), Never>) in
+            storage.setContinuation(to: _cont)
+
             for (idx, expectation) in expectations.enumerated() {
                 expectation.onFulfillment {
-                    let indices = fulfilledIndices.appending(idx)
+                    let indices = storage.appendingIndex(idx)
                     let left = expectations
                         .enumerated()
                         .filter { !indices.contains($0.offset) }
                     if left.isEmpty {
                         task.cancel()
-                        cont.resume()
+                        storage.endContinuation()
                     }
                 }
+            }
+        }
+    }
+}
+
+// MARK: - Indices
+private class FulfillmentStorage {
+    private var indices: [Int] = []
+    private var continuation: CheckedContinuation<(), Never>? = nil
+    private let queue = DispatchQueue(label: "FulfillmentStorageQueue")
+
+    init() { }
+
+    func getIndices() -> [Int] {
+        queue.sync {
+            self.indices
+        }
+    }
+
+    func appendingIndex(_ index: Int) -> [Int] {
+        queue.sync {
+            self.indices.append(index)
+            return self.indices
+        }
+    }
+
+    func setContinuation(to new: CheckedContinuation<(), Never>) {
+        queue.sync {
+            self.continuation = new
+        }
+    }
+
+    func endContinuation(file: StaticString = #filePath, line: UInt = #line) {
+        queue.sync {
+            if self.continuation != nil {
+                self.continuation!.resume()
+                self.continuation = nil
+            } else {
+                XCTFail(
+                    "Trying to end continuation while it has already ended",
+                    file: file,
+                    line: line
+                )
             }
         }
     }
