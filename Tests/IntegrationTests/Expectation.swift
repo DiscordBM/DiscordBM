@@ -1,26 +1,31 @@
+import Foundation
 import XCTest
 
 /// XCTest's own `XCTestExpectation` is waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaay too flaky on linux.
-actor Expectation {
+class Expectation {
     nonisolated let description: String
     private var fulfilled = false
-    private var fulfillment: (@Sendable () async -> Void)? = nil
+    private var fulfillment: (@Sendable () -> Void)? = nil
+    let queue: DispatchQueue
 
     init(description: String) {
         self.description = description
+        self.queue = DispatchQueue(label: "QueueForExpectation:\(description)")
     }
 
-    nonisolated func fulfill(
+    func fulfill(
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        Task { await self._fulfill(file: file, line: line) }
+        queue.sync {
+            self._fulfill(file: file, line: line)
+        }
     }
 
     private func _fulfill(
         file: StaticString = #filePath,
         line: UInt = #line
-    ) async {
+    ) {
         if self.fulfilled {
             XCTFail(
                 "Expectation '\(self.description)' was already fulfilled",
@@ -29,17 +34,19 @@ actor Expectation {
             )
         } else {
             self.fulfilled = true
-            await self.fulfillment?()
+            self.fulfillment?()
         }
     }
 
-    nonisolated func onFulfillment(block: @Sendable @escaping () async -> Void) {
-        Task { await self._onFulfillment(block: block) }
+    nonisolated func onFulfillment(block: @Sendable @escaping () -> Void) {
+        queue.sync {
+            self._onFulfillment(block: block)
+        }
     }
 
-    private func _onFulfillment(block: @Sendable @escaping () async -> Void) async {
+    private func _onFulfillment(block: @Sendable @escaping () -> Void) {
         if self.fulfilled {
-            await block()
+            block()
         } else {
             self.fulfillment = block
         }
@@ -47,14 +54,23 @@ actor Expectation {
 }
 
 // MARK: - Indices
-private actor Indices {
-    var value: [Int] = []
+private class Indices {
+    private var value: [Int] = []
+    let queue = DispatchQueue(label: "ExpectationIndicesQueue")
 
     init() { }
 
+    func get() -> [Int] {
+        queue.sync {
+            self.value
+        }
+    }
+
     func appending(_ index: Int) -> [Int] {
-        self.value.append(index)
-        return self.value
+        queue.sync {
+            self.value.append(index)
+            return self.value
+        }
     }
 }
 
@@ -70,7 +86,7 @@ extension XCTestCase {
 
         let task = Task(priority: .high) {
             try await Task.sleep(for: .nanoseconds(Int(timeout * 1_000_000_000)))
-            let indices = await fulfilledIndices.value
+            let indices = fulfilledIndices.get()
             let left = expectations
                 .enumerated()
                 .filter { !indices.contains($0.offset) }
@@ -86,7 +102,7 @@ extension XCTestCase {
         await withCheckedContinuation { (cont: CheckedContinuation<(), Never>) in
             for (idx, expectation) in expectations.enumerated() {
                 expectation.onFulfillment {
-                    let indices = await fulfilledIndices.appending(idx)
+                    let indices = fulfilledIndices.appending(idx)
                     let left = expectations
                         .enumerated()
                         .filter { !indices.contains($0.offset) }
