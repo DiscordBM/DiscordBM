@@ -183,7 +183,7 @@ final class WebSocketTests: XCTestCase {
             ws.onText { _ in
                 Task {
                     try await ws.send("goodbye")
-                    ws.close()
+                    try await ws.closeWithFuture().get()
                 }
             }
         }
@@ -248,7 +248,7 @@ final class WebSocketTests: XCTestCase {
                     headers: ["Auth": "supersecretsauce"],
                     on: self.elg
                 )
-                ws.close()
+                try await ws.closeWithFuture().get()
             } catch {
                 promiseAuth.fail(error)
             }
@@ -278,7 +278,7 @@ final class WebSocketTests: XCTestCase {
                     to: "ws://localhost:\(port)?foo=bar&bar=baz",
                     on: self.elg
                 )
-                ws.close()
+                try await ws.closeWithFuture().get()
             } catch {
                 promise.fail(error)
             }

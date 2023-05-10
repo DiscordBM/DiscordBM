@@ -104,11 +104,7 @@ public final class WebSocket: @unchecked Sendable {
         self.channel.writeAndFlush(frame, promise: promise)
     }
 
-    public func close(code: WebSocketErrorCode = .goingAway) {
-        _ = self.closeWithFuture(code: code)
-    }
-
-    func closeWithFuture(code: WebSocketErrorCode = .goingAway) -> EventLoopFuture<Void> {
+    public func closeWithFuture(code: WebSocketErrorCode = .goingAway) -> EventLoopFuture<Void> {
         let promise = self.eventLoop.makePromise(of: Void.self)
         self.closeWithFuture(code: code, promise: promise)
         return promise.futureResult

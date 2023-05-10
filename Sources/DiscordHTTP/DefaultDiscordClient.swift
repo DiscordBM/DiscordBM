@@ -2,8 +2,6 @@ import DiscordModels
 import Foundation
 import AsyncHTTPClient
 import Logging
-import struct NIOPosix.NIOConnectionError
-import NIOConcurrencyHelpers
 import NIOHTTP1
 import NIOCore
 import Atomics
@@ -747,22 +745,22 @@ private final class ClientCacheStorage {
     
     /// [Token: ClientCache]
     private var storage = [String: ClientCache]()
-    private let lock = NIOLock()
+    private let queue = DispatchQueue(label: "ClientCacheStorage")
     
     private init() { }
     
     static let shared = ClientCacheStorage()
     
     func cache(for token: Secret) -> ClientCache {
-        self.lock.lock()
-        defer { self.lock.unlock() }
-        let token = token.value
-        if let cache = self.storage[token] {
-            return cache
-        } else {
-            let cache = ClientCache()
-            self.storage[token] = cache
-            return cache
+        queue.sync {
+            let token = token.value
+            if let cache = self.storage[token] {
+                return cache
+            } else {
+                let cache = ClientCache()
+                self.storage[token] = cache
+                return cache
+            }
         }
     }
 }
