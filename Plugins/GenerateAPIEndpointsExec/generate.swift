@@ -262,6 +262,51 @@ init? (endpoint: APIEndpoint) {
 }
 """
 
+///// https://discord.com/developers/docs/resources/channel#delete-own-reaction
+//@inlinable
+//func deleteOwnMessageReaction(
+//    channelId: ChannelSnowflake,
+//    messageId: MessageSnowflake,
+//    emoji: Reaction
+//) async throws -> DiscordHTTPResponse {
+//    let endpoint = APIEndpoint.deleteOwnMessageReaction(
+//        channelId: channelId,
+//        messageId: messageId,
+//        emojiName: emoji.urlPathDescription
+//    )
+//    return try await self.send(request: .init(to: endpoint))
+//}
+
+#warning("remove these")
+
+let funcs = grouped.flatMap(\.value).map {
+    ($0.info.makeCase(), $0.info.makeRawCaseNameWithParams())
+}.map { (infos, raw) -> String in
+    let (name, params) = raw
+    var paramsString = params.map { "\($0): \($0)" }.joined(separator: ", ")
+    if !paramsString.isEmpty {
+        paramsString = "(\(paramsString))"
+    }
+    let endpoint = name.dropLast().dropFirst(6) + paramsString
+    var noCase = String(infos.dropFirst(5))
+    if noCase.last != ")" {
+        noCase += "()"
+    } else {
+        noCase = noCase.replacingOccurrences(of: ", ", with: ",\n    ")
+            .replacingOccurrences(of: ")", with: "\n)")
+            .replacingOccurrences(of: "(", with: "(\n    ")
+    }
+    return """
+    @inlinable
+    func \(noCase) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.\(endpoint)
+        return try await self.send(request: .init(to: endpoint))
+    }
+    """
+}.joined(separator: "\n\n")
+
+let toPrint = funcs
+
 let result = """
 // DO NOT EDIT. Auto-generated using the GenerateAPIEndpoints command plugin.
 
