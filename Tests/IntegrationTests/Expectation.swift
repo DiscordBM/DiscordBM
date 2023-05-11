@@ -35,7 +35,7 @@ actor Expectation {
         }
     }
 
-    nonisolated func onFulfillment(block: @Sendable @escaping () -> Void) {
+    nonisolated private func onFulfillment(block: @Sendable @escaping () -> Void) {
         Task { await self._onFulfillment(block: block) }
     }
 
@@ -49,11 +49,8 @@ actor Expectation {
             break
         }
     }
-}
 
-// MARK: - +XCTestCase
-extension XCTestCase {
-    func waitFulfillment(
+    static func waitFulfillment(
         of expectations: [Expectation],
         timeout: Double,
         file: StaticString = #filePath,
@@ -96,6 +93,23 @@ extension XCTestCase {
                 }
             }
         }
+    }
+}
+
+// MARK: - +XCTestCase
+extension XCTestCase {
+    func waitFulfillment(
+        of expectations: [Expectation],
+        timeout: Double,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
+        await Expectation.waitFulfillment(
+            of: expectations,
+            timeout: timeout,
+            file: file,
+            line: line
+        )
     }
 }
 
