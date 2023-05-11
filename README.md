@@ -97,10 +97,10 @@ struct EntryPoint {
         /// Make an instance like above
         let bot: BotGatewayManager = <#GatewayManager You Made In Previous Steps#>
 
-        /// Tell the manager to connect to Discord
-        /// Might take a few seconds, or even minutes under bad network connections
-        /// Use a `Task { }` if you don't care or you don't want to wait
-        await bot.connect()
+        /// Tell the manager to connect to Discord. Use a `Task { }` because it
+        /// might take a few seconds, or even minutes under bad network connections
+        /// Don't use `Task { }` if you care and want to wait
+        Task { await bot.connect() }
 
         /// Get an `AsyncStream` of `Gateway.Event`s
         let stream = await bot.makeEventsStream()
@@ -193,8 +193,9 @@ for await event in await bot.makeEventsStream() {
 <details>
   <summary> Click to expand </summary>
   
-It's usually better to send a link of your media to Discord, instead of sending the actual file.   
-However, `DiscordBM` still supports sending files directly.   
+`DiscordBM` has support for sending files as attachments.   
+> **Note**   
+> It's usually better to send a link of your media to Discord, instead of sending the actual file.   
 ```swift
 Task {
     /// Raw data of anything like an image
