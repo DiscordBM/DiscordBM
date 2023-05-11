@@ -1232,12 +1232,13 @@ class DiscordClientTests: XCTestCase {
         let content = "Spamming! \(Date())"
         let rateLimitedErrors = ManagedAtomic(0)
         let count = 50
-        let container = Container(targetCounter: count)
+        let counter = Counter(target: count)
         
         let client: any DiscordClient = await DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
             appId: Snowflake(Constants.botId),
+            /// Disable retrials.
             configuration: .init(retryPolicy: nil)
         )
         
@@ -1251,9 +1252,9 @@ class DiscordClientTests: XCTestCase {
                         channelId: Constants.Channels.spam.id,
                         payload: .init(content: content)
                     ).decode()
-                    await container.increaseCounter()
+                    await counter.increase()
                 } catch {
-                    await container.increaseCounter()
+                    await counter.increase()
                     switch error {
                     case DiscordHTTPError.rateLimited:
                         rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
@@ -1274,7 +1275,7 @@ class DiscordClientTests: XCTestCase {
             }
         }
         
-        await container.waitForCounter()
+        await counter.waitFulfillment()
         
         XCTAssertGreaterThan(rateLimitedErrors.load(ordering: .relaxed), 0)
         XCTAssertLessThan(rateLimitedErrors.load(ordering: .relaxed), count)
@@ -1388,7 +1389,7 @@ class DiscordClientTests: XCTestCase {
             let command = try await cacheClient.createApplicationCommand(
                 payload: .init(name: commandName, description: commandDesc)
             ).decode()
-            
+
             XCTAssertEqual(command.name, commandName)
             XCTAssertEqual(command.description, commandDesc)
             
@@ -1415,35 +1416,30 @@ class DiscordClientTests: XCTestCase {
     }
 }
 
-private actor Container {
+private actor Counter {
     private var counter = 0
-    private var targetCounter: Int
+    private var target: Int
+    private var expectation: Expectation?
     
-    init(targetCounter: Int) {
-        self.targetCounter = targetCounter
+    init(target: Int) {
+        self.target = target
     }
     
-    func increaseCounter() {
+    func increase() {
         counter += 1
-        if counter == targetCounter {
-            waiter?.resume()
-            waiter = nil
+        if counter == target {
+            expectation?.fulfill()
+            expectation = nil
         }
     }
     
-    private var waiter: CheckedContinuation<(), Never>?
-    
-    func waitForCounter() async {
-        Task {
-            try await Task.sleep(for: .seconds(10))
-            if waiter != nil {
-                waiter?.resume()
-                waiter = nil
-                XCTFail("Failed to test in-time")
-            }
-        }
-        await withCheckedContinuation {
-            waiter = $0
+    func waitFulfillment() async {
+        let exp = Expectation(description: "Counter")
+        self.expectation = exp
+        if counter == target {
+            return
+        } else {
+            await Expectation.waitFulfillment(of: [exp], timeout: 10)
         }
     }
 }
