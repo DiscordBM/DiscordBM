@@ -6,6 +6,7 @@ import Foundation
 /// The file is the Discord API's (alpha) postman collection
 /// (https://www.postman.com/discord-api) which is exported and then
 /// converted to the OpenAPI format.
+/// I've removed some invalid endpoints from the spec, and added some new ones.
 
 @main
 struct EntryPoint {

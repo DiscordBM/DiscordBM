@@ -480,7 +480,7 @@ public actor ReactToRoleHandler {
         }
     }
     
-    func checkAndRemoveRoleFromUser(emoji: PartialEmoji, userId: UserSnowflake) {
+    func checkAndRemoveRoleFromUser(emoji: Emoji, userId: UserSnowflake) {
         Task {
             do {
                 let emojiReaction = try Reaction(emoji: emoji)

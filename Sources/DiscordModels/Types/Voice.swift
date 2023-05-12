@@ -47,6 +47,15 @@ public struct PartialVoiceState: Sendable, Codable {
     }
 }
 
+/// https://discord.com/developers/docs/resources/voice#voice-region-object-voice-region-structure
+public struct VoiceRegion: Sendable, Codable {
+    public var id: String
+    public var name: String
+    public var optimal: Bool
+    public var deprecated: Bool
+    public var custom: Bool
+}
+
 /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state-gateway-voice-state-update-structure
 public struct VoiceStateUpdate: Sendable, Codable {
     public var guild_id: GuildSnowflake

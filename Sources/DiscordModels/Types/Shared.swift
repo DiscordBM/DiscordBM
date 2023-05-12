@@ -909,8 +909,8 @@ public typealias UserSnowflake = Snowflake<DiscordUser>
 /// Convenience type-alias for `Snowflake<PartialApplication>`
 public typealias ApplicationSnowflake = Snowflake<PartialApplication>
 
-/// Convenience type-alias for `Snowflake<PartialEmoji>`
-public typealias EmojiSnowflake = Snowflake<PartialEmoji>
+/// Convenience type-alias for `Snowflake<Emoji>`
+public typealias EmojiSnowflake = Snowflake<Emoji>
 
 /// Convenience type-alias for `Snowflake<Sticker>`
 public typealias StickerSnowflake = Snowflake<Sticker>

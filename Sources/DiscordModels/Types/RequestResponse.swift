@@ -1,5 +1,5 @@
 
-public enum RequestResponse {
+public enum Responses {
     
     /// https://discord.com/developers/docs/resources/channel#list-public-archived-threads-response-body
     public struct ArchivedThread: Sendable, Codable {

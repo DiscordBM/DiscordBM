@@ -245,9 +245,9 @@ extension DiscordChannel {
         public struct Reaction: Sendable, Codable {
             public var count: Int
             public var me: Bool
-            public var emoji: PartialEmoji
+            public var emoji: Emoji
 
-            public init(count: Int, me: Bool, emoji: PartialEmoji) {
+            public init(count: Int, me: Bool, emoji: Emoji) {
                 self.count = count
                 self.me = me
                 self.emoji = emoji

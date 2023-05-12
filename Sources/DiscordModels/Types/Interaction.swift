@@ -285,12 +285,12 @@ extension Interaction {
             
             public var style: Style
             public var label: String?
-            public var emoji: PartialEmoji?
+            public var emoji: Emoji?
             public var custom_id: String?
             public var url: String?
             public var disabled: Bool?
 
-            public init(style: Style, label: String? = nil, emoji: PartialEmoji? = nil, custom_id: String? = nil, url: String? = nil, disabled: Bool? = nil) {
+            public init(style: Style, label: String? = nil, emoji: Emoji? = nil, custom_id: String? = nil, url: String? = nil, disabled: Bool? = nil) {
                 self.style = style
                 self.label = label
                 self.emoji = emoji
@@ -308,10 +308,10 @@ extension Interaction {
                 public var label: String
                 public var value: String
                 public var description: String?
-                public var emoji: PartialEmoji?
+                public var emoji: Emoji?
                 public var `default`: Bool?
                 
-                public init(label: String, value: String, description: String? = nil, emoji: PartialEmoji? = nil, `default`: Bool? = nil) {
+                public init(label: String, value: String, description: String? = nil, emoji: Emoji? = nil, `default`: Bool? = nil) {
                     self.label = label
                     self.value = value
                     self.description = description

@@ -259,18 +259,15 @@ public enum APIEndpoint: Endpoint {
     case getWebhook(webhookId: WebhookSnowflake)
     case getWebhookByToken(webhookId: WebhookSnowflake, webhookToken: String)
     case getWebhookMessage(webhookId: WebhookSnowflake, webhookToken: String, messageId: MessageSnowflake)
-    case getWebhooksMessagesOriginal(webhookId: WebhookSnowflake, webhookToken: String)
     case listChannelWebhooks(channelId: ChannelSnowflake)
     case createWebhook(channelId: ChannelSnowflake)
     case executeWebhook(webhookId: WebhookSnowflake, webhookToken: String)
-    case patchWebhooksMessagesOriginal(webhookId: WebhookSnowflake, webhookToken: String)
     case updateWebhook(webhookId: WebhookSnowflake)
     case updateWebhookByToken(webhookId: WebhookSnowflake, webhookToken: String)
     case updateWebhookMessage(webhookId: WebhookSnowflake, webhookToken: String, messageId: MessageSnowflake)
     case deleteWebhook(webhookId: WebhookSnowflake)
     case deleteWebhookByToken(webhookId: WebhookSnowflake, webhookToken: String)
     case deleteWebhookMessage(webhookId: WebhookSnowflake, webhookToken: String, messageId: MessageSnowflake)
-    case deleteWebhooksMessagesOriginal(webhookId: WebhookSnowflake, webhookToken: String)
 
     var urlPrefix: String {
         "https://discord.com/api/v\(DiscordGlobalConfiguration.apiVersion)/"
@@ -827,9 +824,6 @@ public enum APIEndpoint: Endpoint {
             let webhookId = webhookId.value
             let messageId = messageId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
-        case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = webhookId.value
-            suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .listChannelWebhooks(channelId):
             let channelId = channelId.value
             suffix = "channels/\(channelId)/webhooks"
@@ -839,9 +833,6 @@ public enum APIEndpoint: Endpoint {
         case let .executeWebhook(webhookId, webhookToken):
             let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
-        case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = webhookId.value
-            suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .updateWebhook(webhookId):
             let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)"
@@ -862,9 +853,6 @@ public enum APIEndpoint: Endpoint {
             let webhookId = webhookId.value
             let messageId = messageId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
-        case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = webhookId.value
-            suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         }
         return urlPrefix + suffix
     }
@@ -1422,10 +1410,6 @@ public enum APIEndpoint: Endpoint {
             let webhookToken = webhookToken.urlPathEncoded().hash
             let messageId = messageId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
-        case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = webhookId.value
-            let webhookToken = webhookToken.urlPathEncoded().hash
-            suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .listChannelWebhooks(channelId):
             let channelId = channelId.value
             suffix = "channels/\(channelId)/webhooks"
@@ -1436,10 +1420,6 @@ public enum APIEndpoint: Endpoint {
             let webhookId = webhookId.value
             let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
-        case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = webhookId.value
-            let webhookToken = webhookToken.urlPathEncoded().hash
-            suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         case let .updateWebhook(webhookId):
             let webhookId = webhookId.value
             suffix = "webhooks/\(webhookId)"
@@ -1464,10 +1444,6 @@ public enum APIEndpoint: Endpoint {
             let webhookToken = webhookToken.urlPathEncoded().hash
             let messageId = messageId.value
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
-        case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
-            let webhookId = webhookId.value
-            let webhookToken = webhookToken.urlPathEncoded().hash
-            suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/@original"
         }
         return urlPrefix + suffix
     }
@@ -1637,18 +1613,15 @@ public enum APIEndpoint: Endpoint {
         case .getWebhook: return .GET
         case .getWebhookByToken: return .GET
         case .getWebhookMessage: return .GET
-        case .getWebhooksMessagesOriginal: return .GET
         case .listChannelWebhooks: return .GET
         case .createWebhook: return .POST
         case .executeWebhook: return .POST
-        case .patchWebhooksMessagesOriginal: return .PATCH
         case .updateWebhook: return .PATCH
         case .updateWebhookByToken: return .PATCH
         case .updateWebhookMessage: return .PATCH
         case .deleteWebhook: return .DELETE
         case .deleteWebhookByToken: return .DELETE
         case .deleteWebhookMessage: return .DELETE
-        case .deleteWebhooksMessagesOriginal: return .DELETE
         }
     }
 
@@ -1817,18 +1790,15 @@ public enum APIEndpoint: Endpoint {
         case .getWebhook: return true
         case .getWebhookByToken: return true
         case .getWebhookMessage: return true
-        case .getWebhooksMessagesOriginal: return true
         case .listChannelWebhooks: return true
         case .createWebhook: return true
         case .executeWebhook: return true
-        case .patchWebhooksMessagesOriginal: return true
         case .updateWebhook: return true
         case .updateWebhookByToken: return true
         case .updateWebhookMessage: return true
         case .deleteWebhook: return true
         case .deleteWebhookByToken: return true
         case .deleteWebhookMessage: return true
-        case .deleteWebhooksMessagesOriginal: return true
         }
     }
 
@@ -1997,18 +1967,15 @@ public enum APIEndpoint: Endpoint {
         case .getWebhook: return true
         case .getWebhookByToken: return false
         case .getWebhookMessage: return false
-        case .getWebhooksMessagesOriginal: return false
         case .listChannelWebhooks: return true
         case .createWebhook: return true
         case .executeWebhook: return false
-        case .patchWebhooksMessagesOriginal: return false
         case .updateWebhook: return true
         case .updateWebhookByToken: return false
         case .updateWebhookMessage: return false
         case .deleteWebhook: return true
         case .deleteWebhookByToken: return false
         case .deleteWebhookMessage: return false
-        case .deleteWebhooksMessagesOriginal: return false
         }
     }
 
@@ -2340,15 +2307,11 @@ public enum APIEndpoint: Endpoint {
             return [webhookId.value, webhookToken]
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
             return [webhookId.value, webhookToken, messageId.value]
-        case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
-            return [webhookId.value, webhookToken]
         case let .listChannelWebhooks(channelId):
             return [channelId.value]
         case let .createWebhook(channelId):
             return [channelId.value]
         case let .executeWebhook(webhookId, webhookToken):
-            return [webhookId.value, webhookToken]
-        case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
             return [webhookId.value, webhookToken]
         case let .updateWebhook(webhookId):
             return [webhookId.value]
@@ -2362,8 +2325,6 @@ public enum APIEndpoint: Endpoint {
             return [webhookId.value, webhookToken]
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
             return [webhookId.value, webhookToken, messageId.value]
-        case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
-            return [webhookId.value, webhookToken]
         }
     }
 
@@ -2532,18 +2493,15 @@ public enum APIEndpoint: Endpoint {
         case .getWebhook: return 161
         case .getWebhookByToken: return 162
         case .getWebhookMessage: return 163
-        case .getWebhooksMessagesOriginal: return 164
-        case .listChannelWebhooks: return 165
-        case .createWebhook: return 166
-        case .executeWebhook: return 167
-        case .patchWebhooksMessagesOriginal: return 168
-        case .updateWebhook: return 169
-        case .updateWebhookByToken: return 170
-        case .updateWebhookMessage: return 171
-        case .deleteWebhook: return 172
-        case .deleteWebhookByToken: return 173
-        case .deleteWebhookMessage: return 174
-        case .deleteWebhooksMessagesOriginal: return 175
+        case .listChannelWebhooks: return 164
+        case .createWebhook: return 165
+        case .executeWebhook: return 166
+        case .updateWebhook: return 167
+        case .updateWebhookByToken: return 168
+        case .updateWebhookMessage: return 169
+        case .deleteWebhook: return 170
+        case .deleteWebhookByToken: return 171
+        case .deleteWebhookMessage: return 172
         }
     }
 
@@ -2875,16 +2833,12 @@ public enum APIEndpoint: Endpoint {
             return "getWebhookByToken(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
             return "getWebhookMessage(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken), messageId.value: \(messageId.value))"
-        case let .getWebhooksMessagesOriginal(webhookId, webhookToken):
-            return "getWebhooksMessagesOriginal(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         case let .listChannelWebhooks(channelId):
             return "listChannelWebhooks(channelId.value: \(channelId.value))"
         case let .createWebhook(channelId):
             return "createWebhook(channelId.value: \(channelId.value))"
         case let .executeWebhook(webhookId, webhookToken):
             return "executeWebhook(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
-        case let .patchWebhooksMessagesOriginal(webhookId, webhookToken):
-            return "patchWebhooksMessagesOriginal(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         case let .updateWebhook(webhookId):
             return "updateWebhook(webhookId.value: \(webhookId.value))"
         case let .updateWebhookByToken(webhookId, webhookToken):
@@ -2897,8 +2851,6 @@ public enum APIEndpoint: Endpoint {
             return "deleteWebhookByToken(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
             return "deleteWebhookMessage(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken), messageId.value: \(messageId.value))"
-        case let .deleteWebhooksMessagesOriginal(webhookId, webhookToken):
-            return "deleteWebhooksMessagesOriginal(webhookId.value: \(webhookId.value), webhookToken: \(webhookToken))"
         }
     }
 }
@@ -3062,7 +3014,6 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case getWebhook
     case getWebhookByToken
     case getWebhookMessage
-    case getWebhooksMessagesOriginal
     case listChannelWebhooks
 
     public var description: String {
@@ -3137,7 +3088,6 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .getWebhook: return "getWebhook"
         case .getWebhookByToken: return "getWebhookByToken"
         case .getWebhookMessage: return "getWebhookMessage"
-        case .getWebhooksMessagesOriginal: return "getWebhooksMessagesOriginal"
         case .listChannelWebhooks: return "listChannelWebhooks"
         }
     }
@@ -3214,7 +3164,6 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .getWebhook: self = .getWebhook
         case .getWebhookByToken: self = .getWebhookByToken
         case .getWebhookMessage: self = .getWebhookMessage
-        case .getWebhooksMessagesOriginal: self = .getWebhooksMessagesOriginal
         case .listChannelWebhooks: self = .listChannelWebhooks
         default: return nil
         }

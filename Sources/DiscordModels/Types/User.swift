@@ -44,9 +44,6 @@ public struct DiscordUser: Sendable, Codable {
     public var flags: IntBitField<Flag>?
     public var premium_type: PremiumKind?
     public var public_flags: IntBitField<Flag>?
-    public var avatar_decoration: String?
-    public var bio: String?
-    public var banner_color: DiscordColor?
 }
 
 /// A partial ``DiscordUser`` object.
@@ -67,7 +64,62 @@ public struct PartialUser: Sendable, Codable {
     public var flags: IntBitField<DiscordUser.Flag>?
     public var premium_type: DiscordUser.PremiumKind?
     public var public_flags: IntBitField<DiscordUser.Flag>?
-    public var avatar_decoration: String?
-    public var bio: String?
-    public var banner_color: DiscordColor?
+}
+
+extension DiscordUser {
+    /// https://discord.com/developers/docs/resources/user#connection-object-connection-structure
+    public struct Connection: Sendable, Codable {
+
+        /// https://discord.com/developers/docs/resources/user#connection-object-services
+        public enum Service: String, Sendable, Codable {
+            case battleNet = "Battle.net"
+            case ebay = "eBay"
+            case epicGames = "Epic Games"
+            case facebook = "Facebook"
+            case github = "GitHub"
+            case instagram = "Instagram"
+            case leagueOfLegends = "League of Legends"
+            case paypal = "PayPal"
+            case playstation = "PlayStation Network"
+            case reddit = "Reddit"
+            case riotGames = "Riot Games"
+            case spotify = "Spotify"
+            case skype = "Skype"
+            case steam = "Steam"
+            case tikTok = "TikTok"
+            case twitch = "Twitch"
+            case twitter = "Twitter"
+            case xbox = "Xbox"
+            case youtube = "YouTube"
+        }
+
+        /// https://discord.com/developers/docs/resources/user#connection-object-visibility-types
+        public enum VisibilityKind: Int, Sendable, Codable {
+            case none = 0
+            case everyone = 1
+        }
+
+        public var id: String
+        public var name: String
+        public var type: Service
+        public var revoked: Bool?
+        public var integrations: [PartialIntegration]?
+        public var verified: Bool
+        public var friend_sync: Bool
+        public var show_activity: Bool
+        public var two_way_link: Bool
+        public var visibility: VisibilityKind
+    }
+
+    /// https://discord.com/developers/docs/resources/user#application-role-connection-object
+    public struct ApplicationRoleConnection: Sendable, Codable, ValidatablePayload {
+        public var platform_name: String?
+        public var platform_username: String?
+        public var metadata: [String: ApplicationRoleConnectionMetadata]
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountDoesNotExceed(platform_name, max: 50, name: "platform_name")
+            validateCharacterCountDoesNotExceed(platform_username, max: 100, name: "platform_username")
+        }
+    }
 }

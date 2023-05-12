@@ -1425,21 +1425,26 @@ private actor Counter {
         self.target = target
     }
     
-    func increase() {
-        counter += 1
-        if counter == target {
-            expectation?.fulfill()
-            expectation = nil
+    func increase(file: StaticString = #filePath, line: UInt = #line) {
+        self.counter += 1
+        if self.counter == self.target {
+            self.expectation?.fulfill(file: file, line: line)
+            self.expectation = nil
         }
     }
     
-    func waitFulfillment() async {
-        let exp = Expectation(description: "Counter")
-        self.expectation = exp
-        if counter == target {
+    func waitFulfillment(file: StaticString = #filePath, line: UInt = #line) async {
+        if self.counter == self.target {
             return
         } else {
-            await Expectation.waitFulfillment(of: [exp], timeout: 10)
+            let exp = Expectation(description: "Counter")
+            self.expectation = exp
+            await Expectation.waitFulfillment(
+                of: [exp],
+                timeout: 10,
+                file: file,
+                line: line
+            )
         }
     }
 }

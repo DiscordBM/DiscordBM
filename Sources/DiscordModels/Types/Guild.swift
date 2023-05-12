@@ -190,7 +190,7 @@ public struct Guild: Sendable, Codable {
     public var default_message_notifications: DefaultMessageNotificationLevel
     public var explicit_content_filter: ExplicitContentFilterLevel
     public var roles: [Role]
-    public var emojis: [PartialEmoji]
+    public var emojis: [Emoji]
     public var features: [Feature]
     public var mfa_level: MFALevel
     public var application_id: ApplicationSnowflake?
@@ -264,7 +264,7 @@ public struct PartialGuild: Sendable, Codable {
     public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
     public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
     public var roles: [Role]?
-    public var emojis: [PartialEmoji]?
+    public var emojis: [Emoji]?
     public var features: [Guild.Feature]?
     public var mfa_level: Guild.MFALevel?
     public var application_id: ApplicationSnowflake?

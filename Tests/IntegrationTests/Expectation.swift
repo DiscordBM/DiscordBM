@@ -22,7 +22,7 @@ actor Expectation {
         Task { await self._fulfill(file: file, line: line) }
     }
 
-    private func _fulfill(file: StaticString = #filePath, line: UInt = #line) async {
+    private func _fulfill(file: StaticString, line: UInt) async {
         if self.state != .started {
             XCTFail(
                 "Expectation '\(self.description)' was already fulfilled with state: \(self.state)",
@@ -67,7 +67,7 @@ actor Expectation {
                 .map(\.element.description)
             if !left.isEmpty {
                 /// End the continuation so the tests don't hang.
-                storage.endContinuation()
+                storage.endContinuation(file: file, line: line)
                 XCTFail(
                     "Some expectations failed to resolve in \(timeout) seconds: \(left)",
                     file: file,
@@ -76,8 +76,8 @@ actor Expectation {
             }
         }
 
-        await withCheckedContinuation { (_cont: CheckedContinuation<(), Never>) in
-            storage.setContinuation(to: _cont)
+        await withCheckedContinuation { continuation in
+            storage.setContinuation(to: continuation)
 
             for (idx, expectation) in expectations.enumerated() {
                 expectation.onFulfillment {
@@ -88,7 +88,7 @@ actor Expectation {
                     if left.isEmpty {
                         task.cancel()
                         /// End the continuation and notify the waiter.
-                        storage.endContinuation()
+                        storage.endContinuation(file: file, line: line)
                     }
                 }
             }
@@ -113,7 +113,7 @@ extension XCTestCase {
     }
 }
 
-// MARK: - Indices
+// MARK: - FulfillmentStorage
 private class FulfillmentStorage {
     private var indices: [Int] = []
     private var continuation: CheckedContinuation<(), Never>? = nil
@@ -140,7 +140,7 @@ private class FulfillmentStorage {
         }
     }
 
-    func endContinuation(file: StaticString = #filePath, line: UInt = #line) {
+    func endContinuation(file: StaticString, line: UInt) {
         queue.sync {
             if self.continuation != nil {
                 self.continuation!.resume()

@@ -13,6 +13,7 @@ public struct Sticker: Sendable, Codable {
         case png = 1
         case apng = 2
         case lottie = 3
+        case gif = 4
     }
     
     public var id: StickerSnowflake
@@ -27,7 +28,6 @@ public struct Sticker: Sendable, Codable {
     public var guild_id: GuildSnowflake?
     public var user: DiscordUser?
     public var sort_value: Int?
-    public var version: Int?
 }
 
 /// https://discord.com/developers/docs/resources/sticker#sticker-item-object
@@ -38,5 +38,12 @@ public struct StickerItem: Sendable, Codable {
 }
 
 /// https://discord.com/developers/docs/resources/sticker#sticker-pack-object-sticker-pack-structure
-/// To be implemented
-public struct StickerPack: Sendable, Codable { }
+public struct StickerPack: Sendable, Codable {
+    public var id: StickerPackSnowflake
+    public var stickers: [Sticker]
+    public var name: String
+    public var sku_id: AnySnowflake
+    public var cover_sticker_id: StickerSnowflake?
+    public var description: String
+    public var banner_asset_id: AnySnowflake?
+}

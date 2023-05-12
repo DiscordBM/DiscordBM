@@ -673,7 +673,7 @@ public struct Gateway: Sendable, Codable {
         public var default_message_notifications: Guild.DefaultMessageNotificationLevel
         public var explicit_content_filter: Guild.ExplicitContentFilterLevel
         public var roles: [Role]
-        public var emojis: [PartialEmoji]
+        public var emojis: [Emoji]
         public var features: [Guild.Feature]
         public var mfa_level: Guild.MFALevel
         public var application_id: ApplicationSnowflake?
@@ -786,7 +786,7 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update-guild-emojis-update-event-fields
     public struct GuildEmojisUpdate: Sendable, Codable {
         public var guild_id: GuildSnowflake
-        public var emojis: [PartialEmoji]
+        public var emojis: [Emoji]
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#guild-stickers-update-guild-stickers-update-event-fields
@@ -1072,7 +1072,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: GuildSnowflake?
         public var burst: Bool?
         public var member: Guild.Member?
-        public var emoji: PartialEmoji
+        public var emoji: Emoji
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove
@@ -1083,7 +1083,7 @@ public struct Gateway: Sendable, Codable {
         public var message_id: MessageSnowflake
         public var guild_id: GuildSnowflake?
         public var burst: Bool?
-        public var emoji: PartialEmoji
+        public var emoji: Emoji
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-all
@@ -1100,7 +1100,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: GuildSnowflake?
         public var message_id: MessageSnowflake
         public var burst: Bool?
-        public var emoji: PartialEmoji
+        public var emoji: Emoji
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#client-status-object
