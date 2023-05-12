@@ -12,6 +12,10 @@
     </a>
 </p>
 
+<p align="center">
+     🌟 Just a reminder that there is a 🌟 button up there if you liked this project 😅 🌟
+</p>
+
 ## Notable Features
 * Everything with async/await. Full integration with the latest Server-Side Swift packages.
 * Connect to the Discord Gateway and receive all events easily.
