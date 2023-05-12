@@ -534,7 +534,7 @@ class DiscordClientTests: XCTestCase {
         }
         
         /// Create new role
-        let rolePayload = Payloads.CreateGuildRole(
+        let rolePayload = Payloads.GuildRole(
             name: "test_role",
             permissions: [.addReactions, .attachFiles, .banMembers, .changeNickname],
             color: .init(red: 100, green: 100, blue: 100)!,

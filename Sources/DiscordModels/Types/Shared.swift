@@ -930,6 +930,12 @@ public typealias WebhookSnowflake = Snowflake<Webhook>
 /// Convenience type-alias for `Snowflake<GuildScheduledEvent>`
 public typealias GuildScheduledEventSnowflake = Snowflake<GuildScheduledEvent>
 
+/// Convenience type-alias for `Snowflake<Guild.Onboarding.Prompt>`
+public typealias OnboardingPromptSnowflake = Snowflake<Guild.Onboarding.Prompt>
+
+/// Convenience type-alias for `Snowflake<Guild.Onboarding.Prompt.Option>`
+public typealias OnboardingPromptOptionSnowflake = Snowflake<Guild.Onboarding.Prompt.Option>
+
 /// Convenience type-alias for `Snowflake<ApplicationCommand>`
 public typealias CommandSnowflake = Snowflake<ApplicationCommand>
 

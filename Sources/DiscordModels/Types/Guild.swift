@@ -17,20 +17,17 @@ public struct Guild: Sendable, Codable {
         public var nick: String?
         public var avatar: String?
         public var roles: [RoleSnowflake]
-        public var hoisted_role: String?
         public var joined_at: DiscordTimestamp
         public var premium_since: DiscordTimestamp?
         public var deaf: Bool?
         public var mute: Bool?
-        public var pending: Bool?
-        public var is_pending: Bool?
         public var flags: IntBitField<Flag>?
+        public var pending: Bool?
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
         
         public init(guildMemberAdd: Gateway.GuildMemberAdd) {
             self.roles = guildMemberAdd.roles
-            self.hoisted_role = guildMemberAdd.hoisted_role
             self.user = guildMemberAdd.user
             self.nick = guildMemberAdd.nick
             self.avatar = guildMemberAdd.avatar
@@ -39,9 +36,7 @@ public struct Guild: Sendable, Codable {
             self.deaf = guildMemberAdd.deaf
             self.mute = guildMemberAdd.mute
             self.pending = guildMemberAdd.pending
-            self.is_pending = guildMemberAdd.is_pending
             self.flags = guildMemberAdd.flags
-            self.permissions = guildMemberAdd.permissions
             self.communication_disabled_until = guildMemberAdd.communication_disabled_until
         }
     }
@@ -224,27 +219,6 @@ public struct Guild: Sendable, Codable {
     public var guild_id: GuildSnowflake?
 }
 
-extension Guild {
-    /// A partial ``Guild.Member`` object.
-    /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
-    public struct PartialMember: Sendable, Codable {
-        public var user: DiscordUser?
-        public var nick: String?
-        public var avatar: String?
-        public var roles: [String]?
-        public var hoisted_role: String?
-        public var joined_at: DiscordTimestamp?
-        public var premium_since: DiscordTimestamp?
-        public var deaf: Bool?
-        public var mute: Bool?
-        public var pending: Bool?
-        public var is_pending: Bool?
-        public var flags: IntBitField<Member.Flag>?
-        public var permissions: StringBitField<Permission>?
-        public var communication_disabled_until: DiscordTimestamp?
-    }
-}
-
 /// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
 public struct PartialGuild: Sendable, Codable {
     public var id: GuildSnowflake
@@ -296,6 +270,64 @@ public struct PartialGuild: Sendable, Codable {
     public var embedded_activities: [Gateway.Activity]?
     public var version: Int?
     public var guild_id: GuildSnowflake?
+}
+
+extension Guild {
+    /// A partial ``Guild.Member`` object.
+    /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
+    public struct PartialMember: Sendable, Codable {
+        public var user: DiscordUser?
+        public var nick: String?
+        public var avatar: String?
+        public var roles: [String]?
+        public var hoisted_role: String?
+        public var joined_at: DiscordTimestamp?
+        public var premium_since: DiscordTimestamp?
+        public var deaf: Bool?
+        public var mute: Bool?
+        public var pending: Bool?
+        public var is_pending: Bool?
+        public var flags: IntBitField<Member.Flag>?
+        public var permissions: StringBitField<Permission>?
+        public var communication_disabled_until: DiscordTimestamp?
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-guild-onboarding-structure
+    public struct Onboarding: Sendable, Codable {
+
+        /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-onboarding-prompt-structure
+        public struct Prompt: Sendable, Codable {
+
+            /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-option-structure
+            public struct Option: Sendable, Codable {
+                public var id: OnboardingPromptOptionSnowflake
+                public var channel_ids: [ChannelSnowflake]
+                public var role_ids: [RoleSnowflake]
+                public var emoji: Emoji
+                public var title: String
+                public var description: String?
+            }
+
+            /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-types
+            public enum Kind: Int, Sendable, Codable {
+                case multipleChoice = 0
+                case dropdown = 1
+            }
+
+            public var id: OnboardingPromptSnowflake
+            public var type: Kind
+            public var options: [Option]
+            public var title: String
+            public var single_select: Bool
+            public var required: Bool
+            public var in_onboarding: Bool
+        }
+
+        public var guild_id: GuildSnowflake
+        public var prompts: [Prompt]
+        public var default_channel_ids: [ChannelSnowflake]
+        public var enabled: Bool
+    }
 }
 
 /// https://discord.com/developers/docs/resources/guild#unavailable-guild-object

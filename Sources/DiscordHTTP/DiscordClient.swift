@@ -658,7 +658,7 @@ public extension DiscordClient {
     func createGuildRole(
         guildId: GuildSnowflake,
         reason: String? = nil,
-        payload: Payloads.CreateGuildRole
+        payload: Payloads.GuildRole
     ) async throws -> DiscordClientResponse<Role> {
         let endpoint = APIEndpoint.createGuildRole(guildId: guildId)
         return try await self.send(

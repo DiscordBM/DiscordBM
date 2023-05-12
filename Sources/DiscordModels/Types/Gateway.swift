@@ -805,7 +805,6 @@ public struct Gateway: Sendable, Codable {
     public struct GuildMemberAdd: Sendable, Codable {
         public var guild_id: GuildSnowflake
         public var roles: [RoleSnowflake]
-        public var hoisted_role: String?
         public var user: DiscordUser
         public var nick: String?
         public var avatar: String?
@@ -813,10 +812,8 @@ public struct Gateway: Sendable, Codable {
         public var premium_since: DiscordTimestamp?
         public var deaf: Bool?
         public var mute: Bool?
-        public var pending: Bool?
-        public var is_pending: Bool?
         public var flags: IntBitField<Guild.Member.Flag>?
-        public var permissions: StringBitField<Permission>?
+        public var pending: Bool?
         public var communication_disabled_until: DiscordTimestamp?
     }
     

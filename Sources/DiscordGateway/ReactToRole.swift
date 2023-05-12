@@ -13,7 +13,7 @@ public actor ReactToRoleHandler {
     /// This configuration must be codable-backward-compatible.
     public struct Configuration: Sendable, Codable {
         public let id: UUID
-        public var createRole: Payloads.CreateGuildRole
+        public var createRole: Payloads.GuildRole
         public let guildId: GuildSnowflake
         public let channelId: ChannelSnowflake
         public let messageId: MessageSnowflake
@@ -36,7 +36,7 @@ public actor ReactToRoleHandler {
         ///   - roleId: The role-id, only if it's already been created.
         public init(
             id: UUID = UUID(),
-            createRole: Payloads.CreateGuildRole,
+            createRole: Payloads.GuildRole,
             guildId: GuildSnowflake,
             channelId: ChannelSnowflake,
             messageId: MessageSnowflake,
@@ -141,7 +141,7 @@ public actor ReactToRoleHandler {
             }
         }
         
-        func getRoleIfExists(role: Payloads.CreateGuildRole) async throws -> Role? {
+        func getRoleIfExists(role: Payloads.GuildRole) async throws -> Role? {
             if let cache = cacheWithIntents(.guilds) {
                 if let role = await cache.guilds[guildId]?.roles.first(where: {
                     $0.name == role.name &&
@@ -305,7 +305,7 @@ public actor ReactToRoleHandler {
     public init(
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
-        role: Payloads.CreateGuildRole,
+        role: Payloads.GuildRole,
         guildId: GuildSnowflake,
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
@@ -383,7 +383,7 @@ public actor ReactToRoleHandler {
             guildId: guildId
         )
         let role = try await self.requestHandler.getRole(id: existingRoleId)
-        let createRole = try await Payloads.CreateGuildRole(
+        let createRole = try await Payloads.GuildRole(
             role: role,
             client: gatewayManager.client
         )
@@ -715,8 +715,8 @@ private extension Logger {
     }
 }
 
-//MARK: + CreateGuildRole
-private extension Payloads.CreateGuildRole {
+//MARK: + GuildRole
+private extension Payloads.GuildRole {
     init(role: Role, client: any DiscordClient) async throws {
         self = .init(
             name: role.name,

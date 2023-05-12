@@ -369,7 +369,7 @@ extension DiscordChannel {
     }
 }
 
-/// https://discord.com/developers/docs/resources/channel#thread-metadata-object
+/// https://discord.com/developers/docs/resources/channel#thread-metadata-object-thread-metadata-structure
 public struct ThreadMetadata: Sendable, Codable {
     public var archived: Bool
     public var auto_archive_duration: DiscordChannel.AutoArchiveDuration
