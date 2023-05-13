@@ -1341,6 +1341,19 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] { }
     }
 
+    /// https://discord.com/developers/docs/resources/channel#group-dm-add-recipient-json-params
+    public struct AddGroupDMUser: Sendable, Encodable, ValidatablePayload {
+        public var access_token: String
+        public var nicks: String
+
+        public init(access_token: String, nicks: String) {
+            self.access_token = access_token
+            self.nicks = nicks
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
     /// https://discord.com/developers/docs/resources/emoji#create-guild-emoji-json-params
     public struct CreateGuildEmoji: Sendable, Encodable, ValidatablePayload {
         public var name: String
@@ -1389,12 +1402,12 @@ public enum Payloads {
 /// https://discord.com/developers/docs/resources/guild#add-guild-member-json-params
     public struct AddGuildMember: Sendable, Encodable, ValidatablePayload {
         public var access_token: String
-        public var nick: String
-        public var roles: [RoleSnowflake]
-        public var mute: Bool
-        public var deaf: Bool
+        public var nick: String?
+        public var roles: [RoleSnowflake]?
+        public var mute: Bool?
+        public var deaf: Bool?
 
-        public init(access_token: String, nick: String, roles: [RoleSnowflake], mute: Bool, deaf: Bool) {
+        public init(access_token: String, nick: String? = nil, roles: [RoleSnowflake]? = nil, mute: Bool? = nil, deaf: Bool? = nil) {
             self.access_token = access_token
             self.nick = nick
             self.roles = roles
@@ -1529,14 +1542,16 @@ public enum Payloads {
     }
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-widget-image-widget-style-options
-    /// Sizes from small to big.
+    /// Cases show sizes from small to big.
     /// See Discord docs for examples.
     public enum WidgetStyle: String, Sendable {
-        case size1 = "small"
-        case size2 = "banner1"
-        case size3 = "banner2"
-        case size4 = "banner3"
-        case size5 = "banner4"
+        case shield = "small"
+        case banner1 = "banner1"
+        case banner2 = "banner2"
+        case banner3 = "banner3"
+        case banner4 = "banner4"
+
+        public static let `default`: WidgetStyle = .shield
     }
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen-json-params
@@ -1761,10 +1776,10 @@ public enum Payloads {
 
     /// https://discord.com/developers/docs/resources/user#modify-current-user-json-params
     public struct ModifyCurrentUser: Sendable, Encodable, ValidatablePayload {
-        public var username: String
+        public var username: String?
         public var avatar: ImageData?
 
-        public init(username: String, avatar: ImageData? = nil) {
+        public init(username: String? = nil, avatar: ImageData? = nil) {
             self.username = username
             self.avatar = avatar
         }

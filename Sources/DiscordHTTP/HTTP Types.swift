@@ -14,16 +14,6 @@ public struct DiscordHTTPRequest: Sendable {
     public let headers: HTTPHeaders
     
     public init(
-        to endpoint: AnyEndpoint,
-        queries: [(String, String?)] = [],
-        headers: HTTPHeaders = [:]
-    ) {
-        self.endpoint = endpoint
-        self.queries = queries
-        self.headers = headers
-    }
-    
-    public init(
         to endpoint: APIEndpoint,
         queries: [(String, String?)] = [],
         headers: HTTPHeaders = [:]

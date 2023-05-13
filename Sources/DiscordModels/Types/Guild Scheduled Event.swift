@@ -57,3 +57,12 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
         entity_metadata?.validate()
     }
 }
+
+extension GuildScheduledEvent {
+    /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-user-object-guild-scheduled-event-user-structure
+    public struct User: Sendable, Codable {
+        public var guild_scheduled_event_id: GuildScheduledEventSnowflake
+        public var user: DiscordUser
+        public var member: Guild.Member?
+    }
+}

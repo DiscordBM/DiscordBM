@@ -663,36 +663,6 @@ paths:
               schema:
                 type: string
               example: ''
-    patch:
-      tags:
-        - Guilds
-      summary: bulk update guild channels
-      parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
-        - name: guild_id
-          in: path
-          schema:
-            type: string
-          required: true
-          description: '(Required) '
-          example: <snowflake>
-      responses:
-        '200':
-          description: OK
-          headers:
-            Content-Type:
-              schema:
-                type: string
-                example: text/plain
-          content:
-            text/plain:
-              schema:
-                type: string
-              example: ''
   /channels/{channel_id}:
     get:
       tags:
@@ -4627,46 +4597,6 @@ paths:
       requestBody:
         content: {}
       parameters:
-        - name: guild_id
-          in: path
-          schema:
-            type: string
-          required: true
-          description: '(Required) '
-          example: <snowflake>
-      responses:
-        '200':
-          description: OK
-          headers:
-            Content-Type:
-              schema:
-                type: string
-                example: text/plain
-          content:
-            text/plain:
-              schema:
-                type: string
-              example: ''
-    patch:
-      tags:
-        - Roles
-      summary: bulk update guild roles
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                - id: <string,null-snowflake>
-                  position: <integer,null-int32>
-                - id: <string,null-snowflake>
-                  position: <integer,null-int32>
-      parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: guild_id
           in: path
           schema:

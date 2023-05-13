@@ -600,7 +600,9 @@ class DiscordClientTests: XCTestCase {
     
     func testDMs() async throws {
         /// Create DM
-        let response = try await client.createDm(recipientId: Constants.personalId).decode()
+        let response = try await client.createDm(
+            payload: .init(recipient_id: Constants.personalId)
+        ).decode()
         
         XCTAssertEqual(response.type, .dm)
         let recipient = try XCTUnwrap(response.recipients?.first)

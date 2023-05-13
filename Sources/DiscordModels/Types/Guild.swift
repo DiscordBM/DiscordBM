@@ -93,7 +93,7 @@ public struct Guild: Sendable, Codable {
         case vipRegions = "VIP_REGIONS"
         case welcomeScreenEnabled = "WELCOME_SCREEN_ENABLED"
 
-        /// These ones are not mentioned in the Discord docs.
+        /// These ones are not mentioned in the Discord docs (There are even more of these).
         /// Might not even be valid anymore.
 //        case commerce = "COMMERCE"
 //        case privateThreads = "PRIVATE_THREADS"
@@ -327,6 +327,42 @@ extension Guild {
         public var prompts: [Prompt]
         public var default_channel_ids: [ChannelSnowflake]
         public var enabled: Bool
+    }
+    
+    /// https://discord.com/developers/docs/resources/guild#guild-preview-object-guild-preview-structure
+    public struct Preview: Sendable, Codable {
+        public var id: GuildSnowflake
+        public var name: String
+        public var icon: String?
+        public var splash: String?
+        public var discovery_splash: String?
+        public var emojis: [Emoji]
+        public var features: [Guild.Feature]
+        public var approximate_member_count: Int
+        public var approximate_presence_count: Int
+        public var description: String?
+        public var stickers: [Sticker]
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#ban-object-ban-structure
+    public struct Ban: Sendable, Codable {
+        public var reason: String?
+        public var user: DiscordUser
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#guild-widget-settings-object-guild-widget-settings-structure
+    public struct WidgetSettings: Sendable, Codable {
+        public var enabled: Bool
+        public var channel_id: ChannelSnowflake
+    }
+
+    public struct Widget: Sendable, Codable {
+        public var id: GuildSnowflake
+        public var name: String
+        public var instant_invite: String?
+        public var channels: [DiscordChannel]
+        public var members: [PartialUser]
+        public var presence_count: Int
     }
 }
 
