@@ -31,6 +31,15 @@ public struct AutoModerationRule: Sendable, Codable {
         public var allow_list: [String]?
         public var mention_total_limit: Int?
         public var mention_raid_protection_enabled: Bool?
+
+        public init(keyword_filter: [String]? = nil, regex_patterns: [String]? = nil, presets: [KeywordPreset]? = nil, allow_list: [String]? = nil, mention_total_limit: Int? = nil, mention_raid_protection_enabled: Bool? = nil) {
+            self.keyword_filter = keyword_filter
+            self.regex_patterns = regex_patterns
+            self.presets = presets
+            self.allow_list = allow_list
+            self.mention_total_limit = mention_total_limit
+            self.mention_raid_protection_enabled = mention_raid_protection_enabled
+        }
     }
     
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object

@@ -10,6 +10,8 @@ class DiscordClientTests: XCTestCase {
     var httpClient: HTTPClient!
     var client: (any DiscordClient)!
 
+    let permanentTestCommandName = "permanent-test-command"
+
     override func setUp() async throws {
         self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
         self.client = await DefaultDiscordClient(
@@ -56,7 +58,7 @@ class DiscordClientTests: XCTestCase {
         let allOldMessages = try await client.listMessages(
             channelId: Constants.Channels.general.id
         ).decode()
-        
+
         for message in allOldMessages where message.author?.id == Constants.botId {
             try await client.deleteMessage(
                 channelId: message.channel_id,
@@ -65,7 +67,9 @@ class DiscordClientTests: XCTestCase {
         }
 
         /// Trigger typing indicator
-        try await client.triggerTypingIndicator(channelId: Constants.Channels.general.id).guardSuccess()
+        try await client.triggerTypingIndicator(
+            channelId: Constants.Channels.general.id
+        ).guardSuccess()
 
         /// Create
         let userMention = DiscordUtils.mention(id: Constants.personalId)
@@ -221,18 +225,44 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertTrue(message.type.isDeletable)
         /// Delete
-        let deletionResponse = try await client.deleteMessage(
+        try await client.deleteMessage(
             channelId: Constants.Channels.general.id,
             messageId: message.id,
             reason: "Random reason " + UUID().uuidString
-        )
-        
-        XCTAssertEqual(deletionResponse.status, .noContent)
+        ).guardSuccess()
+    }
+
+    func testMoreMessage() async throws {
+        let message = try await client.createMessage(
+            channelId: Constants.Channels.announcements.id,
+            payload: .init(content: "Announcement crosspost test!")
+        ).decode()
+
+        _ = try await client.crosspostMessage(
+            channelId: Constants.Channels.announcements.id,
+            messageId: message.id
+        ).decode()
+
+        let message2 = try await client.createMessage(
+            channelId: Constants.Channels.announcements.id,
+            payload: .init(content: "For bulk delete :)")
+        ).decode()
+
+        try await client.bulkDeleteMessages(
+            channelId: Constants.Channels.announcements.id,
+            reason: "Bulk delete test!",
+            payload: .init(messages: [message.id, message2.id])
+        ).guardSuccess()
     }
     
     func testGlobalApplicationCommands() async throws {
         /// Cleanup before start
-        for command in try await client.listApplicationCommands().decode() {
+
+        let oldCommands = try await client.listApplicationCommands()
+            .decode()
+            .filter { $0.name != permanentTestCommandName }
+
+        for command in oldCommands {
             try await client.deleteApplicationCommand(commandId: command.id).guardSuccess()
         }
         
@@ -278,7 +308,9 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(command2.name, commandName2)
         
         /// Get all
-        let allCommands = try await client.listApplicationCommands().decode()
+        let allCommands = try await client.listApplicationCommands()
+            .decode()
+            .filter { $0.name != permanentTestCommandName }
         
         XCTAssertEqual(allCommands.count, 1)
         let retrievedCommand1 = try XCTUnwrap(allCommands.first)
@@ -289,11 +321,19 @@ class DiscordClientTests: XCTestCase {
         let commandName3 = "test-command-3"
         let commandType3: ApplicationCommand.Kind = .user
         let overwrite = try await client.bulkSetApplicationCommands(
-            payload: [.init(
-                name: commandName3,
-                type: commandType3
-            )]
-        ).decode()
+            payload: [
+                .init(
+                    name: commandName3,
+                    type: commandType3
+                ),
+                .init(
+                    name: permanentTestCommandName,
+                    description: "Permanent test command description"
+                )
+            ]
+        ).decode().filter {
+            $0.name != permanentTestCommandName
+        }
         
         XCTAssertEqual(overwrite.count, 1)
         let overwriteCommand1 = try XCTUnwrap(overwrite.first)
@@ -309,10 +349,13 @@ class DiscordClientTests: XCTestCase {
     }
     
     func testGuildApplicationCommands() async throws {
-        /// Cleanup before start
-        for command in try await client.listGuildApplicationCommands(
+        /// Cleanup
+
+        let oldCommands = try await client.listGuildApplicationCommands(
             guildId: Constants.guildId
-        ).decode() {
+        ).decode()
+
+        for command in oldCommands {
             try await client.deleteGuildApplicationCommand(
                 guildId: Constants.guildId,
                 commandId: command.id
@@ -764,7 +807,7 @@ class DiscordClientTests: XCTestCase {
                 rate_limit_per_user: 900
             )
         ).decode()
-        
+
         _ = try await client.listPublicArchivedThreads(
             channelId: Constants.Channels.announcements.id,
             before: Date(),
@@ -1012,6 +1055,143 @@ class DiscordClientTests: XCTestCase {
             reason: "Testing! 2"
         )
         XCTAssertNoThrow(try delete2.guardSuccess())
+    }
+
+    func testAutoModerationRules() async throws {
+        /// Cleanup
+        let rules = try await self.client.listAutoModerationRules(
+            guildId: Constants.guildId
+        ).decode()
+
+        for rule in rules where rule.creator_id == Constants.botId {
+            try await self.client.deleteAutoModerationRule(
+                guildId: Constants.guildId,
+                ruleId: rule.id,
+                reason: "Testing Cleanup!"
+            ).guardSuccess()
+        }
+
+        let createdRule1 = try await self.client.createAutoModerationRule(
+            guildId: Constants.guildId,
+            reason: "Testing!",
+            payload: .init(
+                name: "Testing 1",
+                event_type: .messageSend,
+                trigger_type: .keyword,
+                trigger_metadata: .init(
+                    keyword_filter: ["ood"],
+                    regex_patterns: nil,
+                    presets: [.slurs],
+                    allow_list: ["good"],
+                    mention_total_limit: 1,
+                    mention_raid_protection_enabled: true
+                ),
+                actions: [.blockMessage(customMessage: "You bad boy!!!")],
+                enabled: true,
+                exempt_roles: [Constants.adminRoleId],
+                exempt_channels: [
+                    Constants.Channels.announcements.id,
+                    Constants.Channels.reaction.id
+                ]
+            )
+        ).decode()
+
+        let createdRule2 = try await self.client.createAutoModerationRule(
+            guildId: Constants.guildId,
+            reason: "Testing!",
+            payload: .init(
+                name: "Testing 2",
+                event_type: .messageSend,
+                trigger_type: .mentionSpam,
+                trigger_metadata: .init(
+                    keyword_filter: nil,
+                    regex_patterns: ["moo*l", "looooo*l"],
+                    presets: [.slurs],
+                    allow_list: ["good"],
+                    mention_total_limit: 1,
+                    mention_raid_protection_enabled: true
+                ),
+                actions: [.sendAlertMessage(channelId: Constants.Channels.moderation.id)],
+                enabled: true,
+                exempt_roles: [Constants.adminRoleId],
+                exempt_channels: [
+                    Constants.Channels.general.id,
+                    Constants.Channels.perm1.id
+                ]
+            )
+        ).decode()
+
+        let newRules = try await self.client.listAutoModerationRules(
+            guildId: Constants.guildId
+        ).decode().filter {
+            $0.creator_id == Constants.botId
+        }
+
+        XCTAssertEqual(newRules.count, 2)
+
+        let getRule = try await self.client.getAutoModerationRule(
+            guildId: Constants.guildId,
+            ruleId: createdRule1.id
+        ).decode()
+
+        XCTAssertEqual(getRule.id, createdRule1.id)
+
+        let newName = "Testing 222"
+        let updateRule = try await self.client.updateAutoModerationRule(
+            guildId: Constants.guildId,
+            ruleId: createdRule2.id,
+            reason: "Testing!",
+            payload: .init(
+                name: newName,
+                event_type: .messageSend,
+                trigger_type: .mentionSpam,
+                trigger_metadata: .init(
+                    keyword_filter: nil,
+                    regex_patterns: ["moo*l", "looooo*l", "pooo*l"],
+                    presets: [.slurs],
+                    allow_list: ["good"],
+                    mention_total_limit: 1,
+                    mention_raid_protection_enabled: true
+                ),
+                actions: [.timeout(durationSeconds: 10)],
+                enabled: false,
+                exempt_roles: [Constants.adminRoleId],
+                exempt_channels: [
+                    Constants.Channels.general.id,
+                    Constants.Channels.perm1.id
+                ]
+            )
+        ).decode()
+
+        XCTAssertEqual(updateRule.id, createdRule2.id)
+        XCTAssertEqual(updateRule.name, newName)
+
+        try await self.client.deleteAutoModerationRule(
+            guildId: Constants.guildId,
+            ruleId: createdRule1.id,
+            reason: "Testing Cleanup!"
+        ).guardSuccess()
+
+        try await self.client.deleteAutoModerationRule(
+            guildId: Constants.guildId,
+            ruleId: createdRule2.id,
+            reason: "Testing Cleanup!"
+        ).guardSuccess()
+    }
+
+    func testApplicationCommandPermissions() async throws {
+        let permissions = try await client.listGuildApplicationCommandPermissions(
+            guildId: Constants.guildId
+        ).decode()
+
+        let firstPermissionGroup = try XCTUnwrap(permissions.first)
+
+        let onePermissionGroup = try await client.getGuildApplicationCommandPermissions(
+            guildId: Constants.guildId,
+            commandId: Snowflake(firstPermissionGroup.id)
+        ).decode()
+
+        XCTAssertEqual(onePermissionGroup.id, firstPermissionGroup.id)
     }
     
     /// Couldn't find test-cases for the commented functions

@@ -19,6 +19,8 @@ enum Constants {
     static let personalId: UserSnowflake = "290483761559240704"
     static let personalName = "Mahdi BM"
 
+    static let adminRoleId: RoleSnowflake = "1036971780717432832"
+
     static let secondAccountId: UserSnowflake = "966330655069843457"
 
     static let serverEmojiId: EmojiSnowflake = "1073704788400820324"
@@ -35,6 +37,7 @@ enum Constants {
         case threads = "1074227452987052052"
         case forum = "1075089016979984435"
         case announcements = "1075135538715172954"
+        case moderation = "1075088920989138976"
 
         var id: ChannelSnowflake {
             self.rawValue
