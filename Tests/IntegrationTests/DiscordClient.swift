@@ -389,27 +389,18 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(oneCommand.name, commandName1)
         XCTAssertEqual(oneCommand.description, commandDesc1)
         
-        /// Get permissions. Will be empty since we can't set up permissions using bot tokens
-        let allPerms = try await client.listGuildApplicationCommandPermissions(
+        let permissions = try await client.listGuildApplicationCommandPermissions(
             guildId: Constants.guildId
         ).decode()
-        
-        XCTAssertTrue(allPerms.isEmpty)
-        
-        /// Get one permission. Will throw an error
-        /// since we can't set up permissions using bot tokens
-        let onePerm = try await client.getGuildApplicationCommandPermissions(
+
+        let firstPermissionGroup = try XCTUnwrap(permissions.first)
+
+        let onePermissionGroup = try await client.getGuildApplicationCommandPermissions(
             guildId: Constants.guildId,
-            commandId: command1.id
-        ).decodeError()
-        
-        switch onePerm {
-        case .jsonError(let jsonError) where
-            jsonError.code == .unknownApplicationCommandPermissions:
-            break
-        default:
-            XCTFail("Discord threw unexpected error: \(onePerm)")
-        }
+            commandId: Snowflake(firstPermissionGroup.id)
+        ).decode()
+
+        XCTAssertEqual(onePermissionGroup.id, firstPermissionGroup.id)
         
         /// Edit
         let commandName2 = "test-guild-command-2"
@@ -1177,21 +1168,6 @@ class DiscordClientTests: XCTestCase {
             ruleId: createdRule2.id,
             reason: "Testing Cleanup!"
         ).guardSuccess()
-    }
-
-    func testApplicationCommandPermissions() async throws {
-        let permissions = try await client.listGuildApplicationCommandPermissions(
-            guildId: Constants.guildId
-        ).decode()
-
-        let firstPermissionGroup = try XCTUnwrap(permissions.first)
-
-        let onePermissionGroup = try await client.getGuildApplicationCommandPermissions(
-            guildId: Constants.guildId,
-            commandId: Snowflake(firstPermissionGroup.id)
-        ).decode()
-
-        XCTAssertEqual(onePermissionGroup.id, firstPermissionGroup.id)
     }
     
     /// Couldn't find test-cases for the commented functions
