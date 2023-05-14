@@ -891,7 +891,7 @@ public enum Payloads {
         public var name: String?
         public var icon: ImageData?
 
-        init(name: String? = nil, icon: ImageData? = nil) {
+        public init(name: String? = nil, icon: ImageData? = nil) {
             self.name = name
             self.icon = icon
         }
@@ -1280,15 +1280,15 @@ public enum Payloads {
 
     /// https://discord.com/developers/docs/resources/channel#create-channel-invite-json-params
     public struct CreateChannelInvite: Sendable, Encodable, ValidatablePayload {
-        public var max_age: Count
-        public var max_uses: Count
-        public var temporary: Bool
-        public var unique: Bool
-        public var target_type: Invite.TargetKind
+        public var max_age: Count?
+        public var max_uses: Count?
+        public var temporary: Bool?
+        public var unique: Bool?
+        public var target_type: Invite.TargetKind?
         public var target_user_id: UserSnowflake?
         public var target_application_id: ApplicationSnowflake?
 
-        public init(max_age: Count, max_uses: Count, temporary: Bool, unique: Bool, target_type: Invite.TargetKind, target_user_id: UserSnowflake? = nil, target_application_id: ApplicationSnowflake? = nil) {
+        public init(max_age: Count? = nil, max_uses: Count? = nil, temporary: Bool? = nil, unique: Bool? = nil, target_type: Invite.TargetKind? = nil, target_user_id: UserSnowflake? = nil, target_application_id: ApplicationSnowflake? = nil) {
             self.max_age = max_age
             self.max_uses = max_uses
             self.temporary = temporary
@@ -1300,13 +1300,13 @@ public enum Payloads {
 
         public func validate() -> [ValidationFailure] {
             switch max_age {
-            case .unlimited:
+            case .unlimited, .none:
                 Optional<ValidationFailure>.none
             case let .count(count):
                 validateNumberInRange(count, min: 0, max: 604_800, name: "max_age")
             }
             switch max_uses {
-            case .unlimited:
+            case .unlimited, .none:
                 Optional<ValidationFailure>.none
             case let .count(count):
                 validateNumberInRange(count, min: 0, max: 100, name: "max_uses")

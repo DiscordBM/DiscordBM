@@ -577,38 +577,6 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertEqual(member.user?.id, Constants.personalId)
         
-        /// Search Guild members
-        let search = try await client.searchGuildMembers(
-            guildId: Constants.guildId,
-            query: "Mahdi",
-            limit: nil
-        ).decode()
-        
-        XCTAssertTrue((1...5).contains(search.count), search.count.description)
-        XCTAssertTrue(search.allSatisfy({ $0.user?.username.contains("Mahdi") == true }))
-        
-        /// Search Guild members with invalid limit
-        do {
-            _ = try await client.searchGuildMembers(
-                guildId: Constants.guildId,
-                query: "Mahdi",
-                limit: 10_000
-            )
-            XCTFail("'searchGuildMembers' must fail with too-big limits")
-        } catch {
-            switch error {
-            case DiscordHTTPError.queryParameterOutOfBounds(
-                name: "limit",
-                value: "10000",
-                lowerBound: 1,
-                upperBound: 1_000
-            ):
-                break
-            default:
-                XCTFail("Unexpected fail error: \(error)")
-            }
-        }
-        
         /// Create new role
         let rolePayload = Payloads.GuildRole(
             name: "test_role",
@@ -680,7 +648,156 @@ class DiscordClientTests: XCTestCase {
         try await client.deleteChannel(id: createChannel.id).guardSuccess()
     }
 
+    func testChannelPermissions() async throws {
+        let overwriteId = AnySnowflake(Constants.secondAccountId)
+
+        try await client.setChannelPermissionOverwrite(
+            channelId: Constants.Channels.general.id,
+            overwriteId: overwriteId,
+            reason: "Testing Permissions Set!",
+            payload: .init(
+                type: .member,
+                allow: [.addReactions],
+                deny: [.useExternalEmojis]
+            )
+        ).guardSuccess()
+
+        try await client.deleteChannelPermissionOverwrite(
+            channelId: Constants.Channels.general.id,
+            overwriteId: overwriteId,
+            reason: "Testing Permissions Delete!"
+        ).guardSuccess()
+    }
+
+    func testInvites() async throws {
+        let invite = try await client.createChannelInvite(
+            channelId: Constants.Channels.spam.id,
+            payload: .init(
+                max_age: 30,
+                max_uses: .unlimited,
+                temporary: true,
+                unique: true,
+                target_type: nil,
+                target_user_id: nil,
+                target_application_id: nil
+            )
+        ).decode()
+
+        let guildInvites = try await client
+            .listGuildInvites(guildId: Constants.guildId)
+            .decode()
+
+        XCTAssertEqual(guildInvites.count, 1)
+        XCTAssertEqual(guildInvites.first?.code, invite.code)
+
+        let channelInvites = try await client.listChannelInvites(
+            channelId: Constants.Channels.spam.id
+        ).decode()
+
+        XCTAssertEqual(channelInvites.count, 1)
+        XCTAssertEqual(channelInvites.first?.code, invite.code)
+
+        let resolved = try await client.resolveInvite(code: invite.code).decode()
+
+        XCTAssertEqual(resolved.code, invite.code)
+
+        try await client.revokeInvite(code: invite.code).guardSuccess()
+    }
+
     func testGuildMembers() async throws {
+
+        /// Search Guild members
+        let search = try await client.searchGuildMembers(
+            guildId: Constants.guildId,
+            query: "Mahdi",
+            limit: nil
+        ).decode()
+
+        XCTAssertTrue((1...5).contains(search.count), search.count.description)
+        XCTAssertTrue(search.allSatisfy({ $0.user?.username.contains("Mahdi") == true }))
+
+        /// Search Guild members with invalid limit
+        do {
+            _ = try await client.searchGuildMembers(
+                guildId: Constants.guildId,
+                query: "Mahdi",
+                limit: 10_000
+            )
+            XCTFail("'searchGuildMembers' must fail with too-big limits")
+        } catch {
+            switch error {
+            case DiscordHTTPError.queryParameterOutOfBounds(
+                name: "limit",
+                value: "10000",
+                lowerBound: 1,
+                upperBound: 1_000
+            ):
+                break
+            default:
+                XCTFail("Unexpected fail error: \(error)")
+            }
+        }
+
+        let ownMemberError = try await client.getOwnGuildMember(
+            guildId: Constants.guildId
+        ).decodeError()
+
+        switch ownMemberError {
+        case let .jsonError(jsonError) where jsonError.code == .botsCannotUseEndpoint:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(ownMemberError)")
+        }
+
+        let anotherMember = try await client.getGuildMember(
+            guildId: Constants.guildId,
+            userId: Constants.personalId
+        ).decode()
+
+        XCTAssertEqual(anotherMember.user?.id, Constants.personalId)
+
+        /// Can't add anyone since don't have access token.
+        let addMemberError = try await client.addGuildMember(
+            guildId: Constants.guildId,
+            userId: .makeFake(),
+            payload: .init(
+                access_token: "",
+                nick: "nicko",
+                roles: nil,
+                mute: true,
+                deaf: true
+            )
+        ).decodeError()
+
+        switch addMemberError {
+        case let .jsonError(jsonError) where jsonError.code == .invalidOAuth2AccessToken:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(addMemberError)")
+        }
+
+        /// Can't really delete anyone, since can't add.
+        let deleteMemberError = try await client.deleteGuildMember(
+            guildId: Constants.guildId,
+            userId: .makeFake()
+        ).decodeError()
+
+        switch deleteMemberError {
+        case let .jsonError(jsonError) where jsonError.code == .unknownUser:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(deleteMemberError)")
+        }
+
+        let newNick = "TestBotNick\(Int.random(in: 0..<100))"
+        let memberUpdate = try await client.updateOwnGuildMember(
+            guildId: Constants.guildId,
+            payload: .init(nick: newNick)
+        ).decode()
+
+        XCTAssertEqual(memberUpdate.nick, newNick)
+
+
         let allMembers = try await client
             .listGuildMembers(guildId: Constants.guildId)
             .decode()

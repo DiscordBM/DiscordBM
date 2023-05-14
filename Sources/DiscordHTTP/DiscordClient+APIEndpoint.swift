@@ -667,7 +667,7 @@ public extension DiscordClient {
         channelId: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateChannelInvite
-    ) async throws -> DiscordClientResponse<[Invite]> {
+    ) async throws -> DiscordClientResponse<Invite> {
         let endpoint = APIEndpoint.createChannelInvite(channelId: channelId)
         return try await self.send(
             request: .init(
