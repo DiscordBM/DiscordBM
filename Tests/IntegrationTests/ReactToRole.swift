@@ -125,7 +125,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Create an unrelated reaction, must not be granted the role
-        try await client.addOwnMessageReaction(
+        try await client.addMessageReaction(
             channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
@@ -275,7 +275,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Create an unrelated reaction, must not be granted the role
-        try await client.addOwnMessageReaction(
+        try await client.addMessageReaction(
             channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
@@ -459,7 +459,7 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNil(role, "\(member.roles) contained '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
-        try await client.addOwnMessageReaction(
+        try await client.addMessageReaction(
             channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction2
@@ -478,7 +478,7 @@ class ReactToRoleTests: XCTestCase {
             XCTAssertNotNil(role, "\(member.roles) did not contain '\(roleName)' role. Member roles: \(debugDescription(roles)), all roles: \(debugDescription(guild.roles))")
         }
         
-        try await client.addOwnMessageReaction(
+        try await client.addMessageReaction(
             channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction1
@@ -630,7 +630,7 @@ class ReactToRoleTests: XCTestCase {
         let stoppedState = await handler.state
         XCTAssertEqual(stoppedState, .stopped)
         
-        try await client.addOwnMessageReaction(
+        try await client.addMessageReaction(
             channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction
@@ -771,7 +771,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Create an unrelated reaction, must not be granted the role
-        try await client.addOwnMessageReaction(
+        try await client.addMessageReaction(
             channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
@@ -918,7 +918,7 @@ class ReactToRoleTests: XCTestCase {
         }
         
         /// Create an unrelated reaction, must not be granted the role
-        try await client.addOwnMessageReaction(
+        try await client.addMessageReaction(
             channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: unacceptableReaction
@@ -1141,7 +1141,7 @@ class ReactToRoleTests: XCTestCase {
         XCTAssertEqual(stoppedState, .stopped)
         
         /// Create the reaction again, must not be granted the role
-        try await client.addOwnMessageReaction(
+        try await client.addMessageReaction(
             channelId: Constants.Channels.reaction.id,
             messageId: reactionMessageId,
             emoji: reaction

@@ -19,7 +19,5 @@ struct EntryPoint {
         if !write {
             fatalError("Failed to create/write at \(path.debugDescription)")
         }
-        #warning("remove")
-        print(toPrint)
     }
 }

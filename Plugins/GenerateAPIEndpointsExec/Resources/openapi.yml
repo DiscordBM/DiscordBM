@@ -302,6 +302,31 @@ paths:
               schema:
                 type: string
               example: ''
+    post-2:
+      tags:
+        - Channels
+      summary: create group dm
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ''
   /channels/{channel_id}/permissions/{overwrite_id}:
     put:
       tags:
@@ -452,7 +477,7 @@ paths:
     post:
       tags:
         - Channels
-      summary: follow channel
+      summary: follow announcement channel
       requestBody:
         content:
           application/json:
@@ -663,6 +688,18 @@ paths:
               schema:
                 type: string
               example: ''
+    patch:
+      tags:
+        - Guilds
+      summary: update guild channel positions
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
   /channels/{channel_id}:
     get:
       tags:
@@ -3475,7 +3512,7 @@ paths:
     get:
       tags:
         - Invites
-      summary: invite resolve
+      summary: resolve invite
       parameters:
         - name: with_counts
           in: query
@@ -3510,7 +3547,7 @@ paths:
     delete:
       tags:
         - Invites
-      summary: invite revoke
+      summary: revoke invite
       parameters:
         - name: code
           in: path
@@ -3844,7 +3881,7 @@ paths:
     put:
       tags:
         - Messages
-      summary: add own message reaction
+      summary: add message reaction
       requestBody:
         content: {}
       security:
@@ -4617,6 +4654,18 @@ paths:
               schema:
                 type: string
               example: ''
+    patch:
+      tags:
+        - Roles
+      summary: update guild role positions
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
   /users/@me/applications/{application_id}/role-connection:
     get:
       tags:
@@ -5530,7 +5579,7 @@ paths:
     get:
       tags:
         - Threads
-      summary: get active guild threads
+      summary: list active guild threads
       parameters:
         - name: guild_id
           in: path

@@ -262,56 +262,6 @@ init? (endpoint: APIEndpoint) {
 }
 """
 
-///// https://discord.com/developers/docs/resources/channel#delete-own-reaction
-//@inlinable
-//func deleteOwnMessageReaction(
-//    channelId: ChannelSnowflake,
-//    messageId: MessageSnowflake,
-//    emoji: Reaction
-//) async throws -> DiscordHTTPResponse {
-//    let endpoint = APIEndpoint.deleteOwnMessageReaction(
-//        channelId: channelId,
-//        messageId: messageId,
-//        emojiName: emoji.urlPathDescription
-//    )
-//    return try await self.send(request: .init(to: endpoint))
-//}
-
-#warning("remove these")
-let alreadyThere = ["getGateway", "getBotGateway", "createInteractionResponse", "getOriginalInteractionResponse", "updateOriginalInteractionResponse", "deleteOriginalInteractionResponse", "createFollowupMessage", "getFollowupMessage", "updateFollowupMessage", "deleteFollowupMessage", "createMessage", "updateMessage", "deleteMessage", "listApplicationCommands", "createApplicationCommand", "getApplicationCommand", "updateApplicationCommand", "deleteApplicationCommand", "bulkSetApplicationCommands", "listGuildApplicationCommands", "createGuildApplicationCommand", "getGuildApplicationCommand", "updateGuildApplicationCommand", "deleteGuildApplicationCommand", "bulkSetGuildApplicationCommands", "listGuildApplicationCommandPermissions", "getGuildApplicationCommandPermissions", "setGuildApplicationCommandPermissions", "getGuild", "createGuild", "updateGuild", "deleteGuild", "listGuildRoles", "getChannel", "updateChannel", "updateChannel", "updateChannel", "deleteChannel", "createGuildChannel", "leaveGuild", "createGuildRole", "deleteGuildRole", "addGuildMemberRole", "deleteGuildMemberRole", "addOwnMessageReaction", "deleteOwnMessageReaction", "deleteUserMessageReaction", "listMessageReactionsByEmoji", "deleteAllMessageReactions", "deleteAllMessageReactionsByEmoji", "searchGuildMembers", "getGuildMember", "listMessages", "getMessage", "listGuildAuditLogEntries", "createDm", "triggerTypingIndicator", "createThreadFromMessage", "createThread", "createThreadInForumChannel", "joinThread", "addThreadMember", "leaveThread", "deleteThreadMember", "getThreadMember", "getThreadMember", "listThreadMembers", "listThreadMembers", "listPublicArchivedThreads", "listPrivateArchivedThreads", "listOwnPrivateArchivedThreads", "createWebhook", "listChannelWebhooks", "getGuildWebhooks", "getWebhook", "getWebhookByToken", "updateWebhook", "updateWebhookByToken", "deleteWebhook", "deleteWebhookByToken", "executeWebhook", "executeWebhook", "getWebhookMessage", "updateWebhookMessage", "deleteWebhookMessage"]
-
-let funcs = grouped.flatMap(\.value).map {
-    ($0.info.makeCase(), $0.info.makeRawCaseNameWithParams())
-}.compactMap { (infos, raw) -> String? in
-    let (name, params) = raw
-    var paramsString = params.map { "\($0): \($0)" }.joined(separator: ", ")
-    if !paramsString.isEmpty {
-        paramsString = "(\(paramsString))"
-    }
-    let rawName = String(name.dropLast().dropFirst(6))
-    if alreadyThere.contains(rawName) { return nil }
-    
-    let endpoint = rawName + paramsString
-
-    var noCase = String(infos.dropFirst(5))
-    if noCase.last != ")" {
-        noCase += "()"
-    } else {
-        noCase = noCase.replacingOccurrences(of: ", ", with: ",\n    ")
-            .replacingOccurrences(of: ")", with: "\n)")
-            .replacingOccurrences(of: "(", with: "(\n    ")
-    }
-    return """
-    @inlinable
-    func \(noCase) async throws -> DiscordHTTPResponse {
-        let endpoint = APIEndpoint.\(endpoint)
-        return try await self.send(request: .init(to: endpoint))
-    }
-    """
-}.joined(separator: "\n\n")
-
-let toPrint = funcs
-
 let result = """
 // DO NOT EDIT. Auto-generated using the GenerateAPIEndpoints command plugin.
 

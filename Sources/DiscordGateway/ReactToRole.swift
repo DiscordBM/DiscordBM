@@ -694,7 +694,7 @@ public actor ReactToRoleHandler {
         }
         for reaction in remaining {
             do {
-                try await client.addOwnMessageReaction(
+                try await client.addMessageReaction(
                     channelId: self.configuration.channelId,
                     messageId: self.configuration.messageId,
                     emoji: reaction

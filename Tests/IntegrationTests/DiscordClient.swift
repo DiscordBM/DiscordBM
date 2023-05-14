@@ -115,7 +115,7 @@ class DiscordClientTests: XCTestCase {
         /// Add 4 Reactions
         let reactions = ["🚀", "🤠", "👀", "❤️"]
         for reaction in reactions {
-            let reactionResponse = try await client.addOwnMessageReaction(
+            let reactionResponse = try await client.addMessageReaction(
                 channelId: Constants.Channels.general.id,
                 messageId: message.id,
                 emoji: .unicodeEmoji(reaction)
