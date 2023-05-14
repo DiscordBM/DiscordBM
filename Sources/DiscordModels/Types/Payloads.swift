@@ -1344,11 +1344,11 @@ public enum Payloads {
     /// https://discord.com/developers/docs/resources/channel#group-dm-add-recipient-json-params
     public struct AddGroupDMUser: Sendable, Encodable, ValidatablePayload {
         public var access_token: String
-        public var nicks: String
+        public var nick: String
 
-        public init(access_token: String, nicks: String) {
+        public init(access_token: String, nick: String) {
             self.access_token = access_token
-            self.nicks = nicks
+            self.nick = nick
         }
 
         public func validate() -> [ValidationFailure] { }

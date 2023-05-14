@@ -21,6 +21,15 @@ public struct ApplicationRoleConnectionMetadata: Sendable, Codable, ValidatableP
     public var description: String
     public var description_localizations: DiscordLocaleDict<String>?
 
+    public init(type: Kind, key: String, name: String, name_localizations: [DiscordLocale: String]? = nil, description: String, description_localizations: [DiscordLocale: String]? = nil) {
+        self.type = type
+        self.key = key
+        self.name = name
+        self.name_localizations = .init(name_localizations)
+        self.description = description
+        self.description_localizations = .init(description_localizations)
+    }
+
     public func validate() -> [ValidationFailure] {
         validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
         validateCharacterCountInRange(description, min: 1, max: 200, name: "description")

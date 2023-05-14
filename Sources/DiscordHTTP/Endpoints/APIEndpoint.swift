@@ -186,9 +186,9 @@ public enum APIEndpoint: Endpoint {
     // MARK: Role Connections
     /// https://discord.com/developers/docs/resources/user
     
-    case getApplicationRoleConnectionsMetadata(applicationId: ApplicationSnowflake)
     case getApplicationUserRoleConnection(applicationId: ApplicationSnowflake)
-    case updateApplicationRoleConnectionsMetadata(applicationId: ApplicationSnowflake)
+    case listApplicationRoleConnectionMetadata(applicationId: ApplicationSnowflake)
+    case bulkOverwriteApplicationRoleConnectionMetadata(applicationId: ApplicationSnowflake)
     case updateApplicationUserRoleConnection(applicationId: ApplicationSnowflake)
     
     // MARK: Scheduled Events
@@ -682,13 +682,13 @@ public enum APIEndpoint: Endpoint {
             let guildId = guildId.value
             let roleId = roleId.value
             suffix = "guilds/\(guildId)/roles/\(roleId)"
-        case let .getApplicationRoleConnectionsMetadata(applicationId):
-            let applicationId = applicationId.value
-            suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .getApplicationUserRoleConnection(applicationId):
             let applicationId = applicationId.value
             suffix = "users/@me/applications/\(applicationId)/role-connection"
-        case let .updateApplicationRoleConnectionsMetadata(applicationId):
+        case let .listApplicationRoleConnectionMetadata(applicationId):
+            let applicationId = applicationId.value
+            suffix = "applications/\(applicationId)/role-connections/metadata"
+        case let .bulkOverwriteApplicationRoleConnectionMetadata(applicationId):
             let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .updateApplicationUserRoleConnection(applicationId):
@@ -1268,13 +1268,13 @@ public enum APIEndpoint: Endpoint {
             let guildId = guildId.value
             let roleId = roleId.value
             suffix = "guilds/\(guildId)/roles/\(roleId)"
-        case let .getApplicationRoleConnectionsMetadata(applicationId):
-            let applicationId = applicationId.value
-            suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .getApplicationUserRoleConnection(applicationId):
             let applicationId = applicationId.value
             suffix = "users/@me/applications/\(applicationId)/role-connection"
-        case let .updateApplicationRoleConnectionsMetadata(applicationId):
+        case let .listApplicationRoleConnectionMetadata(applicationId):
+            let applicationId = applicationId.value
+            suffix = "applications/\(applicationId)/role-connections/metadata"
+        case let .bulkOverwriteApplicationRoleConnectionMetadata(applicationId):
             let applicationId = applicationId.value
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .updateApplicationUserRoleConnection(applicationId):
@@ -1573,9 +1573,9 @@ public enum APIEndpoint: Endpoint {
         case .updateGuildRolePositions: return .PATCH
         case .deleteGuildMemberRole: return .DELETE
         case .deleteGuildRole: return .DELETE
-        case .getApplicationRoleConnectionsMetadata: return .GET
         case .getApplicationUserRoleConnection: return .GET
-        case .updateApplicationRoleConnectionsMetadata: return .PUT
+        case .listApplicationRoleConnectionMetadata: return .GET
+        case .bulkOverwriteApplicationRoleConnectionMetadata: return .PUT
         case .updateApplicationUserRoleConnection: return .PUT
         case .getGuildScheduledEvent: return .GET
         case .listGuildScheduledEventUsers: return .GET
@@ -1751,9 +1751,9 @@ public enum APIEndpoint: Endpoint {
         case .updateGuildRolePositions: return true
         case .deleteGuildMemberRole: return true
         case .deleteGuildRole: return true
-        case .getApplicationRoleConnectionsMetadata: return true
         case .getApplicationUserRoleConnection: return true
-        case .updateApplicationRoleConnectionsMetadata: return true
+        case .listApplicationRoleConnectionMetadata: return true
+        case .bulkOverwriteApplicationRoleConnectionMetadata: return true
         case .updateApplicationUserRoleConnection: return true
         case .getGuildScheduledEvent: return true
         case .listGuildScheduledEventUsers: return true
@@ -1929,9 +1929,9 @@ public enum APIEndpoint: Endpoint {
         case .updateGuildRolePositions: return true
         case .deleteGuildMemberRole: return true
         case .deleteGuildRole: return true
-        case .getApplicationRoleConnectionsMetadata: return true
         case .getApplicationUserRoleConnection: return true
-        case .updateApplicationRoleConnectionsMetadata: return true
+        case .listApplicationRoleConnectionMetadata: return true
+        case .bulkOverwriteApplicationRoleConnectionMetadata: return true
         case .updateApplicationUserRoleConnection: return true
         case .getGuildScheduledEvent: return true
         case .listGuildScheduledEventUsers: return true
@@ -2225,11 +2225,11 @@ public enum APIEndpoint: Endpoint {
             return [guildId.value, userId.value, roleId.value]
         case let .deleteGuildRole(guildId, roleId):
             return [guildId.value, roleId.value]
-        case let .getApplicationRoleConnectionsMetadata(applicationId):
-            return [applicationId.value]
         case let .getApplicationUserRoleConnection(applicationId):
             return [applicationId.value]
-        case let .updateApplicationRoleConnectionsMetadata(applicationId):
+        case let .listApplicationRoleConnectionMetadata(applicationId):
+            return [applicationId.value]
+        case let .bulkOverwriteApplicationRoleConnectionMetadata(applicationId):
             return [applicationId.value]
         case let .updateApplicationUserRoleConnection(applicationId):
             return [applicationId.value]
@@ -2458,9 +2458,9 @@ public enum APIEndpoint: Endpoint {
         case .updateGuildRolePositions: return 116
         case .deleteGuildMemberRole: return 117
         case .deleteGuildRole: return 118
-        case .getApplicationRoleConnectionsMetadata: return 119
-        case .getApplicationUserRoleConnection: return 120
-        case .updateApplicationRoleConnectionsMetadata: return 121
+        case .getApplicationUserRoleConnection: return 119
+        case .listApplicationRoleConnectionMetadata: return 120
+        case .bulkOverwriteApplicationRoleConnectionMetadata: return 121
         case .updateApplicationUserRoleConnection: return 122
         case .getGuildScheduledEvent: return 123
         case .listGuildScheduledEventUsers: return 124
@@ -2754,12 +2754,12 @@ public enum APIEndpoint: Endpoint {
             return "deleteGuildMemberRole(guildId.value: \(guildId.value), userId.value: \(userId.value), roleId.value: \(roleId.value))"
         case let .deleteGuildRole(guildId, roleId):
             return "deleteGuildRole(guildId.value: \(guildId.value), roleId.value: \(roleId.value))"
-        case let .getApplicationRoleConnectionsMetadata(applicationId):
-            return "getApplicationRoleConnectionsMetadata(applicationId.value: \(applicationId.value))"
         case let .getApplicationUserRoleConnection(applicationId):
             return "getApplicationUserRoleConnection(applicationId.value: \(applicationId.value))"
-        case let .updateApplicationRoleConnectionsMetadata(applicationId):
-            return "updateApplicationRoleConnectionsMetadata(applicationId.value: \(applicationId.value))"
+        case let .listApplicationRoleConnectionMetadata(applicationId):
+            return "listApplicationRoleConnectionMetadata(applicationId.value: \(applicationId.value))"
+        case let .bulkOverwriteApplicationRoleConnectionMetadata(applicationId):
+            return "bulkOverwriteApplicationRoleConnectionMetadata(applicationId.value: \(applicationId.value))"
         case let .updateApplicationUserRoleConnection(applicationId):
             return "updateApplicationUserRoleConnection(applicationId.value: \(applicationId.value))"
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
@@ -2974,8 +2974,8 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     // MARK: Role Connections
     /// https://discord.com/developers/docs/resources/user
     
-    case getApplicationRoleConnectionsMetadata
     case getApplicationUserRoleConnection
+    case listApplicationRoleConnectionMetadata
     
     // MARK: Scheduled Events
     /// https://discord.com/developers/docs/resources/guild-scheduled-event
@@ -3076,8 +3076,8 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .listMessages: return "listMessages"
         case .getOwnOauth2Application: return "getOwnOauth2Application"
         case .listGuildRoles: return "listGuildRoles"
-        case .getApplicationRoleConnectionsMetadata: return "getApplicationRoleConnectionsMetadata"
         case .getApplicationUserRoleConnection: return "getApplicationUserRoleConnection"
+        case .listApplicationRoleConnectionMetadata: return "listApplicationRoleConnectionMetadata"
         case .getGuildScheduledEvent: return "getGuildScheduledEvent"
         case .listGuildScheduledEventUsers: return "listGuildScheduledEventUsers"
         case .listGuildScheduledEvents: return "listGuildScheduledEvents"
@@ -3152,8 +3152,8 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .listMessages: self = .listMessages
         case .getOwnOauth2Application: self = .getOwnOauth2Application
         case .listGuildRoles: self = .listGuildRoles
-        case .getApplicationRoleConnectionsMetadata: self = .getApplicationRoleConnectionsMetadata
         case .getApplicationUserRoleConnection: self = .getApplicationUserRoleConnection
+        case .listApplicationRoleConnectionMetadata: self = .listApplicationRoleConnectionMetadata
         case .getGuildScheduledEvent: self = .getGuildScheduledEvent
         case .listGuildScheduledEventUsers: self = .listGuildScheduledEventUsers
         case .listGuildScheduledEvents: self = .listGuildScheduledEvents

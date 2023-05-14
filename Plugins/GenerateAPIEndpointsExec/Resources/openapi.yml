@@ -4742,7 +4742,7 @@ paths:
     get:
       tags:
         - Role Connections
-      summary: get application role connections metadata
+      summary: list application role connection metadata
       parameters:
         - name: application_id
           in: path
@@ -4767,7 +4767,7 @@ paths:
     put:
       tags:
         - Role Connections
-      summary: update application role connections metadata
+      summary: bulk overwrite application role connection metadata
       parameters:
         - name: Content-Type
           in: header

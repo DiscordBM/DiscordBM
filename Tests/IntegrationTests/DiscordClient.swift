@@ -223,6 +223,30 @@ class DiscordClientTests: XCTestCase {
         
         XCTAssertEqual(allMessagesAround.count, 3)
 
+        /// Pin Message
+        try await client.pinMessage(
+            channelId: Constants.Channels.general.id,
+            messageId: message.id,
+            reason: "Testing Pin Messages!"
+        ).guardSuccess()
+
+        /// List Pinned Message
+        let pinnedMessage = try await client.listPinnedMessages(
+            channelId: Constants.Channels.general.id
+        ).decode()
+
+        XCTAssertEqual(pinnedMessage.count, 1)
+        let first = try XCTUnwrap(pinnedMessage.first)
+
+        XCTAssertEqual(first.id, message.id)
+
+        /// Unpin Message
+        try await client.unpinMessage(
+            channelId: Constants.Channels.general.id,
+            messageId: message.id,
+            reason: "Testing Deleting Pin Messages!"
+        ).guardSuccess()
+
         XCTAssertTrue(message.type.isDeletable)
         /// Delete
         try await client.deleteMessage(
@@ -486,6 +510,13 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(guildWithCounts.name, Constants.guildName)
         XCTAssertEqual(guildWithCounts.approximate_member_count, 3)
         XCTAssertNotEqual(guildWithCounts.approximate_presence_count, nil)
+
+        let preview = try await client
+            .getGuildPreview(guildId: Constants.guildId)
+            .decode()
+
+        XCTAssertEqual(preview.id, Constants.guildId)
+        XCTAssertEqual(preview.name, Constants.guildName)
         
         /// Get guild audit logs
         let auditLogs = try await client.listGuildAuditLogEntries(
@@ -499,6 +530,17 @@ class DiscordClientTests: XCTestCase {
         let leaveGuild = try await client.leaveGuild(id: fakeGuildId)
         
         XCTAssertEqual(leaveGuild.status, .badRequest)
+
+        let channels = try await client
+            .listGuildChannels(guildId: Constants.guildId)
+            .decode()
+
+        XCTAssertTrue(channels.map(\.id).contains(Constants.Channels.general.id), "\(channels)")
+
+        try await client.updateGuildChannelPositions(
+            guildId: Constants.guildId,
+            payload: [.init(id: Constants.Channels.perm1.id, position: Int.random(in: 1...5))]
+        ).guardSuccess()
 
         /// Create channel
         let createChannel = try await client.createGuildChannel(
@@ -629,28 +671,144 @@ class DiscordClientTests: XCTestCase {
         let entries = auditLogsWithActionType.audit_log_entries
         XCTAssertTrue(entries.contains(where: { $0.reason == reason }), "Entries: \(entries)")
 
+        /// Follow announcement channel
+        try await client.followAnnouncementChannel(
+            id: Constants.Channels.announcements.id,
+            payload: .init(webhook_channel_id: createChannel.id)
+        ).guardSuccess()
+
         try await client.deleteChannel(id: createChannel.id).guardSuccess()
     }
-    
+
+    func testGuildMembers() async throws {
+        let allMembers = try await client
+            .listGuildMembers(guildId: Constants.guildId)
+            .decode()
+
+        XCTAssertGreaterThanOrEqual(allMembers.count, 1, "\(allMembers)")
+
+        if allMembers.count < 1 {
+            return XCTFail("Members count too low: \(allMembers)")
+        }
+
+        let second = allMembers[0]
+
+        let userId = try XCTUnwrap(second.user?.id)
+
+        let limitedMembers = try await client.listGuildMembers(
+            guildId: Constants.guildId,
+            limit: 1,
+            after: userId
+        ).decode()
+
+        XCTAssertGreaterThanOrEqual(limitedMembers.count, 1, "\(limitedMembers)")
+    }
+
+    func testGuildEmojis() async throws {
+        let image = ByteBuffer(data: resource(name: "1kb.png"))
+        let emoji = try await client.createGuildEmoji(
+            guildId: Constants.guildId,
+            reason: "Creating Emoji Test!",
+            payload: .init(
+                name: "testemoji",
+                image: .init(file: .init(data: image, filename: "1kb_emoji.png")),
+                roles: []
+            )
+        ).decode()
+
+        let emojiId = try XCTUnwrap(emoji.id)
+
+        let emojis = try await client
+            .listGuildEmojis(guildId: Constants.guildId)
+            .decode()
+        XCTAssertEqual(emojis.count, 2)
+
+        let firstEmoji = try XCTUnwrap(emojis.last)
+        XCTAssertEqual(firstEmoji.id, emojiId)
+
+        let newName = "testemojinew"
+        let updateEmoji = try await client.updateGuildEmoji(
+            guildId: Constants.guildId,
+            emojiId: emojiId,
+            reason: "Updating Emoji Test!",
+            payload: .init(name: newName, roles: [])
+        ).decode()
+
+        XCTAssertEqual(updateEmoji.id, emojiId)
+        XCTAssertEqual(updateEmoji.name, newName)
+
+        let getEmoji = try await client.getGuildEmoji(
+            guildId: Constants.guildId,
+            emojiId: emojiId
+        ).decode()
+
+        XCTAssertEqual(getEmoji.id, emojiId)
+        XCTAssertEqual(getEmoji.name, newName)
+
+        try await client.deleteGuildEmoji(
+            guildId: Constants.guildId,
+            emojiId: emojiId,
+            reason: "Deleting Emoji Test!"
+        ).guardSuccess()
+    }
+
     func testDMs() async throws {
         /// Create DM
-        let response = try await client.createDm(
+        let dmChannel = try await client.createDm(
             payload: .init(recipient_id: Constants.personalId)
         ).decode()
         
-        XCTAssertEqual(response.type, .dm)
-        let recipient = try XCTUnwrap(response.recipients?.first)
+        XCTAssertEqual(dmChannel.type, .dm)
+        let recipient = try XCTUnwrap(dmChannel.recipients?.first)
         XCTAssertEqual(recipient.id, Constants.personalId)
 
         /// Send a message to the DM channel
         let text = "Testing! \(Date())"
         let message = try await client.createMessage(
-            channelId: response.id,
+            channelId: dmChannel.id,
             payload: .init(content: text)
         ).decode()
         
         XCTAssertEqual(message.content, text)
-        XCTAssertEqual(message.channel_id, response.id)
+        XCTAssertEqual(message.channel_id, dmChannel.id)
+
+        /// These group-dm endpoints require access tokens. Can't test easily.
+        let createGroupDmError = try await client.createGroupDm(
+            payload: .init(access_tokens: [], nicks: [:])
+        ).decodeError()
+
+        switch createGroupDmError {
+        case let .jsonError(jsonError) where jsonError.code == .invalidFormBodyOrInvalidContentType:
+            break
+        default:
+            XCTFail("Unexpected error: \(createGroupDmError)")
+        }
+
+        let addGroupDmUserError = try await client.addGroupDmUser(
+            channelId: dmChannel.id,
+            userId: Constants.personalId,
+            payload: .init(access_token: "", nick: "")
+        ).decodeError()
+
+        switch addGroupDmUserError {
+        case let .jsonError(jsonError)
+            where jsonError.code == .cannotExecuteActionOnThisChannelType:
+            break
+        default:
+            XCTFail("Unexpected error: \(createGroupDmError)")
+        }
+
+        let deleteGroupDmUserError = try await client.deleteGroupDmUser(
+            channelId: dmChannel.id,
+            userId: Constants.personalId
+        ).decodeError()
+
+        switch deleteGroupDmUserError {
+        case let .jsonError(jsonError) where jsonError.code == .missingPermissions:
+            break
+        default:
+            XCTFail("Unexpected error: \(createGroupDmError)")
+        }
     }
     
     func testThreads() async throws {
@@ -740,6 +898,14 @@ class DiscordClientTests: XCTestCase {
             XCTFail("Expected 2 thread member but got \(allThreadMembers.count)")
             return
         }
+
+        /// Test `listActiveGuildThreads` endpoint here since we know have active threads.
+        let activeThreads = try await client
+            .listActiveGuildThreads(guildId: Constants.guildId)
+            .decode()
+
+        XCTAssertFalse(activeThreads.threads.isEmpty)
+        XCTAssertFalse(activeThreads.members.isEmpty)
         
         let allThreadMembersAfter = try await client.listThreadMembersWithMember(
             threadId: thread.id,
@@ -1168,6 +1334,43 @@ class DiscordClientTests: XCTestCase {
             ruleId: createdRule2.id,
             reason: "Testing Cleanup!"
         ).guardSuccess()
+    }
+
+    func testApplicationRoleConnectionMetadata() async throws {
+        let update = try await client.bulkOverwriteApplicationRoleConnectionMetadata(
+            payload: [
+                .init(
+                    type: .booleanEqual,
+                    key: "key",
+                    name: "name",
+                    name_localizations: [.spanish: "nombre"],
+                    description: "role connection description",
+                    description_localizations: [
+                        .englishUK: "role connection descriptionoo",
+                        .englishUS: "role connection descriptionio"
+                    ]
+                ),
+                .init(
+                    type: .dateTimeGreaterThanOrEqual,
+                    key: "keyio",
+                    name: "namio",
+                    name_localizations: [.spanish: "nombrepo"],
+                    description: "role connection descriptionno",
+                    description_localizations: [
+                        .englishUK: "role connection descriptionooko",
+                        .englishUS: "role connection descriptioniolo"
+                    ]
+                )
+            ]
+        ).decode()
+
+        XCTAssertEqual(update.count, 2)
+
+        let metadata = try await client
+            .listApplicationRoleConnectionMetadata()
+            .decode()
+
+        XCTAssertEqual(metadata.count, 2)
     }
     
     /// Couldn't find test-cases for the commented functions

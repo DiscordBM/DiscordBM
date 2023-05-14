@@ -226,24 +226,30 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records
     @inlinable
-    func getApplicationRoleConnectionsMetadata(
+    func listApplicationRoleConnectionMetadata(
         appId: ApplicationSnowflake? = nil
     ) async throws -> DiscordClientResponse<[ApplicationRoleConnectionMetadata]> {
-        let endpoint = APIEndpoint.getApplicationRoleConnectionsMetadata(
+        let endpoint = APIEndpoint.listApplicationRoleConnectionMetadata(
             applicationId: try requireAppId(appId)
         )
         return try await self.send(request: .init(to: endpoint))
     }
 
+    /// Note: At the time of writing this, Discord docs mistakenly don't mention that
+    /// this endpoint takes a payload of type `[ApplicationRoleConnectionMetadata]`.
     /// https://discord.com/developers/docs/resources/application-role-connection-metadata#update-application-role-connection-metadata-records
     @inlinable
-    func updateApplicationRoleConnectionsMetadata(
-        appId: ApplicationSnowflake? = nil
+    func bulkOverwriteApplicationRoleConnectionMetadata(
+        appId: ApplicationSnowflake? = nil,
+        payload: [ApplicationRoleConnectionMetadata]
     ) async throws -> DiscordClientResponse<[ApplicationRoleConnectionMetadata]> {
-        let endpoint = APIEndpoint.updateApplicationRoleConnectionsMetadata(
+        let endpoint = APIEndpoint.bulkOverwriteApplicationRoleConnectionMetadata(
             applicationId: try requireAppId(appId)
         )
-        return try await self.send(request: .init(to: endpoint))
+        return try await self.send(
+            request: .init(to: endpoint),
+            payload: payload
+        )
     }
 
     // MARK: Audit Logs
@@ -1026,10 +1032,14 @@ public extension DiscordClient {
     @inlinable
     func deleteGuildEmoji(
         guildId: GuildSnowflake,
-        emojiId: EmojiSnowflake
+        emojiId: EmojiSnowflake,
+        reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteGuildEmoji(guildId: guildId, emojiId: emojiId)
-        return try await self.send(request: .init(to: endpoint))
+        return try await self.send(request: .init(
+            to: endpoint,
+            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+        ))
     }
 
     // MARK: Guilds
@@ -1097,7 +1107,7 @@ public extension DiscordClient {
     @inlinable
     func listGuildChannels(
         guildId: GuildSnowflake
-    ) async throws -> DiscordClientResponse<[Guild]> {
+    ) async throws -> DiscordClientResponse<[DiscordChannel]> {
         let endpoint = APIEndpoint.listGuildChannels(guildId: guildId)
         return try await self.send(request: .init(to: endpoint))
     }
