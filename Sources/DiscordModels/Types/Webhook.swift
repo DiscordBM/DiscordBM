@@ -34,7 +34,7 @@ public struct WebhookAddress: Sendable, Hashable {
         public var errorDescription: String? {
             switch self {
             case let .invalidUrl(url):
-                return "invalidUrl(\(url))"
+                return "WebhookAddress.Error.invalidUrl(\(url))"
             }
         }
         

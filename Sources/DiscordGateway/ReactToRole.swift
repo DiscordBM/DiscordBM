@@ -72,9 +72,9 @@ public actor ReactToRoleHandler {
         public var errorDescription: String? {
             switch self {
             case let .messageIsInaccessible(messageId, channelId, previousError):
-                return "messageIsInaccessible(messageId: \(messageId), channelId: \(channelId), previousError: \(previousError))"
+                return "ReactToRoleHandler.Error.messageIsInaccessible(messageId: \(messageId), channelId: \(channelId), previousError: \(previousError))"
             case let .roleIsInaccessible(id, previousError):
-                return "roleIsInaccessible(id: \(id), previousError: \(String(describing: previousError)))"
+                return "ReactToRoleHandler.Error.roleIsInaccessible(id: \(id), previousError: \(String(describing: previousError)))"
             }
         }
         

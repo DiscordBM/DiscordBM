@@ -655,7 +655,7 @@ public enum Payloads {
         
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
@@ -687,7 +687,7 @@ public enum Payloads {
         
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
@@ -781,7 +781,7 @@ public enum Payloads {
         
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
@@ -980,14 +980,14 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRangeOrNil(name, min: 1, max: 100, name: "name")
             validateCharacterCountDoesNotExceed(topic, max: 4_096, name: "topic")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
                 name: "rate_limit_per_user"
             )
-            validateNumberInRange(bitrate, min: 8_000, max: 384_000, name: "bitrate")
-            validateNumberInRange(user_limit, min: 0, max: 10_000, name: "user_limit")
+            validateNumberInRangeOrNil(bitrate, min: 8_000, max: 384_000, name: "bitrate")
+            validateNumberInRangeOrNil(user_limit, min: 0, max: 10_000, name: "user_limit")
             validateOnlyContains(
                 flags?.values,
                 name: "flags",
@@ -1022,7 +1022,7 @@ public enum Payloads {
 
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRangeOrNil(name, min: 1, max: 100, name: "name")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
@@ -1079,14 +1079,14 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
             validateCharacterCountDoesNotExceed(topic, max: 4_096, name: "topic")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
                 name: "rate_limit_per_user"
             )
-            validateNumberInRange(bitrate, min: 8_000, max: 384_000, name: "bitrate")
-            validateNumberInRange(user_limit, min: 0, max: 10_000, name: "user_limit")
+            validateNumberInRangeOrNil(bitrate, min: 8_000, max: 384_000, name: "bitrate")
+            validateNumberInRangeOrNil(user_limit, min: 0, max: 10_000, name: "user_limit")
             validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
         }
     }
@@ -1303,13 +1303,13 @@ public enum Payloads {
             case .unlimited, .none:
                 Optional<ValidationFailure>.none
             case let .count(count):
-                validateNumberInRange(count, min: 0, max: 604_800, name: "max_age")
+                validateNumberInRangeOrNil(count, min: 0, max: 604_800, name: "max_age")
             }
             switch max_uses {
             case .unlimited, .none:
                 Optional<ValidationFailure>.none
             case let .count(count):
-                validateNumberInRange(count, min: 0, max: 100, name: "max_uses")
+                validateNumberInRangeOrNil(count, min: 0, max: 100, name: "max_uses")
             }
             if target_type == .stream {
                 validateHasPrecondition(
@@ -1454,19 +1454,14 @@ public enum Payloads {
 
     /// https://discord.com/developers/docs/resources/guild#create-guild-ban-json-params
     public struct CreateGuildBan: Sendable, Encodable, ValidatablePayload {
-        public var delete_message_seconds: Count?
+        public var delete_message_seconds: Int?
 
-        public init(delete_message_seconds: Count? = nil) {
+        public init(delete_message_seconds: Int? = nil) {
             self.delete_message_seconds = delete_message_seconds
         }
 
         public func validate() -> [ValidationFailure] {
-            switch delete_message_seconds {
-            case .unlimited, .none:
-                Optional<ValidationFailure>.none
-            case let .count(count):
-                validateNumberInRange(count, min: 0, max: 604_800, name: "delete_message_seconds")
-            }
+            validateNumberInRangeOrNil(delete_message_seconds, min: 0, max: 604_800, name: "delete_message_seconds")
         }
     }
 
@@ -1537,7 +1532,7 @@ public enum Payloads {
         }
 
         public func validate() -> [ValidationFailure] {
-            validateNumberInRange(days, min: 1, max: 30, name: "days")
+            validateNumberInRangeOrNil(days, min: 1, max: 30, name: "days")
         }
     }
 

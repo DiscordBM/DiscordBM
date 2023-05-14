@@ -119,22 +119,18 @@ class DiscordClientTests: XCTestCase {
         /// Add 4 Reactions
         let reactions = ["🚀", "🤠", "👀", "❤️"]
         for reaction in reactions {
-            let reactionResponse = try await client.addMessageReaction(
+            try await client.addMessageReaction(
                 channelId: Constants.Channels.general.id,
                 messageId: message.id,
                 emoji: .unicodeEmoji(reaction)
-            )
-            
-            XCTAssertEqual(reactionResponse.status, .noContent)
+            ).guardSuccess()
         }
         
-        let deleteOwnMessageReactionResponse = try await client.deleteOwnMessageReaction(
+        try await client.deleteOwnMessageReaction(
             channelId: Constants.Channels.general.id,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[0])
-        )
-        
-        XCTAssertEqual(deleteOwnMessageReactionResponse.status, .noContent)
+        ).guardSuccess()
         
         try await client.deleteUserMessageReaction(
             channelId: Constants.Channels.general.id,
@@ -154,20 +150,16 @@ class DiscordClientTests: XCTestCase {
         let reactionUser = try XCTUnwrap(listMessageReactionsByEmojiResponse.first)
         XCTAssertEqual(reactionUser.id, Constants.botId)
         
-        let deleteAllMessageReactionsByEmojiResponse = try await client.deleteAllMessageReactionsByEmoji(
+        try await client.deleteAllMessageReactionsByEmoji(
             channelId: Constants.Channels.general.id,
             messageId: message.id,
             emoji: .unicodeEmoji(reactions[2])
-        )
+        ).guardSuccess()
         
-        XCTAssertEqual(deleteAllMessageReactionsByEmojiResponse.status, .noContent)
-        
-        let deleteAllMessageReactionsResponse = try await client.deleteAllMessageReactions(
+        try await client.deleteAllMessageReactions(
             channelId: Constants.Channels.general.id,
             messageId: message.id
-        )
-        
-        XCTAssertEqual(deleteAllMessageReactionsResponse.status, .noContent)
+        ).guardSuccess()
         
         /// Get the message again
         let retrievedMessage = try await client.getMessage(
@@ -366,10 +358,9 @@ class DiscordClientTests: XCTestCase {
         
         /// Delete
         let commandId = try XCTUnwrap(overwriteCommand1.id)
-        let deletionResponse = try await client.deleteApplicationCommand(
+        try await client.deleteApplicationCommand(
             commandId: commandId
-        )
-        XCTAssertEqual(deletionResponse.status, .noContent)
+        ).guardSuccess()
     }
     
     func testGuildApplicationCommands() async throws {
@@ -464,28 +455,62 @@ class DiscordClientTests: XCTestCase {
         
         /// Delete
         let commandId = try XCTUnwrap(overwriteCommand1.id)
-        let deletionResponse = try await client.deleteGuildApplicationCommand(
+        try await client.deleteGuildApplicationCommand(
             guildId: Constants.guildId,
             commandId: commandId
-        )
-        XCTAssertEqual(deletionResponse.status, .noContent)
+        ).guardSuccess()
     }
 
-    func testGuildCreateUpdateDelete() async throws {
+    func testGuildWithCreatedGuild() async throws {
         let guildName = "Test Guild"
-        let createGuild = try await client.createGuild(payload: .init(name: guildName)).decode()
-        XCTAssertEqual(createGuild.name, guildName)
+        let createdGuild = try await client.createGuild(payload: .init(name: guildName)).decode()
+        XCTAssertEqual(createdGuild.name, guildName)
 
         let newGuildName = "Test Guild Updated Name"
         let updateGuild = try await client.updateGuild(
-            id: createGuild.id,
+            id: createdGuild.id,
             payload: .init(name: newGuildName)
         ).decode()
 
-        XCTAssertEqual(updateGuild.id, createGuild.id)
+        XCTAssertEqual(updateGuild.id, createdGuild.id)
         XCTAssertEqual(updateGuild.name, newGuildName)
 
-        try await client.deleteGuild(id: createGuild.id).guardSuccess()
+        /// Can't leave guild because the bot is the owner
+        let leaveGuildError = try await client.leaveGuild(id: createdGuild.id).decodeError()
+
+        switch leaveGuildError {
+        case let .jsonError(jsonError) where jsonError.code == .invalidGuild:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(leaveGuildError)")
+        }
+
+        _ = try await client.previewPruneGuild(
+            guildId: Constants.guildId,
+            days: 30,
+            /// The role is unrelated to this guild though.
+            includeRoles: [Constants.adminRoleId]
+        ).decode()
+
+        _ = try await client.pruneGuild(
+            guildId: createdGuild.id,
+            reason: "Testing Guild Prune!",
+            payload: .init(
+                days: 30,
+                compute_prune_count: true,
+                /// The role is unrelated to this guild though.
+                include_roles: [Constants.adminRoleId]
+            )
+        ).decode()
+
+        /// This endpoint requires guild ownership!
+        try await client.setGuildMfaLevel(
+            guildId: createdGuild.id,
+            reason: "Testing MFA!",
+            payload: .init(level: Bool.random() ? .elevated : .none)
+        ).guardSuccess()
+
+        try await client.deleteGuild(id: createdGuild.id).guardSuccess()
     }
 
     func testGuildAndChannel() async throws {
@@ -511,26 +536,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(guildWithCounts.approximate_member_count, 3)
         XCTAssertNotEqual(guildWithCounts.approximate_presence_count, nil)
 
-        let preview = try await client
-            .getGuildPreview(guildId: Constants.guildId)
-            .decode()
-
-        XCTAssertEqual(preview.id, Constants.guildId)
-        XCTAssertEqual(preview.name, Constants.guildName)
-        
-        /// Get guild audit logs
-        let auditLogs = try await client.listGuildAuditLogEntries(
-            guildId: Constants.guildId
-        ).decode()
-        XCTAssertEqual(auditLogs.audit_log_entries.count, 50)
-        
-        /// Leave guild
-        /// Can't leave guild so will just do a bad-request
-        let fakeGuildId = GuildSnowflake(Constants.guildId.value + "1111")
-        let leaveGuild = try await client.leaveGuild(id: fakeGuildId)
-        
-        XCTAssertEqual(leaveGuild.status, .badRequest)
-
+        /// Get guild channels
         let channels = try await client
             .listGuildChannels(guildId: Constants.guildId)
             .decode()
@@ -569,77 +575,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(updateChannel.id, createChannel.id)
         XCTAssertEqual(updateChannel.topic, topic)
 
-        /// Get member
-        let member = try await client.getGuildMember(
-            guildId: Constants.guildId,
-            userId: Constants.personalId
-        ).decode()
-        
-        XCTAssertEqual(member.user?.id, Constants.personalId)
-        
-        /// Create new role
-        let rolePayload = Payloads.GuildRole(
-            name: "test_role",
-            permissions: [.addReactions, .attachFiles, .banMembers, .changeNickname],
-            color: .init(red: 100, green: 100, blue: 100)!,
-            hoist: true,
-            unicode_emoji: nil, // Needs a boosted server
-            mentionable: true
-        )
-        let role = try await client.createGuildRole(
-            guildId: Constants.guildId,
-            payload: rolePayload
-        ).decode()
-        
-        XCTAssertEqual(role.name, rolePayload.name)
-        XCTAssertEqual(role.permissions.toBitValue(), rolePayload.permissions!.toBitValue())
-        XCTAssertEqual(role.color.value, rolePayload.color!.value)
-        XCTAssertEqual(role.hoist, rolePayload.hoist)
-        XCTAssertEqual(role.unicode_emoji, rolePayload.unicode_emoji)
-        XCTAssertEqual(role.mentionable, rolePayload.mentionable)
-        
-        /// Get guild roles
-        let guildRoles = try await client.listGuildRoles(id: Constants.guildId).decode()
-        let rolesWithName = guildRoles.filter({ $0.name == role.name })
-        XCTAssertGreaterThanOrEqual(rolesWithName.count, 1)
-        
-        /// Add role to member
-        let memberRoleAdditionResponse = try await client.addGuildMemberRole(
-            guildId: Constants.guildId,
-            userId: Constants.personalId,
-            roleId: role.id
-        )
-        
-        XCTAssertEqual(memberRoleAdditionResponse.status, .noContent)
-        
-        let memberRoleDeletionResponse = try await client.deleteGuildMemberRole(
-            guildId: Constants.guildId,
-            userId: Constants.personalId,
-            roleId: role.id
-        )
-        
-        XCTAssertEqual(memberRoleDeletionResponse.status, .noContent)
-        
-        /// Delete role
-        let reason = "Random reason " + UUID().uuidString
-        let roleDeletionResponse = try await client.deleteGuildRole(
-            guildId: Constants.guildId,
-            roleId: role.id,
-            reason: reason
-        )
-        
-        XCTAssertEqual(roleDeletionResponse.status, .noContent)
-        
-        /// Get guild audit logs with action type
-        let auditLogsWithActionType = try await client.listGuildAuditLogEntries(
-            guildId: Constants.guildId,
-            action_type: .roleDelete
-        ).decode()
-        
-        let entries = auditLogsWithActionType.audit_log_entries
-        XCTAssertTrue(entries.contains(where: { $0.reason == reason }), "Entries: \(entries)")
-
-        /// Follow announcement channel
+        /// Follow announcement channel to this channel
         try await client.followAnnouncementChannel(
             id: Constants.Channels.announcements.id,
             payload: .init(webhook_channel_id: createChannel.id)
@@ -738,17 +674,6 @@ class DiscordClientTests: XCTestCase {
             }
         }
 
-        let ownMemberError = try await client.getOwnGuildMember(
-            guildId: Constants.guildId
-        ).decodeError()
-
-        switch ownMemberError {
-        case let .jsonError(jsonError) where jsonError.code == .botsCannotUseEndpoint:
-            break
-        case .none, .badStatusCode, .jsonError:
-            XCTFail("Unexpected error: \(ownMemberError)")
-        }
-
         let anotherMember = try await client.getGuildMember(
             guildId: Constants.guildId,
             userId: Constants.personalId
@@ -821,6 +746,117 @@ class DiscordClientTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(limitedMembers.count, 1, "\(limitedMembers)")
     }
 
+    func testGuildBans() async throws {
+        let userId: UserSnowflake = "950695294906007573"
+        let reason = "Testing Guild Bans!"
+
+        try await client.banUserFromGuild(
+            guildId: Constants.guildId,
+            userId: userId,
+            reason: reason,
+            payload: .init(delete_message_seconds: 60)
+        ).guardSuccess()
+
+        let ban = try await client.getGuildBan(
+            guildId: Constants.guildId,
+            userId: userId
+        ).decode()
+
+        XCTAssertEqual(ban.reason, reason)
+        XCTAssertEqual(ban.user.id, userId)
+
+        let bans = try await client.listGuildBans(
+            guildId: Constants.guildId
+        ).decode()
+
+        XCTAssertTrue(bans.map(\.user.id).contains(ban.user.id), "\(bans) did not contain \(ban)")
+
+        try await client.unbanUserFromGuild(
+            guildId: Constants.guildId,
+            userId: userId
+        ).guardSuccess()
+    }
+
+    func testGuildRoles() async throws {
+        /// Create new role
+        let rolePayload = Payloads.GuildRole(
+            name: "test_role",
+            permissions: [.addReactions, .attachFiles, .banMembers, .changeNickname],
+            color: .init(red: 100, green: 100, blue: 100)!,
+            hoist: true,
+            unicode_emoji: nil, // Needs a boosted server
+            mentionable: true
+        )
+        let role = try await client.createGuildRole(
+            guildId: Constants.guildId,
+            reason: "Testing Role Create!",
+            payload: rolePayload
+        ).decode()
+
+        let positionRoles = try await client.updateGuildRolePositions(
+            guildId: Constants.guildId,
+            reason: "Testing Role Positions Update!",
+            payload: [.init(id: role.id, position: Bool.random() ? 3 : 4)]
+        ).decode()
+
+        XCTAssertTrue(
+            positionRoles.map(\.id).contains(role.id),
+            "\(positionRoles) did not contain \(role)"
+        )
+
+        XCTAssertEqual(role.name, rolePayload.name)
+        XCTAssertEqual(role.permissions.toBitValue(), rolePayload.permissions!.toBitValue())
+        XCTAssertEqual(role.color.value, rolePayload.color!.value)
+        XCTAssertEqual(role.hoist, rolePayload.hoist)
+        XCTAssertEqual(role.unicode_emoji, rolePayload.unicode_emoji)
+        XCTAssertEqual(role.mentionable, rolePayload.mentionable)
+
+        /// Get guild roles
+        let guildRoles = try await client.listGuildRoles(id: Constants.guildId).decode()
+        let rolesWithName = guildRoles.filter({ $0.name == role.name })
+        XCTAssertGreaterThanOrEqual(rolesWithName.count, 1)
+
+        /// Add role to member
+        try await client.addGuildMemberRole(
+            guildId: Constants.guildId,
+            userId: Constants.personalId,
+            roleId: role.id
+        ).guardSuccess()
+
+        try await client.deleteGuildMemberRole(
+            guildId: Constants.guildId,
+            userId: Constants.personalId,
+            roleId: role.id
+        ).guardSuccess()
+
+        let updatedRole = try await client.updateGuildRole(
+            guildId: Constants.guildId,
+            roleId: role.id,
+            reason: "Testing Role Update!",
+            payload: .init(name: "test_role_new")
+        ).decode()
+
+        XCTAssertEqual(updatedRole.id, role.id)
+
+        /// Delete role
+        let reason = "Random reason " + UUID().uuidString
+        try await client.deleteGuildRole(
+            guildId: Constants.guildId,
+            roleId: role.id,
+            reason: reason
+        ).guardSuccess()
+
+        /// Get guild audit logs with action type,
+        /// since it'll return some info after these role manipulations.
+        let auditLogsWithActionType = try await client.listGuildAuditLogEntries(
+            guildId: Constants.guildId,
+            action_type: .roleDelete
+        ).decode()
+
+        let entries = auditLogsWithActionType.audit_log_entries
+        XCTAssertTrue(entries.contains(where: { $0.reason == reason }), "Entries: \(entries)")
+    }
+
     func testGuildEmojis() async throws {
         let image = ByteBuffer(data: resource(name: "1kb.png"))
         let emoji = try await client.createGuildEmoji(
@@ -867,6 +903,25 @@ class DiscordClientTests: XCTestCase {
             emojiId: emojiId,
             reason: "Deleting Emoji Test!"
         ).guardSuccess()
+    }
+
+    func testGuildOthers() async throws {
+        let preview = try await client
+            .getGuildPreview(guildId: Constants.guildId)
+            .decode()
+
+        XCTAssertEqual(preview.id, Constants.guildId)
+        XCTAssertEqual(preview.name, Constants.guildName)
+
+        /// Get guild audit logs
+        let auditLogs = try await client.listGuildAuditLogEntries(
+            guildId: Constants.guildId
+        ).decode()
+        XCTAssertEqual(auditLogs.audit_log_entries.count, 50)
+
+        _ = try await client
+            .listGuildVoiceRegions(guildId: Constants.guildId)
+            .decode()
     }
 
     func testDMs() async throws {
@@ -1251,11 +1306,10 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(modify2.guild_id, Constants.guildId)
         XCTAssertEqual(modify2.channel_id, Constants.Channels.webhooks.id)
         
-        let noContentResponse = try await client.executeWebhook(
+        try await client.executeWebhook(
             address: .deconstructed(id: webhook1.id, token: webhook1Token),
             payload: .init(content: "Testing! \(Date())")
-        )
-        XCTAssertEqual(noContentResponse.status, .noContent)
+        ).guardSuccess()
         
         let text = "Testing! \(Date())"
         let date = Date()
@@ -1789,11 +1843,9 @@ class DiscordClientTests: XCTestCase {
             
             let commandsCount = try await cacheClient.listApplicationCommands().decode().count
             
-            let deletionResponse = try await cacheClient.deleteApplicationCommand(
+            try await cacheClient.deleteApplicationCommand(
                 commandId: command.id
-            )
-            
-            XCTAssertEqual(deletionResponse.status, .noContent)
+            ).guardSuccess()
             
             let newCommandsCount = try await cacheClient.listApplicationCommands()
                 .decode().count
@@ -1834,11 +1886,9 @@ class DiscordClientTests: XCTestCase {
             
             let commandsCount = try await cacheClient.listApplicationCommands().decode().count
             
-            let deletionResponse = try await cacheClient.deleteApplicationCommand(
+            try await cacheClient.deleteApplicationCommand(
                 commandId: command.id
-            )
-            
-            XCTAssertEqual(deletionResponse.status, .noContent)
+            ).guardSuccess()
             
             let newCommandsCount = try await cacheClient
                 .listApplicationCommands()
@@ -1878,11 +1928,9 @@ class DiscordClientTests: XCTestCase {
             /// think the command doesn't exist and return 404.
             try await Task.sleep(for: .seconds(1))
             
-            let deletionResponse = try await cacheClient.deleteApplicationCommand(
+            try await cacheClient.deleteApplicationCommand(
                 commandId: command.id
-            )
-            
-            XCTAssertEqual(deletionResponse.status, .noContent)
+            ).guardSuccess()
             
             let newCommandsCount = try await cacheClient
                 .listApplicationCommands()

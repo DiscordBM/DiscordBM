@@ -64,11 +64,11 @@ public struct Reaction: Sendable, Hashable, Codable {
         public var errorDescription: String? {
             switch self {
             case let .moreThan1Emoji(input, count):
-                return "moreThan1Emoji(\(input), count: \(count))"
+                return "Reaction.Error.moreThan1Emoji(\(input), count: \(count))"
             case let .notEmoji(input):
-                return "notEmoji(\(input))"
+                return "Reaction.Error.notEmoji(\(input))"
             case let .cantConvertEmoji(emoji):
-                return "cantConvertEmoji(\(emoji))"
+                return "Reaction.Error.cantConvertEmoji(\(emoji))"
             }
         }
         

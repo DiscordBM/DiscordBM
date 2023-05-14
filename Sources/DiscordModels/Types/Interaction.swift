@@ -496,9 +496,9 @@ extension Interaction {
             public var errorDescription: String? {
                 switch self {
                 case let .unexpectedComponentKind(kind):
-                    return "unexpectedComponentKind(\(kind))"
+                    return "Interaction.ActionRow.CodingError.unexpectedComponentKind(\(kind))"
                 case .actionRowIsSupposedToOnlyAppearAtTopLevel:
-                    return "actionRowIsSupposedToOnlyAppearAtTopLevel"
+                    return "Interaction.ActionRow.CodingError.actionRowIsSupposedToOnlyAppearAtTopLevel"
                 }
             }
             

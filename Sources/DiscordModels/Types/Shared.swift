@@ -341,9 +341,9 @@ public struct DiscordTimestamp: Codable {
         public var errorDescription: String? {
             switch self {
             case let .unexpectedFormat(codingKey, timestamp):
-                return "unexpectedFormat(\(codingKey), \(timestamp))"
+                return "DiscordTimestamp.DecodingError.unexpectedFormat(\(codingKey), \(timestamp))"
             case let .conversionFailure(codingKey, timestamp, components):
-                return "conversionFailure(\(codingKey), \(timestamp), \(components))"
+                return "DiscordTimestamp.DecodingError.conversionFailure(\(codingKey), \(timestamp), \(components))"
             }
         }
         
@@ -571,7 +571,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         public var errorDescription: String? {
             switch self {
             case let .notRepresentingInt(string):
-                return "notRepresentingInt(\(string))"
+                return "StringBitField.DecodingError.notRepresentingInt(\(string))"
             }
         }
         
@@ -974,9 +974,9 @@ public struct SnowflakeInfo: Sendable {
         public var errorDescription: String? {
             switch self {
             case let .fieldTooBig(name, value, max):
-                return "fieldTooBig(\(name), value: \(value), max: \(max))"
+                return "SnowflakeInfo.Error.fieldTooBig(\(name), value: \(value), max: \(max))"
             case let .fieldTooSmall(name, value, min):
-                return "fieldTooSmall(\(name), value: \(value), min: \(min))"
+                return "SnowflakeInfo.Error.fieldTooSmall(\(name), value: \(value), min: \(min))"
             }
         }
 

@@ -235,19 +235,19 @@ public enum DiscordHTTPError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case let .rateLimited(url):
-            return "rateLimited(url: \(url))"
+            return "DiscordHTTPError.rateLimited(url: \(url))"
         case let .badStatusCode(response):
-            return "badStatusCode(\(response))"
+            return "DiscordHTTPError.badStatusCode(\(response))"
         case let .emptyBody(response):
-            return "emptyBody(\(response))"
+            return "DiscordHTTPError.emptyBody(\(response))"
         case let .noContentTypeHeader(response):
-            return "noContentTypeHeader(\(response))"
+            return "DiscordHTTPError.noContentTypeHeader(\(response))"
         case .appIdParameterRequired:
-            return "appIdParameterRequired"
+            return "DiscordHTTPError.appIdParameterRequired"
         case let .queryParametersMutuallyExclusive(queries):
-            return "queryParametersMutuallyExclusive(queries: \(queries))"
+            return "DiscordHTTPError.queryParametersMutuallyExclusive(queries: \(queries))"
         case let .queryParameterOutOfBounds(name, value, lowerBound, upperBound):
-            return "queryParameterOutOfBounds(name: \(name), value: \(value ?? "nil"), lowerBound: \(lowerBound), upperBound: \(upperBound))"
+            return "DiscordHTTPError.queryParameterOutOfBounds(name: \(name), value: \(value ?? "nil"), lowerBound: \(lowerBound), upperBound: \(upperBound))"
         }
     }
     

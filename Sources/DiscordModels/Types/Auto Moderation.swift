@@ -131,7 +131,7 @@ public struct AutoModerationRule: Sendable, Codable {
                     name: "customMessage"
                 )
             case .timeout(let durationSeconds):
-                validateNumberInRange(
+                validateNumberInRangeOrNil(
                     durationSeconds,
                     min: 0,
                     max: 2419200,

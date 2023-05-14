@@ -191,7 +191,7 @@ public struct Gateway: Sendable, Codable {
             public var errorDescription: String? {
                 switch self {
                 case let .unhandledDispatchEvent(type):
-                    return "unhandledDispatchEvent(type: \(type ?? "nil"))"
+                    return "Gateway.Event.GatewayDecodingError.unhandledDispatchEvent(type: \(type ?? "nil"))"
                 }
             }
             
@@ -392,7 +392,7 @@ public struct Gateway: Sendable, Codable {
             public var errorDescription: String? {
                 switch self {
                 case let .notSupposedToBeSent(message):
-                    return "notSupposedToBeSent(\(message))"
+                    return "Gateway.Event.EncodingError.notSupposedToBeSent(\(message))"
                 }
             }
             

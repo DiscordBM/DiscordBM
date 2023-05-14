@@ -77,8 +77,8 @@ public struct ApplicationCommand: Sendable, Codable {
         }
         
         public func validate() -> [ValidationFailure] {
-            validateNumberInRange(min_length, min: 0, max: 6_000, name: "min_length")
-            validateNumberInRange(max_length, min: 0, max: 6_000, name: "max_length")
+            validateNumberInRangeOrNil(min_length, min: 0, max: 6_000, name: "min_length")
+            validateNumberInRangeOrNil(max_length, min: 0, max: 6_000, name: "max_length")
             validateElementCountDoesNotExceed(choices, max: 25, name: "choices")
             validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
             validateCharacterCountInRange(description, min: 1, max: 100, name: "description")
@@ -163,7 +163,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
             public var errorDescription: String? {
                 switch self {
                 case let .couldNotConvertToInteger(string):
-                    return "couldNotConvertToInteger(\(string))"
+                    return "GuildApplicationCommandPermissions.Permission.ConversionError.couldNotConvertToInteger(\(string))"
                 }
             }
             

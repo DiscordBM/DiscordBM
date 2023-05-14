@@ -1454,7 +1454,7 @@ public extension DiscordClient {
     func previewPruneGuild(
         guildId: GuildSnowflake,
         days: Int? = nil,
-        include_roles: [RoleSnowflake]? = nil
+        includeRoles: [RoleSnowflake]? = nil
     ) async throws -> DiscordClientResponse<Responses.GuildPrune> {
         try checkInBounds(name: "days", value: days, lowerBound: 1, upperBound: 30)
         let endpoint = APIEndpoint.previewPruneGuild(guildId: guildId)
@@ -1462,7 +1462,7 @@ public extension DiscordClient {
             to: endpoint,
             queries: [
                 ("days", days.map { "\($0)" }),
-                ("include_roles", include_roles.map { $0.map(\.value).joined(separator: ",") }),
+                ("include_roles", includeRoles.map { $0.map(\.value).joined(separator: ",") }),
             ]
         ))
     }
@@ -2209,6 +2209,7 @@ public extension DiscordClient {
     }
 
     /// https://discord.com/developers/docs/resources/user#get-current-user-guild-member
+    @available(*, unavailable, message: "Currently this endpoint can't be used with a bot token")
     @inlinable
     func getOwnGuildMember(
         guildId: GuildSnowflake

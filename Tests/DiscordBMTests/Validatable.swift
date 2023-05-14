@@ -237,20 +237,20 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
         }
     }
     
-    func validateNumberInRange() throws {
-        try validateNumberInRange(1, min: 0, max: 21_600, name: "adoand").throw()
-        try validateNumberInRange(0, min: 0, max: 21_600, name: "").throw()
-        try validateNumberInRange(21_599, min: 0, max: 21_600, name: "qerqer").throw()
-        try validateNumberInRange(21_600.9, min: 0, max: 21_601, name: "kkdasd").throw()
-        try validateNumberInRange(999, min: 0, max: 998, name: "tt").throw()
+    func validateNumberInRangeOrNil() throws {
+        try validateNumberInRangeOrNil(1, min: 0, max: 21_600, name: "adoand").throw()
+        try validateNumberInRangeOrNil(0, min: 0, max: 21_600, name: "").throw()
+        try validateNumberInRangeOrNil(21_599, min: 0, max: 21_600, name: "qerqer").throw()
+        try validateNumberInRangeOrNil(21_600.9, min: 0, max: 21_601, name: "kkdasd").throw()
+        try validateNumberInRangeOrNil(999, min: 0, max: 998, name: "tt").throw()
         XCTAssertThrowsError(
-            try validateNumberInRange(9, min: 10, max: 21, name: "tt").throw()
+            try validateNumberInRangeOrNil(9, min: 10, max: 21, name: "tt").throw()
         ) { error in
             let error = error as! ValidationError
             XCTAssertErrorsEqual(error, .numberOutOfRange(name: "tt", number: "9", min: "10", max: "21"))
         }
         XCTAssertThrowsError(
-            try validateNumberInRange(22, min: 10, max: 21, name: "c,axz").throw()
+            try validateNumberInRangeOrNil(22, min: 10, max: 21, name: "c,axz").throw()
         ) { error in
             let error = error as! ValidationError
             XCTAssertErrorsEqual(
@@ -259,7 +259,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             )
         }
         XCTAssertThrowsError(
-            try validateNumberInRange(-1391293, min: 10, max: 21, name: "rqerqrew").throw()
+            try validateNumberInRangeOrNil(-1391293, min: 10, max: 21, name: "rqerqrew").throw()
         ) { error in
             let error = error as! ValidationError
             XCTAssertErrorsEqual(
@@ -268,7 +268,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             )
         }
         XCTAssertThrowsError(
-            try validateNumberInRange(934129139, min: 10, max: 21, name: "oewo").throw()
+            try validateNumberInRangeOrNil(934129139, min: 10, max: 21, name: "oewo").throw()
         ) { error in
             let error = error as! ValidationError
             XCTAssertErrorsEqual(
