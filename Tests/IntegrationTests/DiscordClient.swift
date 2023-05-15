@@ -10,7 +10,14 @@ class DiscordClientTests: XCTestCase {
     var httpClient: HTTPClient!
     var client: (any DiscordClient)!
 
+    var bot: BotGatewayManager?
+    var discordCache: DiscordCache?
+
     let permanentTestCommandName = "permanent-test-command"
+
+    deinit {
+        try! httpClient.syncShutdown()
+    }
 
     override func setUp() async throws {
         self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
@@ -21,10 +28,31 @@ class DiscordClientTests: XCTestCase {
             /// For not failing tests
             configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
         )
-    }
-
-    deinit {
-        try! httpClient.syncShutdown()
+        if let cache = discordCache {
+            self.discordCache = cache
+        } else {
+            /// This is to test `GatewayEventHandler` protocol and `DiscordCache`.
+            /// These tests don't assert anything. They're here just because the
+            /// `DiscordClient` tests trigger a lot of gateway events.
+            self.bot = await BotGatewayManager(
+                eventLoopGroup: httpClient.eventLoopGroup,
+                httpClient: httpClient,
+                token: Constants.token,
+                appId: Snowflake(Constants.botId)
+            )
+            self.discordCache = await DiscordCache(
+                gatewayManager: self.bot!,
+                intents: .all,
+                requestAllMembers: .enabledWithPresences,
+                messageCachingPolicy: .saveEditHistoryAndDeleted,
+                itemsLimit: .disabled
+            )
+            Task {
+                for await event in await bot!.makeEventsStream() {
+                    EventHandler(event: event).handle()
+                }
+            }
+        }
     }
 
     /// Just here so you know.
@@ -2030,4 +2058,8 @@ private actor Counter {
             )
         }
     }
+}
+
+private struct EventHandler: GatewayEventHandler {
+    let event: Gateway.Event
 }
