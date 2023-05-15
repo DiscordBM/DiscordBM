@@ -300,7 +300,7 @@ public actor DiscordCache {
     /// The gateway manager that this `DiscordCache` instance caches from.
     let gatewayManagers: [any GatewayManager]
     /// The possible gateway manager that has the guild-members intent.
-    var guildMembersGatewayManager: BotGatewayManager?
+    var guildMembersGatewayManager: (any GatewayManager)?
     /// What intents to cache their related Gateway events.
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
@@ -972,27 +972,22 @@ public actor DiscordCache {
     static func calculateIntentsIntersection(
         gatewayManagers managers: [any GatewayManager],
         intents: Intents
-    ) -> (intents: Intents, guildMembersGatewayManager: BotGatewayManager?)  {
+    ) -> (intents: Intents, guildMembersGatewayManager: (any GatewayManager)?)  {
         var intentsSum = Set<Gateway.Intent>()
-        var guildMembersGatewayManager: BotGatewayManager?
+        var guildMembersGatewayManager: (any GatewayManager)?
 
         for manager in managers {
-            if let botGatewayManager = manager as? BotGatewayManager {
-                let managerIntents = botGatewayManager.identifyPayload.intents.values
+            let managerIntents = manager.identifyPayload.intents.values
 
-                if managerIntents.contains(.guildMembers) {
-                    guildMembersGatewayManager = botGatewayManager
-                }
+            if managerIntents.contains(.guildMembers) {
+                guildMembersGatewayManager = manager
+            }
 
-                switch intents {
-                case .all:
-                    intentsSum.formUnion(managerIntents)
-                case let .some(intents):
-                    intentsSum.formUnion(intents.intersection(managerIntents))
-                }
-            } else {
-                /// If a `GatewayManager` is not a `BotGatewayManager`, quit.
-                return (intents, nil)
+            switch intents {
+            case .all:
+                intentsSum.formUnion(managerIntents)
+            case let .some(intents):
+                intentsSum.formUnion(intents.intersection(managerIntents))
             }
         }
 

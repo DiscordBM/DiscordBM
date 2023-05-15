@@ -26,7 +26,7 @@ public actor BotGatewayManager: GatewayManager {
     var eventParseFailureContinuations = [AsyncStream<(Error, ByteBuffer)>.Continuation]()
     
     //MARK: Connection data
-    nonisolated let identifyPayload: Gateway.Identify
+    public nonisolated let identifyPayload: Gateway.Identify
     
     //MARK: Connection state
     nonisolated let _state = ManagedAtomic(GatewayState.noConnection)

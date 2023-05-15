@@ -1280,6 +1280,7 @@ private actor FakeGatewayManager: GatewayManager {
     nonisolated let client: DiscordClient
     nonisolated let id: UInt = 0
     nonisolated let state: GatewayState = .stopped
+    nonisolated let identifyPayload: Gateway.Identify = .init(token: "", intents: [])
     func connect() async { }
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async { }
     func updatePresence(payload: Gateway.Identify.Presence) async { }

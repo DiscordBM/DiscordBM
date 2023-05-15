@@ -9,6 +9,8 @@ public protocol GatewayManager: AnyActor {
     nonisolated var id: UInt { get }
     /// The current state of the gateway manager.
     nonisolated var state: GatewayState { get }
+    /// The identification payload that is sent to Discord.
+    nonisolated var identifyPayload: Gateway.Identify { get }
     
     /// Starts connecting to Discord.
     func connect() async
