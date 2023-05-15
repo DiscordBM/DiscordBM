@@ -1511,7 +1511,6 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-
     /// https://discord.com/developers/docs/resources/guild#delete-guild-integration
     @inlinable
     func deleteGuildIntegration(
@@ -1541,10 +1540,18 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/guild#modify-guild-widget
     @inlinable
     func updateGuildWidgetSettings(
-        guildId: GuildSnowflake
+        guildId: GuildSnowflake,
+        reason: String? = nil,
+        payload: Payloads.ModifyWidgetSettings
     ) async throws -> DiscordClientResponse<Guild.WidgetSettings> {
         let endpoint = APIEndpoint.updateGuildWidgetSettings(guildId: guildId)
-        return try await self.send(request: .init(to: endpoint))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-widget

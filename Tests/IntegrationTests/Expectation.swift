@@ -114,6 +114,9 @@ extension XCTestCase {
 }
 
 // MARK: - FulfillmentStorage
+
+/// This was initially an `actor`, but having it as a `class` and
+/// synchronizing using a `DispatchQueue` simplifies a lot of stuff.
 private class FulfillmentStorage {
     private var indices: [Int] = []
     private var continuation: CheckedContinuation<(), Never>? = nil

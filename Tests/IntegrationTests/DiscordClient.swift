@@ -722,6 +722,24 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertEqual(memberUpdate.nick, newNick)
 
+        let updatedMember = try await client.updateGuildMember(
+            guildId: Constants.guildId,
+            userId: Constants.secondAccountId,
+            reason: "Testing Guild Member Edit!",
+            payload: .init(
+                nick: "NewNick\(Int.random(in: 0..<100))",
+                roles: [Constants.dummyRoleId],
+                /// These next 3 fields are voice-related. Will throw an error if we attempt
+                /// to set them, considering the target user is not connected to voice.
+                mute: nil,
+                deaf: nil,
+                channel_id: nil,
+                communication_disabled_until: .init(date: Date().addingTimeInterval(30)),
+                flags: [.completedOnboarding, .bypassVerification]
+            )
+        ).decode()
+
+        XCTAssertEqual(updatedMember.user?.id, Constants.secondAccountId)
 
         let allMembers = try await client
             .listGuildMembers(guildId: Constants.guildId)
@@ -905,6 +923,28 @@ class DiscordClientTests: XCTestCase {
         ).guardSuccess()
     }
 
+    func testGuildWidget() async throws {
+        let widgetSettings = try await client
+            .getGuildWidgetSettings(guildId: Constants.guildId)
+            .decode()
+
+        let channelId1 = Constants.Channels.general.id
+        let channelId2 = Constants.Channels.spam.id
+        let changedChannelId = widgetSettings.channel_id == channelId1 ? channelId2 : channelId1
+
+        let updatedWidget = try await client.updateGuildWidgetSettings(
+            guildId: Constants.guildId,
+            reason: "Update Widget Test!",
+            payload: .init(
+                enabled: !widgetSettings.enabled,
+                channel_id: changedChannelId
+            )
+        ).decode()
+
+        XCTAssertEqual(updatedWidget.enabled, !widgetSettings.enabled)
+        XCTAssertEqual(updatedWidget.channel_id, changedChannelId)
+    }
+
     func testGuildOthers() async throws {
         let preview = try await client
             .getGuildPreview(guildId: Constants.guildId)
@@ -919,9 +959,26 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         XCTAssertEqual(auditLogs.audit_log_entries.count, 50)
 
-        _ = try await client
-            .listGuildVoiceRegions(guildId: Constants.guildId)
+        _ = try await client.listGuildVoiceRegions(guildId: Constants.guildId).decode()
+
+        let vanityError = try await client
+            .getGuildVanityUrl(guildId: Constants.guildId)
+            .decodeError()
+
+        switch vanityError {
+            /// `missingAccess` is not accurate.
+            /// The actual problem is that the server doesn't have a vanity url (requires boosts)
+        case let .jsonError(jsonError) where jsonError.code == .missingAccess:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(vanityError)")
+        }
+
+        let onboarding = try await client
+            .getGuildOnboarding(guildId: Constants.guildId)
             .decode()
+
+        XCTAssertEqual(onboarding.guild_id, Constants.guildId)
     }
 
     func testDMs() async throws {

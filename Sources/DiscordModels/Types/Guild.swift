@@ -353,7 +353,7 @@ extension Guild {
     /// https://discord.com/developers/docs/resources/guild#guild-widget-settings-object-guild-widget-settings-structure
     public struct WidgetSettings: Sendable, Codable {
         public var enabled: Bool
-        public var channel_id: ChannelSnowflake
+        public var channel_id: ChannelSnowflake?
     }
 
     public struct Widget: Sendable, Codable {

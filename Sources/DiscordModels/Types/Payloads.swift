@@ -1420,25 +1420,33 @@ public enum Payloads {
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-member-json-params
     public struct ModifyGuildMember: Sendable, Encodable, ValidatablePayload {
-        public var nick: String
-        public var roles: [RoleSnowflake]
-        public var mute: Bool
-        public var deaf: Bool
-        public var channel_id: ChannelSnowflake
+        public var nick: String?
+        public var roles: [RoleSnowflake]?
+        public var mute: Bool?
+        public var deaf: Bool?
+        public var channel_id: ChannelSnowflake?
         public var communication_disabled_until: DiscordTimestamp?
-        public var flags: Int
+        public var flags: IntBitField<Guild.Member.Flag>?
 
-        public init(nick: String, roles: [RoleSnowflake], mute: Bool, deaf: Bool, channel_id: ChannelSnowflake, communication_disabled_until: DiscordTimestamp? = nil, flags: Int) {
+        public init(nick: String? = nil, roles: [RoleSnowflake]? = nil, mute: Bool? = nil, deaf: Bool? = nil, channel_id: ChannelSnowflake? = nil, communication_disabled_until: DiscordTimestamp? = nil, flags: [Guild.Member.Flag]? = nil) {
             self.nick = nick
             self.roles = roles
             self.mute = mute
             self.deaf = deaf
             self.channel_id = channel_id
             self.communication_disabled_until = communication_disabled_until
-            self.flags = flags
+            self.flags = flags.map { .init($0) }
         }
 
-        public func validate() -> [ValidationFailure] { }
+        public func validate() -> [ValidationFailure] {
+            let now = Date().timeIntervalSince1970
+            validateNumberInRangeOrNil(
+                communication_disabled_until?.date.timeIntervalSince1970,
+                min: now,
+                max: now + (28 * 24 * 60 * 60),
+                name: "communication_disabled_until.date.timeIntervalSince1970"
+            )
+        }
     }
 
     /// https://discord.com/developers/docs/resources/guild#modify-current-member-json-params
@@ -1547,6 +1555,19 @@ public enum Payloads {
         case banner4 = "banner4"
 
         public static let `default`: WidgetStyle = .shield
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-widget
+    public struct ModifyWidgetSettings: Sendable, Encodable, ValidatablePayload {
+        public var enabled: Bool?
+        public var channel_id: ChannelSnowflake?
+
+        public init(enabled: Bool? = nil, channel_id: ChannelSnowflake? = nil) {
+            self.enabled = enabled
+            self.channel_id = channel_id
+        }
+
+        public func validate() -> [ValidationFailure] { }
     }
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen-json-params

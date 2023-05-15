@@ -20,6 +20,7 @@ enum Constants {
     static let personalName = "Mahdi BM"
 
     static let adminRoleId: RoleSnowflake = "1036971780717432832"
+    static let dummyRoleId: RoleSnowflake = "1107534145548189726"
 
     static let secondAccountId: UserSnowflake = "966330655069843457"
 
