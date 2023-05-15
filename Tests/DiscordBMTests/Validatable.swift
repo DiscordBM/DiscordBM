@@ -242,7 +242,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
         try validateNumberInRangeOrNil(0, min: 0, max: 21_600, name: "").throw()
         try validateNumberInRangeOrNil(21_599, min: 0, max: 21_600, name: "qerqer").throw()
         try validateNumberInRangeOrNil(21_600.9, min: 0, max: 21_601, name: "kkdasd").throw()
-        try validateNumberInRangeOrNil(999, min: 0, max: 998, name: "tt").throw()
+        try validateNumberInRangeOrNil(997, min: 0, max: 998, name: "tt").throw()
         XCTAssertThrowsError(
             try validateNumberInRangeOrNil(9, min: 10, max: 21, name: "tt").throw()
         ) { error in
