@@ -22,6 +22,8 @@ class GatewayConnectionTests: XCTestCase {
     }
 
     func testConnect() async throws {
+        /// Make sure last tests don't affect this test's gateway connection
+        try await Task.sleep(for: .seconds(5))
 
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
@@ -78,13 +80,13 @@ class GatewayConnectionTests: XCTestCase {
 
         await bot.disconnect()
 
-        /// Make sure it is disconnected
-        try await Task.sleep(for: .seconds(5))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
         XCTAssertEqual(bot.state, .stopped)
     }
     
     func testConnectWithCompression() async throws {
+        /// Make sure last tests don't affect this test's gateway connection
+        try await Task.sleep(for: .seconds(5))
 
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
@@ -142,8 +144,6 @@ class GatewayConnectionTests: XCTestCase {
 
         await bot.disconnect()
 
-        /// Make sure it is disconnected
-        try await Task.sleep(for: .seconds(5))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
         XCTAssertEqual(bot.state, .stopped)
     }
@@ -221,6 +221,9 @@ class GatewayConnectionTests: XCTestCase {
     }
 
     func testUsingShards() async throws {
+        /// Make sure last tests don't affect this test's gateway connection
+        try await Task.sleep(for: .seconds(5))
+
         /// To make sure the calling the getBotGateway endpoint simultaneously
         /// doesn't make the first shard so slow that its test fails.
         ///
@@ -250,6 +253,9 @@ class GatewayConnectionTests: XCTestCase {
     }
 
     func testGatewayStopsOnInvalidToken() async throws {
+        /// Make sure last tests don't affect this test's gateway connection
+        try await Task.sleep(for: .seconds(5))
+
         let criticalLogExpectation = Expectation(description: "criticalLogExpectation")
         let logHandler = TestingLogHandler(expectation: criticalLogExpectation)
 
@@ -311,6 +317,8 @@ class GatewayConnectionTests: XCTestCase {
     }
 
     func testGatewayRequests() async throws {
+        /// Make sure last tests don't affect this test's gateway connection
+        try await Task.sleep(for: .seconds(5))
 
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
@@ -366,8 +374,6 @@ class GatewayConnectionTests: XCTestCase {
 
         await bot.disconnect()
 
-        /// Make sure it is disconnected
-        try await Task.sleep(for: .seconds(5))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
         XCTAssertEqual(bot.state, .stopped)
     }

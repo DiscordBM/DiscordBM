@@ -24,7 +24,9 @@ class PermissionChecker: XCTestCase {
     
     /// Checks to see if the permission checker functions work properly.
     func testCheckPermissions() async throws {
-        
+        /// Make sure last tests don't affect this test's gateway connection
+        try await Task.sleep(for: .seconds(5))
+
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
@@ -152,8 +154,5 @@ class PermissionChecker: XCTestCase {
         ))
         
         await bot.disconnect()
-        
-        /// Wait 5 seconds to make sure it doesn't mess up the next tests due to Discord limits.
-        try await Task.sleep(for: .seconds(5))
     }
 }

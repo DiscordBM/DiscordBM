@@ -169,9 +169,6 @@ class ReactToRoleTests: XCTestCase {
         }
         
         await bot.disconnect()
-        
-        /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(for: .seconds(5))
     }
     
     func testNoCache() async throws {
@@ -319,9 +316,6 @@ class ReactToRoleTests: XCTestCase {
         }
         
         await bot.disconnect()
-        
-        /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(for: .seconds(5))
     }
     
     func testMultipleReactions() async throws {
@@ -541,9 +535,6 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         await bot.disconnect()
-        
-        /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(for: .seconds(5))
     }
     
     func testGrantOnStart() async throws {
@@ -672,9 +663,6 @@ class ReactToRoleTests: XCTestCase {
         ).guardSuccess()
         
         await bot.disconnect()
-        
-        /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(for: .seconds(5))
     }
     
     func testInitializerAcceptingConfiguration() async throws {
@@ -815,9 +803,6 @@ class ReactToRoleTests: XCTestCase {
         }
         
         await bot.disconnect()
-        
-        /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(for: .seconds(5))
     }
     
     func testInitializerWithExistingRole() async throws {
@@ -962,9 +947,6 @@ class ReactToRoleTests: XCTestCase {
         }
         
         await bot.disconnect()
-        
-        /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(for: .seconds(5))
     }
     
     func testMessageIsInvalid() async throws {
@@ -1210,14 +1192,14 @@ class ReactToRoleTests: XCTestCase {
         }
         
         await bot.disconnect()
-        
-        /// So it doesn't mess up the next tests' gateway connections
-        try await Task.sleep(for: .seconds(5))
     }
     
     func makeBotAndCache(
         client: (any DiscordClient)? = nil
     ) async throws -> (any GatewayManager, DiscordCache) {
+        /// Make sure last tests don't affect this test's gateway connection
+        try await Task.sleep(for: .seconds(5))
+
         let bot = BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             client: client ?? self.client,
