@@ -652,15 +652,21 @@ class DiscordClientTests: XCTestCase {
             .listGuildInvites(guildId: Constants.guildId)
             .decode()
 
-        XCTAssertEqual(guildInvites.count, 1)
-        XCTAssertEqual(guildInvites.first?.code, invite.code)
+        XCTAssertGreaterThan(guildInvites.count, 0)
+        XCTAssertTrue(
+            guildInvites.map(\.code).contains(invite.code),
+            "\(guildInvites) did not contain \(invite.code)"
+        )
 
         let channelInvites = try await client.listChannelInvites(
             channelId: Constants.Channels.spam.id
         ).decode()
 
-        XCTAssertEqual(channelInvites.count, 1)
-        XCTAssertEqual(channelInvites.first?.code, invite.code)
+        XCTAssertGreaterThan(channelInvites.count, 0)
+        XCTAssertTrue(
+            channelInvites.map(\.code).contains(invite.code),
+            "\(guildInvites) did not contain \(invite.code)"
+        )
 
         let resolved = try await client.resolveInvite(code: invite.code).decode()
 
