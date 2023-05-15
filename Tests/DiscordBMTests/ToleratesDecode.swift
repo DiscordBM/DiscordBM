@@ -66,7 +66,7 @@ class ToleratesDecodeTests: XCTestCase {
             
             /// Refer to the comment above for some explanations.
             let decoded = try JSONDecoder().decode(
-                PartialApplication.InstallParams.self,
+                DiscordApplication.InstallParams.self,
                 from: Data(text.utf8)
             )
             XCTAssertEqual(decoded.scopes.count, 5)

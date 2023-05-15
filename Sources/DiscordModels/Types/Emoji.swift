@@ -2,7 +2,7 @@ import Foundation
 
 /// An Emoji with all fields marked as optional.
 /// https://discord.com/developers/docs/resources/emoji#emoji-object
-public struct PartialEmoji: Sendable, Codable {
+public struct Emoji: Sendable, Codable {
     public var id: EmojiSnowflake?
     public var name: String?
     public var roles: [RoleSnowflake]?
@@ -56,20 +56,24 @@ public struct Reaction: Sendable, Hashable, Codable {
     }
     
     /// Read `helpAnchor` for help about each error case.
-    public enum Error: LocalizedError {
+    public enum Error: LocalizedError, CustomStringConvertible {
         case moreThan1Emoji(String, count: Int)
         case notEmoji(String)
-        case cantConvertPartialEmoji(PartialEmoji)
-        
-        public var errorDescription: String? {
+        case cantConvertEmoji(Emoji)
+
+        public var description: String {
             switch self {
             case let .moreThan1Emoji(input, count):
-                return "moreThan1Emoji(\(input), count: \(count))"
+                return "Reaction.Error.moreThan1Emoji(\(input), count: \(count))"
             case let .notEmoji(input):
-                return "notEmoji(\(input))"
-            case let .cantConvertPartialEmoji(partialEmoji):
-                return "cantConvertPartialEmoji(\(partialEmoji))"
+                return "Reaction.Error.notEmoji(\(input))"
+            case let .cantConvertEmoji(emoji):
+                return "Reaction.Error.cantConvertEmoji(\(emoji))"
             }
+        }
+
+        public var errorDescription: String? {
+            self.description
         }
         
         public var helpAnchor: String? {
@@ -78,8 +82,8 @@ public struct Reaction: Sendable, Hashable, Codable {
                 return "Expected only 1 emoji in the input '\(input)' but recognized '\(count)' emojis"
             case let .notEmoji(input):
                 return "The input '\(input)' does not seem like an emoji"
-            case let .cantConvertPartialEmoji(partialEmoji):
-                return "Can't convert a partial emoji to a Reaction. Emoji: \(partialEmoji)"
+            case let .cantConvertEmoji(emoji):
+                return "Can't convert a partial emoji to a Reaction. Emoji: \(emoji)"
             }
         }
     }
@@ -100,18 +104,18 @@ public struct Reaction: Sendable, Hashable, Codable {
         Reaction(base: .guildEmoji(name: name, id: id))
     }
     
-    public init(emoji: PartialEmoji) throws {
+    public init(emoji: Emoji) throws {
         if let id = emoji.id {
             self = .guildEmoji(name: emoji.name, id: id)
         } else if let name = emoji.name {
             self = try .unicodeEmoji(name)
         } else {
-            throw Error.cantConvertPartialEmoji(emoji)
+            throw Error.cantConvertEmoji(emoji)
         }
     }
     
     /// Is the same as the partial emoji?
-    public func `is`(_ emoji: PartialEmoji) -> Bool {
+    public func `is`(_ emoji: Emoji) -> Bool {
         switch self.base {
         case let .unicodeEmoji(unicode): return unicode == emoji.name
         case let .guildEmoji(_, id): return id == emoji.id

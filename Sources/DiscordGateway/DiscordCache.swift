@@ -1006,7 +1006,7 @@ public actor DiscordCache {
 #endif
 }
 
-private func == (lhs: PartialEmoji, rhs: PartialEmoji) -> Bool {
+private func == (lhs: Emoji, rhs: Emoji) -> Bool {
     lhs.id == rhs.id && lhs.name == rhs.name
 }
 

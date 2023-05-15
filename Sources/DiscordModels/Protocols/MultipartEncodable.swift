@@ -8,6 +8,18 @@ private let allocator = ByteBufferAllocator()
 /// this `files` field from Codable decode/encodes.
 public protocol MultipartEncodable: Encodable {
     var files: [RawFile]? { get }
+    /// Encode the exact value of `Self`.
+    /// By default, DiscordBM encodes the `files` as one field,
+    /// and the rest of the payload as a `payload_json` field, which is what Discord asks.
+    /// However, very few endpoints don't accept that approach.
+    /// Payloads that set this to `true` shouldn't specify `CodingKeys`
+    /// to exclude the `files` from Codable.
+    static var rawEncodable: Bool { get }
+}
+
+extension MultipartEncodable {
+    /// Default to `false` since that's what 95+ % need.
+    public static var rawEncodable: Bool { false }
 }
 
 /// `RawFile` is _mostly_ copy-pasted from Vapor's `File` :)
@@ -57,18 +69,7 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
     ///
     /// - parameters:
     ///     - data: The file's contents.
-    ///     - filename: The name of the file, not including path.
-    public init(data: String, filename: String) {
-        self.init(data: ByteBuffer(string: data), filename: filename)
-    }
-    
-    /// Creates a new `File`.
-    ///
-    ///     let file = File(data: "hello", filename: "foo.txt")
-    ///
-    /// - parameters:
-    ///     - data: The file's contents.
-    ///     - filename: The name of the file, not including path.
+    ///     - filename: The name of the file **including extension**.
     public init(data: ByteBuffer, filename: String) {
         self.data = data
         self.filename = filename

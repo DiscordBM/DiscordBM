@@ -285,12 +285,12 @@ extension Interaction {
             
             public var style: Style
             public var label: String?
-            public var emoji: PartialEmoji?
+            public var emoji: Emoji?
             public var custom_id: String?
             public var url: String?
             public var disabled: Bool?
 
-            public init(style: Style, label: String? = nil, emoji: PartialEmoji? = nil, custom_id: String? = nil, url: String? = nil, disabled: Bool? = nil) {
+            public init(style: Style, label: String? = nil, emoji: Emoji? = nil, custom_id: String? = nil, url: String? = nil, disabled: Bool? = nil) {
                 self.style = style
                 self.label = label
                 self.emoji = emoji
@@ -308,10 +308,10 @@ extension Interaction {
                 public var label: String
                 public var value: String
                 public var description: String?
-                public var emoji: PartialEmoji?
+                public var emoji: Emoji?
                 public var `default`: Bool?
                 
-                public init(label: String, value: String, description: String? = nil, emoji: PartialEmoji? = nil, `default`: Bool? = nil) {
+                public init(label: String, value: String, description: String? = nil, emoji: Emoji? = nil, `default`: Bool? = nil) {
                     self.label = label
                     self.value = value
                     self.description = description
@@ -489,17 +489,21 @@ extension Interaction {
         public var components: [Component]
         
         /// Read `helpAnchor` for help about each error case.
-        public enum CodingError: LocalizedError {
+        public enum CodingError: LocalizedError, CustomStringConvertible {
             case unexpectedComponentKind(Kind)
             case actionRowIsSupposedToOnlyAppearAtTopLevel
-            
-            public var errorDescription: String? {
+
+            public var description: String {
                 switch self {
                 case let .unexpectedComponentKind(kind):
-                    return "unexpectedComponentKind(\(kind))"
+                    return "Interaction.ActionRow.CodingError.unexpectedComponentKind(\(kind))"
                 case .actionRowIsSupposedToOnlyAppearAtTopLevel:
-                    return "actionRowIsSupposedToOnlyAppearAtTopLevel"
+                    return "Interaction.ActionRow.CodingError.actionRowIsSupposedToOnlyAppearAtTopLevel"
                 }
+            }
+
+            public var errorDescription: String? {
+                self.description
             }
             
             public var helpAnchor: String? {

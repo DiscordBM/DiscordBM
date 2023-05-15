@@ -391,7 +391,7 @@ public struct DefaultDiscordClient: Sendable, DiscordClient {
             let contentType: String
             let buffer: ByteBuffer
             if let multipart = try payload.encodeMultipart() {
-                contentType = "multipart/form-data; boundary=\(MultipartEncodingContainer.boundary)"
+                contentType = "multipart/form-data; boundary=\(MultipartConfiguration.boundary)"
                 buffer = multipart
             } else {
                 contentType = "application/json"

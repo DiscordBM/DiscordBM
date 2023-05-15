@@ -302,6 +302,31 @@ paths:
               schema:
                 type: string
               example: ''
+    post-2:
+      tags:
+        - Channels
+      summary: create group dm
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ''
   /channels/{channel_id}/permissions/{overwrite_id}:
     put:
       tags:
@@ -452,7 +477,7 @@ paths:
     post:
       tags:
         - Channels
-      summary: follow channel
+      summary: follow announcement channel
       requestBody:
         content:
           application/json:
@@ -666,13 +691,8 @@ paths:
     patch:
       tags:
         - Guilds
-      summary: bulk update guild channels
+      summary: update guild channel positions
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: guild_id
           in: path
           schema:
@@ -680,19 +700,6 @@ paths:
           required: true
           description: '(Required) '
           example: <snowflake>
-      responses:
-        '200':
-          description: OK
-          headers:
-            Content-Type:
-              schema:
-                type: string
-                example: text/plain
-          content:
-            text/plain:
-              schema:
-                type: string
-              example: ''
   /channels/{channel_id}:
     get:
       tags:
@@ -3080,120 +3087,6 @@ paths:
               schema:
                 type: string
               example: ''
-  /webhooks/{webhook_id}/{webhook_token}/messages/@original:
-    get:
-      tags:
-        - Webhooks
-      summary: get webhooks messages original
-      parameters:
-        - name: thread_id
-          in: query
-          schema:
-            type: string
-          example: <string,null-snowflake>
-        - name: webhook_id
-          in: path
-          schema:
-            type: string
-          required: true
-          description: '(Required) '
-          example: <snowflake>
-        - name: webhook_token
-          in: path
-          schema:
-            type: string
-          required: true
-          description: '(Required) '
-          example: <string>
-      responses:
-        '200':
-          description: OK
-          headers:
-            Content-Type:
-              schema:
-                type: string
-                example: text/plain
-          content:
-            text/plain:
-              schema:
-                type: string
-              example: ''
-    delete:
-      tags:
-        - Webhooks
-      summary: delete webhooks messages original
-      parameters:
-        - name: thread_id
-          in: query
-          schema:
-            type: string
-          example: <string,null-snowflake>
-        - name: webhook_id
-          in: path
-          schema:
-            type: string
-          required: true
-          description: '(Required) '
-          example: <snowflake>
-        - name: webhook_token
-          in: path
-          schema:
-            type: string
-          required: true
-          description: '(Required) '
-          example: <string>
-      responses:
-        '200':
-          description: OK
-          headers:
-            Content-Type:
-              schema:
-                type: string
-                example: text/plain
-          content:
-            text/plain:
-              schema:
-                type: string
-              example: ''
-    patch:
-      tags:
-        - Webhooks
-      summary: patch webhooks messages original
-      requestBody:
-        content: {}
-      parameters:
-        - name: thread_id
-          in: query
-          schema:
-            type: string
-          example: <string,null-snowflake>
-        - name: webhook_id
-          in: path
-          schema:
-            type: string
-          required: true
-          description: '(Required) '
-          example: <snowflake>
-        - name: webhook_token
-          in: path
-          schema:
-            type: string
-          required: true
-          description: '(Required) '
-          example: <string>
-      responses:
-        '200':
-          description: OK
-          headers:
-            Content-Type:
-              schema:
-                type: string
-                example: text/plain
-          content:
-            text/plain:
-              schema:
-                type: string
-              example: ''
   /interactions/{interaction_id}/{interaction_token}/callback:
     post:
       tags:
@@ -3619,7 +3512,7 @@ paths:
     get:
       tags:
         - Invites
-      summary: invite resolve
+      summary: resolve invite
       parameters:
         - name: with_counts
           in: query
@@ -3654,7 +3547,7 @@ paths:
     delete:
       tags:
         - Invites
-      summary: invite revoke
+      summary: revoke invite
       parameters:
         - name: code
           in: path
@@ -3988,7 +3881,7 @@ paths:
     put:
       tags:
         - Messages
-      summary: add own message reaction
+      summary: add message reaction
       requestBody:
         content: {}
       security:
@@ -4764,23 +4657,8 @@ paths:
     patch:
       tags:
         - Roles
-      summary: bulk update guild roles
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                - id: <string,null-snowflake>
-                  position: <integer,null-int32>
-                - id: <string,null-snowflake>
-                  position: <integer,null-int32>
+      summary: update guild role positions
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: guild_id
           in: path
           schema:
@@ -4788,19 +4666,6 @@ paths:
           required: true
           description: '(Required) '
           example: <snowflake>
-      responses:
-        '200':
-          description: OK
-          headers:
-            Content-Type:
-              schema:
-                type: string
-                example: text/plain
-          content:
-            text/plain:
-              schema:
-                type: string
-              example: ''
   /users/@me/applications/{application_id}/role-connection:
     get:
       tags:
@@ -4877,7 +4742,7 @@ paths:
     get:
       tags:
         - Role Connections
-      summary: get application role connections metadata
+      summary: list application role connection metadata
       parameters:
         - name: application_id
           in: path
@@ -4902,7 +4767,7 @@ paths:
     put:
       tags:
         - Role Connections
-      summary: update application role connections metadata
+      summary: bulk overwrite application role connection metadata
       parameters:
         - name: Content-Type
           in: header
@@ -5714,7 +5579,7 @@ paths:
     get:
       tags:
         - Threads
-      summary: get active guild threads
+      summary: list active guild threads
       parameters:
         - name: guild_id
           in: path

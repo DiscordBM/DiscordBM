@@ -8,12 +8,36 @@ import NIOTransportServices
 import Atomics
 
 public final class WebSocketClient: @unchecked Sendable {
-    public enum Error: LocalizedError {
-        case invalidURL
+
+    public enum Error: LocalizedError, CustomStringConvertible {
+        case invalidURLString(String)
         case invalidResponseStatus(HTTPResponseHead)
         case alreadyShutdown
+
+        public var description: String {
+            switch self {
+            case let .invalidURLString(url):
+                return "WebSocketClient.Error.invalidURLString(\(url))"
+            case let .invalidResponseStatus(head):
+                return "WebSocketClient.Error.invalidResponseStatus(\(head))"
+            case .alreadyShutdown:
+                return "WebSocketClient.Error.alreadyShutdown"
+            }
+        }
+
         public var errorDescription: String? {
-            return "\(self)"
+            self.description
+        }
+
+        public var helpAnchor: String? {
+            switch self {
+            case let .invalidURLString(url):
+                return "The URL string was invalid: \(url)"
+            case let .invalidResponseStatus(head):
+                return "Received invalid status code. Make sure the connection you wan to make is acceptable by the peer. HTTP head: \(head)"
+            case .alreadyShutdown:
+                return "Do not attempt to shutdown the web-socket client when already shut down."
+            }
         }
     }
 

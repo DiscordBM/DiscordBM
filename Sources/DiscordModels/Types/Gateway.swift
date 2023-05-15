@@ -185,14 +185,18 @@ public struct Gateway: Sendable, Codable {
         }
         
         /// Read `helpAnchor` for help about each error case.
-        public enum GatewayDecodingError: LocalizedError {
+        public enum GatewayDecodingError: LocalizedError, CustomStringConvertible {
             case unhandledDispatchEvent(type: String?)
-            
-            public var errorDescription: String? {
+
+            public var description: String {
                 switch self {
                 case let .unhandledDispatchEvent(type):
-                    return "unhandledDispatchEvent(type: \(type ?? "nil"))"
+                    return "Gateway.Event.GatewayDecodingError.unhandledDispatchEvent(type: \(type ?? "nil"))"
                 }
+            }
+
+            public var errorDescription: String? {
+                self.description
             }
             
             public var helpAnchor: String? {
@@ -386,14 +390,18 @@ public struct Gateway: Sendable, Codable {
         }
         
         /// Read `helpAnchor` for help about each error case.
-        enum EncodingError: LocalizedError {
+        public enum EncodingError: LocalizedError, CustomStringConvertible {
             case notSupposedToBeSent(message: String)
-            
-            public var errorDescription: String? {
+
+            public var description: String {
                 switch self {
                 case let .notSupposedToBeSent(message):
-                    return "notSupposedToBeSent(\(message))"
+                    return "Gateway.Event.EncodingError.notSupposedToBeSent(\(message))"
                 }
+            }
+
+            public var errorDescription: String? {
+                self.description
             }
             
             public var helpAnchor: String? {
@@ -673,7 +681,7 @@ public struct Gateway: Sendable, Codable {
         public var default_message_notifications: Guild.DefaultMessageNotificationLevel
         public var explicit_content_filter: Guild.ExplicitContentFilterLevel
         public var roles: [Role]
-        public var emojis: [PartialEmoji]
+        public var emojis: [Emoji]
         public var features: [Guild.Feature]
         public var mfa_level: Guild.MFALevel
         public var application_id: ApplicationSnowflake?
@@ -786,7 +794,7 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update-guild-emojis-update-event-fields
     public struct GuildEmojisUpdate: Sendable, Codable {
         public var guild_id: GuildSnowflake
-        public var emojis: [PartialEmoji]
+        public var emojis: [Emoji]
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#guild-stickers-update-guild-stickers-update-event-fields
@@ -805,7 +813,6 @@ public struct Gateway: Sendable, Codable {
     public struct GuildMemberAdd: Sendable, Codable {
         public var guild_id: GuildSnowflake
         public var roles: [RoleSnowflake]
-        public var hoisted_role: String?
         public var user: DiscordUser
         public var nick: String?
         public var avatar: String?
@@ -813,10 +820,8 @@ public struct Gateway: Sendable, Codable {
         public var premium_since: DiscordTimestamp?
         public var deaf: Bool?
         public var mute: Bool?
-        public var pending: Bool?
-        public var is_pending: Bool?
         public var flags: IntBitField<Guild.Member.Flag>?
-        public var permissions: StringBitField<Permission>?
+        public var pending: Bool?
         public var communication_disabled_until: DiscordTimestamp?
     }
     
@@ -1072,7 +1077,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: GuildSnowflake?
         public var burst: Bool?
         public var member: Guild.Member?
-        public var emoji: PartialEmoji
+        public var emoji: Emoji
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove
@@ -1083,7 +1088,7 @@ public struct Gateway: Sendable, Codable {
         public var message_id: MessageSnowflake
         public var guild_id: GuildSnowflake?
         public var burst: Bool?
-        public var emoji: PartialEmoji
+        public var emoji: Emoji
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-all
@@ -1100,7 +1105,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: GuildSnowflake?
         public var message_id: MessageSnowflake
         public var burst: Bool?
-        public var emoji: PartialEmoji
+        public var emoji: Emoji
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#client-status-object

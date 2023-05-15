@@ -112,22 +112,35 @@ struct EntryPoint {
         /// Handle each event in the stream
         /// This stream will never end, therefore preventing your executable from exiting
         for await event in stream {
-            switch event.data {
-            case let .messageCreate(message):
-                print("NEW MESSAGE!", message)
+            EventHandler(event: event, client: bot.client).handle()
+        }
+    }
+}
 
-                /// Use `bot.client` to send requests to Discord
-                let response = try await bot.client.createMessage(
-                    channelId: message.channel_id,
-                    payload: .init(content: "Got a message: '\(message.content)'")
-                )
-                /// Easily decode the response to the correct type
-                let message = try response.decode()
+/// To keep things cleaner, use a type conforming to 
+/// `GatewayEventHandler` to handle your Gateway events.
+struct EventHandler: GatewayEventHandler {
+    let event: Gateway.Event
+    let client: any DiscordClient
 
-                /// Switch over other cases you have intents for and you care about
-                /// Use the `GatewayEventHandler` protocol for more convenience (see below)
-            default: break
-            }
+    /// Each Gateway payload has its own function. 
+    /// See `GatewayEventHandler` for the full list.
+    /// This function will only be called upon receiving `MESSAGE_CREATE` events.
+    func onMessageCreate(_ payload: Gateway.MessageCreate) async {
+        print("NEW MESSAGE!", payload)
+
+        do {
+            /// Use `client` to send requests to Discord
+            let response = try await client.createMessage(
+                channelId: payload.channel_id,
+                payload: .init(content: "Got a message: '\(payload.content)'")
+            )
+            
+            /// Easily decode the response to the correct type
+            /// `sent` will be of type `DiscordChannel.Message`.
+            let message = try response.decode()
+        } catch {
+            print("We got an error! \(error)")
         }
     }
 }

@@ -662,12 +662,11 @@ extension BotGatewayManager {
     private func waitInShardQueueIfNeeded() async {
         if let shard = self.identifyPayload.shard,
            let maxConcurrency,
-           /// Just to mitigate a possible crash, otherwise shouldn't happen at all.
-           maxConcurrency != 0,
+           /// If shard already connected once before, then skip the wait.
            !self.shardConnectedOnceBefore {
             await ShardManager.shared.waitForOtherShards(
                 shard: shard,
-                maxConcurrency: maxConcurrency
+                maxConcurrency: max(maxConcurrency, 1) /// Avoid an unlikely division-by-zero
             )
             /// Wait a little bit more.
             /// Nothing scientific but seems to make Discord happy `¯\_(ツ)_/¯`.

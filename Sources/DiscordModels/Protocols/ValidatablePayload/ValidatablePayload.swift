@@ -149,7 +149,7 @@ extension ValidatablePayload {
     }
     
     @inlinable
-    func validateNumberInRange<N: Numeric & Comparable>(
+    func validateNumberInRangeOrNil<N: Numeric & Comparable>(
         _ number: N?,
         min: N,
         max: N,

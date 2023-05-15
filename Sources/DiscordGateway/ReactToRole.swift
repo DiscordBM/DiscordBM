@@ -13,7 +13,7 @@ public actor ReactToRoleHandler {
     /// This configuration must be codable-backward-compatible.
     public struct Configuration: Sendable, Codable {
         public let id: UUID
-        public var createRole: Payloads.CreateGuildRole
+        public var createRole: Payloads.GuildRole
         public let guildId: GuildSnowflake
         public let channelId: ChannelSnowflake
         public let messageId: MessageSnowflake
@@ -36,7 +36,7 @@ public actor ReactToRoleHandler {
         ///   - roleId: The role-id, only if it's already been created.
         public init(
             id: UUID = UUID(),
-            createRole: Payloads.CreateGuildRole,
+            createRole: Payloads.GuildRole,
             guildId: GuildSnowflake,
             channelId: ChannelSnowflake,
             messageId: MessageSnowflake,
@@ -61,21 +61,25 @@ public actor ReactToRoleHandler {
     }
     
     /// Read `helpAnchor` for help about each error case.
-    public enum Error: LocalizedError {
+    public enum Error: LocalizedError, CustomStringConvertible {
         case messageIsInaccessible(
             messageId: MessageSnowflake,
             channelId: ChannelSnowflake,
             previousError: Swift.Error
         )
         case roleIsInaccessible(id: RoleSnowflake, previousError: Swift.Error?)
-        
-        public var errorDescription: String? {
+
+        public var description: String {
             switch self {
             case let .messageIsInaccessible(messageId, channelId, previousError):
-                return "messageIsInaccessible(messageId: \(messageId), channelId: \(channelId), previousError: \(previousError))"
+                return "ReactToRoleHandler.Error.messageIsInaccessible(messageId: \(messageId), channelId: \(channelId), previousError: \(previousError))"
             case let .roleIsInaccessible(id, previousError):
-                return "roleIsInaccessible(id: \(id), previousError: \(String(describing: previousError)))"
+                return "ReactToRoleHandler.Error.roleIsInaccessible(id: \(id), previousError: \(String(describing: previousError)))"
             }
+        }
+
+        public var errorDescription: String? {
+            self.description
         }
         
         public var helpAnchor: String? {
@@ -141,7 +145,7 @@ public actor ReactToRoleHandler {
             }
         }
         
-        func getRoleIfExists(role: Payloads.CreateGuildRole) async throws -> Role? {
+        func getRoleIfExists(role: Payloads.GuildRole) async throws -> Role? {
             if let cache = cacheWithIntents(.guilds) {
                 if let role = await cache.guilds[guildId]?.roles.first(where: {
                     $0.name == role.name &&
@@ -305,7 +309,7 @@ public actor ReactToRoleHandler {
     public init(
         gatewayManager: any GatewayManager,
         cache: DiscordCache?,
-        role: Payloads.CreateGuildRole,
+        role: Payloads.GuildRole,
         guildId: GuildSnowflake,
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
@@ -383,7 +387,7 @@ public actor ReactToRoleHandler {
             guildId: guildId
         )
         let role = try await self.requestHandler.getRole(id: existingRoleId)
-        let createRole = try await Payloads.CreateGuildRole(
+        let createRole = try await Payloads.GuildRole(
             role: role,
             client: gatewayManager.client
         )
@@ -480,7 +484,7 @@ public actor ReactToRoleHandler {
         }
     }
     
-    func checkAndRemoveRoleFromUser(emoji: PartialEmoji, userId: UserSnowflake) {
+    func checkAndRemoveRoleFromUser(emoji: Emoji, userId: UserSnowflake) {
         Task {
             do {
                 let emojiReaction = try Reaction(emoji: emoji)
@@ -694,7 +698,7 @@ public actor ReactToRoleHandler {
         }
         for reaction in remaining {
             do {
-                try await client.addOwnMessageReaction(
+                try await client.addMessageReaction(
                     channelId: self.configuration.channelId,
                     messageId: self.configuration.messageId,
                     emoji: reaction
@@ -715,8 +719,8 @@ private extension Logger {
     }
 }
 
-//MARK: + CreateGuildRole
-private extension Payloads.CreateGuildRole {
+//MARK: + GuildRole
+private extension Payloads.GuildRole {
     init(role: Role, client: any DiscordClient) async throws {
         self = .init(
             name: role.name,

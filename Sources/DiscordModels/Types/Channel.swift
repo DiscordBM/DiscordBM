@@ -97,7 +97,9 @@ public struct DiscordChannel: Sendable, Codable {
     }
     
     public var id: ChannelSnowflake
-    public var type: Kind
+    /// Type is optional because there are some endpoints that return
+    /// partial channel objects, and very few of them exclude the `type`.
+    public var type: Kind?
     public var guild_id: GuildSnowflake?
     public var position: Int?
     public var permission_overwrites: [Overwrite]?
@@ -245,9 +247,9 @@ extension DiscordChannel {
         public struct Reaction: Sendable, Codable {
             public var count: Int
             public var me: Bool
-            public var emoji: PartialEmoji
+            public var emoji: Emoji
 
-            public init(count: Int, me: Bool, emoji: PartialEmoji) {
+            public init(count: Int, me: Bool, emoji: Emoji) {
                 self.count = count
                 self.me = me
                 self.emoji = emoji
@@ -369,7 +371,7 @@ extension DiscordChannel {
     }
 }
 
-/// https://discord.com/developers/docs/resources/channel#thread-metadata-object
+/// https://discord.com/developers/docs/resources/channel#thread-metadata-object-thread-metadata-structure
 public struct ThreadMetadata: Sendable, Codable {
     public var archived: Bool
     public var auto_archive_duration: DiscordChannel.AutoArchiveDuration

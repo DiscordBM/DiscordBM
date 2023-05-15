@@ -6,18 +6,6 @@ import NIOFoundationCompat
 /// These types only need to be `Encodable`,
 /// unless we actually need them to be `Decodable` as well.
 public enum Payloads {
-    
-    public struct CreateDM: Sendable, Encodable, ValidatablePayload {
-        public var recipient_id: UserSnowflake
-        
-        @inlinable
-        public init(recipient_id: UserSnowflake) {
-            self.recipient_id = recipient_id
-        }
-        
-        public func validate() -> [ValidationFailure] { }
-    }
-    
     /// An attachment object, but for sending.
     /// https://discord.com/developers/docs/resources/channel#attachment-object
     public struct Attachment: Sendable, Encodable, ValidatablePayload {
@@ -376,35 +364,6 @@ public enum Payloads {
         }
     }
     
-    /// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
-    public struct CreateGuildRole: Sendable, Codable, ValidatablePayload {
-        public var name: String?
-        public var permissions: StringBitField<Permission>?
-        public var color: DiscordColor?
-        public var hoist: Bool?
-        public var icon: ImageData?
-        public var unicode_emoji: String?
-        public var mentionable: Bool?
-        
-        /// `icon` and `unicode_emoji` require `roleIcons` guild feature,
-        /// which most guild don't have.
-        /// No fields are required. If you send an empty payload, you'll get a basic role
-        /// with a name like "new role".
-        public init(name: String? = nil, permissions: [Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, icon: ImageData? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
-            self.name = name
-            self.permissions = permissions.map { .init($0) }
-            self.color = color
-            self.hoist = hoist
-            self.icon = icon
-            self.unicode_emoji = unicode_emoji
-            self.mentionable = mentionable
-        }
-        
-        public func validate() -> [ValidationFailure] {
-            validateCharacterCountDoesNotExceed(name, max: 1_000, name: "name")
-        }
-    }
-    
     /// https://discord.com/developers/docs/resources/channel#create-message-jsonform-params
     public struct CreateMessage: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
@@ -696,7 +655,7 @@ public enum Payloads {
         
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
@@ -728,7 +687,7 @@ public enum Payloads {
         
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
@@ -822,7 +781,7 @@ public enum Payloads {
         
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
@@ -932,7 +891,7 @@ public enum Payloads {
         public var name: String?
         public var icon: ImageData?
 
-        init(name: String? = nil, icon: ImageData? = nil) {
+        public init(name: String? = nil, icon: ImageData? = nil) {
             self.name = name
             self.icon = icon
         }
@@ -944,19 +903,12 @@ public enum Payloads {
 
     /// https://discord.com/developers/docs/resources/channel#overwrite-object
     public struct PartialChannelOverwrite: Sendable, Encodable {
-
-        /// https://discord.com/developers/docs/resources/channel#overwrite-object
-        public enum Kind: Int, Sendable, Encodable, ToleratesIntDecodeMarker {
-            case role = 0
-            case member = 1
-        }
-
         public var id: AnySnowflake
-        public var type: Kind
+        public var type: DiscordChannel.Overwrite.Kind
         public var allow: StringBitField<Permission>?
         public var deny: StringBitField<Permission>?
 
-        public init(id: AnySnowflake, type: Kind, allow: [Permission]? = nil, deny: [Permission]? = nil) {
+        public init(id: AnySnowflake, type: DiscordChannel.Overwrite.Kind, allow: [Permission]? = nil, deny: [Permission]? = nil) {
             self.id = id
             self.type = type
             self.allow = allow.map { .init($0) }
@@ -1028,14 +980,14 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRangeOrNil(name, min: 1, max: 100, name: "name")
             validateCharacterCountDoesNotExceed(topic, max: 4_096, name: "topic")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
                 name: "rate_limit_per_user"
             )
-            validateNumberInRange(bitrate, min: 8_000, max: 384_000, name: "bitrate")
-            validateNumberInRange(user_limit, min: 0, max: 10_000, name: "user_limit")
+            validateNumberInRangeOrNil(bitrate, min: 8_000, max: 384_000, name: "bitrate")
+            validateNumberInRangeOrNil(user_limit, min: 0, max: 10_000, name: "user_limit")
             validateOnlyContains(
                 flags?.values,
                 name: "flags",
@@ -1070,7 +1022,7 @@ public enum Payloads {
 
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRangeOrNil(name, min: 1, max: 100, name: "name")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
@@ -1127,14 +1079,14 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
             validateCharacterCountDoesNotExceed(topic, max: 4_096, name: "topic")
-            validateNumberInRange(
+            validateNumberInRangeOrNil(
                 rate_limit_per_user,
                 min: 0,
                 max: 21_600,
                 name: "rate_limit_per_user"
             )
-            validateNumberInRange(bitrate, min: 8_000, max: 384_000, name: "bitrate")
-            validateNumberInRange(user_limit, min: 0, max: 10_000, name: "user_limit")
+            validateNumberInRangeOrNil(bitrate, min: 8_000, max: 384_000, name: "bitrate")
+            validateNumberInRangeOrNil(user_limit, min: 0, max: 10_000, name: "user_limit")
             validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
         }
     }
@@ -1216,6 +1168,693 @@ public enum Payloads {
 
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 2, max: 100, name: "name")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/auto-moderation#create-auto-moderation-rule-json-params
+    public struct CreateAutoModerationRule: Sendable, Codable, ValidatablePayload {
+        public var name: String
+        public var event_type: AutoModerationRule.EventKind
+        public var trigger_type: AutoModerationRule.TriggerKind
+        public var trigger_metadata: AutoModerationRule.TriggerMetadata?
+        public var actions: [AutoModerationRule.Action]
+        public var enabled: Bool?
+        public var exempt_roles: [RoleSnowflake]?
+        public var exempt_channels: [ChannelSnowflake]?
+
+        public init(name: String, event_type: AutoModerationRule.EventKind, trigger_type: AutoModerationRule.TriggerKind, trigger_metadata: AutoModerationRule.TriggerMetadata? = nil, actions: [AutoModerationRule.Action], enabled: Bool? = nil, exempt_roles: [RoleSnowflake]? = nil, exempt_channels: [ChannelSnowflake]? = nil) {
+            self.name = name
+            self.event_type = event_type
+            self.trigger_type = trigger_type
+            self.trigger_metadata = trigger_metadata
+            self.actions = actions
+            self.enabled = enabled
+            self.exempt_roles = exempt_roles
+            self.exempt_channels = exempt_channels
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateElementCountDoesNotExceed(exempt_roles, max: 50, name: "exempt_roles")
+            validateElementCountDoesNotExceed(exempt_channels, max: 50, name: "exempt_channels")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/auto-moderation#modify-auto-moderation-rule
+    public struct ModifyAutoModerationRule: Sendable, Codable, ValidatablePayload {
+        public var name: String?
+        public var event_type: AutoModerationRule.EventKind?
+        public var trigger_type: AutoModerationRule.TriggerKind?
+        public var trigger_metadata: AutoModerationRule.TriggerMetadata?
+        public var actions: [AutoModerationRule.Action]?
+        public var enabled: Bool?
+        public var exempt_roles: [RoleSnowflake]?
+        public var exempt_channels: [ChannelSnowflake]?
+
+        public init(name: String? = nil, event_type: AutoModerationRule.EventKind? = nil, trigger_type: AutoModerationRule.TriggerKind? = nil, trigger_metadata: AutoModerationRule.TriggerMetadata? = nil, actions: [AutoModerationRule.Action]? = nil, enabled: Bool? = nil, exempt_roles: [RoleSnowflake]? = nil, exempt_channels: [ChannelSnowflake]? = nil) {
+            self.name = name
+            self.event_type = event_type
+            self.trigger_type = trigger_type
+            self.trigger_metadata = trigger_metadata
+            self.actions = actions
+            self.enabled = enabled
+            self.exempt_roles = exempt_roles
+            self.exempt_channels = exempt_channels
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateElementCountDoesNotExceed(exempt_roles, max: 50, name: "exempt_roles")
+            validateElementCountDoesNotExceed(exempt_channels, max: 50, name: "exempt_channels")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#bulk-delete-messages-json-params
+    public struct BulkDeleteMessages: Sendable, Codable, ValidatablePayload {
+        public var messages: [MessageSnowflake]
+
+        public init(messages: [MessageSnowflake]) {
+            self.messages = messages
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateElementCountInRange(messages, min: 2, max: 100, name: "messages")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#edit-channel-permissions-json-params
+    public struct EditChannelPermissions: Sendable, Codable, ValidatablePayload {
+        public var type: DiscordChannel.Overwrite.Kind
+        public var allow: StringBitField<Permission>?
+        public var deny: StringBitField<Permission>?
+
+        public init(type: DiscordChannel.Overwrite.Kind, allow: [Permission]? = nil, deny: [Permission]? = nil) {
+            self.type = type
+            self.allow = allow.map { .init($0) }
+            self.deny = deny.map { .init($0) }
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    public enum Count: Sendable, Encodable, ExpressibleByIntegerLiteral {
+        case unlimited
+        case count(Int)
+
+        public init(integerLiteral value: Int) {
+            if value == 0 {
+                self = .unlimited
+            } else {
+                self = .count(value)
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            switch self {
+            case .unlimited:
+                try container.encode(0)
+            case let .count(count):
+                try container.encode(count)
+            }
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#create-channel-invite-json-params
+    public struct CreateChannelInvite: Sendable, Encodable, ValidatablePayload {
+        public var max_age: Count?
+        public var max_uses: Count?
+        public var temporary: Bool?
+        public var unique: Bool?
+        public var target_type: Invite.TargetKind?
+        public var target_user_id: UserSnowflake?
+        public var target_application_id: ApplicationSnowflake?
+
+        public init(max_age: Count? = nil, max_uses: Count? = nil, temporary: Bool? = nil, unique: Bool? = nil, target_type: Invite.TargetKind? = nil, target_user_id: UserSnowflake? = nil, target_application_id: ApplicationSnowflake? = nil) {
+            self.max_age = max_age
+            self.max_uses = max_uses
+            self.temporary = temporary
+            self.unique = unique
+            self.target_type = target_type
+            self.target_user_id = target_user_id
+            self.target_application_id = target_application_id
+        }
+
+        public func validate() -> [ValidationFailure] {
+            switch max_age {
+            case .unlimited, .none:
+                Optional<ValidationFailure>.none
+            case let .count(count):
+                validateNumberInRangeOrNil(count, min: 0, max: 604_800, name: "max_age")
+            }
+            switch max_uses {
+            case .unlimited, .none:
+                Optional<ValidationFailure>.none
+            case let .count(count):
+                validateNumberInRangeOrNil(count, min: 0, max: 100, name: "max_uses")
+            }
+            if target_type == .stream {
+                validateHasPrecondition(
+                    condition: target_user_id != nil,
+                    allowedIf: target_type == .stream,
+                    name: "target_user_id",
+                    reason: "'target_user_id' & 'target_type == .stream' require each other"
+                )
+            }
+            if target_type == .embeddedApplication {
+                validateHasPrecondition(
+                    condition: target_application_id != nil,
+                    allowedIf: target_type == .embeddedApplication,
+                    name: "target_user_id",
+                    reason: "'target_application_id' & 'target_type == .embeddedApplication' require each other"
+                )
+            }
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#follow-announcement-channel-json-params
+    public struct FollowAnnouncementChannel: Sendable, Encodable, ValidatablePayload {
+        public var webhook_channel_id: ChannelSnowflake
+
+        public init(webhook_channel_id: ChannelSnowflake) {
+            self.webhook_channel_id = webhook_channel_id
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#group-dm-add-recipient-json-params
+    public struct AddGroupDMUser: Sendable, Encodable, ValidatablePayload {
+        public var access_token: String
+        public var nick: String
+
+        public init(access_token: String, nick: String) {
+            self.access_token = access_token
+            self.nick = nick
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/emoji#create-guild-emoji-json-params
+    public struct CreateGuildEmoji: Sendable, Encodable, ValidatablePayload {
+        public var name: String
+        public var image: ImageData
+        public var roles: [RoleSnowflake]
+
+        public init(name: String, image: ImageData, roles: [RoleSnowflake]) {
+            self.name = name
+            self.image = image
+            self.roles = roles
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/emoji#create-guild-emoji-json-params
+    public struct ModifyGuildEmoji: Sendable, Encodable, ValidatablePayload {
+        public var name: String
+        public var roles: [RoleSnowflake]
+
+        public init(name: String, roles: [RoleSnowflake]) {
+            self.name = name
+            self.roles = roles
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-channel-positions-json-params
+    public struct ModifyGuildChannelPositions: Sendable, Encodable, ValidatablePayload {
+        public var id: ChannelSnowflake
+        public var position: Int?
+        public var lock_permissions: Bool?
+        public var parent_id: ChannelSnowflake?
+
+        public init(id: ChannelSnowflake, position: Int? = nil, lock_permissions: Bool? = nil, parent_id: ChannelSnowflake? = nil) {
+            self.id = id
+            self.position = position
+            self.lock_permissions = lock_permissions
+            self.parent_id = parent_id
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+/// https://discord.com/developers/docs/resources/guild#add-guild-member-json-params
+    public struct AddGuildMember: Sendable, Encodable, ValidatablePayload {
+        public var access_token: String
+        public var nick: String?
+        public var roles: [RoleSnowflake]?
+        public var mute: Bool?
+        public var deaf: Bool?
+
+        public init(access_token: String, nick: String? = nil, roles: [RoleSnowflake]? = nil, mute: Bool? = nil, deaf: Bool? = nil) {
+            self.access_token = access_token
+            self.nick = nick
+            self.roles = roles
+            self.mute = mute
+            self.deaf = deaf
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-member-json-params
+    public struct ModifyGuildMember: Sendable, Encodable, ValidatablePayload {
+        public var nick: String?
+        public var roles: [RoleSnowflake]?
+        public var mute: Bool?
+        public var deaf: Bool?
+        public var channel_id: ChannelSnowflake?
+        public var communication_disabled_until: DiscordTimestamp?
+        public var flags: IntBitField<Guild.Member.Flag>?
+
+        public init(nick: String? = nil, roles: [RoleSnowflake]? = nil, mute: Bool? = nil, deaf: Bool? = nil, channel_id: ChannelSnowflake? = nil, communication_disabled_until: DiscordTimestamp? = nil, flags: [Guild.Member.Flag]? = nil) {
+            self.nick = nick
+            self.roles = roles
+            self.mute = mute
+            self.deaf = deaf
+            self.channel_id = channel_id
+            self.communication_disabled_until = communication_disabled_until
+            self.flags = flags.map { .init($0) }
+        }
+
+        public func validate() -> [ValidationFailure] {
+            let now = Date().timeIntervalSince1970
+            validateNumberInRangeOrNil(
+                communication_disabled_until?.date.timeIntervalSince1970,
+                min: now,
+                max: now + (28 * 24 * 60 * 60),
+                name: "communication_disabled_until.date.timeIntervalSince1970"
+            )
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-current-member-json-params
+    public struct ModifyCurrentMember: Sendable, Encodable, ValidatablePayload {
+        public var nick: String?
+
+        public init(nick: String? = nil) {
+            self.nick = nick
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#create-guild-ban-json-params
+    public struct CreateGuildBan: Sendable, Encodable, ValidatablePayload {
+        public var delete_message_seconds: Int?
+
+        public init(delete_message_seconds: Int? = nil) {
+            self.delete_message_seconds = delete_message_seconds
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateNumberInRangeOrNil(delete_message_seconds, min: 0, max: 604_800, name: "delete_message_seconds")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-role-json-params
+    public struct GuildRole: Sendable, Codable, ValidatablePayload {
+        public var name: String?
+        public var permissions: StringBitField<Permission>?
+        public var color: DiscordColor?
+        public var hoist: Bool?
+        public var icon: ImageData?
+        public var unicode_emoji: String?
+        public var mentionable: Bool?
+
+        /// `icon` and `unicode_emoji` require `roleIcons` guild feature,
+        /// which most guild don't have.
+        /// No fields are required. If you send an empty payload, you'll get a basic role
+        /// with a name like "new role".
+        public init(name: String? = nil, permissions: [Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, icon: ImageData? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
+            self.name = name
+            self.permissions = permissions.map { .init($0) }
+            self.color = color
+            self.hoist = hoist
+            self.icon = icon
+            self.unicode_emoji = unicode_emoji
+            self.mentionable = mentionable
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountDoesNotExceed(name, max: 1_000, name: "name")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-role-positions-json-params
+    public struct ModifyGuildRolePositions: Sendable, Encodable, ValidatablePayload {
+        public var id: RoleSnowflake
+        public var position: Int?
+
+        public init(id: RoleSnowflake, position: Int? = nil) {
+            self.id = id
+            self.position = position
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-mfa-level-json-params
+    public struct ModifyGuildMFALevel: Sendable, Encodable, ValidatablePayload {
+        public var level: Guild.MFALevel
+
+        public init(level: Guild.MFALevel) {
+            self.level = level
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#begin-guild-prune-json-params
+    public struct BeginGuildPrune: Sendable, Encodable, ValidatablePayload {
+        public var days: Int
+        public var compute_prune_count: Bool
+        public var include_roles: [RoleSnowflake]
+
+        public init(days: Int, compute_prune_count: Bool, include_roles: [RoleSnowflake]) {
+            self.days = days
+            self.compute_prune_count = compute_prune_count
+            self.include_roles = include_roles
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateNumberInRangeOrNil(days, min: 1, max: 30, name: "days")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#get-guild-widget-image-widget-style-options
+    /// Cases show sizes from small to big.
+    /// See Discord docs for examples.
+    public enum WidgetStyle: String, Sendable {
+        case shield = "small"
+        case banner1 = "banner1"
+        case banner2 = "banner2"
+        case banner3 = "banner3"
+        case banner4 = "banner4"
+
+        public static let `default`: WidgetStyle = .shield
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-widget
+    public struct ModifyWidgetSettings: Sendable, Encodable, ValidatablePayload {
+        public var enabled: Bool?
+        public var channel_id: ChannelSnowflake?
+
+        public init(enabled: Bool? = nil, channel_id: ChannelSnowflake? = nil) {
+            self.enabled = enabled
+            self.channel_id = channel_id
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen-json-params
+    public struct ModifyGuildWelcomeScreen: Sendable, Encodable, ValidatablePayload {
+        public var enabled: Bool?
+        public var welcome_channels: [Guild.WelcomeScreen.Channel]?
+        public var description: String?
+
+        public init(enabled: Bool? = nil, welcome_channels: [Guild.WelcomeScreen.Channel]? = nil, description: String? = nil) {
+            self.enabled = enabled
+            self.welcome_channels = welcome_channels
+            self.description = description
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-current-user-voice-state-json-params
+    public struct ModifyCurrentUserVoiceState: Sendable, Encodable, ValidatablePayload {
+        public var channel_id: ChannelSnowflake?
+        public var suppress: Bool?
+        public var request_to_speak_timestamp: DiscordTimestamp?
+
+        public init(channel_id: ChannelSnowflake? = nil, suppress: Bool? = nil, request_to_speak_timestamp: DiscordTimestamp? = nil) {
+            self.channel_id = channel_id
+            self.suppress = suppress
+            self.request_to_speak_timestamp = request_to_speak_timestamp
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-user-voice-state-json-params
+    public struct ModifyUserVoiceState: Sendable, Encodable, ValidatablePayload {
+        public var channel_id: ChannelSnowflake?
+        public var suppress: Bool?
+
+        public init(channel_id: ChannelSnowflake? = nil, suppress: Bool? = nil) {
+            self.channel_id = channel_id
+            self.suppress = suppress
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event-json-params
+    public struct CreateGuildScheduledEvent: Sendable, Encodable, ValidatablePayload {
+        public var channel_id: ChannelSnowflake?
+        public var entity_metadata: GuildScheduledEvent.EntityMetadata?
+        public var name: String
+        public var privacy_level: GuildScheduledEvent.PrivacyLevel
+        public var scheduled_start_time: DiscordTimestamp
+        public var scheduled_end_time: DiscordTimestamp?
+        public var description: String?
+        public var entity_type: GuildScheduledEvent.EntityKind
+        public var image: ImageData?
+
+        public init(channel_id: ChannelSnowflake? = nil, entity_metadata: GuildScheduledEvent.EntityMetadata? = nil, name: String, privacy_level: GuildScheduledEvent.PrivacyLevel, scheduled_start_time: DiscordTimestamp, scheduled_end_time: DiscordTimestamp? = nil, description: String? = nil, entity_type: GuildScheduledEvent.EntityKind, image: ImageData? = nil) {
+            self.channel_id = channel_id
+            self.entity_metadata = entity_metadata
+            self.name = name
+            self.privacy_level = privacy_level
+            self.scheduled_start_time = scheduled_start_time
+            self.scheduled_end_time = scheduled_end_time
+            self.description = description
+            self.entity_type = entity_type
+            self.image = image
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild-scheduled-event#modify-guild-scheduled-event-json-params
+    public struct ModifyGuildScheduledEvent: Sendable, Encodable, ValidatablePayload {
+        public var channel_id: ChannelSnowflake?
+        public var entity_metadata: GuildScheduledEvent.EntityMetadata?
+        public var name: String?
+        public var privacy_level: GuildScheduledEvent.PrivacyLevel?
+        public var scheduled_start_time: DiscordTimestamp?
+        public var scheduled_end_time: DiscordTimestamp?
+        public var description: String?
+        public var entity_type: GuildScheduledEvent.EntityKind?
+        public var status: GuildScheduledEvent.Status?
+        public var image: ImageData?
+
+        public init(channel_id: ChannelSnowflake? = nil, entity_metadata: GuildScheduledEvent.EntityMetadata? = nil, name: String? = nil, privacy_level: GuildScheduledEvent.PrivacyLevel? = nil, scheduled_start_time: DiscordTimestamp? = nil, scheduled_end_time: DiscordTimestamp? = nil, description: String? = nil, entity_type: GuildScheduledEvent.EntityKind? = nil, status: GuildScheduledEvent.Status? = nil, image: ImageData? = nil) {
+            self.channel_id = channel_id
+            self.entity_metadata = entity_metadata
+            self.name = name
+            self.privacy_level = privacy_level
+            self.scheduled_start_time = scheduled_start_time
+            self.scheduled_end_time = scheduled_end_time
+            self.description = description
+            self.entity_type = entity_type
+            self.status = status
+            self.image = image
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild-template#create-guild-from-guild-template-json-params
+    public struct CreateGuildFromGuildTemplate: Sendable, Encodable, ValidatablePayload {
+        public var name: String
+        public var icon: ImageData?
+
+        public init(name: String, icon: ImageData? = nil) {
+            self.name = name
+            self.icon = icon
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(name, min: 2, max: 100, name: "name")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild-template#create-guild-template-json-params
+    public struct CreateGuildTemplate: Sendable, Encodable, ValidatablePayload {
+        public var name: String
+        public var description: String?
+
+        public init(name: String, description: String? = nil) {
+            self.name = name
+            self.description = description
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
+            validateCharacterCountDoesNotExceed(description, max: 120, name: "description")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild-template#modify-guild-template-json-params
+    public struct ModifyGuildTemplate: Sendable, Encodable, ValidatablePayload {
+        public var name: String?
+        public var description: String?
+
+        public init(name: String? = nil, description: String? = nil) {
+            self.name = name
+            self.description = description
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
+            validateCharacterCountDoesNotExceed(description, max: 120, name: "description")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/stage-instance#create-stage-instance-json-params
+    public struct CreateStageInstance: Sendable, Encodable, ValidatablePayload {
+        public var channel_id: ChannelSnowflake
+        public var topic: String
+        public var privacy_level: StageInstance.PrivacyLevel?
+        public var send_start_notification: Bool?
+
+        public init(channel_id: ChannelSnowflake, topic: String, privacy_level: StageInstance.PrivacyLevel? = nil, send_start_notification: Bool? = nil) {
+            self.channel_id = channel_id
+            self.topic = topic
+            self.privacy_level = privacy_level
+            self.send_start_notification = send_start_notification
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(topic, min: 1, max: 120, name: "topic")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/stage-instance#modify-stage-instance-json-params
+    public struct ModifyStageInstance: Sendable, Encodable, ValidatablePayload {
+        public var topic: String?
+        public var privacy_level: StageInstance.PrivacyLevel?
+
+        public init(topic: String? = nil, privacy_level: StageInstance.PrivacyLevel? = nil) {
+            self.topic = topic
+            self.privacy_level = privacy_level
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRangeOrNil(topic, min: 1, max: 120, name: "topic")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/sticker#create-guild-sticker-form-params
+    public struct CreateGuildSticker: Sendable, Encodable, MultipartEncodable, ValidatablePayload {
+        public var name: String
+        public var description: String
+        public var tags: String
+        public var file: RawFile
+
+        public static var rawEncodable: Bool { true }
+        public var files: [RawFile]? {
+            [self.file]
+        }
+
+        public init(name: String, description: String, tags: String, file: RawFile) {
+            self.name = name
+            self.description = description
+            self.tags = tags
+            self.file = file
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(name, min: 2, max: 30, name: "name")
+            validateCharacterCountInRangeOrNil(description, min: 2, max: 100, name: "description")
+            validateCharacterCountDoesNotExceed(tags, max: 200, name: "tags")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/sticker#modify-guild-sticker-json-params
+    public struct ModifyGuildSticker: Sendable, Encodable, ValidatablePayload {
+        public var name: String?
+        public var description: String?
+        public var tags: String?
+
+        public init(name: String? = nil, description: String? = nil, tags: String? = nil) {
+            self.name = name
+            self.description = description
+            self.tags = tags
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(name, min: 2, max: 30, name: "name")
+            validateCharacterCountInRangeOrNil(description, min: 2, max: 100, name: "description")
+            validateCharacterCountDoesNotExceed(tags, max: 200, name: "tags")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/user#modify-current-user-json-params
+    public struct ModifyCurrentUser: Sendable, Encodable, ValidatablePayload {
+        public var username: String?
+        public var avatar: ImageData?
+
+        public init(username: String? = nil, avatar: ImageData? = nil) {
+            self.username = username
+            self.avatar = avatar
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/user#create-dm-json-params
+    public struct CreateDM: Sendable, Encodable, ValidatablePayload {
+        public var recipient_id: UserSnowflake
+
+        @inlinable
+        public init(recipient_id: UserSnowflake) {
+            self.recipient_id = recipient_id
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/user#create-group-dm-json-params
+    public struct CreateGroupDM: Sendable, Encodable, ValidatablePayload {
+        public var access_tokens: [String]
+        public var nicks: [String: String]
+
+        public init(access_tokens: [String], nicks: [UserSnowflake: String]) {
+            self.access_tokens = access_tokens
+            self.nicks = .init(uniqueKeysWithValues: nicks.map { key, value in
+                (key.value, value)
+            })
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/user#update-user-application-role-connection-json-params
+    public struct UpdateUserApplicationRoleConnection: Sendable, Encodable, ValidatablePayload {
+        public var platform_name: String?
+        public var platform_username: String?
+        public var metadata: [String: ApplicationRoleConnectionMetadata]?
+
+        public init(platform_name: String? = nil, platform_username: String? = nil, metadata: [ApplicationRoleConnectionMetadata]? = nil) {
+            self.platform_name = platform_name
+            self.platform_username = platform_username
+            self.metadata = metadata.map { meta in
+                Dictionary(
+                    meta.map({ ($0.key, $0) }),
+                    uniquingKeysWith: { l, _ in l }
+                )
+            }
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountDoesNotExceed(platform_name, max: 50, name: "platform_name")
+            validateCharacterCountDoesNotExceed(platform_username, max: 100, name: "platform_username")
         }
     }
 }

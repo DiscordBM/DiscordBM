@@ -112,7 +112,6 @@ class DiscordModelsTests: XCTestCase {
             XCTAssertEqual(author.public_flags, [])
             XCTAssertEqual(author.id, "560661188019488714")
             XCTAssertEqual(author.discriminator, "4443")
-            XCTAssertEqual(author.avatar_decoration, nil)
             XCTAssertEqual(author.avatar, "845407ec1491b55828cc1f91c2436e8b")
             XCTAssertTrue(message.attachments.isEmpty)
             XCTAssertEqual(message.guild_id, "439103874612675485")

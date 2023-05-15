@@ -13,40 +13,22 @@ public enum Decompression {
         public static let enabled = Configuration()
     }
     
-    public struct DecompressionError: LocalizedError, Equatable, CustomStringConvertible {
-        
-        private enum Base: Error, Equatable {
-            case inflationError(Int)
-            case initializationError(Int)
-            case invalidTrailingData
-        }
-        
-        private var base: Base
-        
-        /// An error occurred when inflating. Error code is included to aid diagnosis.
-        public static let inflationError: (Int) -> Self = {
-            Self(base: .inflationError($0))
-        }
-        
-        /// Decoder could not be initialized. Error code is included to aid diagnosis.
-        public static let initializationError: (Int) -> Self = {
-            Self(base: .initializationError($0))
-        }
-        
-        /// Decompression completed but there was invalid trailing data behind the compressed data.
-        public static let invalidTrailingData = Self(base: .invalidTrailingData)
-        
+    public enum Error: LocalizedError, CustomStringConvertible, Equatable {
+        case inflationError(Int)
+        case initializationError(Int)
+        case invalidTrailingData
+
         public var description: String {
-            switch self.base {
+            switch self {
             case let .inflationError(int):
-                return "inflationError(\(int))"
+                return "Decompression.Error.inflationError(\(int))"
             case let .initializationError(int):
-                return "initializationError(\(int))"
+                return "Decompression.Error.initializationError(\(int))"
             case .invalidTrailingData:
-                return "invalidTrailingData"
+                return "Decompression.Error.invalidTrailingData"
             }
         }
-        
+
         public var errorDescription: String? {
             self.description
         }
@@ -68,7 +50,7 @@ public enum Decompression {
             }
             
             if part.readableBytes > 0 {
-                throw DecompressionError.invalidTrailingData
+                throw Error.invalidTrailingData
             }
         }
         
@@ -79,7 +61,7 @@ public enum Decompression {
             
             let rc = CZlib_inflateInit2(&self.stream, encoding.window)
             guard rc == Z_OK else {
-                throw DecompressionError.initializationError(Int(rc))
+                throw Error.initializationError(Int(rc))
             }
         }
         
@@ -123,7 +105,7 @@ private extension z_stream {
             
             rc = inflate(&self, Z_SYNC_FLUSH)
             guard rc == Z_OK || rc == Z_STREAM_END else {
-                throw Decompression.DecompressionError.inflationError(Int(rc))
+                throw Decompression.Error.inflationError(Int(rc))
             }
             
             return pointer.count - Int(self.avail_out)

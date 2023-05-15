@@ -1,6 +1,6 @@
 
 /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object
-public struct GuildScheduledEvent: Sendable, Codable {
+public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
     
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
     public enum PrivacyLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
@@ -23,8 +23,16 @@ public struct GuildScheduledEvent: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-metadata
-    public struct EntityMetadata: Sendable, Codable {
+    public struct EntityMetadata: Sendable, Codable, ValidatablePayload {
         public var location: String?
+
+        public init(location: String? = nil) {
+            self.location = location
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(location, min: 1, max: 100, name: "location")
+        }
     }
     
     public var id: GuildScheduledEventSnowflake
@@ -46,4 +54,19 @@ public struct GuildScheduledEvent: Sendable, Codable {
     public var image: String?
     /// Only for Gateway `guildScheduledEventUserAdd` events.
     public var user_ids: [UserSnowflake]?
+
+    public func validate() -> [ValidationFailure] {
+        validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
+        validateCharacterCountInRange(description, min: 1, max: 100, name: "description")
+        entity_metadata?.validate()
+    }
+}
+
+extension GuildScheduledEvent {
+    /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-user-object-guild-scheduled-event-user-structure
+    public struct User: Sendable, Codable {
+        public var guild_scheduled_event_id: GuildScheduledEventSnowflake
+        public var user: DiscordUser
+        public var member: Guild.Member?
+    }
 }

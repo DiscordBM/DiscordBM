@@ -8,7 +8,7 @@ extension WebSocket {
         onClose: @Sendable @escaping (WebSocket) -> () = { _ in }
     ) async throws -> WebSocket {
         guard let url = URL(string: url) else {
-            throw WebSocketClient.Error.invalidURL
+            throw WebSocketClient.Error.invalidURLString(url)
         }
         let scheme = url.scheme ?? "ws"
         return try await WebSocketClient(
