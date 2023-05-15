@@ -237,7 +237,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
         }
     }
     
-    func validateNumberInRangeOrNil() throws {
+    func testValidateNumberInRangeOrNil() throws {
         try validateNumberInRangeOrNil(1, min: 0, max: 21_600, name: "adoand").throw()
         try validateNumberInRangeOrNil(0, min: 0, max: 21_600, name: "").throw()
         try validateNumberInRangeOrNil(21_599, min: 0, max: 21_600, name: "qerqer").throw()
