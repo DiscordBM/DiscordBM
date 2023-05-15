@@ -21,7 +21,7 @@ extension Gateway.GuildCreate {
         
         /// `administrator` perm is like the guild owner.
         if self.roles.contains(where: { role in
-            role.permissions.values.contains(.administrator) &&
+            role.permissions.contains(.administrator) &&
             self.memberHasRole(member: member, roleId: role.id)
         }) {
             return true
@@ -115,25 +115,25 @@ extension Gateway.GuildCreate {
         for overwrite in (channel.permission_overwrites ?? []) {
             switch overwrite.type {
             case .member where overwrite.id == userId:
-                if overwrite.allow.values.contains(perm) {
+                if overwrite.allow.contains(perm) {
                     /// Has the most priority at this point, we can just return immediately.
                     return true
                 }
-                if overwrite.deny.values.contains(perm) {
+                if overwrite.deny.contains(perm) {
                     memberOverwriteDenies = true
                 }
             case .role where member.roles.contains(where: { $0 == overwrite.id }):
-                if overwrite.allow.values.contains(perm) {
+                if overwrite.allow.contains(perm) {
                     roleOverwriteAllows = true
                 }
-                if overwrite.deny.values.contains(perm) {
+                if overwrite.deny.contains(perm) {
                     roleOverwriteDenies = true
                 }
             case .role where overwrite.id == self.id: /// `@everyone` overwrites
-                if overwrite.allow.values.contains(perm) {
+                if overwrite.allow.contains(perm) {
                     everyoneIsAllowed = true
                 }
-                if overwrite.deny.values.contains(perm) {
+                if overwrite.deny.contains(perm) {
                     everyoneIsDenied = true
                 }
             default: break
@@ -149,14 +149,14 @@ extension Gateway.GuildCreate {
         
         /// Member has any roles that allow.
         for role in roles where member.roles.contains(role.id) {
-            if role.permissions.values.contains(perm) {
+            if role.permissions.contains(perm) {
                 return true
             }
         }
         
         /// `@everyone` role allows.
         if let everyoneRole = self.roles.first(where: { $0.id == self.id }),
-           everyoneRole.permissions.values.contains(perm) {
+           everyoneRole.permissions.contains(perm) {
             return true
         }
         
@@ -175,7 +175,7 @@ extension Gateway.GuildCreate {
 
         /// `administrator` perm is like the guild owner.
         if self.roles.contains(where: { role in
-            role.permissions.values.contains(.administrator) &&
+            role.permissions.contains(.administrator) &&
             self.memberHasRole(member: member, roleId: role.id)
         }) {
             return true
@@ -186,14 +186,14 @@ extension Gateway.GuildCreate {
 
         /// Member has any roles that allow.
         for role in roles where member.roles.contains(role.id) {
-            if role.permissions.values.contains(perm) {
+            if role.permissions.contains(perm) {
                 return true
             }
         }
 
         /// `@everyone` role allows.
         if let everyoneRole = self.roles.first(where: { $0.id == self.id }),
-           everyoneRole.permissions.values.contains(perm) {
+           everyoneRole.permissions.contains(perm) {
             return true
         }
 

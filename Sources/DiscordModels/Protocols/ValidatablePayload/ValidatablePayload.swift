@@ -91,12 +91,35 @@ extension ValidatablePayload {
     }
     
     @inlinable
-    func validateOnlyContains<C: Collection>(
-        _ values: C?,
+    func validateOnlyContains<S: Sequence>(
+        _ values: S?,
         name: String,
         reason: String,
-        where block: (C.Element) -> Bool
+        where block: (S.Element) -> Bool
     ) -> ValidationFailure? {
+        if values?.first(where: { !block($0) }) != nil {
+            return ValidationFailure.containsProhibitedValues(
+                name: name,
+                reason: reason,
+                valuesRepresentation: "\(values!)"
+            )
+        }
+        return nil
+    }
+
+    @inlinable
+    func validateOnlyContains<B: BitField>(
+        _ bitField: B?,
+        allowed: [B.R],
+        name: String,
+        reason: String
+    ) -> ValidationFailure? {
+        bitField?.removeAll(allowed)
+        if let bitfield = bitField {
+             B.toBitValue(allowed)
+        }
+        values?.contains(<#T##element: Hashable & RawRepresentable##Hashable & RawRepresentable#>)
+        values?.contains(<#T##element: Hashable & RawRepresentable##Hashable & RawRepresentable#>)
         if values?.first(where: { !block($0) }) != nil {
             return ValidationFailure.containsProhibitedValues(
                 name: name,

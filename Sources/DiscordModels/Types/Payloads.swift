@@ -143,7 +143,7 @@ public enum Payloads {
                 validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
                 allowedMentions?.validate()
                 validateOnlyContains(
-                    flags?.values,
+                    flags,
                     name: "flags",
                     reason: "Can only contain 'suppressEmbeds' and 'ephemeral'",
                     where: { [.suppressEmbeds, .ephemeral].contains($0) }
