@@ -1661,12 +1661,12 @@ public extension DiscordClient {
     @inlinable
     func listGuildScheduledEvents(
         guildId: GuildSnowflake,
-        with_user_count: Bool? = nil
+        withUserCount: Bool? = nil
     ) async throws -> DiscordClientResponse<[GuildScheduledEvent]> {
         let endpoint = APIEndpoint.listGuildScheduledEvents(guildId: guildId)
         return try await self.send(request: .init(
             to: endpoint,
-            queries: [("with_user_count", with_user_count.map { "\($0)" })]
+            queries: [("with_user_count", withUserCount.map { "\($0)" })]
         ))
     }
 
@@ -1692,7 +1692,7 @@ public extension DiscordClient {
     func getGuildScheduledEvent(
         guildId: GuildSnowflake,
         guildScheduledEventId: GuildScheduledEventSnowflake,
-        with_user_count: Bool? = nil
+        withUserCount: Bool? = nil
     ) async throws -> DiscordClientResponse<GuildScheduledEvent> {
         let endpoint = APIEndpoint.getGuildScheduledEvent(
             guildId: guildId,
@@ -1700,7 +1700,7 @@ public extension DiscordClient {
         )
         return try await self.send(request: .init(
             to: endpoint,
-            queries: [("with_user_count", with_user_count.map { "\($0)" })]
+            queries: [("with_user_count", withUserCount.map { "\($0)" })]
         ))
     }
 
@@ -1745,7 +1745,7 @@ public extension DiscordClient {
         guildId: GuildSnowflake,
         guildScheduledEventId: GuildScheduledEventSnowflake,
         limit: Int? = nil,
-        with_member: Bool? = nil,
+        withMember: Bool? = nil,
         before: UserSnowflake? = nil,
         after: UserSnowflake? = nil
     ) async throws -> DiscordClientResponse<[GuildScheduledEvent.User]> {
@@ -1758,7 +1758,7 @@ public extension DiscordClient {
             to: endpoint,
             queries: [
                 ("limit", limit.map { "\($0)" }),
-                ("with_member", with_member.map { "\($0)" }),
+                ("with_member", withMember.map { "\($0)" }),
                 ("before", before?.value),
                 ("after", after?.value),
             ]
@@ -1787,7 +1787,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-template#get-guild-template
     @inlinable
-    func getGuildTemplate(code: String) async throws -> DiscordClientResponse<[GuildTemplate]> {
+    func getGuildTemplate(code: String) async throws -> DiscordClientResponse<GuildTemplate> {
         let endpoint = APIEndpoint.getGuildTemplate(code: code)
         return try await self.send(request: .init(to: endpoint))
     }
@@ -2271,6 +2271,7 @@ public extension DiscordClient {
     }
 
     /// https://discord.com/developers/docs/resources/user#get-user-application-role-connection
+    @available(*, unavailable, message: "Currently this endpoint can't be used with a bot token")
     @inlinable
     func getApplicationUserRoleConnection(
         appId: ApplicationSnowflake? = nil
@@ -2282,6 +2283,7 @@ public extension DiscordClient {
     }
 
     /// https://discord.com/developers/docs/resources/user#update-user-application-role-connection
+    @available(*, unavailable, message: "Currently this endpoint can't be used with a bot token")
     @inlinable
     func updateApplicationUserRoleConnection(
         appId: ApplicationSnowflake? = nil,

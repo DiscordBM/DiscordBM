@@ -26,6 +26,10 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
     public struct EntityMetadata: Sendable, Codable, ValidatablePayload {
         public var location: String?
 
+        public init(location: String? = nil) {
+            self.location = location
+        }
+
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(location, min: 1, max: 100, name: "location")
         }

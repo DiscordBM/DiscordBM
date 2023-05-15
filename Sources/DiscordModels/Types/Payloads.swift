@@ -1616,7 +1616,7 @@ public enum Payloads {
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event-json-params
     public struct CreateGuildScheduledEvent: Sendable, Encodable, ValidatablePayload {
         public var channel_id: ChannelSnowflake?
-        public var entity_metadata: GuildScheduledEvent.EntityMetadata
+        public var entity_metadata: GuildScheduledEvent.EntityMetadata?
         public var name: String
         public var privacy_level: GuildScheduledEvent.PrivacyLevel
         public var scheduled_start_time: DiscordTimestamp
@@ -1625,7 +1625,7 @@ public enum Payloads {
         public var entity_type: GuildScheduledEvent.EntityKind
         public var image: ImageData?
 
-        public init(channel_id: ChannelSnowflake? = nil, entity_metadata: GuildScheduledEvent.EntityMetadata, name: String, privacy_level: GuildScheduledEvent.PrivacyLevel, scheduled_start_time: DiscordTimestamp, scheduled_end_time: DiscordTimestamp? = nil, description: String? = nil, entity_type: GuildScheduledEvent.EntityKind, image: ImageData? = nil) {
+        public init(channel_id: ChannelSnowflake? = nil, entity_metadata: GuildScheduledEvent.EntityMetadata? = nil, name: String, privacy_level: GuildScheduledEvent.PrivacyLevel, scheduled_start_time: DiscordTimestamp, scheduled_end_time: DiscordTimestamp? = nil, description: String? = nil, entity_type: GuildScheduledEvent.EntityKind, image: ImageData? = nil) {
             self.channel_id = channel_id
             self.entity_metadata = entity_metadata
             self.name = name
@@ -1839,13 +1839,17 @@ public enum Payloads {
     public struct UpdateUserApplicationRoleConnection: Sendable, Encodable, ValidatablePayload {
         public var platform_name: String?
         public var platform_username: String?
-        /// FIXME: Weird field
         public var metadata: [String: ApplicationRoleConnectionMetadata]?
 
-        public init(platform_name: String? = nil, platform_username: String? = nil, metadata: [String: ApplicationRoleConnectionMetadata]? = nil) {
+        public init(platform_name: String? = nil, platform_username: String? = nil, metadata: [ApplicationRoleConnectionMetadata]? = nil) {
             self.platform_name = platform_name
             self.platform_username = platform_username
-            self.metadata = metadata
+            self.metadata = metadata.map { meta in
+                Dictionary(
+                    meta.map({ ($0.key, $0) }),
+                    uniquingKeysWith: { l, _ in l }
+                )
+            }
         }
 
         public func validate() -> [ValidationFailure] {

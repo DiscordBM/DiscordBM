@@ -45,5 +45,5 @@ public struct StickerPack: Sendable, Codable {
     public var sku_id: AnySnowflake
     public var cover_sticker_id: StickerSnowflake?
     public var description: String
-    public var banner_asset_id: AnySnowflake?
+    public var banner_asset_id: AssetsSnowflake?
 }
