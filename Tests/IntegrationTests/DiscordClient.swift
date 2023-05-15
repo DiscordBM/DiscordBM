@@ -41,8 +41,10 @@ class DiscordClientTests: XCTestCase {
                 messageCachingPolicy: .saveEditHistoryAndDeleted,
                 itemsLimit: .disabled
             )
+            await bot.connect()
+            let stream = await self.bot.makeEventsStream()
             Task {
-                for await event in await self.bot.makeEventsStream() {
+                for await event in stream {
                     EventHandler(event: event).handle()
                 }
             }
