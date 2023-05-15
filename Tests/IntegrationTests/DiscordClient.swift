@@ -1225,7 +1225,7 @@ class DiscordClientTests: XCTestCase {
             .getGuildTemplate(code: created.code)
             .decode()
 
-        XCTAssertGreaterThan(gotTemplate.code, created.code)
+        XCTAssertEqual(gotTemplate.code, created.code)
 
         let allTemplates = try await client
             .listGuildTemplates(guildId: Constants.guildId)

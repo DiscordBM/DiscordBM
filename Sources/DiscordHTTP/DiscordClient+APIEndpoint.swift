@@ -204,22 +204,22 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    @available(*, unavailable, message: "Currently this endpoint can't be used with a bot token")
-    /// https://discord.com/developers/docs/interactions/application-commands#batch-edit-application-command-permissions
-    @inlinable
-    func setGuildApplicationCommandPermissions(
-        appId: ApplicationSnowflake? = nil,
-        guildId: GuildSnowflake,
-        commandId: CommandSnowflake,
-        payload: Payloads.EditApplicationCommandPermissions
-    ) async throws -> DiscordClientResponse<GuildApplicationCommandPermissions> {
-        let endpoint = APIEndpoint.setGuildApplicationCommandPermissions(
-            applicationId: try requireAppId(appId),
-            guildId: guildId,
-            commandId: commandId
-        )
-        return try await self.send(request: .init(to: endpoint), payload: payload)
-    }
+    /// Currently this endpoint can't be used with a bot token
+//    /// https://discord.com/developers/docs/interactions/application-commands#batch-edit-application-command-permissions
+//    @inlinable
+//    func setGuildApplicationCommandPermissions(
+//        appId: ApplicationSnowflake? = nil,
+//        guildId: GuildSnowflake,
+//        commandId: CommandSnowflake,
+//        payload: Payloads.EditApplicationCommandPermissions
+//    ) async throws -> DiscordClientResponse<GuildApplicationCommandPermissions> {
+//        let endpoint = APIEndpoint.setGuildApplicationCommandPermissions(
+//            applicationId: try requireAppId(appId),
+//            guildId: guildId,
+//            commandId: commandId
+//        )
+//        return try await self.send(request: .init(to: endpoint), payload: payload)
+//    }
 
     // MARK: Application Role Connection Metadata
     /// https://discord.com/developers/docs/resources/application-role-connection-metadata
@@ -2221,15 +2221,15 @@ public extension DiscordClient {
         ))
     }
 
-    /// https://discord.com/developers/docs/resources/user#get-current-user-guild-member
-    @available(*, unavailable, message: "Currently this endpoint can't be used with a bot token")
-    @inlinable
-    func getOwnGuildMember(
-        guildId: GuildSnowflake
-    ) async throws -> DiscordClientResponse<Guild.Member> {
-        let endpoint = APIEndpoint.getOwnGuildMember(guildId: guildId)
-        return try await self.send(request: .init(to: endpoint))
-    }
+    /// Currently this endpoint can't be used with a bot token
+//    /// https://discord.com/developers/docs/resources/user#get-current-user-guild-member
+//    @inlinable
+//    func getOwnGuildMember(
+//        guildId: GuildSnowflake
+//    ) async throws -> DiscordClientResponse<Guild.Member> {
+//        let endpoint = APIEndpoint.getOwnGuildMember(guildId: guildId)
+//        return try await self.send(request: .init(to: endpoint))
+//    }
 
     /// https://discord.com/developers/docs/resources/user#leave-guild
     @inlinable
@@ -2270,33 +2270,33 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/user#get-user-application-role-connection
-    @available(*, unavailable, message: "Currently this endpoint can't be used with a bot token")
-    @inlinable
-    func getApplicationUserRoleConnection(
-        appId: ApplicationSnowflake? = nil
-    ) async throws -> DiscordClientResponse<DiscordUser.Connection> {
-        let endpoint = APIEndpoint.getApplicationUserRoleConnection(
-            applicationId: try requireAppId(appId)
-        )
-        return try await self.send(request: .init(to: endpoint))
-    }
+    /// Currently this endpoint can't be used with a bot token
+//    /// https://discord.com/developers/docs/resources/user#get-user-application-role-connection
+//    @inlinable
+//    func getApplicationUserRoleConnection(
+//        appId: ApplicationSnowflake? = nil
+//    ) async throws -> DiscordClientResponse<DiscordUser.Connection> {
+//        let endpoint = APIEndpoint.getApplicationUserRoleConnection(
+//            applicationId: try requireAppId(appId)
+//        )
+//        return try await self.send(request: .init(to: endpoint))
+//    }
 
-    /// https://discord.com/developers/docs/resources/user#update-user-application-role-connection
-    @available(*, unavailable, message: "Currently this endpoint can't be used with a bot token")
-    @inlinable
-    func updateApplicationUserRoleConnection(
-        appId: ApplicationSnowflake? = nil,
-        payload: Payloads.UpdateUserApplicationRoleConnection
-    ) async throws -> DiscordClientResponse<DiscordUser.Connection> {
-        let endpoint = APIEndpoint.updateApplicationUserRoleConnection(
-            applicationId: try requireAppId(appId)
-        )
-        return try await self.send(
-            request: .init(to: endpoint),
-            payload: payload
-        )
-    }
+    /// Currently this endpoint can't be used with a bot token
+//    /// https://discord.com/developers/docs/resources/user#update-user-application-role-connection
+//    @inlinable
+//    func updateApplicationUserRoleConnection(
+//        appId: ApplicationSnowflake? = nil,
+//        payload: Payloads.UpdateUserApplicationRoleConnection
+//    ) async throws -> DiscordClientResponse<DiscordUser.Connection> {
+//        let endpoint = APIEndpoint.updateApplicationUserRoleConnection(
+//            applicationId: try requireAppId(appId)
+//        )
+//        return try await self.send(
+//            request: .init(to: endpoint),
+//            payload: payload
+//        )
+//    }
 
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice
