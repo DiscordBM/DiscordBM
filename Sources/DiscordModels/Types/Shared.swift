@@ -334,17 +334,21 @@ extension DiscordLocaleDict: Sendable where C: Sendable { }
 public struct DiscordTimestamp: Codable {
     
     /// Read `helpAnchor` for help about each error case.
-    public enum DecodingError: LocalizedError {
+    public enum DecodingError: LocalizedError, CustomStringConvertible {
         case unexpectedFormat([CodingKey], String)
         case conversionFailure([CodingKey], String, DateComponents)
-        
-        public var errorDescription: String? {
+
+        public var description: String {
             switch self {
             case let .unexpectedFormat(codingKey, timestamp):
                 return "DiscordTimestamp.DecodingError.unexpectedFormat(\(codingKey), \(timestamp))"
             case let .conversionFailure(codingKey, timestamp, components):
                 return "DiscordTimestamp.DecodingError.conversionFailure(\(codingKey), \(timestamp), \(components))"
             }
+        }
+
+        public var errorDescription: String? {
+            self.description
         }
         
         public var helpAnchor: String? {
@@ -565,14 +569,18 @@ public struct StringBitField<R>: BitField, Codable
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
     /// Read `helpAnchor` for help about each error case.
-    enum DecodingError: LocalizedError {
+    public enum DecodingError: LocalizedError, CustomStringConvertible {
         case notRepresentingInt(String)
-        
-        public var errorDescription: String? {
+
+        public var description: String {
             switch self {
             case let .notRepresentingInt(string):
                 return "StringBitField.DecodingError.notRepresentingInt(\(string))"
             }
+        }
+
+        public var errorDescription: String? {
+            self.description
         }
         
         public var helpAnchor: String? {
@@ -967,17 +975,21 @@ public typealias AssetsSnowflake = Snowflake<Gateway.Activity.Assets>
 public struct SnowflakeInfo: Sendable {
 
     /// Read `helpAnchor` for help about each error case.
-    public enum Error: LocalizedError {
+    public enum Error: LocalizedError, CustomStringConvertible {
         case fieldTooBig(_ name: String, value: String, max: Int)
         case fieldTooSmall(_ name: String, value: String, min: UInt64)
 
-        public var errorDescription: String? {
+        public var description: String {
             switch self {
             case let .fieldTooBig(name, value, max):
                 return "SnowflakeInfo.Error.fieldTooBig(\(name), value: \(value), max: \(max))"
             case let .fieldTooSmall(name, value, min):
                 return "SnowflakeInfo.Error.fieldTooSmall(\(name), value: \(value), min: \(min))"
             }
+        }
+
+        public var errorDescription: String? {
+            self.description
         }
 
         public var helpAnchor: String? {

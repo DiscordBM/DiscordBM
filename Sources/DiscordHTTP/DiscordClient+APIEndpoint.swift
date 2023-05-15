@@ -2125,7 +2125,6 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-#warning("this is 'multipart/form-data' ?!")
     /// https://discord.com/developers/docs/resources/sticker#create-guild-sticker
     @inlinable
     func createGuildSticker(
@@ -2134,7 +2133,7 @@ public extension DiscordClient {
         payload: Payloads.CreateGuildSticker
     ) async throws -> DiscordClientResponse<Sticker> {
         let endpoint = APIEndpoint.createGuildSticker(guildId: guildId)
-        return try await self.send(
+        return try await self.sendMultipart(
             request: .init(
                 to: endpoint,
                 headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
@@ -2165,10 +2164,14 @@ public extension DiscordClient {
     @inlinable
     func deleteGuildSticker(
         guildId: GuildSnowflake,
-        stickerId: StickerSnowflake
+        stickerId: StickerSnowflake,
+        reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteGuildSticker(guildId: guildId, stickerId: stickerId)
-        return try await self.send(request: .init(to: endpoint))
+        return try await self.send(request: .init(
+            to: endpoint,
+            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+        ))
     }
 
     // MARK: User
@@ -2194,7 +2197,10 @@ public extension DiscordClient {
         payload: Payloads.ModifyCurrentUser
     ) async throws -> DiscordClientResponse<DiscordUser> {
         let endpoint = APIEndpoint.updateOwnUser
-        return try await self.send(request: .init(to: endpoint))
+        return try await self.send(
+            request: .init(to: endpoint),
+            payload: payload
+        )
     }
 
     /// https://discord.com/developers/docs/resources/user#get-current-user-guilds
@@ -2293,8 +2299,9 @@ public extension DiscordClient {
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice
 
+    /// https://discord.com/developers/docs/resources/voice#list-voice-regions
     @inlinable
-    func listVoiceRegions() async throws -> DiscordHTTPResponse {
+    func listVoiceRegions() async throws -> DiscordClientResponse<[VoiceRegion]> {
         let endpoint = APIEndpoint.listVoiceRegions
         return try await self.send(request: .init(to: endpoint))
     }

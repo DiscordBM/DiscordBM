@@ -185,14 +185,18 @@ public struct Gateway: Sendable, Codable {
         }
         
         /// Read `helpAnchor` for help about each error case.
-        public enum GatewayDecodingError: LocalizedError {
+        public enum GatewayDecodingError: LocalizedError, CustomStringConvertible {
             case unhandledDispatchEvent(type: String?)
-            
-            public var errorDescription: String? {
+
+            public var description: String {
                 switch self {
                 case let .unhandledDispatchEvent(type):
                     return "Gateway.Event.GatewayDecodingError.unhandledDispatchEvent(type: \(type ?? "nil"))"
                 }
+            }
+
+            public var errorDescription: String? {
+                self.description
             }
             
             public var helpAnchor: String? {
@@ -386,14 +390,18 @@ public struct Gateway: Sendable, Codable {
         }
         
         /// Read `helpAnchor` for help about each error case.
-        enum EncodingError: LocalizedError {
+        public enum EncodingError: LocalizedError, CustomStringConvertible {
             case notSupposedToBeSent(message: String)
-            
-            public var errorDescription: String? {
+
+            public var description: String {
                 switch self {
                 case let .notSupposedToBeSent(message):
                     return "Gateway.Event.EncodingError.notSupposedToBeSent(\(message))"
                 }
+            }
+
+            public var errorDescription: String? {
+                self.description
             }
             
             public var helpAnchor: String? {

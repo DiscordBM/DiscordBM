@@ -489,17 +489,21 @@ extension Interaction {
         public var components: [Component]
         
         /// Read `helpAnchor` for help about each error case.
-        public enum CodingError: LocalizedError {
+        public enum CodingError: LocalizedError, CustomStringConvertible {
             case unexpectedComponentKind(Kind)
             case actionRowIsSupposedToOnlyAppearAtTopLevel
-            
-            public var errorDescription: String? {
+
+            public var description: String {
                 switch self {
                 case let .unexpectedComponentKind(kind):
                     return "Interaction.ActionRow.CodingError.unexpectedComponentKind(\(kind))"
                 case .actionRowIsSupposedToOnlyAppearAtTopLevel:
                     return "Interaction.ActionRow.CodingError.actionRowIsSupposedToOnlyAppearAtTopLevel"
                 }
+            }
+
+            public var errorDescription: String? {
+                self.description
             }
             
             public var helpAnchor: String? {

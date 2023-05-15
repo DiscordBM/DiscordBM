@@ -145,6 +145,13 @@ public struct Guild: Sendable, Codable {
             public var description: String
             public var emoji_id: EmojiSnowflake?
             public var emoji_name: String?
+
+            public init(channel_id: ChannelSnowflake, description: String, emoji_id: EmojiSnowflake? = nil, emoji_name: String? = nil) {
+                self.channel_id = channel_id
+                self.description = description
+                self.emoji_id = emoji_id
+                self.emoji_name = emoji_name
+            }
         }
         
         public var description: String?
@@ -356,6 +363,7 @@ extension Guild {
         public var channel_id: ChannelSnowflake?
     }
 
+    /// https://discord.com/developers/docs/resources/guild#guild-widget-object-guild-widget-structure
     public struct Widget: Sendable, Codable {
         public var id: GuildSnowflake
         public var name: String

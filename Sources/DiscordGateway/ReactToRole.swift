@@ -61,21 +61,25 @@ public actor ReactToRoleHandler {
     }
     
     /// Read `helpAnchor` for help about each error case.
-    public enum Error: LocalizedError {
+    public enum Error: LocalizedError, CustomStringConvertible {
         case messageIsInaccessible(
             messageId: MessageSnowflake,
             channelId: ChannelSnowflake,
             previousError: Swift.Error
         )
         case roleIsInaccessible(id: RoleSnowflake, previousError: Swift.Error?)
-        
-        public var errorDescription: String? {
+
+        public var description: String {
             switch self {
             case let .messageIsInaccessible(messageId, channelId, previousError):
                 return "ReactToRoleHandler.Error.messageIsInaccessible(messageId: \(messageId), channelId: \(channelId), previousError: \(previousError))"
             case let .roleIsInaccessible(id, previousError):
                 return "ReactToRoleHandler.Error.roleIsInaccessible(id: \(id), previousError: \(String(describing: previousError)))"
             }
+        }
+
+        public var errorDescription: String? {
+            self.description
         }
         
         public var helpAnchor: String? {

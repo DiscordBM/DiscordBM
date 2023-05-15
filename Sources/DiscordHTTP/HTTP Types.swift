@@ -134,7 +134,11 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     @usableFromInline
     func _decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
         if let data = body.map({ Data(buffer: $0, byteTransferStrategy: .noCopy) }) {
-            return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
+            do {
+                return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
+            } catch {
+                throw DiscordHTTPError.decodingError(self, error: error)
+            }
         } else {
             throw DiscordHTTPError.emptyBody(self)
         }
@@ -181,6 +185,12 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
     }
 }
 
+extension DiscordClientResponse: CustomStringConvertible {
+    public var description: String {
+        "DiscordClientResponse<\(Swift._typeName(C.self, qualified: true))>(httpResponse: \(self.httpResponse))"
+    }
+}
+
 /// Represents a Discord HTTP response for CDN endpoints.
 public struct DiscordCDNResponse: Sendable {
     /// The raw http response.
@@ -213,26 +223,54 @@ public struct DiscordCDNResponse: Sendable {
 }
 
 /// Represents a possible Discord HTTP error.
-public enum DiscordHTTPErrorResponse: Sendable {
+/// Is conformed to `Error`/`LocalizedError` so users can conveniently throw it.
+public enum DiscordHTTPErrorResponse: Sendable, LocalizedError, CustomStringConvertible {
     /// The response indicates success. No errors have been found.
     case none
     /// The response does not indicate success and there is a recognizable error in the body.
     case jsonError(JSONError)
     /// The response does not indicate success and there is no recognizable error in the body.
     case badStatusCode(DiscordHTTPResponse)
+
+    public var description: String {
+        switch self {
+        case .none:
+            return "DiscordHTTPErrorResponse.none"
+        case let .jsonError(jsonError):
+            return "DiscordHTTPErrorResponse.jsonError(\(jsonError))"
+        case let .badStatusCode(response):
+            return "DiscordHTTPErrorResponse.badStatusCode(\(response))"
+        }
+    }
+
+    public var errorDescription: String? {
+        self.description
+    }
+
+    public var helpAnchor: String? {
+        switch self {
+        case .none:
+            return "No errors were found"
+        case let .jsonError(jsonError):
+            return "The error is in a recognizable format and you can attempt to recover from it: \(jsonError)"
+        case let .badStatusCode(response):
+            return "The error was not in a recognizable format, but the status code still indicates a failure: \(response)"
+        }
+    }
 }
 
 /// Read `helpAnchor` for help about each error case.
-public enum DiscordHTTPError: LocalizedError {
+public enum DiscordHTTPError: LocalizedError, CustomStringConvertible {
     case rateLimited(url: String)
     case badStatusCode(DiscordHTTPResponse)
     case emptyBody(DiscordHTTPResponse)
     case noContentTypeHeader(DiscordHTTPResponse)
+    case decodingError(DiscordHTTPResponse, error: Error)
     case appIdParameterRequired
     case queryParametersMutuallyExclusive(queries: [(String, String)])
     case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)
-    
-    public var errorDescription: String? {
+
+    public var description: String {
         switch self {
         case let .rateLimited(url):
             return "DiscordHTTPError.rateLimited(url: \(url))"
@@ -242,6 +280,8 @@ public enum DiscordHTTPError: LocalizedError {
             return "DiscordHTTPError.emptyBody(\(response))"
         case let .noContentTypeHeader(response):
             return "DiscordHTTPError.noContentTypeHeader(\(response))"
+        case let .decodingError(response, error):
+            return "DiscordHTTPError.decodingError(\(response), error: \(error))"
         case .appIdParameterRequired:
             return "DiscordHTTPError.appIdParameterRequired"
         case let .queryParametersMutuallyExclusive(queries):
@@ -249,6 +289,10 @@ public enum DiscordHTTPError: LocalizedError {
         case let .queryParameterOutOfBounds(name, value, lowerBound, upperBound):
             return "DiscordHTTPError.queryParameterOutOfBounds(name: \(name), value: \(value ?? "nil"), lowerBound: \(lowerBound), upperBound: \(upperBound))"
         }
+    }
+
+    public var errorDescription: String? {
+        self.description
     }
     
     public var helpAnchor: String? {
@@ -261,6 +305,8 @@ public enum DiscordHTTPError: LocalizedError {
             return "The response body was unexpectedly empty. If it happens frequently, you should report it to me at https://github.com/MahdiBM/DiscordBM/issues. Discord's response: \(response)"
         case let .noContentTypeHeader(response):
             return "Discord didn't send a Content-Type header. See if they mentions any errors in the response: \(response)"
+        case let .decodingError(response, error):
+            return "There has been a decoding error. Make sure your Codable types match the response that Discord sends. Discord's response: \(response). Error: \(error)"
         case .appIdParameterRequired:
             return "The 'appId' parameter is required. Either pass it in the initializer of DefaultDiscordClient/BotGatewayManager or use the 'appId' function parameter"
         case let .queryParametersMutuallyExclusive(queries):

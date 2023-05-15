@@ -97,7 +97,9 @@ public struct DiscordChannel: Sendable, Codable {
     }
     
     public var id: ChannelSnowflake
-    public var type: Kind
+    /// Type is optional because there are some endpoints that return
+    /// partial channel objects, and very few of them exclude the `type`.
+    public var type: Kind?
     public var guild_id: GuildSnowflake?
     public var position: Int?
     public var permission_overwrites: [Overwrite]?

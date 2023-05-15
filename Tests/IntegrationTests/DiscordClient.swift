@@ -1,4 +1,6 @@
-@testable import DiscordBM
+/// Avoid `@tesatable` for `Discord***` target just to make sure everything we use
+/// here is also accessible by the public (e.g. the initializers of different types)
+import DiscordBM
 import DiscordHTTP
 import AsyncHTTPClient
 import Atomics
@@ -8,10 +10,10 @@ import XCTest
 class DiscordClientTests: XCTestCase {
     
     var httpClient: HTTPClient!
-    var client: (any DiscordClient)!
+    var bot: BotGatewayManager!
+    var discordCache: DiscordCache!
 
-    var bot: BotGatewayManager?
-    var discordCache: DiscordCache?
+    var client: (any DiscordClient)!
 
     let permanentTestCommandName = "permanent-test-command"
 
@@ -20,17 +22,9 @@ class DiscordClientTests: XCTestCase {
     }
 
     override func setUp() async throws {
-        self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
-        self.client = await DefaultDiscordClient(
-            httpClient: httpClient,
-            token: Constants.token,
-            appId: Snowflake(Constants.botId),
-            /// For not failing tests
-            configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
-        )
-        if let cache = discordCache {
-            self.discordCache = cache
-        } else {
+        /// Only set these up once.
+        if self.httpClient == nil {
+            self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
             /// This is to test `GatewayEventHandler` protocol and `DiscordCache`.
             /// These tests don't assert anything. They're here just because the
             /// `DiscordClient` tests trigger a lot of gateway events.
@@ -41,18 +35,25 @@ class DiscordClientTests: XCTestCase {
                 appId: Snowflake(Constants.botId)
             )
             self.discordCache = await DiscordCache(
-                gatewayManager: self.bot!,
+                gatewayManager: self.bot,
                 intents: .all,
                 requestAllMembers: .enabledWithPresences,
                 messageCachingPolicy: .saveEditHistoryAndDeleted,
                 itemsLimit: .disabled
             )
             Task {
-                for await event in await bot!.makeEventsStream() {
+                for await event in await self.bot.makeEventsStream() {
                     EventHandler(event: event).handle()
                 }
             }
         }
+        self.client = await DefaultDiscordClient(
+            httpClient: httpClient,
+            token: Constants.token,
+            appId: Snowflake(Constants.botId),
+            /// For not failing tests
+            configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
+        )
     }
 
     /// Just here so you know.
@@ -81,8 +82,8 @@ class DiscordClientTests: XCTestCase {
     
     func testMessageSendDelete() async throws {
         
-        /// Cleanup: Get channel messages and delete messages by the bot itself, if any
-        /// Makes this test resilient to failing because it has failed the last time
+        /// Cleanup: Get channel messages and delete messages by the bot itself, if any.
+        /// Makes this test resilient to failing when it has failed the last time.
         let allOldMessages = try await client.listMessages(
             channelId: Constants.Channels.general.id
         ).decode()
@@ -951,26 +952,181 @@ class DiscordClientTests: XCTestCase {
         ).guardSuccess()
     }
 
+    func testGuildStickers() async throws {
+        let packs = try await client.listStickerPacks().decode()
+        XCTAssertGreaterThan(packs.sticker_packs.count, 0)
+
+        let image = ByteBuffer(data: resource(name: "discordbm-logo.png"))
+
+        let createdSticker = try await client.createGuildSticker(
+            guildId: Constants.guildId,
+            reason: "Test Creating Stickers!",
+            payload: .init(
+                name: "DiscordBM",
+                description: "DiscordBM sticker test!",
+                tags: "DiscordBM",
+                file: .init(data: image, filename: "DiscordBM.png")
+            )
+        ).decode()
+
+        let gotSticker1 = try await client
+            .getSticker(id: createdSticker.id)
+            .decode()
+
+        XCTAssertEqual(gotSticker1.id, createdSticker.id)
+
+        let newName = "1kilograms!"
+        let updatedSticker = try await client.updateGuildSticker(
+            guildId: Constants.guildId,
+            stickerId: createdSticker.id,
+            reason: "Test Updating Stickers!",
+            payload: .init(name: newName)
+        ).decode()
+
+        XCTAssertEqual(updatedSticker.id, createdSticker.id)
+        XCTAssertEqual(updatedSticker.name, newName)
+
+        let gotSticker2 = try await client.getGuildSticker(
+            guildId: Constants.guildId,
+            stickerId: createdSticker.id
+        ).decode()
+
+        XCTAssertEqual(gotSticker2.id, createdSticker.id)
+        XCTAssertEqual(gotSticker2.name, newName)
+
+        let allStickers = try await client
+            .listGuildStickers(guildId: Constants.guildId)
+            .decode()
+
+        XCTAssertGreaterThan(allStickers.count, 0)
+        XCTAssertTrue(
+            allStickers.map(\.id).contains(createdSticker.id),
+            "\(allStickers) did not contain \(createdSticker.id)"
+        )
+
+        try await client.deleteGuildSticker(
+            guildId: Constants.guildId,
+            stickerId: createdSticker.id,
+            reason: "Test Deleting Stickers!"
+        ).guardSuccess()
+    }
+
     func testGuildWidget() async throws {
+        let updatedWidget1 = try await client.updateGuildWidgetSettings(
+            guildId: Constants.guildId,
+            reason: "Update Widget Test!",
+            payload: .init(
+                enabled: true,
+                channel_id: Constants.Channels.general.id
+            )
+        ).decode()
+
+        XCTAssertEqual(updatedWidget1.enabled, true)
+        XCTAssertEqual(updatedWidget1.channel_id, Constants.Channels.general.id)
+
         let widgetSettings = try await client
             .getGuildWidgetSettings(guildId: Constants.guildId)
             .decode()
 
-        let channelId1 = Constants.Channels.general.id
-        let channelId2 = Constants.Channels.spam.id
-        let changedChannelId = widgetSettings.channel_id == channelId1 ? channelId2 : channelId1
+        XCTAssertEqual(widgetSettings.enabled, true)
+        XCTAssertEqual(widgetSettings.channel_id, Constants.Channels.general.id)
 
-        let updatedWidget = try await client.updateGuildWidgetSettings(
+        let widget = try await client
+            .getGuildWidget(guildId: Constants.guildId)
+            .decode()
+
+        XCTAssertEqual(widget.id, Constants.guildId)
+
+        let widgetPng1 = try await client
+            .getGuildWidgetPng(guildId: Constants.guildId)
+            .getFile()
+
+        XCTAssertGreaterThan(widgetPng1.data.readableBytes, 5)
+
+        let widgetPng2 = try await client
+            .getGuildWidgetPng(guildId: Constants.guildId, style: .banner4)
+            .getFile()
+
+        XCTAssertGreaterThan(widgetPng2.data.readableBytes, 5)
+
+        let updatedWidget2 = try await client.updateGuildWidgetSettings(
             guildId: Constants.guildId,
             reason: "Update Widget Test!",
             payload: .init(
-                enabled: !widgetSettings.enabled,
-                channel_id: changedChannelId
+                enabled: false,
+                channel_id: Constants.Channels.spam.id
             )
         ).decode()
 
-        XCTAssertEqual(updatedWidget.enabled, !widgetSettings.enabled)
-        XCTAssertEqual(updatedWidget.channel_id, changedChannelId)
+        XCTAssertEqual(updatedWidget2.enabled, false)
+        XCTAssertEqual(updatedWidget2.channel_id, Constants.Channels.spam.id)
+    }
+
+    func testGuildWelcomeScreen() async throws {
+        let description = "Welcome my future friends!"
+        let updateWelcomeScreen1 = try await client.updateGuildWelcomeScreen(
+            guildId: Constants.guildId,
+            reason: "Testing Updating Welcome Screen 1!",
+            payload: .init(
+                enabled: true,
+                welcome_channels: [.init(
+                    channel_id: Constants.Channels.general.id,
+                    description: "Welcome to the welcome channel!"
+                )],
+                description: description
+            )
+        ).decode()
+
+        XCTAssertEqual(updateWelcomeScreen1.description, description)
+
+        let welcomeScreen1 = try await client.getGuildWelcomeScreen(
+            guildId: Constants.guildId,
+            reason: "Testing Getting Welcome Screen!"
+        ).decode()
+
+        XCTAssertEqual(welcomeScreen1.description, description)
+
+        let updateWelcomeScreen2 = try await client.updateGuildWelcomeScreen(
+            guildId: Constants.guildId,
+            reason: "Testing Updating Welcome Screen 2!",
+            payload: .init(enabled: false)
+        ).decode()
+
+        XCTAssertEqual(updateWelcomeScreen2.description, description)
+
+        let welcomeScreen2 = try await client.getGuildWelcomeScreen(
+            guildId: Constants.guildId,
+            reason: "Testing Getting Welcome Screen!"
+        ).decode()
+
+        XCTAssertEqual(welcomeScreen2.description, description)
+    }
+
+    func testGuildIntegrations() async throws {
+        let integrations = try await client
+            .listGuildIntegrations(guildId: Constants.guildId)
+            .decode()
+
+        XCTAssertGreaterThan(integrations.count, 0)
+
+        XCTAssertTrue(
+            integrations.map(\.application?.id).contains(Snowflake(Constants.botId)),
+            "\(integrations) did not contain \(Constants.botId)"
+        )
+
+        /// Can't delete any integrations because can't automatically add one.
+        let integrationDeleteError = try await client.deleteGuildIntegration(
+            guildId: Constants.guildId,
+            integrationId: .makeFake(),
+            reason: "Won't even work!"
+        ).decodeError()
+
+        switch integrationDeleteError {
+        case let .jsonError(jsonError) where jsonError.code == .unknownIntegration:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(integrationDeleteError)")
+        }
     }
 
     func testGuildOthers() async throws {
@@ -1007,6 +1163,99 @@ class DiscordClientTests: XCTestCase {
             .decode()
 
         XCTAssertEqual(onboarding.guild_id, Constants.guildId)
+    }
+
+    func testVoice() async throws {
+        let regions = try await client.listVoiceRegions().decode()
+
+        XCTAssertGreaterThan(regions.count, 0)
+
+        let guildRegions = try await client
+            .listGuildVoiceRegions(guildId: Constants.guildId)
+            .decode()
+
+        XCTAssertGreaterThan(guildRegions.count, 0)
+
+        /// Can't set this because we can't join a voice/stage channel first.
+        let selfVoiceStateError = try await client.updateSelfVoiceState(
+            guildId: Constants.guildId,
+            payload: .init(
+                channel_id: Constants.Channels.stage.id,
+                suppress: false,
+                request_to_speak_timestamp: DiscordTimestamp(date: Date().addingTimeInterval(5))
+            )
+        ).decodeError()
+
+        switch selfVoiceStateError {
+        case .jsonError(let jsonError) where jsonError.code == .unknownVoiceState:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(selfVoiceStateError)")
+        }
+
+        /// Can't set this because we can't join a voice/stage channel first.
+        let voiceStateError = try await client.updateVoiceState(
+            guildId: Constants.guildId,
+            userId: Constants.secondAccountId,
+            payload: .init(
+                channel_id: Constants.Channels.stage.id,
+                suppress: true
+            )
+        ).decodeError()
+
+        switch voiceStateError {
+        case .jsonError(let jsonError) where jsonError.code == .unknownVoiceState:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(voiceStateError)")
+        }
+    }
+
+    func testUser() async throws {
+        let selfUser = try await client.getOwnUser().decode()
+
+        XCTAssertEqual(selfUser.id, Constants.botId)
+
+        let user = try await client.getUser(id: Constants.secondAccountId).decode()
+
+        XCTAssertEqual(user.id, Constants.secondAccountId)
+
+        do {
+            let image = ByteBuffer(data: resource(name: "1kb.png"))
+            let updatedUser = try await client.updateOwnUser(
+                payload: .init(
+                    username: "DiscBMTestLib\(Int.random(in: 0..<100))",
+                    avatar: .init(file: .init(data: image, filename: "1kb.png"))
+                )
+            ).decode()
+
+            XCTAssertEqual(updatedUser.id, Constants.botId)
+        } catch let error as DiscordHTTPError {
+            if case let .badStatusCode(response) = error,
+               response.description.contains(#""code": "USERNAME_RATE_LIMIT""#) {
+                /// Do nothing, this error is acceptable.
+            } else {
+                throw error
+            }
+        }
+
+        let guilds = try await client.listOwnGuilds().decode()
+
+        XCTAssertGreaterThan(guilds.count, 1, "\(guilds)")
+
+        let guildsWithBefore = try await client.listOwnGuilds(
+            before: guilds.first?.guild_id,
+            limit: 10
+        ).decode()
+
+        XCTAssertGreaterThan(guildsWithBefore.count, 1, "\(guildsWithBefore)")
+
+        let guildsWithAfter = try await client.listOwnGuilds(
+            after: guilds.first?.guild_id,
+            limit: 10
+        ).decode()
+
+        XCTAssertGreaterThan(guildsWithAfter.count, 1, "\(guildsWithAfter)")
     }
 
     func testDMs() async throws {

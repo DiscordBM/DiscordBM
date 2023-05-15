@@ -56,12 +56,12 @@ public struct Reaction: Sendable, Hashable, Codable {
     }
     
     /// Read `helpAnchor` for help about each error case.
-    public enum Error: LocalizedError {
+    public enum Error: LocalizedError, CustomStringConvertible {
         case moreThan1Emoji(String, count: Int)
         case notEmoji(String)
         case cantConvertEmoji(Emoji)
-        
-        public var errorDescription: String? {
+
+        public var description: String {
             switch self {
             case let .moreThan1Emoji(input, count):
                 return "Reaction.Error.moreThan1Emoji(\(input), count: \(count))"
@@ -70,6 +70,10 @@ public struct Reaction: Sendable, Hashable, Codable {
             case let .cantConvertEmoji(emoji):
                 return "Reaction.Error.cantConvertEmoji(\(emoji))"
             }
+        }
+
+        public var errorDescription: String? {
+            self.description
         }
         
         public var helpAnchor: String? {

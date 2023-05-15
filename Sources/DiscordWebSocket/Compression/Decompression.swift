@@ -13,12 +13,12 @@ public enum Decompression {
         public static let enabled = Configuration()
     }
     
-    public enum Error: LocalizedError, Equatable {
+    public enum Error: LocalizedError, CustomStringConvertible, Equatable {
         case inflationError(Int)
         case initializationError(Int)
         case invalidTrailingData
-        
-        public var errorDescription: String? {
+
+        public var description: String {
             switch self {
             case let .inflationError(int):
                 return "Decompression.Error.inflationError(\(int))"
@@ -27,6 +27,10 @@ public enum Decompression {
             case .invalidTrailingData:
                 return "Decompression.Error.invalidTrailingData"
             }
+        }
+
+        public var errorDescription: String? {
+            self.description
         }
     }
     

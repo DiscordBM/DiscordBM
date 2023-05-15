@@ -39,6 +39,8 @@ enum Constants {
         case forum = "1075089016979984435"
         case announcements = "1075135538715172954"
         case moderation = "1075088920989138976"
+        case voice = "1036881951463833613"
+        case stage = "1107680127468457985"
 
         var id: ChannelSnowflake {
             self.rawValue

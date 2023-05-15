@@ -1572,11 +1572,11 @@ public enum Payloads {
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen-json-params
     public struct ModifyGuildWelcomeScreen: Sendable, Encodable, ValidatablePayload {
-        public var enabled: Bool
-        public var welcome_channels: [Guild.WelcomeScreen.Channel]
-        public var description: String
+        public var enabled: Bool?
+        public var welcome_channels: [Guild.WelcomeScreen.Channel]?
+        public var description: String?
 
-        public init(enabled: Bool, welcome_channels: [Guild.WelcomeScreen.Channel], description: String) {
+        public init(enabled: Bool? = nil, welcome_channels: [Guild.WelcomeScreen.Channel]? = nil, description: String? = nil) {
             self.enabled = enabled
             self.welcome_channels = welcome_channels
             self.description = description
@@ -1751,11 +1751,16 @@ public enum Payloads {
     }
 
     /// https://discord.com/developers/docs/resources/sticker#create-guild-sticker-form-params
-    public struct CreateGuildSticker: Sendable, Encodable, ValidatablePayload {
+    public struct CreateGuildSticker: Sendable, Encodable, MultipartEncodable, ValidatablePayload {
         public var name: String
         public var description: String
         public var tags: String
         public var file: RawFile
+
+        public static var rawEncodable: Bool { true }
+        public var files: [RawFile]? {
+            [self.file]
+        }
 
         public init(name: String, description: String, tags: String, file: RawFile) {
             self.name = name
@@ -1766,7 +1771,7 @@ public enum Payloads {
 
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 2, max: 30, name: "name")
-            validateCharacterCountInRange(description, min: 2, max: 100, name: "description")
+            validateCharacterCountInRangeOrNil(description, min: 2, max: 100, name: "description")
             validateCharacterCountDoesNotExceed(tags, max: 200, name: "tags")
         }
     }
@@ -1785,7 +1790,7 @@ public enum Payloads {
 
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 2, max: 30, name: "name")
-            validateCharacterCountInRange(description, min: 2, max: 100, name: "description")
+            validateCharacterCountInRangeOrNil(description, min: 2, max: 100, name: "description")
             validateCharacterCountDoesNotExceed(tags, max: 200, name: "tags")
         }
     }
