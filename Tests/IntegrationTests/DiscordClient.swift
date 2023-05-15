@@ -491,6 +491,13 @@ class DiscordClientTests: XCTestCase {
     }
 
     func testGuildWithCreatedGuild() async throws {
+        /// Cleanup
+        for guild in try await client.listOwnGuilds().decode() {
+            if let ownerId = guild.owner_id, ownerId != Constants.botId {
+                try await client.deleteGuild(id: guild.id).guardSuccess()
+            }
+        }
+
         let guildName = "Test Guild"
         let createdGuild = try await client.createGuild(payload: .init(name: guildName)).decode()
         XCTAssertEqual(createdGuild.name, guildName)
@@ -1263,6 +1270,8 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertEqual(guild.name, guildName)
         XCTAssertFalse(guild.roles.isEmpty)
+
+        try await client.deleteGuild(id: guild.id).guardSuccess()
 
         try await client.deleteGuildTemplate(
             guildId: Constants.guildId,
