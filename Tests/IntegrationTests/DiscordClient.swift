@@ -23,42 +23,11 @@ class DiscordClientTests: XCTestCase {
             /// For not failing tests
             configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
         )
-
-        await GatewayTester.shared.increaseTestsRan()
-
-        if await !GatewayTester.shared.botManagerAlreadySetUp {
-            await GatewayTester.shared.toggleBotManagerAlreadySetUp()
-
-            let bot = await BotGatewayManager(
-                eventLoopGroup: self.httpClient.eventLoopGroup,
-                httpClient: self.httpClient,
-                token: Constants.token,
-                appId: Snowflake(Constants.botId),
-                intents: Gateway.Intent.allCases
-            )
-            let cache = await DiscordCache(
-                gatewayManagers: [bot],
-                intents: .init(Gateway.Intent.allCases),
-                requestAllMembers: .enabledWithPresences,
-                messageCachingPolicy: .saveEditHistoryAndDeleted,
-                itemsLimit: .constant(1_000)
-            )
-            await GatewayTester.shared.setBotAndCache(bot: bot, cache: cache)
-            await bot.connect()
-            let stream = await bot.makeEventsStream()
-            Task {
-                for await event in stream {
-                    EventHandler(event: event).handle()
-                }
-            }
-        }
+        await GatewayTester.shared.increaseTestsRanThenStartIfNeeded(httpClient: httpClient)
     }
 
     override func tearDown() async throws {
-        if await GatewayTester.shared.isLastTest {
-            await GatewayTester.shared.bot?.disconnect()
-            await GatewayTester.shared.removeBotAndCache()
-        }
+        await GatewayTester.shared.endIfNeeded()
     }
 
     /// Just here so you know.
@@ -2569,10 +2538,6 @@ private actor Counter {
     }
 }
 
-private struct EventHandler: GatewayEventHandler {
-    let event: Gateway.Event
-}
-
 /// These are used for a hack-ily run a bot manager
 /// in the background while these tests are running.
 /// This is to test `GatewayEventHandler` protocol and `DiscordCache`.
@@ -2586,19 +2551,18 @@ private actor GatewayTester {
     var testsRan = 0
     private let totalTestCount = 35
     var isLastTest: Bool {
-        /// `DiscordClientTests.testInvocations.count` == `35`
-        /// but `DiscordClientTests.testInvocations` is not available on linux.
-        ///
-        /// **This should be manually updated when test-functions are removed / added.**
+        self.testsRan == self.totalTestCount
+    }
+
+    private init() {
+        /// Check to make sure `DiscordClientTests.testInvocations.count` == `self.totalTestCount`.
+        /// Because `DiscordClientTests.testInvocations.count` is unavailable on linux.
 #if os(macOS)
         if DiscordClientTests.testInvocations.count != self.totalTestCount {
             XCTFail("Someone forgot to update 'GatewayTester.totalTestCount'. Update it to '\(DiscordClientTests.testInvocations.count)'")
         }
 #endif
-        return self.testsRan == self.totalTestCount
     }
-
-    private init() { }
 
     static let shared = GatewayTester()
 
@@ -2606,17 +2570,45 @@ private actor GatewayTester {
         self.botManagerAlreadySetUp.toggle()
     }
 
-    func setBotAndCache(bot: BotGatewayManager, cache: DiscordCache) {
-        self.bot = bot
-        self.cache = cache
-    }
-
-    func removeBotAndCache() {
-        self.bot = nil
-        self.cache = nil
-    }
-
-    func increaseTestsRan() {
+    func increaseTestsRanThenStartIfNeeded(httpClient: HTTPClient) async {
         self.testsRan += 1
+
+        if !self.botManagerAlreadySetUp {
+            self.toggleBotManagerAlreadySetUp()
+
+            self.bot = await BotGatewayManager(
+                eventLoopGroup: httpClient.eventLoopGroup,
+                httpClient: httpClient,
+                token: Constants.token,
+                appId: Snowflake(Constants.botId),
+                intents: Gateway.Intent.allCases
+            )
+            self.cache = await DiscordCache(
+                gatewayManagers: [self.bot!],
+                intents: .init(Gateway.Intent.allCases),
+                requestAllMembers: .enabledWithPresences,
+                messageCachingPolicy: .saveEditHistoryAndDeleted,
+                itemsLimit: .constant(1_000)
+            )
+            await self.bot!.connect()
+            let stream = await self.bot!.makeEventsStream()
+            Task {
+                for await event in stream {
+                    EventHandler(event: event).handle()
+                }
+            }
+        }
     }
+
+    func endIfNeeded() async {
+        if self.isLastTest {
+            await self.bot?.disconnect()
+            self.bot = nil
+            self.cache = nil
+        }
+    }
+}
+
+private struct EventHandler: GatewayEventHandler {
+    let event: Gateway.Event
 }
