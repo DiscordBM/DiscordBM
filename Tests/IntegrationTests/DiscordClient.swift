@@ -19,9 +19,7 @@ class DiscordClientTests: XCTestCase {
 
     deinit {
         try! httpClient.syncShutdown()
-        Task {
-            await bot.disconnect()
-        }
+        Task { await bot.disconnect() }
     }
 
     override func setUp() async throws {

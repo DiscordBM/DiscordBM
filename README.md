@@ -137,7 +137,7 @@ struct EventHandler: GatewayEventHandler {
             )
             
             /// Easily decode the response to the correct type
-            /// `sent` will be of type `DiscordChannel.Message`.
+            /// `message` will be of type `DiscordChannel.Message`.
             let message = try response.decode()
         } catch {
             print("We got an error! \(error)")
