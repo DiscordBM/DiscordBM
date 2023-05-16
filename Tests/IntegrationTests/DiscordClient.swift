@@ -35,24 +35,24 @@ class DiscordClientTests: XCTestCase {
         if await !GatewayTester.shared.botManagerAlreadySetUp {
             await GatewayTester.shared.toggleBotManagerAlreadySetUp()
 
+            let bot = await BotGatewayManager(
+                eventLoopGroup: self.httpClient.eventLoopGroup,
+                httpClient: self.httpClient,
+                token: Constants.token,
+                appId: Snowflake(Constants.botId),
+                intents: Gateway.Intent.allCases
+            )
+            let cache = await DiscordCache(
+                gatewayManagers: [bot],
+                intents: .init(Gateway.Intent.allCases),
+                requestAllMembers: .enabledWithPresences,
+                messageCachingPolicy: .saveEditHistoryAndDeleted,
+                itemsLimit: .constant(1_000)
+            )
+            await GatewayTester.shared.setBotAndCache(bot: bot, cache: cache)
+            await bot.connect()
+            let stream = await bot.makeEventsStream()
             Task {
-                let bot = await BotGatewayManager(
-                    eventLoopGroup: self.httpClient.eventLoopGroup,
-                    httpClient: self.httpClient,
-                    token: Constants.token,
-                    appId: Snowflake(Constants.botId),
-                    intents: Gateway.Intent.allCases
-                )
-                let cache = await DiscordCache(
-                    gatewayManagers: [bot],
-                    intents: .init(Gateway.Intent.allCases),
-                    requestAllMembers: .enabledWithPresences,
-                    messageCachingPolicy: .saveEditHistoryAndDeleted,
-                    itemsLimit: .constant(1_000)
-                )
-                await GatewayTester.shared.setBotAndCache(bot: bot, cache: cache)
-                await bot.connect()
-                let stream = await bot.makeEventsStream()
                 for await event in stream {
                     EventHandler(event: event).handle()
                 }
