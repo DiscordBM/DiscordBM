@@ -1,4 +1,4 @@
-/// Avoid `@tesatable` for `Discord***` target just to make sure everything we use
+/// Avoid `@tesatable` for `Discord***` targets just to make sure everything we use
 /// here is also accessible by the public (e.g. the initializers of different types)
 import DiscordBM
 import DiscordHTTP
@@ -14,10 +14,6 @@ class DiscordClientTests: XCTestCase {
 
     let permanentTestCommandName = "permanent-test-command"
 
-    deinit {
-        try! httpClient.syncShutdown()
-    }
-
     override func setUp() async throws {
         self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         self.client = await DefaultDiscordClient(
@@ -25,9 +21,7 @@ class DiscordClientTests: XCTestCase {
             token: Constants.token,
             appId: Snowflake(Constants.botId),
             /// For not failing tests
-            configuration: .init(retryPolicy: .init(
-                backoff: .basedOnHeaders(maxAllowed: 10)
-            ))
+            configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
         )
 
         await GatewayTester.shared.increaseTestsRan()
@@ -65,6 +59,7 @@ class DiscordClientTests: XCTestCase {
             await GatewayTester.shared.bot?.disconnect()
             await GatewayTester.shared.removeBotAndCache()
         }
+        try? await httpClient.shutdown()
     }
 
     /// Just here so you know.
@@ -2590,11 +2585,18 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
+    private let totalTestCount = 35
     var isLastTest: Bool {
         /// `DiscordClientTests.testInvocations.count` == `35`
         /// but `DiscordClientTests.testInvocations` is not available on linux.
-        /// This should be manually updated when test-funcs are removed / added.
-        self.testsRan == 35
+        ///
+        /// **This should be manually updated when test-functions are removed / added.**
+#if os(macOS)
+        if DiscordClientTests.testInvocations.count != self.totalTestCount {
+            XCTFail("Someone forgot to update 'GatewayTester.totalTestCount'. Update it to '\(DiscordClientTests.testInvocations.count)'")
+        }
+#endif
+        return self.testsRan == self.totalTestCount
     }
 
     private init() { }
