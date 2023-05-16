@@ -59,11 +59,6 @@ class DiscordClientTests: XCTestCase {
             await GatewayTester.shared.bot?.disconnect()
             await GatewayTester.shared.removeBotAndCache()
         }
-        /// To avoid 'unavailable from asynchronous contexts'.
-        /// There will be "Leaking Promise" crashes in tests if we use the async version.
-        try {
-            try httpClient.syncShutdown()
-        }()
     }
 
     /// Just here so you know.
