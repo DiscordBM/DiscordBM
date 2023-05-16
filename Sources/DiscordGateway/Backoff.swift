@@ -34,19 +34,19 @@ actor Backoff {
         if tryCount == 0 {
             /// Even if the last connection was successful, don't try to connect too fast.
             let timePast = now - previousTry
-            if timePast > minBackoff {
+            if timePast > self.minBackoff {
                 return nil
             } else {
-                let remaining = minBackoff - timePast
+                let remaining = self.minBackoff - timePast
                 let millis = Int64(remaining * 1_000)
                 return .milliseconds(millis)
             }
         } else {
-            let effectiveTryCount = min(tryCount, maxExponentiation)
-            let factor = coefficient * pow(base, Double(effectiveTryCount))
+            let effectiveTryCount = min(tryCount, self.maxExponentiation)
+            let factor = self.coefficient * pow(self.base, Double(effectiveTryCount))
             let timePast = now - previousTry
             let calculatedWait = factor - timePast
-            let minRequiredWait = minBackoff - timePast
+            let minRequiredWait = self.minBackoff - timePast
             let toWait = max(calculatedWait, minRequiredWait)
             if toWait > 0 {
                 let millis = Int64(toWait * 1_000) + 1
@@ -58,20 +58,20 @@ actor Backoff {
     }
     
     func resetTryCount() {
-        tryCount = 0
+        self.tryCount = 0
     }
     
     func willTry() {
-        previousTry = Date().timeIntervalSince1970
+        self.previousTry = Date().timeIntervalSince1970
     }
     
     #if DEBUG
     func test_setTryCount(to newValue: Int) {
-        tryCount = newValue
+        self.tryCount = newValue
     }
     
     func test_setPreviousTry(to newValue: TimeInterval) {
-        previousTry = newValue
+        self.previousTry = newValue
     }
     #endif
 }
