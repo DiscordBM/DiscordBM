@@ -23,23 +23,23 @@ public enum ValidationFailure: Sendable {
     public var errorDescription: String {
         switch self {
         case let .atLeastOneFieldIsRequired(names):
-            return "atLeastOneFieldIsRequired(names: \(names))"
+            return "ValidationFailure.atLeastOneFieldIsRequired(names: \(names))"
         case let .tooManyCharacters(name, max):
-            return "tooManyCharacters(name: \(name), max: \(max))"
+            return "ValidationFailure.tooManyCharacters(name: \(name), max: \(max))"
         case let .characterCountOutOfRange(name, min, max):
-            return "characterCountOutOfRange(name: \(name), min: \(min), max: \(max))"
+            return "ValidationFailure.characterCountOutOfRange(name: \(name), min: \(min), max: \(max))"
         case let .tooManyElements(name, max):
-            return "tooManyElements(name: \(name), max: \(max))"
+            return "ValidationFailure.tooManyElements(name: \(name), max: \(max))"
         case let .elementCountOutOfRange(name, min, max):
-            return "elementCountOutOfRange(name: \(name), min: \(min), max: \(max))"
+            return "ValidationFailure.elementCountOutOfRange(name: \(name), min: \(min), max: \(max))"
         case let .containsProhibitedValues(name, reason, valuesRepresentation):
-            return "containsProhibitedValues(name: \(name), reason: \(reason), valuesRepresentation: \(valuesRepresentation))"
+            return "ValidationFailure.containsProhibitedValues(name: \(name), reason: \(reason), valuesRepresentation: \(valuesRepresentation))"
         case let .hasPrecondition(name, reason):
-            return "hasPrecondition(name: \(name), reason: \(reason))"
+            return "ValidationFailure.hasPrecondition(name: \(name), reason: \(reason))"
         case let .cantBeEmpty(name):
-            return "cantBeEmpty(name: \(name))"
+            return "ValidationFailure.cantBeEmpty(name: \(name))"
         case let .numberOutOfRange(name, number, min, max):
-            return "numberOutOfRange(name: \(name), number: \(number), min: \(min), max: \(max))"
+            return "ValidationFailure.numberOutOfRange(name: \(name), number: \(number), min: \(min), max: \(max))"
         }
     }
     

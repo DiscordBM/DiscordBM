@@ -44,11 +44,11 @@ class DiscordClientTests: XCTestCase {
                     intents: Gateway.Intent.allCases
                 )
                 let cache = await DiscordCache(
-                    gatewayManager: bot,
-                    intents: .all,
+                    gatewayManagers: [bot],
+                    intents: .init(Gateway.Intent.allCases),
                     requestAllMembers: .enabledWithPresences,
                     messageCachingPolicy: .saveEditHistoryAndDeleted,
-                    itemsLimit: .disabled
+                    itemsLimit: .constant(1_000)
                 )
                 await GatewayTester.shared.setBotAndCache(bot: bot, cache: cache)
                 await bot.connect()

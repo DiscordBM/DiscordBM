@@ -640,7 +640,6 @@ public actor DiscordCache {
                 self.guilds[user.guild_id]?.guild_scheduled_events[idx]
                     .user_ids = [user.user_id]
             } else {
-                
                 self.guilds[user.guild_id]?.guild_scheduled_events[idx]
                     .user_ids?.append(user.user_id)
             }

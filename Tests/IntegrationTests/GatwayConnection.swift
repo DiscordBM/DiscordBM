@@ -28,7 +28,7 @@ class GatewayConnectionTests: XCTestCase {
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
-            compression: false,
+            compression: true,
             token: Constants.token,
             appId: Snowflake(Constants.botId),
             presence: .init(
@@ -37,6 +37,83 @@ class GatewayConnectionTests: XCTestCase {
                 afk: false
             ),
             intents: Gateway.Intent.allCases
+        )
+
+        let expectation = Expectation(description: "Connected")
+
+        let connectionInfo = ConnectionInfo()
+
+        Task {
+            for await event in await bot.makeEventsStream() {
+                if case let .ready(ready) = event.data {
+                    await connectionInfo.setReady(ready)
+                    expectation.fulfill()
+                } else if event.opcode == .hello {
+                    await connectionInfo.setDidHello()
+                } else if await connectionInfo.ready == nil {
+                    expectation.fulfill()
+                }
+            }
+        }
+
+        Task {
+            for await (error, buffer) in await bot.makeEventsParseFailureStream() {
+                /// Parsing failures are not the end of the world.
+                /// They might even be acceptable.
+                /// However since we know this gateway manager won't do much more than
+                /// the basic regular stuff like identify/ping-pong, it shouldn't throw
+                /// parsing errors for those.
+                XCTFail("Received parsing failure. Error: \(error), buffer: \(buffer), string-buffer: \(String(buffer: buffer))")
+            }
+        }
+
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(for: .milliseconds(200))
+
+        Task { await bot.connect() }
+
+        await waitFulfillment(of: [expectation], timeout: 10)
+
+        let didHello = await connectionInfo.didHello
+        let _ready = await connectionInfo.ready
+        XCTAssertTrue(didHello)
+        let ready = try XCTUnwrap(_ready)
+        XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
+        XCTAssertEqual(ready.application.id, Snowflake(Constants.botId))
+        XCTAssertFalse(ready.session_id.isEmpty)
+        XCTAssertEqual(ready.user.id, Constants.botId)
+        XCTAssertEqual(ready.user.bot, true)
+
+        /// The bot should not disconnect for 120s.
+        /// This is to make sure we aren't getting invalid-session-ed immediately.
+        /// Also to check that ping-ponging works.
+        try await Task.sleep(for: .seconds(120))
+        XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
+
+        await bot.disconnect()
+
+        XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
+        XCTAssertEqual(bot.state, .stopped)
+    }
+
+    func testConnectWithoutCompression() async throws {
+        /// Make sure last tests don't affect this test's gateway connection
+        try await Task.sleep(for: .seconds(5))
+
+        let bot = await BotGatewayManager(
+            eventLoopGroup: httpClient.eventLoopGroup,
+            httpClient: httpClient,
+            compression: false,
+            appId: Snowflake(Constants.botId),
+            identifyPayload: .init(
+                token: Constants.token,
+                presence: .init(
+                    activities: [.init(name: "Testing!", type: .competing)],
+                    status: .invisible,
+                    afk: false
+                ),
+                intents: Gateway.Intent.allCases
+            )
         )
 
         let expectation = Expectation(description: "Connected")
@@ -76,70 +153,6 @@ class GatewayConnectionTests: XCTestCase {
         /// This is to make sure we aren't getting invalid-session-ed immediately.
         try await Task.sleep(for: .seconds(10))
         
-        XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
-
-        await bot.disconnect()
-
-        XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
-        XCTAssertEqual(bot.state, .stopped)
-    }
-    
-    func testConnectWithCompression() async throws {
-        /// Make sure last tests don't affect this test's gateway connection
-        try await Task.sleep(for: .seconds(5))
-
-        let bot = await BotGatewayManager(
-            eventLoopGroup: httpClient.eventLoopGroup,
-            httpClient: httpClient,
-            compression: true,
-            token: Constants.token,
-            appId: Snowflake(Constants.botId),
-            presence: .init(
-                activities: [.init(name: "Testing!", type: .competing)],
-                status: .invisible,
-                afk: false
-            ),
-            intents: Gateway.Intent.allCases
-        )
-
-        let expectation = Expectation(description: "Connected")
-        
-        let connectionInfo = ConnectionInfo()
-
-        Task {
-            for await event in await bot.makeEventsStream() {
-                if case let .ready(ready) = event.data {
-                    await connectionInfo.setReady(ready)
-                    expectation.fulfill()
-                } else if event.opcode == .hello {
-                    await connectionInfo.setDidHello()
-                } else if await connectionInfo.ready == nil {
-                    expectation.fulfill()
-                }
-            }
-        }
-
-        /// To make sure these 2 `Task`s are triggered in order
-        try await Task.sleep(for: .milliseconds(200))
-
-        Task { await bot.connect() }
-
-        await waitFulfillment(of: [expectation], timeout: 10)
-        
-        let didHello = await connectionInfo.didHello
-        let _ready = await connectionInfo.ready
-        XCTAssertTrue(didHello)
-        let ready = try XCTUnwrap(_ready)
-        XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
-        XCTAssertEqual(ready.application.id, Snowflake(Constants.botId))
-        XCTAssertFalse(ready.session_id.isEmpty)
-        XCTAssertEqual(ready.user.id, Constants.botId)
-        XCTAssertEqual(ready.user.bot, true)
-
-        /// The bot should not disconnect for 120s.
-        /// This is to make sure we aren't getting invalid-session-ed immediately.
-        /// Also to check that ping-ponging works.
-        try await Task.sleep(for: .seconds(120))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
 
         await bot.disconnect()
