@@ -7,23 +7,6 @@ import Atomics
 import NIOCore
 import XCTest
 
-/// These are used for a hack-ily run a bot manager
-/// in the background while these tests are running.
-/// This is to test `GatewayEventHandler` protocol and `DiscordCache`.
-/// These tests don't assert anything. They're here just because the
-/// `DiscordClient` tests trigger a lot of gateway events that are
-/// useful for testing `DiscordCache` and `GatewayEventHandler` routings.
-private var botManagerAlreadySetUp = false
-private var bot: BotGatewayManager? = nil
-private var discordCache: DiscordCache? = nil
-private var testsRan = 0
-private var isLastTest: Bool {
-    /// `DiscordClientTests.testInvocations.count` == `35`
-    /// but `DiscordClientTests.testInvocations` is not available on linux.
-    /// This should be manually updated when test-funcs are removed / added.
-    testsRan == 35
-}
-
 class DiscordClientTests: XCTestCase {
     
     var httpClient: HTTPClient!
@@ -36,7 +19,7 @@ class DiscordClientTests: XCTestCase {
     }
 
     override func setUp() async throws {
-        testsRan += 1
+        await GatewayTester.shared.increaseTestsRan()
 
         self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         self.client = await DefaultDiscordClient(
@@ -49,26 +32,27 @@ class DiscordClientTests: XCTestCase {
             ))
         )
 
-        if !botManagerAlreadySetUp {
-            botManagerAlreadySetUp.toggle()
+        if await !GatewayTester.shared.botManagerAlreadySetUp {
+            await GatewayTester.shared.toggleBotManagerAlreadySetUp()
 
             Task {
-                bot = await BotGatewayManager(
-                    eventLoopGroup: httpClient.eventLoopGroup,
-                    httpClient: httpClient,
+                let bot = await BotGatewayManager(
+                    eventLoopGroup: self.httpClient.eventLoopGroup,
+                    httpClient: self.httpClient,
                     token: Constants.token,
                     appId: Snowflake(Constants.botId),
                     intents: Gateway.Intent.allCases
                 )
-                discordCache = await DiscordCache(
-                    gatewayManager: bot!,
+                let cache = await DiscordCache(
+                    gatewayManager: bot,
                     intents: .all,
                     requestAllMembers: .enabledWithPresences,
                     messageCachingPolicy: .saveEditHistoryAndDeleted,
                     itemsLimit: .disabled
                 )
-                await bot!.connect()
-                let stream = await bot!.makeEventsStream()
+                await GatewayTester.shared.setBotAndCache(bot: bot, cache: cache)
+                await bot.connect()
+                let stream = await bot.makeEventsStream()
                 for await event in stream {
                     EventHandler(event: event).handle()
                 }
@@ -77,10 +61,9 @@ class DiscordClientTests: XCTestCase {
     }
 
     override func tearDown() async throws {
-        if isLastTest {
-            await bot!.disconnect()
-            bot = nil
-            discordCache = nil
+        if await GatewayTester.shared.isLastTest {
+            await GatewayTester.shared.bot?.disconnect()
+            await GatewayTester.shared.removeBotAndCache()
         }
     }
 
@@ -2594,4 +2577,45 @@ private actor Counter {
 
 private struct EventHandler: GatewayEventHandler {
     let event: Gateway.Event
+}
+
+/// These are used for a hack-ily run a bot manager
+/// in the background while these tests are running.
+/// This is to test `GatewayEventHandler` protocol and `DiscordCache`.
+/// These tests don't assert anything. They're here just because the
+/// `DiscordClient` tests trigger a lot of gateway events that are
+/// useful for testing `DiscordCache` and `GatewayEventHandler` routings.
+private actor GatewayTester {
+    var botManagerAlreadySetUp = false
+    var bot: BotGatewayManager? = nil
+    var cache: DiscordCache? = nil
+    var testsRan = 0
+    var isLastTest: Bool {
+        /// `DiscordClientTests.testInvocations.count` == `35`
+        /// but `DiscordClientTests.testInvocations` is not available on linux.
+        /// This should be manually updated when test-funcs are removed / added.
+        self.testsRan == 35
+    }
+
+    private init() { }
+
+    static let shared = GatewayTester()
+
+    func toggleBotManagerAlreadySetUp() {
+        self.botManagerAlreadySetUp.toggle()
+    }
+
+    func setBotAndCache(bot: BotGatewayManager, cache: DiscordCache) {
+        self.bot = bot
+        self.cache = cache
+    }
+
+    func removeBotAndCache() {
+        self.bot = nil
+        self.cache = nil
+    }
+
+    func increaseTestsRan() {
+        self.testsRan += 1
+    }
 }
