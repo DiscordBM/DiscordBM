@@ -19,8 +19,6 @@ class DiscordClientTests: XCTestCase {
     }
 
     override func setUp() async throws {
-        await GatewayTester.shared.increaseTestsRan()
-
         self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         self.client = await DefaultDiscordClient(
             httpClient: httpClient,
@@ -31,6 +29,8 @@ class DiscordClientTests: XCTestCase {
                 backoff: .basedOnHeaders(maxAllowed: 10)
             ))
         )
+
+        await GatewayTester.shared.increaseTestsRan()
 
         if await !GatewayTester.shared.botManagerAlreadySetUp {
             await GatewayTester.shared.toggleBotManagerAlreadySetUp()
