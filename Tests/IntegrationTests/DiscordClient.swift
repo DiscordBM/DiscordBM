@@ -18,7 +18,10 @@ private var bot: BotGatewayManager? = nil
 private var discordCache: DiscordCache? = nil
 private var testsRan = 0
 private var isLastTest: Bool {
-    testsRan == DiscordClientTests.testInvocations.count
+    /// `DiscordClientTests.testInvocations.count` == `35`
+    /// but `DiscordClientTests.testInvocations` is not available on linux.
+    /// This should be manually updated when test-funcs are removed / added.
+    testsRan == 35
 }
 
 class DiscordClientTests: XCTestCase {
