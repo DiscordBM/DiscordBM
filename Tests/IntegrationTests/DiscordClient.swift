@@ -7,56 +7,78 @@ import Atomics
 import NIOCore
 import XCTest
 
+/// These are used for a hack-ily run a bot manager
+/// in the background while these tests are running.
+/// This is to test `GatewayEventHandler` protocol and `DiscordCache`.
+/// These tests don't assert anything. They're here just because the
+/// `DiscordClient` tests trigger a lot of gateway events that are
+/// useful for testing `DiscordCache` and `GatewayEventHandler` routings.
+private var botManagerAlreadySetUp = false
+private var bot: BotGatewayManager? = nil
+private var discordCache: DiscordCache? = nil
+private var testsRan = 0
+private var isLastTest: Bool {
+    testsRan == DiscordClientTests.testInvocations.count
+}
+
 class DiscordClientTests: XCTestCase {
     
     var httpClient: HTTPClient!
-    var bot: BotGatewayManager!
-    var discordCache: DiscordCache!
-
     var client: (any DiscordClient)!
 
     let permanentTestCommandName = "permanent-test-command"
 
     deinit {
         try! httpClient.syncShutdown()
-        Task { await bot.disconnect() }
     }
 
     override func setUp() async throws {
-        /// Only set these up once.
-        if self.httpClient == nil {
-            self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-            /// This is to test `GatewayEventHandler` protocol and `DiscordCache`.
-            /// These tests don't assert anything. They're here just because the
-            /// `DiscordClient` tests trigger a lot of gateway events.
-            self.bot = await BotGatewayManager(
-                eventLoopGroup: httpClient.eventLoopGroup,
-                httpClient: httpClient,
-                token: Constants.token,
-                appId: Snowflake(Constants.botId)
-            )
-            self.discordCache = await DiscordCache(
-                gatewayManager: self.bot,
-                intents: .all,
-                requestAllMembers: .enabledWithPresences,
-                messageCachingPolicy: .saveEditHistoryAndDeleted,
-                itemsLimit: .disabled
-            )
-            await bot.connect()
-            let stream = await self.bot.makeEventsStream()
-            Task {
-                for await event in stream {
-                    EventHandler(event: event).handle()
-                }
-            }
-        }
+        testsRan += 1
+
+        self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
             appId: Snowflake(Constants.botId),
             /// For not failing tests
-            configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
+            configuration: .init(retryPolicy: .init(
+                backoff: .basedOnHeaders(maxAllowed: 10)
+            ))
         )
+
+        if !botManagerAlreadySetUp {
+            botManagerAlreadySetUp.toggle()
+
+            Task {
+                bot = await BotGatewayManager(
+                    eventLoopGroup: httpClient.eventLoopGroup,
+                    httpClient: httpClient,
+                    token: Constants.token,
+                    appId: Snowflake(Constants.botId),
+                    intents: Gateway.Intent.allCases
+                )
+                discordCache = await DiscordCache(
+                    gatewayManager: bot!,
+                    intents: .all,
+                    requestAllMembers: .enabledWithPresences,
+                    messageCachingPolicy: .saveEditHistoryAndDeleted,
+                    itemsLimit: .disabled
+                )
+                await bot!.connect()
+                let stream = await bot!.makeEventsStream()
+                for await event in stream {
+                    EventHandler(event: event).handle()
+                }
+            }
+        }
+    }
+
+    override func tearDown() async throws {
+        if isLastTest {
+            await bot!.disconnect()
+            bot = nil
+            discordCache = nil
+        }
     }
 
     /// Just here so you know.

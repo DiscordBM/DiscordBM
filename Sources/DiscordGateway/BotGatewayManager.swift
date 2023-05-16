@@ -158,7 +158,7 @@ public actor BotGatewayManager: GatewayManager {
         appId: ApplicationSnowflake? = nil,
         shard: IntPair? = nil,
         presence: Gateway.Identify.Presence? = nil,
-        intents: [Gateway.Intent] = []
+        intents: [Gateway.Intent]
     ) async {
         let token = Secret(token)
         self.eventLoopGroup = eventLoopGroup
