@@ -31,7 +31,7 @@ Penny is available [here](https://github.com/vapor/penny-bot) and you can find `
   
 > Make sure you have **Xcode 14.1 or above**. Lower Xcode 14 versions have known issues that cause problems for libraries.    
 
-### Initializing a Gateway Manager On Your Own
+### Initializing a Gateway Manager
 
 First you need to initialize a `BotGatewayManager` instance, then tell it to connect and start using it.   
 
@@ -521,5 +521,6 @@ To keep `DiscordBM` up to date with Discord API changes, `DiscordBM` will _add_ 
 This includes adding new cases to enums. If you want to try to avoid breaking changes, make sure you have a `default` case in your `switch` statements or use `if case let`/`if case`.
 
 ## Contribution & Support
-Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.   
+Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.    
+If there is missing/upcoming feature, you can make an issue/PR for it with a link to the related Discord docs page or the related issue/PR in [Discord docs repository](https://github.com/discord/discord-api-docs).   
 Passing the `linux-integration` tests is not required for PRs because of token/access problems.

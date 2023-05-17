@@ -1,15 +1,20 @@
 import DiscordModels
 
 public protocol DiscordClient: Sendable {
+    /// You app's id. If you don't provide it here, you will need to provide it at
+    /// all call-sites of `DiscordClient` functions that accept an `appId`.
     var appId: ApplicationSnowflake? { get }
-    
+
+    /// Send a request to Discord with no body.
     func send(request: DiscordHTTPRequest) async throws -> DiscordHTTPResponse
-    
+
+    /// Send a request to payload with a JSON body.
     func send<E: Sendable & Encodable & ValidatablePayload>(
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordHTTPResponse
-    
+
+    /// Send a request to Discord with a Multipart body.
     func sendMultipart<E: Sendable & MultipartEncodable & ValidatablePayload>(
         request: DiscordHTTPRequest,
         payload: E

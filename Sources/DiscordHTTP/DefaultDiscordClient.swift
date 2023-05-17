@@ -11,7 +11,7 @@ import Atomics
 private let rateLimiter = HTTPRateLimiter(label: "DiscordClientRateLimiter")
 
 //MARK: - DefaultDiscordClient
-public struct DefaultDiscordClient: Sendable, DiscordClient {
+public struct DefaultDiscordClient: DiscordClient {
     
     let client: HTTPClient
     public let token: Secret
@@ -672,7 +672,8 @@ public struct ClientConfiguration: Sendable {
     }
     
     /// The behavior used for caching requests.
-    /// Due to how it works, you shouldn't use `CachingBehavior`s with different TTLs for the same bot-token.
+    /// Due to how it works, you shouldn't use `CachingBehavior`s
+    /// with different TTLs for the same bot-token.
     public let cachingBehavior: CachingBehavior
     var requestTimeoutAmount: TimeAmount
     /// How much for the `HTTPClient` to wait for a connection before failing.
@@ -851,4 +852,8 @@ private extension HTTPHeaders {
 }
 
 //MARK: User-Agent constant
+/// Discord apparently looks at this for figuring out library-usages.
+/// Technically they could also look at the info passed in Gateway's identify payload, for that.
+/// From what I've figured, if Discord sees a lot of people are using the same library, they
+/// will contact the owner and add the library to the list of suggested libraries on their website.
 private let userAgent = "DiscordBM (https://github.com/mahdibm/discordbm, 1.0.0)"

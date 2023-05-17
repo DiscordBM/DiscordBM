@@ -123,7 +123,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
         }
     }
     
-    /// Decode the response into an arbitrary type.
+    /// Decodes the response into an arbitrary type.
     @inlinable
     public func decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
         try self.guardSuccess()
@@ -178,7 +178,7 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
         self.httpResponse.decodeError()
     }
     
-    /// Decode the response.
+    /// Decodes the response.
     @inlinable
     public func decode() throws -> C {
         try httpResponse.decode(as: C.self)
