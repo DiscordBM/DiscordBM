@@ -265,6 +265,7 @@ public enum DiscordHTTPError: LocalizedError, CustomStringConvertible {
     case badStatusCode(DiscordHTTPResponse)
     case emptyBody(DiscordHTTPResponse)
     case noContentTypeHeader(DiscordHTTPResponse)
+    case noAuthenticationHeader(request: DiscordHTTPRequest)
     case decodingError(DiscordHTTPResponse, error: Error)
     case appIdParameterRequired
     case queryParametersMutuallyExclusive(queries: [(String, String)])
@@ -280,6 +281,8 @@ public enum DiscordHTTPError: LocalizedError, CustomStringConvertible {
             return "DiscordHTTPError.emptyBody(\(response))"
         case let .noContentTypeHeader(response):
             return "DiscordHTTPError.noContentTypeHeader(\(response))"
+        case let .noAuthenticationHeader(request):
+            return "DiscordHTTPError.noAuthenticationHeader(request: \(request))"
         case let .decodingError(response, error):
             return "DiscordHTTPError.decodingError(\(response), error: \(error))"
         case .appIdParameterRequired:
@@ -305,6 +308,8 @@ public enum DiscordHTTPError: LocalizedError, CustomStringConvertible {
             return "The response body was unexpectedly empty. If it happens frequently, you should report it to me at https://github.com/MahdiBM/DiscordBM/issues. Discord's response: \(response)"
         case let .noContentTypeHeader(response):
             return "Discord didn't send a Content-Type header. See if they mentions any errors in the response: \(response)"
+        case let .noAuthenticationHeader(request):
+            return "The endpoint requires an authentication header but you have not passed authentication info in the 'DefaultDiscordClient' initializer. Request: \(request)"
         case let .decodingError(response, error):
             return "There has been a decoding error. Make sure your Codable types match the response that Discord sends. Discord's response: \(response). Error: \(error)"
         case .appIdParameterRequired:

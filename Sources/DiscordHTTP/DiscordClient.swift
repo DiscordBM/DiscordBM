@@ -1,7 +1,7 @@
 import DiscordModels
 
 public protocol DiscordClient: Sendable {
-    /// You app's id. If you don't provide it here, you will need to provide it at
+    /// Your app's id. If you don't provide it here, you will need to provide it at
     /// all call-sites of `DiscordClient` functions that accept an `appId`.
     var appId: ApplicationSnowflake? { get }
 

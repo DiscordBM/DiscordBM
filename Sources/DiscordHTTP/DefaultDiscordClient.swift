@@ -12,9 +12,9 @@ private let rateLimiter = HTTPRateLimiter(label: "DiscordClientRateLimiter")
 
 //MARK: - DefaultDiscordClient
 public struct DefaultDiscordClient: DiscordClient {
-    
+
     let client: HTTPClient
-    public let token: Secret
+    public let authentication: AuthenticationHeader
     public let appId: ApplicationSnowflake?
     let configuration: ClientConfiguration
     let cache: ClientCache
@@ -23,6 +23,7 @@ public struct DefaultDiscordClient: DiscordClient {
     private static let requestIdGenerator = ManagedAtomic(UInt(0))
     
     /// If you provide no app id, you'll need to pass it to some functions on call site.
+    /// `token` must be a bot token.
     public init(
         httpClient: HTTPClient,
         token: Secret,
@@ -30,25 +31,69 @@ public struct DefaultDiscordClient: DiscordClient {
         configuration: ClientConfiguration = .init()
     ) async {
         self.client = httpClient
-        self.token = token
+        self.authentication = .botToken(token)
         self.appId = appId
         self.configuration = configuration
-        self.cache = await ClientCacheStorage.shared.cache(for: token)
+        self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
-    
+
     /// If you provide no app id, you'll need to pass it to some functions on call site.
+    /// `token` must be a bot token.
     public init(
         httpClient: HTTPClient,
         token: String,
         appId: ApplicationSnowflake?,
         configuration: ClientConfiguration = .init()
     ) async {
-        await self.init(
-            httpClient: httpClient,
-            token: Secret(token),
-            appId: appId,
-            configuration: configuration
-        )
+        self.client = httpClient
+        self.authentication = .botToken(Secret(token))
+        self.appId = appId
+        self.configuration = configuration
+        self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
+    }
+
+    /// If you provide no app id, you'll need to pass it to some functions on call site.
+    /// `oAuthToken` must be an OAuth token.
+    public init(
+        httpClient: HTTPClient,
+        oAuthToken: Secret,
+        appId: ApplicationSnowflake?,
+        configuration: ClientConfiguration = .init()
+    ) async {
+        self.client = httpClient
+        self.authentication = .oAuthToken(oAuthToken)
+        self.appId = appId
+        self.configuration = configuration
+        self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
+    }
+
+    /// If you provide no app id, you'll need to pass it to some functions on call site.
+    /// `oAuthToken` must be an OAuth token.
+    public init(
+        httpClient: HTTPClient,
+        oAuthToken: String,
+        appId: ApplicationSnowflake?,
+        configuration: ClientConfiguration = .init()
+    ) async {
+        self.client = httpClient
+        self.authentication = .oAuthToken(Secret(oAuthToken))
+        self.appId = appId
+        self.configuration = configuration
+        self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
+    }
+
+    /// If you provide no app id, you'll need to pass it to some functions on call site.
+    public init(
+        httpClient: HTTPClient,
+        authentication: AuthenticationHeader,
+        appId: ApplicationSnowflake?,
+        configuration: ClientConfiguration = .init()
+    ) async {
+        self.client = httpClient
+        self.authentication = authentication
+        self.appId = appId
+        self.configuration = configuration
+        self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
     func checkRateLimitsAllowRequest(
@@ -244,7 +289,7 @@ public struct DefaultDiscordClient: DiscordClient {
             request.headers = req.headers
             request.headers.add(name: "User-Agent", value: userAgent)
             if req.endpoint.requiresAuthorizationHeader {
-                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
+                try self.authentication.addHeader(headers: &request.headers, request: req)
             }
             
             logger.debug("Will send a request to Discord", metadata: [
@@ -319,7 +364,7 @@ public struct DefaultDiscordClient: DiscordClient {
             request.headers.add(name: "User-Agent", value: userAgent)
             request.headers.replaceOrAdd(name: "Content-Type", value: "application/json")
             if req.endpoint.requiresAuthorizationHeader {
-                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
+                try self.authentication.addHeader(headers: &request.headers, request: req)
             }
             
             request.body = .bytes(data)
@@ -405,7 +450,7 @@ public struct DefaultDiscordClient: DiscordClient {
             request.headers.add(name: "User-Agent", value: userAgent)
             request.headers.replaceOrAdd(name: "Content-Type", value: contentType)
             if req.endpoint.requiresAuthorizationHeader {
-                request.headers.replaceOrAdd(name: "Authorization", value: "Bot \(token.value)")
+                try self.authentication.addHeader(headers: &request.headers, request: req)
             }
             
             request.body = .byteBuffer(buffer)
@@ -433,6 +478,38 @@ public struct DefaultDiscordClient: DiscordClient {
             )
             
             return (response, false)
+        }
+    }
+}
+
+//MARK: - AuthenticationHeader
+public enum AuthenticationHeader: Sendable {
+    case botToken(Secret)
+    case oAuthToken(Secret)
+    case none
+
+    @inlinable
+    var id: String? {
+        switch self {
+        case .botToken(let secret):
+            return "bot_\(secret.value)"
+        case .oAuthToken(let secret):
+            return "oat_\(secret.value)"
+        case .none:
+            return nil
+        }
+    }
+
+    /// Adds an authentication header or throws an error.
+    @inlinable
+    func addHeader(headers: inout HTTPHeaders, request: DiscordHTTPRequest) throws {
+        switch self {
+        case .botToken(let secret):
+            headers.replaceOrAdd(name: "Authorization", value: "Bot \(secret.value)")
+        case .oAuthToken(let secret):
+            headers.replaceOrAdd(name: "Authorization", value: "Bearer \(secret.value)")
+        case .none:
+            throw DiscordHTTPError.noAuthenticationHeader(request: request)
         }
     }
 }
@@ -746,19 +823,28 @@ private actor ClientCacheStorage {
     
     /// [Token: ClientCache]
     private var storage = [String: ClientCache]()
+    private var noAuth: ClientCache? = nil
     
     private init() { }
     
     static let shared = ClientCacheStorage()
 
-    func cache(for token: Secret) -> ClientCache {
-        let token = token.value
-        if let cache = self.storage[token] {
-            return cache
+    func cache(for authenticationHeader: AuthenticationHeader) -> ClientCache {
+        if let id = authenticationHeader.id {
+            if let cache = self.storage[id] {
+                return cache
+            } else {
+                let cache = ClientCache()
+                self.storage[id] = cache
+                return cache
+            }
         } else {
-            let cache = ClientCache()
-            self.storage[token] = cache
-            return cache
+            if let noAuth {
+                return noAuth
+            } else {
+                self.noAuth = .init()
+                return self.noAuth!
+            }
         }
     }
 }
