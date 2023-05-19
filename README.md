@@ -18,13 +18,14 @@
 
 ## Notable Features
 * Everything with async/await. Full integration with the latest Server-Side Swift packages.
+* Supports the full Discord API for bots, except Voice (for now).
 * Connect to the Discord Gateway and receive all events easily.
 * Send requests to the Discord API using library's Discord client.
 * Hard-typed APIs. All Gateway events and API responses have their own type and can be decoded easily.
 * Abstractions for easier testability.
 
 ## Showcase
-You can see Vapor community's Penny bot as a showcase of using this library in production. Penny's primary purpose is to give coins to the helpful members of the Vapor community. She can also ping members when specific words are used (similar to Slackbot).
+You can see Vapor community's Penny bot as a showcase of using this library in production. Penny's primary purpose is to give coins to the helpful members of the Vapor community. She also pings members for their specified keywords (similar to Slackbot), and notifies everyone of Swift's evolution and proposals.     
 Penny is available [here](https://github.com/vapor/penny-bot) and you can find `DiscordBM` used in the [PennyBOT](https://github.com/vapor/penny-bot/tree/main/CODE/Sources/PennyBOT) target.
 
 ## How To Use
