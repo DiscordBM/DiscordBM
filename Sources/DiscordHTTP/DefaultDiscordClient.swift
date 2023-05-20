@@ -17,8 +17,14 @@ public struct DefaultDiscordClient: DiscordClient {
     public let authentication: AuthenticationHeader
     public let appId: ApplicationSnowflake?
     let configuration: ClientConfiguration
-    let cache: ClientCache
     let logger = DiscordGlobalConfiguration.makeLogger("DefaultDiscordClient")
+
+    /// Use `getCache()` to get the appropriate cache.
+
+    /// The cache used for requests that require an auth header.
+    let _authCache: ClientCache
+    /// The global cache used for requests that require no auth header.
+    let _globalCache = ClientCache.global
     
     private static let requestIdGenerator = ManagedAtomic(UInt(0))
 
@@ -33,7 +39,7 @@ public struct DefaultDiscordClient: DiscordClient {
         self.authentication = .botToken(token)
         self.appId = appId ?? self.authentication.extractAppIdIfAvailable()
         self.configuration = configuration
-        self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
+        self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
     /// `token` must be a bot token.
@@ -47,7 +53,7 @@ public struct DefaultDiscordClient: DiscordClient {
         self.authentication = .botToken(Secret(token))
         self.appId = appId ?? self.authentication.extractAppIdIfAvailable()
         self.configuration = configuration
-        self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
+        self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
     /// `oAuthToken` must be an OAuth token.
@@ -62,7 +68,7 @@ public struct DefaultDiscordClient: DiscordClient {
         /// OAuth tokens don't contain an app-id to extract
         self.appId = appId
         self.configuration = configuration
-        self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
+        self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
     /// `oAuthToken` must be an OAuth token.
@@ -77,7 +83,7 @@ public struct DefaultDiscordClient: DiscordClient {
         /// OAuth tokens don't contain an app-id to extract
         self.appId = appId
         self.configuration = configuration
-        self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
+        self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
     public init(
@@ -90,7 +96,7 @@ public struct DefaultDiscordClient: DiscordClient {
         self.authentication = authentication
         self.appId = appId ?? self.authentication.extractAppIdIfAvailable()
         self.configuration = configuration
-        self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
+        self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
     func checkRateLimitsAllowRequest(
@@ -147,6 +153,7 @@ public struct DefaultDiscordClient: DiscordClient {
     
     func getFromCache(
         identity: CacheableEndpointIdentity?,
+        requiresAuthHeader: Bool,
         parameters: [String],
         queries: [(String, String?)]
     ) async -> DiscordHTTPResponse? {
@@ -156,7 +163,9 @@ public struct DefaultDiscordClient: DiscordClient {
         guard let identity,
               self.configuration.cachingBehavior.getTTL(for: identity) != nil
         else { return nil }
-        return await cache.get(item: .init(
+        return await self.getCache(
+            requiresAuthHeader: requiresAuthHeader
+        ).get(item: .init(
             identity: identity,
             parameters: parameters,
             queries: queries
@@ -166,6 +175,7 @@ public struct DefaultDiscordClient: DiscordClient {
     func saveInCache(
         response: DiscordHTTPResponse,
         identity: CacheableEndpointIdentity?,
+        requiresAuthHeader: Bool,
         parameters: [String],
         queries: [(String, String?)]
     ) async {
@@ -173,7 +183,7 @@ public struct DefaultDiscordClient: DiscordClient {
               (200..<300).contains(response.status.code),
               let ttl = self.configuration.cachingBehavior.getTTL(for: identity)
         else { return }
-        await cache.add(
+        await self.getCache(requiresAuthHeader: requiresAuthHeader).add(
             response: response,
             item: .init(
                 identity: identity,
@@ -223,6 +233,15 @@ public struct DefaultDiscordClient: DiscordClient {
             "retriesWithoutThis": .stringConvertible(retriesSoFar)
         ])
     }
+
+    /// Returns an appropriate `ClientCache`.
+    func getCache(requiresAuthHeader: Bool) -> ClientCache {
+        if requiresAuthHeader {
+            return self._authCache
+        } else {
+            return self._globalCache
+        }
+    }
     
     /// Sends requests and retries if needed.
     func sendWithRetries(
@@ -249,6 +268,7 @@ public struct DefaultDiscordClient: DiscordClient {
             await self.saveInCache(
                 response: response,
                 identity: identity,
+                requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
                 parameters: req.endpoint.parameters,
                 queries: req.queries
             )
@@ -263,6 +283,7 @@ public struct DefaultDiscordClient: DiscordClient {
             
             if let cached = await self.getFromCache(
                 identity: identity,
+                requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
                 parameters: req.endpoint.parameters,
                 queries: req.queries
             ) {
@@ -328,6 +349,7 @@ public struct DefaultDiscordClient: DiscordClient {
             let identity = CacheableEndpointIdentity(endpoint: req.endpoint)
             if let cached = await self.getFromCache(
                 identity: identity,
+                requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
                 parameters: req.endpoint.parameters,
                 queries: req.queries
             ) {
@@ -335,6 +357,7 @@ public struct DefaultDiscordClient: DiscordClient {
             }
             if let cached = await self.getFromCache(
                 identity: identity,
+                requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
                 parameters: req.endpoint.parameters,
                 queries: req.queries
             ) {
@@ -406,6 +429,7 @@ public struct DefaultDiscordClient: DiscordClient {
             let identity = CacheableEndpointIdentity(endpoint: req.endpoint)
             if let cached = await self.getFromCache(
                 identity: identity,
+                requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
                 parameters: req.endpoint.parameters,
                 queries: req.queries
             ) {
@@ -413,6 +437,7 @@ public struct DefaultDiscordClient: DiscordClient {
             }
             if let cached = await self.getFromCache(
                 identity: identity,
+                requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
                 parameters: req.endpoint.parameters,
                 queries: req.queries
             ) {
@@ -905,6 +930,8 @@ actor ClientCache {
     var timeTable = [CacheableItem: Double]()
     /// [ID: Response]
     var storage = [CacheableItem: DiscordHTTPResponse]()
+
+    static let global = ClientCache()
     
     init() {
         Task { await self.collectGarbage() }
