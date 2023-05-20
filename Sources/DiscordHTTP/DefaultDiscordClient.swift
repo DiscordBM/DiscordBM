@@ -506,7 +506,7 @@ public enum AuthenticationHeader: Sendable {
         case .oAuthToken(let secret):
             headers.replaceOrAdd(name: "Authorization", value: "Bearer \(secret.value)")
         case .none:
-            throw DiscordHTTPError.noAuthenticationHeader(request: request)
+            throw DiscordHTTPError.authenticationHeaderRequired(request: request)
         }
     }
 

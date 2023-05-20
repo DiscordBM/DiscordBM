@@ -60,9 +60,8 @@ let bot = await BotGatewayManager(
 See the [GatewayConnection tests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
 
 > **Warning**   
-> In a production app you should use environment variables to load your Bot Token.   
+> In a production app you should use **environment variables** to load your Bot Token.   
 > Avoid hard-coding your Bot Token to reduce the chances of leaking it.   
-> App ID is public so no need to worry about that.   
 
 ### Initializing a Gateway Manager With Vapor
 <details>
