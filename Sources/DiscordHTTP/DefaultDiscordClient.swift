@@ -511,6 +511,7 @@ public enum AuthenticationHeader: Sendable {
     }
 
     /// Extracts the app-id from a bot token. Otherwise returns nil.
+    @inlinable
     func extractAppIdIfAvailable() -> ApplicationSnowflake? {
         switch self {
         case let .botToken(token):

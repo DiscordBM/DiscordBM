@@ -514,7 +514,7 @@ Finally, add `import DiscordBM` to your source code.
 
 ## Versioning
 `DiscordBM` will try to follow Semantic Versioning 2.0.0, with exceptions.     
-To keep `DiscordBM` up to date with Discord API changes, `DiscordBM` will _add_ any new properties to any types in minor versions, even if it's technically a breaking change.   
+To keep `DiscordBM` up to date with Discord API's frequent changes, `DiscordBM` will **add** any new properties to any types in **minor** versions, even if it's technically a breaking change.   
 This includes adding new cases to enums. If you want to try to avoid breaking changes, make sure you have a `default` case in your `switch` statements or use `if case let`/`if case`.
 
 ## Contribution & Support

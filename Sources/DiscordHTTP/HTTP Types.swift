@@ -137,7 +137,11 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
             do {
                 return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
             } catch {
-                throw DiscordHTTPError.decodingError(self, error: error)
+                throw DiscordHTTPError.decodingError(
+                    typeName: Swift._typeName(D.self),
+                    response: self,
+                    error: error
+                )
             }
         } else {
             throw DiscordHTTPError.emptyBody(self)
@@ -266,7 +270,7 @@ public enum DiscordHTTPError: LocalizedError, CustomStringConvertible {
     case emptyBody(DiscordHTTPResponse)
     case noContentTypeHeader(DiscordHTTPResponse)
     case authenticationHeaderRequired(request: DiscordHTTPRequest)
-    case decodingError(DiscordHTTPResponse, error: Error)
+    case decodingError(typeName: String, response: DiscordHTTPResponse, error: Error)
     case appIdParameterRequired
     case queryParametersMutuallyExclusive(queries: [(String, String)])
     case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)
@@ -283,8 +287,8 @@ public enum DiscordHTTPError: LocalizedError, CustomStringConvertible {
             return "DiscordHTTPError.noContentTypeHeader(\(response))"
         case let .authenticationHeaderRequired(request):
             return "DiscordHTTPError.authenticationHeaderRequired(request: \(request))"
-        case let .decodingError(response, error):
-            return "DiscordHTTPError.decodingError(\(response), error: \(error))"
+        case let .decodingError(typeName, response, error):
+            return "DiscordHTTPError.decodingError(typeName: \(typeName), response: \(response), error: \(error))"
         case .appIdParameterRequired:
             return "DiscordHTTPError.appIdParameterRequired"
         case let .queryParametersMutuallyExclusive(queries):
@@ -310,8 +314,8 @@ public enum DiscordHTTPError: LocalizedError, CustomStringConvertible {
             return "Discord didn't send a Content-Type header. See if they mentions any errors in the response: \(response)"
         case let .authenticationHeaderRequired(request):
             return "The endpoint requires an authentication header but you have not passed authentication info in the 'DefaultDiscordClient' initializer. Request: \(request)"
-        case let .decodingError(response, error):
-            return "There has been a decoding error. Make sure your Codable types match the response that Discord sends. Discord's response: \(response). Error: \(error)"
+        case let .decodingError(typeName, response, error):
+            return "Could not decode to type '\(typeName)'. Make sure your Codable types match the response that Discord sends. Discord's response: \(response). Error: \(error)"
         case .appIdParameterRequired:
             return "The 'appId' parameter is required. Either pass it in the initializer of DefaultDiscordClient/BotGatewayManager or use the 'appId' function parameter"
         case let .queryParametersMutuallyExclusive(queries):

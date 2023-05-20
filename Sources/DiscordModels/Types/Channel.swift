@@ -271,31 +271,7 @@ extension DiscordChannel {
             // FIXME: Don't have the type to use `Snowflake<Type>` instead
             public var party_id: AnySnowflake?
         }
-        
-        /// A ``DiscordUser`` with an extra `member` field.
-        /// https://discord.com/developers/docs/resources/user#user-object-user-structure
-        public struct MentionUser: Sendable, Codable {
-            public var id: UserSnowflake
-            public var username: String
-            public var discriminator: String
-            public var avatar: String?
-            public var bot: Bool?
-            public var system: Bool?
-            public var mfa_enabled: Bool?
-            public var banner: String?
-            public var accent_color: DiscordColor?
-            public var locale: DiscordLocale?
-            public var verified: Bool?
-            public var email: String?
-            public var flags: IntBitField<DiscordUser.Flag>?
-            public var premium_type: DiscordUser.PremiumKind?
-            public var public_flags: IntBitField<DiscordUser.Flag>?
-            public var avatar_decoration: String?
-            public var bio: String?
-            public var banner_color: DiscordColor?
-            public var member: Guild.Member?
-        }
-        
+
         public var id: MessageSnowflake
         public var channel_id: ChannelSnowflake
         public var guild_id: GuildSnowflake?
@@ -306,7 +282,7 @@ extension DiscordChannel {
         public var edited_timestamp: DiscordTimestamp?
         public var tts: Bool
         public var mention_everyone: Bool
-        public var mentions: [MentionUser]
+        public var mentions: [DiscordUser]
         public var mention_roles: [RoleSnowflake]
         public var mention_channels: [ChannelMention]?
         public var attachments: [Attachment]
@@ -343,7 +319,7 @@ extension DiscordChannel {
         public var edited_timestamp: DiscordTimestamp?
         public var tts: Bool?
         public var mention_everyone: Bool?
-        public var mentions: [Message.MentionUser]?
+        public var mentions: [DiscordUser]?
         public var mention_roles: [RoleSnowflake]?
         public var mention_channels: [DiscordChannel.Message.ChannelMention]?
         public var attachments: [DiscordChannel.Message.Attachment]?

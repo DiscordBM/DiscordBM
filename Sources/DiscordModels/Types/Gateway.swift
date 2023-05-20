@@ -947,6 +947,47 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#message-create
     /// https://discord.com/developers/docs/resources/channel#message-object
     public struct MessageCreate: Sendable, Codable {
+
+        /// A ``DiscordUser`` with an extra `member` field.
+        /// https://discord.com/developers/docs/topics/gateway-events#message-create-message-create-extra-fields
+        /// https://discord.com/developers/docs/resources/user#user-object-user-structure
+        public struct MentionUser: Sendable, Codable {
+            public var id: UserSnowflake
+            public var username: String
+            public var discriminator: String
+            public var avatar: String?
+            public var bot: Bool?
+            public var system: Bool?
+            public var mfa_enabled: Bool?
+            public var banner: String?
+            public var accent_color: DiscordColor?
+            public var locale: DiscordLocale?
+            public var verified: Bool?
+            public var email: String?
+            public var flags: IntBitField<DiscordUser.Flag>?
+            public var premium_type: DiscordUser.PremiumKind?
+            public var public_flags: IntBitField<DiscordUser.Flag>?
+            public var member: Guild.PartialMember?
+
+            public init(user: DiscordUser) {
+                self.id = user.id
+                self.username = user.username
+                self.discriminator = user.discriminator
+                self.avatar = user.avatar
+                self.bot = user.bot
+                self.system = user.system
+                self.mfa_enabled = user.mfa_enabled
+                self.banner = user.banner
+                self.accent_color = user.accent_color
+                self.locale = user.locale
+                self.verified = user.verified
+                self.email = user.email
+                self.flags = user.flags
+                self.premium_type = user.premium_type
+                self.public_flags = user.public_flags
+            }
+        }
+
         public var id: MessageSnowflake
         public var channel_id: ChannelSnowflake
         public var author: PartialUser?
@@ -980,7 +1021,7 @@ public struct Gateway: Sendable, Codable {
         /// The extra fields:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
-        public var mentions: [DiscordChannel.Message.MentionUser]
+        public var mentions: [MentionUser]
         
         public mutating func update(with partialMessage: DiscordChannel.PartialMessage) {
             self.id = partialMessage.id
@@ -1000,7 +1041,7 @@ public struct Gateway: Sendable, Codable {
                 self.mention_everyone = mention_everyone
             }
             if let mentions = partialMessage.mentions {
-                self.mentions = mentions
+                self.mentions = mentions.map { .init(user: $0) }
             }
             if let mention_roles = partialMessage.mention_roles {
                 self.mention_roles = mention_roles
