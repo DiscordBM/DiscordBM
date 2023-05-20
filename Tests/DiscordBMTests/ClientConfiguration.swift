@@ -382,6 +382,18 @@ class ClientConfigurationTests: XCTestCase {
             XCTAssertNil(fromCache)
         }
     }
+
+    func testAuthenticationHeader() async throws {
+        let header1 = AuthenticationHeader.botToken(
+            "MTEwOTUzODY0MTY2OTI3MTY4NA.GnqP8q.8hhS0qeDTbAkKJB_bvwl5VfCzflKzkQgbMXNiA"
+        )
+        XCTAssertEqual(header1.extractAppIdIfAvailable(), "1109538641669271684")
+
+        let header2 = AuthenticationHeader.botToken(
+            "OTUwNjk1Mjk0OTA2MDA3NTcz.GnqP8q.8hhS0qeDTbAkKJB_bvwl5VfCzflKzkQgbMXNiA"
+        )
+        XCTAssertEqual(header2.extractAppIdIfAvailable(), "950695294906007573")
+    }
 }
 
 // MARK: - DiscordHTTPResponse + Equatable

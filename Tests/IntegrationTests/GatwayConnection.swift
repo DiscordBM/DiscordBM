@@ -30,7 +30,6 @@ class GatewayConnectionTests: XCTestCase {
             httpClient: httpClient,
             compression: true,
             token: Constants.token,
-            appId: Snowflake(Constants.botId),
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,
@@ -38,6 +37,8 @@ class GatewayConnectionTests: XCTestCase {
             ),
             intents: Gateway.Intent.allCases
         )
+
+        XCTAssertEqual(bot.client.appId?.value, Constants.botId.value)
 
         let expectation = Expectation(description: "Connected")
 
@@ -104,7 +105,6 @@ class GatewayConnectionTests: XCTestCase {
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
             compression: false,
-            appId: Snowflake(Constants.botId),
             identifyPayload: .init(
                 token: Constants.token,
                 presence: .init(
@@ -172,7 +172,6 @@ class GatewayConnectionTests: XCTestCase {
                 httpClient: self.httpClient,
                 compression: true,
                 token: Constants.token,
-                appId: Snowflake(Constants.botId),
                 shard: shard,
                 presence: .init(
                     activities: [.init(name: "Testing!", type: .competing)],
@@ -244,8 +243,7 @@ class GatewayConnectionTests: XCTestCase {
         /// this helps is that the `DiscordClient` always caches the getBotGateway endpoint.
         try await DefaultDiscordClient(
             httpClient: httpClient,
-            token: Constants.token,
-            appId: Snowflake(Constants.botId)
+            token: Constants.token
         ).getBotGateway().guardSuccess()
 
         /// Just to make sure it is initialized
@@ -281,7 +279,6 @@ class GatewayConnectionTests: XCTestCase {
             httpClient: httpClient,
             compression: false,
             token: Constants.token.dropLast(4) + "aaaa",
-            appId: Snowflake(Constants.botId),
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,
@@ -338,7 +335,6 @@ class GatewayConnectionTests: XCTestCase {
             httpClient: httpClient,
             compression: true,
             token: Constants.token,
-            appId: Snowflake(Constants.botId),
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,

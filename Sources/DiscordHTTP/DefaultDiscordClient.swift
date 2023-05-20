@@ -23,8 +23,6 @@ public struct DefaultDiscordClient: DiscordClient {
 
     /// The cache used for requests that require an auth header.
     let _authCache: ClientCache
-    /// The global cache used for requests that require no auth header.
-    let _globalCache = ClientCache.global
     
     private static let requestIdGenerator = ManagedAtomic(UInt(0))
 
@@ -239,7 +237,7 @@ public struct DefaultDiscordClient: DiscordClient {
         if requiresAuthHeader {
             return self._authCache
         } else {
-            return self._globalCache
+            return .global
         }
     }
     
@@ -540,13 +538,21 @@ public enum AuthenticationHeader: Sendable {
     func extractAppIdIfAvailable() -> ApplicationSnowflake? {
         switch self {
         case let .botToken(token):
-            if let base64 = token.value.split(separator: ".").first,
-               let data = Data(base64Encoded: String(base64 + "==")),
-               let decoded = String(data: data, encoding: .utf8) {
-                return ApplicationSnowflake(decoded)
-            } else {
-                return nil
+            if let base64 = token.value.split(separator: ".").first {
+                for base64 in [base64 + "==", base64] {
+                    if let data = Data(base64Encoded: String(base64)),
+                       let decoded = String(data: data, encoding: .utf8) {
+                        return ApplicationSnowflake(decoded)
+                    }
+                }
             }
+
+            DiscordGlobalConfiguration.makeLogger("AuthenticationHeader").error(
+                "Cannot extract app-id from the bot token", metadata: [
+                    "BotTokenSecret": .stringConvertible(token)
+                ]
+            )
+            return nil
         case .oAuthToken, .none: return nil
         }
     }
