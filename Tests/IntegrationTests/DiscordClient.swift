@@ -19,7 +19,6 @@ class DiscordClientTests: XCTestCase {
         self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
-            appId: Snowflake(Constants.botId),
             /// For not failing tests
             configuration: .init(retryPolicy: .init(backoff: .basedOnHeaders(maxAllowed: 10)))
         )
@@ -28,6 +27,23 @@ class DiscordClientTests: XCTestCase {
 
     override func tearDown() async throws {
         await GatewayTester.shared.endIfNeeded()
+    }
+
+    func testAppIdSetting() async throws {
+        /// Tests that it can extract an app-id from a bot-token even if not provided.
+        let client1 = await DefaultDiscordClient(
+            httpClient: httpClient,
+            token: Constants.token
+        )
+        XCTAssertEqual(client1.appId?.value, Constants.botId.value)
+
+        /// Tests that the provided app-id overrides the bot-token-extracted app-id
+        let client2 = await DefaultDiscordClient(
+            httpClient: httpClient,
+            token: Constants.token,
+            appId: ApplicationSnowflake("000")
+        )
+        XCTAssertEqual(client2.appId?.value, "000")
     }
 
     /// Just here so you know.
@@ -2332,7 +2348,6 @@ class DiscordClientTests: XCTestCase {
         let client: any DiscordClient = await DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
-            appId: Snowflake(Constants.botId),
             /// Disable retrials.
             configuration: .init(retryPolicy: nil)
         )
@@ -2378,7 +2393,7 @@ class DiscordClientTests: XCTestCase {
         /// Waiting 10 seconds to make sure the next tests don't get rate-limited
         try await Task.sleep(for: .seconds(10))
     }
-    
+
     func testCachingInPractice() async throws {
         /// Caching enabled
         do {
@@ -2387,7 +2402,6 @@ class DiscordClientTests: XCTestCase {
             let cacheClient: any DiscordClient = await DefaultDiscordClient(
                 httpClient: httpClient,
                 token: Constants.token,
-                appId: Snowflake(Constants.botId),
                 configuration: configuration
             )
             
@@ -2430,7 +2444,6 @@ class DiscordClientTests: XCTestCase {
             let cacheClient: any DiscordClient = await DefaultDiscordClient(
                 httpClient: httpClient,
                 token: Constants.token,
-                appId: Snowflake(Constants.botId),
                 configuration: configuration
             )
             
@@ -2467,7 +2480,6 @@ class DiscordClientTests: XCTestCase {
             let cacheClient: any DiscordClient = await DefaultDiscordClient(
                 httpClient: httpClient,
                 token: Constants.token,
-                appId: Snowflake(Constants.botId),
                 configuration: configuration
             )
             
@@ -2549,7 +2561,7 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
-    private let totalTestCount = 35
+    private let totalTestCount = 36
     var isLastTest: Bool {
         self.testsRan == self.totalTestCount
     }

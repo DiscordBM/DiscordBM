@@ -47,7 +47,6 @@ let bot = await BotGatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
     httpClient: httpClient,
     token: <#Your Bot Token#>,
-    appId: Snowflake(<#Your App ID#>),
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
         activities: [.init(name: "Fortnite", type: .game)], 
@@ -77,8 +76,7 @@ let app: Application = <#Your Vapor Application#>
 let bot = await BotGatewayManager(
     eventLoopGroup: app.eventLoopGroup,
     httpClient: app.http.client.shared,
-    token: YOUR_BOT_TOKEN,
-    appId: Snowflake(YOUR_APP_ID),
+    token: <#Your Bot Token#>,
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
         activities: [.init(name: "Fortnite", type: .game)],
@@ -171,7 +169,6 @@ In most cases, the library doesn't try to abstract away Discord's stuff.
   
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding Bot Token](https://user-images.githubusercontent.com/54685446/200565393-ea31c2ad-fd3a-44a1-9789-89460ab5d1a9.png)
-![Finding App ID](https://user-images.githubusercontent.com/54685446/200565475-9893d326-423e-4344-a853-9de2f9ed25b4.png)
 
 </details>
 

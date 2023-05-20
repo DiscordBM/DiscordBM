@@ -21,77 +21,74 @@ public struct DefaultDiscordClient: DiscordClient {
     let logger = DiscordGlobalConfiguration.makeLogger("DefaultDiscordClient")
     
     private static let requestIdGenerator = ManagedAtomic(UInt(0))
-    
-    /// If you provide no app id, you'll need to pass it to some functions on call site.
+
     /// `token` must be a bot token.
     public init(
         httpClient: HTTPClient,
         token: Secret,
-        appId: ApplicationSnowflake?,
+        appId: ApplicationSnowflake? = nil,
         configuration: ClientConfiguration = .init()
     ) async {
         self.client = httpClient
         self.authentication = .botToken(token)
-        self.appId = appId
+        self.appId = appId ?? self.authentication.extractAppIdIfAvailable()
         self.configuration = configuration
         self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
-    /// If you provide no app id, you'll need to pass it to some functions on call site.
     /// `token` must be a bot token.
     public init(
         httpClient: HTTPClient,
         token: String,
-        appId: ApplicationSnowflake?,
+        appId: ApplicationSnowflake? = nil,
         configuration: ClientConfiguration = .init()
     ) async {
         self.client = httpClient
         self.authentication = .botToken(Secret(token))
-        self.appId = appId
+        self.appId = appId ?? self.authentication.extractAppIdIfAvailable()
         self.configuration = configuration
         self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
-    /// If you provide no app id, you'll need to pass it to some functions on call site.
     /// `oAuthToken` must be an OAuth token.
     public init(
         httpClient: HTTPClient,
         oAuthToken: Secret,
-        appId: ApplicationSnowflake?,
+        appId: ApplicationSnowflake? = nil,
         configuration: ClientConfiguration = .init()
     ) async {
         self.client = httpClient
         self.authentication = .oAuthToken(oAuthToken)
+        /// OAuth tokens don't contain an app-id to extract
         self.appId = appId
         self.configuration = configuration
         self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
-    /// If you provide no app id, you'll need to pass it to some functions on call site.
     /// `oAuthToken` must be an OAuth token.
     public init(
         httpClient: HTTPClient,
         oAuthToken: String,
-        appId: ApplicationSnowflake?,
+        appId: ApplicationSnowflake? = nil,
         configuration: ClientConfiguration = .init()
     ) async {
         self.client = httpClient
         self.authentication = .oAuthToken(Secret(oAuthToken))
+        /// OAuth tokens don't contain an app-id to extract
         self.appId = appId
         self.configuration = configuration
         self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
-    /// If you provide no app id, you'll need to pass it to some functions on call site.
     public init(
         httpClient: HTTPClient,
         authentication: AuthenticationHeader,
-        appId: ApplicationSnowflake?,
+        appId: ApplicationSnowflake? = nil,
         configuration: ClientConfiguration = .init()
     ) async {
         self.client = httpClient
         self.authentication = authentication
-        self.appId = appId
+        self.appId = appId ?? self.authentication.extractAppIdIfAvailable()
         self.configuration = configuration
         self.cache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
@@ -510,6 +507,21 @@ public enum AuthenticationHeader: Sendable {
             headers.replaceOrAdd(name: "Authorization", value: "Bearer \(secret.value)")
         case .none:
             throw DiscordHTTPError.noAuthenticationHeader(request: request)
+        }
+    }
+
+    /// Extracts the app-id from a bot token. Otherwise returns nil.
+    func extractAppIdIfAvailable() -> ApplicationSnowflake? {
+        switch self {
+        case let .botToken(token):
+            if let base64 = token.value.split(separator: ".").first,
+               let data = Data(base64Encoded: String(base64 + "==")),
+               let decoded = String(data: data, encoding: .utf8) {
+                return ApplicationSnowflake(decoded)
+            } else {
+                return nil
+            }
+        case .oAuthToken, .none: return nil
         }
     }
 }

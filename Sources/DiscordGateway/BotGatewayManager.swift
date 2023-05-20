@@ -111,7 +111,7 @@ public actor BotGatewayManager: GatewayManager {
     ///   - clientConfiguration: Configuration of the `DiscordClient`.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
     ///   - compression: Enables transport compression for less network bandwidth usage.
-    ///   - appId: Your Discord application id.
+    ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
         eventLoopGroup: EventLoopGroup,
@@ -144,7 +144,7 @@ public actor BotGatewayManager: GatewayManager {
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
     ///   - compression: Enables transport compression for less network bandwidth usage.
     ///   - token: Your Discord bot-token.
-    ///   - appId: Your Discord application id.
+    ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
     ///   - shard: What shard this Manager is representing, incase you use shard-ing at all.
     ///   - presence: The initial presence of the bot.
     ///   - intents: The Discord intents you want to receive messages for.
