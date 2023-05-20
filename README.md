@@ -170,6 +170,213 @@ In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding Bot Token](https://user-images.githubusercontent.com/54685446/200565393-ea31c2ad-fd3a-44a1-9789-89460ab5d1a9.png)
 
 </details>
+    
+### Application (including Slash) Commands
+    
+   <details>
+ <summary> Click to expand </summary>
+       
+`DiscordBM` has full support for slash commands, modals, autocomplete etc...    
+You can see Penny as an example of using all kinds of commands in production. Penny registers the commands [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/CommandsManager.swift) and responds to them [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Handlers/InteractionHandler.swift).   
+In this example you'll only make 2 simple slash commands, so you can get started:   
+       
+```swift
+// MARK: - In `EntryPoint.main()`
+
+/// Make a list of `Payloads.ApplicationCommandCreate`s that you want to register
+let commands = DiscordCommand.allCases.map { command in
+    return Payloads.ApplicationCommandCreate(
+        name: command.rawValue,
+        description: command.description,
+        options: command.options
+    )
+}
+
+/// You only need to do this once on startup. THis updates all you commands to the new ones.
+try await bot.client
+    .bulkSetApplicationCommands(payload: commands)
+    .guardSuccess() /// Throw an error if not successful
+
+/// Handle events later since the loop blocks the function
+for await event in await bot.makeEventsStream() {
+    EventHandler(event: event, client: bot.client).handle()
+}
+
+// MARK: - In `EventHandler`
+       
+/// Use `onInteractionCreate(_:)` for handling interactions.
+struct EventHandler: GatewayEventHandler {
+    let event: Gateway.Event
+    let client: any DiscordClient
+    let logger = Logger(label: "EventHandler")
+
+    func onInteractionCreate(_ interaction: Interaction) async {
+        do {
+            /// You only have 3 second to respond, so it's better to send the response
+            /// right away, and edit the response later.
+            /// This will show a loading indicator to users.
+            try await client.createInteractionResponse(
+                id: interaction.id,
+                token: interaction.token,
+                payload: .deferredChannelMessageWithSource()
+            ).guardSuccess()
+
+            /// Delete this if you want. Just here so you notice the loading indicator :)
+            try await Task.sleep(for: .seconds(1))
+
+            /// Handle the interaction data
+            switch interaction.data {
+            case let .applicationCommand(applicationCommand):
+                switch DiscordCommand(rawValue: applicationCommand.name) {
+                case .echo:
+                    if let echo = applicationCommand.options?.first?.value?.asString {
+                        /// Edits the interaction response.
+                        /// This response is intentionally too fancy just so you can see what's possible :)
+                        try await client.updateOriginalInteractionResponse(
+                            token: interaction.token,
+                            payload: Payloads.EditWebhookMessage(
+                                content: "Hello, You wanted me to echo something!",
+                                embeds: [Embed(
+                                    title: "This is an embed",
+                                    description: """
+                                    You sent this, so I'll echo it to you!
+
+                                    > \(DiscordUtils.escapingSpecialCharacters(echo))
+                                    """,
+                                    timestamp: Date(),
+                                    color: .init(value: .random(in: 0 ..< (1 << 24) )),
+                                    footer: .init(text: "Footer!"),
+                                    author: .init(name: "Authored by DiscordBM!"),
+                                    fields: [
+                                        .init(name: "field name!", value: "field value!")
+                                    ]
+                                )],
+                                components: [[.button(.init(
+                                    style: .link,
+                                    label: "Open DiscordBM!",
+                                    url: "https://github.com/MahdiBM/DiscordBM"
+                                ))]]
+                            )
+                        ).guardSuccess()
+                    } else {
+                        try await client.updateOriginalInteractionResponse(
+                            token: interaction.token,
+                            payload: Payloads.EditWebhookMessage(
+                                content: "Hello, You wanted me to echo something!",
+                                embeds: [Embed(
+                                    title: "This is an embed",
+                                    description: """
+                                    You sent this, so I'll echo it to you but there was nothing!
+                                    """,
+                                    timestamp: Date().addingTimeInterval(90),
+                                    color: .green,
+                                    footer: .init(text: "Footer!"),
+                                    author: .init(name: "Authored by DiscordBM!"),
+                                    fields: [
+                                        .init(name: "field name!", value: "field value!")
+                                    ]
+                                )]
+                            )
+                        ).guardSuccess()
+                    }
+                case .link:
+                    if let subcommandOption = applicationCommand.options?.first,
+                       let subcommand = LinkSubCommand(rawValue: subcommandOption.name),
+                       let id = subcommandOption.options?.first?.value?.asString {
+                        let name = subcommand.rawValue.capitalized
+                        try await client.updateOriginalInteractionResponse(
+                            token: interaction.token,
+                            payload: Payloads.EditWebhookMessage(
+                                content: "Hello, You wanted me to echo something!",
+                                embeds: [.init(
+                                    description: "Will link a \(name) account with id '\(id)'",
+                                    color: .yellow
+                                )]
+                            )
+                        ).guardSuccess()
+                    }
+                case .none: break
+                }
+            default: break
+            }
+        } catch {
+            logger.error("Caught an interaction error", metadata: [
+                "error": "\(error)",
+                "interaction": "\(interaction)"
+            ])
+        }
+    }
+}
+
+// MARK: - Define a nice clean enum for your commands
+enum DiscordCommand: String, CaseIterable {
+    case echo
+    case link
+
+    var description: String? {
+        switch self {
+        case .echo:
+            return "Echos what you say"
+        case .link:
+            return "Links your accounts in Penny"
+        }
+    }
+
+    var options: [ApplicationCommand.Option]? {
+        switch self {
+        case .echo:
+            return [ApplicationCommand.Option(
+                type: .string,
+                name: "string",
+                description: "What to echo :)"
+            )]
+        case .link:
+            return LinkSubCommand.allCases.map { subCommand in
+                return ApplicationCommand.Option(
+                    type: .subCommand,
+                    name: subCommand.rawValue,
+                    description: subCommand.description,
+                    options: subCommand.options
+                )
+            }
+        }
+    }
+}
+
+// MARK: - You can use enums for subcommands too 
+enum LinkSubCommand: String, CaseIterable {
+    case discord
+    case github
+
+    var description: String {
+        switch self {
+        case .discord:
+            return "Link your Discord account"
+        case .github:
+            return "Link your Github account"
+        }
+    }
+
+    var options: [ApplicationCommand.Option] {
+        switch self {
+        case .discord: return [ApplicationCommand.Option(
+            type: .string,
+            name: "id",
+            description: "Your Discord account ID",
+            required: true
+        )]
+        case .github: return [ApplicationCommand.Option(
+            type: .string,
+            name: "id",
+            description: "Your Github account ID",
+            required: true
+        )]
+        }
+    }
+}
+```
+                                                                                  
+</details>
 
 ### Sending Attachments
 <details>
