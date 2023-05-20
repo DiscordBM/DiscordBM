@@ -18,7 +18,7 @@
 
 ## Notable Features
 * Everything with async/await. Full integration with the latest Server-Side Swift packages.
-* Supports the full Discord API for bots, except Voice (for now).
+* Access the full Discord API for bots, except Voice (for now).
 * Connect to the Discord Gateway and receive all events easily.
 * Send requests to the Discord API using library's Discord client.
 * Hard-typed APIs. All Gateway events and API responses have their own type and can be decoded easily.
