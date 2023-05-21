@@ -551,6 +551,43 @@ public struct Gateway: Sendable, Codable {
         case guildScheduledEvents = 16
         case autoModerationConfiguration = 20
         case autoModerationExecution = 21
+
+        /// All intents including those that require privileges
+        /// https://discord.com/developers/docs/topics/gateway#privileged-intents
+        public static var all: [Intent] {
+            Gateway.Intent.allCases
+        }
+
+        /// All intents that require no privileges.
+        /// https://discord.com/developers/docs/topics/gateway#privileged-intents
+        public static var unprivileged: [Intent] {
+            .init(Gateway.Intent.allCases.filter(\.isPrivileged))
+        }
+
+        /// https://discord.com/developers/docs/topics/gateway#privileged-intents
+        public var isPrivileged: Bool {
+            switch self {
+            case .guilds: return false
+            case .guildMembers: return true
+            case .guildModeration: return false
+            case .guildEmojisAndStickers: return false
+            case .guildIntegrations: return false
+            case .guildWebhooks: return false
+            case .guildInvites: return false
+            case .guildVoiceStates: return false
+            case .guildPresences: return true
+            case .guildMessages: return false
+            case .guildMessageReactions: return false
+            case .guildMessageTyping: return false
+            case .directMessages: return false
+            case .directMessageReactions: return false
+            case .directMessageTyping: return false
+            case .messageContent: return true
+            case .guildScheduledEvents: return false
+            case .autoModerationConfiguration: return false
+            case .autoModerationExecution: return false
+            }
+        }
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#resume-resume-structure

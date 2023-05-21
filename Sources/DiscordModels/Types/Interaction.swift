@@ -282,7 +282,35 @@ extension Interaction {
                 case danger = 4
                 case link = 5
             }
-            
+
+            /// The same as ``Style``, but has no `link`.
+            /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
+            public enum NonLinkStyle: Sendable {
+                case primary
+                case secondary
+                case success
+                case danger
+
+                public func toStyle() -> Style {
+                    switch self {
+                    case .primary: return .primary
+                    case .secondary: return .secondary
+                    case .success: return .success
+                    case .danger: return .danger
+                    }
+                }
+
+                public init? (style: Style) {
+                    switch style {
+                    case .primary: self = .primary
+                    case .secondary: self = .secondary
+                    case .success: self = .success
+                    case .danger: self = .danger
+                    case .link: return nil
+                    }
+                }
+            }
+
             public var style: Style
             public var label: String?
             public var emoji: Emoji?
@@ -290,11 +318,22 @@ extension Interaction {
             public var url: String?
             public var disabled: Bool?
 
-            public init(style: Style, label: String? = nil, emoji: Emoji? = nil, custom_id: String? = nil, url: String? = nil, disabled: Bool? = nil) {
-                self.style = style
+            /// Makes a non-link button.
+            /// At least one of `label` and `emoji` is required.
+            public init(style: NonLinkStyle, label: String? = nil, emoji: Emoji? = nil, custom_id: String, disabled: Bool? = nil) {
+                self.style = style.toStyle()
                 self.label = label
                 self.emoji = emoji
                 self.custom_id = custom_id
+                self.disabled = disabled
+            }
+
+            /// Makes a link button.
+            /// At least one of `label` and `emoji` is required.
+            public init(label: String? = nil, emoji: Emoji? = nil, url: String, disabled: Bool? = nil) {
+                self.style = .link
+                self.label = label
+                self.emoji = emoji
                 self.url = url
                 self.disabled = disabled
             }

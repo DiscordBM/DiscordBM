@@ -393,6 +393,25 @@ class ClientConfigurationTests: XCTestCase {
             "OTUwNjk1Mjk0OTA2MDA3NTcz.GnqP8q.8hhS0qeDTbAkKJB_bvwl5VfCzflKzkQgbMXNiA"
         )
         XCTAssertEqual(header2.extractAppIdIfAvailable(), "950695294906007573")
+
+        func makeFakeToken(id: UInt) -> String {
+            let base64 = Data(id.description.utf8).base64EncodedString()
+            return "\(base64).GnqP8q.8hhS0qeDTbAkKJB_bvwl5VfCzflKzkQgbMXNiA"
+        }
+
+        /// Swift's base64 decoding seems to be rather strict,
+        /// so we test a wide a range of numbers here to make sure
+        for length in (1...19) {
+            for _ in 0..<100 {
+                let numberChars = "0123456789"
+                let numberString = (0..<length).map { _ in numberChars.randomElement()! }
+                if let number = UInt(String(numberString)) {
+                    let token = makeFakeToken(id: number)
+                    let header = AuthenticationHeader.botToken(Secret(token))
+                    XCTAssertEqual(header.extractAppIdIfAvailable()?.value, "\(number)")
+                }
+            }
+        }
     }
 }
 

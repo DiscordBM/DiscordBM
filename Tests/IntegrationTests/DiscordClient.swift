@@ -110,7 +110,11 @@ class DiscordClientTests: XCTestCase {
                     channel_id: Constants.Channels.general.id,
                     guild_id: Constants.guildId,
                     fail_if_not_exists: false
-                )
+                ),
+                components: [[
+                    .button(.init(label: "Go to mahdibm.com!", url: "https://mahdibm.com")),
+                    .button(.init(style: .danger, emoji: .init(name: "🐥"), custom_id: "heyyyy"))
+                ]]
             )
         ).decode()
         

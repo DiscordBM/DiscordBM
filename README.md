@@ -54,6 +54,7 @@ let bot = await BotGatewayManager(
         afk: false
     ),
     /// Add all the intents you want
+    /// You can also use `Gateway.Intent.unprivileged` or `Gateway.Intent.allCases`
     intents: [.guildMessages, .messageContent]
 )
 ```
@@ -83,6 +84,7 @@ let bot = await BotGatewayManager(
         afk: false
     ),
     /// Add all the intents you want
+    /// You can also use `Gateway.Intent.unprivileged` or `Gateway.Intent.allCases`
     intents: [.guildMessages, .messageContent]
 )
 ```
@@ -175,8 +177,8 @@ In [Discord developer portal](https://discord.com/developers/applications):
     
    <details>
  <summary> Click to expand </summary>
-       
-`DiscordBM` has full support for slash commands, modals, autocomplete etc...    
+
+`DiscordBM` comes with full support for all kinds of "interactions" such as slash commands, modals, autocomplete etc... and gives you full control over how you want to use them using type-safe APIs.    
 You can see Penny as an example of using all kinds of commands in production. Penny registers the commands [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/CommandsManager.swift) and responds to them [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Handlers/InteractionHandler.swift).   
 In this example you'll only make 2 simple slash commands, so you can get started:   
        
@@ -184,6 +186,7 @@ In this example you'll only make 2 simple slash commands, so you can get started
 // MARK: - In `EntryPoint.main()`
 
 /// Make a list of `Payloads.ApplicationCommandCreate`s that you want to register
+/// `DiscordCommand` is an enum that has the full info of your commands. See below
 let commands = DiscordCommand.allCases.map { command in
     return Payloads.ApplicationCommandCreate(
         name: command.rawValue,
@@ -192,28 +195,30 @@ let commands = DiscordCommand.allCases.map { command in
     )
 }
 
-/// You only need to do this once on startup. THis updates all you commands to the new ones.
+/// You only need to do this once on startup. This updates all your commands to the new ones.
 try await bot.client
     .bulkSetApplicationCommands(payload: commands)
     .guardSuccess() /// Throw an error if not successful
 
-/// Handle events later since the loop blocks the function
-for await event in await bot.makeEventsStream() {
+/// Use the events-stream later since the for-loop blocks the function
+let eventsStream = await bot.makeEventsStream()
+for await event in eventsStream {
     EventHandler(event: event, client: bot.client).handle()
 }
 
 // MARK: - In `EventHandler`
-       
+
 /// Use `onInteractionCreate(_:)` for handling interactions.
 struct EventHandler: GatewayEventHandler {
     let event: Gateway.Event
     let client: any DiscordClient
     let logger = Logger(label: "EventHandler")
 
+    /// Handle Interactions. 
     func onInteractionCreate(_ interaction: Interaction) async {
         do {
-            /// You only have 3 second to respond, so it's better to send the response
-            /// right away, and edit the response later.
+            /// You only have 3 second to respond, so it's better to send 
+            /// the response right away, and edit the response later.
             /// This will show a loading indicator to users.
             try await client.createInteractionResponse(
                 id: interaction.id,
@@ -231,7 +236,7 @@ struct EventHandler: GatewayEventHandler {
                 case .echo:
                     if let echo = applicationCommand.options?.first?.value?.asString {
                         /// Edits the interaction response.
-                        /// This response is intentionally too fancy just so you can see what's possible :)
+                        /// This response is intentionally too fancy just so you see what's possible :)
                         try await client.updateOriginalInteractionResponse(
                             token: interaction.token,
                             payload: Payloads.EditWebhookMessage(
@@ -252,7 +257,6 @@ struct EventHandler: GatewayEventHandler {
                                     ]
                                 )],
                                 components: [[.button(.init(
-                                    style: .link,
                                     label: "Open DiscordBM!",
                                     url: "https://github.com/MahdiBM/DiscordBM"
                                 ))]]
@@ -287,7 +291,7 @@ struct EventHandler: GatewayEventHandler {
                         try await client.updateOriginalInteractionResponse(
                             token: interaction.token,
                             payload: Payloads.EditWebhookMessage(
-                                content: "Hello, You wanted me to echo something!",
+                                content: "Hi, did you wante me to link your accounts?",
                                 embeds: [.init(
                                     description: "Will link a \(name) account with id '\(id)'",
                                     color: .yellow
@@ -300,6 +304,7 @@ struct EventHandler: GatewayEventHandler {
             default: break
             }
         } catch {
+            /// Log the errors. Using a `Logger` is preferred compared to just `print()`.
             logger.error("Caught an interaction error", metadata: [
                 "error": "\(error)",
                 "interaction": "\(interaction)"
@@ -313,6 +318,7 @@ enum DiscordCommand: String, CaseIterable {
     case echo
     case link
 
+    /// The description of the command that Discord users will see.
     var description: String? {
         switch self {
         case .echo:
@@ -322,6 +328,7 @@ enum DiscordCommand: String, CaseIterable {
         }
     }
 
+    /// The options of the command that Discord users will have.
     var options: [ApplicationCommand.Option]? {
         switch self {
         case .echo:
@@ -348,6 +355,7 @@ enum LinkSubCommand: String, CaseIterable {
     case discord
     case github
 
+    /// The description of the subcommand that Discord users will see.
     var description: String {
         switch self {
         case .discord:
@@ -357,6 +365,7 @@ enum LinkSubCommand: String, CaseIterable {
         }
     }
 
+    /// The options of the subcommand that Discord users will have.
     var options: [ApplicationCommand.Option] {
         switch self {
         case .discord: return [ApplicationCommand.Option(
@@ -375,7 +384,7 @@ enum LinkSubCommand: String, CaseIterable {
     }
 }
 ```
-                                                                                  
+
 </details>
 
 ### Sending Attachments

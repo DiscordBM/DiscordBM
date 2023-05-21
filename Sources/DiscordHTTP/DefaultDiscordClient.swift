@@ -539,7 +539,7 @@ public enum AuthenticationHeader: Sendable {
         switch self {
         case let .botToken(token):
             if let base64 = token.value.split(separator: ".").first {
-                for base64 in [base64 + "==", base64] {
+                for base64 in [base64, base64 + "=="] {
                     if let data = Data(base64Encoded: String(base64)),
                        let decoded = String(data: data, encoding: .utf8) {
                         return ApplicationSnowflake(decoded)
