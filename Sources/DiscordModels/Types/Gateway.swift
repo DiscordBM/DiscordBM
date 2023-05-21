@@ -552,12 +552,6 @@ public struct Gateway: Sendable, Codable {
         case autoModerationConfiguration = 20
         case autoModerationExecution = 21
 
-        /// All intents including those that require privileges
-        /// https://discord.com/developers/docs/topics/gateway#privileged-intents
-        public static var all: [Intent] {
-            Gateway.Intent.allCases
-        }
-
         /// All intents that require no privileges.
         /// https://discord.com/developers/docs/topics/gateway#privileged-intents
         public static var unprivileged: [Intent] {

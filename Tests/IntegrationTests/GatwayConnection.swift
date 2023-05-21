@@ -112,7 +112,7 @@ class GatewayConnectionTests: XCTestCase {
                     status: .invisible,
                     afk: false
                 ),
-                intents: Gateway.Intent.allCases
+                intents: Gateway.Intent.unprivileged
             )
         )
 
