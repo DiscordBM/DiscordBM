@@ -32,6 +32,7 @@ public struct DiscordUser: Sendable, Codable {
     public var id: UserSnowflake
     public var username: String
     public var discriminator: String
+    public var global_name: String?
     public var avatar: String?
     public var bot: Bool?
     public var system: Bool?
@@ -52,6 +53,7 @@ public struct PartialUser: Sendable, Codable {
     public var id: UserSnowflake
     public var username: String?
     public var discriminator: String?
+    public var global_name: String?
     public var avatar: String?
     public var bot: Bool?
     public var system: Bool?

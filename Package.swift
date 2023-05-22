@@ -180,16 +180,19 @@ let package = Package(
         ),
         .testTarget(
             name: "DiscordBMTests",
-            dependencies: ["DiscordBM"]
+            dependencies: ["DiscordBM"],
+            swiftSettings: swiftSettings
         ),
         /// Vapor's `WebSocketKit` tests with modifications to fit `DiscordBM` better.
         .testTarget(
             name: "WebSocketTests",
-            dependencies: ["DiscordWebSocket"]
+            dependencies: ["DiscordWebSocket"],
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["DiscordBM"]
+            dependencies: ["DiscordBM"],
+            swiftSettings: swiftSettings
         ),
     ]
 )
