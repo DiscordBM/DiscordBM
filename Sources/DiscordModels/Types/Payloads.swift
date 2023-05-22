@@ -216,7 +216,7 @@ public enum Payloads {
                 }
             }
 
-            func encode(to encoder: Encoder) throws {
+            func encode(to encoder: any Encoder) throws {
                 var container = encoder.singleValueContainer()
                 switch self {
                 case let .message(message):
@@ -317,7 +317,7 @@ public enum Payloads {
             self.file = file
         }
         
-        public func encode(to encoder: Encoder) throws {
+        public func encode(to encoder: any Encoder) throws {
             guard let string = self.encodeToString() else {
                 throw EncodingError.invalidValue(
                     file, .init(
@@ -1267,7 +1267,7 @@ public enum Payloads {
             }
         }
 
-        public func encode(to encoder: Encoder) throws {
+        public func encode(to encoder: any Encoder) throws {
             var container = encoder.singleValueContainer()
             switch self {
             case .unlimited:

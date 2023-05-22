@@ -3,7 +3,7 @@ extension WebSocket {
         to url: String,
         headers: HTTPHeaders = [:],
         configuration: WebSocketClient.Configuration = .init(),
-        on eventLoopGroup: EventLoopGroup,
+        on eventLoopGroup: any EventLoopGroup,
         onBuffer: @Sendable @escaping (ByteBuffer) -> () = { _ in },
         onClose: @Sendable @escaping (WebSocket) -> () = { _ in }
     ) async throws -> WebSocket {

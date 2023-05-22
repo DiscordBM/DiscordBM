@@ -469,7 +469,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
             self = .init(from: string)
         }
         
-        public func encode(to encoder: Encoder) throws {
+        public func encode(to encoder: any Encoder) throws {
             var container = encoder.singleValueContainer()
             try container.encode(self.asString)
         }

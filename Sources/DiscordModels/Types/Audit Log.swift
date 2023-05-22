@@ -86,7 +86,7 @@ public struct AuditLog: Sendable, Codable {
                 }
             }
             
-            public func encode(to encoder: Encoder) throws {
+            public func encode(to encoder: any Encoder) throws {
                 var container = encoder.singleValueContainer()
                 switch self {
                 case let .string(string):
@@ -340,7 +340,7 @@ public struct AuditLog: Sendable, Codable {
                     }
                 }
                 
-                public func encode(to encoder: Encoder) throws {
+                public func encode(to encoder: any Encoder) throws {
                     var container = encoder.container(keyedBy: CodingKeys.self)
                     try container.encode(self.id, forKey: .id)
                     switch type {
@@ -389,7 +389,7 @@ public struct AuditLog: Sendable, Codable {
                     case channel_id
                 }
                 
-                public func encode(to encoder: Encoder) throws {
+                public func encode(to encoder: any Encoder) throws {
                     var container = encoder.container(keyedBy: CodingKeys.self)
                     try container.encode(
                         self.auto_moderation_rule_name,
@@ -556,7 +556,7 @@ public struct AuditLog: Sendable, Codable {
                 }
             }
             
-            public func encode(to encoder: Encoder) throws {
+            public func encode(to encoder: any Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 let type = ActionKind(action: self)
                 try container.encode(type, forKey: .action_type)

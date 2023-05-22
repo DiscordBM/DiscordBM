@@ -149,7 +149,7 @@ public actor BotGatewayManager: GatewayManager {
     ///   - presence: The initial presence of the bot.
     ///   - intents: The Discord intents you want to receive messages for.
     public init(
-        eventLoopGroup: EventLoopGroup,
+        eventLoopGroup: any EventLoopGroup,
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,

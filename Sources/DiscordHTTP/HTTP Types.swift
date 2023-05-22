@@ -270,7 +270,7 @@ public enum DiscordHTTPError: LocalizedError, CustomStringConvertible {
     case emptyBody(DiscordHTTPResponse)
     case noContentTypeHeader(DiscordHTTPResponse)
     case authenticationHeaderRequired(request: DiscordHTTPRequest)
-    case decodingError(typeName: String, response: DiscordHTTPResponse, error: Error)
+    case decodingError(typeName: String, response: DiscordHTTPResponse, error: any Error)
     case appIdParameterRequired
     case queryParametersMutuallyExclusive(queries: [(String, String)])
     case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)

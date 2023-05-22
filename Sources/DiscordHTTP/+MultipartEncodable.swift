@@ -63,7 +63,7 @@ struct MultipartEncodingContainer: Encodable {
             self.buffer = .init(data: data)
         }
 
-        func encode(to encoder: Encoder) throws {
+        func encode(to encoder: any Encoder) throws {
             let data = Data(buffer: buffer, byteTransferStrategy: .noCopy)
             var container = encoder.singleValueContainer()
             try container.encode(data)

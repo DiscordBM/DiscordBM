@@ -95,7 +95,7 @@ public struct AutoModerationRule: Sendable, Codable {
             }
         }
         
-        public func encode(to encoder: Encoder) throws {
+        public func encode(to encoder: any Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             switch self {
             case let .blockMessage(customMessage):

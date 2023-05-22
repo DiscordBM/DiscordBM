@@ -68,7 +68,7 @@ public struct Interaction: Sendable, Codable {
                 self.attachments = try decode(forKey: .attachments)
             }
 
-            public func encode(to encoder: Encoder) throws {
+            public func encode(to encoder: any Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
 
                 /// `JSONEncoder` has a special-case encoding for dictionaries of `[String: some Encodable]`.
@@ -214,7 +214,7 @@ public struct Interaction: Sendable, Codable {
         )
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(self.id, forKey: .id)
@@ -497,7 +497,7 @@ extension Interaction {
                 }
             }
             
-            public func encode(to encoder: Encoder) throws {
+            public func encode(to encoder: any Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 switch self {
                 case let .button(button):
@@ -569,7 +569,7 @@ extension Interaction {
             self.components = try container.decode([Component].self, forKey: .components)
         }
         
-        public func encode(to encoder: Encoder) throws {
+        public func encode(to encoder: any Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(Kind.actionRow, forKey: .type)
             try container.encode(self.components, forKey: .components)

@@ -51,7 +51,7 @@ public struct Reaction: Sendable, Hashable, Codable {
         self.base = try .init(from: decoder)
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         try self.base.encode(to: encoder)
     }
     

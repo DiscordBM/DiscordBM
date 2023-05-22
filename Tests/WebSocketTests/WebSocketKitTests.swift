@@ -351,7 +351,7 @@ final class WebSocketTests: XCTestCase {
         try await server.close(mode: .all).get()
     }
 
-    var elg: EventLoopGroup!
+    var elg: (any EventLoopGroup)!
     override func setUp() {
         // needs to be at least two to avoid client / server on same EL timing issues
         self.elg = MultiThreadedEventLoopGroup(numberOfThreads: 2)
@@ -363,7 +363,7 @@ final class WebSocketTests: XCTestCase {
 
 extension ServerBootstrap {
     static func webSocket(
-        on eventLoopGroup: EventLoopGroup,
+        on eventLoopGroup: any EventLoopGroup,
         tls: Bool = false,
         onUpgrade: @escaping (HTTPRequestHead, WebSocket) -> ()
     ) -> ServerBootstrap {

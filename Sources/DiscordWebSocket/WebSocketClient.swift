@@ -42,7 +42,7 @@ public final class WebSocketClient: @unchecked Sendable {
     }
 
     public enum EventLoopGroupProvider {
-        case shared(EventLoopGroup)
+        case shared(any EventLoopGroup)
         case createNew
     }
 
@@ -72,7 +72,7 @@ public final class WebSocketClient: @unchecked Sendable {
     }
 
     let eventLoopGroupProvider: EventLoopGroupProvider
-    let group: EventLoopGroup
+    let group: any EventLoopGroup
     let configuration: Configuration
     let isShutdown = ManagedAtomic(false)
 
@@ -200,7 +200,7 @@ public final class WebSocketClient: @unchecked Sendable {
         }
     }
     
-    private static func makeBootstrap(on eventLoop: EventLoopGroup) -> NIOClientTCPBootstrapProtocol {
+    private static func makeBootstrap(on eventLoop: any EventLoopGroup) -> any NIOClientTCPBootstrapProtocol {
         #if canImport(Network)
         if let tsBootstrap = NIOTSConnectionBootstrap(validatingGroup: eventLoop) {
             return tsBootstrap

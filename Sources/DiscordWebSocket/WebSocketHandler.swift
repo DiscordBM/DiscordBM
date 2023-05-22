@@ -3,7 +3,7 @@ import NIOWebSocket
 
 extension WebSocket {
     public static func client(
-        on channel: Channel,
+        on channel: any Channel,
         decompression: Decompression.Configuration?,
         onBuffer: @Sendable @escaping (ByteBuffer) -> () = { _ in },
         onClose: @Sendable @escaping (WebSocket) -> () = { _ in }
@@ -45,7 +45,7 @@ private final class WebSocketHandler: ChannelInboundHandler {
         self.webSocket.handle(incoming: frame)
     }
 
-    func errorCaught(context: ChannelHandlerContext, error: Error) {
+    func errorCaught(context: ChannelHandlerContext, error: any Error) {
         let errorCode: WebSocketErrorCode
         if let error = error as? NIOWebSocketError {
             errorCode = WebSocketErrorCode(error)

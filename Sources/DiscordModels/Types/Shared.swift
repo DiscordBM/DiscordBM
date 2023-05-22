@@ -36,7 +36,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
         }
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
         case let .string(string):
@@ -75,7 +75,7 @@ public enum StringOrInt: Sendable, Codable {
         }
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
         case let .string(string):
@@ -102,7 +102,7 @@ public enum IntOrDouble: Sendable, Codable {
         }
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
         case let .int(int):
@@ -320,7 +320,7 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
         self.values = container.toDictionary()
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         let container = _DiscordLocaleCodableContainer<C>(self.values)
         try container.encode(to: encoder)
     }
@@ -427,7 +427,7 @@ public struct DiscordTimestamp: Codable {
         self.date = date
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         
         let componentSet: Set<Calendar.Component> = [
@@ -555,7 +555,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         }
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         let value = self.toBitValue()
         try container.encode(value)
@@ -616,7 +616,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         }
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         let value = self.toBitValue()
         try container.encode("\(value)")
@@ -654,7 +654,7 @@ public struct IntPair: Sendable, Codable, CustomStringConvertible {
         self.second = array[1]
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         try [first, second].encode(to: encoder)
     }
 }
@@ -723,7 +723,7 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
         self.value = try .init(from: decoder)
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         try self.value.encode(to: encoder)
     }
 }
@@ -764,7 +764,7 @@ public struct Secret:
         self.value = try .init(from: decoder)
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         try self.value.encode(to: encoder)
     }
 }
@@ -783,7 +783,7 @@ public final class DereferenceBox<C>: Codable where C: Codable {
         self.value = try .init(from: decoder)
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         try self.value.encode(to: encoder)
     }
 }
@@ -824,7 +824,7 @@ extension SnowflakeProtocol {
 #endif
     }
 
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         try self.value.encode(to: encoder)
     }
 

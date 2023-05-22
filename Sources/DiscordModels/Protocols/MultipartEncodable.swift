@@ -56,7 +56,7 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
     }
     
     /// `Encodable` conformance.
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         let data = Data(buffer: self.data)
         try container.encode(data, forKey: .data)

@@ -6,7 +6,7 @@ import Foundation
 import NIOFoundationCompat
 
 public final class WebSocket: @unchecked Sendable {
-    public var eventLoop: EventLoop {
+    public var eventLoop: any EventLoop {
         return channel.eventLoop
     }
 
@@ -20,7 +20,7 @@ public final class WebSocket: @unchecked Sendable {
         self.channel.closeFuture
     }
 
-    private let channel: Channel
+    private let channel: any Channel
 
     private var onBufferCallback: (ByteBuffer) -> ()
 
@@ -33,7 +33,7 @@ public final class WebSocket: @unchecked Sendable {
     private var scheduledTimeoutTask: Scheduled<Void>?
 
     init(
-        channel: Channel,
+        channel: any Channel,
         decompression: Decompression.Configuration?,
         onBuffer: @Sendable @escaping (ByteBuffer) -> (),
         onClose: @Sendable @escaping (WebSocket) -> ()
