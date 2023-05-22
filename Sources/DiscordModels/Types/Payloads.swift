@@ -306,7 +306,7 @@ public enum Payloads {
             self.file = file
         }
         
-        public init(from decoder: Decoder) throws {
+        public init(from decoder: any Decoder) throws {
             let string = try String(from: decoder)
             guard let file = ImageData.decodeFromString(string) else {
                 throw DecodingError.dataCorrupted(.init(

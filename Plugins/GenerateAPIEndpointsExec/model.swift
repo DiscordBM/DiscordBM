@@ -45,7 +45,7 @@ struct API: Decodable {
             
             var values: [(method: HTTPMethod, info: Info)]
             
-            init(from decoder: Decoder) throws {
+            init(from decoder: any Decoder) throws {
                 let container = try decoder.singleValueContainer()
                 let infos = try container.decode([String: Info].self)
                 self.values = infos.map { methodString, info in
@@ -346,7 +346,7 @@ struct API: Decodable {
         case paths
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.version = try container.decode(String.self, forKey: .version)
         self.info = try container.decode(API.Info.self, forKey: .info)

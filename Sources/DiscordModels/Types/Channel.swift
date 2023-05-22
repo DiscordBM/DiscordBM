@@ -463,7 +463,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
             }
         }
         
-        public init(from decoder: Decoder) throws {
+        public init(from decoder: any Decoder) throws {
             let container = try decoder.singleValueContainer()
             let string = try container.decode(String.self)
             self = .init(from: string)

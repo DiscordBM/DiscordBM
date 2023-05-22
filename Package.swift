@@ -2,13 +2,8 @@
 
 import PackageDescription
 
-let swiftSettings: [SwiftSetting] = [
-    /// Versioned releases can't use this flag?! So can't commit this flag to git.
-    /// `DiscordBM` passes the `complete` level.
-    ///
-    /// `minimal` / `targeted` / `complete`
-//    .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
-
+#if swift(>=5.8)
+let upcomingFeatureFlags: [SwiftSetting] = [
     /// `-enable-upcoming-feature` flags will get removed in the future
     /// and we'll need to remove them from here too.
 
@@ -30,6 +25,18 @@ let swiftSettings: [SwiftSetting] = [
     /// https://github.com/apple/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md
     /// `ImportObjcForwardDeclarations` not enabled because it's objc-related.
 ]
+#else
+/// Unsupported
+let upcomingFeatureFlags: [SwiftSetting] = []
+#endif
+
+let swiftSettings: [SwiftSetting] = [
+    /// Versioned releases can't use this flag?! So can't commit this flag to git.
+    /// `DiscordBM` passes the `complete` level.
+    ///
+    /// `minimal` / `targeted` / `complete`
+    //    .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
+] + upcomingFeatureFlags
 
 let package = Package(
     name: "DiscordBM",

@@ -47,7 +47,7 @@ public struct Reaction: Sendable, Hashable, Codable {
         self.base = base
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         self.base = try .init(from: decoder)
     }
     

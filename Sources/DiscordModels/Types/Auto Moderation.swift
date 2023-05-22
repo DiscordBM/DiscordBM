@@ -65,7 +65,7 @@ public struct AutoModerationRule: Sendable, Codable {
             case duration_seconds
         }
         
-        public init(from decoder: Decoder) throws {
+        public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let type = try container.decode(Int.self, forKey: .type)
             switch type {

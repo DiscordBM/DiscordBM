@@ -22,7 +22,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
         }
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let string = try? container.decode(String.self) {
             self = .string(string)
@@ -65,7 +65,7 @@ public enum StringOrInt: Sendable, Codable {
         }
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let string = try? container.decode(String.self) {
             self = .string(string)
@@ -92,7 +92,7 @@ public enum IntOrDouble: Sendable, Codable {
     case int(Int)
     case double(Double)
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let int = try? container.decode(Int.self) {
             self = .int(int)
@@ -315,7 +315,7 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
         self.values = elements
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try _DiscordLocaleCodableContainer<C>(from: decoder)
         self.values = container.toDictionary()
     }
@@ -367,7 +367,7 @@ public struct DiscordTimestamp: Codable {
         self.date = date
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         let string = try container.decode(String.self)
         
@@ -539,7 +539,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         self.values = values
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         let int = try container.decode(Int.self)
         
@@ -597,7 +597,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         self.values = values
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         let string = try container.decode(String.self)
         guard let int = Int(string) else {
@@ -641,7 +641,7 @@ public struct IntPair: Sendable, Codable, CustomStringConvertible {
         self.second = second
     }
 
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         let array = try container.decode([Int].self)
         guard array.count == 2 else {
@@ -719,7 +719,7 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
         self.value = value
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         self.value = try .init(from: decoder)
     }
     
@@ -760,7 +760,7 @@ public struct Secret:
         self.description
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         self.value = try .init(from: decoder)
     }
     
@@ -779,7 +779,7 @@ public final class DereferenceBox<C>: Codable where C: Codable {
         self.value = value
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         self.value = try .init(from: decoder)
     }
     
@@ -809,7 +809,7 @@ extension SnowflakeProtocol {
         self.init(snowflake.value)
     }
 
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         try self.init(.init(from: decoder))
 #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
         if self.parse() == nil {

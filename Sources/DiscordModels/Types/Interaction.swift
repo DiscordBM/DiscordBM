@@ -45,7 +45,7 @@ public struct Interaction: Sendable, Codable {
                 case attachments
             }
 
-            public init(from decoder: Decoder) throws {
+            public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
 
                 /// `JSONDecoder` has a special-case decoding for dictionaries of `[String: some Decodable]`.
@@ -166,7 +166,7 @@ public struct Interaction: Sendable, Codable {
         case entitlement_sku_ids
     }
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.id = try container.decode(InteractionSnowflake.self, forKey: .id)
@@ -474,7 +474,7 @@ extension Interaction {
                 case type
             }
             
-            public init(from decoder: Decoder) throws {
+            public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
                 let type = try container.decode(Kind.self, forKey: .type)
                 switch type {
@@ -560,7 +560,7 @@ extension Interaction {
             case components
         }
         
-        public init(from decoder: Decoder) throws {
+        public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let type = try container.decode(Kind.self, forKey: .type)
             guard type == .actionRow else {

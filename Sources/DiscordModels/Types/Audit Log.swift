@@ -52,7 +52,7 @@ public struct AuditLog: Sendable, Codable {
                 }
             }
             
-            public init(from decoder: Decoder) throws {
+            public init(from decoder: any Decoder) throws {
                 let container = try decoder.singleValueContainer()
                 if let string = try? container.decode(String.self) {
                     self = .string(string)
@@ -318,7 +318,7 @@ public struct AuditLog: Sendable, Codable {
                     case role_name
                 }
                 
-                public init(from decoder: Decoder) throws {
+                public init(from decoder: any Decoder) throws {
                     let container = try decoder.container(keyedBy: CodingKeys.self)
                     self.id = try container.decode(String.self, forKey: .id)
                     let type = try container.decode(String.self, forKey: .type)
@@ -358,7 +358,7 @@ public struct AuditLog: Sendable, Codable {
                 public var auto_moderation_rule_trigger_type: AutoModerationRule.TriggerKind
                 public var channel_id: ChannelSnowflake
                 
-                public init(from decoder: Decoder) throws {
+                public init(from decoder: any Decoder) throws {
                     let container = try decoder.container(keyedBy: CodingKeys.self)
                     self.auto_moderation_rule_name = try container.decode(
                         String.self,
@@ -415,7 +415,7 @@ public struct AuditLog: Sendable, Codable {
                 case application_id
             }
             
-            public init(from decoder: Decoder) throws {
+            public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
                 let actionType = try container.decode(ActionKind.self, forKey: .action_type)
                 func optionsNestedContainer() throws -> KeyedDecodingContainer<OptionsCodingKeys> {
@@ -669,7 +669,7 @@ public struct AuditLog: Sendable, Codable {
             case reason
         }
         
-        public init(from decoder: Decoder) throws {
+        public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
             self.target_id = try container.decodeIfPresent(AnySnowflake.self, forKey: .target_id)

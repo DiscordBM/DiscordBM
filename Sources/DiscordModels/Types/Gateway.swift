@@ -231,7 +231,7 @@ public struct Gateway: Sendable, Codable {
             self.type = type
         }
         
-        public init(from decoder: Decoder) throws {
+        public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self.opcode = try container.decode(Opcode.self, forKey: .opcode)
             self.sequenceNumber = try container.decodeIfPresent(Int.self, forKey: .sequenceNumber)
@@ -1322,7 +1322,7 @@ public struct Gateway: Sendable, Codable {
                 self.url = url
             }
             
-            public init(from decoder: Decoder) throws {
+            public init(from decoder: any Decoder) throws {
                 if let container = try? decoder.container(keyedBy: CodingKeys.self) {
                     self.label = try container.decode(String.self, forKey: .label)
                     self.url = try container.decode(String.self, forKey: .url)
