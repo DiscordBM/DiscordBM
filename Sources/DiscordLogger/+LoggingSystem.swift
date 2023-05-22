@@ -15,7 +15,7 @@ extension LoggingSystem {
         address: WebhookAddress,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
-        makeMainLogHandler: @Sendable @escaping (String, Logger.MetadataProvider?) -> LogHandler
+        makeMainLogHandler: @Sendable @escaping (String, Logger.MetadataProvider?) -> any LogHandler
     ) async {
         LoggingSystem._bootstrap({ label, metadataProvider in
             var otherHandler = makeMainLogHandler(label, metadataProvider)
@@ -36,7 +36,7 @@ extension LoggingSystem {
     }
     
     private static func _bootstrap(
-        _ factory: @Sendable @escaping (String, Logger.MetadataProvider?) -> LogHandler,
+        _ factory: @Sendable @escaping (String, Logger.MetadataProvider?) -> any LogHandler,
         metadataProvider: Logger.MetadataProvider?
     ) {
 #if DEBUG

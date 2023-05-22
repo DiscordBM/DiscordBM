@@ -42,7 +42,7 @@ public struct DiscordLogHandler: LogHandler {
         address: WebhookAddress,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
-        makeMainLogHandler: (String, Logger.MetadataProvider?) -> LogHandler
+        makeMainLogHandler: (String, Logger.MetadataProvider?) -> any LogHandler
     ) -> Logger {
         Logger(label: label) { label in
             multiplexLogHandler(
@@ -61,7 +61,7 @@ public struct DiscordLogHandler: LogHandler {
         address: WebhookAddress,
         level: Logger.Level = .info,
         metadataProvider: Logger.MetadataProvider? = nil,
-        makeMainLogHandler: (String, Logger.MetadataProvider?) -> LogHandler
+        makeMainLogHandler: (String, Logger.MetadataProvider?) -> any LogHandler
     ) -> MultiplexLogHandler {
         var otherHandler = makeMainLogHandler(label, metadataProvider)
         otherHandler.logLevel = level

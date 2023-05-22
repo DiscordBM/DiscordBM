@@ -46,7 +46,7 @@ public extension GatewayManager {
 
     @available(*, unavailable, message: "Use 'makeEventsParseFailureStream()' instead: 'for await (error, buffer) in await bot.makeEventsParseFailureStream() { /*handle error & buffer*/ }'")
     func addEventParseFailureHandler(
-        _ handler: @Sendable @escaping (Error, ByteBuffer) -> Void
+        _ handler: @Sendable @escaping (any Error, ByteBuffer) -> Void
     ) { }
 }
 

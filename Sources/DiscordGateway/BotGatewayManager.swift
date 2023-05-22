@@ -89,7 +89,7 @@ public actor BotGatewayManager: GatewayManager {
     ///   - appId: Your Discord application id.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
-        eventLoopGroup: EventLoopGroup,
+        eventLoopGroup: any EventLoopGroup,
         client: any DiscordClient,
         maxFrameSize: Int =  1 << 31,
         compression: Bool = true,
@@ -114,7 +114,7 @@ public actor BotGatewayManager: GatewayManager {
     ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
-        eventLoopGroup: EventLoopGroup,
+        eventLoopGroup: any EventLoopGroup,
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,

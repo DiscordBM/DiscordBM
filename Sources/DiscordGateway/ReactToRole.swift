@@ -65,9 +65,9 @@ public actor ReactToRoleHandler {
         case messageIsInaccessible(
             messageId: MessageSnowflake,
             channelId: ChannelSnowflake,
-            previousError: Swift.Error
+            previousError: any Swift.Error
         )
-        case roleIsInaccessible(id: RoleSnowflake, previousError: Swift.Error?)
+        case roleIsInaccessible(id: RoleSnowflake, previousError: (any Swift.Error)?)
 
         public var description: String {
             switch self {
