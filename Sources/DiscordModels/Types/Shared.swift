@@ -155,7 +155,7 @@ public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecodeMarke
 /// because Discord doesn't like how Codable decode/encodes `[DiscordLocale: String]`.
 public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLiteral {
     
-    struct _DiscordLocaleCodableContainer<C: Codable>: Codable {
+    struct _DiscordLocaleCodableContainer: Codable {
         var danish: C?
         var german: C?
         var englishUK: C?
@@ -316,12 +316,12 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
     }
     
     public init(from decoder: any Decoder) throws {
-        let container = try _DiscordLocaleCodableContainer<C>(from: decoder)
+        let container = try _DiscordLocaleCodableContainer(from: decoder)
         self.values = container.toDictionary()
     }
     
     public func encode(to encoder: any Encoder) throws {
-        let container = _DiscordLocaleCodableContainer<C>(self.values)
+        let container = _DiscordLocaleCodableContainer(self.values)
         try container.encode(to: encoder)
     }
 }
@@ -335,8 +335,8 @@ public struct DiscordTimestamp: Codable {
     
     /// Read `helpAnchor` for help about each error case.
     public enum DecodingError: LocalizedError, CustomStringConvertible {
-        case unexpectedFormat([CodingKey], String)
-        case conversionFailure([CodingKey], String, DateComponents)
+        case unexpectedFormat([any CodingKey], String)
+        case conversionFailure([any CodingKey], String, DateComponents)
 
         public var description: String {
             switch self {
