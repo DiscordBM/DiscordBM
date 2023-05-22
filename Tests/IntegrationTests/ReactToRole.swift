@@ -1259,7 +1259,7 @@ class ReactToRoleTests: XCTestCase {
 }
 
 private actor FakeGatewayManager: GatewayManager {
-    nonisolated let client: DiscordClient
+    nonisolated let client: any DiscordClient
     nonisolated let id: UInt = 0
     nonisolated let state: GatewayState = .stopped
     nonisolated let identifyPayload: Gateway.Identify = .init(token: "", intents: [])
@@ -1270,12 +1270,12 @@ private actor FakeGatewayManager: GatewayManager {
     func makeEventsStream() async -> AsyncStream<Gateway.Event> {
         AsyncStream<Gateway.Event> { _ in }
     }
-    func makeEventsParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
-        AsyncStream<(Error, ByteBuffer)> { _ in }
+    func makeEventsParseFailureStream() async -> AsyncStream<(any Error, ByteBuffer)> {
+        AsyncStream<(any Error, ByteBuffer)> { _ in }
     }
     func disconnect() async { }
     
-    init(client: DiscordClient) {
+    init(client: any DiscordClient) {
         self.client = client
     }
 }

@@ -65,7 +65,7 @@ class DiscordCacheTests: XCTestCase {
 }
 
 private actor FakeGatewayManager: GatewayManager {
-    nonisolated var client: DiscordClient { get { fatalError() } }
+    nonisolated var client: any DiscordClient { fatalError() }
     nonisolated let id: UInt = 0
     nonisolated let state: DiscordGateway.GatewayState = .stopped
     nonisolated let identifyPayload: Gateway.Identify = .init(token: "", intents: [])
@@ -76,8 +76,8 @@ private actor FakeGatewayManager: GatewayManager {
     func makeEventsStream() async -> AsyncStream<Gateway.Event> {
         AsyncStream<Gateway.Event> { _ in }
     }
-    func makeEventsParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
-        AsyncStream<(Error, ByteBuffer)> { _ in }
+    func makeEventsParseFailureStream() async -> AsyncStream<(any Error, ByteBuffer)> {
+        AsyncStream<(any Error, ByteBuffer)> { _ in }
     }
     func disconnect() async { }
 }

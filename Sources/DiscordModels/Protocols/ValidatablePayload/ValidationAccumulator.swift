@@ -3,23 +3,23 @@
 @resultBuilder
 struct ValidationAccumulator {
     
-    static func buildBlock(_ components: ValidationResult...) -> [ValidationFailure] {
+    static func buildBlock(_ components: any ValidationResult...) -> [ValidationFailure] {
         components.flatMap { $0.get() }
     }
     
-    static func buildArray(_ components: [ValidationResult]) -> [ValidationFailure] {
+    static func buildArray(_ components: [any ValidationResult]) -> [ValidationFailure] {
         components.flatMap { $0.get() }
     }
     
-    static func buildEither(first components: [ValidationResult]) -> [ValidationFailure] {
+    static func buildEither(first components: [any ValidationResult]) -> [ValidationFailure] {
         components.flatMap { $0.get() }
     }
     
-    static func buildEither(second components: [ValidationResult]) -> [ValidationFailure] {
+    static func buildEither(second components: [any ValidationResult]) -> [ValidationFailure] {
         components.flatMap { $0.get() }
     }
 
-    static func buildOptional(_ components: [ValidationResult]?) -> [ValidationFailure] {
+    static func buildOptional(_ components: [any ValidationResult]?) -> [ValidationFailure] {
         (components ?? []).flatMap { $0.get() }
     }
 }

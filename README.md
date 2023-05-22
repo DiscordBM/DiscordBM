@@ -395,34 +395,34 @@ enum LinkSubCommand: String, CaseIterable {
 > **Note**   
 > It's usually better to send a link of your media to Discord, instead of sending the actual file.   
 ```swift
-Task {
-    /// Raw data of anything like an image
-    let image: ByteBuffer = <#Your Image Buffer#>
-    
-    /// Example 1
-    try await bot.client.createMessage(
-        channelId: <#Channel ID#>,
-        payload: .init(
-            content: "A message with an attachment!",
-            files: [.init(data: image, filename: "pic.png")],
-            attachments: [.init(index: 0, description: "Picture of something secret :)")]
-            ///                 ~~~~~~~^ `0` is the index of the attachment in the `files` array.
-        )
+/// Raw data of anything like an image
+let image: ByteBuffer = <#Your Image Buffer#>
+
+/// Example 1
+try await bot.client.createMessage(
+    channelId: <#Channel ID#>,
+    payload: .init(
+        content: "A message with an attachment!",
+        files: [.init(data: image, filename: "pic.png")],
+        attachments: [.init(index: 0, description: "Picture of something secret :)")]
+        ///                 ~~~~~~~^
+        /// `0` is the index of the attachment in the `files` array.
     )
-    
-    /// Example 2
-    try await bot.client.createMessage(
-        channelId: <#Channel ID#>,
-        payload: .init(
-            embeds: [.init(
-                title: "An embed with an attachment!",
-                image: .init(url: .attachment(name: "penguin.png"))
-                ///                          ~~~~~~~^ `penguin.png` is the name of the attachment in the `files` array.   
-            )],
-            files: [.init(data: image, filename: "penguin.png")]
-        )
-     )
-}
+)
+
+/// Example 2
+try await bot.client.createMessage(
+    channelId: <#Channel ID#>,
+    payload: .init(
+        embeds: [.init(
+            title: "An embed with an attachment!",
+            image: .init(url: .attachment(name: "penguin.png"))
+            ///                          ~~~~~~~^ 
+            /// `penguin.png` is the name of the attachment in the `files` array.   
+        )],
+        files: [.init(data: image, filename: "penguin.png")]
+    )
+)
 ```
 Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/DiscordClient.swift) to see how you can send media in a real-world situation.
 

@@ -155,7 +155,7 @@ actor HTTPRateLimiter {
     /// you should make sure the request is sent, or otherwise this rate-limiter's
     /// global rate-limit will be less than the max amount and might not allow you
     /// to make too many requests per second, when it should.
-    func shouldRequest(to endpoint: Endpoint) -> ShouldRequestResponse {
+    func shouldRequest(to endpoint: AnyEndpoint) -> ShouldRequestResponse {
         guard minutelyInvalidRequestsLimitAllows() else { return .false }
         if endpoint.countsAgainstGlobalRateLimit {
             guard globalRateLimitAllows() else { return .false }

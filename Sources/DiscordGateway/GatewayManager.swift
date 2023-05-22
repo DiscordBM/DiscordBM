@@ -23,7 +23,7 @@ public protocol GatewayManager: AnyActor {
     /// Makes an stream of Gateway events.
     func makeEventsStream() async -> AsyncStream<Gateway.Event>
     /// Makes an stream of Gateway event parse failures.
-    func makeEventsParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)>
+    func makeEventsParseFailureStream() async -> AsyncStream<(any Error, ByteBuffer)>
     /// Disconnects from Discord.
     func disconnect() async
 }
@@ -37,7 +37,7 @@ public extension GatewayManager {
     }
 
     @available(*, unavailable, renamed: "makeEventsParseFailureStream")
-    func makeEventParseFailureStream() async -> AsyncStream<(Error, ByteBuffer)> {
+    func makeEventParseFailureStream() async -> AsyncStream<(any Error, ByteBuffer)> {
         fatalError()
     }
 

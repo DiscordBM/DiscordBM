@@ -23,7 +23,7 @@ public actor BotGatewayManager: GatewayManager {
     
     //MARK: Event streams
     var eventStreamContinuations = [AsyncStream<Gateway.Event>.Continuation]()
-    var eventParseFailureContinuations = [AsyncStream<(Error, ByteBuffer)>.Continuation]()
+    var eventParseFailureContinuations = [AsyncStream<(any Error, ByteBuffer)>.Continuation]()
     
     //MARK: Connection data
     public nonisolated let identifyPayload: Gateway.Identify
@@ -274,8 +274,8 @@ public actor BotGatewayManager: GatewayManager {
     }
 
     /// Makes an stream of Gateway event parse failures.
-    public func makeEventsParseFailureStream() -> AsyncStream<(Error, ByteBuffer)> {
-        AsyncStream<(Error, ByteBuffer)> { continuation in
+    public func makeEventsParseFailureStream() -> AsyncStream<(any Error, ByteBuffer)> {
+        AsyncStream<(any Error, ByteBuffer)> { continuation in
             self.eventParseFailureContinuations.append(continuation)
         }
     }

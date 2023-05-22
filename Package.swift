@@ -8,6 +8,27 @@ let swiftSettings: [SwiftSetting] = [
     ///
     /// `minimal` / `targeted` / `complete`
 //    .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
+
+    /// `-enable-upcoming-feature` flags will get removed in the future
+    /// and we'll need to remove them from here too.
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md
+    /// Require `any` for existential types.
+        .unsafeFlags(["-enable-upcoming-feature", "ExistentialAny"]),
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md
+    /// Nicer `#file`.
+        .unsafeFlags(["-enable-upcoming-feature", "ConciseMagicFile"]),
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0286-forward-scan-trailing-closures.md
+    /// This one shouldn't do much to be honest, but shouldn't hurt as well.
+        .unsafeFlags(["-enable-upcoming-feature", "ForwardTrailingClosures"]),
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0354-regex-literals.md
+    /// `BareSlashRegexLiterals` not enabled since we don't use regex anywhere.
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md
+    /// `ImportObjcForwardDeclarations` not enabled because it's objc-related.
 ]
 
 let package = Package(

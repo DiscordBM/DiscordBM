@@ -130,7 +130,7 @@ class HTTPRateLimiterTests: XCTestCase {
 
         /// Interactions endpoints are not limited by the global rate limit, so should allow requests.
         do {
-            let shouldRequest = await rateLimiter.shouldRequest(to: interactionEndpoint)
+            let shouldRequest = await rateLimiter.shouldRequest(to: .api(interactionEndpoint))
             XCTAssertEqual(shouldRequest, .true)
         }
     }
