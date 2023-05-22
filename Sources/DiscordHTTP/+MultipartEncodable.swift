@@ -12,23 +12,26 @@ extension MultipartEncodable {
     /// Throws encoding errors.
     func encodeMultipart() throws -> ByteBuffer? {
         guard let files = self.files, !files.isEmpty else { return nil }
-        
-        let payload: Encodable
+
+        var buffer = allocator.buffer(capacity: 1_024)
+
         if Self.rawEncodable {
-            payload = self
+            try FormDataEncoder().encode(
+                self,
+                boundary: MultipartConfiguration.boundary,
+                into: &buffer
+            )
         } else {
-            payload = MultipartEncodingContainer(
+            let payload = MultipartEncodingContainer(
                 payload_json: try .init(from: self),
                 files: files
             )
+            try FormDataEncoder().encode(
+                payload,
+                boundary: MultipartConfiguration.boundary,
+                into: &buffer
+            )
         }
-
-        var buffer = allocator.buffer(capacity: 1_024)
-        try FormDataEncoder().encode(
-            payload,
-            boundary: MultipartConfiguration.boundary,
-            into: &buffer
-        )
 
         return buffer
     }
