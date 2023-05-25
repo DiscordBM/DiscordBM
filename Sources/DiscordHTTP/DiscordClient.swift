@@ -1,8 +1,10 @@
 import DiscordModels
 
 public protocol DiscordClient: Sendable {
-    /// Your app's id. If you don't provide it here, you will need to provide it at
-    /// all call-sites of `DiscordClient` functions that accept an `appId`.
+    /// Your app's id.
+    /// If you don't provide it here, DiscordBM will try to extract it from your token.
+    /// If there is no `appId` you will need to provide it at all call-sites of
+    /// `DiscordClient` functions that accept an `appId`.
     var appId: ApplicationSnowflake? { get }
 
     /// Send a request to Discord with no body.

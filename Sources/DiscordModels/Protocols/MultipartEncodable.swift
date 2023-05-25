@@ -2,11 +2,10 @@ import MultipartKit
 import NIOCore
 import Foundation
 
-private let allocator = ByteBufferAllocator()
-
-/// Note: you need to use a custom `CodingKey` on conforming types to exclude
+/// Note: you need to use a custom `CodingKeys` on conforming types to exclude
 /// this `files` field from Codable decode/encodes.
 public protocol MultipartEncodable: Encodable {
+    /// The files to be uploaded.
     var files: [RawFile]? { get }
     /// Encode the exact value of `Self`.
     /// By default, DiscordBM encodes the `files` as one field,
@@ -18,7 +17,7 @@ public protocol MultipartEncodable: Encodable {
 }
 
 extension MultipartEncodable {
-    /// Default to `false` since that's what 95+ % need.
+    /// Default to `false` since that's what 99+ % need.
     public static var rawEncodable: Bool { false }
 }
 

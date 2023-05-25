@@ -9,7 +9,7 @@ extension LoggingSystem {
     /// Bootstraps the logging system to use `DiscordLogHandler`.
     /// After calling this function, all your `Logger`s will start using `DiscordLogHandler`.
     ///
-    /// - NOTE: Be careful because `LoggingSystem.bootstrap` can only be called once.
+    /// - NOTE: Be careful because `LoggingSystem.bootstrap` can only be called once in RELEASE mode.
     /// If you use libraries like Vapor, you would want to remove such lines where you call `LoggingSystem...` and replace it with this function.
     public static func bootstrapWithDiscordLogger(
         address: WebhookAddress,
@@ -34,7 +34,7 @@ extension LoggingSystem {
         /// If the log-manager is not yet set, then when it's set it'll use this new logger anyway.
         await ConfigurationStorage.shared.logManager?.renewFallbackLogger()
     }
-    
+
     private static func _bootstrap(
         _ factory: @Sendable @escaping (String, Logger.MetadataProvider?) -> any LogHandler,
         metadataProvider: Logger.MetadataProvider?
