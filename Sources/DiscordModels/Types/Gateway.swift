@@ -185,24 +185,14 @@ public struct Gateway: Sendable, Codable {
         }
         
         /// Read `helpAnchor` for help about each error case.
-        public enum GatewayDecodingError: LocalizedError, CustomStringConvertible {
+        public enum GatewayDecodingError: Error, CustomStringConvertible {
+            /// The dispatch event type '\(type ?? "nil")' is unhandled. This is probably a new Discord event which is not yet officially documented. I actively look for new events, and check Discord docs, so there is nothing to worry about. The library will support this event when it should.
             case unhandledDispatchEvent(type: String?)
 
             public var description: String {
                 switch self {
                 case let .unhandledDispatchEvent(type):
                     return "Gateway.Event.GatewayDecodingError.unhandledDispatchEvent(type: \(type ?? "nil"))"
-                }
-            }
-
-            public var errorDescription: String? {
-                self.description
-            }
-            
-            public var helpAnchor: String? {
-                switch self {
-                case let .unhandledDispatchEvent(type):
-                    return "The dispatch event type '\(type ?? "nil")' is unhandled. This is probably a new Discord event which is not yet officially documented. I actively look for new events, and check Discord docs, so there is nothing to worry about. The library will support this event when it should"
                 }
             }
         }
@@ -390,24 +380,14 @@ public struct Gateway: Sendable, Codable {
         }
         
         /// Read `helpAnchor` for help about each error case.
-        public enum EncodingError: LocalizedError, CustomStringConvertible {
+        public enum EncodingError: Error, CustomStringConvertible {
+            /// This event is not supposed to be sent at all. This could be a library issue, please report at https://github.com/MahdiBM/DiscordBM/issues.
             case notSupposedToBeSent(message: String)
 
             public var description: String {
                 switch self {
                 case let .notSupposedToBeSent(message):
                     return "Gateway.Event.EncodingError.notSupposedToBeSent(\(message))"
-                }
-            }
-
-            public var errorDescription: String? {
-                self.description
-            }
-            
-            public var helpAnchor: String? {
-                switch self {
-                case let .notSupposedToBeSent(message):
-                    return "This event is not supposed to be sent at all. This could be a library issue, please report at https://github.com/MahdiBM/DiscordBM/issues. Message: \(message)"
                 }
             }
         }

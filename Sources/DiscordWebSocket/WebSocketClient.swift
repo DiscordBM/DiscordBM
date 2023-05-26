@@ -9,9 +9,12 @@ import Atomics
 
 public final class WebSocketClient: @unchecked Sendable {
 
-    public enum Error: LocalizedError, CustomStringConvertible {
+    public enum Error: Swift.Error, CustomStringConvertible {
+        /// The URL string was invalid
         case invalidURLString(String)
+        /// Received invalid status code. Make sure the connection you wan to make is acceptable by the peer.
         case invalidResponseStatus(HTTPResponseHead)
+        /// Do not attempt to shutdown the web-socket client when already shut down.
         case alreadyShutdown
 
         public var description: String {
@@ -22,21 +25,6 @@ public final class WebSocketClient: @unchecked Sendable {
                 return "WebSocketClient.Error.invalidResponseStatus(\(head))"
             case .alreadyShutdown:
                 return "WebSocketClient.Error.alreadyShutdown"
-            }
-        }
-
-        public var errorDescription: String? {
-            self.description
-        }
-
-        public var helpAnchor: String? {
-            switch self {
-            case let .invalidURLString(url):
-                return "The URL string was invalid: \(url)"
-            case let .invalidResponseStatus(head):
-                return "Received invalid status code. Make sure the connection you wan to make is acceptable by the peer. HTTP head: \(head)"
-            case .alreadyShutdown:
-                return "Do not attempt to shutdown the web-socket client when already shut down."
             }
         }
     }

@@ -13,9 +13,12 @@ public enum Decompression {
         public static let enabled = Configuration()
     }
     
-    public enum Error: LocalizedError, CustomStringConvertible, Equatable {
+    public enum Error: Swift.Error, CustomStringConvertible, Equatable {
+        /// Error while performing inflation.
         case inflationError(Int)
+        /// Error while initializing the decoder.
         case initializationError(Int)
+        /// There was extra trailing data after the decoding completed.
         case invalidTrailingData
 
         public var description: String {
@@ -27,10 +30,6 @@ public enum Decompression {
             case .invalidTrailingData:
                 return "Decompression.Error.invalidTrailingData"
             }
-        }
-
-        public var errorDescription: String? {
-            self.description
         }
     }
     

@@ -227,12 +227,11 @@ public struct DiscordCDNResponse: Sendable {
 }
 
 /// Represents a possible Discord HTTP error.
-/// Is conformed to `Error`/`LocalizedError` so users can conveniently throw it.
-public enum DiscordHTTPErrorResponse: Sendable, LocalizedError, CustomStringConvertible {
-
-    /// The response does not indicate success and there is a recognizable error in the body.
+/// Is conformed to `Error` so users can conveniently throw it.
+public enum DiscordHTTPErrorResponse: Sendable, Error, CustomStringConvertible {
+    /// The error is in a recognizable format and you can attempt to recover from it.
     case jsonError(JSONError)
-    /// The response does not indicate success and there is no recognizable error in the body.
+    /// The error was not in a recognizable format, but the status code still indicates a failure.
     case badStatusCode(DiscordHTTPResponse)
 
     public var description: String {
@@ -243,31 +242,27 @@ public enum DiscordHTTPErrorResponse: Sendable, LocalizedError, CustomStringConv
             return "DiscordHTTPErrorResponse.badStatusCode(\(response))"
         }
     }
-
-    public var errorDescription: String? {
-        self.description
-    }
-
-    public var helpAnchor: String? {
-        switch self {
-        case let .jsonError(jsonError):
-            return "The error is in a recognizable format and you can attempt to recover from it: \(jsonError)"
-        case let .badStatusCode(response):
-            return "The error was not in a recognizable format, but the status code still indicates a failure: \(response)"
-        }
-    }
 }
 
 /// Read `helpAnchor` for help about each error case.
-public enum DiscordHTTPError: LocalizedError, CustomStringConvertible {
+public enum DiscordHTTPError: Error, CustomStringConvertible {
+    /// Discord has rate-limited you at '\(url)'. Try to send less messages or send at a slower pace.
     case rateLimited(url: String)
+    /// Discord responded with a non-200 status code.
     case badStatusCode(DiscordHTTPResponse)
+    /// The response body was unexpectedly empty. If it happens frequently, you should report it to me at https://github.com/MahdiBM/DiscordBM/issues.
     case emptyBody(DiscordHTTPResponse)
+    /// Discord didn't send a Content-Type header. See if they mentions any errors in the response.
     case noContentTypeHeader(DiscordHTTPResponse)
+    /// The endpoint requires an authentication header but you have not passed authentication info in the 'DefaultDiscordClient' initializer.
     case authenticationHeaderRequired(request: DiscordHTTPRequest)
+    /// Could not decode to type '\(typeName)'. Make sure your Codable types match the response that Discord sends.
     case decodingError(typeName: String, response: DiscordHTTPResponse, error: any Error)
+    /// The 'appId' parameter is required. Either pass it in the initializer of DefaultDiscordClient/BotGatewayManager or use the 'appId' function parameter
     case appIdParameterRequired
+    /// Discord only accepts one of these query parameters at a time.
     case queryParametersMutuallyExclusive(queries: [(String, String)])
+    /// The query parameter '\(name)' with a value of '\(value ?? "nil")' is out of the Discord-acceptable bounds of \(lowerBound)...\(upperBound).
     case queryParameterOutOfBounds(name: String, value: String?, lowerBound: Int, upperBound: Int)
 
     public var description: String {
@@ -290,33 +285,6 @@ public enum DiscordHTTPError: LocalizedError, CustomStringConvertible {
             return "DiscordHTTPError.queryParametersMutuallyExclusive(queries: \(queries))"
         case let .queryParameterOutOfBounds(name, value, lowerBound, upperBound):
             return "DiscordHTTPError.queryParameterOutOfBounds(name: \(name), value: \(value ?? "nil"), lowerBound: \(lowerBound), upperBound: \(upperBound))"
-        }
-    }
-
-    public var errorDescription: String? {
-        self.description
-    }
-    
-    public var helpAnchor: String? {
-        switch self {
-        case let .rateLimited(url):
-            return "Discord has rate-limited you at '\(url)'. Try to send less messages or send at a slower pace"
-        case let .badStatusCode(response):
-            return "Discord responded with a non-200 status code. Discord says: \(response.body.map(String.init) ?? "nil")"
-        case let .emptyBody(response):
-            return "The response body was unexpectedly empty. If it happens frequently, you should report it to me at https://github.com/MahdiBM/DiscordBM/issues. Discord's response: \(response)"
-        case let .noContentTypeHeader(response):
-            return "Discord didn't send a Content-Type header. See if they mentions any errors in the response: \(response)"
-        case let .authenticationHeaderRequired(request):
-            return "The endpoint requires an authentication header but you have not passed authentication info in the 'DefaultDiscordClient' initializer. Request: \(request)"
-        case let .decodingError(typeName, response, error):
-            return "Could not decode to type '\(typeName)'. Make sure your Codable types match the response that Discord sends. Discord's response: \(response). Error: \(error)"
-        case .appIdParameterRequired:
-            return "The 'appId' parameter is required. Either pass it in the initializer of DefaultDiscordClient/BotGatewayManager or use the 'appId' function parameter"
-        case let .queryParametersMutuallyExclusive(queries):
-            return "Discord only accepts one of these query parameters at a time: \(queries)"
-        case let .queryParameterOutOfBounds(name, value, lowerBound, upperBound):
-            return "The query parameter '\(name)' with a value of '\(value ?? "nil")' is out of the Discord-acceptable bounds of \(lowerBound)...\(upperBound)"
         }
     }
 }

@@ -157,24 +157,14 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
         }
         
         /// Read `helpAnchor` for help about each error case.
-        public enum ConversionError: LocalizedError, CustomStringConvertible {
+        public enum ConversionError: Error, CustomStringConvertible {
+            /// Couldn't convert \(id) to an integer
             case couldNotConvertToInteger(GuildSnowflake)
 
             public var description: String {
                 switch self {
                 case let .couldNotConvertToInteger(string):
                     return "GuildApplicationCommandPermissions.Permission.ConversionError.couldNotConvertToInteger(\(string))"
-                }
-            }
-
-            public var errorDescription: String? {
-                self.description
-            }
-            
-            public var helpAnchor: String? {
-                switch self {
-                case let .couldNotConvertToInteger(id):
-                    return "Couldn't convert \(id.value.debugDescription) to an integer"
                 }
             }
         }

@@ -528,8 +528,10 @@ extension Interaction {
         public var components: [Component]
         
         /// Read `helpAnchor` for help about each error case.
-        public enum CodingError: LocalizedError, CustomStringConvertible {
+        public enum CodingError: Error, CustomStringConvertible {
+            /// This component kind was not expected here. This is a library decoding issue, please report at: https://github.com/MahdiBM/DiscordBM/issues.
             case unexpectedComponentKind(Kind)
+            /// I thought action-row is supposed to only appear at top-level as a container for other components. This is a library decoding issue, please report at: https://github.com/MahdiBM/DiscordBM/issues.
             case actionRowIsSupposedToOnlyAppearAtTopLevel
 
             public var description: String {
@@ -538,19 +540,6 @@ extension Interaction {
                     return "Interaction.ActionRow.CodingError.unexpectedComponentKind(\(kind))"
                 case .actionRowIsSupposedToOnlyAppearAtTopLevel:
                     return "Interaction.ActionRow.CodingError.actionRowIsSupposedToOnlyAppearAtTopLevel"
-                }
-            }
-
-            public var errorDescription: String? {
-                self.description
-            }
-            
-            public var helpAnchor: String? {
-                switch self {
-                case let .unexpectedComponentKind(kind):
-                    return "This component kind was not expected here. This is a library decoding issue, please report at: https://github.com/MahdiBM/DiscordBM/issues. Kind: \(kind)"
-                case .actionRowIsSupposedToOnlyAppearAtTopLevel:
-                    return "I thought action-row is supposed to only appear at top-level as a container for other components. This is a library decoding issue, please report at: https://github.com/MahdiBM/DiscordBM/issues"
                 }
             }
         }

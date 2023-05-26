@@ -28,24 +28,14 @@ public struct Webhook: Sendable, Codable {
 public struct WebhookAddress: Sendable, Hashable {
     
     /// Read `helpAnchor` for help about each error case.
-    public enum Error: LocalizedError, CustomStringConvertible {
+    public enum Error: Swift.Error, CustomStringConvertible {
+        /// The provided URL '\(url.debugDescription)' doesn't look like a webhook URL
         case invalidUrl(String)
 
         public var description: String {
             switch self {
             case let .invalidUrl(url):
                 return "WebhookAddress.Error.invalidUrl(\(url))"
-            }
-        }
-
-        public var errorDescription: String? {
-            self.description
-        }
-        
-        public var helpAnchor: String? {
-            switch self {
-            case let .invalidUrl(url):
-                return "The provided URL '\(url.debugDescription)' doesn't look like a webhook URL"
             }
         }
     }

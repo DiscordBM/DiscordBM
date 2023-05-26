@@ -334,8 +334,10 @@ extension DiscordLocaleDict: Sendable where C: Sendable { }
 public struct DiscordTimestamp: Codable {
     
     /// Read `helpAnchor` for help about each error case.
-    public enum DecodingError: LocalizedError, CustomStringConvertible {
+    public enum DecodingError: Swift.Error, CustomStringConvertible {
+        /// The timestamp had an unexpected format. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues.
         case unexpectedFormat([any CodingKey], String)
+        /// Could not convert the timestamp to a 'Date'. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues.
         case conversionFailure([any CodingKey], String, DateComponents)
 
         public var description: String {
@@ -344,19 +346,6 @@ public struct DiscordTimestamp: Codable {
                 return "DiscordTimestamp.DecodingError.unexpectedFormat(\(codingKey), \(timestamp))"
             case let .conversionFailure(codingKey, timestamp, components):
                 return "DiscordTimestamp.DecodingError.conversionFailure(\(codingKey), \(timestamp), \(components))"
-            }
-        }
-
-        public var errorDescription: String? {
-            self.description
-        }
-        
-        public var helpAnchor: String? {
-            switch self {
-            case let .unexpectedFormat(codingKey, timestamp):
-                return "The timestamp had an unexpected format. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues. Coding key: \(codingKey.map(\.stringValue)), timestamp: \(timestamp)"
-            case let .conversionFailure(codingKey, timestamp, components):
-                return "Could not convert the timestamp to a 'Date'. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues. Coding key: \(codingKey.map(\.stringValue)), timestamp: \(timestamp), components: \(components)"
             }
         }
     }
@@ -569,24 +558,14 @@ public struct StringBitField<R>: BitField, Codable
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
     /// Read `helpAnchor` for help about each error case.
-    public enum DecodingError: LocalizedError, CustomStringConvertible {
+    public enum DecodingError: Swift.Error, CustomStringConvertible {
+        /// The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues.
         case notRepresentingInt(String)
 
         public var description: String {
             switch self {
             case let .notRepresentingInt(string):
                 return "StringBitField.DecodingError.notRepresentingInt(\(string))"
-            }
-        }
-
-        public var errorDescription: String? {
-            self.description
-        }
-        
-        public var helpAnchor: String? {
-            switch self {
-            case let .notRepresentingInt(string):
-                return "The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues. String: \(string)"
             }
         }
     }
@@ -975,8 +954,10 @@ public typealias AssetsSnowflake = Snowflake<Gateway.Activity.Assets>
 public struct SnowflakeInfo: Sendable {
 
     /// Read `helpAnchor` for help about each error case.
-    public enum Error: LocalizedError, CustomStringConvertible {
+    public enum Error: Swift.Error, CustomStringConvertible {
+        /// Entered field '\(name)' is bigger than expected. It has a value of '\(value)', but max accepted is '\(max)'
         case fieldTooBig(_ name: String, value: String, max: Int)
+        /// Entered field '\(name)' is smaller than expected. It has a value of '\(value)', but min accepted is '\(min)'
         case fieldTooSmall(_ name: String, value: String, min: UInt64)
 
         public var description: String {
@@ -985,19 +966,6 @@ public struct SnowflakeInfo: Sendable {
                 return "SnowflakeInfo.Error.fieldTooBig(\(name), value: \(value), max: \(max))"
             case let .fieldTooSmall(name, value, min):
                 return "SnowflakeInfo.Error.fieldTooSmall(\(name), value: \(value), min: \(min))"
-            }
-        }
-
-        public var errorDescription: String? {
-            self.description
-        }
-
-        public var helpAnchor: String? {
-            switch self {
-            case let .fieldTooBig(name, value, max):
-                return "Entered field '\(name)' is bigger than expected. It has a value of '\(value)', but max accepted is '\(max)'"
-            case let .fieldTooSmall(name, value, min):
-                return "Entered field '\(name)' is smaller than expected. It has a value of '\(value)', but min accepted is '\(min)'"
             }
         }
     }

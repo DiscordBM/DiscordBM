@@ -1,5 +1,5 @@
 
-public enum ValidationFailure: Sendable {
+public enum ValidationFailure: Sendable, CustomStringConvertible {
     /// At least one of these fields is required to be present.
     case atLeastOneFieldIsRequired(names: [String])
     /// Too many characters in the target (likely a String). Need to shorten it.
@@ -18,9 +18,8 @@ public enum ValidationFailure: Sendable {
     case cantBeEmpty(name: String)
     /// The number is too big or too small.
     case numberOutOfRange(name: String, number: String, min: String, max: String)
-    
-    /// To be used in `ValidationError`.
-    public var errorDescription: String {
+
+    public var description: String {
         switch self {
         case let .atLeastOneFieldIsRequired(names):
             return "ValidationFailure.atLeastOneFieldIsRequired(names: \(names))"
@@ -40,30 +39,6 @@ public enum ValidationFailure: Sendable {
             return "ValidationFailure.cantBeEmpty(name: \(name))"
         case let .numberOutOfRange(name, number, min, max):
             return "ValidationFailure.numberOutOfRange(name: \(name), number: \(number), min: \(min), max: \(max))"
-        }
-    }
-    
-    /// To be used in `ValidationError`.
-    public var helpAnchor: String {
-        switch self {
-        case let .atLeastOneFieldIsRequired(names):
-            return "At least one of these fields is required: \(names)"
-        case let .tooManyCharacters(name, max):
-            return "Too many characters in the '\(name)' field. Max allowed is '\(max)'"
-        case let .characterCountOutOfRange(name, min, max):
-            return "Character count of the '\(name)' field is out of the acceptable range of \(min)...\(max)"
-        case let .tooManyElements(name, max):
-            return "Too many elements in the '\(name)' field. Max allowed is '\(max)'"
-        case let .elementCountOutOfRange(name, min, max):
-            return "Element count of the '\(name)' field is out of the acceptable range of \(min)...\(max)"
-        case let .containsProhibitedValues(name, reason, valuesRepresentation):
-            return "The '\(name)' field contains prohibited values. Values: \(valuesRepresentation). Reason: \(reason)"
-        case let .hasPrecondition(name, reason):
-            return "A precondition was not met for the '\(name)' field. Reason: \(reason)"
-        case let .cantBeEmpty(name):
-            return "The '\(name)' field can't be empty."
-        case let .numberOutOfRange(name, number, min, max):
-            return "The '\(name)' is set to the number '\(number)' which is out of the acceptable range of \(min)...\(max)"
         }
     }
 }

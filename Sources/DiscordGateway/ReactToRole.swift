@@ -61,12 +61,14 @@ public actor ReactToRoleHandler {
     }
     
     /// Read `helpAnchor` for help about each error case.
-    public enum Error: LocalizedError, CustomStringConvertible {
+    public enum Error: Swift.Error, CustomStringConvertible {
+        /// Can't access a message with id '\(messageId)' in channel '\(channelId)'. This could be because the message doesn't exist or the bot doesn't have enough permissions to see it.
         case messageIsInaccessible(
             messageId: MessageSnowflake,
             channelId: ChannelSnowflake,
             previousError: any Swift.Error
         )
+        /// Can't access a role with id '\(id)'. This could be because the role doesn't exist or the bot doesn't have enough permissions to see it.
         case roleIsInaccessible(id: RoleSnowflake, previousError: (any Swift.Error)?)
 
         public var description: String {
@@ -75,19 +77,6 @@ public actor ReactToRoleHandler {
                 return "ReactToRoleHandler.Error.messageIsInaccessible(messageId: \(messageId), channelId: \(channelId), previousError: \(previousError))"
             case let .roleIsInaccessible(id, previousError):
                 return "ReactToRoleHandler.Error.roleIsInaccessible(id: \(id), previousError: \(String(describing: previousError)))"
-            }
-        }
-
-        public var errorDescription: String? {
-            self.description
-        }
-        
-        public var helpAnchor: String? {
-            switch self {
-            case let .messageIsInaccessible(messageId, channelId, previousError):
-                return "Can't access a message with id '\(messageId)' in channel '\(channelId)'. This could be because the message doesn't exist or the bot doesn't have enough permissions to see it. Previous error: \(previousError)"
-            case let .roleIsInaccessible(id, previousError):
-                return "Can't access a role with id '\(id)'. This could be because the role doesn't exist or the bot doesn't have enough permissions to see it. Previous error: \(String(describing: previousError))"
             }
         }
     }

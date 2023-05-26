@@ -56,9 +56,12 @@ public struct Reaction: Sendable, Hashable, Codable {
     }
     
     /// Read `helpAnchor` for help about each error case.
-    public enum Error: LocalizedError, CustomStringConvertible {
+    public enum Error: Swift.Error, CustomStringConvertible {
+        /// Expected only 1 emoji in the input '\(input)' but recognized '\(count)' emojis.
         case moreThan1Emoji(String, count: Int)
+        /// The input '\(input)' does not seem like an emoji.
         case notEmoji(String)
+        /// Can't convert a partial emoji to a Reaction.
         case cantConvertEmoji(Emoji)
 
         public var description: String {
@@ -69,21 +72,6 @@ public struct Reaction: Sendable, Hashable, Codable {
                 return "Reaction.Error.notEmoji(\(input))"
             case let .cantConvertEmoji(emoji):
                 return "Reaction.Error.cantConvertEmoji(\(emoji))"
-            }
-        }
-
-        public var errorDescription: String? {
-            self.description
-        }
-        
-        public var helpAnchor: String? {
-            switch self {
-            case let .moreThan1Emoji(input, count):
-                return "Expected only 1 emoji in the input '\(input)' but recognized '\(count)' emojis"
-            case let .notEmoji(input):
-                return "The input '\(input)' does not seem like an emoji"
-            case let .cantConvertEmoji(emoji):
-                return "Can't convert a partial emoji to a Reaction. Emoji: \(emoji)"
             }
         }
     }

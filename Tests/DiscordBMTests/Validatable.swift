@@ -296,8 +296,8 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
     
     func XCTAssertErrorsEqual(_ expression1: ValidationError, _ expression2: ValidationFailure) {
         XCTAssertEqual(
-            expression1.failures.first!.errorDescription,
-            expression2.errorDescription
+            expression1.failures.first!.description,
+            expression2.description
         )
     }
 }
