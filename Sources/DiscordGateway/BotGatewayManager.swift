@@ -59,9 +59,6 @@ public actor BotGatewayManager: GatewayManager {
     var maxConcurrency: Int? = nil
     var shardConnectedOnceBefore = false
     
-    //MARK: Compression
-    let compression: Bool
-    
     //MARK: Backoff
     
     /// Discord cares about the identify payload for rate-limiting and if we send
@@ -85,20 +82,17 @@ public actor BotGatewayManager: GatewayManager {
     ///   - httpClient: A `HTTPClient`.
     ///   - client: A `DiscordClient` to use.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
-    ///   - compression: Enables transport compression for less network bandwidth usage.
     ///   - appId: Your Discord application id.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
         eventLoopGroup: any EventLoopGroup,
         client: any DiscordClient,
         maxFrameSize: Int =  1 << 31,
-        compression: Bool = true,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
-        self.compression = compression
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
@@ -110,7 +104,6 @@ public actor BotGatewayManager: GatewayManager {
     ///   - httpClient: A `HTTPClient`.
     ///   - clientConfiguration: Configuration of the `DiscordClient`.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
-    ///   - compression: Enables transport compression for less network bandwidth usage.
     ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
@@ -118,7 +111,6 @@ public actor BotGatewayManager: GatewayManager {
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
-        compression: Bool = true,
         appId: ApplicationSnowflake? = nil,
         identifyPayload: Gateway.Identify
     ) async {
@@ -130,7 +122,6 @@ public actor BotGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
-        self.compression = compression
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
@@ -142,7 +133,6 @@ public actor BotGatewayManager: GatewayManager {
     ///   - httpClient: A `HTTPClient`.
     ///   - clientConfiguration: Configuration of the `DiscordClient`.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
-    ///   - compression: Enables transport compression for less network bandwidth usage.
     ///   - token: Your Discord bot-token.
     ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
     ///   - shard: What shard this Manager is representing, incase you use shard-ing at all.
@@ -153,7 +143,6 @@ public actor BotGatewayManager: GatewayManager {
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
-        compression: Bool = true,
         token: String,
         appId: ApplicationSnowflake? = nil,
         shard: IntPair? = nil,
@@ -169,7 +158,6 @@ public actor BotGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
-        self.compression = compression
         self.identifyPayload = .init(
             token: token,
             shard: shard,
@@ -181,68 +169,13 @@ public actor BotGatewayManager: GatewayManager {
         self.logger = logger
     }
 
+    /// Starts connecting to Discord.
+    /// If you want to become aware of when the connection is established, you need
+    /// to listen for the related Gateway events such as 'ready' and 'resume'.
     public nonisolated func connect() {
-        Task { self._connect }
+        Task { await self._connect() }
     }
 
-    /// Starts connecting to Discord.
-    /// `_state` must be set to an appropriate value before triggering this function.
-    func _connect() async {
-        logger.debug("Connect method triggered")
-        /// Guard we're attempting to connect too fast
-        if let connectIn = await connectionBackoff.canPerformIn() {
-            logger.warning("Cannot try to connect immediately due to backoff", metadata: [
-                "wait-time": .stringConvertible(connectIn)
-            ])
-            await self.sleep(for: connectIn)
-        }
-        /// Guard if other connections are in process
-        guard [.noConnection, .configured, .stopped].contains(self.state) else {
-            logger.error("Gateway state doesn't allow a new connection", metadata: [
-                "state": .stringConvertible(state)
-            ])
-            return
-        }
-        self._state.store(.connecting, ordering: .relaxed)
-        await self.sendQueue.reset()
-        let gatewayURL = await getGatewayURL()
-        var urlSuffix = "?v=\(DiscordGlobalConfiguration.apiVersion)&encoding=json"
-        logger.trace("Will wait for other shards if needed")
-        await waitInShardQueueIfNeeded()
-        var configuration = WebSocketClient.Configuration(maxFrameSize: self.maxFrameSize)
-        if compression {
-            urlSuffix += "&compress=zlib-stream"
-            configuration.decompression = .enabled
-        }
-        logger.trace("Will try to connect to Discord through web-socket")
-        do {
-            let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
-            let onBuffer: @Sendable (ByteBuffer) -> Void = { buffer in
-                Task { await self.processBinaryData(buffer, forConnectionWithId: connectionId) }
-            }
-            let onClose: @Sendable (WebSocket) -> Void = { ws in
-                Task { await self.setupOnClose(ws: ws, forConnectionWithId: connectionId) }
-            }
-            let ws = try await WebSocket.connect(
-                to: gatewayURL + urlSuffix,
-                configuration: configuration,
-                on: eventLoopGroup,
-                onBuffer: onBuffer,
-                onClose: onClose
-            )
-            self.logger.debug("Connected to Discord through web-socket. Will configure")
-            self.closeWebSocket(ws: self.ws)
-            self.ws = ws
-            self._state.store(.configured, ordering: .relaxed)
-        } catch {
-            logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
-                "error": .string("\(error)")
-            ])
-            self._state.store(.noConnection, ordering: .relaxed)
-            await self._connect()
-        }
-    }
-    
     /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
     public func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) {
         /// This took a lot of time to figure out, not sure why it needs opcode `1`.
@@ -313,6 +246,67 @@ public actor BotGatewayManager: GatewayManager {
 }
 
 extension BotGatewayManager {
+    /// Starts connecting to Discord.
+    /// `_state` must be set to an appropriate value before triggering this function.
+    func _connect() async {
+        logger.debug("Connect method triggered")
+        /// Guard we're attempting to connect too fast
+        if let connectIn = await connectionBackoff.canPerformIn() {
+            logger.warning("Cannot try to connect immediately due to backoff", metadata: [
+                "wait-time": .stringConvertible(connectIn)
+            ])
+            await self.sleep(for: connectIn)
+        }
+        /// Guard if other connections are in process
+        guard [.noConnection, .configured, .stopped].contains(self.state) else {
+            logger.error("Gateway state doesn't allow a new connection", metadata: [
+                "state": .stringConvertible(state)
+            ])
+            return
+        }
+        self._state.store(.connecting, ordering: .relaxed)
+        await self.sendQueue.reset()
+        let gatewayURL = await getGatewayURL()
+        logger.trace("Will wait for other shards if needed")
+        await waitInShardQueueIfNeeded()
+        let queries: [(String, String)] = [
+            ("v", "\(DiscordGlobalConfiguration.apiVersion)"),
+            ("encoding", "json"),
+            ("compress", "zlib-stream")
+        ]
+        let configuration = WebSocketClient.Configuration(
+            maxFrameSize: self.maxFrameSize,
+            decompression: .enabled
+        )
+        logger.trace("Will try to connect to Discord through web-socket")
+        do {
+            let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
+            let onBuffer: @Sendable (ByteBuffer) -> Void = { buffer in
+                Task { await self.processBinaryData(buffer, forConnectionWithId: connectionId) }
+            }
+            let onClose: @Sendable (WebSocket) -> Void = { ws in
+                Task { await self.setupOnClose(ws: ws, forConnectionWithId: connectionId) }
+            }
+            let ws = try await WebSocket.connect(
+                to: gatewayURL + queries.makeForURLQuery(),
+                configuration: configuration,
+                on: eventLoopGroup,
+                onBuffer: onBuffer,
+                onClose: onClose
+            )
+            self.logger.debug("Connected to Discord through web-socket. Will configure")
+            self.closeWebSocket(ws: self.ws)
+            self.ws = ws
+            self._state.store(.configured, ordering: .relaxed)
+        } catch {
+            logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
+                "error": .string("\(error)")
+            ])
+            self._state.store(.noConnection, ordering: .relaxed)
+            await self._connect()
+        }
+    }
+
     private func processEvent(_ event: Gateway.Event) async {
         if let sequenceNumber = event.sequenceNumber {
             self.sequenceNumber = sequenceNumber

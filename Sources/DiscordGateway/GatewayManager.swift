@@ -11,7 +11,7 @@ public protocol GatewayManager: AnyActor {
     nonisolated var state: GatewayState { get }
     /// The identification payload that is sent to Discord.
     nonisolated var identifyPayload: Gateway.Identify { get }
-    
+
     /// Starts connecting to Discord.
     /// If you want to become aware of when the connection is established, you need
     /// to listen for the related Gateway events such as 'ready' and 'resume'.

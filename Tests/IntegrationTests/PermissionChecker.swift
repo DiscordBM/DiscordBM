@@ -30,7 +30,6 @@ class PermissionChecker: XCTestCase {
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             httpClient: httpClient,
-            compression: false,
             token: Constants.token,
             appId: Snowflake(Constants.botId),
             presence: .init(
@@ -57,10 +56,10 @@ class PermissionChecker: XCTestCase {
             }
         }
 
-        /// To make sure these 2 `Task`s are triggered in order
+        /// To make sure these 2 are triggered in order
         try await Task.sleep(for: .milliseconds(200))
         
-        Task { await bot.connect() }
+        bot.connect()
 
         await waitFulfillment(of: [expectation], timeout: 10)
 

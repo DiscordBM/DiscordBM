@@ -111,7 +111,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     /// print(httpResponse.description)
     /// ```
     @inlinable
-    public func decodeError() -> DiscordHTTPErrorResponse {
+    public func decodeError() -> DiscordHTTPErrorResponse? {
         if (200..<300).contains(self.status.code) {
             return .none
         } else {
@@ -178,7 +178,7 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
     /// print(httpResponse.description)
     /// ```
     @inlinable
-    public func decodeError() -> DiscordHTTPErrorResponse {
+    public func decodeError() -> DiscordHTTPErrorResponse? {
         self.httpResponse.decodeError()
     }
     
@@ -229,8 +229,7 @@ public struct DiscordCDNResponse: Sendable {
 /// Represents a possible Discord HTTP error.
 /// Is conformed to `Error`/`LocalizedError` so users can conveniently throw it.
 public enum DiscordHTTPErrorResponse: Sendable, LocalizedError, CustomStringConvertible {
-    /// The response indicates success. No errors have been found.
-    case none
+
     /// The response does not indicate success and there is a recognizable error in the body.
     case jsonError(JSONError)
     /// The response does not indicate success and there is no recognizable error in the body.
@@ -238,8 +237,6 @@ public enum DiscordHTTPErrorResponse: Sendable, LocalizedError, CustomStringConv
 
     public var description: String {
         switch self {
-        case .none:
-            return "DiscordHTTPErrorResponse.none"
         case let .jsonError(jsonError):
             return "DiscordHTTPErrorResponse.jsonError(\(jsonError))"
         case let .badStatusCode(response):
@@ -253,8 +250,6 @@ public enum DiscordHTTPErrorResponse: Sendable, LocalizedError, CustomStringConv
 
     public var helpAnchor: String? {
         switch self {
-        case .none:
-            return "No errors were found"
         case let .jsonError(jsonError):
             return "The error is in a recognizable format and you can attempt to recover from it: \(jsonError)"
         case let .badStatusCode(response):

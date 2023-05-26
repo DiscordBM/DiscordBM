@@ -1203,7 +1203,6 @@ class ReactToRoleTests: XCTestCase {
         let bot = BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
             client: client ?? self.client,
-            compression: true,
             identifyPayload: .init(
                 token: Constants.token,
                 presence: .init(
@@ -1240,10 +1239,10 @@ class ReactToRoleTests: XCTestCase {
             }
         }
 
-        /// To make sure these 2 `Task`s are triggered in order
+        /// To make sure these 2 are triggered in order
         try await Task.sleep(for: .milliseconds(200))
 
-        Task { await bot.connect() }
+        bot.connect()
 
         await waitFulfillment(of: [expectation], timeout: 10)
         

@@ -512,7 +512,7 @@ class DiscordClientTests: XCTestCase {
         case let .jsonError(jsonError) where jsonError.code == .invalidGuild:
             break
         case .none, .badStatusCode, .jsonError:
-            XCTFail("Unexpected error: \(leaveGuildError)")
+            XCTFail("Unexpected error: \(String(describing: leaveGuildError))")
         }
 
         _ = try await client.previewPruneGuild(
@@ -734,7 +734,7 @@ class DiscordClientTests: XCTestCase {
         case let .jsonError(jsonError) where jsonError.code == .invalidOAuth2AccessToken:
             break
         case .none, .badStatusCode, .jsonError:
-            XCTFail("Unexpected error: \(addMemberError)")
+            XCTFail("Unexpected error: \(String(describing: addMemberError))")
         }
 
         /// Can't really delete anyone, since can't add.
@@ -747,7 +747,7 @@ class DiscordClientTests: XCTestCase {
         case let .jsonError(jsonError) where jsonError.code == .unknownUser:
             break
         case .none, .badStatusCode, .jsonError:
-            XCTFail("Unexpected error: \(deleteMemberError)")
+            XCTFail("Unexpected error: \(String(describing: deleteMemberError))")
         }
 
         let newNick = "TestBotNick\(Int.random(in: 0..<100))"
@@ -1073,7 +1073,7 @@ class DiscordClientTests: XCTestCase {
         case let .jsonError(jsonError) where jsonError.code == .unknownIntegration:
             break
         case .none, .badStatusCode, .jsonError:
-            XCTFail("Unexpected error: \(integrationDeleteError)")
+            XCTFail("Unexpected error: \(String(describing: integrationDeleteError))")
         }
     }
 
@@ -1299,7 +1299,7 @@ class DiscordClientTests: XCTestCase {
         case let .jsonError(jsonError) where jsonError.code == .missingAccess:
             break
         case .none, .badStatusCode, .jsonError:
-            XCTFail("Unexpected error: \(vanityError)")
+            XCTFail("Unexpected error: \(String(describing: vanityError))")
         }
 
         let onboarding = try await client
@@ -1440,7 +1440,7 @@ class DiscordClientTests: XCTestCase {
         case .jsonError(let jsonError) where jsonError.code == .unknownVoiceState:
             break
         case .none, .badStatusCode, .jsonError:
-            XCTFail("Unexpected error: \(selfVoiceStateError)")
+            XCTFail("Unexpected error: \(String(describing: selfVoiceStateError))")
         }
 
         /// Can't set this because we can't join a voice/stage channel first.
@@ -1457,7 +1457,7 @@ class DiscordClientTests: XCTestCase {
         case .jsonError(let jsonError) where jsonError.code == .unknownVoiceState:
             break
         case .none, .badStatusCode, .jsonError:
-            XCTFail("Unexpected error: \(voiceStateError)")
+            XCTFail("Unexpected error: \(String(describing: voiceStateError))")
         }
     }
 
@@ -1541,7 +1541,7 @@ class DiscordClientTests: XCTestCase {
         case let .jsonError(jsonError) where jsonError.code == .invalidFormBodyOrInvalidContentType:
             break
         default:
-            XCTFail("Unexpected error: \(createGroupDmError)")
+            XCTFail("Unexpected error: \(String(describing: createGroupDmError))")
         }
 
         let addGroupDmUserError = try await client.addGroupDmUser(
@@ -1555,7 +1555,7 @@ class DiscordClientTests: XCTestCase {
             where jsonError.code == .cannotExecuteActionOnThisChannelType:
             break
         default:
-            XCTFail("Unexpected error: \(createGroupDmError)")
+            XCTFail("Unexpected error: \(String(describing: createGroupDmError))")
         }
 
         let deleteGroupDmUserError = try await client.deleteGroupDmUser(
@@ -1567,7 +1567,7 @@ class DiscordClientTests: XCTestCase {
         case let .jsonError(jsonError) where jsonError.code == .missingPermissions:
             break
         default:
-            XCTFail("Unexpected error: \(createGroupDmError)")
+            XCTFail("Unexpected error: \(String(describing: createGroupDmError))")
         }
     }
     
@@ -2606,13 +2606,21 @@ private actor GatewayTester {
                 messageCachingPolicy: .saveEditHistoryAndDeleted,
                 itemsLimit: .constant(1_000)
             )
-            await self.bot!.connect()
+            self.bot!.connect()
+
+            let expectation = Expectation(description: "GatewayTesterConnect")
+
             let stream = await self.bot!.makeEventsStream()
             Task {
                 for await event in stream {
+                    if case .ready = event.data {
+                        expectation.fulfill()
+                    }
                     EventHandler(event: event).handle()
                 }
             }
+
+            await Expectation.waitFulfillment(of: [expectation], timeout: 10)
         }
     }
 
