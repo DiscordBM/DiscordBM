@@ -1,7 +1,9 @@
 import enum NIOHTTP1.HTTPMethod
 
 public extension DiscordClient {
-    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    /// Get a file from CDN using the raw url.
+    /// This is useful to use with for example
+    /// a `DiscordChannel.Message.Attachment` object's `url` property.
     @inlinable
     func getFromCDN(url: String) async throws -> DiscordCDNResponse {
         let endpoint = LooseEndpoint(url: url)
