@@ -180,10 +180,14 @@ public actor BotGatewayManager: GatewayManager {
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
     }
-    
+
+    public nonisolated func connect() {
+        Task { self._connect }
+    }
+
     /// Starts connecting to Discord.
     /// `_state` must be set to an appropriate value before triggering this function.
-    public func connect() async {
+    func _connect() async {
         logger.debug("Connect method triggered")
         /// Guard we're attempting to connect too fast
         if let connectIn = await connectionBackoff.canPerformIn() {
@@ -235,7 +239,7 @@ public actor BotGatewayManager: GatewayManager {
                 "error": .string("\(error)")
             ])
             self._state.store(.noConnection, ordering: .relaxed)
-            await self.connect()
+            await self._connect()
         }
     }
     
@@ -336,7 +340,7 @@ extension BotGatewayManager {
                 self.sessionId = nil
             }
             self._state.store(.noConnection, ordering: .relaxed)
-            await self.connect()
+            await self._connect()
         case let .hello(hello):
             logger.debug("Received 'hello'")
             self.setupPingTask(
@@ -482,7 +486,7 @@ extension BotGatewayManager {
             )
             if self.canTryReconnect(code: ws.closeCode) {
                 self._state.store(.noConnection, ordering: .relaxed)
-                await self.connect()
+                await self._connect()
             } else {
                 self._state.store(.stopped, ordering: .relaxed)
                 self.connectionId.wrappingIncrement(ordering: .relaxed)
@@ -570,7 +574,7 @@ extension BotGatewayManager {
                     "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                 ])
                 self._state.store(.noConnection, ordering: .relaxed)
-                await self.connect()
+                await self._connect()
             }
         }
     }

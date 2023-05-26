@@ -13,7 +13,9 @@ public protocol GatewayManager: AnyActor {
     nonisolated var identifyPayload: Gateway.Identify { get }
     
     /// Starts connecting to Discord.
-    func connect() async
+    /// If you want to become aware of when the connection is established, you need
+    /// to listen for the related Gateway events such as 'ready' and 'resume'.
+    nonisolated func connect()
     /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
