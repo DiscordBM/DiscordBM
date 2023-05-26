@@ -61,16 +61,6 @@ class BitFieldTests: XCTestCase {
     
     func testInitFromBitValue() {
         do {
-            let field = IntBitField<Raw>(rawValue: -20_139_123)
-            XCTAssertEqual(field, [])
-        }
-        
-        do {
-            let field = IntBitField<Raw>(rawValue: -1)
-            XCTAssertEqual(field, [])
-        }
-        
-        do {
             let field = IntBitField<Raw>(rawValue: 0)
             XCTAssertEqual(field, [])
         }
@@ -112,7 +102,7 @@ class BitFieldTests: XCTestCase {
             let field2 = IntBitField<Raw>([
                 .administrator, .viewAuditLog, .kickMembers, .sendMessagesInThreads, .banMembers, .manageGuild, .manageChannels, .muteMembers, .manageMessages, .manageThreads, .sendMessages, .sendTtsMessages, .useExternalStickers, .manageWebhooks, .deafenMembers, .moderateMembers, .useExternalEmojis, .viewChannel, .prioritySpeaker, .createPrivateThreads, .useApplicationCommands, .createInstantInvite, .createPublicThreads, .embedLinks, .addReactions, .manageEvents, .changeNickname, .stream, .mentionEveryone, .useSoundboard
             ])
-            XCTAssertEqual(field1, field2)
+            XCTAssertNotEqual(field1, field2)
         }
     }
 

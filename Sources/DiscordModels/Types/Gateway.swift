@@ -511,7 +511,7 @@ public struct Gateway: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
-    public enum Intent: Int, Sendable, Codable, CaseIterable {
+    public enum Intent: UInt, Sendable, Codable, CaseIterable {
         case guilds = 0
         case guildMembers = 1
         case guildModeration = 2
@@ -1238,7 +1238,7 @@ public struct Gateway: Sendable, Codable {
         }
         
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-flags
-        public enum Flag: Int, Sendable {
+        public enum Flag: UInt, Sendable {
             case instance = 0
             case join = 1
             case spectate = 2

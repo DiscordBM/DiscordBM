@@ -50,7 +50,7 @@ public struct DiscordChannel: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
-    public enum Flag: Int, Sendable {
+    public enum Flag: UInt, Sendable {
         case pinned = 1
         case requireTag = 4
     }
@@ -205,7 +205,7 @@ extension DiscordChannel {
         }
         
         /// https://discord.com/developers/docs/resources/channel#message-object-message-flags
-        public enum Flag: Int, Sendable {
+        public enum Flag: UInt, Sendable {
             case crossposted = 0
             case isCrosspost = 1
             case suppressEmbeds = 2

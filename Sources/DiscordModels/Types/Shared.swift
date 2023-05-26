@@ -470,9 +470,9 @@ extension DiscordTimestamp: Sendable { }
 
 private let bitFieldLogger = DiscordGlobalConfiguration.makeDecodeLogger("DBM.BitField")
 
-public protocol BitField: OptionSet, CustomStringConvertible where RawValue == Int {
-    associatedtype R: RawRepresentable where R: Hashable, R.RawValue == Int
-    var rawValue: Int { get set }
+public protocol BitField: OptionSet, CustomStringConvertible where RawValue == UInt {
+    associatedtype R: RawRepresentable where R: Hashable, R.RawValue == UInt
+    var rawValue: UInt { get set }
 }
 
 public extension BitField {
@@ -511,12 +511,12 @@ public extension BitField {
     }
 
     /// Returns the `R` values in this bit field.
-    func representableValues() -> (values: Set<R>, unknown: Set<Int>) {
+    func representableValues() -> (values: Set<R>, unknown: Set<UInt>) {
         var bitValue = self.rawValue
         var values: ContiguousArray<R> = []
-        var unknownValues: Set<Int> = []
+        var unknownValues: Set<UInt> = []
         guard bitValue > 0 else { return ([], []) }
-        var counter = 0
+        var counter: UInt = 0
         while bitValue != 0 {
             if (bitValue & 1) == 1 {
                 if let newValue = R(rawValue: counter) {
@@ -548,21 +548,21 @@ public extension BitField {
 }
 
 public struct IntBitField<R>: BitField
-where R: RawRepresentable & Hashable, R.RawValue == Int {
-    public var rawValue: Int
+where R: RawRepresentable & Hashable, R.RawValue == UInt {
+    public var rawValue: UInt
 
     public init() {
         self.rawValue = 0
     }
 
-    public init(rawValue: Int) {
+    public init(rawValue: UInt) {
         self.rawValue = rawValue
     }
 }
 
 extension IntBitField: Codable {
-    public init(from decoder: Decoder) throws {
-        self.rawValue = try Int(from: decoder)
+    public init(from decoder: any Decoder) throws {
+        self.rawValue = try UInt(from: decoder)
 #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
         let (values, unknownValues) = self.representableValues()
         if !unknownValues.isEmpty {
@@ -576,7 +576,7 @@ extension IntBitField: Codable {
 #endif
     }
 
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         try self.rawValue.encode(to: encoder)
     }
 }
@@ -585,7 +585,7 @@ extension IntBitField: Sendable where R: Sendable { }
 
 /// A bit-field that decode/encodes itself as a string.
 public struct StringBitField<R>: BitField
-where R: RawRepresentable, R: Hashable, R.RawValue == Int {
+where R: RawRepresentable, R: Hashable, R.RawValue == UInt {
     
     /// Read `helpAnchor` for help about each error case.
     public enum DecodingError: Swift.Error, CustomStringConvertible {
@@ -600,13 +600,13 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
         }
     }
 
-    public var rawValue: Int
+    public var rawValue: UInt
 
     public init() {
         self.rawValue = 0
     }
 
-    public init(rawValue: Int) {
+    public init(rawValue: UInt) {
         self.rawValue = rawValue
     }
 }
@@ -614,7 +614,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
 extension StringBitField: Codable {
     public init(from decoder: any Decoder) throws {
         let string = try String(from: decoder)
-        guard let int = Int(string) else {
+        guard let int = UInt(string) else {
             throw DecodingError.notRepresentingInt(string)
         }
         self.rawValue = int

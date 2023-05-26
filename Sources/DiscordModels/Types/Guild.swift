@@ -6,7 +6,7 @@ public struct Guild: Sendable, Codable {
     public struct Member: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags
-        public enum Flag: Int, Sendable {
+        public enum Flag: UInt, Sendable {
             case didRejoin = 0
             case completedOnboarding = 1
             case bypassVerification = 2
@@ -119,7 +119,7 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-system-channel-flags
-    public enum SystemChannelFlag: Int, Sendable {
+    public enum SystemChannelFlag: UInt, Sendable {
         case suppressJoinNotifications = 0
         case suppressPremiumSubscriptions = 1
         case suppressGuildReminderNotifications = 2

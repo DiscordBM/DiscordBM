@@ -11,7 +11,7 @@ public struct DiscordUser: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/user#user-object-user-flags
-    public enum Flag: Int, Sendable {
+    public enum Flag: UInt, Sendable {
         case staff = 0
         case partner = 1
         case hypeSquad = 2
