@@ -282,7 +282,7 @@ extension DiscordChannel {
         public var edited_timestamp: DiscordTimestamp?
         public var tts: Bool
         public var mention_everyone: Bool
-        public var mentions: [DiscordUser]
+        public var mentions: [MentionUser]
         public var mention_roles: [RoleSnowflake]
         public var mention_channels: [ChannelMention]?
         public var attachments: [Attachment]
@@ -319,7 +319,7 @@ extension DiscordChannel {
         public var edited_timestamp: DiscordTimestamp?
         public var tts: Bool?
         public var mention_everyone: Bool?
-        public var mentions: [DiscordUser]?
+        public var mentions: [MentionUser]?
         public var mention_roles: [RoleSnowflake]?
         public var mention_channels: [DiscordChannel.Message.ChannelMention]?
         public var attachments: [DiscordChannel.Message.Attachment]?

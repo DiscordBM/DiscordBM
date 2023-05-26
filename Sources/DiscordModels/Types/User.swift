@@ -68,6 +68,30 @@ public struct PartialUser: Sendable, Codable {
     public var public_flags: IntBitField<DiscordUser.Flag>?
 }
 
+/// A ``DiscordUser`` with an extra `member` field.
+/// https://discord.com/developers/docs/topics/gateway-events#message-create-message-create-extra-fields
+/// https://discord.com/developers/docs/resources/user#user-object-user-structure
+public struct MentionUser: Sendable, Codable {
+    public var id: UserSnowflake
+    public var username: String
+    public var discriminator: String
+    public var global_name: String?
+    public var avatar: String?
+    public var bot: Bool?
+    public var system: Bool?
+    public var mfa_enabled: Bool?
+    public var banner: String?
+    public var accent_color: DiscordColor?
+    public var locale: DiscordLocale?
+    public var verified: Bool?
+    public var email: String?
+    public var flags: IntBitField<DiscordUser.Flag>?
+    public var premium_type: DiscordUser.PremiumKind?
+    public var public_flags: IntBitField<DiscordUser.Flag>?
+    public var member: Guild.PartialMember?
+}
+
+
 extension DiscordUser {
     /// https://discord.com/developers/docs/resources/user#connection-object-connection-structure
     public struct Connection: Sendable, Codable {
