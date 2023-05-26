@@ -1263,7 +1263,7 @@ private actor FakeGatewayManager: GatewayManager {
     nonisolated let id: UInt = 0
     nonisolated let state: GatewayState = .stopped
     nonisolated let identifyPayload: Gateway.Identify = .init(token: "", intents: [])
-    func connect() async { }
+    nonisolated func connect() { }
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async { }
     func updatePresence(payload: Gateway.Identify.Presence) async { }
     func updateVoiceState(payload: VoiceStateUpdate) async { }

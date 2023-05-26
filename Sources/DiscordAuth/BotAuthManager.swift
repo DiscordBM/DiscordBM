@@ -1,3 +1,4 @@
+import DiscordModels
 
 private let baseURLs = (
     authorization: "https://discord.com/api/oauth2/authorize",
@@ -15,19 +16,24 @@ public struct BotAuthManager: Sendable {
     }
     
     /// The bot will immediately join servers which authorize your bot through this URL.
+    /// https://discord.com/developers/docs/topics/oauth2#bot-authorization-flow
     public func makeBotAuthorizationURL(
         withApplicationCommands: Bool = true,
-        permissions: [Permission] = []
+        permissions: [Permission] = [],
+        guildId: GuildSnowflake? = nil,
+        disableGuildSelect: Bool? = nil
     ) -> String {
         var scopes: [OAuth2Scope] = [.bot]
         if withApplicationCommands {
             scopes.append(.applicationsCommands)
         }
-        let permissions = StringBitField<Permission>(permissions).toBitValue()
-        let queries = [
+        let permissions = StringBitField(permissions).toBitValue()
+        let queries: [(String, String?)] = [
             ("client_id", self.clientId),
             ("permissions", "\(permissions)"),
-            ("scope", scopes.map(\.rawValue).joined(separator: " "))
+            ("scope", scopes.map(\.rawValue).joined(separator: " ")),
+            ("guild_id", guildId?.value),
+            ("disable_guild_select", disableGuildSelect?.description)
         ]
         return baseURLs.authorization + queries.makeForURLQuery()
     }
