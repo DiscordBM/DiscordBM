@@ -4,6 +4,7 @@ import AsyncHTTPClient
 import Atomics
 import Logging
 import DiscordModels
+import enum NIOCore.ChannelError
 import enum NIOWebSocket.WebSocketErrorCode
 
 public actor BotGatewayManager: GatewayManager {
@@ -612,12 +613,19 @@ extension BotGatewayManager {
                             opcode: .init(encodedWebSocketOpcode: opcode)!
                         )
                     } catch {
-                        self.logger.error("Could not send payload through websocket", metadata: [
-                            "error": .string("\(error)"),
-                            "payload": .string("\(payload)"),
-                            "opcode": .stringConvertible(opcode),
-                            "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-                        ])
+                        if let channelError = error as? ChannelError,
+                           case .ioOnClosedChannel = channelError {
+                            self.logger.error("Received 'ChannelError.ioOnClosedChannel' error while sending payload through web-socket. Will fully disconnect and reconnect again")
+                            await self.disconnect()
+                            await self._connect()
+                        } else {
+                            self.logger.error("Could not send payload through web-socket", metadata: [
+                                "error": .string("\(error)"),
+                                "payload": .string("\(payload)"),
+                                "opcode": .stringConvertible(opcode),
+                                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                            ])
+                        }
                     }
                 } else {
                     /// Pings aka `heartbeat`s are fine if they are sent when a ws connection

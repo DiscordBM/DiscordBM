@@ -20,12 +20,15 @@ public protocol Endpoint: Sendable, CustomStringConvertible {
 public enum AnyEndpoint: Endpoint {
     case api(APIEndpoint)
     case cdn(CDNEndpoint)
+    case loose(LooseEndpoint)
     
     public var url: String {
         switch self {
         case let .api(endpoint):
             return endpoint.url
         case let .cdn(endpoint):
+            return endpoint.url
+        case let .loose(endpoint):
             return endpoint.url
         }
     }
@@ -36,6 +39,8 @@ public enum AnyEndpoint: Endpoint {
             return endpoint.urlDescription
         case let .cdn(endpoint):
             return endpoint.urlDescription
+        case let .loose(endpoint):
+            return endpoint.urlDescription
         }
     }
     
@@ -44,6 +49,8 @@ public enum AnyEndpoint: Endpoint {
         case let .api(endpoint):
             return endpoint.httpMethod
         case let .cdn(endpoint):
+            return endpoint.httpMethod
+        case let .loose(endpoint):
             return endpoint.httpMethod
         }
     }
@@ -54,6 +61,8 @@ public enum AnyEndpoint: Endpoint {
             return endpoint.countsAgainstGlobalRateLimit
         case let .cdn(endpoint):
             return endpoint.countsAgainstGlobalRateLimit
+        case let .loose(endpoint):
+            return endpoint.countsAgainstGlobalRateLimit
         }
     }
     
@@ -62,6 +71,8 @@ public enum AnyEndpoint: Endpoint {
         case let .api(endpoint):
             return endpoint.requiresAuthorizationHeader
         case let .cdn(endpoint):
+            return endpoint.requiresAuthorizationHeader
+        case let .loose(endpoint):
             return endpoint.requiresAuthorizationHeader
         }
     }
@@ -72,6 +83,8 @@ public enum AnyEndpoint: Endpoint {
             return endpoint.parameters
         case let .cdn(endpoint):
             return endpoint.parameters
+        case let .loose(endpoint):
+            return endpoint.parameters
         }
     }
     
@@ -81,15 +94,19 @@ public enum AnyEndpoint: Endpoint {
             return endpoint.id
         case let .cdn(endpoint):
             return -endpoint.id
+        case let .loose(endpoint):
+            return endpoint.id
         }
     }
     
     public var description: String {
         switch self {
         case let .api(endpoint):
-            return "api(\(endpoint))"
+            return "AnyEndpoint.api(\(endpoint))"
         case let .cdn(endpoint):
-            return "cdn(\(endpoint))"
+            return "AnyEndpoint.cdn(\(endpoint))"
+        case let .loose(endpoint):
+            return "AnyEndpoint.loose(\(endpoint))"
         }
     }
 }

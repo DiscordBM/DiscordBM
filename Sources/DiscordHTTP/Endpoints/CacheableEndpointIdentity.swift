@@ -2,6 +2,7 @@
 public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertible {
     case api(CacheableAPIEndpointIdentity)
     case cdn(CDNEndpointIdentity)
+    case loose(LooseEndpoint)
     
     init? (endpoint: AnyEndpoint) {
         switch endpoint {
@@ -13,15 +14,19 @@ public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertib
             }
         case let .cdn(endpoint):
             self = .cdn(CDNEndpointIdentity(endpoint: endpoint))
+        case let .loose(endpoint):
+            self = .loose(endpoint)
         }
     }
     
     public var description: String {
         switch self {
         case .api(let endpoint):
-            return "api(\(endpoint))"
+            return "CacheableEndpointIdentity.api(\(endpoint))"
         case .cdn(let endpoint):
-            return "cdn(\(endpoint))"
+            return "CacheableEndpointIdentity.cdn(\(endpoint))"
+        case .loose(let endpoint):
+            return "CacheableEndpointIdentity.loose(\(endpoint))"
         }
     }
 }

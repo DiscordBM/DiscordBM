@@ -32,6 +32,12 @@ public struct DiscordHTTPRequest: Sendable {
         self.queries = queries
         self.headers = headers
     }
+
+    public init(to endpoint: LooseEndpoint) {
+        self.endpoint = .loose(endpoint)
+        self.queries = []
+        self.headers = [:]
+    }
 }
 
 /// Represents a raw Discord HTTP response.

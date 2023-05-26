@@ -989,13 +989,13 @@ class DiscordClientTests: XCTestCase {
             .getGuildWidgetPng(guildId: Constants.guildId)
             .getFile()
 
-        XCTAssertGreaterThan(widgetPng1.data.readableBytes, 5)
+        XCTAssertGreaterThan(widgetPng1.data.readableBytes, 100)
 
         let widgetPng2 = try await client
             .getGuildWidgetPng(guildId: Constants.guildId, style: .banner4)
             .getFile()
 
-        XCTAssertGreaterThan(widgetPng2.data.readableBytes, 5)
+        XCTAssertGreaterThan(widgetPng2.data.readableBytes, 100)
 
         let updatedWidget2 = try await client.updateGuildWidgetSettings(
             guildId: Constants.guildId,
@@ -1135,7 +1135,7 @@ class DiscordClientTests: XCTestCase {
             cover: imageHash
         ).getFile()
 
-        XCTAssertGreaterThan(eventCover.data.readableBytes, 5)
+        XCTAssertGreaterThan(eventCover.data.readableBytes, 100)
 
         let eventsWithCount = try await client.listGuildScheduledEvents(
             guildId: Constants.guildId,
@@ -1412,7 +1412,7 @@ class DiscordClientTests: XCTestCase {
             .getCDNStickerPackBanner(assetId: firstPack.banner_asset_id!)
             .getFile()
 
-        XCTAssertGreaterThan(packBanner.data.readableBytes, 5)
+        XCTAssertGreaterThan(packBanner.data.readableBytes, 100)
     }
 
     func testVoice() async throws {
@@ -2143,7 +2143,7 @@ class DiscordClientTests: XCTestCase {
             let file = try await client.getCDNCustomEmoji(
                 emojiId: "1073704788400820324"
             ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
             XCTAssertEqual(file.extension, "png")
             XCTAssertEqual(file.filename, "1073704788400820324.png")
         }
@@ -2153,7 +2153,7 @@ class DiscordClientTests: XCTestCase {
                 guildId: "922186320275722322",
                 icon: "a_6367dd2460a846748ad133206c910da5"
             ).getFile(overrideName: "guildIcon")
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
             XCTAssertEqual(file.extension, "gif")
             XCTAssertEqual(file.filename, "guildIcon.gif")
         }
@@ -2163,7 +2163,7 @@ class DiscordClientTests: XCTestCase {
                 guildId: "922186320275722322",
                 splash: "276ba186b5208a74344706941eb7fe8d"
             ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
         
         do {
@@ -2171,7 +2171,7 @@ class DiscordClientTests: XCTestCase {
                 guildId: "922186320275722322",
                 splash: "178be4921b08b761d9d9d6117c6864e2"
             ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
         
         do {
@@ -2179,7 +2179,7 @@ class DiscordClientTests: XCTestCase {
                 guildId: "922186320275722322",
                 banner: "6e2e4d93e102a997cc46d15c28b0dfa0"
             ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
         
 //        do {
@@ -2187,14 +2187,14 @@ class DiscordClientTests: XCTestCase {
 //                userId: UserSnowflake,
 //                banner: String
 //            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
         
         do {
             let file = try await client.getCDNDefaultUserAvatar(
                 discriminator: 0517
             ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
             XCTAssertEqual(file.extension, "png")
         }
         
@@ -2203,7 +2203,7 @@ class DiscordClientTests: XCTestCase {
                 userId: "290483761559240704",
                 avatar: "2df0a0198e00ba23bf2dc728c4db94d9"
             ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
         
 //        do {
@@ -2212,21 +2212,21 @@ class DiscordClientTests: XCTestCase {
 //                userId: "816681064855502868",
 //                avatar: "b94e12ce3debd281000d5291eec2b502"
 //            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
 //
 //        do {
 //            let file = try await client.getCDNApplicationIcon(
 //                appId: ApplicationSnowflake, icon: String
 //            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
 //
 //        do {
 //            let file = try await client.getCDNApplicationCover(
 //                appId: ApplicationSnowflake, cover: String
 //            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
         
         do {
@@ -2234,14 +2234,14 @@ class DiscordClientTests: XCTestCase {
                 appId: "401518684763586560",
                 assetId: "920476458709819483"
             ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
         
 //        do {
 //            let file = try await client.getCDNAchievementIcon(
 //                appId: ApplicationSnowflake, achievementId: String, icon: String
 //            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
         
 //        do {
@@ -2249,21 +2249,21 @@ class DiscordClientTests: XCTestCase {
 //                appId: ApplicationSnowflake,
 //                assetId: String
 //            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
         
 //        do {
 //            let file = try await client.getCDNTeamIcon(
 //                teamId: String, icon: String
 //            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
         
         do {
             let file = try await client.getCDNSticker(
                 stickerId: "975144332535406633"
             ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
         
         do {
@@ -2271,7 +2271,7 @@ class DiscordClientTests: XCTestCase {
                 roleId: "984557789999407214",
                 icon: "2cba6c72f7abd52885359054e09ab7a2"
             ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 10)
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
 
 //
@@ -2279,7 +2279,7 @@ class DiscordClientTests: XCTestCase {
 //            let file = try await client.getCDNGuildMemberBanner(
 //                guildId: GuildSnowflake, userId: UserSnowflake, banner: String
 //            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 10)
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
 
         /// `getCDNGuildScheduledEventCover()` is tested with guild-scheduled-event tests.
@@ -2312,6 +2312,11 @@ class DiscordClientTests: XCTestCase {
             XCTAssertFalse(attachment.id.value.isEmpty)
             XCTAssertFalse(attachment.url.isEmpty)
             XCTAssertFalse(attachment.proxy_url.isEmpty)
+
+            let redownloaded = try await client
+                .getFromCDN(url: attachment.url)
+                .getFile()
+            XCTAssertGreaterThan(redownloaded.data.readableBytes, 100)
         }
         
         do {
@@ -2339,6 +2344,11 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(image.width, 1200)
             XCTAssertFalse(image.url.asString.isEmpty)
             XCTAssertFalse(image.proxy_url?.isEmpty == true)
+
+            let redownloaded = try await client
+                .getFromCDN(url: image.url.asString)
+                .getFile()
+            XCTAssertGreaterThan(redownloaded.data.readableBytes, 100)
         }
     }
     

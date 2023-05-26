@@ -578,17 +578,21 @@ public struct ClientConfiguration: Sendable {
         /// This instance's default TTL (Time-To-Live) for CDN endpoints.
         @usableFromInline
         var cdnEndpointsDefaultTTL: Double?
+        @usableFromInline
+        var looseEndpointsTTL: Double?
 
         init(
             apiEndpointsStorage: [CacheableAPIEndpointIdentity: Double] = [:],
             cdnEndpointsStorage: [CDNEndpointIdentity: Double] = [:],
             apiEndpointsDefaultTTL: Double? = nil,
-            cdnEndpointsDefaultTTL: Double? = nil
+            cdnEndpointsDefaultTTL: Double? = nil,
+            looseEndpointsTTL: Double? = nil
         ) {
             self.apiEndpointsStorage = apiEndpointsStorage
             self.cdnEndpointsStorage = cdnEndpointsStorage
             self.apiEndpointsDefaultTTL = apiEndpointsDefaultTTL
             self.cdnEndpointsDefaultTTL = cdnEndpointsDefaultTTL
+            self.looseEndpointsTTL = looseEndpointsTTL
 
             /// Necessary for `BotGatewayManager`.
             /// Users realistically shouldn't need to call these endpoints anyway.
@@ -606,7 +610,8 @@ public struct ClientConfiguration: Sendable {
             apiEndpoints: [CacheableAPIEndpointIdentity: Double] = [:],
             cdnEndpoints: [CDNEndpointIdentity: Double] = [:],
             apiEndpointsDefaultTTL: Double? = 5,
-            cdnEndpointsDefaultTTL: Double? = nil
+            cdnEndpointsDefaultTTL: Double? = nil,
+            looseEndpointsTTL: Double? = nil
         ) -> CachingBehavior {
             CachingBehavior(
                 apiEndpointsStorage: apiEndpoints,
@@ -644,6 +649,8 @@ public struct ClientConfiguration: Sendable {
                 guard let ttl = self.cdnEndpointsStorage[cdnEndpointIdentity]
                 else { return self.cdnEndpointsDefaultTTL }
                 return ttl == 0 ? nil : ttl
+            case .loose:
+                return self.looseEndpointsTTL
             }
         }
     }
@@ -912,6 +919,9 @@ actor ClientCache {
             case .cdn(let endpoint):
                 hasher.combine(1)
                 hasher.combine(endpoint.rawValue)
+            case .loose(let endpoint):
+                hasher.combine(2)
+                endpoint.hash(into: &hasher)
             }
             for param in parameters {
                 hasher.combine(param)
