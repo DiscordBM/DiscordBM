@@ -131,10 +131,10 @@ public enum Payloads {
                 validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
                 allowedMentions?.validate()
                 validateOnlyContains(
-                    flags?.values,
+                    flags,
                     name: "flags",
                     reason: "Can only contain 'suppressEmbeds' and 'ephemeral'",
-                    where: { [.suppressEmbeds, .ephemeral].contains($0) }
+                    allowed: [.suppressEmbeds, .ephemeral]
                 )
                 attachments?.validate()
                 embeds?.validate()
@@ -425,10 +425,10 @@ public enum Payloads {
                 names: "embeds"
             )
             validateOnlyContains(
-                flags?.values,
+                flags,
                 name: "flags",
                 reason: "Can only contain 'suppressEmbeds' or 'suppressNotifications'",
-                where: { [.suppressEmbeds, .suppressNotifications].contains($0) }
+                allowed: [.suppressEmbeds, .suppressNotifications]
             )
             attachments?.validate()
             embeds?.validate()
@@ -473,10 +473,10 @@ public enum Payloads {
                 names: "embeds"
             )
             validateOnlyContains(
-                flags?.values,
+                flags,
                 name: "flags",
                 reason: "Can only contain 'suppressEmbeds'",
-                where: { $0 == .suppressEmbeds }
+                allowed: [.suppressEmbeds]
             )
             allowed_mentions?.validate()
             attachments?.validate()
@@ -538,10 +538,10 @@ public enum Payloads {
                 names: "embeds"
             )
             validateOnlyContains(
-                flags?.values,
+                flags,
                 name: "flags",
                 reason: "Can only contain 'suppressEmbeds'",
-                where: { $0 == .suppressEmbeds }
+                allowed: [.suppressEmbeds]
             )
             allowed_mentions?.validate()
             attachments?.validate()
@@ -749,10 +749,10 @@ public enum Payloads {
                     names: "embeds"
                 )
                 validateOnlyContains(
-                    flags?.values,
+                    flags,
                     name: "flags",
                     reason: "Can only contain 'suppressEmbeds' or 'suppressNotifications'",
-                    where: { [.suppressEmbeds, .suppressNotifications].contains($0) }
+                    allowed: [.suppressEmbeds, .suppressNotifications]
                 )
                 attachments?.validate()
                 embeds?.validate()
@@ -989,10 +989,10 @@ public enum Payloads {
             validateNumberInRangeOrNil(bitrate, min: 8_000, max: 384_000, name: "bitrate")
             validateNumberInRangeOrNil(user_limit, min: 0, max: 10_000, name: "user_limit")
             validateOnlyContains(
-                flags?.values,
+                flags,
                 name: "flags",
                 reason: "Can only contain 'requireTag'",
-                where: { .requireTag == $0 }
+                allowed: [.requireTag]
             )
             validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
         }
@@ -1029,10 +1029,10 @@ public enum Payloads {
                 name: "rate_limit_per_user"
             )
             validateOnlyContains(
-                flags?.values,
+                flags,
                 name: "flags",
                 reason: "Can only contain 'pinned'",
-                where: { .pinned == $0 }
+                allowed: [.pinned]
             )
             validateElementCountDoesNotExceed(applied_tags, max: 5, name: "applied_tags")
         }

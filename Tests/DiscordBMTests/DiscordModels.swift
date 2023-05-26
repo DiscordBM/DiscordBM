@@ -204,7 +204,7 @@ class DiscordModelsTests: XCTestCase {
         XCTAssertThrowsError(try Reaction.unicodeEmoji("😀😀"))
     }
     
-    func testJSONErrorDecoding() throws {
+    func testJSONErrorDecodingJSONError() throws {
         let json = """
         {
         "message": "Invalid authentication token",
@@ -222,6 +222,26 @@ class DiscordModelsTests: XCTestCase {
         if case let .jsonError(jsonError) = error {
             XCTAssertEqual(jsonError.message, "Invalid authentication token")
             XCTAssertEqual(jsonError.code, .invalidAuthenticationToken)
+        } else {
+            XCTFail("\(error) was not a 'jsonError'")
+        }
+    }
+
+    func testJSONErrorDecodingBasStatusCode() throws {
+        let json = """
+        {
+        "some": "thing"
+        }
+        """
+        let data = ByteBuffer(string: json)
+        let response = DiscordHTTPResponse(
+            host: "discord.com",
+            status: .badGateway,
+            version: .http1_1,
+            body: data
+        )
+        let error =  try XCTUnwrap(response.decodeError())
+        if case .badStatusCode = error {
         } else {
             XCTFail("\(error) was not a 'jsonError'")
         }

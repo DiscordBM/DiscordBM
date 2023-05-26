@@ -70,7 +70,7 @@ class ToleratesDecodeTests: XCTestCase {
                 from: Data(text.utf8)
             )
             XCTAssertEqual(decoded.scopes.count, 5)
-            XCTAssertEqual(decoded.permissions.toBitValue(), 15)
+            XCTAssertEqual(decoded.permissions.rawValue, 15)
         }
     }
 }

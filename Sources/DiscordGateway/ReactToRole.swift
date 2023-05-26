@@ -139,8 +139,7 @@ public actor ReactToRoleHandler {
                 if let role = await cache.guilds[guildId]?.roles.first(where: {
                     $0.name == role.name &&
                     $0.color == role.color &&
-                    $0.permissions.values.sorted(by: { $0.rawValue > $1.rawValue })
-                    == (role.permissions?.values ?? []).sorted(by: { $0.rawValue > $1.rawValue })
+                    $0.permissions.rawValue == (role.permissions?.rawValue ?? 0)
                 }) {
                     return role
                 } else {
@@ -153,8 +152,7 @@ public actor ReactToRoleHandler {
                     .first {
                         $0.name == role.name &&
                         $0.color == role.color &&
-                        $0.permissions.values.sorted(by: { $0.rawValue > $1.rawValue })
-                        == (role.permissions?.values ?? []).sorted(by: { $0.rawValue > $1.rawValue })
+                        $0.permissions.rawValue == (role.permissions?.rawValue ?? 0)
                     }
             }
         }
@@ -713,7 +711,7 @@ private extension Payloads.GuildRole {
     init(role: Role, client: any DiscordClient) async throws {
         self = .init(
             name: role.name,
-            permissions: Array(role.permissions.values),
+            permissions: Array(role.permissions.representableValues().values),
             color: role.color,
             hoist: role.hoist,
             icon: nil,
@@ -731,8 +729,8 @@ private extension Payloads.GuildRole {
     
     static func != (lhs: Self, rhs: Self) -> Bool {
         !(lhs.name == rhs.name &&
-          (lhs.permissions?.values ?? []).sorted(by: { $0.rawValue > $1.rawValue })
-          == (rhs.permissions?.values ?? []).sorted(by: { $0.rawValue > $1.rawValue }) &&
+          (lhs.permissions?.representableValues().values ?? []).sorted(by: { $0.rawValue > $1.rawValue })
+          == (rhs.permissions?.representableValues().values ?? []).sorted(by: { $0.rawValue > $1.rawValue }) &&
           lhs.color == rhs.color &&
           lhs.hoist == rhs.hoist &&
           lhs.icon?.file.data == rhs.icon?.file.data &&

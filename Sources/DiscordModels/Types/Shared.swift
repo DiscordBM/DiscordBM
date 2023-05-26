@@ -468,27 +468,51 @@ extension DiscordTimestamp: Sendable { }
 
 //MARK: - Bitfield
 
-/// A protocol for bit-fields.
-public protocol BitField: ExpressibleByArrayLiteral {
-    associatedtype R: RawRepresentable where R: Hashable, R.RawValue == Int
-    var values: Set<R> { get set }
-    init(_ values: Set<R>)
-}
-
 private let bitFieldLogger = DiscordGlobalConfiguration.makeDecodeLogger("DBM.BitField")
 
-extension BitField {
-    
-    public init(arrayLiteral elements: R...) {
-        self.init(Set(elements))
+public protocol BitField: OptionSet, CustomStringConvertible where RawValue == Int {
+    associatedtype R: RawRepresentable where R: Hashable, R.RawValue == Int
+    var rawValue: Int { get set }
+}
+
+public extension BitField {
+
+    func contains(_ member: R) -> Bool {
+        ((self.rawValue >> member.rawValue) & 1) == 1
     }
-    
-    public init(_ elements: [R]) {
-        self.init(Set(elements))
+
+    @discardableResult
+    mutating func insert(_ newMember: __owned R) -> (inserted: Bool, memberAfterInsert: R) {
+        if self.contains(newMember) {
+            return (inserted: false, memberAfterInsert: newMember)
+        } else {
+            self.rawValue |= (1 << newMember.rawValue)
+            return (inserted: true, memberAfterInsert: newMember)
+        }
     }
-    
-    internal static func fromBitValue(_ bitValue: Int) -> (values: Set<R>, unknown: Set<Int>) {
-        var bitValue = bitValue
+
+    @discardableResult
+    mutating func remove(_ member: R) -> R? {
+        if self.contains(member) {
+            self.rawValue = self.rawValue - (1 << member.rawValue)
+            return member
+        } else {
+            return nil
+        }
+    }
+
+    @discardableResult
+    mutating func update(with newMember: __owned R) -> R? {
+        self.insert(newMember).memberAfterInsert
+    }
+
+    var description: String {
+        "\(Swift._typeName(Self.self))(rawValue: \(self.rawValue))"
+    }
+
+    /// Returns the `R` values in this bit field.
+    func representableValues() -> (values: Set<R>, unknown: Set<Int>) {
+        var bitValue = self.rawValue
         var values: ContiguousArray<R> = []
         var unknownValues: Set<Int> = []
         guard bitValue > 0 else { return ([], []) }
@@ -506,34 +530,41 @@ extension BitField {
         }
         return (Set(values), unknownValues)
     }
-    
-    public init(bitValue: Int) {
-        self.init(Self.fromBitValue(bitValue).values)
+
+    @inlinable
+    init<S: Sequence>(_ elements: S) where S.Element == R {
+        self.init(
+            rawValue: elements
+                .map(\.rawValue)
+                .map({ 1 << $0 })
+                .reduce(into: 0, +=)
+        )
     }
-    
-    public func toBitValue() -> Int {
-        values.map(\.rawValue)
-            .map({ 1 << $0 })
-            .reduce(into: 0, +=)
+
+    @inlinable
+    init(arrayLiteral elements: R...) {
+        self.init(elements)
     }
 }
 
-/// A bit-field that decode/encodes itself as an integer.
-public struct IntBitField<R>: BitField, Codable
-where R: RawRepresentable, R: Hashable, R.RawValue == Int {
-    
-    public var values: Set<R>
-    
-    public init(_ values: Set<R>) {
-        self.values = values
+public struct IntBitField<R>: BitField
+where R: RawRepresentable & Hashable, R.RawValue == Int {
+    public var rawValue: Int
+
+    public init() {
+        self.rawValue = 0
     }
-    
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let int = try container.decode(Int.self)
-        
-        let unknownValues: Set<Int>
-        (self.values, unknownValues) = Self.fromBitValue(int)
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+}
+
+extension IntBitField: Codable {
+    public init(from decoder: Decoder) throws {
+        self.rawValue = try Int(from: decoder)
+#if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
+        let (values, unknownValues) = self.representableValues()
         if !unknownValues.isEmpty {
             bitFieldLogger.warning("Found bit-field unknown values", metadata: [
                 "unknownValues": .stringConvertible(unknownValues),
@@ -542,19 +573,18 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
                 "codingPath": .stringConvertible(decoder.codingPath.map(\.stringValue))
             ])
         }
+#endif
     }
-    
-    public func encode(to encoder: any Encoder) throws {
-        var container = encoder.singleValueContainer()
-        let value = self.toBitValue()
-        try container.encode(value)
+
+    public func encode(to encoder: Encoder) throws {
+        try self.rawValue.encode(to: encoder)
     }
 }
 
 extension IntBitField: Sendable where R: Sendable { }
 
 /// A bit-field that decode/encodes itself as a string.
-public struct StringBitField<R>: BitField, Codable
+public struct StringBitField<R>: BitField
 where R: RawRepresentable, R: Hashable, R.RawValue == Int {
     
     /// Read `helpAnchor` for help about each error case.
@@ -569,22 +599,28 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
             }
         }
     }
-    
-    public var values: Set<R>
-    
-    public init(_ values: Set<R>) {
-        self.values = values
+
+    public var rawValue: Int
+
+    public init() {
+        self.rawValue = 0
     }
-    
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+}
+
+extension StringBitField: Codable {
     public init(from decoder: any Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let string = try container.decode(String.self)
+        let string = try String(from: decoder)
         guard let int = Int(string) else {
             throw DecodingError.notRepresentingInt(string)
         }
-        
-        let unknownValues: Set<Int>
-        (self.values, unknownValues) = Self.fromBitValue(int)
+        self.rawValue = int
+
+#if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
+        let (values, unknownValues) = self.representableValues()
         if !unknownValues.isEmpty {
             bitFieldLogger.warning("Found bit-field unknown values", metadata: [
                 "unknownValues": .stringConvertible(unknownValues),
@@ -593,12 +629,11 @@ where R: RawRepresentable, R: Hashable, R.RawValue == Int {
                 "codingPath": .stringConvertible(decoder.codingPath.map(\.stringValue))
             ])
         }
+#endif
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
-        var container = encoder.singleValueContainer()
-        let value = self.toBitValue()
-        try container.encode("\(value)")
+        try "\(self.rawValue)".encode(to: encoder)
     }
 }
 

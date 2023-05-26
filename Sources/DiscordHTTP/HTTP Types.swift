@@ -150,12 +150,16 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
 }
 
 /// Represents a Discord HTTP response for endpoints that return some data in the body.
-public struct DiscordClientResponse<C>: Sendable where C: Codable {
+public struct DiscordClientResponse<C>: Sendable, CustomStringConvertible where C: Codable {
     /// The raw http response.
     public let httpResponse: DiscordHTTPResponse
     
     public init(httpResponse: DiscordHTTPResponse) {
         self.httpResponse = httpResponse
+    }
+
+    public var description: String {
+        "DiscordClientResponse<\(Swift._typeName(C.self, qualified: true))>(httpResponse: \(self.httpResponse))"
     }
     
     /// Throws an error if the response does not indicate success.
@@ -189,14 +193,8 @@ public struct DiscordClientResponse<C>: Sendable where C: Codable {
     }
 }
 
-extension DiscordClientResponse: CustomStringConvertible {
-    public var description: String {
-        "DiscordClientResponse<\(Swift._typeName(C.self, qualified: true))>(httpResponse: \(self.httpResponse))"
-    }
-}
-
 /// Represents a Discord HTTP response for CDN endpoints.
-public struct DiscordCDNResponse: Sendable {
+public struct DiscordCDNResponse: Sendable, CustomStringConvertible {
     /// The raw http response.
     public let httpResponse: DiscordHTTPResponse
     /// The fallback name for the file that will be decoded.
@@ -206,7 +204,11 @@ public struct DiscordCDNResponse: Sendable {
         self.httpResponse = httpResponse
         self.fallbackFileName = fallbackFileName
     }
-    
+
+    public var description: String {
+        "DiscordCDNResponse(httpResponse: \(self.httpResponse), fallbackFileName: \"\(self.fallbackFileName)\")"
+    }
+
     @inlinable
     public func guardSuccess() throws {
         try self.httpResponse.guardSuccess()

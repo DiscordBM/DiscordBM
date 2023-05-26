@@ -89,22 +89,31 @@ extension ValidatablePayload {
         }
         return nil
     }
-    
+
     @inlinable
-    func validateOnlyContains<C: Collection>(
-        _ values: C?,
+    func validateOnlyContains<Field: BitField>(
+        _ field: Field?,
         name: String,
         reason: String,
-        where block: (C.Element) -> Bool
+        allowed: [Field.R]
     ) -> ValidationFailure? {
-        if values?.first(where: { !block($0) }) != nil {
-            return ValidationFailure.containsProhibitedValues(
-                name: name,
-                reason: reason,
-                valuesRepresentation: "\(values!)"
-            )
+        if var checkField = field {
+            for allow in allowed {
+                checkField.remove(allow)
+            }
+            if checkField.rawValue == 0 {
+                return nil
+            } else {
+                return ValidationFailure.containsProhibitedValues(
+                    name: name,
+                    reason: reason,
+                    /// Safe to force-unwrap based on the `if var` above.
+                    valuesRepresentation: "\(field!)"
+                )
+            }
+        } else {
+            return nil
         }
-        return nil
     }
     
     @inlinable

@@ -859,7 +859,7 @@ class DiscordClientTests: XCTestCase {
         )
 
         XCTAssertEqual(role.name, rolePayload.name)
-        XCTAssertEqual(role.permissions.toBitValue(), rolePayload.permissions!.toBitValue())
+        XCTAssertEqual(role.permissions.rawValue, rolePayload.permissions!.rawValue)
         XCTAssertEqual(role.color.value, rolePayload.color!.value)
         XCTAssertEqual(role.hoist, rolePayload.hoist)
         XCTAssertEqual(role.unicode_emoji, rolePayload.unicode_emoji)

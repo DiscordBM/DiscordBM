@@ -140,37 +140,39 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
     }
     
     func testValidateOnlyContains() throws {
+        typealias Field = StringBitField<Permission>?
         try validateOnlyContains(
-            Optional<Array<String>>.none,
+            Field.none,
             name: "r",
             reason: "k",
-            where: { _ in false }
+            allowed: []
         ).throw()
         try validateOnlyContains(
-            Optional<Array<Int>>.none,
+            Field.none,
             name: "r",
             reason: "k",
-            where: { _ in true }
+            allowed: []
         ).throw()
         try validateOnlyContains(
-            [1, 2, 3],
+            Field([.addReactions, .administrator, .attachFiles]),
             name: "r",
             reason: "k",
-            where: { [1, 2, 3].contains($0) }
+            allowed: [.addReactions, .administrator, .attachFiles]
         ).throw()
+        let throwingField = Field([.addReactions, .connect, .administrator, .attachFiles])
         XCTAssertThrowsError(
             try validateOnlyContains(
-                [1, 2, 3, 4],
+                throwingField,
                 name: "r",
                 reason: "k",
-                where: { [1, 2, 3].contains($0) }
+                allowed: [.addReactions, .connect, .administrator]
             ).throw()
         ) { error in
             let error = error as! ValidationError
             XCTAssertErrorsEqual(error, .containsProhibitedValues(
                 name: "r",
                 reason: "k",
-                valuesRepresentation: "\([1, 2, 3, 4])"
+                valuesRepresentation: "\(throwingField!)"
             ))
         }
     }
@@ -294,10 +296,15 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
         }
     }
     
-    func XCTAssertErrorsEqual(_ expression1: ValidationError, _ expression2: ValidationFailure) {
+    func XCTAssertErrorsEqual(
+        _ expression1: ValidationError,
+        _ expression2: ValidationFailure,
+        line: UInt = #line
+    ) {
         XCTAssertEqual(
             expression1.failures.first!.description,
-            expression2.description
+            expression2.description,
+            line: line
         )
     }
 }

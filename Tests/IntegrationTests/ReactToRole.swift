@@ -247,7 +247,7 @@ class ReactToRoleTests: XCTestCase {
             /// Verify the role has the requested properties
             XCTAssertEqual(role.name, roleName)
             XCTAssertEqual(role.color, roleColor)
-            XCTAssertEqual(Array(role.permissions.values), rolePermissions)
+            XCTAssertEqual(Array(role.permissions.representableValues().values), rolePermissions)
             XCTAssertNil(role.unicode_emoji)
         }
         

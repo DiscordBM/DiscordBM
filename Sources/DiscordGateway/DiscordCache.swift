@@ -976,7 +976,7 @@ public actor DiscordCache {
         var guildMembersGatewayManager: (any GatewayManager)?
 
         for manager in managers {
-            let managerIntents = manager.identifyPayload.intents.values
+            let (managerIntents, _) = manager.identifyPayload.intents.representableValues()
 
             if managerIntents.contains(.guildMembers) {
                 guildMembersGatewayManager = manager
