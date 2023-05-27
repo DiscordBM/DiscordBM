@@ -20,7 +20,7 @@ public enum CDNEndpoint: Endpoint {
         assetId: AssetsSnowflake
     )
     /// FIXME: `achievementId` should be of type `Snowflake<Achievement>` but
-    /// `DiscordBM` doesn't yet have the `Achievement` type.
+    /// `DiscordBM` doesn't have the `Achievement` type.
     case achievementIcon(
         appId: ApplicationSnowflake,
         achievementId: AnySnowflake,
