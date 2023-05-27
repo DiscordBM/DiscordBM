@@ -179,10 +179,9 @@ In [Discord developer portal](https://discord.com/developers/applications):
 `DiscordBM` comes with full support for all kinds of "interactions" such as slash commands, modals, autocomplete etc... and gives you full control over how you want to use them using type-safe APIs.    
 You can see Penny as an example of using all kinds of commands in production. Penny registers the commands [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/CommandsManager.swift) and responds to them [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Handlers/InteractionHandler.swift).   
 In this example you'll only make 2 simple slash commands, so you can get started:   
-       
-```swift
-// MARK: - In `EntryPoint.main()`
 
+In your `EntryPoint.main()`:
+```swift
 /// Make a list of `Payloads.ApplicationCommandCreate`s that you want to register
 /// `DiscordCommand` is an enum that has the full info of your commands. See below
 let commands = DiscordCommand.allCases.map { command in
@@ -203,9 +202,9 @@ let eventsStream = await bot.makeEventsStream()
 for await event in eventsStream {
     EventHandler(event: event, client: bot.client).handle()
 }
-
-// MARK: - In `EventHandler`
-
+```
+In your `EventHandler`:
+```swift
 /// Use `onInteractionCreate(_:)` for handling interactions.
 struct EventHandler: GatewayEventHandler {
     let event: Gateway.Event
@@ -310,7 +309,9 @@ struct EventHandler: GatewayEventHandler {
         }
     }
 }
-
+```
+In a new file like `DiscordCommand.swift`, to keep things organized: 
+```swift
 // MARK: - Define a nice clean enum for your commands
 enum DiscordCommand: String, CaseIterable {
     case echo
@@ -734,6 +735,6 @@ To keep `DiscordBM` up to date with Discord API's frequent changes, `DiscordBM` 
 This includes adding new cases to enums. If you want to try to avoid breaking changes, make sure you have a `default` case in your `switch` statements or use `if case let`/`if case`.
 
 ## Contribution & Support
-Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.com/invite/vapor) to discuss your ideas.    
+Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.gg/vapor) to discuss your ideas.    
 If there is missing/upcoming feature, you can make an issue/PR for it with a link to the related Discord docs page or the related issue/PR in [Discord docs repository](https://github.com/discord/discord-api-docs).   
 Passing the `linux-integration` tests is not required for PRs because of token/access problems.
