@@ -10,14 +10,18 @@ import Atomics
 /// different `token`s should not matter because buckets are random anyway.
 private let rateLimiter = HTTPRateLimiter(label: "DiscordClientRateLimiter")
 
-//MARK: - DefaultDiscordClient
 public struct DefaultDiscordClient: DiscordClient {
 
-    let client: HTTPClient
+    public let client: HTTPClient
     public let authentication: AuthenticationHeader
     public let appId: ApplicationSnowflake?
-    let configuration: ClientConfiguration
-    let logger = DiscordGlobalConfiguration.makeLogger("DefaultDiscordClient")
+    public let configuration: ClientConfiguration
+    public let logger = DiscordGlobalConfiguration.makeLogger("DefaultDiscordClient")
+    /// Discord apparently looks at this for figuring out library-usages.
+    /// Technically they could also look at the info passed in Gateway's identify payload, for that.
+    /// From what I've figured, if Discord sees a lot of people are using the same library, they
+    /// will contact the owner and add the library to the list of suggested libraries on their website.
+    public let userAgent = "DiscordBM (https://github.com/mahdibm/discordbm, 1.0.0)"
 
     /// Use `getCache()` to get the appropriate cache.
 
@@ -97,6 +101,7 @@ public struct DefaultDiscordClient: DiscordClient {
         self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
+    @usableFromInline
     func checkRateLimitsAllowRequest(
         to endpoint: AnyEndpoint,
         requestId: UInt,
@@ -140,7 +145,8 @@ public struct DefaultDiscordClient: DiscordClient {
             }
         }
     }
-    
+
+    @usableFromInline
     func includeInRateLimits(
         endpoint: AnyEndpoint,
         headers: HTTPHeaders,
@@ -148,7 +154,8 @@ public struct DefaultDiscordClient: DiscordClient {
     ) async {
         await rateLimiter.include(endpoint: endpoint, headers: headers, status: status)
     }
-    
+
+    @usableFromInline
     func getFromCache(
         identity: CacheableEndpointIdentity?,
         requiresAuthHeader: Bool,
@@ -194,7 +201,8 @@ public struct DefaultDiscordClient: DiscordClient {
             "queries": .stringConvertible(queries)
         ])
     }
-    
+
+    @usableFromInline
     func execute(_ request: HTTPClient.Request) async throws -> DiscordHTTPResponse {
         DiscordHTTPResponse(
             _response: try await self.client.execute(
@@ -240,8 +248,9 @@ public struct DefaultDiscordClient: DiscordClient {
             return .global
         }
     }
-    
+
     /// Sends requests and retries if needed.
+    @usableFromInline
     func sendWithRetries(
         request req: DiscordHTTPRequest,
         sendRequest: (CacheableEndpointIdentity?, Int, UInt) async throws -> (DiscordHTTPResponse, Bool)
@@ -274,7 +283,8 @@ public struct DefaultDiscordClient: DiscordClient {
         
         return response
     }
-    
+
+    @inlinable
     public func send(request req: DiscordHTTPRequest) async throws -> DiscordHTTPResponse {
         try await self.sendWithRetries(request: req) {
             identity, retryCounter, requestId in
@@ -869,133 +879,9 @@ public struct ClientConfiguration: Sendable {
     }
 }
 
-//MARK: - ClientCacheStorage
-private actor ClientCacheStorage {
-    
-    /// [Token: ClientCache]
-    private var storage = [String: ClientCache]()
-    private var noAuth: ClientCache? = nil
-    
-    private init() { }
-    
-    static let shared = ClientCacheStorage()
-
-    func cache(for authenticationHeader: AuthenticationHeader) -> ClientCache {
-        if let id = authenticationHeader.id {
-            if let cache = self.storage[id] {
-                return cache
-            } else {
-                let cache = ClientCache()
-                self.storage[id] = cache
-                return cache
-            }
-        } else {
-            if let noAuth {
-                return noAuth
-            } else {
-                self.noAuth = .init()
-                return self.noAuth!
-            }
-        }
-    }
-}
-
-//MARK: - ClientCache
-
-/// This doesn't use the `Cache-Control` header because I couldn't
-/// find a 2xx response with a `Cache-Control` header returned by Discord.
-actor ClientCache {
-    
-    struct CacheableItem: Hashable {
-        let identity: CacheableEndpointIdentity
-        let parameters: [String]
-        let queries: [(String, String?)]
-        
-        func hash(into hasher: inout Hasher) {
-            switch identity {
-            case .api(let endpoint):
-                hasher.combine(0)
-                hasher.combine(endpoint.rawValue)
-            case .cdn(let endpoint):
-                hasher.combine(1)
-                hasher.combine(endpoint.rawValue)
-            case .loose(let endpoint):
-                hasher.combine(2)
-                endpoint.hash(into: &hasher)
-            }
-            for param in parameters {
-                hasher.combine(param)
-            }
-            for (key, value) in queries {
-                hasher.combine(key)
-                hasher.combine(value)
-            }
-        }
-        
-        static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.identity == rhs.identity &&
-            lhs.parameters == rhs.parameters &&
-            lhs.queries.elementsEqual(rhs.queries, by: {
-                $0.0 == $1.0 &&
-                $0.1 == $1.1
-            })
-        }
-    }
-    
-    /// [ID: ExpirationTime]
-    var timeTable = [CacheableItem: Double]()
-    /// [ID: Response]
-    var storage = [CacheableItem: DiscordHTTPResponse]()
-
-    static let global = ClientCache()
-    
-    init() {
-        Task { await self.collectGarbage() }
-    }
-    
-    func add(response: DiscordHTTPResponse, item: CacheableItem, ttl: Double) {
-        self.timeTable[item] = Date().timeIntervalSince1970 + ttl
-        self.storage[item] = response
-    }
-    
-    func get(item: CacheableItem) -> DiscordHTTPResponse? {
-        if let time = self.timeTable[item] {
-            if time > Date().timeIntervalSince1970 {
-                return storage[item]
-            } else {
-                self.timeTable[item] = nil
-                self.storage[item] = nil
-                return nil
-            }
-        } else {
-            return nil
-        }
-    }
-    
-    private func collectGarbage() async {
-        /// Quit in case of task cancelation.
-        guard (try? await Task.sleep(for: .seconds(60))) != nil else { return }
-        let now = Date().timeIntervalSince1970
-        for (item, expirationDate) in self.timeTable {
-            if expirationDate < now {
-                self.timeTable[item] = nil
-                self.storage[item] = nil
-            }
-        }
-        await collectGarbage()
-    }
-}
-
 //MARK: +HTTPHeaders
 private extension HTTPHeaders {
     func resetOrRetryAfterHeaderValue() -> String? {
         self.first(name: "x-ratelimit-reset-after") ?? self.first(name: "retry-after")
     }
 }
-
-//MARK: User-Agent constant
-/// Discord apparently looks at this for figuring out library-usages.
-/// Technically they could also look at the info passed in Gateway's identify payload, for that.
-/// From what I've figured, if Discord sees a lot of people are using the same library, they
-/// will contact the owner and add the library to the list of suggested libraries on their website.
-private let userAgent = "DiscordBM (https://github.com/mahdibm/discordbm, 1.0.0)"
