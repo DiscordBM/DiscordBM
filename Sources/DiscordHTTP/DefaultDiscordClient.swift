@@ -20,7 +20,7 @@ public struct DefaultDiscordClient: DiscordClient {
     /// Technically they could also look at the info passed in Gateway's identify payload, for that.
     /// From what I've figured, if Discord sees a lot of people are using the same library, they
     /// will contact the owner and add the library to the list of suggested libraries on their website.
-    public let userAgent = "DiscordBM (https://github.com/mahdibm/discordbm, 1.0.0)"
+    public let userAgent = "DiscordBM (https://github.com/discordbm/discordbm, 1.0.0)"
 
     /// Use `getCache()` to get the appropriate cache.
 

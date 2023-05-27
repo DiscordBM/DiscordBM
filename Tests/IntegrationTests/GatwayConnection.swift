@@ -248,7 +248,7 @@ class GatewayConnectionTests: XCTestCase {
 
         XCTAssertEqual(messages.count, 1)
         let first = try XCTUnwrap(messages.first)
-        XCTAssertEqual(first, #"Will not reconnect because Discord does not allow it. Something is wrong. Your close code is 'authenticationFailed', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/MahdiBM/DiscordBM/issues if you think this is a library issue"#)
+        XCTAssertEqual(first, #"Will not reconnect because Discord does not allow it. Something is wrong. Your close code is 'authenticationFailed', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/DiscordBM/DiscordBM/issues if you think this is a library issue"#)
 
         /// Wait 1s just incase.
         try await Task.sleep(for: .seconds(1))

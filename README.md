@@ -1,11 +1,11 @@
 <p align="center">
     <img src="https://user-images.githubusercontent.com/54685446/201329617-9fd91ab0-35c2-42c2-8963-47b68c6a490a.png" alt="DiscordBM">
     <br>
-    <a href="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml">
-        <img src="https://github.com/MahdiBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
+    <a href="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml">
+        <img src="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
     </a>
-    <a href="https://codecov.io/gh/MahdiBM/DiscordBM">
-        <img src="https://codecov.io/gh/MahdiBM/DiscordBM/branch/main/graph/badge.svg?token=P4DYX2FWYT" alt="Codecov">
+    <a href="https://codecov.io/gh/DiscordBM/DiscordBM">
+        <img src="https://codecov.io/gh/DiscordBM/DiscordBM/branch/main/graph/badge.svg?token=P4DYX2FWYT" alt="Codecov">
     </a>
     <a href="https://swift.org">
         <img src="https://img.shields.io/badge/swift-5.8%20/%205.7-brightgreen.svg" alt="Latest/Minimum Swift Version">
@@ -58,7 +58,7 @@ let bot = await BotGatewayManager(
     intents: [.guildMessages, .messageContent]
 )
 ```
-See the [GatewayConnection tests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
+See the [GatewayConnection tests](https://github.com/DiscordBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
 
 > **Warning**   
 > In a production app you should use **environment variables** to load your Bot Token.   
@@ -160,7 +160,7 @@ In most cases, the library doesn't try to abstract away Discord's stuff.
   
 > **Warning**   
 > `DiscordBM` is still in beta so new releases can come with breaking changes.   
-> [**Read the release notes**](https://github.com/MahdiBM/DiscordBM/releases) to fix the breaking changes that you encounter and become aware of new features.
+> [**Read the release notes**](https://github.com/DiscordBM/DiscordBM/releases) to fix the breaking changes that you encounter and become aware of new features.
 
 ### Bot Token And App ID
 <details>
@@ -255,7 +255,7 @@ struct EventHandler: GatewayEventHandler {
                                 )],
                                 components: [[.button(.init(
                                     label: "Open DiscordBM!",
-                                    url: "https://github.com/MahdiBM/DiscordBM"
+                                    url: "https://github.com/DiscordBM/DiscordBM"
                                 ))]]
                             )
                         ).guardSuccess()
@@ -423,7 +423,7 @@ try await bot.client.createMessage(
     )
 )
 ```
-Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://github.com/MahdiBM/DiscordBM/blob/main/Tests/IntegrationTests/DiscordClient.swift) to see how you can send media in a real-world situation.
+Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://github.com/DiscordBM/DiscordBM/blob/main/Tests/IntegrationTests/DiscordClient.swift) to see how you can send media in a real-world situation.
 
 </details>
 
@@ -716,7 +716,7 @@ To use the `DiscordBM` library in a SwiftPM project,
 add the following line to the dependencies in your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/MahdiBM/DiscordBM", from: "1.0.0-beta.1"),
+.package(url: "https://github.com/DiscordBM/DiscordBM", from: "1.0.0-beta.1"),
 ```
 
 Include `DiscordBM` as a dependency for your targets:

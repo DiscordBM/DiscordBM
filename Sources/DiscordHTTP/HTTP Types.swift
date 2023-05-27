@@ -258,7 +258,7 @@ public enum DiscordHTTPError: Error, CustomStringConvertible {
     case rateLimited(url: String)
     /// Discord responded with a non-200 status code.
     case badStatusCode(DiscordHTTPResponse)
-    /// The response body was unexpectedly empty. If it happens frequently, you should report it to me at https://github.com/MahdiBM/DiscordBM/issues.
+    /// The response body was unexpectedly empty. If it happens frequently, you should report it to me at https://github.com/DiscordBM/DiscordBM/issues.
     case emptyBody(DiscordHTTPResponse)
     /// Discord didn't send a Content-Type header. See if they mentions any errors in the response.
     case noContentTypeHeader(DiscordHTTPResponse)

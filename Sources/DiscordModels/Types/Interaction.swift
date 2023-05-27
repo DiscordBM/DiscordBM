@@ -529,9 +529,9 @@ extension Interaction {
         
         /// Read `helpAnchor` for help about each error case.
         public enum CodingError: Error, CustomStringConvertible {
-            /// This component kind was not expected here. This is a library decoding issue, please report at: https://github.com/MahdiBM/DiscordBM/issues.
+            /// This component kind was not expected here. This is a library decoding issue, please report at: https://github.com/DiscordBM/DiscordBM/issues.
             case unexpectedComponentKind(Kind)
-            /// I thought action-row is supposed to only appear at top-level as a container for other components. This is a library decoding issue, please report at: https://github.com/MahdiBM/DiscordBM/issues.
+            /// I thought action-row is supposed to only appear at top-level as a container for other components. This is a library decoding issue, please report at: https://github.com/DiscordBM/DiscordBM/issues.
             case actionRowIsSupposedToOnlyAppearAtTopLevel
 
             public var description: String {

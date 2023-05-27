@@ -381,7 +381,7 @@ public struct Gateway: Sendable, Codable {
         
         /// Read `helpAnchor` for help about each error case.
         public enum EncodingError: Error, CustomStringConvertible {
-            /// This event is not supposed to be sent at all. This could be a library issue, please report at https://github.com/MahdiBM/DiscordBM/issues.
+            /// This event is not supposed to be sent at all. This could be a library issue, please report at https://github.com/DiscordBM/DiscordBM/issues.
             case notSupposedToBeSent(message: String)
 
             public var description: String {

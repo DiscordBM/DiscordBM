@@ -48,7 +48,7 @@ public enum AuthenticationHeader: Sendable {
             }
 
             DiscordGlobalConfiguration.makeLogger("AuthenticationHeader").error(
-                "Cannot extract app-id from the bot token, please report this at https://github.com/MahdiBM/DiscordBM/issues. It can be an empty issue with a title like 'AuthenticationHeader failed to decode app-id'", metadata: [
+                "Cannot extract app-id from the bot token, please report this at https://github.com/DiscordBM/DiscordBM/issues. It can be an empty issue with a title like 'AuthenticationHeader failed to decode app-id'", metadata: [
                     "botTokenSecret": .stringConvertible(token)
                 ]
             )

@@ -128,7 +128,7 @@ where R: RawRepresentable, R: Hashable, R.RawValue == UInt {
 
     /// Read `helpAnchor` for help about each error case.
     public enum DecodingError: Swift.Error, CustomStringConvertible {
-        /// The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues.
+        /// The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/DiscordBM/DiscordBM/issues.
         case notRepresentingInt(String)
 
         public var description: String {

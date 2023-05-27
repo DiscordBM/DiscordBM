@@ -335,9 +335,9 @@ public struct DiscordTimestamp: Codable {
     
     /// Read `helpAnchor` for help about each error case.
     public enum DecodingError: Swift.Error, CustomStringConvertible {
-        /// The timestamp had an unexpected format. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues.
+        /// The timestamp had an unexpected format. This is a library decoding issue, please report this at https://github.com/DiscordBM/DiscordBM/issues.
         case unexpectedFormat([any CodingKey], String)
-        /// Could not convert the timestamp to a 'Date'. This is a library decoding issue, please report this at https://github.com/MahdiBM/DiscordBM/issues.
+        /// Could not convert the timestamp to a 'Date'. This is a library decoding issue, please report this at https://github.com/DiscordBM/DiscordBM/issues.
         case conversionFailure([any CodingKey], String, DateComponents)
 
         public var description: String {
@@ -433,7 +433,7 @@ public struct DiscordTimestamp: Codable {
         else {
             throw EncodingError.invalidValue(date, .init(
                 codingPath: container.codingPath,
-                debugDescription: "Programming Error. Could not encode Date to Discord Timestamp. Please report: https://github.com/MahdiBM/DiscordBM/issues"
+                debugDescription: "Programming Error. Could not encode Date to Discord Timestamp. Please report: https://github.com/DiscordBM/DiscordBM/issues"
             ))
         }
         let miliSecond = nanoSecond / 1_000
