@@ -173,7 +173,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
             inGuildWithId guildId: GuildSnowflake,
             permission: Bool
         ) throws -> Self {
-            guard let guildNumber = Int(guildId.value) else {
+            guard let guildNumber = Int(guildId.rawValue) else {
                 throw ConversionError.couldNotConvertToInteger(guildId)
             }
             return self.init(

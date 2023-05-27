@@ -23,7 +23,7 @@ class DiscordCacheTests: XCTestCase {
         
         do {
             let auditLogs = await cache.storage.auditLogs
-            XCTAssertEqual(auditLogs.keys.map(\.value.description), (1...10).map(\.description))
+            XCTAssertEqual(auditLogs.keys.map(\.rawValue.description), (1...10).map(\.description))
         }
         
         /// The 11th item will trigger a check, and the first item will be removed.
@@ -35,7 +35,7 @@ class DiscordCacheTests: XCTestCase {
         
         do {
             let auditLogs = await cache.storage.auditLogs
-            XCTAssertEqual(auditLogs.keys.map(\.value.description), (2...11).map(\.description))
+            XCTAssertEqual(auditLogs.keys.map(\.rawValue.description), (2...11).map(\.description))
         }
         
         /// The 12-19th mutations won't trigger a check.
@@ -47,7 +47,7 @@ class DiscordCacheTests: XCTestCase {
         
         do {
             let auditLogs = await cache.storage.auditLogs
-            XCTAssertEqual(auditLogs.keys.map(\.value.description), (2...19).map(\.description))
+            XCTAssertEqual(auditLogs.keys.map(\.rawValue.description), (2...19).map(\.description))
         }
         
         /// The 20th mutation will trigger a check, and older items will be removed.
@@ -59,7 +59,7 @@ class DiscordCacheTests: XCTestCase {
         
         do {
             let auditLogs = await cache.storage.auditLogs
-            XCTAssertEqual(auditLogs.keys.map(\.value.description), (11...20).map(\.description))
+            XCTAssertEqual(auditLogs.keys.map(\.rawValue.description), (11...20).map(\.description))
         }
     }
 }

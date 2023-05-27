@@ -77,7 +77,7 @@ public struct Interaction: Sendable, Codable {
                 func encode<K, E>(_ dict: [K: E]?, forKey key: CodingKeys) throws
                 where K: SnowflakeProtocol, E: Encodable {
                     let transformed = dict?.map { key, value -> (String, E) in
-                        return (key.value, value)
+                        return (key.rawValue, value)
                     }
                     let stringDict: [String: E]? = transformed.map { .init(uniqueKeysWithValues: $0) }
                     try container.encode(stringDict, forKey: key)

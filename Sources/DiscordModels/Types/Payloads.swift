@@ -1828,7 +1828,7 @@ public enum Payloads {
         public init(access_tokens: [String], nicks: [UserSnowflake: String]) {
             self.access_tokens = access_tokens
             self.nicks = .init(uniqueKeysWithValues: nicks.map { key, value in
-                (key.value, value)
+                (key.rawValue, value)
             })
         }
 

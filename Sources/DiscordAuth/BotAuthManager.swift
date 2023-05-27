@@ -32,7 +32,7 @@ public struct BotAuthManager: Sendable {
             ("client_id", self.clientId),
             ("permissions", "\(permissions)"),
             ("scope", scopes.map(\.rawValue).joined(separator: " ")),
-            ("guild_id", guildId?.value),
+            ("guild_id", guildId?.rawValue),
             ("disable_guild_select", disableGuildSelect?.description)
         ]
         return baseURLs.authorization + queries.makeForURLQuery()

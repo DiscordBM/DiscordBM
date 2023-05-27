@@ -408,7 +408,7 @@ class ClientConfigurationTests: XCTestCase {
                 if let number = UInt(String(numberString)) {
                     let token = makeFakeToken(id: number)
                     let header = AuthenticationHeader.botToken(Secret(token))
-                    XCTAssertEqual(header.extractAppIdIfAvailable()?.value, "\(number)")
+                    XCTAssertEqual(header.extractAppIdIfAvailable()?.rawValue, "\(number)")
                 }
             }
         }

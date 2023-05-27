@@ -27,19 +27,19 @@ public enum DiscordUtils {
     /// When used in a Discord message, shows up as mentioning a user.
     @inlinable
     public static func mention(id: UserSnowflake) -> String {
-        "<@\(id.value)>"
+        "<@\(id.rawValue)>"
     }
     
     /// When used in a Discord message, shows up as mentioning a channel.
     @inlinable
     public static func mention(id: ChannelSnowflake) -> String {
-        "<#\(id.value)>"
+        "<#\(id.rawValue)>"
     }
     
     /// When used in a Discord message, shows up as mentioning a role, if mentionable.
     @inlinable
     public static func mention(id: RoleSnowflake) -> String {
-        "<@&\(id.value)>"
+        "<@&\(id.rawValue)>"
     }
     
     /// When used in a Discord message, shows up as mentioning a slash command.
@@ -52,7 +52,7 @@ public enum DiscordUtils {
     ) -> String {
         let subcommandGroup = subcommandGroup.map { " \($0)" } ?? ""
         let subcommand = subcommand.map { " \($0)" } ?? ""
-        return "</\(name)\(subcommandGroup)\(subcommand):\(id.value)>"
+        return "</\(name)\(subcommandGroup)\(subcommand):\(id.rawValue)>"
     }
     
     /// When used in a Discord message, shows up as an emoji.
@@ -64,13 +64,13 @@ public enum DiscordUtils {
     /// When used in a Discord message, shows up as a custom guild emoji.
     @inlinable
     public static func customEmoji(name: String, id: EmojiSnowflake) -> String {
-        "<:\(name):\(id.value)>"
+        "<:\(name):\(id.rawValue)>"
     }
     
     /// When used in a Discord message, shows up as a custom animated guild emoji.
     @inlinable
     public static func customAnimatedEmoji(name: String, id: EmojiSnowflake) -> String {
-        "<a:\(name):\(id.value)>"
+        "<a:\(name):\(id.rawValue)>"
     }
     
     /// When used in a Discord message, shows up as a **localized** time.

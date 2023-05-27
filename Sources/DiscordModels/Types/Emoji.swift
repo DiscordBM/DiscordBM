@@ -39,7 +39,7 @@ public struct Reaction: Sendable, Hashable, Codable {
     public var urlPathDescription: String {
         switch self.base {
         case let .unicodeEmoji(emoji): return emoji
-        case let .guildEmoji(name, id): return "\(name ?? ""):\(id.value)"
+        case let .guildEmoji(name, id): return "\(name ?? ""):\(id.rawValue)"
         }
     }
     

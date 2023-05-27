@@ -1,8 +1,4 @@
-#if os(macOS) /// Xcode toolchains don't usually throw preconcurrency warnings.
 import Foundation
-#else
-@preconcurrency import Foundation
-#endif
 
 public protocol SnowflakeProtocol:
     Sendable,
@@ -11,14 +7,14 @@ public protocol SnowflakeProtocol:
     CustomStringConvertible,
     ExpressibleByStringLiteral {
 
-    var value: String { get }
-    init(_ value: String)
+    var rawValue: String { get }
+    init(_ rawValue: String)
 }
 
 extension SnowflakeProtocol {
     /// Initializes a snowflake from another snowflake.
     public init(_ snowflake: any SnowflakeProtocol) {
-        self.init(snowflake.value)
+        self.init(snowflake.rawValue)
     }
 
     public init(from decoder: any Decoder) throws {
@@ -27,7 +23,7 @@ extension SnowflakeProtocol {
         if self.parse() == nil {
             DiscordGlobalConfiguration.makeDecodeLogger("SnowflakeProtocol").warning(
                 "Could not parse a snowflake", metadata: [
-                    "codingPath": "\(decoder.codingPath)",
+                    "codingPath": "\(decoder.codingPath.map(\.stringValue))",
                     "decoded": "\(self.value)"
                 ]
             )
@@ -36,11 +32,11 @@ extension SnowflakeProtocol {
     }
 
     public func encode(to encoder: any Encoder) throws {
-        try self.value.encode(to: encoder)
+        try self.rawValue.encode(to: encoder)
     }
 
-    public init(stringLiteral value: String) {
-        self.init(value)
+    public init(stringLiteral rawValue: String) {
+        self.init(rawValue)
     }
 
     /// Initializes a snowflake from a `SnowflakeInfo`.
@@ -52,7 +48,7 @@ extension SnowflakeProtocol {
     /// Parses the snowflake to `SnowflakeInfo`.
     @inlinable
     public func parse() -> SnowflakeInfo? {
-        SnowflakeInfo(from: self.value)
+        SnowflakeInfo(from: self.rawValue)
     }
 
     /// Makes a fake snowflake.
@@ -74,14 +70,14 @@ extension SnowflakeProtocol {
 /// let botId: UserSnowflake = Snowflake(appId)
 /// ```
 public struct Snowflake<Tag>: SnowflakeProtocol {
-    public let value: String
+    public let rawValue: String
 
-    public init(_ value: String) {
-        self.value = value
+    public init(_ rawValue: String) {
+        self.rawValue = rawValue
     }
 
     public var description: String {
-        #"Snowflake<\#(Swift._typeName(Tag.self, qualified: false))>("\#(value)")"#
+        #"Snowflake<\#(Swift._typeName(Tag.self, qualified: false))>("\#(rawValue)")"#
     }
 }
 
@@ -96,19 +92,19 @@ public struct Snowflake<Tag>: SnowflakeProtocol {
 /// let botId: UserSnowflake = Snowflake(appId)
 /// ```
 public struct AnySnowflake: SnowflakeProtocol {
-    public let value: String
+    public let rawValue: String
 
-    public init(_ value: String) {
-        self.value = value
+    public init(_ rawValue: String) {
+        self.rawValue = rawValue
     }
 
     public var description: String {
-        #"AnySnowflake("\#(value)")"#
+        #"AnySnowflake("\#(rawValue)")"#
     }
 }
 
 public func == (lhs: any SnowflakeProtocol, rhs: any SnowflakeProtocol) -> Bool {
-    lhs.value == rhs.value
+    lhs.rawValue == rhs.rawValue
 }
 
 /// The parsed info of a snowflake.
@@ -230,7 +226,7 @@ public struct SnowflakeInfo: Sendable {
 
     @inlinable
     internal init? (from snowflake: any SnowflakeProtocol) {
-        self.init(from: snowflake.value)
+        self.init(from: snowflake.rawValue)
     }
 
     @usableFromInline
