@@ -35,7 +35,7 @@ class DiscordClientTests: XCTestCase {
             httpClient: httpClient,
             token: Constants.token
         )
-        XCTAssertEqual(client1.appId?.value, Constants.botId.value)
+        XCTAssertEqual(client1.appId?.rawValue, Constants.botId.rawValue)
 
         /// Tests that the provided app-id overrides the bot-token-extracted app-id
         let client2 = await DefaultDiscordClient(
@@ -43,7 +43,7 @@ class DiscordClientTests: XCTestCase {
             token: Constants.token,
             appId: ApplicationSnowflake("000")
         )
-        XCTAssertEqual(client2.appId?.value, "000")
+        XCTAssertEqual(client2.appId?.rawValue, "000")
     }
 
     /// Just here so you know.
@@ -1650,7 +1650,7 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         XCTAssertEqual(threadMemberWithMember.user_id, Constants.personalId)
-        XCTAssertNotNil(threadMemberWithMember.member.user?.id, Constants.personalId.value)
+        XCTAssertNotNil(threadMemberWithMember.member.user?.id, Constants.personalId.rawValue)
         
         let allThreadMembers = try await client.listThreadMembers(threadId: thread.id).decode()
         
@@ -1798,7 +1798,7 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         XCTAssertTrue(webhook1.token?.isEmpty == false)
-        XCTAssertTrue(webhook1.id.value.isEmpty == false)
+        XCTAssertTrue(webhook1.id.rawValue.isEmpty == false)
         XCTAssertTrue(webhook1.avatar?.isEmpty == false)
         XCTAssertEqual(webhook1.name, webhookName1)
         XCTAssertEqual(webhook1.guild_id, Constants.guildId)
@@ -1812,7 +1812,7 @@ class DiscordClientTests: XCTestCase {
         ).decode()
         
         XCTAssertTrue(webhook2.token?.isEmpty == false)
-        XCTAssertTrue(webhook2.id.value.isEmpty == false)
+        XCTAssertTrue(webhook2.id.rawValue.isEmpty == false)
         XCTAssertNil(webhook2.avatar)
         XCTAssertEqual(webhook2.name, webhookName2)
         XCTAssertEqual(webhook2.guild_id, Constants.guildId)
@@ -2309,7 +2309,7 @@ class DiscordClientTests: XCTestCase {
             XCTAssertGreaterThan(attachment.size, 20_000)
             XCTAssertEqual(attachment.height, 210)
             XCTAssertEqual(attachment.width, 1200)
-            XCTAssertFalse(attachment.id.value.isEmpty)
+            XCTAssertFalse(attachment.id.rawValue.isEmpty)
             XCTAssertFalse(attachment.url.isEmpty)
             XCTAssertFalse(attachment.proxy_url.isEmpty)
 

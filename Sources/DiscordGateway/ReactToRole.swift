@@ -561,10 +561,10 @@ public actor ReactToRoleHandler {
     }
     
     func addRoleToMember(userId: UserSnowflake) async {
-        guard userId.value != client.appId?.value else { return }
+        guard userId.rawValue != client.appId?.rawValue else { return }
         guard let roleId = await getRoleId() else {
             self.logger.warning("Can't get a role to grant the member", metadata: [
-                "userId": .string(userId.value)
+                "userId": .string(userId.rawValue)
             ])
             return
         }
@@ -627,7 +627,7 @@ public actor ReactToRoleHandler {
     }
     
     func removeRoleFromMember(userId: UserSnowflake) async {
-        guard userId.value != client.appId?.value,
+        guard userId.rawValue != client.appId?.rawValue,
               let roleId = self.configuration.roleId
         else { return }
         do {

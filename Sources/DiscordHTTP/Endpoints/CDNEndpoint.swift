@@ -45,45 +45,45 @@ public enum CDNEndpoint: Endpoint {
         let suffix: String
         switch self {
         case let .customEmoji(emojiId):
-            suffix = "emojis/\(emojiId.value)"
+            suffix = "emojis/\(emojiId.rawValue)"
         case let .guildIcon(guildId, icon):
-            suffix = "icons/\(guildId.value)/\(icon)"
+            suffix = "icons/\(guildId.rawValue)/\(icon)"
         case let .guildSplash(guildId, splash):
-            suffix = "splashes/\(guildId.value)/\(splash)"
+            suffix = "splashes/\(guildId.rawValue)/\(splash)"
         case let .guildDiscoverySplash(guildId, splash):
-            suffix = "discovery-splashes/\(guildId.value)/\(splash)"
+            suffix = "discovery-splashes/\(guildId.rawValue)/\(splash)"
         case let .guildBanner(guildId, banner):
-            suffix = "banners/\(guildId.value)/\(banner)"
+            suffix = "banners/\(guildId.rawValue)/\(banner)"
         case let .userBanner(userId, banner):
-            suffix = "banners/\(userId.value)/\(banner)"
+            suffix = "banners/\(userId.rawValue)/\(banner)"
         case let .defaultUserAvatar(discriminator):
             suffix = "embed/avatars/\(discriminator).png" /// Needs `.png`
         case let .userAvatar(userId, avatar):
-            suffix = "avatars/\(userId.value)/\(avatar)"
+            suffix = "avatars/\(userId.rawValue)/\(avatar)"
         case let .guildMemberAvatar(guildId, userId, avatar):
-            suffix = "guilds/\(guildId.value)/users/\(userId.value)/avatars/\(avatar)"
+            suffix = "guilds/\(guildId.rawValue)/users/\(userId.rawValue)/avatars/\(avatar)"
         case let .applicationIcon(appId, icon):
-            suffix = "app-icons/\(appId.value)/\(icon)"
+            suffix = "app-icons/\(appId.rawValue)/\(icon)"
         case let .applicationCover(appId, cover):
-            suffix = "app-icons/\(appId.value)/\(cover)"
+            suffix = "app-icons/\(appId.rawValue)/\(cover)"
         case let .applicationAsset(appId, assetId):
-            suffix = "app-assets/\(appId.value)/\(assetId.value)"
+            suffix = "app-assets/\(appId.rawValue)/\(assetId.rawValue)"
         case let .achievementIcon(appId, achievementId, icon):
-            suffix = "app-assets/\(appId.value)/achievements/\(achievementId.value)/icons/\(icon)"
+            suffix = "app-assets/\(appId.rawValue)/achievements/\(achievementId.rawValue)/icons/\(icon)"
         case let .storePageAsset(appId, assetId):
-            suffix = "app-assets/\(appId.value)/store/\(assetId.value)"
+            suffix = "app-assets/\(appId.rawValue)/store/\(assetId.rawValue)"
         case let .stickerPackBanner(assetId):
-            suffix = "app-assets/710982414301790216/store/\(assetId.value)"
+            suffix = "app-assets/710982414301790216/store/\(assetId.rawValue)"
         case let .teamIcon(teamId, icon):
-            suffix = "team-icons/\(teamId.value)/\(icon)"
+            suffix = "team-icons/\(teamId.rawValue)/\(icon)"
         case let .sticker(stickerId):
-            suffix = "stickers/\(stickerId.value).png" /// Needs `.png`
+            suffix = "stickers/\(stickerId.rawValue).png" /// Needs `.png`
         case let .roleIcon(roleId, icon):
-            suffix = "role-icons/\(roleId.value)/\(icon)"
+            suffix = "role-icons/\(roleId.rawValue)/\(icon)"
         case let .guildScheduledEventCover(eventId, cover):
-            suffix = "guild-events/\(eventId.value)/\(cover)"
+            suffix = "guild-events/\(eventId.rawValue)/\(cover)"
         case let .guildMemberBanner(guildId, userId, banner):
-            suffix = "guilds/\(guildId.value)/users/\(userId.value)/banners/\(banner)"
+            suffix = "guilds/\(guildId.rawValue)/users/\(userId.rawValue)/banners/\(banner)"
         }
         return suffix.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? suffix
     }
@@ -142,45 +142,45 @@ public enum CDNEndpoint: Endpoint {
     public var parameters: [String] {
         switch self {
         case .customEmoji(let emojiId):
-            return [emojiId.value]
+            return [emojiId.rawValue]
         case .guildIcon(let guildId, let icon):
-            return [guildId.value, icon]
+            return [guildId.rawValue, icon]
         case .guildSplash(let guildId, let splash):
-            return [guildId.value, splash]
+            return [guildId.rawValue, splash]
         case .guildDiscoverySplash(let guildId, let splash):
-            return [guildId.value, splash]
+            return [guildId.rawValue, splash]
         case .guildBanner(let guildId, let banner):
-            return [guildId.value, banner]
+            return [guildId.rawValue, banner]
         case .userBanner(let userId, let banner):
-            return [userId.value, banner]
+            return [userId.rawValue, banner]
         case .defaultUserAvatar(let discriminator):
             return [discriminator]
         case .userAvatar(let userId, let avatar):
-            return [userId.value, avatar]
+            return [userId.rawValue, avatar]
         case .guildMemberAvatar(let guildId, let userId, let avatar):
-            return [guildId.value, userId.value, avatar]
+            return [guildId.rawValue, userId.rawValue, avatar]
         case .applicationIcon(let appId, let icon):
-            return [appId.value, icon]
+            return [appId.rawValue, icon]
         case .applicationCover(let appId, let cover):
-            return [appId.value, cover]
+            return [appId.rawValue, cover]
         case .applicationAsset(let appId, let assetId):
-            return [appId.value, assetId.value]
+            return [appId.rawValue, assetId.rawValue]
         case .achievementIcon(let appId, let achievementId, let icon):
-            return [appId.value, achievementId.value, icon]
+            return [appId.rawValue, achievementId.rawValue, icon]
         case .storePageAsset(let appId, let assetId):
-            return [appId.value, assetId.value]
+            return [appId.rawValue, assetId.rawValue]
         case .stickerPackBanner(let assetId):
-            return [assetId.value]
+            return [assetId.rawValue]
         case .teamIcon(let teamId, let icon):
-            return [teamId.value, icon]
+            return [teamId.rawValue, icon]
         case .sticker(let stickerId):
-            return [stickerId.value]
+            return [stickerId.rawValue]
         case .roleIcon(let roleId, let icon):
-            return [roleId.value, icon]
+            return [roleId.rawValue, icon]
         case .guildScheduledEventCover(let eventId, let cover):
-            return [eventId.value, cover]
+            return [eventId.rawValue, cover]
         case .guildMemberBanner(let guildId, let userId, let banner):
-            return [guildId.value, userId.value, banner]
+            return [guildId.rawValue, userId.rawValue, banner]
         }
     }
     

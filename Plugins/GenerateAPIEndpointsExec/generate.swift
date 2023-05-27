@@ -46,7 +46,7 @@ let _url = grouped.flatMap(\.value).map { info in
     }
     let paramsEncoded = params.compactMap { param -> String? in
         if param.hasSuffix("Id") {
-            return #"let \#(param) = \#(param).value"#
+            return #"let \#(param) = \#(param).rawValue"#
         } else if noEncodeParamSuffixes.contains(where: { param.hasSuffix($0) }) {
             return nil
         } else {
@@ -92,7 +92,7 @@ let _urlDescription = grouped.flatMap(\.value).map { info in
     }
     let paramsEncoded = params.compactMap { param -> String? in
         if param.hasSuffix("Id") {
-            return #"let \#(param) = \#(param).value"#
+            return #"let \#(param) = \#(param).rawValue"#
         } else if param == webhookTokenParam {
             return #"let \#(param) = \#(param).urlPathEncoded().hash"#
         } else if noEncodeParamSuffixes.contains(where: { param.hasSuffix($0) }) {
@@ -159,7 +159,7 @@ let _parameters = grouped.flatMap(\.value).map { info -> String in
     let (name, _params) = info.info.makeIterativeCase()
     let params = _params.map { param in
         if param.hasSuffix("Id") {
-            return "\(param).value"
+            return "\(param).rawValue"
         } else {
             return param
         }
@@ -180,7 +180,7 @@ let _description = grouped.flatMap(\.value).map { info -> String in
     let (name, _params) = info.info.makeIterativeCase()
     let params = _params.map { param in
         if param.hasSuffix("Id") {
-            return "\(param).value"
+            return "\(param).rawValue"
         } else {
             return param
         }

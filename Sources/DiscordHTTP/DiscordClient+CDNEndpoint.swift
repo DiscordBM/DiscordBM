@@ -7,7 +7,7 @@ public extension DiscordClient {
         let endpoint = CDNEndpoint.customEmoji(emojiId: emojiId)
         return try await self.send(
             request: .init(to: endpoint),
-            fallbackFileName: emojiId.value
+            fallbackFileName: emojiId.rawValue
         )
     }
 
@@ -130,7 +130,7 @@ public extension DiscordClient {
         let endpoint = CDNEndpoint.applicationAsset(appId: appId, assetId: assetId)
         return try await self.send(
             request: .init(to: endpoint),
-            fallbackFileName: assetId.value
+            fallbackFileName: assetId.rawValue
         )
     }
 
@@ -170,7 +170,7 @@ public extension DiscordClient {
         let endpoint = CDNEndpoint.storePageAsset(appId: appId, assetId: assetId)
         return try await self.send(
             request: .init(to: endpoint),
-            fallbackFileName: assetId.value
+            fallbackFileName: assetId.rawValue
         )
     }
 
@@ -182,7 +182,7 @@ public extension DiscordClient {
         let endpoint = CDNEndpoint.stickerPackBanner(assetId: assetId)
         return try await self.send(
             request: .init(to: endpoint),
-            fallbackFileName: assetId.value
+            fallbackFileName: assetId.rawValue
         )
     }
 
@@ -205,7 +205,7 @@ public extension DiscordClient {
         let endpoint = CDNEndpoint.sticker(stickerId: stickerId)
         return try await self.send(
             request: .init(to: endpoint),
-            fallbackFileName: stickerId.value
+            fallbackFileName: stickerId.rawValue
         )
     }
 

@@ -37,7 +37,7 @@ class GatewayConnectionTests: XCTestCase {
             intents: Gateway.Intent.allCases
         )
 
-        XCTAssertEqual(bot.client.appId?.value, Constants.botId.value)
+        XCTAssertEqual(bot.client.appId?.rawValue, Constants.botId.rawValue)
 
         let expectation = Expectation(description: "Connected")
 

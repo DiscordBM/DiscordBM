@@ -272,10 +272,10 @@ public extension DiscordClient {
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
-                ("user_id", userId?.value),
+                ("user_id", userId?.rawValue),
                 ("action_type", action_type.map { "\($0.rawValue)" }),
-                ("before", before?.value),
-                ("after", after?.value),
+                ("before", before?.rawValue),
+                ("after", after?.rawValue),
                 ("limit", limit.map { "\($0)" })
             ]
         ))
@@ -442,17 +442,17 @@ public extension DiscordClient {
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<[DiscordChannel.Message]> {
         try checkMutuallyExclusive(queries: [
-            ("around", around?.value),
-            ("before", before?.value),
-            ("after", after?.value)
+            ("around", around?.rawValue),
+            ("before", before?.rawValue),
+            ("after", after?.rawValue)
         ])
         let endpoint = APIEndpoint.listMessages(channelId: channelId)
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
-                ("around", around?.value),
-                ("before", before?.value),
-                ("after", after?.value),
+                ("around", around?.rawValue),
+                ("before", before?.rawValue),
+                ("after", after?.rawValue),
                 ("limit", limit.map({ "\($0)" }))
             ]
         ))
@@ -556,7 +556,7 @@ public extension DiscordClient {
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
-                ("after", after?.value),
+                ("after", after?.rawValue),
                 ("limit", limit.map({ "\($0)" }))
             ]
         ))
@@ -911,7 +911,7 @@ public extension DiscordClient {
             to: endpoint,
             queries: [
                 ("with_member", "true"),
-                ("after", after?.value),
+                ("after", after?.rawValue),
                 ("limit", limit.map({ "\($0)" })),
             ]
         ))
@@ -1175,7 +1175,7 @@ public extension DiscordClient {
             to: endpoint,
             queries: [
                 ("limit", limit?.description),
-                ("after", after.map { $0.value }),
+                ("after", after.map { $0.rawValue }),
             ]
         ))
     }
@@ -1315,8 +1315,8 @@ public extension DiscordClient {
             to: endpoint,
             queries: [
                 ("limit", limit.map { "\($0)" }),
-                ("before", before?.value),
-                ("after", after?.value)
+                ("before", before?.rawValue),
+                ("after", after?.rawValue)
             ]
         ))
     }
@@ -1463,7 +1463,7 @@ public extension DiscordClient {
             to: endpoint,
             queries: [
                 ("days", days.map { "\($0)" }),
-                ("include_roles", includeRoles.map { $0.map(\.value).joined(separator: ",") }),
+                ("include_roles", includeRoles.map { $0.map(\.rawValue).joined(separator: ",") }),
             ]
         ))
     }
@@ -1585,7 +1585,7 @@ public extension DiscordClient {
                 to: endpoint,
                 queries: [("style", style.map { $0.rawValue })]
             ),
-            fallbackFileName: "widget_\((style ?? .default).rawValue)_\(guildId.value)"
+            fallbackFileName: "widget_\((style ?? .default).rawValue)_\(guildId.rawValue)"
         )
     }
 
@@ -1760,8 +1760,8 @@ public extension DiscordClient {
             queries: [
                 ("limit", limit.map { "\($0)" }),
                 ("with_member", withMember.map { "\($0)" }),
-                ("before", before?.value),
-                ("after", after?.value),
+                ("before", before?.rawValue),
+                ("after", after?.rawValue),
             ]
         ))
     }
@@ -1892,7 +1892,7 @@ public extension DiscordClient {
         )
         return try await self.send(request: .init(
             to: endpoint,
-            queries: [("thread_id", threadId?.value)]
+            queries: [("thread_id", threadId?.rawValue)]
         ))
     }
 
@@ -1952,7 +1952,7 @@ public extension DiscordClient {
         )
         return try await self.send(request: .init(
             to: endpoint,
-            queries: [("thread_id", threadId?.value)]
+            queries: [("thread_id", threadId?.rawValue)]
         ))
     }
 
@@ -2004,7 +2004,7 @@ public extension DiscordClient {
             queries: [
                 ("with_counts", withCounts.map { "\($0)" }),
                 ("with_expiration", withExpiration.map { "\($0)" }),
-                ("guild_scheduled_event_id", guildScheduledEventId.map { "\($0.value)" })
+                ("guild_scheduled_event_id", guildScheduledEventId.map { "\($0.rawValue)" })
             ]
         ))
     }
@@ -2215,8 +2215,8 @@ public extension DiscordClient {
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
-                ("before", before?.value),
-                ("after", after?.value),
+                ("before", before?.rawValue),
+                ("after", after?.rawValue),
                 ("limit", limit.map { "\($0)" })
             ]
         ))
@@ -2451,7 +2451,7 @@ public extension DiscordClient {
         return try await self.sendMultipart(
             request: .init(
                 to: endpoint,
-                queries: [("thread_id", threadId?.value)]
+                queries: [("thread_id", threadId?.rawValue)]
             ),
             payload: payload
         )
@@ -2475,7 +2475,7 @@ public extension DiscordClient {
                 to: endpoint,
                 queries: [
                     ("wait", "true"),
-                    ("thread_id", threadId?.value)
+                    ("thread_id", threadId?.rawValue)
                 ]
             ),
             payload: payload
@@ -2498,7 +2498,7 @@ public extension DiscordClient {
         )
         return try await self.send(request: .init(
             to: endpoint,
-            queries: [("thread_id", threadId?.value)]
+            queries: [("thread_id", threadId?.rawValue)]
         ))
     }
 
@@ -2520,7 +2520,7 @@ public extension DiscordClient {
         return try await self.sendMultipart(
             request: .init(
                 to: endpoint,
-                queries: [("thread_id", threadId?.value)]
+                queries: [("thread_id", threadId?.rawValue)]
             ),
             payload: payload
         )
@@ -2542,7 +2542,7 @@ public extension DiscordClient {
         )
         return try await self.send(request: .init(
             to: endpoint,
-            queries: [("thread_id", threadId?.value)]
+            queries: [("thread_id", threadId?.rawValue)]
         ))
     }
 }
