@@ -142,6 +142,35 @@ class BitFieldTests: XCTestCase {
             XCTAssertFalse(field.contains(.hypeSquadOnlineHouse2))
         }
 
+        /// Contains 3
+        do {
+            let field = Field([
+                .hypeSquadOnlineHouse1
+            ])
+
+            XCTAssertFalse(field.contains(.hypeSquadOnlineHouse2))
+        }
+
+        /// Contains 4
+        do {
+            let field = Field([
+                .hypeSquadOnlineHouse1,
+                .teamPseudoUser
+            ])
+
+            XCTAssertFalse(field.contains(.hypeSquadOnlineHouse2))
+        }
+
+        /// Contains 5
+        do {
+            let field = Field([
+                .hypeSquadOnlineHouse1,
+                .teamPseudoUser
+            ])
+
+            XCTAssertTrue(field.contains(.teamPseudoUser))
+        }
+
         /// Insert
         do {
             var field = Field([.hypeSquadOnlineHouse1, .hypeSquadOnlineHouse3])

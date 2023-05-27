@@ -711,7 +711,7 @@ private extension Payloads.GuildRole {
     init(role: Role, client: any DiscordClient) async throws {
         self = .init(
             name: role.name,
-            permissions: Array(role.permissions.representableValues().values),
+            permissions: role.permissions,
             color: role.color,
             hoist: role.hoist,
             icon: nil,

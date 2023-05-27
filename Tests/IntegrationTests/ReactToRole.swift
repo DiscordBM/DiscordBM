@@ -193,7 +193,7 @@ class ReactToRoleTests: XCTestCase {
             cache: nil,
             role: .init(
                 name: roleName,
-                permissions: rolePermissions,
+                permissions: .init(rolePermissions),
                 color: roleColor,
                 hoist: nil,
                 icon: nil,

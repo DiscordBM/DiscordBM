@@ -116,12 +116,12 @@ public enum Payloads {
                 case attachments
             }
 
-            public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: AllowedMentions? = nil, flags: [DiscordChannel.Message.Flag]? = nil, components: [Interaction.ActionRow]? = nil, attachments: [Attachment]? = nil, files: [RawFile]? = nil) {
+            public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: AllowedMentions? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, components: [Interaction.ActionRow]? = nil, attachments: [Attachment]? = nil, files: [RawFile]? = nil) {
                 self.tts = tts
                 self.content = content
                 self.embeds = embeds
                 self.allowedMentions = allowedMentions
-                self.flags = flags.map { .init($0) }
+                self.flags = flags
                 self.components = components
                 self.attachments = attachments
                 self.files = files
@@ -391,7 +391,7 @@ public enum Payloads {
             case flags
         }
         
-        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
+        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil) {
             self.content = content
             self.nonce = nonce
             self.tts = tts
@@ -402,7 +402,7 @@ public enum Payloads {
             self.sticker_ids = sticker_ids
             self.files = files
             self.attachments = attachments
-            self.flags = flags.map { .init($0) }
+            self.flags = flags
         }
         
         public func validate() -> [ValidationFailure] {
@@ -454,10 +454,10 @@ public enum Payloads {
             case attachments
         }
         
-        public init(content: String? = nil, embeds: [Embed]? = nil, flags: [DiscordChannel.Message.Flag]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil) {
+        public init(content: String? = nil, embeds: [Embed]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil) {
             self.content = content
             self.embeds = embeds
-            self.flags = flags.map { .init($0) }
+            self.flags = flags
             self.allowed_mentions = allowed_mentions
             self.components = components
             self.files = files
@@ -719,7 +719,7 @@ public enum Payloads {
                 case flags
             }
             
-            public init(content: String? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: [DiscordChannel.Message.Flag]? = nil) {
+            public init(content: String? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil) {
                 self.content = content
                 self.embeds = embeds
                 self.allowed_mentions = allowed_mentions
@@ -727,7 +727,7 @@ public enum Payloads {
                 self.sticker_ids = sticker_ids
                 self.files = files
                 self.attachments = attachments
-                self.flags = flags.map { .init($0) }
+                self.flags = flags
             }
             
             public func validate() -> [ValidationFailure] {
@@ -908,11 +908,11 @@ public enum Payloads {
         public var allow: StringBitField<Permission>?
         public var deny: StringBitField<Permission>?
 
-        public init(id: AnySnowflake, type: DiscordChannel.Overwrite.Kind, allow: [Permission]? = nil, deny: [Permission]? = nil) {
+        public init(id: AnySnowflake, type: DiscordChannel.Overwrite.Kind, allow: StringBitField<Permission>? = nil, deny: StringBitField<Permission>? = nil) {
             self.id = id
             self.type = type
-            self.allow = allow.map { .init($0) }
-            self.deny = deny.map { .init($0) }
+            self.allow = allow
+            self.deny = deny
         }
     }
 
@@ -955,7 +955,7 @@ public enum Payloads {
         public var default_sort_order: DiscordChannel.SortOrder?
         public var default_forum_layout: DiscordChannel.ForumLayout?
 
-        public init(name: String? = nil, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, flags: [DiscordChannel.Flag]? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_thread_rate_limit_per_user: Int? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
+        public init(name: String? = nil, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, flags: IntBitField<DiscordChannel.Flag>? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_thread_rate_limit_per_user: Int? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
             self.name = name
             self.type = type
             self.position = position
@@ -969,7 +969,7 @@ public enum Payloads {
             self.rtc_region = rtc_region
             self.video_quality_mode = video_quality_mode
             self.default_auto_archive_duration = default_auto_archive_duration
-            self.flags = flags.map { .init($0) }
+            self.flags = flags
             self.available_tags = available_tags
             self.default_reaction_emoji = default_reaction_emoji
             self.default_thread_rate_limit_per_user = default_thread_rate_limit_per_user
@@ -1009,14 +1009,14 @@ public enum Payloads {
         public var flags: IntBitField<DiscordChannel.Flag>?
         public var applied_tags: [PartialForumTag]?
 
-        public init(name: String? = nil, archived: Bool? = nil, auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, locked: Bool? = nil, invitable: Bool? = nil, rate_limit_per_user: Int? = nil, flags: [DiscordChannel.Flag]? = nil, applied_tags: [PartialForumTag]? = nil) {
+        public init(name: String? = nil, archived: Bool? = nil, auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, locked: Bool? = nil, invitable: Bool? = nil, rate_limit_per_user: Int? = nil, flags: IntBitField<DiscordChannel.Flag>? = nil, applied_tags: [PartialForumTag]? = nil) {
             self.name = name
             self.archived = archived
             self.auto_archive_duration = auto_archive_duration
             self.locked = locked
             self.invitable = invitable
             self.rate_limit_per_user = rate_limit_per_user
-            self.flags = flags.map { .init($0) }
+            self.flags = flags
             self.applied_tags = applied_tags
         }
 
@@ -1057,7 +1057,7 @@ public enum Payloads {
         public var default_reaction_emoji: DiscordChannel.DefaultReaction?
         public var default_sort_order: DiscordChannel.SortOrder?
 
-        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, flags: [DiscordChannel.Flag]? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_thread_rate_limit_per_user: Int? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
+        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_sort_order: DiscordChannel.SortOrder? = nil) {
             self.name = name
             self.type = type
             self.position = position
@@ -1104,7 +1104,7 @@ public enum Payloads {
         public var system_channel_id: ChannelSnowflake?
         public var system_channel_flags: IntBitField<Guild.SystemChannelFlag>?
 
-        public init(name: String, icon: ImageData? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, roles: [Role]? = nil, channels: [DiscordChannel]? = nil, afk_channel_id: ChannelSnowflake? = nil, afk_timeout: Guild.AFKTimeout? = nil, system_channel_id: ChannelSnowflake? = nil, system_channel_flags: [Guild.SystemChannelFlag]? = nil) {
+        public init(name: String, icon: ImageData? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, roles: [Role]? = nil, channels: [DiscordChannel]? = nil, afk_channel_id: ChannelSnowflake? = nil, afk_timeout: Guild.AFKTimeout? = nil, system_channel_id: ChannelSnowflake? = nil, system_channel_flags: IntBitField<Guild.SystemChannelFlag>? = nil) {
             self.name = name
             self.icon = icon
             self.verification_level = verification_level
@@ -1115,7 +1115,7 @@ public enum Payloads {
             self.afk_channel_id = afk_channel_id
             self.afk_timeout = afk_timeout
             self.system_channel_id = system_channel_id
-            self.system_channel_flags = system_channel_flags.map { .init($0) }
+            self.system_channel_flags = system_channel_flags
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1144,7 +1144,7 @@ public enum Payloads {
         public var description: String?
         public var premium_progress_bar_enabled: Bool?
 
-        public init(name: String? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, afk_channel_id: ChannelSnowflake? = nil, afk_timeout: Guild.AFKTimeout? = nil, icon: ImageData? = nil, owner_id: UserSnowflake? = nil, splash: ImageData? = nil, discovery_splash: ImageData? = nil, banner: ImageData? = nil, system_channel_id: ChannelSnowflake? = nil, system_channel_flags: [Guild.SystemChannelFlag]? = nil, rules_channel_id: ChannelSnowflake? = nil, public_updates_channel_id: ChannelSnowflake? = nil, preferred_locale: DiscordLocale? = nil, features: [Guild.Feature]? = nil, description: String? = nil, premium_progress_bar_enabled: Bool? = nil) {
+        public init(name: String? = nil, verification_level: Guild.VerificationLevel? = nil, default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil, explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil, afk_channel_id: ChannelSnowflake? = nil, afk_timeout: Guild.AFKTimeout? = nil, icon: ImageData? = nil, owner_id: UserSnowflake? = nil, splash: ImageData? = nil, discovery_splash: ImageData? = nil, banner: ImageData? = nil, system_channel_id: ChannelSnowflake? = nil, system_channel_flags: IntBitField<Guild.SystemChannelFlag>? = nil, rules_channel_id: ChannelSnowflake? = nil, public_updates_channel_id: ChannelSnowflake? = nil, preferred_locale: DiscordLocale? = nil, features: [Guild.Feature]? = nil, description: String? = nil, premium_progress_bar_enabled: Bool? = nil) {
             self.name = name
             self.verification_level = verification_level
             self.default_message_notifications = default_message_notifications
@@ -1157,7 +1157,7 @@ public enum Payloads {
             self.discovery_splash = discovery_splash
             self.banner = banner
             self.system_channel_id = system_channel_id
-            self.system_channel_flags = system_channel_flags.map { .init($0) }
+            self.system_channel_flags = system_channel_flags
             self.rules_channel_id = rules_channel_id
             self.public_updates_channel_id = public_updates_channel_id
             self.preferred_locale = preferred_locale
@@ -1246,10 +1246,10 @@ public enum Payloads {
         public var allow: StringBitField<Permission>?
         public var deny: StringBitField<Permission>?
 
-        public init(type: DiscordChannel.Overwrite.Kind, allow: [Permission]? = nil, deny: [Permission]? = nil) {
+        public init(type: DiscordChannel.Overwrite.Kind, allow: StringBitField<Permission>? = nil, deny: StringBitField<Permission>? = nil) {
             self.type = type
-            self.allow = allow.map { .init($0) }
-            self.deny = deny.map { .init($0) }
+            self.allow = allow
+            self.deny = deny
         }
 
         public func validate() -> [ValidationFailure] { }
@@ -1428,14 +1428,14 @@ public enum Payloads {
         public var communication_disabled_until: DiscordTimestamp?
         public var flags: IntBitField<Guild.Member.Flag>?
 
-        public init(nick: String? = nil, roles: [RoleSnowflake]? = nil, mute: Bool? = nil, deaf: Bool? = nil, channel_id: ChannelSnowflake? = nil, communication_disabled_until: DiscordTimestamp? = nil, flags: [Guild.Member.Flag]? = nil) {
+        public init(nick: String? = nil, roles: [RoleSnowflake]? = nil, mute: Bool? = nil, deaf: Bool? = nil, channel_id: ChannelSnowflake? = nil, communication_disabled_until: DiscordTimestamp? = nil, flags: IntBitField<Guild.Member.Flag>? = nil) {
             self.nick = nick
             self.roles = roles
             self.mute = mute
             self.deaf = deaf
             self.channel_id = channel_id
             self.communication_disabled_until = communication_disabled_until
-            self.flags = flags.map { .init($0) }
+            self.flags = flags
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1488,9 +1488,9 @@ public enum Payloads {
         /// which most guild don't have.
         /// No fields are required. If you send an empty payload, you'll get a basic role
         /// with a name like "new role".
-        public init(name: String? = nil, permissions: [Permission]? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, icon: ImageData? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
+        public init(name: String? = nil, permissions: StringBitField<Permission>? = nil, color: DiscordColor? = nil, hoist: Bool? = nil, icon: ImageData? = nil, unicode_emoji: String? = nil, mentionable: Bool? = nil) {
             self.name = name
-            self.permissions = permissions.map { .init($0) }
+            self.permissions = permissions
             self.color = color
             self.hoist = hoist
             self.icon = icon
