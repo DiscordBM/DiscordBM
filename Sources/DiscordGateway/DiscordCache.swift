@@ -24,7 +24,7 @@ public actor DiscordCache {
             self = .some(Set(guildIds))
         }
         
-        func contains(_ value: Snowflake<Tag>) -> Bool {
+        public func contains(_ value: Snowflake<Tag>) -> Bool {
             switch self {
             case .all: return true
             case .none: return false
@@ -45,7 +45,7 @@ public actor DiscordCache {
             self = .some(.init(elements))
         }
         
-        func contains(_ value: Gateway.Intent) -> Bool {
+        public func contains(_ value: Gateway.Intent) -> Bool {
             switch self {
             case .all: return true
             case let .some(values): return values.contains(value)
@@ -64,7 +64,7 @@ public actor DiscordCache {
         
         public static var enabledWithPresences: RequestMembers { .enabledWithPresences() }
         
-        func isEnabled(for guildId: GuildSnowflake) -> Bool {
+        public func isEnabled(for guildId: GuildSnowflake) -> Bool {
             switch self {
             case .disabled: return false
             case let .enabled(guilds), let .enabledWithPresences(guilds):
@@ -72,7 +72,7 @@ public actor DiscordCache {
             }
         }
         
-        func wantsPresences(for guildId: GuildSnowflake) -> Bool {
+        public func wantsPresences(for guildId: GuildSnowflake) -> Bool {
             switch self {
             case .disabled, .enabled: return false
             case let .enabledWithPresences(guilds):
@@ -305,15 +305,15 @@ public actor DiscordCache {
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
     /// With `.all`, all events will be cached.
-    let intents: Intents
+    public let intents: Intents
     /// In big guilds/servers, Discord only sends your own member/presence info by default.
     /// You need to request the rest of the members, which is what this parameter specifies.
     /// Must have `guildMembers` and `guildPresences` intents enabled depending on what you want.
-    let requestMembers: RequestMembers
+    public let requestMembers: RequestMembers
     /// How to cache messages.
-    let messageCachingPolicy: MessageCachingPolicy
+    public let messageCachingPolicy: MessageCachingPolicy
     /// Keeps the storage from using too much memory. Removes the oldest items.
-    let itemsLimit: ItemsLimit
+    public let itemsLimit: ItemsLimit
     /// How often to check and enforce the limit above.
     private let checkForLimitEvery: Int
     /// The storage of cached stuff.

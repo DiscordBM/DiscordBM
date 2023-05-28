@@ -494,81 +494,11 @@ let escapedMessage = "Does this look bold to you?! \(escaped)"
 </details>
 
 ### Discord Logger
+
 <details>
   <summary> Click to expand </summary>
 
-`DiscordBM` comes with a `LogHandler` which can send all your logs to Discord:
-```swift
-import DiscordLogger
-import Logging
-
-/// Configure the Discord Logging Manager.
-DiscordGlobalConfiguration.logManager = await DiscordLogManager(
-    httpClient: <#HTTPClient You Made In Previous Steps#>
-)
-
-/// Bootstrap the `LoggingSystem`. After this, all your `Logger`s will automagically start using `DiscordLogHandler`.
-/// Do not use a `Task { }`. Wait before the `LoggingSystem` is bootstrapped.  
-await LoggingSystem.bootstrapWithDiscordLogger(
-    /// The webhook address to send the logs to. 
-    /// You can easily create a webhook using Discord desktop app with a few clicks.
-    /// See https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks
-    /// There is a 'Making A Webhook' there.
-    address: try .url(<#Your Webhook URL#>),
-    makeMainLogHandler: StreamLogHandler.standardOutput(label:metadataProvider:)
-)
-
-/// Make sure you haven't called `LoggingSystem.bootstrap` anywhere else, because you can only call it once.
-/// For example Vapor's templates use `LoggingSystem.bootstrap` on boot, and you need to remove that.
-```
-`DiscordLogManager` comes with a ton of useful configuration options.   
-Here is an example of a decently-configured `DiscordLogManager`:   
-Read `DiscordLogManager.Configuration.init` documentation for full info.
-
-```swift
-DiscordGlobalConfiguration.logManager = await DiscordLogManager(
-    httpClient: <#HTTPClient You Made In Previous Steps#>,
-    configuration: .init(
-        aliveNotice: .init(
-            address: try .url(<#Your Webhook URL#>),
-            /// If nil, DiscordLogger will only send 1 "I'm alive" notice, on boot.
-            /// If not nil, it will send a "I'm alive" notice every this-amount too. 
-            interval: nil,
-            message: "I'm Alive! :)",
-            color: .blue,
-            initialNoticeMention: .user("970723029262942248")
-        ),
-        mentions: [
-            .warning: .role("970723134149918800"),
-            .error: .role("970723101044244510"),
-            .critical: .role("970723029262942248"),
-        ],
-        extraMetadata: [.warning, .error, .critical],
-        disabledLogLevels: [.debug, .trace], 
-        disabledInDebug: true
-    )
-)
-```
-If you want to only use Discord logger and don't use the rest of `DiscordBM`, you can specify `DiscordLogger` as your dependency:
-```swift
-/// In `Package.swift`:
-.product(name: "DiscordLogger", package: "DiscordBM"),
-```
-
-#### Example
-
-```swift
-/// After bootstrapping the `LoggingSystem`, and with the configuration above, but `extraMetadata` set to `[.critical]`
-let logger = Logger(label: "LoggerLabel")
-logger.warning("Warning you about something!")
-logger.error("We're having an error!", metadata: [
-    "number": .stringConvertible(1),
-    "statusCode": "401 Unauthorized"
-])
-logger.critical("CRITICAL PROBLEM. ABOUT TO EXPLODE 💥")
-```
-
-<img width="370" alt="DiscordLogger Showcase Output" src="https://user-images.githubusercontent.com/54685446/217464224-1cb6ed75-8683-4977-8bd3-03752d7d7597.png">
+`DiscordLogger` has been moved to https://github.com/DiscordBM/DiscordLogger
 
 </details>
 
@@ -645,59 +575,9 @@ let hasRole = guild.userHasRole(
 ### React-To-Role
 <details>
   <summary> Click to expand </summary>
-  
-`DiscordBM` can automatically assign a role to members when they react to a message with specific emojis:
 
-```swift
-let handler = try await ReactToRoleHandler(
-    gatewayManager: <#GatewayManager You Made In Previous Steps#>,
-    /// Your DiscordCache. This is not necessary (you can pass `nil`)
-    /// Only helpful if the cache has `guilds` and/or `guildMembers` intents enabled
-    cache: cache,
-    /// The role-creation payload
-    role: .init(
-        name: "cool-gang",
-        color: .green
-    ),
-    guildId: <#Guild ID of The Message You Created#>,
-    channelId: <#Channel ID of The Message You Created#>,
-    messageId: <#Message ID of The Message You Created#>,
-    /// The list of reactions to get the role for
-    reactions: [.unicodeEmoji("🐔")]
-)
-```
+React-To-Role has been moved to https://github.com/DiscordBM/DiscordReactToRole
 
-After this, anyone reacting with `🐔` to the message will be assigned the role.   
-There are a bunch more options, take a look at `ReactToRoleHandler` initializers for more info.
-
-> **Warning**   
-> The handler will need quite a few permissions. Namely `view messages`, `send messages` & `add reactions` in the channel where the message is, plus `manage roles` in the guild. These are only the minimums. If the bot is receiving 403 responses from Discord, it probably needs some more permissions as well.
-
-#### Behavior
-The handler will:
-* Verify the message exists at all, and throws an error in the initializer if not.
-* React to the message as the bot-user with all the reactions you specified.
-* Re-create the role if it's removed or doesn't exist.
-* Stop working if you use `await handler.stop()`.
-* Re-start working again if you use `try await handler.restart()`.
-
-#### Persistence 
-If you need to persist the handler somewhere:
-* You only need to persist handler's `configuration`, which is `Codable`.
-* You need to update the configuration you saved, whenever it's changed.   
-  To become notified of configuration changes, you should use the `onConfigurationChanged` parameter in initializers:
-
-```swift
-let handler = try await ReactToRoleHandler(
-    .
-    .
-    .
-    onConfigurationChanged: { configuration in 
-        await saveToDatabase(configuration: configuration)
-    }
-)
-```
-  
 </details>
 
 ## Testability
