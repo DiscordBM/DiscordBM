@@ -44,6 +44,7 @@ public enum Permission: UInt, Sendable, Hashable, Codable {
     case moderateMembers = 40
     case viewCreatorMonetizationAnalytics = 41
     case useSoundboard = 42
+    case useExternalSounds = 45
     case sendVoiceMessages = 46
 }
 
