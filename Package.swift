@@ -52,8 +52,28 @@ let package = Package(
             targets: ["DiscordBM"]
         ),
         .library(
-            name: "DiscordLogger",
-            targets: ["DiscordLogger"]
+            name: "DiscordCore",
+            targets: ["DiscordCore"]
+        ),
+        .library(
+            name: "DiscordHTTP",
+            targets: ["DiscordHTTP"]
+        ),
+        .library(
+            name: "DiscordGateway",
+            targets: ["DiscordGateway"]
+        ),
+        .library(
+            name: "DiscordModels",
+            targets: ["DiscordModels"]
+        ),
+        .library(
+            name: "DiscordUtilities",
+            targets: ["DiscordUtilities"]
+        ),
+        .library(
+            name: "DiscordAuth",
+            targets: ["DiscordAuth"]
         )
     ],
     dependencies: [
@@ -74,17 +94,8 @@ let package = Package(
                 "DiscordHTTP",
                 "DiscordCore",
                 "DiscordGateway",
-                "DiscordLogger",
                 "DiscordModels",
                 "DiscordUtilities",
-            ],
-            swiftSettings: swiftSettings
-        ),
-        .target(
-            name: "DiscordHTTP",
-            dependencies: [
-                .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                "DiscordModels",
             ],
             swiftSettings: swiftSettings
         ),
@@ -97,22 +108,20 @@ let package = Package(
             swiftSettings: swiftSettings
         ),
         .target(
+            name: "DiscordHTTP",
+            dependencies: [
+                .product(name: "AsyncHTTPClient", package: "async-http-client"),
+                "DiscordModels",
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .target(
             name: "DiscordGateway",
             dependencies: [
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "DiscordWebSocket",
                 "DiscordHTTP",
-            ],
-            swiftSettings: swiftSettings
-        ),
-        .target(
-            name: "DiscordLogger",
-            dependencies: [
-                .product(name: "NIOCore", package: "swift-nio"),
-                .product(name: "Logging", package: "swift-log"),
-                "DiscordHTTP",
-                "DiscordUtilities",
             ],
             swiftSettings: swiftSettings
         ),
