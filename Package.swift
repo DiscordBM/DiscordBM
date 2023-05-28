@@ -30,13 +30,17 @@ let upcomingFeatureFlags: [SwiftSetting] = [
 let upcomingFeatureFlags: [SwiftSetting] = []
 #endif
 
-let swiftSettings: [SwiftSetting] = [
-    /// Versioned releases can't use this flag?! So can't commit this flag to git.
+let _swiftSettings: [SwiftSetting] = [
     /// `DiscordBM` passes the `complete` level.
     ///
     /// `minimal` / `targeted` / `complete`
-    //    .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
+    .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
 ] + upcomingFeatureFlags
+
+let enableSwiftSettings = false
+
+/// Versioned releases can't use these flags?! So can't commit this to git while enabled.
+let swiftSettings = enableSwiftSettings ? _swiftSettings : []
 
 let package = Package(
     name: "DiscordBM",

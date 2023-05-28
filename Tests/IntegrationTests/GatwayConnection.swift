@@ -5,7 +5,7 @@ import Logging
 import Foundation
 import XCTest
 
-class GatewayConnectionTests: XCTestCase {
+class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
     var httpClient: HTTPClient!
 

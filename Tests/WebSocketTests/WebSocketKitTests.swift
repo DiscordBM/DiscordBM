@@ -5,7 +5,7 @@ import NIOSSL
 import NIOWebSocket
 @testable import DiscordWebSocket
 
-final class WebSocketTests: XCTestCase {
+final class WebSocketTests: XCTestCase, @unchecked Sendable {
     func testWebSocketEcho() throws {
         let server = try ServerBootstrap.webSocket(on: self.elg) { req, ws in
             ws.onText { buffer in
@@ -365,7 +365,7 @@ extension ServerBootstrap {
     static func webSocket(
         on eventLoopGroup: any EventLoopGroup,
         tls: Bool = false,
-        onUpgrade: @escaping (HTTPRequestHead, WebSocket) -> ()
+        onUpgrade: @Sendable @escaping (HTTPRequestHead, WebSocket) -> ()
     ) -> ServerBootstrap {
         return ServerBootstrap(group: eventLoopGroup).childChannelInitializer { channel in
             if tls {

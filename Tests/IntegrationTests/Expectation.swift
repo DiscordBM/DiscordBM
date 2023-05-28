@@ -117,7 +117,7 @@ extension XCTestCase {
 
 /// This was initially an `actor`, but having it as a `class` and
 /// synchronizing using a `DispatchQueue` simplifies a lot of stuff.
-private class FulfillmentStorage {
+private class FulfillmentStorage: @unchecked Sendable {
     private var indices: [Int] = []
     private var continuation: CheckedContinuation<(), Never>? = nil
     private let queue = DispatchQueue(label: "FulfillmentStorageQueue")
