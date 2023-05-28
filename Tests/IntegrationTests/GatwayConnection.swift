@@ -67,10 +67,10 @@ class GatewayConnectionTests: XCTestCase {
             }
         }
 
-        /// To make sure these 2 are triggered in order
+        /// To make sure these 2 `Task`s are triggered in order
         try await Task.sleep(for: .milliseconds(200))
 
-        bot.connect()
+        Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation], timeout: 10)
 
@@ -132,10 +132,10 @@ class GatewayConnectionTests: XCTestCase {
                 }
             }
 
-            /// To make sure these 2 are triggered in order
+            /// To make sure these 2 `Task`s are triggered in order
             try await Task.sleep(for: .milliseconds(200))
 
-            bot.connect()
+            Task { await bot.connect() }
 
             let timeout = Double((shard.first + 1) * 20)
             await waitFulfillment(of: [expectation], timeout: timeout)
@@ -234,10 +234,10 @@ class GatewayConnectionTests: XCTestCase {
             }
         }
 
-        /// To make sure these 2 are triggered in order
+        /// To make sure these 2 `Task`s are triggered in order
         try await Task.sleep(for: .milliseconds(200))
 
-        bot.connect()
+        Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation, criticalLogExpectation], timeout: 10)
 
@@ -285,10 +285,10 @@ class GatewayConnectionTests: XCTestCase {
             }
         }
 
-        /// To make sure these 2 are triggered in order
+        /// To make sure these 2 `Task`s are triggered in order
         try await Task.sleep(for: .milliseconds(200))
 
-        bot.connect()
+        Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation], timeout: 10)
         

@@ -56,10 +56,10 @@ class PermissionChecker: XCTestCase {
             }
         }
 
-        /// To make sure these 2 are triggered in order
+        /// To make sure these 2 `Task`s are triggered in order
         try await Task.sleep(for: .milliseconds(200))
         
-        bot.connect()
+        Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation], timeout: 10)
 

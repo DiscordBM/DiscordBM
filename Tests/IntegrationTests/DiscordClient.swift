@@ -2616,7 +2616,7 @@ private actor GatewayTester {
                 messageCachingPolicy: .saveEditHistoryAndDeleted,
                 itemsLimit: .constant(1_000)
             )
-            self.bot!.connect()
+            await self.bot!.connect()
 
             let expectation = Expectation(description: "GatewayTesterConnect")
 

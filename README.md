@@ -101,8 +101,10 @@ struct EntryPoint {
         /// Make an instance like above
         let bot: BotGatewayManager = <#GatewayManager You Made In Previous Steps#>
 
-        /// Tell the manager to start to connect to Discord.
-        bot.connect()
+        /// Tell the manager to connect to Discord. Use a `Task { }` because it
+        /// might take a few seconds, or even minutes under bad network connections
+        /// Don't use `Task { }` if you care and want to wait
+        Task { await bot.connect() }
 
         /// Get an `AsyncStream` of `Gateway.Event`s
         let stream = await bot.makeEventsStream()

@@ -170,11 +170,65 @@ public actor BotGatewayManager: GatewayManager {
         self.logger = logger
     }
 
-    /// Starts connecting to Discord.
-    /// If you want to become aware of when the connection is established, you need
-    /// to listen for the related Gateway events such as 'ready' and 'resume'.
-    public nonisolated func connect() {
-        Task { await self._connect() }
+    /// Connects to Discord.
+    /// `_state` must be set to an appropriate value before triggering this function.
+    public func connect() async {
+        logger.debug("Connect method triggered")
+        /// Guard we're attempting to connect too fast
+        if let connectIn = await connectionBackoff.canPerformIn() {
+            logger.warning("Cannot try to connect immediately due to backoff", metadata: [
+                "wait-time": .stringConvertible(connectIn)
+            ])
+            await self.sleep(for: connectIn)
+        }
+        /// Guard if other connections are in process
+        guard [.noConnection, .configured, .stopped].contains(self.state) else {
+            logger.error("Gateway state doesn't allow a new connection", metadata: [
+                "state": .stringConvertible(state)
+            ])
+            return
+        }
+        self._state.store(.connecting, ordering: .relaxed)
+        await self.sendQueue.reset()
+        let gatewayURL = await getGatewayURL()
+        logger.trace("Will wait for other shards if needed")
+        await waitInShardQueueIfNeeded()
+        let queries: [(String, String)] = [
+            ("v", "\(DiscordGlobalConfiguration.apiVersion)"),
+            ("encoding", "json"),
+            ("compress", "zlib-stream")
+        ]
+        let configuration = WebSocketClient.Configuration(
+            maxFrameSize: self.maxFrameSize,
+            decompression: .enabled
+        )
+        logger.trace("Will try to connect to Discord through web-socket")
+        do {
+            let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
+            let onBuffer: @Sendable (ByteBuffer) -> Void = { buffer in
+                Task { await self.processBinaryData(buffer, forConnectionWithId: connectionId) }
+            }
+            let onClose: @Sendable (WebSocket) -> Void = { ws in
+                Task { await self.setupOnClose(ws: ws, forConnectionWithId: connectionId) }
+            }
+            let ws = try await WebSocket.connect(
+                to: gatewayURL + queries.makeForURLQuery(),
+                configuration: configuration,
+                on: eventLoopGroup,
+                onBuffer: onBuffer,
+                onClose: onClose
+            )
+            self.logger.debug("Connected to Discord through web-socket. Will configure")
+            self.closeWebSocket(ws: self.ws)
+            self.ws = ws
+            self._state.store(.configured, ordering: .relaxed)
+        } catch {
+            logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
+                "error": .string("\(error)")
+            ])
+            self._state.store(.noConnection, ordering: .relaxed)
+            await self.connect()
+        }
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
@@ -247,67 +301,6 @@ public actor BotGatewayManager: GatewayManager {
 }
 
 extension BotGatewayManager {
-    /// Starts connecting to Discord.
-    /// `_state` must be set to an appropriate value before triggering this function.
-    func _connect() async {
-        logger.debug("Connect method triggered")
-        /// Guard we're attempting to connect too fast
-        if let connectIn = await connectionBackoff.canPerformIn() {
-            logger.warning("Cannot try to connect immediately due to backoff", metadata: [
-                "wait-time": .stringConvertible(connectIn)
-            ])
-            await self.sleep(for: connectIn)
-        }
-        /// Guard if other connections are in process
-        guard [.noConnection, .configured, .stopped].contains(self.state) else {
-            logger.error("Gateway state doesn't allow a new connection", metadata: [
-                "state": .stringConvertible(state)
-            ])
-            return
-        }
-        self._state.store(.connecting, ordering: .relaxed)
-        await self.sendQueue.reset()
-        let gatewayURL = await getGatewayURL()
-        logger.trace("Will wait for other shards if needed")
-        await waitInShardQueueIfNeeded()
-        let queries: [(String, String)] = [
-            ("v", "\(DiscordGlobalConfiguration.apiVersion)"),
-            ("encoding", "json"),
-            ("compress", "zlib-stream")
-        ]
-        let configuration = WebSocketClient.Configuration(
-            maxFrameSize: self.maxFrameSize,
-            decompression: .enabled
-        )
-        logger.trace("Will try to connect to Discord through web-socket")
-        do {
-            let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
-            let onBuffer: @Sendable (ByteBuffer) -> Void = { buffer in
-                Task { await self.processBinaryData(buffer, forConnectionWithId: connectionId) }
-            }
-            let onClose: @Sendable (WebSocket) -> Void = { ws in
-                Task { await self.setupOnClose(ws: ws, forConnectionWithId: connectionId) }
-            }
-            let ws = try await WebSocket.connect(
-                to: gatewayURL + queries.makeForURLQuery(),
-                configuration: configuration,
-                on: eventLoopGroup,
-                onBuffer: onBuffer,
-                onClose: onClose
-            )
-            self.logger.debug("Connected to Discord through web-socket. Will configure")
-            self.closeWebSocket(ws: self.ws)
-            self.ws = ws
-            self._state.store(.configured, ordering: .relaxed)
-        } catch {
-            logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
-                "error": .string("\(error)")
-            ])
-            self._state.store(.noConnection, ordering: .relaxed)
-            await self._connect()
-        }
-    }
-
     private func processEvent(_ event: Gateway.Event) async {
         if let sequenceNumber = event.sequenceNumber {
             self.sequenceNumber = sequenceNumber
@@ -335,7 +328,7 @@ extension BotGatewayManager {
                 self.sessionId = nil
             }
             self._state.store(.noConnection, ordering: .relaxed)
-            await self._connect()
+            await self.connect()
         case let .hello(hello):
             logger.debug("Received 'hello'")
             self.setupPingTask(
@@ -481,7 +474,7 @@ extension BotGatewayManager {
             )
             if self.canTryReconnect(code: ws.closeCode) {
                 self._state.store(.noConnection, ordering: .relaxed)
-                await self._connect()
+                await self.connect()
             } else {
                 self._state.store(.stopped, ordering: .relaxed)
                 self.connectionId.wrappingIncrement(ordering: .relaxed)
@@ -569,7 +562,7 @@ extension BotGatewayManager {
                     "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                 ])
                 self._state.store(.noConnection, ordering: .relaxed)
-                await self._connect()
+                await self.connect()
             }
         }
     }
@@ -617,7 +610,7 @@ extension BotGatewayManager {
                            case .ioOnClosedChannel = channelError {
                             self.logger.error("Received 'ChannelError.ioOnClosedChannel' error while sending payload through web-socket. Will fully disconnect and reconnect again")
                             await self.disconnect()
-                            await self._connect()
+                            await self.connect()
                         } else {
                             self.logger.error("Could not send payload through web-socket", metadata: [
                                 "error": .string("\(error)"),
