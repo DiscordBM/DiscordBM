@@ -4,10 +4,25 @@ import AsyncHTTPClient
 import Atomics
 import Logging
 import DiscordModels
-import enum NIOCore.ChannelError
+import NIO
 import enum NIOWebSocket.WebSocketErrorCode
 
 public actor BotGatewayManager: GatewayManager {
+
+    /// The info related to the shard status of this gateway-manager.
+    struct ShardInfo: Sendable {
+        var shardConnectedOnceBefore = false
+        let shard: IntPair
+        let maxConcurrency: Int
+        /// Shard manager must exist if and only if a shard is configured (by the library).
+        let shardsCoordinator: ShardsCoordinator
+
+        init(shard: IntPair, maxConcurrency: Int, shardsCoordinator: ShardsCoordinator) {
+            self.shard = shard
+            self.maxConcurrency = maxConcurrency
+            self.shardsCoordinator = shardsCoordinator
+        }
+    }
     
     private weak var ws: WebSocket?
     let eventLoopGroup: any EventLoopGroup
@@ -18,23 +33,18 @@ public actor BotGatewayManager: GatewayManager {
     /// Generator of `BotGatewayManager` ids.
     static let idGenerator = ManagedAtomic(UInt(0))
     /// This gateway manager's identifier.
-    public nonisolated let id = BotGatewayManager.idGenerator
-        .wrappingIncrementThenLoad(ordering: .relaxed)
+    public nonisolated let id = idGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
     let logger: Logger
     
     //MARK: Event streams
-    var eventStreamContinuations = [AsyncStream<Gateway.Event>.Continuation]()
-    var eventParseFailureContinuations = [AsyncStream<(any Error, ByteBuffer)>.Continuation]()
+    var eventsStreamContinuations = [AsyncStream<Gateway.Event>.Continuation]()
+    var eventsParseFailureContinuations = [AsyncStream<(any Error, ByteBuffer)>.Continuation]()
     
     //MARK: Connection data
     public nonisolated let identifyPayload: Gateway.Identify
     
     //MARK: Connection state
-    nonisolated let _state = ManagedAtomic(GatewayState.noConnection)
-    /// The current state of the gateway manager.
-    public nonisolated var state: GatewayState {
-        self._state.load(ordering: .relaxed)
-    }
+    private nonisolated let _state = ManagedAtomic(GatewayState.noConnection)
     
     //MARK: Send queue
     
@@ -57,8 +67,7 @@ public actor BotGatewayManager: GatewayManager {
     var resumeGatewayURL: String? = nil
     
     //MARK: Shard-ing
-    var maxConcurrency: Int? = nil
-    var shardConnectedOnceBefore = false
+    var shardInfo: ShardInfo? = nil
     
     //MARK: Backoff
     
@@ -77,13 +86,28 @@ public actor BotGatewayManager: GatewayManager {
     //MARK: Ping-pong tracking properties
     var unsuccessfulPingsCount = 0
     var lastPongDate = Date()
-    
+
+    internal init(
+        eventLoopGroup: any EventLoopGroup,
+        client: any DiscordClient,
+        maxFrameSize: Int =  1 << 31,
+        shardInfo: ShardInfo,
+        identifyPayloadWithShard identifyPayload: Gateway.Identify
+    ) {
+        self.eventLoopGroup = eventLoopGroup
+        self.client = client
+        self.maxFrameSize = maxFrameSize
+        self.shardInfo = shardInfo
+        self.identifyPayload = identifyPayload
+        var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
+        logger[metadataKey: "gateway-id"] = .string("\(self.id)")
+        self.logger = logger
+    }
+
     /// - Parameters:
     ///   - eventLoopGroup: An `EventLoopGroup`.
-    ///   - httpClient: A `HTTPClient`.
     ///   - client: A `DiscordClient` to use.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
-    ///   - appId: Your Discord application id.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
         eventLoopGroup: any EventLoopGroup,
@@ -94,10 +118,19 @@ public actor BotGatewayManager: GatewayManager {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
-        self.identifyPayload = identifyPayload
+
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
+
+        if identifyPayload.shard != nil {
+            var identifyPayload = identifyPayload
+            identifyPayload.shard = nil
+            self.identifyPayload = identifyPayload
+            logger.warning("You can't manually configure a 'BotGatewayManager' for shard-ing. Use 'ShardsGatewayManager' instead.")
+        } else {
+            self.identifyPayload = identifyPayload
+        }
     }
     
     /// - Parameters:
@@ -123,10 +156,19 @@ public actor BotGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
-        self.identifyPayload = identifyPayload
+
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
+
+        if identifyPayload.shard != nil {
+            var identifyPayload = identifyPayload
+            identifyPayload.shard = nil
+            self.identifyPayload = identifyPayload
+            logger.warning("You can't manually configure a 'BotGatewayManager' for shard-ing. Use 'ShardsGatewayManager' instead.")
+        } else {
+            self.identifyPayload = identifyPayload
+        }
     }
     
     /// - Parameters:
@@ -136,7 +178,6 @@ public actor BotGatewayManager: GatewayManager {
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
     ///   - token: Your Discord bot-token.
     ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
-    ///   - shard: What shard this Manager is representing, incase you use shard-ing at all.
     ///   - presence: The initial presence of the bot.
     ///   - intents: The Discord intents you want to receive messages for.
     public init(
@@ -146,7 +187,6 @@ public actor BotGatewayManager: GatewayManager {
         maxFrameSize: Int =  1 << 31,
         token: String,
         appId: ApplicationSnowflake? = nil,
-        shard: IntPair? = nil,
         presence: Gateway.Identify.Presence? = nil,
         intents: [Gateway.Intent]
     ) async {
@@ -161,7 +201,6 @@ public actor BotGatewayManager: GatewayManager {
         self.maxFrameSize = maxFrameSize
         self.identifyPayload = .init(
             token: token,
-            shard: shard,
             presence: presence,
             intents: intents
         )
@@ -179,10 +218,11 @@ public actor BotGatewayManager: GatewayManager {
             logger.warning("Cannot try to connect immediately due to backoff", metadata: [
                 "wait-time": .stringConvertible(connectIn)
             ])
-            await self.sleep(for: connectIn)
+            try? await Task.sleep(for: connectIn)
         }
         /// Guard if other connections are in process
-        guard [.noConnection, .configured, .stopped].contains(self.state) else {
+        let state = self._state.load(ordering: .relaxed)
+        guard [.noConnection, .configured, .stopped].contains(state) else {
             logger.error("Gateway state doesn't allow a new connection", metadata: [
                 "state": .stringConvertible(state)
             ])
@@ -191,8 +231,6 @@ public actor BotGatewayManager: GatewayManager {
         self._state.store(.connecting, ordering: .relaxed)
         await self.sendQueue.reset()
         let gatewayURL = await getGatewayURL()
-        logger.trace("Will wait for other shards if needed")
-        await waitInShardQueueIfNeeded()
         let queries: [(String, String)] = [
             ("v", "\(DiscordGlobalConfiguration.apiVersion)"),
             ("encoding", "json"),
@@ -261,14 +299,14 @@ public actor BotGatewayManager: GatewayManager {
     /// Makes an stream of Gateway events.
     public func makeEventsStream() -> AsyncStream<Gateway.Event> {
         AsyncStream<Gateway.Event> { continuation in
-            self.eventStreamContinuations.append(continuation)
+            self.eventsStreamContinuations.append(continuation)
         }
     }
 
     /// Makes an stream of Gateway event parse failures.
     public func makeEventsParseFailureStream() -> AsyncStream<(any Error, ByteBuffer)> {
         AsyncStream<(any Error, ByteBuffer)> { continuation in
-            self.eventParseFailureContinuations.append(continuation)
+            self.eventsParseFailureContinuations.append(continuation)
         }
     }
     
@@ -289,14 +327,6 @@ public actor BotGatewayManager: GatewayManager {
         await connectionBackoff.resetTryCount()
         await self.sendQueue.reset()
         self.closeWebSocket(ws: self.ws)
-        if let shard = self.identifyPayload.shard,
-           let maxConcurrency = self.maxConcurrency {
-            self.shardConnectedOnceBefore = false
-            await ShardManager.shared.disconnected(
-                shard: shard,
-                maxConcurrency: maxConcurrency
-            )
-        }
     }
 }
 
@@ -331,10 +361,14 @@ extension BotGatewayManager {
             await self.connect()
         case let .hello(hello):
             logger.debug("Received 'hello'")
+            /// Start heart-beating right-away.
+            /// Don't wait for shards first, as that might take too long.
             self.setupPingTask(
                 forConnectionWithId: self.connectionId.load(ordering: .relaxed),
                 every: .milliseconds(Int64(hello.heartbeat_interval))
             )
+            await waitInShardQueueIfNeeded()
+            logger.trace("Will resume or identify")
             await self.sendResumeOrIdentify()
         case let .ready(payload):
             logger.notice("Received ready notice. The connection is fully established", metadata: [
@@ -360,27 +394,14 @@ extension BotGatewayManager {
             logger.trace("Got Discord gateway url from 'resumeGatewayURL'")
             return gatewayURL
         } else {
-            /// If the bot is using shard-ing, we need to call a different endpoint
-            /// to get some more info than only the gateway url.
-            if identifyPayload.shard == nil {
-                if let gatewayURL = try? await client.getGateway().decode().url {
-                    logger.trace("Got Discord gateway url from gateway api call")
-                    return gatewayURL
-                }
+            if let gatewayURL = try? await client.getGateway().decode().url {
+                logger.trace("Got Discord gateway url from gateway api call")
+                return gatewayURL
             } else {
-                if let gatewayBot = try? await client.getBotGateway().decode() {
-                    logger.trace("Got Discord gateway url from gateway-bot api call", metadata: [
-                        "max_concurrency": .stringConvertible(
-                            gatewayBot.session_start_limit.max_concurrency
-                        )
-                    ])
-                    self.maxConcurrency = gatewayBot.session_start_limit.max_concurrency
-                    return gatewayBot.url
-                }
+                logger.error("Cannot get gateway url to connect to. Will retry in 10 seconds")
+                try? await Task.sleep(for: .seconds(10))
+                return await self.getGatewayURL()
             }
-            logger.error("Cannot get gateway url to connect to. Will retry in 10 seconds")
-            await self.sleep(for: .seconds(10))
-            return await self.getGatewayURL()
         }
     }
     
@@ -443,14 +464,14 @@ extension BotGatewayManager {
                 "event": .string("\(event)")
             ])
             Task { await self.processEvent(event) }
-            for continuation in self.eventStreamContinuations {
+            for continuation in self.eventsStreamContinuations {
                 continuation.yield(event)
             }
         } catch {
             self.logger.debug("Failed to decode event", metadata: [
                 "error": .string("\(error)")
             ])
-            for continuation in self.eventParseFailureContinuations {
+            for continuation in self.eventsParseFailureContinuations {
                 continuation.yield((error, buffer))
             }
         }
@@ -521,7 +542,7 @@ extension BotGatewayManager {
         every duration: Duration
     ) {
         Task {
-            await self.sleep(for: duration)
+            try? await Task.sleep(for: duration)
             guard self.connectionId.load(ordering: .relaxed) == connectionId else {
                 self.logger.trace("Canceled a ping task", metadata: [
                     "connectionId": .stringConvertible(connectionId)
@@ -545,7 +566,7 @@ extension BotGatewayManager {
             data: .heartbeat(lastSequenceNumber: self.sequenceNumber)
         ))
         Task {
-            await self.sleep(for: .seconds(10))
+            try? await Task.sleep(for: .seconds(10))
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
             /// 15 == 10 + 5. 10 seconds that we slept, + 5 seconds tolerance.
             /// The tolerance being too long should not matter as pings usually happen
@@ -643,34 +664,24 @@ extension BotGatewayManager {
         await connectionBackoff.resetTryCount()
         self.unsuccessfulPingsCount = 0
         await self.sendQueue.reset()
-        if let shard = self.identifyPayload.shard,
-           let maxConcurrency = self.maxConcurrency,
-           !self.shardConnectedOnceBefore {
-            self.shardConnectedOnceBefore = true
-            await ShardManager.shared.connected(
-                shard: shard,
-                maxConcurrency: maxConcurrency
-            )
-        }
     }
 
     /// Discord says: "you must start the shard buckets in "order". That means that you can start shard 0 -> shard 15 concurrently, and then you can start shard 16 -> shard 31."
     /// https://discord.com/developers/docs/topics/gateway#sharding
     ///
-    /// This shard-ing logic can't handle out-of-process shards.
+    /// This shard-ing logic can't handle out-of-process shards yet.
+    /// Maybe soon with some `DistributedActor`s magic.
     private func waitInShardQueueIfNeeded() async {
-        if let shard = self.identifyPayload.shard,
-           let maxConcurrency,
+        if let shardInfo,
            /// If shard already connected once before, then skip the wait.
-           !self.shardConnectedOnceBefore {
-            await ShardManager.shared.waitForOtherShards(
-                shard: shard,
-                maxConcurrency: max(maxConcurrency, 1) /// Avoid an unlikely division-by-zero
+           !shardInfo.shardConnectedOnceBefore {
+            logger.trace("Will wait for other shards")
+            /// `shardManager` must exist. Initializer must enforce this.
+            await shardInfo.shardsCoordinator.waitForOtherShards(
+                shard: shardInfo.shard,
+                maxConcurrency: max(shardInfo.maxConcurrency, 1) /// Avoid an unlikely division-by-zero
             )
-            /// Wait a little bit more.
-            /// Nothing scientific but seems to make Discord happy `¯\_(ツ)_/¯`.
-            let more = (shard.second / maxConcurrency) * 500
-            await self.sleep(for: .milliseconds(more))
+            logger.trace("Done waiting for other shards")
         }
     }
     
@@ -682,14 +693,36 @@ extension BotGatewayManager {
             ])
         }
     }
-    
-    private func sleep(for duration: Duration) async {
-        do {
-            try await Task.sleep(for: duration)
-        } catch {
-            logger.warning("Task failed to sleep properly", metadata: [
-                "error": .string("\(error)")
-            ])
+}
+
+// MARK: For ShardsGatewayManager
+extension BotGatewayManager {
+    func addEventsContinuation(_ continuation: AsyncStream<Gateway.Event>.Continuation) {
+        self.eventsStreamContinuations.append(continuation)
+    }
+
+    func addEventsParseFailureContinuation(
+        _ continuation: AsyncStream<(any Error, ByteBuffer)>.Continuation
+    ) {
+        self.eventsParseFailureContinuations.append(continuation)
+    }
+}
+
+//MARK: - GatewayState
+private enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
+    case stopped
+    case noConnection
+    case connecting
+    case configured
+    case connected
+
+    var description: String {
+        switch self {
+        case .stopped: return "stopped"
+        case .noConnection: return "noConnection"
+        case .connecting: return "connecting"
+        case .configured: return "configured"
+        case .connected: return "connected"
         }
     }
 }

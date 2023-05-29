@@ -2610,7 +2610,7 @@ private actor GatewayTester {
                 intents: Gateway.Intent.allCases
             )
             self.cache = await DiscordCache(
-                gatewayManagers: [self.bot!],
+                gatewayManager: self.bot!,
                 intents: .init(Gateway.Intent.allCases),
                 requestAllMembers: .enabledWithPresences,
                 messageCachingPolicy: .saveEditHistoryAndDeleted,

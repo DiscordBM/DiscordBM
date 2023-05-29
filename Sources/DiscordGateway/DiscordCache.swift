@@ -44,13 +44,6 @@ public actor DiscordCache {
         public init<S>(_ elements: S) where S: Sequence, S.Element == Gateway.Intent {
             self = .some(.init(elements))
         }
-        
-        public func contains(_ value: Gateway.Intent) -> Bool {
-            switch self {
-            case .all: return true
-            case let .some(values): return values.contains(value)
-            }
-        }
     }
     
     public enum RequestMembers: Sendable {
@@ -298,14 +291,12 @@ public actor DiscordCache {
     }
     
     /// The gateway manager that this `DiscordCache` instance caches from.
-    let gatewayManagers: [any GatewayManager]
-    /// The possible gateway manager that has the guild-members intent.
-    var guildMembersGatewayManager: (any GatewayManager)?
+    let gatewayManager: any GatewayManager
     /// What intents to cache their related Gateway events.
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
     /// With `.all`, all events will be cached.
-    public let intents: Intents
+    public let intents: Set<Gateway.Intent>
     /// In big guilds/servers, Discord only sends your own member/presence info by default.
     /// You need to request the rest of the members, which is what this parameter specifies.
     /// Must have `guildMembers` and `guildPresences` intents enabled depending on what you want.
@@ -347,9 +338,9 @@ public actor DiscordCache {
         itemsLimit: ItemsLimit = .default,
         storage: Storage = Storage()
     ) async {
-        self.gatewayManagers = [gatewayManager]
-        (self.intents, self.guildMembersGatewayManager) = DiscordCache.calculateIntentsIntersection(
-            gatewayManagers: gatewayManagers,
+        self.gatewayManager = gatewayManager
+        self.intents = DiscordCache.calculateIntentsIntersection(
+            gatewayManager: gatewayManager,
             intents: intents
         )
         self.requestMembers = requestAllMembers
@@ -361,47 +352,6 @@ public actor DiscordCache {
         Task {
             for await event in await gatewayManager.makeEventsStream() {
                 self.handleEvent(event)
-            }
-        }
-    }
-
-    /// - Parameters:
-    ///   - gatewayManagers: The gateway managers that this `DiscordCache` instance caches from.
-    ///     Multiple gateway managers are only useful if you're using shard-ing in the same process.
-    ///   - intents: What intents to cache their related Gateway events.
-    ///     This does not affect what events you receive from Discord.
-    ///     The intents you enter here must have been enabled in your `GatewayManager`.
-    ///   - requestAllMembers: In big guilds/servers, Discord only sends your own member/presence
-    ///     info by default. You need to request the rest of the members, which is what this
-    ///     parameter specifies. Must have `guildMembers` and `guildPresences` intents enabled
-    ///     depending on what you want.
-    ///   - messageCachingPolicy: How to cache messages.
-    ///   - itemsLimit: Keeps the storage from using too much memory. Removes the oldest items.
-    ///   - storage: The storage of cached stuff. You usually don't need to provide this parameter.
-    public init(
-        gatewayManagers: [any GatewayManager],
-        intents: Intents,
-        requestAllMembers: RequestMembers,
-        messageCachingPolicy: MessageCachingPolicy = .normal,
-        itemsLimit: ItemsLimit = .default,
-        storage: Storage = Storage()
-    ) async {
-        self.gatewayManagers = gatewayManagers
-        (self.intents, self.guildMembersGatewayManager) = DiscordCache.calculateIntentsIntersection(
-            gatewayManagers: gatewayManagers,
-            intents: intents
-        )
-        self.requestMembers = requestAllMembers
-        self.messageCachingPolicy = messageCachingPolicy
-        self.itemsLimit = itemsLimit
-        self.checkForLimitEvery = itemsLimit.calculateCheckForLimitEvery()
-        self.storage = storage
-
-        for gatewayManager in gatewayManagers {
-            Task {
-                for await event in await gatewayManager.makeEventsStream() {
-                    self.handleEvent(event)
-                }
             }
         }
     }
@@ -418,7 +368,7 @@ public actor DiscordCache {
             self.guilds[guildCreate.id] = guildCreate
             if requestMembers.isEnabled(for: guildCreate.id) {
                 Task {
-                    await guildMembersGatewayManager?.requestGuildMembersChunk(payload: .init(
+                    await gatewayManager.requestGuildMembersChunk(payload: .init(
                         guild_id: guildCreate.id,
                         query: "",
                         limit: 0,
@@ -858,18 +808,13 @@ public actor DiscordCache {
     
     private func intentsAllowCaching(event: Gateway.Event) -> Bool {
         guard let data = event.data else { return false }
-        switch intents {
-        case .all:
+        let correspondingIntents = data.correspondingIntents
+        if correspondingIntents.isEmpty {
             return true
-        case let .some(intents):
-            let correspondingIntents = data.correspondingIntents
-            if correspondingIntents.isEmpty {
-                return true
-            } else if correspondingIntents.contains(where: { intents.contains($0) }) {
-                return true
-            } else {
-                return false
-            }
+        } else if correspondingIntents.contains(where: { intents.contains($0) }) {
+            return true
+        } else {
+            return false
         }
     }
     
@@ -969,28 +914,21 @@ public actor DiscordCache {
     }
 
     static func calculateIntentsIntersection(
-        gatewayManagers managers: [any GatewayManager],
+        gatewayManager manager: any GatewayManager,
         intents: Intents
-    ) -> (intents: Intents, guildMembersGatewayManager: (any GatewayManager)?)  {
+    ) -> Set<Gateway.Intent> {
         var intentsSum = Set<Gateway.Intent>()
-        var guildMembersGatewayManager: (any GatewayManager)?
 
-        for manager in managers {
-            let (managerIntents, _) = manager.identifyPayload.intents.representableValues()
+        let (managerIntents, _) = manager.identifyPayload.intents.representableValues()
 
-            if managerIntents.contains(.guildMembers) {
-                guildMembersGatewayManager = manager
-            }
-
-            switch intents {
-            case .all:
-                intentsSum.formUnion(managerIntents)
-            case let .some(intents):
-                intentsSum.formUnion(intents.intersection(managerIntents))
-            }
+        switch intents {
+        case .all:
+            intentsSum.formUnion(managerIntents)
+        case let .some(intents):
+            intentsSum.formUnion(intents.intersection(managerIntents))
         }
 
-        return (.some(intentsSum), guildMembersGatewayManager)
+        return intentsSum
     }
     
 #if DEBUG

@@ -7,8 +7,6 @@ public protocol GatewayManager: AnyActor {
     nonisolated var client: any DiscordClient { get }
     /// This gateway manager's identifier.
     nonisolated var id: UInt { get }
-    /// The current state of the gateway manager.
-    nonisolated var state: GatewayState { get }
     /// The identification payload that is sent to Discord.
     nonisolated var identifyPayload: Gateway.Identify { get }
 
@@ -48,23 +46,4 @@ public extension GatewayManager {
     func addEventParseFailureHandler(
         _ handler: @Sendable @escaping (any Error, ByteBuffer) -> Void
     ) { }
-}
-
-/// The state of a `GatewayManager`.
-public enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
-    case stopped
-    case noConnection
-    case connecting
-    case configured
-    case connected
-    
-    public var description: String {
-        switch self {
-        case .stopped: return "stopped"
-        case .noConnection: return "noConnection"
-        case .connecting: return "connecting"
-        case .configured: return "configured"
-        case .connected: return "connected"
-        }
-    }
 }

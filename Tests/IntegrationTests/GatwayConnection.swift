@@ -93,108 +93,48 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         await bot.disconnect()
 
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
-        XCTAssertEqual(bot.state, .stopped)
     }
 
-    func connectWithShard(shard: IntPair) -> Expectation {
-        let exp = Expectation(description: "ConnectForShard:\(shard)")
-
-        Task {
-            defer { exp.fulfill() }
-
-            let bot = await BotGatewayManager(
-                eventLoopGroup: self.httpClient.eventLoopGroup,
-                httpClient: self.httpClient,
-                token: Constants.token,
-                shard: shard,
-                presence: .init(
-                    activities: [.init(name: "Testing!", type: .competing)],
-                    status: .invisible,
-                    afk: false
-                ),
-                intents: Gateway.Intent.allCases
-            )
-
-            let expectation = Expectation(description: "Connected:\(shard)")
-
-            let connectionInfo = ConnectionInfo()
-
-            Task {
-                for await event in await bot.makeEventsStream() {
-                    if case let .ready(ready) = event.data {
-                        await connectionInfo.setReady(ready)
-                        expectation.fulfill()
-                    } else if event.opcode == .hello {
-                        await connectionInfo.setDidHello()
-                    } else if await connectionInfo.ready == nil {
-                        expectation.fulfill()
-                    }
-                }
-            }
-
-            /// To make sure these 2 `Task`s are triggered in order
-            try await Task.sleep(for: .milliseconds(200))
-
-            Task { await bot.connect() }
-
-            let timeout = Double((shard.first + 1) * 20)
-            await waitFulfillment(of: [expectation], timeout: timeout)
-
-            let didHello = await connectionInfo.didHello
-            let _ready = await connectionInfo.ready
-            XCTAssertTrue(didHello)
-            let ready = try XCTUnwrap(_ready, "Shard \(shard)")
-            XCTAssertEqual(ready.v, DiscordGlobalConfiguration.apiVersion)
-            XCTAssertEqual(ready.application.id, Snowflake(Constants.botId))
-            XCTAssertFalse(ready.session_id.isEmpty)
-            XCTAssertEqual(ready.user.id, Constants.botId)
-            XCTAssertEqual(ready.user.bot, true)
-
-            /// The bot should not disconnect for 10s.
-            /// This is to make sure we aren't getting invalid-session-ed immediately.
-            try await Task.sleep(for: .seconds(10))
-            XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
-
-            await bot.disconnect()
-
-            /// Make sure it is disconnected
-            try await Task.sleep(for: .seconds(5))
-            XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
-            XCTAssertEqual(bot.state, .stopped)
-        }
-
-        return exp
-    }
-
-    func testUsingShards() async throws {
+    func testShardsGatewayManager() async throws {
         /// Make sure last tests don't affect this test's gateway connection
         try await Task.sleep(for: .seconds(5))
 
-        /// To make sure the calling the getBotGateway endpoint simultaneously
-        /// doesn't make the first shard so slow that its test fails.
-        ///
-        /// Not a bad idea to do in a real app with too many shards, either. The reason why
-        /// this helps is that the `DiscordClient` always caches the getBotGateway endpoint.
-        try await DefaultDiscordClient(
-            httpClient: httpClient,
-            token: Constants.token
-        ).getBotGateway().guardSuccess()
+        let shardCount = 20
 
-        /// Just to make sure it is initialized
-        /// So thread sanitizer doesn't show a warning
-        _ = ShardManager.shared
+        let bot: any GatewayManager = await ShardsGatewayManager(
+            eventLoopGroup: self.httpClient.eventLoopGroup,
+            httpClient: self.httpClient,
+            token: Constants.token,
+            shardCountStrategy: .exact(shardCount),
+            presence: .init(
+                activities: [.init(name: "Testing!", type: .competing)],
+                status: .invisible,
+                afk: false
+            ),
+            intents: Gateway.Intent.allCases
+        )
 
-        let shardCount = 16
+        let counter = ShardCounter(shardCount: shardCount)
 
-        var expectations = [Expectation]()
-
-        for idx in (0..<shardCount) {
-            expectations.append(
-                connectWithShard(shard: .init(idx, shardCount))
-            )
+        Task {
+            for await event in await bot.makeEventsStream() {
+                if case let .ready(ready) = event.data {
+                    let shardIdx = try XCTUnwrap(ready.shard?.first)
+                    await counter.increase(shardIdx: shardIdx)
+                } else if event.opcode == .invalidSession {
+                    XCTFail("Received invalid session in a shard")
+                } else {
+                    /// Do nothing
+                }
+            }
         }
 
-        await waitFulfillment(of: expectations, timeout: Double(shardCount * 25))
+        /// To make sure these 2 `Task`s are triggered in order
+        try await Task.sleep(for: .milliseconds(200))
+
+        Task { await bot.connect() }
+
+        await counter.waitFulfillment()
     }
 
     func testGatewayStopsOnInvalidToken() async throws {
@@ -256,7 +196,6 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         /// BotGatewayManager already "stopped" itself and increased the `connectionId`
         /// since token was invalid and Discord complains about that.
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
-        XCTAssertEqual(bot.state, .stopped)
     }
 
     func testGatewayRequests() async throws {
@@ -316,7 +255,6 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         await bot.disconnect()
 
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
-        XCTAssertEqual(bot.state, .stopped)
     }
 }
 
@@ -332,6 +270,41 @@ private actor ConnectionInfo {
     
     func setDidHello() {
         self.didHello = true
+    }
+}
+
+private actor ShardCounter {
+    private var connectedShards = Set<Int>()
+    private var shardCount: Int
+    private var expectation: Expectation?
+
+    init(shardCount: Int) {
+        self.shardCount = shardCount
+    }
+
+    func increase(shardIdx: Int, file: StaticString = #filePath, line: UInt = #line) {
+        if !connectedShards.insert(shardIdx).inserted {
+            XCTFail("Seems like ShardCounter has already been fulfilled for shardIdx '\(shardIdx)'")
+        }
+        if connectedShards.sorted() == Array(0..<(shardCount)) {
+            self.expectation?.fulfill(file: file, line: line)
+            self.expectation = nil
+        }
+    }
+
+    func waitFulfillment(file: StaticString = #filePath, line: UInt = #line) async {
+        if connectedShards.sorted() == Array(0..<(shardCount)) {
+            return
+        } else {
+            let exp = Expectation(description: "Counter")
+            self.expectation = exp
+            await Expectation.waitFulfillment(
+                of: [exp],
+                timeout: Double(shardCount * 25),
+                file: file,
+                line: line
+            )
+        }
     }
 }
 

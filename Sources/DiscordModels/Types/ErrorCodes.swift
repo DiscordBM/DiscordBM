@@ -1,4 +1,3 @@
-import DiscordCore
 
 /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
 public enum GatewayCloseCode: UInt16, Sendable, Codable {
@@ -239,6 +238,7 @@ public enum JSONErrorCode: Int, Sendable, Codable {
     case messageBlockedByHarmfulLinksFilter = 240000
 }
 
+/// https://discord.com/developers/docs/topics/opcodes-and-status-codes#json
 public struct JSONError: Sendable, Codable {
     public var message: String
     /// Might be `nil` in case of something like a rate-limit error.
