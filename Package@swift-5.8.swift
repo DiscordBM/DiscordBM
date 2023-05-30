@@ -1,6 +1,36 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 5.8
 
 import PackageDescription
+
+let upcomingFeatureFlags: [SwiftSetting] = [
+    /// `-enable-upcoming-feature` flags will get removed in the future
+    /// and we'll need to remove them from here too.
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md
+    /// Require `any` for existential types.
+        .enableUpcomingFeature("ExistentialAny"),
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md
+    /// Nicer `#file`.
+        .enableUpcomingFeature("ConciseMagicFile"),
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0286-forward-scan-trailing-closures.md
+    /// This one shouldn't do much to be honest, but shouldn't hurt as well.
+        .enableUpcomingFeature("ForwardTrailingClosures"),
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0354-regex-literals.md
+    /// `BareSlashRegexLiterals` not enabled since we don't use regex anywhere.
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md
+    /// `ImportObjcForwardDeclarations` not enabled because it's objc-related.
+]
+
+let swiftSettings: [SwiftSetting] = [
+    /// `DiscordBM` passes the `complete` level.
+    ///
+    /// `minimal` / `targeted` / `complete`
+//    .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
+] + upcomingFeatureFlags
 
 let package = Package(
     name: "DiscordBM",
@@ -60,21 +90,24 @@ let package = Package(
                 "DiscordGateway",
                 "DiscordModels",
                 "DiscordUtilities",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordCore",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordHTTP",
             dependencies: [
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "DiscordModels",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordGateway",
@@ -83,7 +116,8 @@ let package = Package(
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 "DiscordWebSocket",
                 "DiscordHTTP",
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordModels",
@@ -91,19 +125,22 @@ let package = Package(
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
                 "DiscordCore"
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordUtilities",
             dependencies: [
                 "DiscordModels"
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordAuth",
             dependencies: [
                 "DiscordModels"
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .plugin(
             name: "GenerateAPIEndpoints",
@@ -125,7 +162,8 @@ let package = Package(
                 .product(name: "Yams", package: "Yams")
             ],
             path: "Plugins/GenerateAPIEndpointsExec",
-            resources: [.copy("Resources/openapi.yml")]
+            resources: [.copy("Resources/openapi.yml")],
+            swiftSettings: swiftSettings
         ),
         /// Vapor's `WebSocketKit` with modifications to fit `DiscordBM` better.
         .target(
@@ -141,7 +179,8 @@ let package = Package(
                 .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
                 .product(name: "Atomics", package: "swift-atomics"),
                 "CZlib"
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "CZlib",
@@ -152,16 +191,19 @@ let package = Package(
         ),
         .testTarget(
             name: "DiscordBMTests",
-            dependencies: ["DiscordBM"]
+            dependencies: ["DiscordBM"],
+            swiftSettings: swiftSettings
         ),
         /// Vapor's `WebSocketKit` tests with modifications to fit `DiscordBM` better.
         .testTarget(
             name: "WebSocketTests",
-            dependencies: ["DiscordWebSocket"]
+            dependencies: ["DiscordWebSocket"],
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["DiscordBM"]
+            dependencies: ["DiscordBM"],
+            swiftSettings: swiftSettings
         ),
     ]
 )
