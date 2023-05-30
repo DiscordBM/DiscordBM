@@ -44,7 +44,7 @@ public actor BotGatewayManager: GatewayManager {
     public nonisolated let identifyPayload: Gateway.Identify
     
     //MARK: Connection state
-    private nonisolated let _state = ManagedAtomic(GatewayState.noConnection)
+    private nonisolated let state = ManagedAtomic(GatewayState.noConnection)
     
     //MARK: Send queue
     
@@ -71,8 +71,10 @@ public actor BotGatewayManager: GatewayManager {
     
     //MARK: Backoff
     
-    /// Discord cares about the identify payload for rate-limiting and if we send
-    /// more than 1000 identifies in a day, Discord will revoke the bot token.
+    /// Discord cares about the identify payload for rate-limiting and if you send
+    /// more than 1000 identifies in a day, Discord will revoke your bot token
+    /// (unless your bot is big enough that has a bigger identify-limit than 1000 per day).
+    ///
     /// This Backoff does not necessarily prevent your bot token getting revoked,
     /// but in the worst case, doesn't let it happen sooner than ~6 hours.
     /// This also helps in other situations, for example when there is a Discord outage.
@@ -210,7 +212,7 @@ public actor BotGatewayManager: GatewayManager {
     }
 
     /// Connects to Discord.
-    /// `_state` must be set to an appropriate value before triggering this function.
+    /// `state` must be set to an appropriate value before triggering this function.
     public func connect() async {
         logger.debug("Connect method triggered")
         /// Guard we're attempting to connect too fast
@@ -221,14 +223,14 @@ public actor BotGatewayManager: GatewayManager {
             try? await Task.sleep(for: connectIn)
         }
         /// Guard if other connections are in process
-        let state = self._state.load(ordering: .relaxed)
+        let state = self.state.load(ordering: .relaxed)
         guard [.noConnection, .configured, .stopped].contains(state) else {
             logger.error("Gateway state doesn't allow a new connection", metadata: [
                 "state": .stringConvertible(state)
             ])
             return
         }
-        self._state.store(.connecting, ordering: .relaxed)
+        self.state.store(.connecting, ordering: .relaxed)
         await self.sendQueue.reset()
         let gatewayURL = await getGatewayURL()
         let queries: [(String, String)] = [
@@ -259,12 +261,12 @@ public actor BotGatewayManager: GatewayManager {
             self.logger.debug("Connected to Discord through web-socket. Will configure")
             self.closeWebSocket(ws: self.ws)
             self.ws = ws
-            self._state.store(.configured, ordering: .relaxed)
+            self.state.store(.configured, ordering: .relaxed)
         } catch {
             logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
                 "error": .string("\(error)")
             ])
-            self._state.store(.noConnection, ordering: .relaxed)
+            self.state.store(.noConnection, ordering: .relaxed)
             await self.connect()
         }
     }
@@ -316,14 +318,14 @@ public actor BotGatewayManager: GatewayManager {
         logger.debug("Will disconnect", metadata: [
             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
         ])
-        if self._state.load(ordering: .relaxed) == .stopped {
+        if self.state.load(ordering: .relaxed) == .stopped {
             logger.debug("Already disconnected", metadata: [
                 "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
             ])
             return
         }
         self.connectionId.wrappingIncrement(ordering: .relaxed)
-        self._state.store(.stopped, ordering: .relaxed)
+        self.state.store(.stopped, ordering: .relaxed)
         await connectionBackoff.resetTryCount()
         await self.sendQueue.reset()
         self.closeWebSocket(ws: self.ws)
@@ -357,7 +359,7 @@ extension BotGatewayManager {
                 self.resumeGatewayURL = nil
                 self.sessionId = nil
             }
-            self._state.store(.noConnection, ordering: .relaxed)
+            self.state.store(.noConnection, ordering: .relaxed)
             await self.connect()
         case let .hello(hello):
             logger.debug("Received 'hello'")
@@ -494,10 +496,10 @@ extension BotGatewayManager {
                 ]
             )
             if self.canTryReconnect(code: ws.closeCode) {
-                self._state.store(.noConnection, ordering: .relaxed)
+                self.state.store(.noConnection, ordering: .relaxed)
                 await self.connect()
             } else {
-                self._state.store(.stopped, ordering: .relaxed)
+                self.state.store(.stopped, ordering: .relaxed)
                 self.connectionId.wrappingIncrement(ordering: .relaxed)
                 self.logger.critical("Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/DiscordBM/DiscordBM/issues if you think this is a library issue")
 
@@ -582,7 +584,7 @@ extension BotGatewayManager {
                 logger.debug("Too many unsuccessful pings. Will try to reconnect", metadata: [
                     "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                 ])
-                self._state.store(.noConnection, ordering: .relaxed)
+                self.state.store(.noConnection, ordering: .relaxed)
                 await self.connect()
             }
         }
@@ -651,7 +653,7 @@ extension BotGatewayManager {
                         "Trying to send through ws when a connection is not established",
                         metadata: [
                             "payload": .string("\(payload)"),
-                            "state": .stringConvertible(self._state.load(ordering: .relaxed)),
+                            "state": .stringConvertible(self.state.load(ordering: .relaxed)),
                             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                         ])
                 }
@@ -660,7 +662,7 @@ extension BotGatewayManager {
     }
     
     private func onSuccessfulConnection() async {
-        self._state.store(.connected, ordering: .relaxed)
+        self.state.store(.connected, ordering: .relaxed)
         await connectionBackoff.resetTryCount()
         self.unsuccessfulPingsCount = 0
         await self.sendQueue.reset()

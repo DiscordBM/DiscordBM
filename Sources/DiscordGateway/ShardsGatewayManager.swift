@@ -7,29 +7,38 @@ import NIO
 
 public actor ShardsGatewayManager: GatewayManager {
 
-    /// How many shard to try to spin up.
-    public enum MakeShardConfiguration {
-        /// `(indexOfShard: Int, totalShardCount: Int) -> Set<Gateway.Intent>`
-        public typealias MakeIntentsAutomatic = (Int, Int) -> [Gateway.Intent]
-        /// `(indexOfShard: Int) -> Set<Gateway.Intent>`
-        public typealias MakeIntentsExact = (Int) -> [Gateway.Intent]
+    /// Configuration for shard-management.
+    public struct Configuration: Sendable {
 
-        /// Uses Discord's suggested shard-count.
-        /// Allows you to configure the exact intents for each shard if you want.
-        case automatic(makeIntents: MakeIntentsAutomatic? = nil)
-        /// Uses this exact amount of shards.
-        /// Allows you to configure the exact intents for each shard if you want.
-        case exact(count: Int, makeIntents: MakeIntentsExact? = nil)
+        /// How many.
+        public enum Count: Sendable {
+            case automatic
+            case exact(Int)
+        }
 
-        /// Uses Discord's suggested shard-count.
-        public static var automatic: MakeShardConfiguration = .automatic()
+        /// How many shards to spin up.
+        /// In case of `.automatic`, will use Discord's suggested shard-count.
+        public let shardCount: Count
+        /// Will make different intents for each shard based on this closure.
+        /// `(indexOfShard: Int, totalShardCount: Int) -> [Gateway.Intent]`
+        public let makeIntents: (@Sendable (Int, Int) -> [Gateway.Intent])?
+
+        /// - Parameters:
+        ///   - shardCount: How many shards to spin up.
+        ///   In case of `.automatic`, will use Discord's suggested shard-count.
+        ///   - makeIntents: Will make different intents for each shard based on this closure.
+        ///   `(indexOfShard: Int, totalShardCount: Int) -> [Gateway.Intent]`
+        public init(
+            shardCount: Count = .automatic,
+            makeIntents: (@Sendable (Int, Int) -> [Gateway.Intent])? = nil
+        ) {
+            self.shardCount = shardCount
+            self.makeIntents = makeIntents
+        }
     }
 
     /// The underlying gateway managers for each shard.
     var managers = [BotGatewayManager]()
-
-    var hasPopulatedGatewayManagers = false
-    var populationWaiters = [CheckedContinuation<Void, Never>]()
 
     let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
@@ -49,27 +58,31 @@ public actor ShardsGatewayManager: GatewayManager {
     //MARK: Connection data
     public nonisolated let identifyPayload: Gateway.Identify
 
+    //MARK: GatewayManager-population properties
+    var hasPopulatedGatewayManagers = false
+    var populationWaiters = [CheckedContinuation<Void, Never>]()
+
     //MARK: Shard-ing
     let shardsCoordinator = ShardsCoordinator()
-    let makeShardConfiguration: MakeShardConfiguration
+    let configuration: Configuration
 
     /// - Parameters:
     ///   - eventLoopGroup: An `EventLoopGroup`.
     ///   - client: A `DiscordClient` to use.
+    ///   - configuration: shard-management configuration.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
-    ///   - shardCountStrategy: How many shards to spin up.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
         eventLoopGroup: any EventLoopGroup,
         client: any DiscordClient,
+        configuration: Configuration = .init(),
         maxFrameSize: Int =  1 << 31,
-        makeShardConfiguration: MakeShardConfiguration = .automatic,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
-        self.makeShardConfiguration = makeShardConfiguration
+        self.configuration = configuration
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("ShardsManager")
         logger[metadataKey: "shards-manager-id"] = .string("\(self.id)")
@@ -79,18 +92,18 @@ public actor ShardsGatewayManager: GatewayManager {
     /// - Parameters:
     ///   - eventLoopGroup: An `EventLoopGroup`.
     ///   - httpClient: A `HTTPClient`.
+    ///   - configuration: shard-management configuration.
     ///   - clientConfiguration: Configuration of the `DiscordClient`.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
     ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
-    ///   - shardCountStrategy: How many shards to spin up.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
         eventLoopGroup: any EventLoopGroup,
         httpClient: HTTPClient,
+        configuration: Configuration = .init(),
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
         appId: ApplicationSnowflake? = nil,
-        makeShardConfiguration: MakeShardConfiguration = .automatic,
         identifyPayload: Gateway.Identify
     ) async {
         self.eventLoopGroup = eventLoopGroup
@@ -101,7 +114,7 @@ public actor ShardsGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
-        self.makeShardConfiguration = makeShardConfiguration
+        self.configuration = configuration
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("ShardsManager")
         logger[metadataKey: "shards-manager-id"] = .string("\(self.id)")
@@ -111,21 +124,21 @@ public actor ShardsGatewayManager: GatewayManager {
     /// - Parameters:
     ///   - eventLoopGroup: An `EventLoopGroup`.
     ///   - httpClient: A `HTTPClient`.
+    ///   - configuration: shard-management configuration.
     ///   - clientConfiguration: Configuration of the `DiscordClient`.
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
     ///   - token: Your Discord bot-token.
     ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
-    ///   - shardCountStrategy: How many shards to spin up.
     ///   - presence: The initial presence of the bot.
     ///   - intents: The Discord intents you want to receive messages for.
     public init(
         eventLoopGroup: any EventLoopGroup,
         httpClient: HTTPClient,
+        configuration: Configuration = .init(),
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
         token: String,
         appId: ApplicationSnowflake? = nil,
-        makeShardConfiguration: MakeShardConfiguration = .automatic,
         presence: Gateway.Identify.Presence? = nil,
         intents: [Gateway.Intent]
     ) async {
@@ -138,7 +151,7 @@ public actor ShardsGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
-        self.makeShardConfiguration = makeShardConfiguration
+        self.configuration = configuration
         self.identifyPayload = .init(
             token: token,
             presence: presence,
@@ -154,32 +167,20 @@ public actor ShardsGatewayManager: GatewayManager {
         do {
             let gatewayInfo = await getGatewayInfo()
             let shardCount: Int = {
-                switch self.makeShardConfiguration {
+                switch self.configuration.shardCount {
                 case .automatic: return gatewayInfo.shards
-                case let .exact(count, _): return max(count, 1)
+                case let .exact(count): return max(count, 1)
                 }
             }()
-//            let _intents = identifyPayload.intents.representableValues()
-//            let allIntents = _intents.values.map(\.rawValue) + _intents.unknown
-//#warning("Change intents of identify payload")
-
-            //TODO: ability to configure intents for each shard
 
             for idx in 0..<shardCount {
-
                 let shard = IntPair(idx, shardCount)
+
                 var payload = self.identifyPayload
                 payload.shard = shard
 
-                switch self.makeShardConfiguration {
-                case let .automatic(makeIntents):
-                    if let intents = makeIntents?(idx, shardCount) {
-                        payload.intents = .init(intents)
-                    }
-                case let .exact(_, makeIntents):
-                    if let intents = makeIntents?(idx) {
-                        payload.intents = .init(intents)
-                    }
+                if let intents = self.configuration.makeIntents?(idx, shardCount) {
+                    payload.intents = .init(intents)
                 }
 
                 self.managers.append(
@@ -197,6 +198,7 @@ public actor ShardsGatewayManager: GatewayManager {
                 )
             }
 
+            /// Notify anyone that was waiting for the `managers` to be populated.
             self.hasPopulatedGatewayManagers = true
             for waiter in self.populationWaiters {
                 waiter.resume()
@@ -253,18 +255,10 @@ public actor ShardsGatewayManager: GatewayManager {
 
     /// Disconnects all shards from Discord.
     public func disconnect() async {
-        if self.hasPopulatedGatewayManagers {
-            await withTaskGroup(of: Void.self) { group in
-                for manager in self.managers {
-                    group.addTask { await manager.disconnect() }
-                }
-            }
-        } else {
-            await self.waitForGatewayManagersPopulation()
-            await withTaskGroup(of: Void.self) { group in
-                for manager in self.managers {
-                    group.addTask { await manager.disconnect() }
-                }
+        await self.waitForGatewayManagersPopulation()
+        await withTaskGroup(of: Void.self) { group in
+            for manager in self.managers {
+                group.addTask { await manager.disconnect() }
             }
         }
     }
@@ -284,6 +278,9 @@ extension ShardsGatewayManager {
         return await self.getGatewayInfo()
     }
 
+    /// Makes sure the one-time job of populating `managers` has been done already, before
+    /// accessing the `managers`. If the functions access `managers` too fast, the array will be
+    /// empty nothing will happen, which makes the implementation look buggy.
     private func waitForGatewayManagersPopulation() async {
         if !self.hasPopulatedGatewayManagers {
             await withCheckedContinuation {

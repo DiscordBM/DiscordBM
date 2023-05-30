@@ -104,11 +104,11 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let bot: any GatewayManager = await ShardsGatewayManager(
             eventLoopGroup: self.httpClient.eventLoopGroup,
             httpClient: self.httpClient,
-            token: Constants.token,
-            makeShardConfiguration: .exact(
-                count: shardCount,
-                makeIntents: { _ in Gateway.Intent.allCases }
+            configuration: .init(
+                shardCount: .exact(shardCount),
+                makeIntents: { _, _ in Gateway.Intent.allCases }
             ),
+            token: Constants.token,
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,
