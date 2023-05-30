@@ -5,12 +5,14 @@ extension WebSocket {
     public static func client(
         on channel: any Channel,
         decompression: Decompression.Configuration?,
+        setWebSocket: @Sendable @escaping (WebSocket) async -> Void = { _ in },
         onBuffer: @Sendable @escaping (ByteBuffer) -> () = { _ in },
         onClose: @Sendable @escaping (WebSocket) -> () = { _ in }
     ) async throws -> WebSocket {
-        let webSocket = try WebSocket(
+        let webSocket = try await WebSocket(
             channel: channel,
             decompression: decompression,
+            setWebSocket: setWebSocket,
             onBuffer: onBuffer,
             onClose: onClose
         )

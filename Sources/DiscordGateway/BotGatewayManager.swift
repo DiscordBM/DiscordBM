@@ -245,22 +245,29 @@ public actor BotGatewayManager: GatewayManager {
         logger.trace("Will try to connect to Discord through web-socket")
         do {
             let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
+            let setWebSocket: @Sendable (WebSocket) async -> Void = { ws in
+                await self.closeWebSocket(ws: self.ws)
+                await self.setWebSocket(ws: ws)
+            }
             let onBuffer: @Sendable (ByteBuffer) -> Void = { buffer in
                 Task { await self.processBinaryData(buffer, forConnectionWithId: connectionId) }
             }
             let onClose: @Sendable (WebSocket) -> Void = { ws in
                 Task { await self.setupOnClose(ws: ws, forConnectionWithId: connectionId) }
             }
-            let ws = try await WebSocket.connect(
+            /// Not removing the returned `WebSocket` for tests compatibility.
+            /// The actual setting of `self.ws` to the new `WebSocket` happens in
+            /// the `setWebSocket` parameter. This is to try to avoid a weird bug where
+            /// `WebSocket.connect()` returns the `WebSocket` _before_ the first event is received.
+            _ = try await WebSocket.connect(
                 to: gatewayURL + queries.makeForURLQuery(),
                 configuration: configuration,
                 on: eventLoopGroup,
+                setWebSocket: setWebSocket,
                 onBuffer: onBuffer,
                 onClose: onClose
             )
             self.logger.debug("Connected to Discord through web-socket. Will configure")
-            self.closeWebSocket(ws: self.ws)
-            self.ws = ws
             self.state.store(.configured, ordering: .relaxed)
         } catch {
             logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
@@ -685,6 +692,10 @@ extension BotGatewayManager {
             )
             logger.trace("Done waiting for other shards")
         }
+    }
+
+    func setWebSocket(ws: WebSocket) {
+        self.ws = ws
     }
     
     private nonisolated func closeWebSocket(ws: WebSocket?) {

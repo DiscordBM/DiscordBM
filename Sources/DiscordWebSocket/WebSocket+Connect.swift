@@ -4,6 +4,7 @@ extension WebSocket {
         headers: HTTPHeaders = [:],
         configuration: WebSocketClient.Configuration = .init(),
         on eventLoopGroup: any EventLoopGroup,
+        setWebSocket: @Sendable @escaping (WebSocket) async -> Void = { _ in },
         onBuffer: @Sendable @escaping (ByteBuffer) -> () = { _ in },
         onClose: @Sendable @escaping (WebSocket) -> () = { _ in }
     ) async throws -> WebSocket {
@@ -21,6 +22,7 @@ extension WebSocket {
             path: url.path,
             query: url.query,
             headers: headers,
+            setWebSocket: setWebSocket,
             onBuffer: onBuffer,
             onClose: onClose
         )

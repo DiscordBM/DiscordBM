@@ -35,19 +35,21 @@ public final class WebSocket: @unchecked Sendable {
     init(
         channel: any Channel,
         decompression: Decompression.Configuration?,
+        setWebSocket: @Sendable @escaping (WebSocket) async -> Void,
         onBuffer: @Sendable @escaping (ByteBuffer) -> (),
         onClose: @Sendable @escaping (WebSocket) -> ()
-    ) throws {
+    ) async throws {
         self.channel = channel
         if let decompression {
             self.decompressor = Decompression.Decompressor()
-            try self.decompressor?.initializeDecoder(encoding: decompression.algorithm)
+            try self.decompressor!.initializeDecoder(encoding: decompression.algorithm)
         }
         self.onBufferCallback = onBuffer
         self.waitingForPong = false
         self.waitingForClose = false
         self.scheduledTimeoutTask = nil
         self.channel.closeFuture.whenComplete { _ in onClose(self) }
+        await setWebSocket(self)
     }
 
     /// For tests compatibility

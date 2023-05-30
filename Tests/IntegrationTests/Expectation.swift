@@ -70,7 +70,7 @@ actor Expectation {
                 /// End the continuation so the tests don't hang.
                 storage.endContinuation(file: file, line: line)
                 XCTFail(
-                    "Some expectations failed to resolve in \(timeout) seconds: \(left). Message: \(message())",
+                    "Some expectations failed to resolve in \(timeout) seconds: \(left). \(message())",
                     file: file,
                     line: line
                 )
