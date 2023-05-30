@@ -15,7 +15,7 @@ public struct BotAuthManager: Sendable {
         self.clientId = clientId
     }
     
-    /// The bot will immediately join servers which authorize your bot through this URL.
+    /// The bot will immediately join servers which authorize your bot via this URL.
     /// https://discord.com/developers/docs/topics/oauth2#bot-authorization-flow
     public func makeBotAuthorizationURL(
         withApplicationCommands: Bool = true,

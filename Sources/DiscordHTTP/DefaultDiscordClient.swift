@@ -4,11 +4,8 @@ import AsyncHTTPClient
 import Logging
 import NIOHTTP1
 import NIOCore
+import NIOFoundationCompat
 import Atomics
-
-/// The fact that this could be used by multiple different `DiscordClient`s with
-/// different `token`s should not matter because buckets are random anyway.
-private let rateLimiter = HTTPRateLimiter(label: "DiscordClientRateLimiter")
 
 public struct DefaultDiscordClient: DiscordClient {
     public let client: HTTPClient
@@ -26,8 +23,14 @@ public struct DefaultDiscordClient: DiscordClient {
 
     /// The cache used for requests that require an auth header.
     let _authCache: ClientCache
-    
-    private static let requestIdGenerator = ManagedAtomic(UInt(0))
+
+    @usableFromInline
+    static let requestIdGenerator = ManagedAtomic(UInt(0))
+
+    /// The fact that this could be used by multiple different `DiscordClient`s with
+    /// different `token`s should not matter because buckets are random anyway.
+    @usableFromInline
+    static let rateLimiter = HTTPRateLimiter(label: "DiscordClientRateLimiter")
 
     /// `token` must be a bot token.
     public init(
@@ -100,13 +103,13 @@ public struct DefaultDiscordClient: DiscordClient {
         self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
-    @usableFromInline
+    @inlinable
     func checkRateLimitsAllowRequest(
         to endpoint: AnyEndpoint,
         requestId: UInt,
         retriesSoFar: Int
     ) async throws {
-        switch await rateLimiter.shouldRequest(to: endpoint) {
+        switch await Self.rateLimiter.shouldRequest(to: endpoint) {
         case .true: return
         case .false:
             /// `HTTPRateLimiter` already logs this.
@@ -128,7 +131,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 )
                 let nanos = UInt64(after * 1_000_000_000)
                 try await Task.sleep(for: .nanoseconds(nanos))
-                await rateLimiter.addGlobalRateLimitRecord()
+                await Self.rateLimiter.addGlobalRateLimitRecord()
             } else {
                 logger.warning(
                     "HTTP bucket is exhausted. Retry policy does not allow retry",
@@ -145,16 +148,29 @@ public struct DefaultDiscordClient: DiscordClient {
         }
     }
 
-    @usableFromInline
+    @inlinable
     func includeInRateLimits(
         endpoint: AnyEndpoint,
         headers: HTTPHeaders,
         status: HTTPResponseStatus
     ) async {
-        await rateLimiter.include(endpoint: endpoint, headers: headers, status: status)
+        await Self.rateLimiter.include(endpoint: endpoint, headers: headers, status: status)
     }
 
-    @usableFromInline
+    /// To centralize the way the is-cacheable checking is done.
+    /// Because this must be the same in `getFromCache` and `saveInCache`.
+    @inlinable
+    func isCacheable(identity: CacheableEndpointIdentity?) -> (CacheableEndpointIdentity, Double)? {
+        guard let identity,
+              let ttl = self.configuration.cachingBehavior.getTTL(for: identity)
+        else { return nil }
+        return (identity, ttl)
+    }
+
+    /// Gets the response from cache if available.
+    /// If there is another request in queue with the same identity, waits for that to finish.
+    /// This means that this func is trusting that a response is always made if this returns `nil`.
+    @inlinable
     func getFromCache(
         identity: CacheableEndpointIdentity?,
         requiresAuthHeader: Bool,
@@ -164,9 +180,9 @@ public struct DefaultDiscordClient: DiscordClient {
         /// Since the `ClientCache` is shared and another `DiscordClient` could have
         /// had added a response to it, at least make sure that this
         /// `DiscordClient` should be using any caching at all for the endpoint.
-        guard let identity,
-              self.configuration.cachingBehavior.getTTL(for: identity) != nil
-        else { return nil }
+        guard let (identity, _) = self.isCacheable(identity: identity) else {
+            return nil
+        }
         return await self.getCache(
             requiresAuthHeader: requiresAuthHeader
         ).get(item: .init(
@@ -175,7 +191,8 @@ public struct DefaultDiscordClient: DiscordClient {
             queries: queries
         ))
     }
-    
+
+    @inlinable
     func saveInCache(
         response: DiscordHTTPResponse,
         identity: CacheableEndpointIdentity?,
@@ -183,11 +200,11 @@ public struct DefaultDiscordClient: DiscordClient {
         parameters: [String],
         queries: [(String, String?)]
     ) async {
-        guard let identity,
-              (200..<300).contains(response.status.code),
-              let ttl = self.configuration.cachingBehavior.getTTL(for: identity)
-        else { return }
-        await self.getCache(requiresAuthHeader: requiresAuthHeader).add(
+        guard (200..<300).contains(response.status.code),
+              let (identity, ttl) = self.isCacheable(identity: identity) else {
+            return
+        }
+        await self.getCache(requiresAuthHeader: requiresAuthHeader).save(
             response: response,
             item: .init(
                 identity: identity,
@@ -199,6 +216,23 @@ public struct DefaultDiscordClient: DiscordClient {
             "endpointIdentity": .stringConvertible(identity),
             "queries": .stringConvertible(queries)
         ])
+    }
+
+    @inlinable
+    func unlockRequestsInCache(
+        identity: CacheableEndpointIdentity?,
+        requiresAuthHeader: Bool,
+        parameters: [String],
+        queries: [(String, String?)]
+    ) async {
+        guard let identity = identity else { return }
+        await self.getCache(requiresAuthHeader: requiresAuthHeader).unlockRequests(
+            forItem: .init(
+                identity: identity,
+                parameters: parameters,
+                queries: queries
+            )
+        )
     }
 
     @usableFromInline
@@ -215,6 +249,7 @@ public struct DefaultDiscordClient: DiscordClient {
     }
     
     /// Waits for the next retry if needed, and increases the retry counter.
+    @inlinable
     func waitForRetryAndIncreaseRetryCount(
         retriesSoFar: inout Int,
         headers: HTTPHeaders,
@@ -240,6 +275,7 @@ public struct DefaultDiscordClient: DiscordClient {
     }
 
     /// Returns an appropriate `ClientCache`.
+    @usableFromInline
     func getCache(requiresAuthHeader: Bool) -> ClientCache {
         if requiresAuthHeader {
             return self._authCache
@@ -249,7 +285,7 @@ public struct DefaultDiscordClient: DiscordClient {
     }
 
     /// Sends requests and retries if needed.
-    @usableFromInline
+    @inlinable
     func sendWithRetries(
         request req: DiscordHTTPRequest,
         sendRequest: (CacheableEndpointIdentity?, Int, UInt) async throws -> (DiscordHTTPResponse, Bool)
@@ -259,20 +295,41 @@ public struct DefaultDiscordClient: DiscordClient {
         let requestId = Self.requestIdGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
         
         var retriesSoFar = 0
-        var (response, cached) = try await sendRequest(identity, retriesSoFar, requestId)
-        
-        while configuration.shouldRetry(status: response.status, retriesSoFar: retriesSoFar) {
-            try await waitForRetryAndIncreaseRetryCount(
-                retriesSoFar: &retriesSoFar,
-                headers: response.headers,
-                requestId: requestId
-            )
+        var cached = false
+        var response: DiscordHTTPResponse
+        do {
             (response, cached) = try await sendRequest(identity, retriesSoFar, requestId)
+
+            while configuration.shouldRetry(status: response.status, retriesSoFar: retriesSoFar) {
+                try await waitForRetryAndIncreaseRetryCount(
+                    retriesSoFar: &retriesSoFar,
+                    headers: response.headers,
+                    requestId: requestId
+                )
+                (response, cached) = try await sendRequest(identity, retriesSoFar, requestId)
+            }
+        } catch {
+            if !cached {
+                await self.unlockRequestsInCache(
+                    identity: identity,
+                    requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
+                    parameters: req.endpoint.parameters,
+                    queries: req.queries
+                )
+            }
+            
+            throw error
         }
         
         if !cached {
             await self.saveInCache(
                 response: response,
+                identity: identity,
+                requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
+                parameters: req.endpoint.parameters,
+                queries: req.queries
+            )
+            await self.unlockRequestsInCache(
                 identity: identity,
                 requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
                 parameters: req.endpoint.parameters,
@@ -287,7 +344,7 @@ public struct DefaultDiscordClient: DiscordClient {
     public func send(request req: DiscordHTTPRequest) async throws -> DiscordHTTPResponse {
         try await self.sendWithRetries(request: req) {
             identity, retryCounter, requestId in
-            
+
             if let cached = await self.getFromCache(
                 identity: identity,
                 requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
@@ -301,7 +358,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 ])
                 return (cached, true)
             }
-            
+
             try await self.checkRateLimitsAllowRequest(
                 to: req.endpoint,
                 requestId: requestId,
@@ -341,7 +398,8 @@ public struct DefaultDiscordClient: DiscordClient {
             return (response, false)
         }
     }
-    
+
+    @inlinable
     public func send<E: Sendable & Encodable & ValidatablePayload>(
         request req: DiscordHTTPRequest,
         payload: E
@@ -421,7 +479,8 @@ public struct DefaultDiscordClient: DiscordClient {
             return (response, false)
         }
     }
-    
+
+    @inlinable
     public func sendMultipart<E: Sendable & MultipartEncodable & ValidatablePayload>(
         request req: DiscordHTTPRequest,
         payload: E

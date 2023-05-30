@@ -238,7 +238,7 @@ class ClientConfigurationTests: XCTestCase {
                 parameters: [],
                 queries: []
             )
-            await cache.add(response: response, item: item, ttl: 5)
+            await cache.save(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(item: item)
             XCTAssertEqual(response, fromCache)
         }
@@ -258,7 +258,7 @@ class ClientConfigurationTests: XCTestCase {
                 parameters: [],
                 queries: [("name", "mahdi"), ("age", "99"), ("height", nil)]
             )
-            await cache.add(response: response, item: item, ttl: 5)
+            await cache.save(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(item: item)
             XCTAssertEqual(response, fromCache)
         }
@@ -278,7 +278,7 @@ class ClientConfigurationTests: XCTestCase {
                 parameters: [],
                 queries: []
             )
-            await cache.add(response: response, item: item, ttl: 5)
+            await cache.save(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(item: .init(
                 identity: .api(.listGuildAuditLogEntries),
                 parameters: [],
@@ -302,7 +302,7 @@ class ClientConfigurationTests: XCTestCase {
                 parameters: ["1"],
                 queries: []
             )
-            await cache.add(response: response, item: item, ttl: 5)
+            await cache.save(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(item: .init(
                 identity: .api(.getChannel),
                 parameters: [],
@@ -326,7 +326,7 @@ class ClientConfigurationTests: XCTestCase {
                 parameters: [],
                 queries: [("name", "mahdi")]
             )
-            await cache.add(response: response, item: item, ttl: 5)
+            await cache.save(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(item: .init(
                 identity: .api(.getChannel),
                 parameters: [],
@@ -350,7 +350,7 @@ class ClientConfigurationTests: XCTestCase {
                 parameters: [],
                 queries: []
             )
-            await cache.add(response: response, item: item, ttl: 5)
+            await cache.save(response: response, item: item, ttl: 5)
             let fromCache = await cache.get(
                 item: .init(
                     identity: .api(.getChannel),
@@ -376,7 +376,7 @@ class ClientConfigurationTests: XCTestCase {
                 parameters: [],
                 queries: []
             )
-            await cache.add(response: response, item: item, ttl: 1.5)
+            await cache.save(response: response, item: item, ttl: 1.5)
             try await Task.sleep(for: .milliseconds(1_500))
             let fromCache = await cache.get(item: item)
             XCTAssertNil(fromCache)

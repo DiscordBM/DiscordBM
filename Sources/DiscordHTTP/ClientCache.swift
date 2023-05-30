@@ -2,13 +2,23 @@ import struct Foundation.Date
 
 /// This doesn't use the `Cache-Control` header because I couldn't
 /// find a 2xx response with a `Cache-Control` header returned by Discord.
+@usableFromInline
 actor ClientCache {
 
+    @usableFromInline
     struct CacheableItem: Hashable {
         let identity: CacheableEndpointIdentity
         let parameters: [String]
         let queries: [(String, String?)]
 
+        @usableFromInline
+        init(identity: CacheableEndpointIdentity, parameters: [String], queries: [(String, String?)]) {
+            self.identity = identity
+            self.parameters = parameters
+            self.queries = queries
+        }
+
+        @usableFromInline
         func hash(into hasher: inout Hasher) {
             switch identity {
             case .api(let endpoint):
@@ -30,6 +40,7 @@ actor ClientCache {
             }
         }
 
+        @usableFromInline
         static func == (lhs: Self, rhs: Self) -> Bool {
             lhs.identity == rhs.identity &&
             lhs.parameters == rhs.parameters &&
@@ -42,6 +53,9 @@ actor ClientCache {
 
     /// [ID: ExpirationTime]
     var timeTable = [CacheableItem: Double]()
+    /// [ID: ExpirationTime]
+    var pendingContinuations = [CacheableItem: [CheckedContinuation<Void, Never>]]()
+    var lockedItems = Set<CacheableItem>()
     /// [ID: Response]
     var storage = [CacheableItem: DiscordHTTPResponse]()
 
@@ -51,15 +65,35 @@ actor ClientCache {
         Task { await self.collectGarbage() }
     }
 
-    func add(response: DiscordHTTPResponse, item: CacheableItem, ttl: Double) {
+    @usableFromInline
+    func save(response: DiscordHTTPResponse, item: CacheableItem, ttl: Double) {
         self.timeTable[item] = Date().timeIntervalSince1970 + ttl
         self.storage[item] = response
     }
 
-    func get(item: CacheableItem) -> DiscordHTTPResponse? {
+    /// Gets the item from cache, or acquires a lock for the item.
+    /// A request **must** be made if this returns `nil`.
+    @usableFromInline
+    func get(item: CacheableItem) async -> DiscordHTTPResponse? {
+        /// If insert is successful, it means the lock was acquired.
+        /// If the insert is unsuccessful, it means there is another request being made
+        /// and this request needs to wait for that.
+        if !lockedItems.insert(item).inserted {
+            await withCheckedContinuation { continuation in
+                self.pendingContinuations[item, default: []].append(continuation)
+            }
+            return await self.get(item: item)
+        }
+
         if let time = self.timeTable[item] {
             if time > Date().timeIntervalSince1970 {
-                return storage[item]
+                if let existing = storage[item] {
+                    /// Unlock if the item existed
+                    self.unlockRequests(forItem: item)
+                    return existing
+                } else {
+                    return nil
+                }
             } else {
                 self.timeTable[item] = nil
                 self.storage[item] = nil
@@ -68,6 +102,15 @@ actor ClientCache {
         } else {
             return nil
         }
+    }
+
+    /// Unlock making other requests with for the same `item` identity.
+    @usableFromInline
+    func unlockRequests(forItem item: CacheableItem) {
+        for continuation in self.pendingContinuations.removeValue(forKey: item) ?? [] {
+            continuation.resume()
+        }
+        self.lockedItems.remove(item)
     }
 
     private func collectGarbage() async {
@@ -85,7 +128,6 @@ actor ClientCache {
 }
 
 // MARK: - ClientCacheStorage
-
 actor ClientCacheStorage {
 
     /// [Token: ClientCache]

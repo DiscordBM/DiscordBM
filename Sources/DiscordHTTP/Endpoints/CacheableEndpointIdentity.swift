@@ -3,7 +3,8 @@ public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertib
     case api(CacheableAPIEndpointIdentity)
     case cdn(CDNEndpointIdentity)
     case loose(LooseEndpoint)
-    
+
+    @usableFromInline
     init? (endpoint: AnyEndpoint) {
         switch endpoint {
         case let .api(endpoint):

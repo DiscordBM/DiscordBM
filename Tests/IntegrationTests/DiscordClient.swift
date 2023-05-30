@@ -2529,15 +2529,71 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(commandsCount, newCommandsCount + 1)
         }
     }
+
+    func testCachingInPracticeOnlyOneActualRequestMade() async throws {
+        /// Caching enabled
+        /// Will make 1 request a lot of times, but the `DefaultDiscordClient` must
+        /// only send the request to Discord once, and all other times return a cached response.
+        do {
+            let configuration = ClientConfiguration(cachingBehavior: .enabled(defaultTTL: 10))
+            let cacheClient: any DiscordClient = await DefaultDiscordClient(
+                httpClient: httpClient,
+                token: Constants.token,
+                configuration: configuration
+            )
+
+            /// Ridiculously high number just to make sure there is no concurrency mismanagement.
+            let requestCount = 1_000
+            let counter = Counter(target: requestCount, timeout: 25)
+            let responses = Responses()
+            for _ in 0..<requestCount {
+                /// Detached so the requests run as concurrently as possible.
+                Task.detached(priority: .high) {
+                    do {
+                        let response = try await cacheClient.getOwnUser()
+                        try response.guardSuccess()
+                        await counter.increase()
+                        await responses.save(response: response.httpResponse)
+                    } catch {
+                        await counter.increase()
+                        XCTFail("Unexpected error: \(error)")
+                    }
+                }
+            }
+
+            await counter.waitFulfillment()
+
+            let allResponses = await responses.responses
+            XCTAssertEqual(allResponses.count, requestCount)
+
+            let cloudFlareUniqueRequestIdHeaders = allResponses.compactMap {
+                $0.headers.first(name: "cf-ray")
+            }
+            XCTAssertEqual(cloudFlareUniqueRequestIdHeaders.count, requestCount)
+
+            let allDifferentCloudFlareUniqueIds = Set(cloudFlareUniqueRequestIdHeaders)
+            XCTAssertEqual(allDifferentCloudFlareUniqueIds.count, 1, "\(allDifferentCloudFlareUniqueIds)")
+
+            /// Wait till the cached response is invalidated
+            try await Task.sleep(for: .seconds(10))
+
+            let response = try await cacheClient.getOwnUser()
+            let cloudFlareUniqueId = try XCTUnwrap(response.httpResponse.headers.first(name: "cf-ray"))
+
+            XCTAssertNotEqual(cloudFlareUniqueId, cloudFlareUniqueRequestIdHeaders.first)
+        }
+    }
 }
 
 private actor Counter {
     private var counter = 0
     private var target: Int
+    private var timeout: Double
     private var expectation: Expectation?
     
-    init(target: Int) {
+    init(target: Int, timeout: Double = 10) {
         self.target = target
+        self.timeout = timeout
     }
     
     func increase(file: StaticString = #filePath, line: UInt = #line) {
@@ -2556,11 +2612,19 @@ private actor Counter {
             self.expectation = exp
             await Expectation.waitFulfillment(
                 of: [exp],
-                timeout: 10,
+                timeout: timeout,
                 file: file,
                 line: line
             )
         }
+    }
+}
+
+private actor Responses {
+    var responses = [DiscordHTTPResponse]()
+
+    func save(response: DiscordHTTPResponse) {
+        self.responses.append(response)
     }
 }
 
@@ -2575,7 +2639,7 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
-    private let totalTestCount = 36
+    private let totalTestCount = 37
     var isLastTest: Bool {
         self.testsRan == self.totalTestCount
     }

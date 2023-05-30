@@ -152,6 +152,7 @@ public struct ClientConfiguration: Sendable {
             }
 
             /// Returns the time needed to wait before the next retry, if any.
+            @inlinable
             func waitTimeBeforeRetry(retriesSoFar: Int, headers: HTTPHeaders) -> Double? {
                 switch self {
                 case let .constant(constant):
@@ -236,6 +237,7 @@ public struct ClientConfiguration: Sendable {
         }
 
         /// Should retry a request or not.
+        @usableFromInline
         func shouldRetry(status: HTTPResponseStatus, retriesSoFar times: Int) -> Bool {
             self.maxRetries > times && self.statuses.contains(status)
         }
@@ -270,11 +272,13 @@ public struct ClientConfiguration: Sendable {
     /// This all works based on Discord docs' validation notes.
     public var performValidations: Bool
 
+    @inlinable
     func shouldRetry(status: HTTPResponseStatus, retriesSoFar times: Int) -> Bool {
         self.retryPolicy?.shouldRetry(status: status, retriesSoFar: times) ?? false
     }
 
     /// Returns the amount of time that the client should wait before the next retry, if any.
+    @inlinable
     func waitTimeBeforeRetry(retriesSoFar times: Int, headers: HTTPHeaders) -> Double? {
         switch self.retryPolicy?.backoff {
         case let .some(backoff):
@@ -312,7 +316,8 @@ public struct ClientConfiguration: Sendable {
 }
 
 //MARK: +HTTPHeaders
-private extension HTTPHeaders {
+extension HTTPHeaders {
+    @inlinable
     func resetOrRetryAfterHeaderValue() -> String? {
         self.first(name: "x-ratelimit-reset-after") ?? self.first(name: "retry-after")
     }

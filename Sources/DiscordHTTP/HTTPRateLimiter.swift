@@ -3,6 +3,7 @@ import NIOHTTP1
 
 private let logger = DiscordGlobalConfiguration.makeLogger("DBM.HTTPRateLimiter")
 
+@usableFromInline
 actor HTTPRateLimiter {
     
     private struct Bucket: Hashable, CustomStringConvertible {
@@ -133,7 +134,8 @@ actor HTTPRateLimiter {
             return true
         }
     }
-    
+
+    @usableFromInline
     func addGlobalRateLimitRecord() {
         let globalId = self.currentGlobalRateLimitId()
         if self.requestsThisSecond.id == globalId {
@@ -142,7 +144,8 @@ actor HTTPRateLimiter {
             self.requestsThisSecond = (globalId, 1)
         }
     }
-    
+
+    @usableFromInline
     enum ShouldRequestResponse {
         case `true`
         case `false`
@@ -155,6 +158,7 @@ actor HTTPRateLimiter {
     /// you should make sure the request is sent, or otherwise this rate-limiter's
     /// global rate-limit will be less than the max amount and might not allow you
     /// to make too many requests per second, when it should.
+    @usableFromInline
     func shouldRequest(to endpoint: AnyEndpoint) -> ShouldRequestResponse {
         guard minutelyInvalidRequestsLimitAllows() else { return .false }
         if endpoint.countsAgainstGlobalRateLimit {
@@ -182,7 +186,8 @@ actor HTTPRateLimiter {
             return .true
         }
     }
-    
+
+    @usableFromInline
     func include(endpoint: AnyEndpoint, headers: HTTPHeaders, status: HTTPResponseStatus) {
         /// Add to invalid requests limit if needed.
         if [429, 403, 401].contains(status.code) {

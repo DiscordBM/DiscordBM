@@ -10,6 +10,7 @@ extension MultipartEncodable {
     /// Returns `nil` if there are no multipart data to be encoded,
     /// in which case this should be sent as JSON.
     /// Throws encoding errors.
+    @usableFromInline
     func encodeMultipart() throws -> ByteBuffer? {
         guard let files = self.files, !files.isEmpty else { return nil }
 
@@ -37,7 +38,9 @@ extension MultipartEncodable {
     }
 }
 
+@usableFromInline
 enum MultipartConfiguration {
+    @usableFromInline
     static let boundary: String = {
         let random1 = (0..<5).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
         let random2 = (0..<5).map { _ in Int.random(in: 0..<10) }.map { "\($0)" }.joined()
