@@ -105,7 +105,10 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
             eventLoopGroup: self.httpClient.eventLoopGroup,
             httpClient: self.httpClient,
             token: Constants.token,
-            shardCountStrategy: .exact(shardCount),
+            makeShardConfiguration: .exact(
+                count: shardCount,
+                makeIntents: { _ in Gateway.Intent.allCases }
+            ),
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],
                 status: .invisible,

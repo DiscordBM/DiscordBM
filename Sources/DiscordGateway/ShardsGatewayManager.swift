@@ -8,11 +8,21 @@ import NIO
 public actor ShardsGatewayManager: GatewayManager {
 
     /// How many shard to try to spin up.
-    public enum ShardCountStrategy {
+    public enum MakeShardConfiguration {
+        /// `(indexOfShard: Int, totalShardCount: Int) -> Set<Gateway.Intent>`
+        public typealias MakeIntentsAutomatic = (Int, Int) -> [Gateway.Intent]
+        /// `(indexOfShard: Int) -> Set<Gateway.Intent>`
+        public typealias MakeIntentsExact = (Int) -> [Gateway.Intent]
+
         /// Uses Discord's suggested shard-count.
-        case automatic
+        /// Allows you to configure the exact intents for each shard if you want.
+        case automatic(makeIntents: MakeIntentsAutomatic? = nil)
         /// Uses this exact amount of shards.
-        case exact(Int)
+        /// Allows you to configure the exact intents for each shard if you want.
+        case exact(count: Int, makeIntents: MakeIntentsExact? = nil)
+
+        /// Uses Discord's suggested shard-count.
+        public static var automatic: MakeShardConfiguration = .automatic()
     }
 
     /// The underlying gateway managers for each shard.
@@ -41,7 +51,7 @@ public actor ShardsGatewayManager: GatewayManager {
 
     //MARK: Shard-ing
     let shardsCoordinator = ShardsCoordinator()
-    let shardCountStrategy: ShardCountStrategy
+    let makeShardConfiguration: MakeShardConfiguration
 
     /// - Parameters:
     ///   - eventLoopGroup: An `EventLoopGroup`.
@@ -53,13 +63,13 @@ public actor ShardsGatewayManager: GatewayManager {
         eventLoopGroup: any EventLoopGroup,
         client: any DiscordClient,
         maxFrameSize: Int =  1 << 31,
-        shardCountStrategy: ShardCountStrategy = .automatic,
+        makeShardConfiguration: MakeShardConfiguration = .automatic,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
-        self.shardCountStrategy = shardCountStrategy
+        self.makeShardConfiguration = makeShardConfiguration
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("ShardsManager")
         logger[metadataKey: "shards-manager-id"] = .string("\(self.id)")
@@ -80,7 +90,7 @@ public actor ShardsGatewayManager: GatewayManager {
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int =  1 << 31,
         appId: ApplicationSnowflake? = nil,
-        shardCountStrategy: ShardCountStrategy = .automatic,
+        makeShardConfiguration: MakeShardConfiguration = .automatic,
         identifyPayload: Gateway.Identify
     ) async {
         self.eventLoopGroup = eventLoopGroup
@@ -91,7 +101,7 @@ public actor ShardsGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
-        self.shardCountStrategy = shardCountStrategy
+        self.makeShardConfiguration = makeShardConfiguration
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("ShardsManager")
         logger[metadataKey: "shards-manager-id"] = .string("\(self.id)")
@@ -115,7 +125,7 @@ public actor ShardsGatewayManager: GatewayManager {
         maxFrameSize: Int =  1 << 31,
         token: String,
         appId: ApplicationSnowflake? = nil,
-        shardCountStrategy: ShardCountStrategy = .automatic,
+        makeShardConfiguration: MakeShardConfiguration = .automatic,
         presence: Gateway.Identify.Presence? = nil,
         intents: [Gateway.Intent]
     ) async {
@@ -128,7 +138,7 @@ public actor ShardsGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
-        self.shardCountStrategy = shardCountStrategy
+        self.makeShardConfiguration = makeShardConfiguration
         self.identifyPayload = .init(
             token: token,
             presence: presence,
@@ -144,9 +154,9 @@ public actor ShardsGatewayManager: GatewayManager {
         do {
             let gatewayInfo = await getGatewayInfo()
             let shardCount: Int = {
-                switch self.shardCountStrategy {
+                switch self.makeShardConfiguration {
                 case .automatic: return gatewayInfo.shards
-                case let .exact(count): return max(count, 1)
+                case let .exact(count, _): return max(count, 1)
                 }
             }()
 //            let _intents = identifyPayload.intents.representableValues()
@@ -156,9 +166,22 @@ public actor ShardsGatewayManager: GatewayManager {
             //TODO: ability to configure intents for each shard
 
             for idx in 0..<shardCount {
+
                 let shard = IntPair(idx, shardCount)
                 var payload = self.identifyPayload
                 payload.shard = shard
+
+                switch self.makeShardConfiguration {
+                case let .automatic(makeIntents):
+                    if let intents = makeIntents?(idx, shardCount) {
+                        payload.intents = .init(intents)
+                    }
+                case let .exact(_, makeIntents):
+                    if let intents = makeIntents?(idx) {
+                        payload.intents = .init(intents)
+                    }
+                }
+
                 self.managers.append(
                     BotGatewayManager(
                         eventLoopGroup: self.eventLoopGroup,

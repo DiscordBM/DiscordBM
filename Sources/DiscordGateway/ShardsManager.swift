@@ -3,6 +3,9 @@ import struct Foundation.Date
 
 actor ShardsCoordinator {
     private var lastConnectionDates = [Date]()
+    /// Each `maxConcurrency` amount of connections need to wait **5** seconds.
+    /// https://discord.com/developers/docs/topics/gateway#session-start-limit-object-session-start-limit-structure
+    let waitTime = 5.0
     
     init() { }
 
@@ -18,10 +21,7 @@ actor ShardsCoordinator {
             let first = firstDateInMaxConcurrencyLimitBucket.timeIntervalSince1970
             let now = Date().timeIntervalSince1970
             let diff = now - first
-            /// Each `maxConcurrency` amount of connections need to wait **5** seconds.
-            /// https://discord.com/developers/docs/topics/gateway#session-start-limit-object-session-start-limit-structure
-            let waitTime = 5.0
-            let diffWithWaitTime = waitTime - diff
+            let diffWithWaitTime = self.waitTime - diff
             if diffWithWaitTime > 0 {
                 self.lastConnectionDates.append(Date().addingTimeInterval(diffWithWaitTime))
                 try? await Task.sleep(nanoseconds: UInt64(diffWithWaitTime * 1_000_000_000))
