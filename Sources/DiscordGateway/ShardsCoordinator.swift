@@ -1,7 +1,7 @@
 import DiscordModels
 import struct Foundation.Date
 
-actor ShardsCoordinator {
+actor ShardCoordinator {
     private var lastConnectionDates = [Date]()
     /// Each `maxConcurrency` amount of connections need to wait **5** seconds.
     /// https://discord.com/developers/docs/topics/gateway#session-start-limit-object-session-start-limit-structure

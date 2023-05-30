@@ -95,13 +95,13 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
     }
 
-    func testShardsGatewayManager() async throws {
+    func testShardingGatewayManager() async throws {
         /// Make sure last tests don't affect this test's gateway connection
         try await Task.sleep(for: .seconds(5))
 
         let shardCount = 20
 
-        let bot: any GatewayManager = await ShardsGatewayManager(
+        let bot: any GatewayManager = await ShardingGatewayManager(
             eventLoopGroup: self.httpClient.eventLoopGroup,
             httpClient: self.httpClient,
             configuration: .init(

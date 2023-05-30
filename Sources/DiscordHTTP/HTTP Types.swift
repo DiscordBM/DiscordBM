@@ -117,7 +117,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     /// print(httpResponse.description)
     /// ```
     @inlinable
-    public func decodeError() -> DiscordHTTPErrorResponse? {
+    public func asError() -> DiscordHTTPErrorResponse? {
         if (200..<300).contains(self.status.code) {
             return .none
         } else {
@@ -128,7 +128,17 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
             }
         }
     }
-    
+
+    /// Decodes the response into `JSONError` or throws.
+    @inlinable
+    public func decodeJSONError() throws -> JSONError {
+        if (200..<300).contains(self.status.code) {
+            throw DiscordHTTPError.cantDecodeJSONErrorFromSuccessfulResponse(self)
+        } else {
+            return try self._decode(as: JSONError.self)
+        }
+    }
+
     /// Decodes the response into an arbitrary type.
     @inlinable
     public func decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
@@ -188,8 +198,14 @@ public struct DiscordClientResponse<C>: Sendable, CustomStringConvertible where 
     /// print(httpResponse.description)
     /// ```
     @inlinable
-    public func decodeError() -> DiscordHTTPErrorResponse? {
-        self.httpResponse.decodeError()
+    public func asError() -> DiscordHTTPErrorResponse? {
+        self.httpResponse.asError()
+    }
+
+    /// Decodes the response into `JSONError` or throws.
+    @inlinable
+    public func decodeJSONError() throws -> JSONError {
+        try self.httpResponse.decodeJSONError()
     }
     
     /// Decodes the response.
@@ -258,6 +274,8 @@ public enum DiscordHTTPError: Error, CustomStringConvertible {
     case rateLimited(url: String)
     /// Discord responded with a non-200 status code.
     case badStatusCode(DiscordHTTPResponse)
+    /// Discord responded with a 200 status code but you requested DiscordBM to decode a `JSONError`.
+    case cantDecodeJSONErrorFromSuccessfulResponse(DiscordHTTPResponse)
     /// The response body was unexpectedly empty. If it happens frequently, you should report it to me at https://github.com/DiscordBM/DiscordBM/issues.
     case emptyBody(DiscordHTTPResponse)
     /// Discord didn't send a Content-Type header. See if they mentions any errors in the response.
@@ -279,6 +297,8 @@ public enum DiscordHTTPError: Error, CustomStringConvertible {
             return "DiscordHTTPError.rateLimited(url: \(url))"
         case let .badStatusCode(response):
             return "DiscordHTTPError.badStatusCode(\(response))"
+        case let .cantDecodeJSONErrorFromSuccessfulResponse(response):
+            return "DiscordHTTPError.cantDecodeJSONErrorFromSuccessfulResponse(\(response))"
         case let .emptyBody(response):
             return "DiscordHTTPError.emptyBody(\(response))"
         case let .noContentTypeHeader(response):

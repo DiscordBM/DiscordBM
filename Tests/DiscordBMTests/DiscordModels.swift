@@ -218,16 +218,20 @@ class DiscordModelsTests: XCTestCase {
             version: .http1_1,
             body: data
         )
-        let error =  try XCTUnwrap(response.decodeError())
+        let error =  try XCTUnwrap(response.asError())
         if case let .jsonError(jsonError) = error {
             XCTAssertEqual(jsonError.message, "Invalid authentication token")
             XCTAssertEqual(jsonError.code, .invalidAuthenticationToken)
         } else {
             XCTFail("\(error) was not a 'jsonError'")
         }
+
+        let jsonError = try response.decodeJSONError()
+        XCTAssertEqual(jsonError.message, "Invalid authentication token")
+        XCTAssertEqual(jsonError.code, .invalidAuthenticationToken)
     }
 
-    func testJSONErrorDecodingBasStatusCode() throws {
+    func testJSONErrorDecodingBadStatusCode() throws {
         let json = """
         {
         "some": "thing"
@@ -240,10 +244,11 @@ class DiscordModelsTests: XCTestCase {
             version: .http1_1,
             body: data
         )
-        let error =  try XCTUnwrap(response.decodeError())
-        if case .badStatusCode = error {
-        } else {
-            XCTFail("\(error) was not a 'jsonError'")
+        let error =  try XCTUnwrap(response.asError())
+        switch error {
+        case .badStatusCode: break
+        default:
+            XCTFail("\(error) was not a 'badStatusCode'")
         }
     }
 

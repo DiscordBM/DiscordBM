@@ -5,7 +5,7 @@ import AsyncHTTPClient
 import Atomics
 import NIO
 
-public actor ShardsGatewayManager: GatewayManager {
+public actor ShardingGatewayManager: GatewayManager {
 
     /// Configuration for shard-management.
     public struct Configuration: Sendable {
@@ -39,12 +39,11 @@ public actor ShardsGatewayManager: GatewayManager {
 
     /// The underlying gateway managers for each shard.
     var managers = [BotGatewayManager]()
-
     let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
     /// Max frame size we accept to receive through the web-socket connection.
-    nonisolated let maxFrameSize: Int
+    let maxFrameSize: Int
     
     static let idGenerator = ManagedAtomic(UInt(0))
     public nonisolated let id: UInt = idGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
@@ -63,7 +62,7 @@ public actor ShardsGatewayManager: GatewayManager {
     var populationWaiters = [CheckedContinuation<Void, Never>]()
 
     //MARK: Shard-ing
-    let shardsCoordinator = ShardsCoordinator()
+    let shardCoordinator = ShardCoordinator()
     let configuration: Configuration
 
     /// - Parameters:
@@ -191,7 +190,7 @@ public actor ShardsGatewayManager: GatewayManager {
                         shardInfo: .init(
                             shard: shard,
                             maxConcurrency: gatewayInfo.session_start_limit.max_concurrency,
-                            shardsCoordinator: self.shardsCoordinator
+                            shardCoordinator: self.shardCoordinator
                         ),
                         identifyPayloadWithShard: payload
                     )
@@ -264,7 +263,7 @@ public actor ShardsGatewayManager: GatewayManager {
     }
 }
 
-extension ShardsGatewayManager {
+extension ShardingGatewayManager {
     private func getGatewayInfo() async -> Gateway.BotConnectionInfo {
         logger.debug("Will try to get Discord gateway url")
         if let gatewayBot = try? await client.getBotGateway().decode() {

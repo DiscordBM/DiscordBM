@@ -15,12 +15,12 @@ public actor BotGatewayManager: GatewayManager {
         let shard: IntPair
         let maxConcurrency: Int
         /// Shard manager must exist if and only if a shard is configured (by the library).
-        let shardsCoordinator: ShardsCoordinator
+        let shardCoordinator: ShardCoordinator
 
-        init(shard: IntPair, maxConcurrency: Int, shardsCoordinator: ShardsCoordinator) {
+        init(shard: IntPair, maxConcurrency: Int, shardCoordinator: ShardCoordinator) {
             self.shard = shard
             self.maxConcurrency = maxConcurrency
-            self.shardsCoordinator = shardsCoordinator
+            self.shardCoordinator = shardCoordinator
         }
     }
     
@@ -29,7 +29,7 @@ public actor BotGatewayManager: GatewayManager {
     /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
     /// Max frame size we accept to receive through the web-socket connection.
-    nonisolated let maxFrameSize: Int
+    let maxFrameSize: Int
     /// Generator of `BotGatewayManager` ids.
     static let idGenerator = ManagedAtomic(UInt(0))
     /// This gateway manager's identifier.
@@ -129,7 +129,7 @@ public actor BotGatewayManager: GatewayManager {
             var identifyPayload = identifyPayload
             identifyPayload.shard = nil
             self.identifyPayload = identifyPayload
-            logger.warning("You can't manually configure a 'BotGatewayManager' for shard-ing. Use 'ShardsGatewayManager' instead.")
+            logger.warning("You can't manually configure a 'BotGatewayManager' for shard-ing. Use 'ShardingGatewayManager' instead.")
         } else {
             self.identifyPayload = identifyPayload
         }
@@ -167,7 +167,7 @@ public actor BotGatewayManager: GatewayManager {
             var identifyPayload = identifyPayload
             identifyPayload.shard = nil
             self.identifyPayload = identifyPayload
-            logger.warning("You can't manually configure a 'BotGatewayManager' for shard-ing. Use 'ShardsGatewayManager' instead.")
+            logger.warning("You can't manually configure a 'BotGatewayManager' for shard-ing. Use 'ShardingGatewayManager' instead.")
         } else {
             self.identifyPayload = identifyPayload
         }
@@ -679,7 +679,7 @@ extension BotGatewayManager {
            !shardInfo.shardConnectedOnceBefore {
             logger.trace("Will wait for other shards")
             /// `shardManager` must exist. Initializer must enforce this.
-            await shardInfo.shardsCoordinator.waitForOtherShards(
+            await shardInfo.shardCoordinator.waitForOtherShards(
                 shard: shardInfo.shard,
                 maxConcurrency: max(shardInfo.maxConcurrency, 1) /// Avoid an unlikely division-by-zero
             )
@@ -697,7 +697,7 @@ extension BotGatewayManager {
     }
 }
 
-// MARK: For ShardsGatewayManager
+// MARK: For ShardingGatewayManager
 extension BotGatewayManager {
     func addEventsContinuation(_ continuation: AsyncStream<Gateway.Event>.Continuation) {
         self.eventsStreamContinuations.append(continuation)

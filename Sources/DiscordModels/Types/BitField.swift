@@ -102,6 +102,7 @@ where R: RawRepresentable & Hashable, R.RawValue == UInt {
 extension IntBitField: Codable {
     public init(from decoder: any Decoder) throws {
         self.rawValue = try UInt(from: decoder)
+
 #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
         let (values, unknownValues) = self.representableValues()
         if !unknownValues.isEmpty {
@@ -180,10 +181,12 @@ extension StringBitField: Sendable where R: Sendable { }
 
 //MARK: RangeReplaceableCollection + BitField
 public extension RangeReplaceableCollection {
+    @inlinable
     init<Field>(_ bitField: Field) where Field: BitField, Self.Element == Field.R {
         self.init(bitField.representableValues().values)
     }
 
+    @inlinable
     init? <Field>(_ bitField: Field?) where Field: BitField, Self.Element == Field.R {
         if let values = bitField?.representableValues().values {
             self.init(values)

@@ -506,7 +506,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(updateGuild.name, newGuildName)
 
         /// Can't leave guild because the bot is the owner
-        let leaveGuildError = try await client.leaveGuild(id: createdGuild.id).decodeError()
+        let leaveGuildError = try await client.leaveGuild(id: createdGuild.id).asError()
 
         switch leaveGuildError {
         case let .jsonError(jsonError) where jsonError.code == .invalidGuild:
@@ -728,7 +728,7 @@ class DiscordClientTests: XCTestCase {
                 mute: true,
                 deaf: true
             )
-        ).decodeError()
+        ).asError()
 
         switch addMemberError {
         case let .jsonError(jsonError) where jsonError.code == .invalidOAuth2AccessToken:
@@ -741,7 +741,7 @@ class DiscordClientTests: XCTestCase {
         let deleteMemberError = try await client.deleteGuildMember(
             guildId: Constants.guildId,
             userId: .makeFake()
-        ).decodeError()
+        ).asError()
 
         switch deleteMemberError {
         case let .jsonError(jsonError) where jsonError.code == .unknownUser:
@@ -1067,7 +1067,7 @@ class DiscordClientTests: XCTestCase {
             guildId: Constants.guildId,
             integrationId: .makeFake(),
             reason: "Won't even work!"
-        ).decodeError()
+        ).asError()
 
         switch integrationDeleteError {
         case let .jsonError(jsonError) where jsonError.code == .unknownIntegration:
@@ -1291,7 +1291,7 @@ class DiscordClientTests: XCTestCase {
 
         let vanityError = try await client
             .getGuildVanityUrl(guildId: Constants.guildId)
-            .decodeError()
+            .asError()
 
         switch vanityError {
             /// `missingAccess` is not accurate.
@@ -1434,7 +1434,7 @@ class DiscordClientTests: XCTestCase {
                 suppress: false,
                 request_to_speak_timestamp: DiscordTimestamp(date: Date().addingTimeInterval(5))
             )
-        ).decodeError()
+        ).asError()
 
         switch selfVoiceStateError {
         case .jsonError(let jsonError) where jsonError.code == .unknownVoiceState:
@@ -1451,7 +1451,7 @@ class DiscordClientTests: XCTestCase {
                 channel_id: Constants.Channels.stage.id,
                 suppress: true
             )
-        ).decodeError()
+        ).asError()
 
         switch voiceStateError {
         case .jsonError(let jsonError) where jsonError.code == .unknownVoiceState:
@@ -1535,7 +1535,7 @@ class DiscordClientTests: XCTestCase {
         /// These group-dm endpoints require access tokens. Can't test easily.
         let createGroupDmError = try await client.createGroupDm(
             payload: .init(access_tokens: [], nicks: [:])
-        ).decodeError()
+        ).asError()
 
         switch createGroupDmError {
         case let .jsonError(jsonError) where jsonError.code == .invalidFormBodyOrInvalidContentType:
@@ -1548,7 +1548,7 @@ class DiscordClientTests: XCTestCase {
             channelId: dmChannel.id,
             userId: Constants.personalId,
             payload: .init(access_token: "", nick: "")
-        ).decodeError()
+        ).asError()
 
         switch addGroupDmUserError {
         case let .jsonError(jsonError)
@@ -1561,7 +1561,7 @@ class DiscordClientTests: XCTestCase {
         let deleteGroupDmUserError = try await client.deleteGroupDmUser(
             channelId: dmChannel.id,
             userId: Constants.personalId
-        ).decodeError()
+        ).asError()
 
         switch deleteGroupDmUserError {
         case let .jsonError(jsonError) where jsonError.code == .missingPermissions:
