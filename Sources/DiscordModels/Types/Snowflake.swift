@@ -24,7 +24,7 @@ extension SnowflakeProtocol {
             DiscordGlobalConfiguration.makeDecodeLogger("SnowflakeProtocol").warning(
                 "Could not parse a snowflake", metadata: [
                     "codingPath": "\(decoder.codingPath.map(\.stringValue))",
-                    "decoded": "\(self.value)"
+                    "decoded": "\(self.rawValue)"
                 ]
             )
         }
