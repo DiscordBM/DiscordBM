@@ -29,7 +29,7 @@ let swiftSettings: [SwiftSetting] = [
     /// `DiscordBM` passes the `complete` level.
     ///
     /// `minimal` / `targeted` / `complete`
-//    .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
+//    .unsafeFlags(["-strict-concurrency=complete"])
 ] + upcomingFeatureFlags
 
 let package = Package(
