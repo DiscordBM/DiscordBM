@@ -52,6 +52,7 @@ actor Expectation {
 
     static func waitFulfillment(
         of expectations: [Expectation],
+        message: @Sendable @autoclosure @escaping () -> String = "",
         timeout: Double,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -69,7 +70,7 @@ actor Expectation {
                 /// End the continuation so the tests don't hang.
                 storage.endContinuation(file: file, line: line)
                 XCTFail(
-                    "Some expectations failed to resolve in \(timeout) seconds: \(left)",
+                    "Some expectations failed to resolve in \(timeout) seconds: \(left). Message: \(message())",
                     file: file,
                     line: line
                 )
@@ -100,12 +101,14 @@ actor Expectation {
 extension XCTestCase {
     func waitFulfillment(
         of expectations: [Expectation],
+        message: @Sendable @autoclosure @escaping () -> String = "",
         timeout: Double,
         file: StaticString = #filePath,
         line: UInt = #line
     ) async {
         await Expectation.waitFulfillment(
             of: expectations,
+            message: message(),
             timeout: timeout,
             file: file,
             line: line

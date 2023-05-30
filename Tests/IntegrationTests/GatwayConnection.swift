@@ -11,7 +11,9 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
-            Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
+            var logger = Logger(label: $0)
+            logger.logLevel = .debug
+            return logger
         }
         self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
     }
@@ -295,7 +297,10 @@ private actor ShardCounter {
         }
     }
 
-    func waitFulfillment(file: StaticString = #filePath, line: UInt = #line) async {
+    func waitFulfillment(
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
         if connectedShards.sorted() == Array(0..<(shardCount)) {
             return
         } else {
