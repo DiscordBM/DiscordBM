@@ -1112,6 +1112,7 @@ public struct Gateway: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-emoji
     public struct MessageReactionRemoveEmoji: Sendable, Codable {
+        public var type: ReactionKind
         public var channel_id: ChannelSnowflake
         public var guild_id: GuildSnowflake?
         public var message_id: MessageSnowflake

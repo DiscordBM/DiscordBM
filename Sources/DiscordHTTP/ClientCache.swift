@@ -6,7 +6,7 @@ import struct Foundation.Date
 actor ClientCache {
 
     @usableFromInline
-    struct CacheableItem: Hashable {
+    struct CacheableItem: Sendable, Hashable {
         let identity: CacheableEndpointIdentity
         let parameters: [String]
         let queries: [(String, String?)]

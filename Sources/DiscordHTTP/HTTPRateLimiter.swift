@@ -146,13 +146,13 @@ actor HTTPRateLimiter {
     }
 
     @usableFromInline
-    enum ShouldRequestResponse {
+    enum ShouldRequestResponse: Sendable {
         case `true`
         case `false`
         /// Need to wait some seconds if you want to make the request
         case after(Double)
     }
-    
+
     /// Should request to the endpoint or not.
     /// This also adds a record to the global rate-limit, so if this returns true,
     /// you should make sure the request is sent, or otherwise this rate-limiter's
