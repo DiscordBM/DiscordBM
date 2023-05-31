@@ -27,6 +27,7 @@ public actor ShardingGatewayManager: GatewayManager {
         ///   - shardCount: How many shards to spin up.
         ///   In case of `.automatic`, will use Discord's suggested shard-count.
         ///   - makeIntents: Will make different intents for each shard based on this closure.
+        ///   If `nil`, all shards will have all intents passed to the `ShardingGatewayManager`.
         ///   `(indexOfShard: Int, totalShardCount: Int) -> [Gateway.Intent]`
         public init(
             shardCount: Count = .automatic,
@@ -75,7 +76,7 @@ public actor ShardingGatewayManager: GatewayManager {
         eventLoopGroup: any EventLoopGroup,
         client: any DiscordClient,
         configuration: Configuration = .init(),
-        maxFrameSize: Int =  1 << 31,
+        maxFrameSize: Int = 1 << 28,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
@@ -101,7 +102,7 @@ public actor ShardingGatewayManager: GatewayManager {
         httpClient: HTTPClient,
         configuration: Configuration = .init(),
         clientConfiguration: ClientConfiguration = .init(),
-        maxFrameSize: Int =  1 << 31,
+        maxFrameSize: Int = 1 << 28,
         appId: ApplicationSnowflake? = nil,
         identifyPayload: Gateway.Identify
     ) async {
@@ -128,6 +129,8 @@ public actor ShardingGatewayManager: GatewayManager {
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
     ///   - token: Your Discord bot-token.
     ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
+    ///   - largeThreshold: Value between 50 and 250, total number of members where the gateway
+    ///     will stop sending offline members in the guild member list.
     ///   - presence: The initial presence of the bot.
     ///   - intents: The Discord intents you want to receive messages for.
     public init(
@@ -135,9 +138,10 @@ public actor ShardingGatewayManager: GatewayManager {
         httpClient: HTTPClient,
         configuration: Configuration = .init(),
         clientConfiguration: ClientConfiguration = .init(),
-        maxFrameSize: Int =  1 << 31,
+        maxFrameSize: Int = 1 << 28,
         token: String,
         appId: ApplicationSnowflake? = nil,
+        largeThreshold: Int? = nil,
         presence: Gateway.Identify.Presence? = nil,
         intents: [Gateway.Intent]
     ) async {
@@ -153,9 +157,11 @@ public actor ShardingGatewayManager: GatewayManager {
         self.configuration = configuration
         self.identifyPayload = .init(
             token: token,
+            large_threshold: largeThreshold,
             presence: presence,
             intents: intents
         )
+
         var logger = DiscordGlobalConfiguration.makeLogger("ShardsManager")
         logger[metadataKey: "shards-manager-id"] = .string("\(self.id)")
         self.logger = logger

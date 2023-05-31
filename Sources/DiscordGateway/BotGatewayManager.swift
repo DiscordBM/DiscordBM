@@ -92,7 +92,7 @@ public actor BotGatewayManager: GatewayManager {
     internal init(
         eventLoopGroup: any EventLoopGroup,
         client: any DiscordClient,
-        maxFrameSize: Int =  1 << 31,
+        maxFrameSize: Int = 1 << 28,
         shardInfo: ShardInfo,
         identifyPayloadWithShard identifyPayload: Gateway.Identify
     ) {
@@ -114,7 +114,7 @@ public actor BotGatewayManager: GatewayManager {
     public init(
         eventLoopGroup: any EventLoopGroup,
         client: any DiscordClient,
-        maxFrameSize: Int =  1 << 31,
+        maxFrameSize: Int = 1 << 28,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
@@ -146,7 +146,7 @@ public actor BotGatewayManager: GatewayManager {
         eventLoopGroup: any EventLoopGroup,
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
-        maxFrameSize: Int =  1 << 31,
+        maxFrameSize: Int = 1 << 28,
         appId: ApplicationSnowflake? = nil,
         identifyPayload: Gateway.Identify
     ) async {
@@ -180,15 +180,18 @@ public actor BotGatewayManager: GatewayManager {
     ///   - maxFrameSize: Max frame size the WebSocket should allow receiving.
     ///   - token: Your Discord bot-token.
     ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
+    ///   - largeThreshold: Value between 50 and 250, total number of members where the gateway
+    ///     will stop sending offline members in the guild member list.
     ///   - presence: The initial presence of the bot.
     ///   - intents: The Discord intents you want to receive messages for.
     public init(
         eventLoopGroup: any EventLoopGroup,
         httpClient: HTTPClient,
         clientConfiguration: ClientConfiguration = .init(),
-        maxFrameSize: Int =  1 << 31,
+        maxFrameSize: Int = 1 << 28,
         token: String,
         appId: ApplicationSnowflake? = nil,
+        largeThreshold: Int? = nil,
         presence: Gateway.Identify.Presence? = nil,
         intents: [Gateway.Intent]
     ) async {
@@ -203,9 +206,11 @@ public actor BotGatewayManager: GatewayManager {
         self.maxFrameSize = maxFrameSize
         self.identifyPayload = .init(
             token: token,
+            large_threshold: largeThreshold,
             presence: presence,
             intents: intents
         )
+
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
