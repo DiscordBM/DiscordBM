@@ -164,7 +164,7 @@ In most cases, the library doesn't try to abstract away Discord's stuff.
 > `DiscordBM` is still in beta so new releases can come with breaking changes.   
 > [**Read the release notes**](https://github.com/DiscordBM/DiscordBM/releases) to fix the breaking changes that you encounter and become aware of new features.
 
-### Bot Token And App ID
+### Finding Your Bot Token
 <details>
   <summary> Click to expand </summary>
   
@@ -172,14 +172,16 @@ In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding Bot Token](https://user-images.githubusercontent.com/54685446/200565393-ea31c2ad-fd3a-44a1-9789-89460ab5d1a9.png)
 
 </details>
-    
+
 ### Application (including Slash) Commands
-    
-   <details>
- <summary> Click to expand </summary>
+
+<details>
+  <summary> Click to expand </summary>
 
 `DiscordBM` comes with full support for all kinds of "interactions" such as slash commands, modals, autocomplete etc... and gives you full control over how you want to use them using type-safe APIs.    
-You can see Penny as an example of using all kinds of commands in production. Penny registers the commands [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/CommandsManager.swift) and responds to them [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Handlers/InteractionHandler.swift).   
+> You can see Penny as an example of using all kinds of commands in production.    
+Penny registers the commands [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/CommandsManager.swift) and responds to them [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Handlers/InteractionHandler.swift).   
+
 In this example you'll only make 2 simple slash commands, so you can get started:   
 
 In your `EntryPoint.main()`:
@@ -612,9 +614,9 @@ Include `DiscordBM` as a dependency for your targets:
 Finally, add `import DiscordBM` to your source code.
 
 ## Versioning
-`DiscordBM` will try to follow Semantic Versioning 2.0.0, with exceptions.     
-To keep `DiscordBM` up to date with Discord API's frequent changes, `DiscordBM` will **add** any new properties to any types in **minor** versions, even if it's technically a breaking change.   
-This includes adding new cases to enums. If you want to try to avoid breaking changes, make sure you have a `default` case in your `switch` statements or use `if case let`/`if case`.
+`DiscordBM` will try to follow Semantic Versioning 2.0.0, with exceptions:    
+* To keep `DiscordBM` up to date with Discord API's frequent changes, `DiscordBM` will **add** any new properties to any types in **minor** versions, even if it's technically a breaking change.   
+* This includes adding new cases to enums. If you want to try to avoid breaking changes, make sure you have a `default` case in your `switch` statements or use `if case let`/`if case`.
 
 ## Contribution & Support
 Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.gg/vapor) to discuss your ideas.    
