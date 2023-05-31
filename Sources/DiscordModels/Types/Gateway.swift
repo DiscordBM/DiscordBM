@@ -734,8 +734,8 @@ public struct Gateway: Sendable, Codable {
         public var channels: [DiscordChannel]
         public var threads: [DiscordChannel]
         public var presences: [Gateway.PartialPresenceUpdate]
-        public var guild_scheduled_events: [GuildScheduledEvent]
         public var stage_instances: [StageInstance]
+        public var guild_scheduled_events: [GuildScheduledEvent]
         
         public mutating func update(with new: Guild) {
             self.id = new.id

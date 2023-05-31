@@ -268,8 +268,8 @@ extension DiscordChannel {
             }
             
             public var type: Kind
-            // FIXME: Don't have the type to use `Snowflake<Type>` instead
-            public var party_id: AnySnowflake?
+            /// Not an Snowflake. Example: `spotify:715622804258684938`.
+            public var party_id: String?
         }
 
         public var id: MessageSnowflake
