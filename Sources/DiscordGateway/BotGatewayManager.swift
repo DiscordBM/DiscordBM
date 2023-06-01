@@ -23,7 +23,7 @@ public actor BotGatewayManager: GatewayManager {
         }
     }
     
-    private weak var ws: WebSocket?
+    var ws: WebSocket?
     let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
