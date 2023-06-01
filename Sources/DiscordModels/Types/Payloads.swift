@@ -763,14 +763,14 @@ public enum Payloads {
         public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
         public var rate_limit_per_user: Int?
         public var message: ForumMessage
-        public var applied_tags: [String]?
+        public var applied_tags: [ForumTagSnowflake]?
         
         public init(
             name: String,
             auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil,
             rate_limit_per_user: Int? = nil,
             message: ForumMessage,
-            applied_tags: [String]? = nil
+            applied_tags: [ForumTagSnowflake]? = nil
         ) {
             self.name = name
             self.auto_archive_duration = auto_archive_duration
@@ -917,19 +917,29 @@ public enum Payloads {
     }
 
     /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
-    public struct PartialForumTag: Sendable, Encodable {
+    public struct PartialForumTag: Sendable, Encodable, ValidatablePayload {
         public var id: ForumTagSnowflake?
         public var name: String
         public var moderated: Bool?
         public var emoji_id: EmojiSnowflake?
         public var emoji_name: String?
 
-        public init(id: ForumTagSnowflake? = nil, name: String, moderated: Bool? = nil, emoji_id: EmojiSnowflake? = nil, emoji_name: String? = nil) {
+        public init(id: ForumTagSnowflake? = nil, name: String, moderated: Bool? = nil, emoji_id: EmojiSnowflake? = nil) {
             self.id = id
             self.name = name
             self.moderated = moderated
             self.emoji_id = emoji_id
+        }
+
+        public init(id: ForumTagSnowflake? = nil, name: String, moderated: Bool? = nil, emoji_name: String? = nil) {
+            self.id = id
+            self.name = name
+            self.moderated = moderated
             self.emoji_name = emoji_name
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(name, min: 0, max: 20, name: "name")
         }
     }
 
@@ -995,6 +1005,7 @@ public enum Payloads {
                 allowed: [.requireTag]
             )
             validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
+            available_tags?.validate()
         }
     }
 
@@ -1035,6 +1046,7 @@ public enum Payloads {
                 allowed: [.pinned]
             )
             validateElementCountDoesNotExceed(applied_tags, max: 5, name: "applied_tags")
+            applied_tags?.validate()
         }
     }
 
@@ -1088,6 +1100,7 @@ public enum Payloads {
             validateNumberInRangeOrNil(bitrate, min: 8_000, max: 384_000, name: "bitrate")
             validateNumberInRangeOrNil(user_limit, min: 0, max: 10_000, name: "user_limit")
             validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
+            available_tags?.validate()
         }
     }
 
