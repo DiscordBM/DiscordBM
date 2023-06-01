@@ -379,7 +379,7 @@ public struct DiscordTimestamp: Codable {
                 throw DecodingError.unexpectedFormat(container.codingPath, string)
             }
             components = DateComponents(
-                calendar: Calendar.utc,
+                calendar: .utc,
                 year: year,
                 month: month,
                 day: day,
@@ -399,7 +399,7 @@ public struct DiscordTimestamp: Codable {
                 throw DecodingError.unexpectedFormat(container.codingPath, string)
             }
             components = DateComponents(
-                calendar: Calendar.utc,
+                calendar: .utc,
                 year: year,
                 month: month,
                 day: day,

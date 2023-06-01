@@ -14,7 +14,6 @@ public actor BotGatewayManager: GatewayManager {
         var shardConnectedOnceBefore = false
         let shard: IntPair
         let maxConcurrency: Int
-        /// Shard manager must exist if and only if a shard is configured (by the library).
         let shardCoordinator: ShardCoordinator
 
         init(shard: IntPair, maxConcurrency: Int, shardCoordinator: ShardCoordinator) {

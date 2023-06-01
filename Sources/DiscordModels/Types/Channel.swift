@@ -268,7 +268,7 @@ extension DiscordChannel {
             }
             
             public var type: Kind
-            /// Not an Snowflake. Example: `spotify:715622804258684938`.
+            /// Not a Snowflake. Example: `spotify:715622804258684938`.
             public var party_id: String?
         }
 

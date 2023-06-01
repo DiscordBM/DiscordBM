@@ -59,6 +59,7 @@ public actor ShardingGatewayManager: GatewayManager {
     public nonisolated let identifyPayload: Gateway.Identify
 
     //MARK: GatewayManager-population properties
+    var connectionLocked = false
     var hasPopulatedGatewayManagers = false
     var populationWaiters = [CheckedContinuation<Void, Never>]()
 
@@ -169,53 +170,24 @@ public actor ShardingGatewayManager: GatewayManager {
 
     /// Connects all shards to Discord.
     public func connect() async {
-        do {
-            let gatewayInfo = await getGatewayInfo()
-            let shardCount: Int = {
-                switch self.configuration.shardCount {
-                case .automatic: return gatewayInfo.shards
-                case let .exact(count): return max(count, 1)
-                }
-            }()
+        if self.connectionLocked {
+            self.logger.error("Attempt to connect shards while the connect function is locked")
+            return
+        } else {
+            self.connectionLocked = true
+        }
 
-            for idx in 0..<shardCount {
-                let shard = IntPair(idx, shardCount)
+        if self.managers.isEmpty {
+            await self.populateGatewayManagers()
+        }
 
-                var payload = self.identifyPayload
-                payload.shard = shard
-
-                if let intents = self.configuration.makeIntents?(idx, shardCount) {
-                    payload.intents = .init(intents)
-                }
-
-                self.managers.append(
-                    BotGatewayManager(
-                        eventLoopGroup: self.eventLoopGroup,
-                        client: self.client,
-                        maxFrameSize: self.maxFrameSize,
-                        shardInfo: .init(
-                            shard: shard,
-                            maxConcurrency: gatewayInfo.session_start_limit.max_concurrency,
-                            shardCoordinator: self.shardCoordinator
-                        ),
-                        identifyPayloadWithShard: payload
-                    )
-                )
-            }
-
-            /// Notify anyone that was waiting for the `managers` to be populated.
-            self.hasPopulatedGatewayManagers = true
-            for waiter in self.populationWaiters {
-                waiter.resume()
-            }
-            self.populationWaiters.removeAll()
-
-            await withTaskGroup(of: Void.self) { group in
-                for manager in self.managers {
-                    group.addTask { await manager.connect() }
-                }
+        await withTaskGroup(of: Void.self) { group in
+            for manager in self.managers {
+                group.addTask { await manager.connect() }
             }
         }
+
+        self.connectionLocked = false
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
@@ -270,6 +242,49 @@ public actor ShardingGatewayManager: GatewayManager {
 }
 
 extension ShardingGatewayManager {
+    private func populateGatewayManagers() async {
+        let gatewayInfo = await self.getGatewayInfo()
+        let shardCount: Int = {
+            switch self.configuration.shardCount {
+            case .automatic: return gatewayInfo.shards
+            case let .exact(count): return max(count, 1)
+            }
+        }()
+
+        for idx in 0..<shardCount {
+            let shard = IntPair(idx, shardCount)
+
+            var payload = self.identifyPayload
+            payload.shard = shard
+
+            if let intents = self.configuration.makeIntents?(idx, shardCount) {
+                payload.intents = .init(intents)
+            }
+
+            self.managers.append(
+                BotGatewayManager(
+                    eventLoopGroup: self.eventLoopGroup,
+                    client: self.client,
+                    maxFrameSize: self.maxFrameSize,
+                    shardInfo: .init(
+                        shard: shard,
+                        maxConcurrency: gatewayInfo.session_start_limit.max_concurrency,
+                        shardCoordinator: self.shardCoordinator
+                    ),
+                    identifyPayloadWithShard: payload
+                )
+            )
+        }
+
+
+        /// Notify anyone that was waiting for the `managers` to be populated.
+        self.hasPopulatedGatewayManagers = true
+        for waiter in self.populationWaiters {
+            waiter.resume()
+        }
+        self.populationWaiters.removeAll()
+    }
+
     private func getGatewayInfo() async -> Gateway.BotConnectionInfo {
         logger.debug("Will try to get Discord gateway url")
         if let gatewayBot = try? await client.getBotGateway().decode() {
