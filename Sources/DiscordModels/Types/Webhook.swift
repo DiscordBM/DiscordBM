@@ -27,7 +27,6 @@ public struct Webhook: Sendable, Codable {
 /// The address of a Webhook.
 public struct WebhookAddress: Sendable, Hashable {
     
-    /// Read `helpAnchor` for help about each error case.
     public enum Error: Swift.Error, CustomStringConvertible {
         /// The provided URL '\(url.debugDescription)' doesn't look like a webhook URL
         case invalidUrl(String)

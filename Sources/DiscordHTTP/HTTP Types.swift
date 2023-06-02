@@ -268,7 +268,6 @@ public enum DiscordHTTPErrorResponse: Sendable, Error, CustomStringConvertible {
     }
 }
 
-/// Read `helpAnchor` for help about each error case.
 public enum DiscordHTTPError: Error, CustomStringConvertible {
     /// Discord has rate-limited you at '\(url)'. Try to send less messages or send at a slower pace.
     case rateLimited(url: String)

@@ -332,8 +332,7 @@ extension DiscordLocaleDict: Sendable where C: Sendable { }
 
 /// A timestamp that decode/encodes itself how Discord expects.
 public struct DiscordTimestamp: Codable {
-    
-    /// Read `helpAnchor` for help about each error case.
+
     public enum DecodingError: Swift.Error, CustomStringConvertible {
         /// The timestamp had an unexpected format. This is a library decoding issue, please report this at https://github.com/DiscordBM/DiscordBM/issues.
         case unexpectedFormat([any CodingKey], String)

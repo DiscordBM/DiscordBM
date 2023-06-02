@@ -1,6 +1,5 @@
 import Foundation
 
-/// Read `helpAnchor` for help.
 public struct ValidationError: Sendable, Error, CustomStringConvertible {
     /// The model that failed the validations.
     public let model: any Sendable

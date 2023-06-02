@@ -110,7 +110,6 @@ public func == (lhs: any SnowflakeProtocol, rhs: any SnowflakeProtocol) -> Bool 
 /// The parsed info of a snowflake.
 public struct SnowflakeInfo: Sendable {
 
-    /// Read `helpAnchor` for help about each error case.
     public enum Error: Swift.Error, CustomStringConvertible {
         /// Entered field '\(name)' is bigger than expected. It has a value of '\(value)', but max accepted is '\(max)'
         case fieldTooBig(_ name: String, value: String, max: Int)

@@ -55,7 +55,6 @@ public struct Reaction: Sendable, Hashable, Codable {
         try self.base.encode(to: encoder)
     }
     
-    /// Read `helpAnchor` for help about each error case.
     public enum Error: Swift.Error, CustomStringConvertible {
         /// Expected only 1 emoji in the input '\(input)' but recognized '\(count)' emojis.
         case moreThan1Emoji(String, count: Int)

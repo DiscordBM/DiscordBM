@@ -183,8 +183,7 @@ public struct Gateway: Sendable, Codable {
                 }
             }
         }
-        
-        /// Read `helpAnchor` for help about each error case.
+
         public enum GatewayDecodingError: Error, CustomStringConvertible {
             /// The dispatch event type '\(type ?? "nil")' is unhandled. This is probably a new Discord event which is not yet officially documented. I actively look for new events, and check Discord docs, so there is nothing to worry about. The library will support this event when it should.
             case unhandledDispatchEvent(type: String?)
@@ -379,7 +378,6 @@ public struct Gateway: Sendable, Codable {
             }
         }
         
-        /// Read `helpAnchor` for help about each error case.
         public enum EncodingError: Error, CustomStringConvertible {
             /// This event is not supposed to be sent at all. This could be a library issue, please report at https://github.com/DiscordBM/DiscordBM/issues.
             case notSupposedToBeSent(message: String)

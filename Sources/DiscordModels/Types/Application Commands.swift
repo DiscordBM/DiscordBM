@@ -156,7 +156,6 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
             self.id = id
         }
         
-        /// Read `helpAnchor` for help about each error case.
         public enum ConversionError: Error, CustomStringConvertible {
             /// Couldn't convert \(id) to an integer
             case couldNotConvertToInteger(GuildSnowflake)

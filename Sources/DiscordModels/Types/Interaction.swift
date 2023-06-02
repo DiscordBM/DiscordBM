@@ -527,7 +527,6 @@ extension Interaction {
         
         public var components: [Component]
         
-        /// Read `helpAnchor` for help about each error case.
         public enum CodingError: Error, CustomStringConvertible {
             /// This component kind was not expected here. This is a library decoding issue, please report at: https://github.com/DiscordBM/DiscordBM/issues.
             case unexpectedComponentKind(Kind)

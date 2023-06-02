@@ -127,7 +127,6 @@ extension IntBitField: Sendable where R: Sendable { }
 public struct StringBitField<R>: BitField
 where R: RawRepresentable, R: Hashable, R.RawValue == UInt {
 
-    /// Read `helpAnchor` for help about each error case.
     public enum DecodingError: Swift.Error, CustomStringConvertible {
         /// The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/DiscordBM/DiscordBM/issues.
         case notRepresentingInt(String)
