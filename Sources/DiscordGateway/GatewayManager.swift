@@ -25,25 +25,3 @@ public protocol GatewayManager: AnyActor {
     /// Disconnects from Discord.
     func disconnect() async
 }
-
-// FIXME: These are to help users fix breaking changes easier.
-// Should remove these when the package is out of beta.
-public extension GatewayManager {
-    @available(*, unavailable, renamed: "makeEventsStream")
-    func makeEventStream() async -> AsyncStream<Gateway.Event> {
-        fatalError()
-    }
-
-    @available(*, unavailable, renamed: "makeEventsParseFailureStream")
-    func makeEventParseFailureStream() async -> AsyncStream<(any Error, ByteBuffer)> {
-        fatalError()
-    }
-
-    @available(*, unavailable, message: "Use 'makeEventsStream()' instead: 'for await event in await bot.makeEventsStream() { /*handle event*/ }'")
-    func addEventHandler(_ handler: @Sendable @escaping (Gateway.Event) -> Void) { }
-
-    @available(*, unavailable, message: "Use 'makeEventsParseFailureStream()' instead: 'for await (error, buffer) in await bot.makeEventsParseFailureStream() { /*handle error & buffer*/ }'")
-    func addEventParseFailureHandler(
-        _ handler: @Sendable @escaping (any Error, ByteBuffer) -> Void
-    ) { }
-}

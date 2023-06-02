@@ -113,16 +113,3 @@ public enum DiscordUtils {
             .replacingOccurrences(of: #":"#, with: #"\:"#) /// Emojis, e.g. `:thumbsup:`
     }
 }
-
-// FIXME: These are to help users fix breaking changes easier.
-// Should remove these when the package is out of beta.
-extension DiscordUtils {
-    @available(*, unavailable, message: "renamed to 'mention(id: UserSnowflake)'")
-    public static func userMention(id: String) -> String { fatalError() }
-
-    @available(*, unavailable, message: "renamed to 'mention(id: ChannelSnowflake)'")
-    public static func channelMention(id: String) -> String { fatalError() }
-
-    @available(*, unavailable, message: "renamed to 'mention(id: RoleSnowflake)'")
-    public static func roleMention(id: String) -> String { fatalError() }
-}
