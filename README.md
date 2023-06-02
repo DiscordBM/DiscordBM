@@ -7,6 +7,9 @@
     <a href="https://codecov.io/gh/DiscordBM/DiscordBM">
         <img src="https://codecov.io/gh/DiscordBM/DiscordBM/branch/main/graph/badge.svg?token=P4DYX2FWYT" alt="Codecov">
     </a>
+    <a href="https://github.com/DiscordBM/DiscordBM">
+        <img src="https://tokei.rs/b1/github/DiscordBM/DiscordBM" alt="Lines of Code">
+    </a>
     <a href="https://swift.org">
         <img src="https://img.shields.io/badge/swift-5.8%20/%205.7-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
@@ -25,8 +28,11 @@
 * Abstractions for easier testability.
 
 ## Showcase
-You can see Vapor community's Penny bot as a showcase of using this library in production. Penny's primary purpose is to give coins to the helpful members of the Vapor community. She also pings members for their specified keywords (similar to Slackbot), and notifies everyone of Swift's evolution and proposals.     
-Penny is available [here](https://github.com/vapor/penny-bot) and you can find `DiscordBM` used in the [PennyBOT](https://github.com/vapor/penny-bot/tree/main/CODE/Sources/PennyBOT) target.
+Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Penny.swift#L1).
+
+* Penny's primary purpose is to give coins to the helpful members of the Vapor community.
+* She also pings members for their specified keywords (similar to Slackbot). 
+* And notifies everyone of Swift's evolution proposals.    
 
 ## How To Use
   
