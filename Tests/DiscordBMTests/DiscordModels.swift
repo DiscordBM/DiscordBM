@@ -345,6 +345,10 @@ class DiscordModelsTests: XCTestCase {
     }
 
     func testStringIntDoubleBoolUtilities() throws {
+        func option(_ value: StringIntDoubleBool) -> Interaction.ApplicationCommand.Option {
+            .init(name: "", type: .boolean, value: value)
+        }
+
         do {
             let value = StringIntDoubleBool.string("l")
 
@@ -353,6 +357,9 @@ class DiscordModelsTests: XCTestCase {
 
             XCTAssertNoThrow(try Optional(value).requireString())
             XCTAssertThrowsError(try Optional(value).requireInt())
+
+            XCTAssertNoThrow(try option(value).requireString())
+            XCTAssertThrowsError(try option(value).requireInt())
         }
 
         do {
@@ -363,6 +370,9 @@ class DiscordModelsTests: XCTestCase {
 
             XCTAssertNoThrow(try Optional(value).requireInt())
             XCTAssertThrowsError(try Optional(value).requireDouble())
+
+            XCTAssertNoThrow(try option(value).requireInt())
+            XCTAssertThrowsError(try option(value).requireDouble())
         }
 
         do {
@@ -373,6 +383,9 @@ class DiscordModelsTests: XCTestCase {
 
             XCTAssertNoThrow(try Optional(value).requireDouble())
             XCTAssertThrowsError(try Optional(value).requireBool())
+
+            XCTAssertNoThrow(try option(value).requireDouble())
+            XCTAssertThrowsError(try option(value).requireBool())
         }
 
         do {
@@ -383,6 +396,9 @@ class DiscordModelsTests: XCTestCase {
 
             XCTAssertNoThrow(try Optional(value).requireBool())
             XCTAssertThrowsError(try Optional(value).requireString())
+
+            XCTAssertNoThrow(try option(value).requireBool())
+            XCTAssertThrowsError(try option(value).requireString())
         }
     }
 

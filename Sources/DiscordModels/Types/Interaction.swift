@@ -119,6 +119,30 @@ public struct Interaction: Sendable, Codable {
             public var options: [Option]?
             public var focused: Bool?
 
+            /// Requires a `String` value or throws `StringIntDoubleBool.Error`.
+            @inlinable
+            public func requireString() throws -> String {
+                try self.value.requireString()
+            }
+
+            /// Requires a `Int` value or throws `StringIntDoubleBool.Error`.
+            @inlinable
+            public func requireInt() throws -> Int {
+                try self.value.requireInt()
+            }
+
+            /// Requires a `Double` value or throws `StringIntDoubleBool.Error`.
+            @inlinable
+            public func requireDouble() throws -> Double {
+                try self.value.requireDouble()
+            }
+
+            /// Requires a `Bool` value or throws `StringIntDoubleBool.Error`.
+            @inlinable
+            public func requireBool() throws -> Bool {
+                try self.value.requireBool()
+            }
+
             /// Returns the first option with the `name`, or nil.
             @inlinable
             public func option(named name: String) -> Option? {
