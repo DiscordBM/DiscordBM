@@ -2,6 +2,20 @@ import Foundation
 
 /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-structure
 public struct Interaction: Sendable, Codable {
+
+    public enum Error: Swift.Error, CustomStringConvertible {
+        case optionNotFoundInCommand(name: String, command: ApplicationCommand)
+        case optionNotFoundInOption(name: String, parentOption: ApplicationCommand.Option)
+
+        public var description: String {
+            switch self {
+            case let .optionNotFoundInCommand(name, command):
+                return "Interaction.Error.optionNotFoundInCommand(name: \(name), command: \(command))"
+            case let .optionNotFoundInOption(name, parentOption):
+                return "Interaction.Error.optionNotFoundInOption(name: \(name), parentOption: \(parentOption))"
+            }
+        }
+    }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
@@ -79,7 +93,9 @@ public struct Interaction: Sendable, Codable {
                     let transformed = dict?.map { key, value -> (String, E) in
                         return (key.rawValue, value)
                     }
-                    let stringDict: [String: E]? = transformed.map { .init(uniqueKeysWithValues: $0) }
+                    let stringDict: [String: E]? = transformed.map {
+                        .init(uniqueKeysWithValues: $0)
+                    }
                     try container.encode(stringDict, forKey: key)
                 }
 
@@ -99,6 +115,22 @@ public struct Interaction: Sendable, Codable {
             public var value: StringIntDoubleBool?
             public var options: [Option]?
             public var focused: Bool?
+
+            /// Returns the first option with the `name`, or nil.
+            @inlinable
+            public func option(named name: String) -> Option? {
+                self.options?.first(where: { $0.name == name })
+            }
+
+            /// Returns the first option with the `name`, or throws `Interaction.Error`.
+            @inlinable
+            public func requireOption(named name: String) throws -> Option {
+                if let option = self.options?.first(where: { $0.name == name }) {
+                    return option
+                } else {
+                    throw Error.optionNotFoundInOption(name: name, parentOption: self)
+                }
+            }
         }
         
         public var id: CommandSnowflake
@@ -108,6 +140,22 @@ public struct Interaction: Sendable, Codable {
         public var options: [Option]?
         public var guild_id: GuildSnowflake?
         public var target_id: AnySnowflake?
+
+        /// Returns the first option with the `name`, or nil.
+        @inlinable
+        public func option(named name: String) -> Option? {
+            self.options?.first(where: { $0.name == name })
+        }
+
+        /// Returns the first option with the `name`, or throws `Interaction.Error`.
+        @inlinable
+        public func requireOption(named name: String) throws -> Option {
+            if let option = self.options?.first(where: { $0.name == name }) {
+                return option
+            } else {
+                throw Error.optionNotFoundInCommand(name: name, command: self)
+            }
+        }
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-message-component-data-structure
@@ -527,7 +575,7 @@ extension Interaction {
         
         public var components: [Component]
         
-        public enum CodingError: Error, CustomStringConvertible {
+        public enum CodingError: Swift.Error, CustomStringConvertible {
             /// This component kind was not expected here. This is a library decoding issue, please report at: https://github.com/DiscordBM/DiscordBM/issues.
             case unexpectedComponentKind(Kind)
             /// I thought action-row is supposed to only appear at top-level as a container for other components. This is a library decoding issue, please report at: https://github.com/DiscordBM/DiscordBM/issues.

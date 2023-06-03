@@ -301,6 +301,89 @@ class DiscordModelsTests: XCTestCase {
         _ = try decoder.decode(Interaction.ApplicationCommand.ResolvedData.self, from: encoded)
     }
 
+    func testApplicationCommandUtilities() throws {
+        let command = Interaction.ApplicationCommand(
+            id: try! .makeFake(),
+            name: "",
+            type: .applicationCommand,
+            options: [.init(name: "ppppp", type: .attachment)]
+        )
+
+        XCTAssertNotNil(command.option(named: "ppppp"))
+        XCTAssertNoThrow(try command.requireOption(named: "ppppp"))
+
+        XCTAssertNil(command.option(named: "dasdad"))
+        XCTAssertThrowsError(try command.requireOption(named: "iaoso")) { error in
+            let error = error as! Interaction.Error
+            switch error {
+            case .optionNotFoundInCommand: break
+            default:
+                XCTFail("Unexpected error: \(error)")
+            }
+        }
+
+        let option = Interaction.ApplicationCommand.Option(
+            name: "dsdagedddd",
+            type: .channel,
+            options: [.init(name: "lsol", type: .number)]
+        )
+
+        XCTAssertNotNil(option.option(named: "lsol"))
+        XCTAssertNoThrow(try option.requireOption(named: "lsol"))
+
+        XCTAssertNil(option.option(named: "dasdad"))
+        XCTAssertThrowsError(try option.requireOption(named: "iaoso")) { error in
+            let error = error as! Interaction.Error
+            switch error {
+            case .optionNotFoundInOption: break
+            default:
+                XCTFail("Unexpected error: \(error)")
+            }
+        }
+    }
+
+    func testStringIntDoubleBoolUtilities() throws {
+        do {
+            let value = StringIntDoubleBool.string("l")
+
+            XCTAssertNoThrow(try value.requireString())
+            XCTAssertThrowsError(try value.requireInt())
+
+            XCTAssertNoThrow(try Optional(value).requireString())
+            XCTAssertThrowsError(try Optional(value).requireInt())
+        }
+
+        do {
+            let value = StringIntDoubleBool.int(1)
+
+            XCTAssertNoThrow(try value.requireInt())
+            XCTAssertThrowsError(try value.requireDouble())
+
+            XCTAssertNoThrow(try Optional(value).requireInt())
+            XCTAssertThrowsError(try Optional(value).requireDouble())
+        }
+
+        do {
+            let value = StringIntDoubleBool.double(9.8)
+
+            XCTAssertNoThrow(try value.requireDouble())
+            XCTAssertThrowsError(try value.requireBool())
+
+            XCTAssertNoThrow(try Optional(value).requireDouble())
+            XCTAssertThrowsError(try Optional(value).requireBool())
+        }
+
+        do {
+            let value = StringIntDoubleBool.bool(false)
+
+            XCTAssertNoThrow(try value.requireBool())
+            XCTAssertThrowsError(try value.requireString())
+
+            XCTAssertNoThrow(try Optional(value).requireBool())
+            XCTAssertThrowsError(try Optional(value).requireString())
+        }
+    }
+
     func testCollectionContainsAnything() throws {
         let array1: [String]? = nil
         XCTAssertEqual(array1.containsAnything, false)

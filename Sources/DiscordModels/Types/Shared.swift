@@ -8,6 +8,18 @@ import Foundation
 
 /// To dynamically decode/encode String or Int or Double or Bool.
 public enum StringIntDoubleBool: Sendable, Codable {
+
+    public enum Error: Swift.Error, CustomStringConvertible {
+        case valueIsNotOfType(Any.Type)
+
+        public var description: String {
+            switch self {
+            case let .valueIsNotOfType(type):
+                return "StringIntDoubleBool.Error.valueIsNotOfType(\(String(describing: type)))"
+            }
+        }
+    }
+
     case string(String)
     case int(Int)
     case double(Double)
@@ -19,6 +31,42 @@ public enum StringIntDoubleBool: Sendable, Codable {
         case .int(let int): return "\(int)"
         case .double(let double): return String(format: "%.2f", double)
         case .bool(let bool): return "\(bool)"
+        }
+    }
+
+    /// Requires a `String` or throws `StringIntDoubleBool.Error`.
+    @inlinable
+    public func requireString() throws -> String {
+        switch self {
+        case .string(let string): return string
+        default: throw Error.valueIsNotOfType(String.self)
+        }
+    }
+
+    /// Requires a `Int` or throws `StringIntDoubleBool.Error`.
+    @inlinable
+    public func requireInt() throws -> Int {
+        switch self {
+        case .int(let int): return int
+        default: throw Error.valueIsNotOfType(Int.self)
+        }
+    }
+
+    /// Requires a `Double` or throws `StringIntDoubleBool.Error`.
+    @inlinable
+    public func requireDouble() throws -> Double {
+        switch self {
+        case .double(let double): return double
+        default: throw Error.valueIsNotOfType(Double.self)
+        }
+    }
+
+    /// Requires a `Bool` or throws `StringIntDoubleBool.Error`.
+    @inlinable
+    public func requireBool() throws -> Bool {
+        switch self {
+        case .bool(let bool): return bool
+        default: throw Error.valueIsNotOfType(Bool.self)
         }
     }
     
@@ -47,6 +95,44 @@ public enum StringIntDoubleBool: Sendable, Codable {
             try container.encode(double)
         case let .bool(bool):
             try container.encode(bool)
+        }
+    }
+}
+
+extension Optional<StringIntDoubleBool> {
+    /// Requires a `String` or throws `StringIntDoubleBool.Error`.
+    @inlinable
+    public func requireString() throws -> String {
+        switch self {
+        case .string(let string): return string
+        default: throw StringIntDoubleBool.Error.valueIsNotOfType(String.self)
+        }
+    }
+
+    /// Requires a `Int` or throws `StringIntDoubleBool.Error`.
+    @inlinable
+    public func requireInt() throws -> Int {
+        switch self {
+        case .int(let int): return int
+        default: throw StringIntDoubleBool.Error.valueIsNotOfType(Int.self)
+        }
+    }
+
+    /// Requires a `Double` or throws `StringIntDoubleBool.Error`.
+    @inlinable
+    public func requireDouble() throws -> Double {
+        switch self {
+        case .double(let double): return double
+        default: throw StringIntDoubleBool.Error.valueIsNotOfType(Double.self)
+        }
+    }
+
+    /// Requires a `Bool` or throws `StringIntDoubleBool.Error`.
+    @inlinable
+    public func requireBool() throws -> Bool {
+        switch self {
+        case .bool(let bool): return bool
+        default: throw StringIntDoubleBool.Error.valueIsNotOfType(Bool.self)
         }
     }
 }
