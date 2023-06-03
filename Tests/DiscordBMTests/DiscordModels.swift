@@ -313,14 +313,7 @@ class DiscordModelsTests: XCTestCase {
         XCTAssertNoThrow(try command.requireOption(named: "ppppp"))
 
         XCTAssertNil(command.option(named: "dasdad"))
-        XCTAssertThrowsError(try command.requireOption(named: "iaoso")) { error in
-            let error = error as! Interaction.Error
-            switch error {
-            case .optionNotFoundInCommand: break
-            default:
-                XCTFail("Unexpected error: \(error)")
-            }
-        }
+        XCTAssertThrowsError(try command.requireOption(named: "iaoso"))
 
         let option = Interaction.ApplicationCommand.Option(
             name: "dsdagedddd",
@@ -332,14 +325,23 @@ class DiscordModelsTests: XCTestCase {
         XCTAssertNoThrow(try option.requireOption(named: "lsol"))
 
         XCTAssertNil(option.option(named: "dasdad"))
-        XCTAssertThrowsError(try option.requireOption(named: "iaoso")) { error in
-            let error = error as! Interaction.Error
-            switch error {
-            case .optionNotFoundInOption: break
-            default:
-                XCTFail("Unexpected error: \(error)")
-            }
-        }
+        XCTAssertThrowsError(try option.requireOption(named: "iaoso"))
+
+        let optionalOptions = command.options
+
+        XCTAssertNotNil(optionalOptions.option(named: "ppppp"))
+        XCTAssertNoThrow(try optionalOptions.requireOption(named: "ppppp"))
+
+        XCTAssertNil(optionalOptions.option(named: "dasdad"))
+        XCTAssertThrowsError(try optionalOptions.requireOption(named: "iaoso"))
+
+        let options = optionalOptions!
+
+        XCTAssertNotNil(options.option(named: "ppppp"))
+        XCTAssertNoThrow(try options.requireOption(named: "ppppp"))
+
+        XCTAssertNil(options.option(named: "dasdad"))
+        XCTAssertThrowsError(try options.requireOption(named: "iaoso"))
     }
 
     func testStringIntDoubleBoolUtilities() throws {

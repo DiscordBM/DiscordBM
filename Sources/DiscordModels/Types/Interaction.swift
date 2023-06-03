@@ -6,6 +6,7 @@ public struct Interaction: Sendable, Codable {
     public enum Error: Swift.Error, CustomStringConvertible {
         case optionNotFoundInCommand(name: String, command: ApplicationCommand)
         case optionNotFoundInOption(name: String, parentOption: ApplicationCommand.Option)
+        case optionNotFoundInOptions(name: String, options: [ApplicationCommand.Option]?)
 
         public var description: String {
             switch self {
@@ -13,6 +14,8 @@ public struct Interaction: Sendable, Codable {
                 return "Interaction.Error.optionNotFoundInCommand(name: \(name), command: \(command))"
             case let .optionNotFoundInOption(name, parentOption):
                 return "Interaction.Error.optionNotFoundInOption(name: \(name), parentOption: \(parentOption))"
+            case let .optionNotFoundInOptions(name, options):
+                return "Interaction.Error.optionNotFoundInOption(name: \(name), options: \(String(describing: options)))"
             }
         }
     }
@@ -288,6 +291,42 @@ public struct Interaction: Sendable, Codable {
         try container.encodeIfPresent(self.guild_locale, forKey: .guild_locale)
         try container.encodeIfPresent(self.app_permissions, forKey: .app_permissions)
         try container.encodeIfPresent(self.entitlement_sku_ids, forKey: .entitlement_sku_ids)
+    }
+}
+
+extension Array<Interaction.ApplicationCommand.Option> {
+    /// Returns the first option with the `name`, or nil.
+    @inlinable
+    public func option(named name: String) -> Interaction.ApplicationCommand.Option? {
+        self.first(where: { $0.name == name })
+    }
+
+    /// Returns the first option with the `name`, or throws `Interaction.Error`.
+    @inlinable
+    public func requireOption(named name: String) throws -> Interaction.ApplicationCommand.Option {
+        if let option = self.first(where: { $0.name == name }) {
+            return option
+        } else {
+            throw Interaction.Error.optionNotFoundInOptions(name: name, options: self)
+        }
+    }
+}
+
+extension Optional<Array<Interaction.ApplicationCommand.Option>> {
+    /// Returns the first option with the `name`, or nil.
+    @inlinable
+    public func option(named name: String) -> Interaction.ApplicationCommand.Option? {
+        self?.first(where: { $0.name == name })
+    }
+
+    /// Returns the first option with the `name`, or throws `Interaction.Error`.
+    @inlinable
+    public func requireOption(named name: String) throws -> Interaction.ApplicationCommand.Option {
+        if let option = self?.first(where: { $0.name == name }) {
+            return option
+        } else {
+            throw Interaction.Error.optionNotFoundInOptions(name: name, options: self)
+        }
     }
 }
 
