@@ -10,12 +10,12 @@ import Foundation
 public enum StringIntDoubleBool: Sendable, Codable {
 
     public enum Error: Swift.Error, CustomStringConvertible {
-        case valueIsNotOfType(Any.Type)
+        case valueIsNotOfType(Any.Type, value: StringIntDoubleBool)
 
         public var description: String {
             switch self {
-            case let .valueIsNotOfType(type):
-                return "StringIntDoubleBool.Error.valueIsNotOfType(\(String(describing: type)))"
+            case let .valueIsNotOfType(type, value):
+                return "StringIntDoubleBool.Error.valueIsNotOfType(\(String(describing: type)), value: \(value))"
             }
         }
     }
@@ -39,7 +39,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
     public func requireString() throws -> String {
         switch self {
         case .string(let string): return string
-        default: throw Error.valueIsNotOfType(String.self)
+        default: throw Error.valueIsNotOfType(String.self, value: self)
         }
     }
 
@@ -48,7 +48,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
     public func requireInt() throws -> Int {
         switch self {
         case .int(let int): return int
-        default: throw Error.valueIsNotOfType(Int.self)
+        default: throw Error.valueIsNotOfType(Int.self, value: self)
         }
     }
 
@@ -57,7 +57,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
     public func requireDouble() throws -> Double {
         switch self {
         case .double(let double): return double
-        default: throw Error.valueIsNotOfType(Double.self)
+        default: throw Error.valueIsNotOfType(Double.self, value: self)
         }
     }
 
@@ -66,7 +66,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
     public func requireBool() throws -> Bool {
         switch self {
         case .bool(let bool): return bool
-        default: throw Error.valueIsNotOfType(Bool.self)
+        default: throw Error.valueIsNotOfType(Bool.self, value: self)
         }
     }
     
