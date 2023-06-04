@@ -1,4 +1,4 @@
-name: tests
+name: integration tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
