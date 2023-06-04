@@ -78,11 +78,11 @@ See the [GatewayConnection tests](https://github.com/DiscordBM/DiscordBM/blob/ma
 import DiscordBM
 import Vapor
 
-let app: Application = <#Your Vapor Application#>
+let app: Application = Your_Vapor_Application
 let bot = await BotGatewayManager(
     eventLoopGroup: app.eventLoopGroup,
     httpClient: app.http.client.shared,
-    token: <#Your Bot Token#>,
+    token: Your_Bot_Token,
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
         activities: [.init(name: "Fortnite", type: .game)],
@@ -221,10 +221,10 @@ struct EventHandler: GatewayEventHandler {
     let client: any DiscordClient
     let logger = Logger(label: "EventHandler")
 
-    /// Handle Interactions. 
+    /// Handle Interactions.
     func onInteractionCreate(_ interaction: Interaction) async {
         do {
-            /// You only have 3 second to respond, so it's better to send 
+            /// You only have 3 second to respond, so it's better to send
             /// the response right away, and edit the response later.
             /// This will show a loading indicator to users.
             try await client.createInteractionResponse(
@@ -291,21 +291,28 @@ struct EventHandler: GatewayEventHandler {
                         ).guardSuccess()
                     }
                 case .link:
-                    if let subcommandOption = applicationCommand.options?.first,
-                       let subcommand = LinkSubCommand(rawValue: subcommandOption.name),
-                       let id = subcommandOption.options?.first?.value?.asString {
-                        let name = subcommand.rawValue.capitalized
-                        try await client.updateOriginalInteractionResponse(
-                            token: interaction.token,
-                            payload: Payloads.EditWebhookMessage(
-                                content: "Hi, did you wante me to link your accounts?",
-                                embeds: [.init(
-                                    description: "Will link a \(name) account with id '\(id)'",
-                                    color: .yellow
-                                )]
-                            )
-                        ).guardSuccess()
-                    }
+                    /// `DiscordBM` has some "require" functions for easier unwrapping of
+                    /// application commands. These "require" functions will either give you
+                    /// what you want, or throw an error.
+                    /// Some examples are `requireValue()` that unwraps optional values, or
+                    /// `requireString()` that gives you the string value of a command option.
+                    let subcommandOption = try (applicationCommand.options?.first).requireValue()
+                    let subcommandName = subcommandOption.name
+                    let subcommand = try LinkSubCommand(rawValue: subcommandName).requireValue()
+
+                    let id = try (subcommandOption.options?.first).requireValue().requireString()
+                    let name = subcommand.rawValue.capitalized
+
+                    try await client.updateOriginalInteractionResponse(
+                        token: interaction.token,
+                        payload: Payloads.EditWebhookMessage(
+                            content: "Hi, did you wanted me to link your accounts?",
+                            embeds: [.init(
+                                description: "Will link a \(name) account with id '\(id)'",
+                                color: .yellow
+                            )]
+                        )
+                    ).guardSuccess()
                 case .none: break
                 }
             default: break
