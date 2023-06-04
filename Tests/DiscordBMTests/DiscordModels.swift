@@ -337,7 +337,7 @@ class DiscordModelsTests: XCTestCase {
 
         let actionsRows: [Interaction.ActionRow] = [
             .init(components: [
-                .button(try .init(style: .primary, label: "lsofm", custom_id: "lcmjf"))
+                .button(.init(style: .primary, label: "lsofm", custom_id: "lcmjf"))
             ])
         ]
 
@@ -365,7 +365,7 @@ class DiscordModelsTests: XCTestCase {
 
         do {
             let component: Interaction.ActionRow.Component = .button(
-                try! .init(label: "mmm", url: "https://fake.com")
+                .init(label: "mmm", url: "https://fake.com")
             )
 
             XCTAssertNoThrow(try component.requireButton())

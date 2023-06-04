@@ -12,8 +12,6 @@ public struct Interaction: Sendable, Codable {
         case componentNotFoundInActionRow(customId: String, actionRow: ActionRow)
         case componentNotFoundInActionRows(customId: String, actionRows: [ActionRow])
 
-        case actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired
-
         case componentWasNotOfKind(kind: String, component: ActionRow.Component)
 
         public var description: String {
@@ -30,8 +28,6 @@ public struct Interaction: Sendable, Codable {
                 return "Interaction.Error.componentNotFoundInActionRow(customId: \(customId), actionRow: \(actionRow))"
             case let .componentNotFoundInActionRows(customId, actionRows):
                 return "Interaction.Error.componentNotFoundInActionRows(customId: \(customId), actionRows: \(actionRows))"
-            case .actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired:
-                return "Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired"
             case let .componentWasNotOfKind(kind, component):
                 return "Interaction.Error.componentWasNotOfKind(kind: \(kind), component: \(component))"
             }
@@ -474,14 +470,41 @@ extension Interaction {
             public var disabled: Bool?
 
             /// Makes a non-link button.
-            /// At least one of `label` and `emoji` is required.
-            ///
-            /// - Throws: `Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired`
-            /// if both `label` and `emoji` are `nil`.
-            public init(style: NonLinkStyle, label: String? = nil, emoji: Emoji? = nil, custom_id: String, disabled: Bool? = nil) throws {
-                if label == nil && emoji == nil {
-                    throw Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired
-                }
+            public init(
+                style: NonLinkStyle,
+                label: String,
+                custom_id: String,
+                disabled: Bool? = nil
+            ) {
+                self.style = style.toStyle()
+                self.label = label
+                self.emoji = nil
+                self.custom_id = custom_id
+                self.disabled = disabled
+            }
+
+            /// Makes a non-link button.
+            public init(
+                style: NonLinkStyle,
+                emoji: Emoji,
+                custom_id: String,
+                disabled: Bool? = nil
+            ) {
+                self.style = style.toStyle()
+                self.label = nil
+                self.emoji = emoji
+                self.custom_id = custom_id
+                self.disabled = disabled
+            }
+
+            /// Makes a non-link button.
+            public init(
+                style: NonLinkStyle,
+                label: String,
+                emoji: Emoji,
+                custom_id: String,
+                disabled: Bool? = nil
+            ) {
                 self.style = style.toStyle()
                 self.label = label
                 self.emoji = emoji
@@ -490,14 +513,38 @@ extension Interaction {
             }
 
             /// Makes a link button.
-            /// At least one of `label` and `emoji` is required.
-            ///
-            /// - Throws: `Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired`
-            /// if both `label` and `emoji` are `nil`.
-            public init(label: String? = nil, emoji: Emoji? = nil, url: String, disabled: Bool? = nil) throws {
-                if label == nil && emoji == nil {
-                    throw Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired
-                }
+            public init(
+                label: String,
+                url: String,
+                disabled: Bool? = nil
+            ) {
+                self.style = .link
+                self.label = label
+                self.emoji = nil
+                self.url = url
+                self.disabled = disabled
+            }
+
+            /// Makes a link button.
+            public init(
+                emoji: Emoji,
+                url: String,
+                disabled: Bool? = nil
+            ) {
+                self.style = .link
+                self.label = nil
+                self.emoji = emoji
+                self.url = url
+                self.disabled = disabled
+            }
+
+            /// Makes a link button.
+            public init(
+                label: String,
+                emoji: Emoji,
+                url: String,
+                disabled: Bool? = nil
+            ) {
                 self.style = .link
                 self.label = label
                 self.emoji = emoji
