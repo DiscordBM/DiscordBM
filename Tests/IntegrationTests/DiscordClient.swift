@@ -912,6 +912,21 @@ class DiscordClientTests: XCTestCase {
     }
 
     func testGuildEmojis() async throws {
+        /// Clean-up in the test failed last time
+        let leftOverEmojis = try await client
+            .listGuildEmojis(guildId: Constants.guildId)
+            .decode()
+            .filter({ $0.name?.hasPrefix("testemoji") == true })
+        for emoji in leftOverEmojis {
+            let id = try XCTUnwrap(emoji.id)
+            try await client.deleteGuildEmoji(
+                guildId: Constants.guildId,
+                emojiId: id,
+                reason: "Clean-up"
+            ).guardSuccess()
+        }
+
+        /// Create Emoji
         let image = ByteBuffer(data: resource(name: "1kb.png"))
         let emoji = try await client.createGuildEmoji(
             guildId: Constants.guildId,
@@ -925,6 +940,7 @@ class DiscordClientTests: XCTestCase {
 
         let emojiId = try XCTUnwrap(emoji.id)
 
+        /// Get Guild Emojis
         let emojis = try await client
             .listGuildEmojis(guildId: Constants.guildId)
             .decode()
@@ -933,6 +949,7 @@ class DiscordClientTests: XCTestCase {
         let firstEmoji = try XCTUnwrap(emojis.last)
         XCTAssertEqual(firstEmoji.id, emojiId)
 
+        /// Update Emoji
         let newName = "testemojinew"
         let updateEmoji = try await client.updateGuildEmoji(
             guildId: Constants.guildId,
@@ -944,6 +961,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(updateEmoji.id, emojiId)
         XCTAssertEqual(updateEmoji.name, newName)
 
+        /// Get One Guild Emoji
         let getEmoji = try await client.getGuildEmoji(
             guildId: Constants.guildId,
             emojiId: emojiId
@@ -952,6 +970,7 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(getEmoji.id, emojiId)
         XCTAssertEqual(getEmoji.name, newName)
 
+        /// Delete Emoji
         try await client.deleteGuildEmoji(
             guildId: Constants.guildId,
             emojiId: emojiId,
