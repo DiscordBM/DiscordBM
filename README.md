@@ -4,6 +4,9 @@
     <a href="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml">
         <img src="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
     </a>
+    <a href="https://github.com/DiscordBM/DiscordBM/actions/workflows/integration-tests.yml">
+        <img src="https://github.com/DiscordBM/DiscordBM/actions/workflows/integration-tests.yml/badge.svg" alt="Integration Tests Badge">
+    </a>
     <a href="https://codecov.io/gh/DiscordBM/DiscordBM">
         <img src="https://codecov.io/gh/DiscordBM/DiscordBM/branch/main/graph/badge.svg?token=P4DYX2FWYT" alt="Codecov">
     </a>

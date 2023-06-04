@@ -1,0 +1,26 @@
+name: tests
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+on:
+  pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
+  push: { branches: [ main ] }
+
+jobs:
+  tests:
+    if: ${{ github.event_name == 'push' || (github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id && !github.event.pull_request.draft) }}
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+    runs-on: ubuntu-latest
+    container: swift:5.8-jammy
+    steps:
+      - name: Check out package
+        uses: actions/checkout@v3
+      - name: Run tests
+        run: swift test --filter IntegrationTests --sanitize=thread --enable-code-coverage
+      - name: Upload code coverage
+        uses: vapor/swift-codecov-action@v0.2
+        with:
+          ignore_paths: '/Tests/|/Plugins/|/Sources/CZlib/'
+          cc_env_vars: 'SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH'
+          cc_fail_ci_if_error: false
