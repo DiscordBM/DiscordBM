@@ -487,7 +487,7 @@ class DiscordClientTests: XCTestCase {
     func testGuildWithCreatedGuild() async throws {
         /// Cleanup
         for guild in try await client.listOwnGuilds().decode() {
-            if let ownerId = guild.owner_id, ownerId != Constants.botId {
+            if guild.name?.hasPrefix("Test Guild") == true {
                 try await client.deleteGuild(id: guild.id).guardSuccess()
             }
         }
@@ -912,7 +912,7 @@ class DiscordClientTests: XCTestCase {
     }
 
     func testGuildEmojis() async throws {
-        /// Clean-up in the test failed last time
+        /// Cleanup in the test failed last time
         let leftOverEmojis = try await client
             .listGuildEmojis(guildId: Constants.guildId)
             .decode()
@@ -922,7 +922,7 @@ class DiscordClientTests: XCTestCase {
             try await client.deleteGuildEmoji(
                 guildId: Constants.guildId,
                 emojiId: id,
-                reason: "Clean-up"
+                reason: "Cleanup"
             ).guardSuccess()
         }
 
