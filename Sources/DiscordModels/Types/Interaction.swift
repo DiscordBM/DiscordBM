@@ -14,6 +14,8 @@ public struct Interaction: Sendable, Codable {
 
         case actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired
 
+        case componentWasNotOfKind(kind: String, component: ActionRow.Component)
+
         public var description: String {
             switch self {
             case let .optionNotFoundInCommand(name, command):
@@ -30,6 +32,8 @@ public struct Interaction: Sendable, Codable {
                 return "Interaction.Error.componentNotFoundInActionRows(customId: \(customId), actionRows: \(actionRows))"
             case .actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired:
                 return "Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired"
+            case let .componentWasNotOfKind(kind, component):
+                return "Interaction.Error.componentWasNotOfKind(kind: \(kind), component: \(component))"
             }
         }
     }
@@ -686,10 +690,94 @@ extension Interaction {
                     try selectMenu.encode(to: encoder)
                 }
             }
+
+            /// Returns the associated value if the component case is `button`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireButton() throws -> Button {
+                switch self {
+                case let .button(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "button", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `stringSelect`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireStringSelect() throws -> StringSelectMenu {
+                switch self {
+                case let .stringSelect(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "stringSelect", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `textInput`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireTextInput() throws -> TextInput {
+                switch self {
+                case let .textInput(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "textInput", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `userSelect`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireUserSelect() throws -> SelectMenu {
+                switch self {
+                case let .userSelect(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "userSelect", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `roleSelect`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireRoleSelect() throws -> SelectMenu {
+                switch self {
+                case let .roleSelect(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "roleSelect", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `mentionableSelect`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireMentionableSelect() throws -> SelectMenu {
+                switch self {
+                case let .mentionableSelect(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "mentionableSelect", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `channelSelect`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireChannelSelect() throws -> ChannelSelectMenu {
+                switch self {
+                case let .channelSelect(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "channelSelect", component: self)
+                }
+            }
         }
-        
+
         public var components: [Component]
-        
+
         public enum CodingError: Swift.Error, CustomStringConvertible {
             /// This component kind was not expected here. This is a library decoding issue, please report at: https://github.com/DiscordBM/DiscordBM/issues.
             case unexpectedComponentKind(Kind)
@@ -736,13 +824,13 @@ extension Interaction {
 
         /// Returns the component with the `customId`, or `nil`.
         @inlinable
-        public func component(withCustomId customId: String) -> Component? {
+        public func component(customId: String) -> Component? {
             self.components.first(where: { $0.customId == customId })
         }
 
         /// Returns the component with the `customId`, or throws `Interaction.Error`.
         @inlinable
-        public func requireComponent(withCustomId customId: String) throws -> Component {
+        public func requireComponent(customId: String) throws -> Component {
             if let component = self.components.first(where: { $0.customId == customId }) {
                 return component
             } else {
@@ -755,15 +843,13 @@ extension Interaction {
 extension Array<Interaction.ActionRow> {
     /// Returns the component with the `customId`, or `nil`.
     @inlinable
-    public func component(withCustomId customId: String) -> Interaction.ActionRow.Component? {
+    public func component(customId: String) -> Interaction.ActionRow.Component? {
         self.flatMap(\.components).first(where: { $0.customId == customId })
     }
 
     /// Returns the component with the `customId`, or throws `Interaction.Error`.
     @inlinable
-    public func requireComponent(
-        withCustomId customId: String
-    ) throws -> Interaction.ActionRow.Component {
+    public func requireComponent(customId: String) throws -> Interaction.ActionRow.Component {
         if let component = self.flatMap(\.components).first(where: { $0.customId == customId }) {
             return component
         } else {
@@ -778,15 +864,13 @@ extension Array<Interaction.ActionRow> {
 extension Array<Interaction.ActionRow.Component> {
     /// Returns the component with the `customId`, or `nil`.
     @inlinable
-    public func component(withCustomId customId: String) -> Interaction.ActionRow.Component? {
+    public func component(customId: String) -> Interaction.ActionRow.Component? {
         self.first(where: { $0.customId == customId })
     }
 
     /// Returns the component with the `customId`, or throws `Interaction.Error`.
     @inlinable
-    public func requireComponent(
-        withCustomId customId: String
-    ) throws -> Interaction.ActionRow.Component {
+    public func requireComponent(customId: String) throws -> Interaction.ActionRow.Component {
         if let component = self.first(where: { $0.customId == customId }) {
             return component
         } else {

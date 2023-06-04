@@ -341,27 +341,90 @@ class DiscordModelsTests: XCTestCase {
             ])
         ]
 
-        XCTAssertNotNil(actionsRows.component(withCustomId: "lcmjf"))
-        XCTAssertNoThrow(try actionsRows.requireComponent(withCustomId: "lcmjf"))
+        XCTAssertNotNil(actionsRows.component(customId: "lcmjf"))
+        XCTAssertNoThrow(try actionsRows.requireComponent(customId: "lcmjf"))
 
-        XCTAssertNil(actionsRows.component(withCustomId: "dafe"))
-        XCTAssertThrowsError(try actionsRows.requireComponent(withCustomId: "grwgwr"))
+        XCTAssertNil(actionsRows.component(customId: "dafe"))
+        XCTAssertThrowsError(try actionsRows.requireComponent(customId: "grwgwr"))
 
         let actionsRow = actionsRows[0]
 
-        XCTAssertNotNil(actionsRow.component(withCustomId: "lcmjf"))
-        XCTAssertNoThrow(try actionsRow.requireComponent(withCustomId: "lcmjf"))
+        XCTAssertNotNil(actionsRow.component(customId: "lcmjf"))
+        XCTAssertNoThrow(try actionsRow.requireComponent(customId: "lcmjf"))
 
-        XCTAssertNil(actionsRow.component(withCustomId: "dafe"))
-        XCTAssertThrowsError(try actionsRow.requireComponent(withCustomId: "grwgwr"))
+        XCTAssertNil(actionsRow.component(customId: "dafe"))
+        XCTAssertThrowsError(try actionsRow.requireComponent(customId: "grwgwr"))
 
         let components = actionsRows[0].components
 
-        XCTAssertNotNil(components.component(withCustomId: "lcmjf"))
-        XCTAssertNoThrow(try components.requireComponent(withCustomId: "lcmjf"))
+        XCTAssertNotNil(components.component(customId: "lcmjf"))
+        XCTAssertNoThrow(try components.requireComponent(customId: "lcmjf"))
 
-        XCTAssertNil(components.component(withCustomId: "dafe"))
-        XCTAssertThrowsError(try components.requireComponent(withCustomId: "grwgwr"))
+        XCTAssertNil(components.component(customId: "dafe"))
+        XCTAssertThrowsError(try components.requireComponent(customId: "grwgwr"))
+
+        do {
+            let component: Interaction.ActionRow.Component = .button(
+                try! .init(label: "mmm", url: "https://fake.com")
+            )
+
+            XCTAssertNoThrow(try component.requireButton())
+            XCTAssertThrowsError(try component.requireStringSelect())
+        }
+
+        do {
+            let component: Interaction.ActionRow.Component = .stringSelect(
+                .init(custom_id: "ooo", options: [])
+            )
+
+            XCTAssertNoThrow(try component.requireStringSelect())
+            XCTAssertThrowsError(try component.requireTextInput())
+        }
+
+        do {
+            let component: Interaction.ActionRow.Component = .textInput(
+                .init(custom_id: "qqq")
+            )
+
+            XCTAssertNoThrow(try component.requireTextInput())
+            XCTAssertThrowsError(try component.requireUserSelect())
+        }
+
+        do {
+            let component: Interaction.ActionRow.Component = .userSelect(
+                .init(custom_id: "iii")
+            )
+
+            XCTAssertNoThrow(try component.requireUserSelect())
+            XCTAssertThrowsError(try component.requireRoleSelect())
+        }
+
+        do {
+            let component: Interaction.ActionRow.Component = .roleSelect(
+                .init(custom_id: "lll")
+            )
+
+            XCTAssertNoThrow(try component.requireRoleSelect())
+            XCTAssertThrowsError(try component.requireMentionableSelect())
+        }
+
+        do {
+            let component: Interaction.ActionRow.Component = .mentionableSelect(
+                .init(custom_id: "uuewe")
+            )
+
+            XCTAssertNoThrow(try component.requireMentionableSelect())
+            XCTAssertThrowsError(try component.requireChannelSelect())
+        }
+
+        do {
+            let component: Interaction.ActionRow.Component = .channelSelect(
+                .init(custom_id: "cnajc")
+            )
+
+            XCTAssertNoThrow(try component.requireChannelSelect())
+            XCTAssertThrowsError(try component.requireButton())
+        }
     }
 
     func testStringIntDoubleBoolUtilities() throws {
