@@ -327,21 +327,41 @@ class DiscordModelsTests: XCTestCase {
         XCTAssertNil(option.option(named: "dasdad"))
         XCTAssertThrowsError(try option.requireOption(named: "iaoso"))
 
-        let optionalOptions = command.options
-
-        XCTAssertNotNil(optionalOptions.option(named: "ppppp"))
-        XCTAssertNoThrow(try optionalOptions.requireOption(named: "ppppp"))
-
-        XCTAssertNil(optionalOptions.option(named: "dasdad"))
-        XCTAssertThrowsError(try optionalOptions.requireOption(named: "iaoso"))
-
-        let options = optionalOptions!
+        let options = command.options!
 
         XCTAssertNotNil(options.option(named: "ppppp"))
         XCTAssertNoThrow(try options.requireOption(named: "ppppp"))
 
         XCTAssertNil(options.option(named: "dasdad"))
         XCTAssertThrowsError(try options.requireOption(named: "iaoso"))
+
+        let actionsRows: [Interaction.ActionRow] = [
+            .init(components: [
+                .button(try .init(style: .primary, label: "lsofm", custom_id: "lcmjf"))
+            ])
+        ]
+
+        XCTAssertNotNil(actionsRows.component(withCustomId: "lcmjf"))
+        XCTAssertNoThrow(try actionsRows.requireComponent(withCustomId: "lcmjf"))
+
+        XCTAssertNil(actionsRows.component(withCustomId: "dafe"))
+        XCTAssertThrowsError(try actionsRows.requireComponent(withCustomId: "grwgwr"))
+
+        let actionsRow = actionsRows[0]
+
+        XCTAssertNotNil(actionsRow.component(withCustomId: "lcmjf"))
+        XCTAssertNoThrow(try actionsRow.requireComponent(withCustomId: "lcmjf"))
+
+        XCTAssertNil(actionsRow.component(withCustomId: "dafe"))
+        XCTAssertThrowsError(try actionsRow.requireComponent(withCustomId: "grwgwr"))
+
+        let components = actionsRows[0].components
+
+        XCTAssertNotNil(components.component(withCustomId: "lcmjf"))
+        XCTAssertNoThrow(try components.requireComponent(withCustomId: "lcmjf"))
+
+        XCTAssertNil(components.component(withCustomId: "dafe"))
+        XCTAssertThrowsError(try components.requireComponent(withCustomId: "grwgwr"))
     }
 
     func testStringIntDoubleBoolUtilities() throws {
@@ -355,9 +375,6 @@ class DiscordModelsTests: XCTestCase {
             XCTAssertNoThrow(try value.requireString())
             XCTAssertThrowsError(try value.requireInt())
 
-            XCTAssertNoThrow(try Optional(value).requireString())
-            XCTAssertThrowsError(try Optional(value).requireInt())
-
             XCTAssertNoThrow(try option(value).requireString())
             XCTAssertThrowsError(try option(value).requireInt())
         }
@@ -367,9 +384,6 @@ class DiscordModelsTests: XCTestCase {
 
             XCTAssertNoThrow(try value.requireInt())
             XCTAssertThrowsError(try value.requireDouble())
-
-            XCTAssertNoThrow(try Optional(value).requireInt())
-            XCTAssertThrowsError(try Optional(value).requireDouble())
 
             XCTAssertNoThrow(try option(value).requireInt())
             XCTAssertThrowsError(try option(value).requireDouble())
@@ -381,9 +395,6 @@ class DiscordModelsTests: XCTestCase {
             XCTAssertNoThrow(try value.requireDouble())
             XCTAssertThrowsError(try value.requireBool())
 
-            XCTAssertNoThrow(try Optional(value).requireDouble())
-            XCTAssertThrowsError(try Optional(value).requireBool())
-
             XCTAssertNoThrow(try option(value).requireDouble())
             XCTAssertThrowsError(try option(value).requireBool())
         }
@@ -393,9 +404,6 @@ class DiscordModelsTests: XCTestCase {
 
             XCTAssertNoThrow(try value.requireBool())
             XCTAssertThrowsError(try value.requireString())
-
-            XCTAssertNoThrow(try Optional(value).requireBool())
-            XCTAssertThrowsError(try Optional(value).requireString())
 
             XCTAssertNoThrow(try option(value).requireBool())
             XCTAssertThrowsError(try option(value).requireString())

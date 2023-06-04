@@ -8,6 +8,12 @@ public struct Interaction: Sendable, Codable {
         case optionNotFoundInOption(name: String, parentOption: ApplicationCommand.Option)
         case optionNotFoundInOptions(name: String, options: [ApplicationCommand.Option]?)
 
+        case componentNotFoundInComponents(customId: String, components: [ActionRow.Component])
+        case componentNotFoundInActionRow(customId: String, actionRow: ActionRow)
+        case componentNotFoundInActionRows(customId: String, actionRows: [ActionRow])
+
+        case actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired
+
         public var description: String {
             switch self {
             case let .optionNotFoundInCommand(name, command):
@@ -16,6 +22,14 @@ public struct Interaction: Sendable, Codable {
                 return "Interaction.Error.optionNotFoundInOption(name: \(name), parentOption: \(parentOption))"
             case let .optionNotFoundInOptions(name, options):
                 return "Interaction.Error.optionNotFoundInOption(name: \(name), options: \(String(describing: options)))"
+            case let .componentNotFoundInComponents(customId, components):
+                return "Interaction.Error.componentNotFoundInComponents(customId: \(customId), components: \(components))"
+            case let .componentNotFoundInActionRow(customId, actionRow):
+                return "Interaction.Error.componentNotFoundInActionRow(customId: \(customId), actionRow: \(actionRow))"
+            case let .componentNotFoundInActionRows(customId, actionRows):
+                return "Interaction.Error.componentNotFoundInActionRows(customId: \(customId), actionRows: \(actionRows))"
+            case .actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired:
+                return "Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired"
             }
         }
     }
@@ -119,40 +133,74 @@ public struct Interaction: Sendable, Codable {
             public var options: [Option]?
             public var focused: Bool?
 
-            /// Requires a `String` value or throws `StringIntDoubleBool.Error`.
+            /// Requires a `String` value or throws `StringIntDoubleBool.Error`/`OptionalError`.
             @inlinable
-            public func requireString() throws -> String {
-                try self.value.requireString()
+            public func requireString(
+                file: String = #file,
+                function: String = #function,
+                line: UInt = #line
+            ) throws -> String {
+                try self.value
+                    .requireValue(file: file, function: function, line: line)
+                    .requireString()
             }
 
-            /// Requires a `Int` value or throws `StringIntDoubleBool.Error`.
+            /// Requires a `Int` value or throws `StringIntDoubleBool.Error`/`OptionalError`.
             @inlinable
-            public func requireInt() throws -> Int {
-                try self.value.requireInt()
+            public func requireInt(
+                file: String = #file,
+                function: String = #function,
+                line: UInt = #line
+            ) throws -> Int {
+                try self.value
+                    .requireValue(file: file, function: function, line: line)
+                    .requireInt()
             }
 
-            /// Requires a `Double` value or throws `StringIntDoubleBool.Error`.
+            /// Requires a `Double` value or throws `StringIntDoubleBool.Error`/`OptionalError`.
             @inlinable
-            public func requireDouble() throws -> Double {
-                try self.value.requireDouble()
+            public func requireDouble(
+                file: String = #file,
+                function: String = #function,
+                line: UInt = #line
+            ) throws -> Double {
+                try self.value
+                    .requireValue(file: file, function: function, line: line)
+                    .requireDouble()
             }
 
-            /// Requires a `Bool` value or throws `StringIntDoubleBool.Error`.
+            /// Requires a `Bool` value or throws `StringIntDoubleBool.Error`/`OptionalError`.
             @inlinable
-            public func requireBool() throws -> Bool {
-                try self.value.requireBool()
+            public func requireBool(
+                file: String = #file,
+                function: String = #function,
+                line: UInt = #line
+            ) throws -> Bool {
+                try self.value
+                    .requireValue(file: file, function: function, line: line)
+                    .requireBool()
             }
 
-            /// Returns the first option with the `name`, or nil.
+            /// Returns the option with the `name`, or `nil`.
             @inlinable
             public func option(named name: String) -> Option? {
                 self.options?.first(where: { $0.name == name })
             }
 
-            /// Returns the first option with the `name`, or throws `Interaction.Error`.
+            /// Returns the option with the `name`, or throws `Interaction.Error`/`OptionalError`.
             @inlinable
-            public func requireOption(named name: String) throws -> Option {
-                if let option = self.options?.first(where: { $0.name == name }) {
+            public func requireOption(
+                named name: String,
+                file: String = #file,
+                function: String = #function,
+                line: UInt = #line
+            ) throws -> Option {
+                let options = try self.options.requireValue(
+                    file: file,
+                    function: function,
+                    line: line
+                )
+                if let option = options.first(where: { $0.name == name }) {
                     return option
                 } else {
                     throw Error.optionNotFoundInOption(name: name, parentOption: self)
@@ -168,16 +216,26 @@ public struct Interaction: Sendable, Codable {
         public var guild_id: GuildSnowflake?
         public var target_id: AnySnowflake?
 
-        /// Returns the first option with the `name`, or nil.
+        /// Returns the option with the `name`, or `nil`.
         @inlinable
         public func option(named name: String) -> Option? {
             self.options?.first(where: { $0.name == name })
         }
 
-        /// Returns the first option with the `name`, or throws `Interaction.Error`.
+        /// Returns the option with the `name`, or throws `Interaction.Error`/`OptionalError`.
         @inlinable
-        public func requireOption(named name: String) throws -> Option {
-            if let option = self.options?.first(where: { $0.name == name }) {
+        public func requireOption(
+            named name: String,
+            file: String = #file,
+            function: String = #function,
+            line: UInt = #line
+        ) throws -> Option {
+            let options = try self.options.requireValue(
+                file: file,
+                function: function,
+                line: line
+            )
+            if let option = options.first(where: { $0.name == name }) {
                 return option
             } else {
                 throw Error.optionNotFoundInCommand(name: name, command: self)
@@ -319,34 +377,16 @@ public struct Interaction: Sendable, Codable {
 }
 
 extension Array<Interaction.ApplicationCommand.Option> {
-    /// Returns the first option with the `name`, or nil.
+    /// Returns the option with the `name`, or `nil`.
     @inlinable
     public func option(named name: String) -> Interaction.ApplicationCommand.Option? {
         self.first(where: { $0.name == name })
     }
 
-    /// Returns the first option with the `name`, or throws `Interaction.Error`.
+    /// Returns the option with the `name`, or throws `Interaction.Error`.
     @inlinable
     public func requireOption(named name: String) throws -> Interaction.ApplicationCommand.Option {
         if let option = self.first(where: { $0.name == name }) {
-            return option
-        } else {
-            throw Interaction.Error.optionNotFoundInOptions(name: name, options: self)
-        }
-    }
-}
-
-extension Optional<Array<Interaction.ApplicationCommand.Option>> {
-    /// Returns the first option with the `name`, or nil.
-    @inlinable
-    public func option(named name: String) -> Interaction.ApplicationCommand.Option? {
-        self?.first(where: { $0.name == name })
-    }
-
-    /// Returns the first option with the `name`, or throws `Interaction.Error`.
-    @inlinable
-    public func requireOption(named name: String) throws -> Interaction.ApplicationCommand.Option {
-        if let option = self?.first(where: { $0.name == name }) {
             return option
         } else {
             throw Interaction.Error.optionNotFoundInOptions(name: name, options: self)
@@ -369,7 +409,7 @@ extension Interaction {
     /// Anything inside `ActionRow` must not be used on its own for decoding/encoding purposes.
     /// For example you always need to use `[ActionRow]` instead of `[ActionRow.Component]`.
     public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral {
-        
+
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
         public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case actionRow = 1
@@ -431,7 +471,13 @@ extension Interaction {
 
             /// Makes a non-link button.
             /// At least one of `label` and `emoji` is required.
-            public init(style: NonLinkStyle, label: String? = nil, emoji: Emoji? = nil, custom_id: String, disabled: Bool? = nil) {
+            ///
+            /// - Throws: `Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired`
+            /// if both `label` and `emoji` are `nil`.
+            public init(style: NonLinkStyle, label: String? = nil, emoji: Emoji? = nil, custom_id: String, disabled: Bool? = nil) throws {
+                if label == nil && emoji == nil {
+                    throw Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired
+                }
                 self.style = style.toStyle()
                 self.label = label
                 self.emoji = emoji
@@ -441,7 +487,13 @@ extension Interaction {
 
             /// Makes a link button.
             /// At least one of `label` and `emoji` is required.
-            public init(label: String? = nil, emoji: Emoji? = nil, url: String, disabled: Bool? = nil) {
+            ///
+            /// - Throws: `Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired`
+            /// if both `label` and `emoji` are `nil`.
+            public init(label: String? = nil, emoji: Emoji? = nil, url: String, disabled: Bool? = nil) throws {
+                if label == nil && emoji == nil {
+                    throw Interaction.Error.actionRowButtonAtLeastOneOfLabelAndEmojiIsRequired
+                }
                 self.style = .link
                 self.label = label
                 self.emoji = emoji
@@ -680,6 +732,68 @@ extension Interaction {
 
         public init(arrayLiteral elements: Component...) {
             self.components = elements
+        }
+
+        /// Returns the component with the `customId`, or `nil`.
+        @inlinable
+        public func component(withCustomId customId: String) -> Component? {
+            self.components.first(where: { $0.customId == customId })
+        }
+
+        /// Returns the component with the `customId`, or throws `Interaction.Error`.
+        @inlinable
+        public func requireComponent(withCustomId customId: String) throws -> Component {
+            if let component = self.components.first(where: { $0.customId == customId }) {
+                return component
+            } else {
+                throw Error.componentNotFoundInActionRow(customId: customId, actionRow: self)
+            }
+        }
+    }
+}
+
+extension Array<Interaction.ActionRow> {
+    /// Returns the component with the `customId`, or `nil`.
+    @inlinable
+    public func component(withCustomId customId: String) -> Interaction.ActionRow.Component? {
+        self.flatMap(\.components).first(where: { $0.customId == customId })
+    }
+
+    /// Returns the component with the `customId`, or throws `Interaction.Error`.
+    @inlinable
+    public func requireComponent(
+        withCustomId customId: String
+    ) throws -> Interaction.ActionRow.Component {
+        if let component = self.flatMap(\.components).first(where: { $0.customId == customId }) {
+            return component
+        } else {
+            throw Interaction.Error.componentNotFoundInActionRows(
+                customId: customId,
+                actionRows: self
+            )
+        }
+    }
+}
+
+extension Array<Interaction.ActionRow.Component> {
+    /// Returns the component with the `customId`, or `nil`.
+    @inlinable
+    public func component(withCustomId customId: String) -> Interaction.ActionRow.Component? {
+        self.first(where: { $0.customId == customId })
+    }
+
+    /// Returns the component with the `customId`, or throws `Interaction.Error`.
+    @inlinable
+    public func requireComponent(
+        withCustomId customId: String
+    ) throws -> Interaction.ActionRow.Component {
+        if let component = self.first(where: { $0.customId == customId }) {
+            return component
+        } else {
+            throw Interaction.Error.componentNotFoundInComponents(
+                customId: customId,
+                components: self
+            )
         }
     }
 }

@@ -99,44 +99,6 @@ public enum StringIntDoubleBool: Sendable, Codable {
     }
 }
 
-extension Optional<StringIntDoubleBool> {
-    /// Requires a `String` or throws `StringIntDoubleBool.Error`.
-    @inlinable
-    public func requireString() throws -> String {
-        switch self {
-        case .string(let string): return string
-        default: throw StringIntDoubleBool.Error.valueIsNotOfType(String.self)
-        }
-    }
-
-    /// Requires a `Int` or throws `StringIntDoubleBool.Error`.
-    @inlinable
-    public func requireInt() throws -> Int {
-        switch self {
-        case .int(let int): return int
-        default: throw StringIntDoubleBool.Error.valueIsNotOfType(Int.self)
-        }
-    }
-
-    /// Requires a `Double` or throws `StringIntDoubleBool.Error`.
-    @inlinable
-    public func requireDouble() throws -> Double {
-        switch self {
-        case .double(let double): return double
-        default: throw StringIntDoubleBool.Error.valueIsNotOfType(Double.self)
-        }
-    }
-
-    /// Requires a `Bool` or throws `StringIntDoubleBool.Error`.
-    @inlinable
-    public func requireBool() throws -> Bool {
-        switch self {
-        case .bool(let bool): return bool
-        default: throw StringIntDoubleBool.Error.valueIsNotOfType(Bool.self)
-        }
-    }
-}
-
 //MARK: - StringOrInt
 
 /// To dynamically decode/encode String or Int.
