@@ -81,11 +81,11 @@ See the [GatewayConnection tests](https://github.com/DiscordBM/DiscordBM/blob/ma
 import DiscordBM
 import Vapor
 
-let app: Application = Your_Vapor_Application
+let app: Application = <#Your Vapor Application#>
 let bot = await BotGatewayManager(
     eventLoopGroup: app.eventLoopGroup,
     httpClient: app.http.client.shared,
-    token: Your_Bot_Token,
+    token: <#Your Bot Token#>,
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
         activities: [.init(name: "Fortnite", type: .game)],
@@ -513,15 +513,6 @@ let escapedMessage = "Does this look bold to you?! \(escaped)"
 ```
 </details>
 
-### Discord Logger
-
-<details>
-  <summary> Click to expand </summary>
-
-`DiscordLogger` has been moved to https://github.com/DiscordBM/DiscordLogger
-
-</details>
-
 ### Discord Cache
 <details>
   <summary> Click to expand </summary>
@@ -551,7 +542,7 @@ if let aGuild = await cache.guilds[<#Guild ID#>] {
     print("Guild not found")
 }
 ```
-  
+
 </details>
 
 ### Checking Permissions & Roles
@@ -592,11 +583,24 @@ let hasRole = guild.userHasRole(
 
 </details>
 
+## Related Projects
+
+### Discord Logger
+
+<details>
+  <summary> Click to expand </summary>
+
+`DiscordLogger` enables you to send your logs to Discord with beautiful formatting and a lot of customization options.
+Read more about it at https://github.com/DiscordBM/DiscordLogger.
+
+</details>
+
 ### React-To-Role
 <details>
   <summary> Click to expand </summary>
 
-React-To-Role has been moved to https://github.com/DiscordBM/DiscordReactToRole
+React-To-Role helps you assign roles to members when they react to a message.
+Read more about it at https://github.com/DiscordBM/DiscordReactToRole.
 
 </details>
 
@@ -607,6 +611,39 @@ React-To-Role has been moved to https://github.com/DiscordBM/DiscordReactToRole
 `DiscordBM` comes with tools to make testing your app easier.   
 * You can type-erase your `BotGatewayManager`s using the `GatewayManager` protocol so you can override your gateway manager with a mocked implementation in tests.   
 * You can also do the same for `DefaultDiscordClient` and type-erase it using the `DiscordClient` protocol so you can provide a mocked implementation when testing.
+
+</details>
+
+## Implementation Details
+
+### Default Discord Client
+<details>
+  <summary> Click to expand </summary>
+
+These are some general implementation detail notes about the `DefaultDiscordClient`.   
+Generally, the `DefaultDiscordClient` will try to be as smart as possible with minimal compromises.
+
+> I'll refer to `DefaultDiscordClient` as "it" or "DDC", just as shorter alternatives.
+
+#### Rate Limits
+`DiscordBM` comes with a `HTTPRateLimiter` type that keeps track of the `x-ratelimit` headers.    
+This, in conjunction with `ClientConfiguration`'s `RetryPolicy`, helps `DiscordBM` to recover from what that can otherwise be a `429 Too Many Requests` error from Discord.   
+The behavior specified below is enabled by default.
+
+* Before each request, DDC will ask the rate-limiter if the headers allow a request.
+* The rate-limiter will respond with `yes, you can`, `no, you can't` or `yes, but you must wait x seconds first, otherwise no`.
+* If the response `yes`, the DDC will continue performing the request.
+* If the response `no`, the DDC will throw a "rate-limited" error.
+* If the response `yes, but you must wait x seconds first, otherwise no`, then the DDC will look at the `retryPolicy` of its `configuration`.
+* The DDC will act like there has been a `429` error, and will ask the `retryPolicy` if it's possible to retry such a failure, and under what circumstances.
+* The `retryPolicy` may specify that `429` requests can be retried `basedOnHeaders` if not longer than `maxAllowed` seconds.
+* The DDC will wait as long as `x seconds` which the rate-limiter specified, then will perform the request. This only happens if the `x seconds` is not longer than the `maxAllowed`.
+* In any other cases other than specified above, the DDC will fail with a "rate-limited" error.
+
+#### Concurrent Requests
+`ClientConfiguration`s `CachingBehavior` has the ability to avoid multiple concurrent requests with the same "cacheable identity".   
+* You can enable caching using DDC's `configuration.cachingBehavior` through the initializers by passing `cachingBehavior: .enabled` or the `.custom` static functions.  
+* As an example, if you make 10 concurrent requests to the same endpoint with the same parameters, the DDC will only perform 1 of those requests, and let the other 9 requests use the cached value. 
 
 </details>
 

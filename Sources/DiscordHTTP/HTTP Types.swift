@@ -269,7 +269,7 @@ public enum DiscordHTTPErrorResponse: Sendable, Error, CustomStringConvertible {
 }
 
 public enum DiscordHTTPError: Error, CustomStringConvertible {
-    /// Discord has rate-limited you at '\(url)'. Try to send less messages or send at a slower pace.
+    /// Your rate-limits have been exhausted for '\(url)'. Try to send less messages or send at a slower pace.
     case rateLimited(url: String)
     /// Discord responded with a non-200 status code.
     case badStatusCode(DiscordHTTPResponse)

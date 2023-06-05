@@ -51,7 +51,7 @@ public struct ClientConfiguration: Sendable {
         public static func custom(
             apiEndpoints: [CacheableAPIEndpointIdentity: Double] = [:],
             cdnEndpoints: [CDNEndpointIdentity: Double] = [:],
-            apiEndpointsDefaultTTL: Double? = 5,
+            apiEndpointsDefaultTTL: Double? = nil,
             cdnEndpointsDefaultTTL: Double? = nil,
             looseEndpointsTTL: Double? = nil
         ) -> CachingBehavior {

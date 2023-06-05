@@ -485,18 +485,19 @@ class DiscordClientTests: XCTestCase {
     }
 
     func testGuildWithCreatedGuild() async throws {
+        let guildName = "Test Guild"
+
         /// Cleanup
         for guild in try await client.listOwnGuilds().decode() {
-            if guild.name?.hasPrefix("Test Guild") == true {
+            if guild.name?.hasPrefix(guildName) == true {
                 try await client.deleteGuild(id: guild.id).guardSuccess()
             }
         }
 
-        let guildName = "Test Guild"
         let createdGuild = try await client.createGuild(payload: .init(name: guildName)).decode()
         XCTAssertEqual(createdGuild.name, guildName)
 
-        let newGuildName = "Test Guild Updated Name"
+        let newGuildName = guildName + " Updated Name"
         let updateGuild = try await client.updateGuild(
             id: createdGuild.id,
             payload: .init(name: newGuildName)
