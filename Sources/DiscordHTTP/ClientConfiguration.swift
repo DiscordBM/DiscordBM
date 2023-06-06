@@ -9,21 +9,17 @@ public struct ClientConfiguration: Sendable {
     public struct CachingBehavior: Sendable {
 
         /// [ID: TTL]
-        @usableFromInline
         var apiEndpointsStorage = [CacheableAPIEndpointIdentity: Duration]()
         /// [ID: TTL]
-        @usableFromInline
         var cdnEndpointsStorage = [CDNEndpointIdentity: Duration]()
         /// This instance's default TTL (Time-To-Live) for API endpoints.
-        @usableFromInline
         var apiEndpointsDefaultTTL: Duration?
         /// This instance's default TTL (Time-To-Live) for CDN endpoints.
-        @usableFromInline
         var cdnEndpointsDefaultTTL: Duration?
         /// This instance's default TTL (Time-To-Live) for Loose endpoints.
-        @usableFromInline
         var looseEndpointsTTL: Duration?
 
+        @usableFromInline
         init(
             apiEndpointsStorage: [CacheableAPIEndpointIdentity: Duration] = [:],
             cdnEndpointsStorage: [CDNEndpointIdentity: Duration] = [:],
@@ -45,10 +41,11 @@ public struct ClientConfiguration: Sendable {
             self.apiEndpointsStorage.updateValue(.seconds(120), forKey: .getBotGateway)
         }
 
-        /// Uses the TTL in the 'endpoints'. If not available, falls back to `defaultTTL`.
-        /// Setting TTL to `0` in endpoints, disables caching for that endpoint.
+        /// Uses the TTL in the 'endpoints'. If not available, falls back to the 'defaultTTL'.
+        /// Setting TTL to `.zero` in 'endpoints' dictionary, disables caching for that endpoint.
         /// NOTE: Caching behavior for `getGateway` and `getBotGateway` api endpoints
         /// can't be modified by users.
+        @inlinable
         public static func custom(
             apiEndpoints: [CacheableAPIEndpointIdentity: Duration] = [:],
             cdnEndpoints: [CDNEndpointIdentity: Duration] = [:],
@@ -65,18 +62,21 @@ public struct ClientConfiguration: Sendable {
         }
 
         /// Caches all cacheable endpoints for 5 seconds,
-        /// except for `getGateway` which is cached for an hour.
+        /// Doesn't cache CDN/Loose endpoints.
+        @inlinable
         public static var enabled: CachingBehavior {
             CachingBehavior.enabled(defaultTTL: .seconds(5))
         }
 
         /// Caches all cacheable API endpoints for the entered seconds,
-        /// Doesn't cache CDN endpoints.
+        /// Doesn't cache CDN/Loose endpoints.
+        @inlinable
         public static func enabled(defaultTTL: Duration) -> CachingBehavior {
             CachingBehavior.custom(apiEndpointsDefaultTTL: defaultTTL)
         }
 
         /// Caches everything for 0.1 seconds.
+        @inlinable
         public static var minimal: CachingBehavior {
             CachingBehavior(
                 apiEndpointsDefaultTTL: .milliseconds(100),
@@ -86,6 +86,7 @@ public struct ClientConfiguration: Sendable {
         }
 
         /// Doesn't allow caching at all.
+        @inlinable
         public static var disabled: CachingBehavior {
             CachingBehavior()
         }
