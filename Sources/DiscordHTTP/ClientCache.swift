@@ -1,4 +1,5 @@
 import struct Foundation.Date
+import typealias Foundation.TimeInterval
 
 /// This doesn't use the `Cache-Control` header because I couldn't
 /// find a 2xx response with a `Cache-Control` header returned by Discord.
@@ -66,8 +67,8 @@ actor ClientCache {
     }
 
     @usableFromInline
-    func save(response: DiscordHTTPResponse, item: CacheableItem, ttl: Double) {
-        self.timeTable[item] = Date().timeIntervalSince1970 + ttl
+    func save(response: DiscordHTTPResponse, item: CacheableItem, ttl: Duration) {
+        self.timeTable[item] = Date().timeIntervalSince1970 + ttl.asTimeInterval
         self.storage[item] = response
     }
 
@@ -155,5 +156,13 @@ actor ClientCacheStorage {
                 return self.noAuth!
             }
         }
+    }
+}
+
+private extension Duration {
+    var asTimeInterval: TimeInterval {
+        let comps = self.components
+        let attos = Double(comps.attoseconds) / 1_000_000_000_000_000_000
+        return Double(comps.seconds) + attos
     }
 }

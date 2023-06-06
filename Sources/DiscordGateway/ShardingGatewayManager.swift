@@ -300,7 +300,7 @@ extension ShardingGatewayManager {
 
     /// Makes sure the one-time job of populating `managers` has been done already, before
     /// accessing the `managers`. If the functions access `managers` too fast, the array will be
-    /// empty nothing will happen, which makes the implementation look buggy.
+    /// empty and nothing will happen, which makes the implementation look buggy.
     private func waitForGatewayManagersPopulation() async {
         if !self.hasPopulatedGatewayManagers {
             await withCheckedContinuation {

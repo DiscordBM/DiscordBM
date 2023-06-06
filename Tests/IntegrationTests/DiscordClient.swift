@@ -2431,7 +2431,9 @@ class DiscordClientTests: XCTestCase {
     func testCachingInPractice() async throws {
         /// Caching enabled
         do {
-            let cachingBehavior = ClientConfiguration.CachingBehavior.enabled(defaultTTL: 2)
+            let cachingBehavior = ClientConfiguration.CachingBehavior.enabled(
+                defaultTTL: .seconds(2)
+            )
             let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
             let cacheClient: any DiscordClient = await DefaultDiscordClient(
                 httpClient: httpClient,
@@ -2471,8 +2473,8 @@ class DiscordClientTests: XCTestCase {
         /// Caching enabled, but with exception, so disabled
         do {
             let cachingBehavior = ClientConfiguration.CachingBehavior.custom(
-                apiEndpoints: [.listApplicationCommands: 0],
-                apiEndpointsDefaultTTL: 2
+                apiEndpoints: [.listApplicationCommands: .zero],
+                apiEndpointsDefaultTTL: .seconds(2)
             )
             let configuration = ClientConfiguration(cachingBehavior: cachingBehavior)
             let cacheClient: any DiscordClient = await DefaultDiscordClient(
@@ -2555,7 +2557,9 @@ class DiscordClientTests: XCTestCase {
         /// Will make 1 request a lot of times, but the `DefaultDiscordClient` must
         /// only send the request to Discord once, and all other times return a cached response.
         do {
-            let configuration = ClientConfiguration(cachingBehavior: .enabled(defaultTTL: 10))
+            let configuration = ClientConfiguration(
+                cachingBehavior: .enabled(defaultTTL: .seconds(10))
+            )
             let cacheClient: any DiscordClient = await DefaultDiscordClient(
                 httpClient: httpClient,
                 token: Constants.token,

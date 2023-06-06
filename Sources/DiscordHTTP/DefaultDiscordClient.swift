@@ -161,7 +161,7 @@ public struct DefaultDiscordClient: DiscordClient {
     /// Because this must be the same in `getFromCache` and `saveInCache`.
     /// Returns the `CacheableEndpointIdentity` and the `TTL`.
     @inlinable
-    func isCacheable(identity: CacheableEndpointIdentity?) -> (CacheableEndpointIdentity, Double)? {
+    func isCacheable(identity: CacheableEndpointIdentity?) -> (CacheableEndpointIdentity, Duration)? {
         guard let identity,
               let ttl = self.configuration.cachingBehavior.getTTL(for: identity)
         else { return nil }
