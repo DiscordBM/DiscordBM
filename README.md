@@ -297,8 +297,7 @@ struct EventHandler: GatewayEventHandler {
                     /// `DiscordBM` has some "require" functions for easier unwrapping of
                     /// application commands. These "require" functions will either give you
                     /// what you want, or throw an error.
-                    /// Some examples are `requireValue()` that unwraps optional values, or
-                    /// `requireString()` that gives you the string value of a command option.
+                    /// See the full list below.
                     let subcommandOption = try (applicationCommand.options?.first).requireValue()
                     let subcommandName = subcommandOption.name
                     let subcommand = try LinkSubCommand(rawValue: subcommandName).requireValue()
@@ -403,6 +402,26 @@ enum LinkSubCommand: String, CaseIterable {
     }
 }
 ```
+
+#### Interaction Parsing Helpers
+* `StringIntDoubleBool` has:
+  * `requireString() throws -> String`
+  * `requireInt() throws -> Int`
+  * `requireDouble() throws -> Double`
+  * `requireBool() throws -> Bool`
+* `Interaction.ApplicationCommand.Option` has all the `StringIntDoubleBool` functions for unwrapping an option's `value` .
+* `Interaction.ApplicationCommand.Option` AND related types (like `[Option]`) have:
+  * `option(named: String) -> Option?`
+  * `requireOption(named: String) throws -> Option`
+* `Interaction.ActionRow` and related types (like `[ActionRow]`) have:
+  * `requireButton() throws -> Button`
+  * `requireStringSelect() throws -> StringSelectMenu`
+  * `requireTextInput() throws -> TextInput`
+  * `requireUserSelect() throws -> SelectMenu`
+  * `requireRoleSelect() throws -> SelectMenu`
+  * `requireMentionableSelect() throws -> SelectMenu`
+  * `requireChannelSelect() throws -> ChannelSelectMenu`
+* Swift's `Optional` has a `requireValue() throws` function overload (only in `DiscordBM`).                                             
 
 </details>
 
