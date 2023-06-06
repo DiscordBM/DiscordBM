@@ -77,7 +77,7 @@ public struct ClientConfiguration: Sendable {
         }
 
         /// Caches everything for 0.1 seconds.
-        public var minimal: CachingBehavior {
+        public static var minimal: CachingBehavior {
             CachingBehavior(
                 apiEndpointsDefaultTTL: .milliseconds(100),
                 cdnEndpointsDefaultTTL: .milliseconds(100),
