@@ -58,11 +58,6 @@ public actor ShardingGatewayManager: GatewayManager {
     //MARK: Connection data
     public nonisolated let identifyPayload: Gateway.Identify
 
-    //MARK: GatewayManager-population properties
-    var connectionLocked = false
-    var hasPopulatedGatewayManagers = false
-    var populationWaiters = [CheckedContinuation<Void, Never>]()
-
     //MARK: Shard-ing
     let shardCoordinator = ShardCoordinator()
     let configuration: Configuration
@@ -79,15 +74,18 @@ public actor ShardingGatewayManager: GatewayManager {
         configuration: Configuration = .init(),
         maxFrameSize: Int = 1 << 28,
         identifyPayload: Gateway.Identify
-    ) {
+    ) async {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
         self.configuration = configuration
         self.identifyPayload = identifyPayload
+
         var logger = DiscordGlobalConfiguration.makeLogger("ShardsManager")
         logger[metadataKey: "shards-manager-id"] = .string("\(self.id)")
         self.logger = logger
+
+        await self.populateGatewayManagers()
     }
 
     /// - Parameters:
@@ -117,9 +115,12 @@ public actor ShardingGatewayManager: GatewayManager {
         self.maxFrameSize = maxFrameSize
         self.configuration = configuration
         self.identifyPayload = identifyPayload
+
         var logger = DiscordGlobalConfiguration.makeLogger("ShardsManager")
         logger[metadataKey: "shards-manager-id"] = .string("\(self.id)")
         self.logger = logger
+
+        await self.populateGatewayManagers()
     }
 
     /// - Parameters:
@@ -166,33 +167,21 @@ public actor ShardingGatewayManager: GatewayManager {
         var logger = DiscordGlobalConfiguration.makeLogger("ShardsManager")
         logger[metadataKey: "shards-manager-id"] = .string("\(self.id)")
         self.logger = logger
+
+        await self.populateGatewayManagers()
     }
 
     /// Connects all shards to Discord.
     public func connect() async {
-        if self.connectionLocked {
-            self.logger.error("Attempt to connect shards while the connect function is locked")
-            return
-        } else {
-            self.connectionLocked = true
-        }
-
-        if self.managers.isEmpty {
-            await self.populateGatewayManagers()
-        }
-
         await withTaskGroup(of: Void.self) { group in
             for manager in self.managers {
                 group.addTask { await manager.connect() }
             }
         }
-
-        self.connectionLocked = false
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
     public func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async {
-        await self.waitForGatewayManagersPopulation()
         await self.managers
             .first(where: { $0.identifyPayload.intents.contains(.guildMembers) })?
             .requestGuildMembersChunk(payload: payload)
@@ -200,19 +189,16 @@ public actor ShardingGatewayManager: GatewayManager {
 
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     public func updatePresence(payload: Gateway.Identify.Presence) async {
-        await self.waitForGatewayManagersPopulation()
         await self.managers.first?.updatePresence(payload: payload)
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
     public func updateVoiceState(payload: VoiceStateUpdate) async {
-        await self.waitForGatewayManagersPopulation()
         await self.managers.first?.updateVoiceState(payload: payload)
     }
 
     /// Makes an stream of Gateway events.
     public func makeEventsStream() async -> AsyncStream<Gateway.Event> {
-        await self.waitForGatewayManagersPopulation()
         return AsyncStream<Gateway.Event> { continuation in
             for manager in self.managers {
                 Task { await manager.addEventsContinuation(continuation) }
@@ -222,7 +208,6 @@ public actor ShardingGatewayManager: GatewayManager {
 
     /// Makes an stream of Gateway event parse failures.
     public func makeEventsParseFailureStream() async -> AsyncStream<(any Error, ByteBuffer)> {
-        await self.waitForGatewayManagersPopulation()
         return AsyncStream<(any Error, ByteBuffer)> { continuation in
             for manager in self.managers {
                 Task { await manager.addEventsParseFailureContinuation(continuation) }
@@ -232,7 +217,6 @@ public actor ShardingGatewayManager: GatewayManager {
 
     /// Disconnects all shards from Discord.
     public func disconnect() async {
-        await self.waitForGatewayManagersPopulation()
         await withTaskGroup(of: Void.self) { group in
             for manager in self.managers {
                 group.addTask { await manager.disconnect() }
@@ -275,14 +259,6 @@ extension ShardingGatewayManager {
                 )
             )
         }
-
-
-        /// Notify anyone that was waiting for the `managers` to be populated.
-        self.hasPopulatedGatewayManagers = true
-        for waiter in self.populationWaiters {
-            waiter.resume()
-        }
-        self.populationWaiters.removeAll()
     }
 
     private func getGatewayInfo() async -> Gateway.BotConnectionInfo {
@@ -296,16 +272,5 @@ extension ShardingGatewayManager {
         logger.error("Cannot get gateway url to connect to. Will retry in 10 seconds")
         try? await Task.sleep(for: .seconds(10))
         return await self.getGatewayInfo()
-    }
-
-    /// Makes sure the one-time job of populating `managers` has been done already, before
-    /// accessing the `managers`. If the functions access `managers` too fast, the array will be
-    /// empty and nothing will happen, which makes the implementation look buggy.
-    private func waitForGatewayManagersPopulation() async {
-        if !self.hasPopulatedGatewayManagers {
-            await withCheckedContinuation {
-                self.populationWaiters.append($0)
-            }
-        }
     }
 }
