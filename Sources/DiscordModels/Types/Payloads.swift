@@ -78,7 +78,7 @@ public enum Payloads {
     public struct InteractionResponse: Sendable, MultipartEncodable, ValidatablePayload {
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
-        public enum Kind: Int, Sendable, Encodable, ToleratesIntDecodeMarker {
+        public enum Kind: Int, Sendable, Encodable {
             /// For ping-pong.
             case pong = 1
             /// Normal response.

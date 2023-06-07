@@ -7,6 +7,9 @@ import Logging
  the new values that were decoded successfully but the enum didn't have a representation for.
  `_ToleratesDecode` should not be used outside what there already is in this file.
  */
+
+/// UnstableEnum macro solves this problem in Swift 5.9+
+#if swift(<5.9)
 protocol _ToleratesDecode { }
 protocol ToleratesStringDecodeMarker: _ToleratesDecode { }
 protocol ToleratesIntDecodeMarker: _ToleratesDecode { }
@@ -100,3 +103,4 @@ private struct DescriptionBox<T>: @unchecked Sendable, CustomStringConvertible {
         self.value = value
     }
 }
+#endif

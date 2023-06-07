@@ -576,6 +576,16 @@ public struct Gateway: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence-status-types
+#if swift(>=5.9)
+    @UnstableEnum<String>
+    public enum Status: RawRepresentable, Sendable, Codable {
+        case online // "online"
+        case doNotDisturb // "dnd"
+        case afk // "idle"
+        case offline // "offline"
+        case invisible // "invisible"
+    }
+#else
     public enum Status: String, Sendable, Codable, ToleratesStringDecodeMarker {
         case online = "online"
         case doNotDisturb = "dnd"
@@ -583,7 +593,8 @@ public struct Gateway: Sendable, Codable {
         case offline = "offline"
         case invisible = "invisible"
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/topics/gateway-events#hello-hello-structure
     public struct Hello: Sendable, Codable {
         public var heartbeat_interval: Int
@@ -926,11 +937,19 @@ public struct Gateway: Sendable, Codable {
     public struct InviteCreate: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
+#if swift(>=5.9)
+        @UnstableEnum<Int>
+        public enum TargetKind: RawRepresentable, Sendable, Codable {
+            case stream // 1
+            case embeddedApplication // 2
+        }
+#else
         public enum TargetKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case stream = 1
             case embeddedApplication = 2
         }
-        
+#endif
+
         public var channel_id: ChannelSnowflake
         public var code: String
         public var created_at: DiscordTimestamp
@@ -1071,12 +1090,20 @@ public struct Gateway: Sendable, Codable {
         public var channel_id: ChannelSnowflake
         public var guild_id: GuildSnowflake?
     }
-    
+
+#if swift(>=5.9)
+    @UnstableEnum<Int>
+    public enum ReactionKind: RawRepresentable, Sendable, Codable {
+        case normal // 0
+        case `super` // 1
+    }
+#else
     public enum ReactionKind: Int, Sendable, Codable {
         case normal = 0
         case `super` = 1
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-add-message-reaction-add-event-fields
     public struct MessageReactionAdd: Sendable, Codable {
         public var type: ReactionKind
@@ -1164,6 +1191,17 @@ public struct Gateway: Sendable, Codable {
     public struct Activity: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
+#if swift(>=5.9)
+        @UnstableEnum<Int>
+        public enum Kind: RawRepresentable, Sendable, Codable {
+            case game // 0
+            case streaming // 1
+            case listening // 2
+            case watching // 3
+            case custom // 4
+            case competing // 5
+        }
+#else
         public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case game = 0
             case streaming = 1
@@ -1172,7 +1210,8 @@ public struct Gateway: Sendable, Codable {
             case custom = 4
             case competing = 5
         }
-        
+#endif
+
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-timestamps
         public struct Timestamps: Sendable, Codable {
             public var start: Int?

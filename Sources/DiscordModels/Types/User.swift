@@ -3,13 +3,23 @@
 public struct DiscordUser: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/user#user-object-premium-types
+#if swift(>=5.9)
+    @UnstableEnum<Int>
+    public enum PremiumKind: RawRepresentable, Sendable, Codable {
+        case none // 0
+        case nitroClassic // 1
+        case nitro // 2
+        case nitroBasic // 3
+    }
+#else
     public enum PremiumKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case none = 0
         case nitroClassic = 1
         case nitro = 2
         case nitroBasic = 3
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/resources/user#user-object-user-flags
     public enum Flag: UInt, Sendable {
         case staff = 0
@@ -97,7 +107,31 @@ extension DiscordUser {
     public struct Connection: Sendable, Codable {
 
         /// https://discord.com/developers/docs/resources/user#connection-object-services
-        public enum Service: String, Sendable, Codable {
+#if swift(>=5.9)
+        @UnstableEnum<String>
+        public enum Service: RawRepresentable, Sendable, Codable {
+            case battleNet // "Battle.net"
+            case ebay // "eBay"
+            case epicGames // "Epic Games"
+            case facebook // "Facebook"
+            case github // "GitHub"
+            case instagram // "Instagram"
+            case leagueOfLegends // "League of Legends"
+            case paypal // "PayPal"
+            case playstation // "PlayStation Network"
+            case reddit // "Reddit"
+            case riotGames // "Riot Games"
+            case spotify // "Spotify"
+            case skype // "Skype"
+            case steam // "Steam"
+            case tikTok // "TikTok"
+            case twitch // "Twitch"
+            case twitter // "Twitter"
+            case xbox // "Xbox"
+            case youtube // "YouTube"
+        }
+#else
+        public enum Service: String, Sendable, Codable, ToleratesStringDecodeMarker {
             case battleNet = "Battle.net"
             case ebay = "eBay"
             case epicGames = "Epic Games"
@@ -118,12 +152,21 @@ extension DiscordUser {
             case xbox = "Xbox"
             case youtube = "YouTube"
         }
+#endif
 
         /// https://discord.com/developers/docs/resources/user#connection-object-visibility-types
+#if swift(>=5.9)
+        @UnstableEnum<Int>
+        public enum VisibilityKind: RawRepresentable, Sendable, Codable {
+            case none // 0
+            case everyone // 1
+        }
+#else
         public enum VisibilityKind: Int, Sendable, Codable {
             case none = 0
             case everyone = 1
         }
+#endif
 
         public var id: String
         public var name: String

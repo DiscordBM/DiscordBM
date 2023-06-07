@@ -3,27 +3,53 @@
 public struct AutoModerationRule: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-event-types
+#if swift(>=5.9)
+    @UnstableEnum<Int>
+    public enum EventKind: RawRepresentable, Sendable, Codable {
+        case messageSend // 1
+    }
+#else
     public enum EventKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case messageSend = 1
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types
+#if swift(>=5.9)
+    @UnstableEnum<Int>
+    public enum TriggerKind: RawRepresentable, Sendable, Codable {
+        case keyword // 1
+        case spam // 3
+        case keywordPreset // 4
+        case mentionSpam // 5
+    }
+#else
     public enum TriggerKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case keyword = 1
         case spam = 3
         case keywordPreset = 4
         case mentionSpam = 5
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata
     public struct TriggerMetadata: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-preset-types
+#if swift(>=5.9)
+        @UnstableEnum<Int>
+        public enum KeywordPreset: RawRepresentable, Sendable, Codable {
+            case profanity // 1
+            case sexualContent // 2
+            case slurs // 3
+        }
+#else
         public enum KeywordPreset: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case profanity = 1
             case sexualContent = 2
             case slurs = 3
         }
+#endif
 
         public var keyword_filter: [String]?
         public var regex_patterns: [String]?

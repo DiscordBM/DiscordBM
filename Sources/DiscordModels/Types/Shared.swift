@@ -164,6 +164,41 @@ public enum IntOrDouble: Sendable, Codable {
 //MARK: - DiscordLocale
 
 /// https://discord.com/developers/docs/reference#locales
+#if swift(>=5.9)
+@UnstableEnum<String>
+public enum DiscordLocale: RawRepresentable, Sendable, Codable {
+    case danish // "da"
+    case german // "de"
+    case englishUK // "en-GB"
+    case englishUS // "en-US"
+    case spanish // "es-ES"
+    case french // "fr"
+    case croatian // "hr"
+    case italian // "it"
+    case lithuanian // "lt"
+    case hungarian // "hu"
+    case dutch // "nl"
+    case norwegian // "no"
+    case polish // "pl"
+    case portuguese // "pt-BR"
+    case romanian // "ro"
+    case finnish // "fi"
+    case swedish // "sv-SE"
+    case vietnamese // "vi"
+    case turkish // "tr"
+    case czech // "cs"
+    case greek // "el"
+    case bulgarian // "bg"
+    case russian // "ru"
+    case ukrainian // "uk"
+    case hindi // "hi"
+    case thai // "th"
+    case chineseChina // "zh-CN"
+    case japanese // "ja"
+    case chineseTaiwan // "zh-TW"
+    case korean // "ko"
+}
+#else
 public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecodeMarker {
     case danish = "da"
     case german = "de"
@@ -196,6 +231,7 @@ public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecodeMarke
     case chineseTaiwan = "zh-TW"
     case korean = "ko"
 }
+#endif
 
 //MARK: - DiscordLocaleDict
 
@@ -301,7 +337,11 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
                 case .japanese: self.japanese = value
                 case .chineseTaiwan: self.chineseTaiwan = value
                 case .korean: self.korean = value
+#if swift(>=5.9)
+                case .unknown: break // Ignore
+#endif
                 }
+                #warning("better?")
             }
         }
         

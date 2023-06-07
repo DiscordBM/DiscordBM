@@ -4,16 +4,41 @@ import Foundation
 public struct ApplicationCommand: Sendable, Codable {
     
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
+#if swift(>=5.9)
+    @UnstableEnum<Int>
+    public enum Kind: RawRepresentable, Sendable, Codable {
+        case chatInput // 1
+        case user // 2
+        case message // 3
+    }
+#else
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case chatInput = 1
         case user = 2
         case message = 3
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure
     public struct Option: Sendable, Codable, ValidatablePayload {
         
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+#if swift(>=5.9)
+        @UnstableEnum<Int>
+        public enum Kind: RawRepresentable, Sendable, Codable {
+            case subCommand // 1
+            case subCommandGroup // 2
+            case string // 3
+            case integer // 4
+            case boolean // 5
+            case user // 6
+            case channel // 7
+            case role // 8
+            case mentionable // 9
+            case number // 10
+            case attachment // 11
+        }
+#else
         public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case subCommand = 1
             case subCommandGroup = 2
@@ -27,7 +52,8 @@ public struct ApplicationCommand: Sendable, Codable {
             case number = 10
             case attachment = 11
         }
-        
+#endif
+
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-choice-structure
         public struct Choice: Sendable, Codable {
             
@@ -140,12 +166,21 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
     public struct Permission: Sendable, Codable {
         
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-application-command-permission-type
+#if swift(>=5.9)
+        @UnstableEnum<Int>
+        public enum Kind: RawRepresentable, Sendable, Codable {
+            case role // 1
+            case user // 2
+            case channel // 3
+        }
+#else
         public enum Kind: Int, Sendable, Codable {
             case role = 1
             case user = 2
             case channel = 3
         }
-        
+#endif
+
         public var type: Kind
         public var permission: Bool
         public var id: AnySnowflake

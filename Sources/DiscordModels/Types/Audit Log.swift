@@ -126,6 +126,65 @@ public struct AuditLog: Sendable, Codable {
         }
         
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
+#if swift(>=5.9)
+        @UnstableEnum<Int>
+        public enum ActionKind: RawRepresentable, Sendable, Codable {
+            case guildUpdate // 1
+            case channelCreate // 10
+            case channelUpdate // 11
+            case channelDelete // 12
+            case channelOverwriteCreate // 13
+            case channelOverwriteUpdate // 14
+            case channelOverwriteDelete // 15
+            case memberKick // 20
+            case memberPrune // 21
+            case memberBanAdd // 22
+            case memberBanRemove // 23
+            case memberUpdate // 24
+            case memberRoleUpdate // 25
+            case memberMove // 26
+            case memberDisconnect // 27
+            case botAdd // 28
+            case roleCreate // 30
+            case roleUpdate // 31
+            case roleDelete // 32
+            case inviteCreate // 40
+            case inviteUpdate // 41
+            case inviteDelete // 42
+            case webhookCreate // 50
+            case webhookUpdate // 51
+            case webhookDelete // 52
+            case emojiCreate // 60
+            case emojiUpdate // 61
+            case emojiDelete // 62
+            case messageDelete // 72
+            case messageBulkDelete // 73
+            case messagePin // 74
+            case messageUnpin // 75
+            case integrationCreate // 80
+            case integrationUpdate // 81
+            case integrationDelete // 82
+            case stageInstanceCreate // 83
+            case stageInstanceUpdate // 84
+            case stageInstanceDelete // 85
+            case stickerCreate // 90
+            case stickerUpdate // 91
+            case stickerDelete // 92
+            case guildScheduledEventCreate // 100
+            case guildScheduledEventUpdate // 101
+            case guildScheduledEventDelete // 102
+            case threadCreate // 110
+            case threadUpdate // 111
+            case threadDelete // 112
+            case applicationCommandPermissionUpdate // 121
+            case autoModerationRuleCreate // 140
+            case autoModerationRuleUpdate // 141
+            case autoModerationRuleDelete // 142
+            case autoModerationBlockMessage // 143
+            case autoModerationFlagToChannel // 144
+            case autoModerationUserCommunicationDisabled // 145
+        }
+#else
         public enum ActionKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case guildUpdate = 1
             case channelCreate = 10
@@ -181,66 +240,8 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationBlockMessage = 143
             case autoModerationFlagToChannel = 144
             case autoModerationUserCommunicationDisabled = 145
-            
-            init(action: Action) {
-                switch action {
-                case .guildUpdate: self = .guildUpdate
-                case .channelCreate: self = .channelCreate
-                case .channelUpdate: self = .channelUpdate
-                case .channelDelete: self = .channelDelete
-                case .channelOverwriteCreate: self = .channelOverwriteCreate
-                case .channelOverwriteUpdate: self = .channelOverwriteUpdate
-                case .channelOverwriteDelete: self = .channelOverwriteDelete
-                case .memberKick: self = .memberKick
-                case .memberPrune: self = .memberPrune
-                case .memberBanAdd: self = .memberBanAdd
-                case .memberBanRemove: self = .memberBanRemove
-                case .memberUpdate: self = .memberUpdate
-                case .memberRoleUpdate: self = .memberRoleUpdate
-                case .memberMove: self = .memberMove
-                case .memberDisconnect: self = .memberDisconnect
-                case .botAdd: self = .botAdd
-                case .roleCreate: self = .roleCreate
-                case .roleUpdate: self = .roleUpdate
-                case .roleDelete: self = .roleDelete
-                case .inviteCreate: self = .inviteCreate
-                case .inviteUpdate: self = .inviteUpdate
-                case .inviteDelete: self = .inviteDelete
-                case .webhookCreate: self = .webhookCreate
-                case .webhookUpdate: self = .webhookUpdate
-                case .webhookDelete: self = .webhookDelete
-                case .emojiCreate: self = .emojiCreate
-                case .emojiUpdate: self = .emojiUpdate
-                case .emojiDelete: self = .emojiDelete
-                case .messageDelete: self = .messageDelete
-                case .messageBulkDelete: self = .messageBulkDelete
-                case .messagePin: self = .messagePin
-                case .messageUnpin: self = .messageUnpin
-                case .integrationCreate: self = .integrationCreate
-                case .integrationUpdate: self = .integrationUpdate
-                case .integrationDelete: self = .integrationDelete
-                case .stageInstanceCreate: self = .stageInstanceCreate
-                case .stageInstanceUpdate: self = .stageInstanceUpdate
-                case .stageInstanceDelete: self = .stageInstanceDelete
-                case .stickerCreate: self = .stickerCreate
-                case .stickerUpdate: self = .stickerUpdate
-                case .stickerDelete: self = .stickerDelete
-                case .guildScheduledEventCreate: self = .guildScheduledEventCreate
-                case .guildScheduledEventUpdate: self = .guildScheduledEventUpdate
-                case .guildScheduledEventDelete: self = .guildScheduledEventDelete
-                case .threadCreate: self = .threadCreate
-                case .threadUpdate: self = .threadUpdate
-                case .threadDelete: self = .threadDelete
-                case .applicationCommandPermissionUpdate: self = .applicationCommandPermissionUpdate
-                case .autoModerationRuleCreate: self = .autoModerationRuleCreate
-                case .autoModerationRuleUpdate: self = .autoModerationRuleUpdate
-                case .autoModerationRuleDelete: self = .autoModerationRuleDelete
-                case .autoModerationBlockMessage: self = .autoModerationBlockMessage
-                case .autoModerationFlagToChannel: self = .autoModerationFlagToChannel
-                case .autoModerationUserCommunicationDisabled: self = .autoModerationUserCommunicationDisabled
-                }
-            }
         }
+#endif
         
         /// A mix of the below two types.
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
@@ -300,7 +301,8 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationBlockMessage(AutoModerationInfo)
             case autoModerationFlagToChannel(AutoModerationInfo)
             case autoModerationUserCommunicationDisabled(AutoModerationInfo)
-            
+            case unknown
+
             public struct OverwriteInfo: Sendable, Codable {
                 
                 public enum Kind: Sendable {
@@ -553,6 +555,11 @@ public struct AuditLog: Sendable, Codable {
                 case .autoModerationUserCommunicationDisabled:
                     let moderationInfo = try container.decode(AutoModerationInfo.self, forKey: .options)
                     self = .autoModerationUserCommunicationDisabled(moderationInfo)
+#if swift(>=5.9)
+                case .unknown:
+                    #warning("better handling than adding a `unknown` case to that enum")
+                    self = .unknown
+#endif
                 }
             }
             
@@ -648,6 +655,9 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(moderationInfo, forKey: .options)
                 case let .autoModerationUserCommunicationDisabled(moderationInfo):
                     try container.encode(moderationInfo, forKey: .options)
+#if swift(>=5.9)
+                case .unknown: break
+#endif
                 }
             }
         }
@@ -693,3 +703,70 @@ public struct AuditLog: Sendable, Codable {
     public var users: [DiscordUser]
     public var webhooks: [Webhook]
 }
+
+// MARK: +AuditLog.Entry.ActionKind
+extension AuditLog.Entry.ActionKind {
+    init(action: AuditLog.Entry.Action) {
+        switch action {
+        case .guildUpdate: self = .guildUpdate
+        case .channelCreate: self = .channelCreate
+        case .channelUpdate: self = .channelUpdate
+        case .channelDelete: self = .channelDelete
+        case .channelOverwriteCreate: self = .channelOverwriteCreate
+        case .channelOverwriteUpdate: self = .channelOverwriteUpdate
+        case .channelOverwriteDelete: self = .channelOverwriteDelete
+        case .memberKick: self = .memberKick
+        case .memberPrune: self = .memberPrune
+        case .memberBanAdd: self = .memberBanAdd
+        case .memberBanRemove: self = .memberBanRemove
+        case .memberUpdate: self = .memberUpdate
+        case .memberRoleUpdate: self = .memberRoleUpdate
+        case .memberMove: self = .memberMove
+        case .memberDisconnect: self = .memberDisconnect
+        case .botAdd: self = .botAdd
+        case .roleCreate: self = .roleCreate
+        case .roleUpdate: self = .roleUpdate
+        case .roleDelete: self = .roleDelete
+        case .inviteCreate: self = .inviteCreate
+        case .inviteUpdate: self = .inviteUpdate
+        case .inviteDelete: self = .inviteDelete
+        case .webhookCreate: self = .webhookCreate
+        case .webhookUpdate: self = .webhookUpdate
+        case .webhookDelete: self = .webhookDelete
+        case .emojiCreate: self = .emojiCreate
+        case .emojiUpdate: self = .emojiUpdate
+        case .emojiDelete: self = .emojiDelete
+        case .messageDelete: self = .messageDelete
+        case .messageBulkDelete: self = .messageBulkDelete
+        case .messagePin: self = .messagePin
+        case .messageUnpin: self = .messageUnpin
+        case .integrationCreate: self = .integrationCreate
+        case .integrationUpdate: self = .integrationUpdate
+        case .integrationDelete: self = .integrationDelete
+        case .stageInstanceCreate: self = .stageInstanceCreate
+        case .stageInstanceUpdate: self = .stageInstanceUpdate
+        case .stageInstanceDelete: self = .stageInstanceDelete
+        case .stickerCreate: self = .stickerCreate
+        case .stickerUpdate: self = .stickerUpdate
+        case .stickerDelete: self = .stickerDelete
+        case .guildScheduledEventCreate: self = .guildScheduledEventCreate
+        case .guildScheduledEventUpdate: self = .guildScheduledEventUpdate
+        case .guildScheduledEventDelete: self = .guildScheduledEventDelete
+        case .threadCreate: self = .threadCreate
+        case .threadUpdate: self = .threadUpdate
+        case .threadDelete: self = .threadDelete
+        case .applicationCommandPermissionUpdate: self = .applicationCommandPermissionUpdate
+        case .autoModerationRuleCreate: self = .autoModerationRuleCreate
+        case .autoModerationRuleUpdate: self = .autoModerationRuleUpdate
+        case .autoModerationRuleDelete: self = .autoModerationRuleDelete
+        case .autoModerationBlockMessage: self = .autoModerationBlockMessage
+        case .autoModerationFlagToChannel: self = .autoModerationFlagToChannel
+        case .autoModerationUserCommunicationDisabled: self = .autoModerationUserCommunicationDisabled
+#if swift(>=5.9)
+        case .unknown:
+            self = .unknown(0)
+#endif
+        }
+    }
+}
+#warning("better handling ")

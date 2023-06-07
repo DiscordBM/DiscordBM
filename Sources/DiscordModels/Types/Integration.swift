@@ -3,19 +3,37 @@
 public struct Integration: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/guild#integration-object-integration-structure
+#if swift(>=5.9)
+    @UnstableEnum<String>
+    public enum Kind: RawRepresentable, Sendable, Codable {
+        case twitch
+        case youtube
+        case discord
+        case guildSubscription // "guild_subscription"
+    }
+#else
     public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
         case twitch
         case youtube
         case discord
         case guildSubscription = "guild_subscription"
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors
+#if swift(>=5.9)
+    @UnstableEnum<Int>
+    public enum ExpireBehavior: RawRepresentable, Sendable, Codable {
+        case removeRole // 0
+        case kick // 1
+    }
+#else
     public enum ExpireBehavior: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case removeRole = 0
         case kick = 1
     }
-    
+#endif
+
     public var id: IntegrationSnowflake
     public var name: String
     public var type: Kind

@@ -3,11 +3,19 @@
 public struct StageInstance: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/stage-instance#stage-instance-object-privacy-level
+#if swift(>=5.9)
+    @UnstableEnum<Int>
+    public enum PrivacyLevel: RawRepresentable, Sendable, Codable {
+        case `public` // 1
+        case guildOnly // 2
+    }
+#else
     public enum PrivacyLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case `public` = 1
         case guildOnly = 2
     }
-    
+#endif
+
     public var id: StageInstanceSnowflake
     public var guild_id: GuildSnowflake
     public var channel_id: ChannelSnowflake

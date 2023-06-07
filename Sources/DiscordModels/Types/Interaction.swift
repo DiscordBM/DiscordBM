@@ -35,6 +35,16 @@ public struct Interaction: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
+#if swift(>=5.9)
+    @UnstableEnum<Int>
+    public enum Kind: RawRepresentable, Sendable, Codable {
+        case ping // 1
+        case applicationCommand // 2
+        case messageComponent // 3
+        case applicationCommandAutocomplete // 4
+        case modalSubmit // 5
+    }
+#else
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case ping = 1
         case applicationCommand = 2
@@ -42,7 +52,8 @@ public struct Interaction: Sendable, Codable {
         case applicationCommandAutocomplete = 4
         case modalSubmit = 5
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
     public struct ApplicationCommand: Sendable, Codable {
         
@@ -323,6 +334,9 @@ public struct Interaction: Sendable, Codable {
             )
         case .ping:
             self.data = nil
+#if swift(>=5.9)
+        case .unknown: self.data = nil
+#endif
         }
         self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
         self.channel_id = try container.decodeIfPresent(
@@ -411,6 +425,19 @@ extension Interaction {
     public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral {
 
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
+#if swift(>=5.9)
+        @UnstableEnum<Int>
+        public enum Kind: RawRepresentable, Sendable, Codable {
+            case actionRow // 1
+            case button // 2
+            case stringSelect // 3
+            case textInput // 4
+            case userSelect // 5
+            case roleSelect // 6
+            case mentionableSelect // 7
+            case channelSelect // 8
+        }
+#else
         public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case actionRow = 1
             case button = 2
@@ -421,11 +448,22 @@ extension Interaction {
             case mentionableSelect = 7
             case channelSelect = 8
         }
-        
+#endif
+
         /// https://discord.com/developers/docs/interactions/message-components#button-object-button-structure
         public struct Button: Sendable, Codable {
             
             /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
+#if swift(>=5.9)
+            @UnstableEnum<Int>
+            public enum Style: RawRepresentable, Sendable, Codable {
+                case primary // 1
+                case secondary // 2
+                case success // 3
+                case danger // 4
+                case link // 5
+            }
+#else
             public enum Style: Int, Sendable, Codable, ToleratesIntDecodeMarker {
                 case primary = 1
                 case secondary = 2
@@ -433,6 +471,7 @@ extension Interaction {
                 case danger = 4
                 case link = 5
             }
+#endif
 
             /// The same as ``Style``, but has no `link`.
             /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
@@ -458,6 +497,9 @@ extension Interaction {
                     case .success: self = .success
                     case .danger: self = .danger
                     case .link: return nil
+#if swift(>=5.9)
+                    case .unknown: return nil
+#endif
                     }
                 }
             }
@@ -630,11 +672,19 @@ extension Interaction {
         public struct TextInput: Sendable, Codable {
             
         /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
+#if swift(>=5.9)
+            @UnstableEnum<Int>
+            public enum Style: RawRepresentable, Sendable, Codable {
+                case short // 1
+                case paragraph // 2
+            }
+#else
             public enum Style: Int, Sendable, Codable, ToleratesIntDecodeMarker {
                 case short = 1
                 case paragraph = 2
             }
-            
+#endif
+
             public var custom_id: String
             public var style: Style?
             public var label: String?
@@ -664,6 +714,10 @@ extension Interaction {
             case roleSelect(SelectMenu)
             case mentionableSelect(SelectMenu)
             case channelSelect(ChannelSelectMenu)
+#if swift(>=5.9)
+            case unknown
+#endif
+            #warning("pass container in unknown?! or not?")
 
             public var customId: String? {
                 switch self {
@@ -681,6 +735,10 @@ extension Interaction {
                     return value.custom_id
                 case let .channelSelect(value):
                     return value.custom_id
+#if swift(>=5.9)
+                case .unknown:
+                    return nil
+#endif
                 }
             }
 
@@ -708,6 +766,10 @@ extension Interaction {
                     self = try .channelSelect(.init(from: decoder))
                 case .textInput:
                     self = try .textInput(.init(from: decoder))
+#if swift(>=5.9)
+                case .unknown:
+                    self = .unknown
+#endif
                 }
             }
             
@@ -735,6 +797,9 @@ extension Interaction {
                 case let .channelSelect(selectMenu):
                     try container.encode(Kind.channelSelect, forKey: .type)
                     try selectMenu.encode(to: encoder)
+#if swift(>=5.9)
+                case .unknown: break
+#endif
                 }
             }
 

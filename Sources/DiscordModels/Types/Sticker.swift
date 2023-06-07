@@ -3,19 +3,37 @@
 public struct Sticker: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types
+#if swift(>=5.9)
+    @UnstableEnum<Int>
+    public enum Kind: RawRepresentable, Sendable, Codable {
+        case standard // 1
+        case guild // 2
+    }
+#else
     public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case standard = 1
         case guild = 2
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-format-types
+#if swift(>=5.9)
+    @UnstableEnum<Int>
+    public enum FormatKind: RawRepresentable, Sendable, Codable {
+        case png // 1
+        case apng // 2
+        case lottie // 3
+        case gif // 4
+    }
+#else
     public enum FormatKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case png = 1
         case apng = 2
         case lottie = 3
         case gif = 4
     }
-    
+#endif
+
     public var id: StickerSnowflake
     public var pack_id: StickerPackSnowflake?
     public var name: String
