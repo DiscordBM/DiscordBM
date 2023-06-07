@@ -410,10 +410,13 @@ enum LinkSubCommand: String, CaseIterable {
   * `requireDouble() throws -> Double`
   * `requireBool() throws -> Bool`
 * `Interaction.ApplicationCommand.Option` has all the `StringIntDoubleBool` functions for unwrapping an option's `value` .
-* `Interaction.ApplicationCommand.Option` AND related types (like `[Option]`) have:
+* `Interaction.ApplicationCommand.Option` and related types (like `[Option]`) have:
   * `option(named: String) -> Option?`
   * `requireOption(named: String) throws -> Option`
-* `Interaction.ActionRow` and related types (like `[ActionRow]`) have:
+* `[Interaction.ActionRow]` and `[Interaction.ActionRow.Component]` have:
+  * `component(customId: String) -> Interaction.ActionRow.Component?`
+  * `requireComponent(customId: String) throws -> Interaction.ActionRow.Component`
+* `Interaction.ActionRow.Component` has:
   * `requireButton() throws -> Button`
   * `requireStringSelect() throws -> StringSelectMenu`
   * `requireTextInput() throws -> TextInput`
@@ -642,7 +645,7 @@ Read more about it at https://github.com/DiscordBM/DiscordReactToRole.
 These are some general implementation detail notes about the `DefaultDiscordClient`.   
 Generally, the `DefaultDiscordClient` will try to be as smart as possible with minimal compromises.
 
-> I'll refer to `DefaultDiscordClient` as "it" or "DDC", just as shorter alternatives.
+> I'll refer to `DefaultDiscordClient` as "DDC" to be more concise.
 
 #### Rate Limits
 `DiscordBM` comes with a `HTTPRateLimiter` type that keeps track of the `x-ratelimit` headers.    
@@ -661,8 +664,8 @@ The behavior specified below is enabled by default.
 
 #### Concurrent Requests
 `ClientConfiguration`s `CachingBehavior` has the ability to avoid multiple concurrent requests with the same "cacheable identity".   
-* You can enable caching using DDC's `configuration.cachingBehavior` through the initializers by passing `cachingBehavior: .enabled` or the `.custom` static functions.  
-* As an example, if you make 10 concurrent requests to the same endpoint with the same parameters, the DDC will only perform 1 of those requests, and let the other 9 requests use the cached value. 
+* You can enable caching using DDC's `configuration.cachingBehavior` through the initializers by passing `cachingBehavior: .minimal`, `.enabled` or the `.custom` static functions.  
+* As an example, if you have caching enabled for a cacheable endpoint, and you make 10 concurrent requests to the endpoint with the same parameters, the DDC will only perform 1 of those requests, and let the other 9 requests use the cached value. 
 
 </details>
 

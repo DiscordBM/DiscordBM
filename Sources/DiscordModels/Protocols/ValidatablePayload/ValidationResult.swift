@@ -9,7 +9,7 @@ extension ValidationFailure: ValidationResult {
     }
 }
 
-extension Array: ValidationResult where Element == ValidationFailure {
+extension Array<ValidationFailure>: ValidationResult {
     func get() -> [ValidationFailure] {
         self
     }

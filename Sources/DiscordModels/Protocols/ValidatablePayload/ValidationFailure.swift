@@ -43,7 +43,7 @@ public enum ValidationFailure: Sendable, CustomStringConvertible {
     }
 }
 
-extension Array where Element == ValidationFailure {
+extension Array<ValidationFailure> {
     /// Throws a `ValidationError` if any `ValidationFailure`s are available.
     /// - Parameter model: The data to be reported for debugging in case of throw.
     public func `throw`(model: any Sendable) throws {
