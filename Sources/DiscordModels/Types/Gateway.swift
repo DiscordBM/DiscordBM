@@ -1275,7 +1275,7 @@ public struct Gateway: Sendable, Codable {
                 self.match = match
             }
         }
-        
+        #warning("add decode-logging logic to the macro?")
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-flags
 #if swift(>=5.9)
         @UnstableEnum<UInt>
