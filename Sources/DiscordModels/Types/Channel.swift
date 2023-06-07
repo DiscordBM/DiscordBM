@@ -7,7 +7,7 @@ public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
 #if swift(>=5.9)
-    @UnstableEnum<Int>
+    @UnstableEnum<UInt>
     public enum Kind: RawRepresentable, Sendable, Codable {
         case guildText // 0
         case dm // 1
@@ -23,7 +23,7 @@ public struct DiscordChannel: Sendable, Codable {
         case guildForum // 15
     }
 #else
-    public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+    public enum Kind: UInt, Sendable, Codable, ToleratesIntDecodeMarker {
         case guildText = 0
         case dm = 1
         case guildVoice = 2
@@ -94,11 +94,19 @@ public struct DiscordChannel: Sendable, Codable {
 
     #warning("UInt ?! also take care of these in the macro")
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
+#if swift(>=5.9)
+    @UnstableEnum<UInt>
+    public enum Flag: RawRepresentable, Sendable {
+        case pinned // 1
+        case requireTag // 4
+    }
+#else
     public enum Flag: UInt, Sendable {
         case pinned = 1
         case requireTag = 4
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
 #if swift(>=5.9)
     @UnstableEnum<Int>
@@ -295,6 +303,22 @@ extension DiscordChannel {
 #endif
 
         /// https://discord.com/developers/docs/resources/channel#message-object-message-flags
+#if swift(>=5.9)
+        @UnstableEnum<UInt>
+        public enum Flag: RawRepresentable, Sendable {
+            case crossposted // 0
+            case isCrosspost // 1
+            case suppressEmbeds // 2
+            case sourceMessageDeleted // 3
+            case urgent // 4
+            case hasThread // 5
+            case ephemeral // 6
+            case loading // 7
+            case failedToMentionSomeRolesInThread // 8
+            case suppressNotifications // 12
+            case isVoiceMessage // 13
+        }
+#else
         public enum Flag: UInt, Sendable {
             case crossposted = 0
             case isCrosspost = 1
@@ -308,7 +332,8 @@ extension DiscordChannel {
             case suppressNotifications = 12
             case isVoiceMessage = 13
         }
-        
+#endif
+
         /// https://discord.com/developers/docs/resources/channel#channel-mention-object
         public struct ChannelMention: Sendable, Codable {
             public var id: ChannelSnowflake

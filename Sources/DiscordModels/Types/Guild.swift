@@ -4,15 +4,25 @@ public struct Guild: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
     public struct Member: Sendable, Codable {
-        
+        #warning("BitFields don't need to take care of unknown values anymore?")
         /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags
+#if swift(>=5.9)
+        @UnstableEnum<UInt>
+        public enum Flag: RawRepresentable, Sendable {
+            case didRejoin // 0
+            case completedOnboarding // 1
+            case bypassVerification // 2
+            case startedOnboarding // 3
+        }
+#else
         public enum Flag: UInt, Sendable {
             case didRejoin = 0
             case completedOnboarding = 1
             case bypassVerification = 2
             case startedOnboarding = 3
         }
-        
+#endif
+
         public var user: DiscordUser?
         public var nick: String?
         public var avatar: String?
@@ -188,6 +198,17 @@ public struct Guild: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-system-channel-flags
+#if swift(>=5.9)
+    @UnstableEnum<UInt>
+    public enum SystemChannelFlag: RawRepresentable, Sendable {
+        case suppressJoinNotifications // 0
+        case suppressPremiumSubscriptions // 1
+        case suppressGuildReminderNotifications // 2
+        case suppressJoinNotificationReplies // 3
+        case suppressRoleSubscriptionPurchaseNotifications // 4
+        case suppressRoleSubscriptionPurchaseNotificationReplies // 5
+    }
+#else
     public enum SystemChannelFlag: UInt, Sendable {
         case suppressJoinNotifications = 0
         case suppressPremiumSubscriptions = 1
@@ -196,7 +217,8 @@ public struct Guild: Sendable, Codable {
         case suppressRoleSubscriptionPurchaseNotifications = 4
         case suppressRoleSubscriptionPurchaseNotificationReplies = 5
     }
-    
+#endif
+
     /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier
 #if swift(>=5.9)
     @UnstableEnum<Int>

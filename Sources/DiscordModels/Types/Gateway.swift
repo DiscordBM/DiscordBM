@@ -507,7 +507,8 @@ public struct Gateway: Sendable, Codable {
             self.intents = .init(intents)
         }
     }
-    
+
+    #warning("make the macro work with CaseIterable")
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
     public enum Intent: UInt, Sendable, Codable, CaseIterable {
         case guilds = 0
@@ -561,7 +562,7 @@ public struct Gateway: Sendable, Codable {
             }
         }
     }
-    
+
     /// https://discord.com/developers/docs/topics/gateway-events#resume-resume-structure
     public struct Resume: Sendable, Codable {
         public var token: Secret
@@ -1192,7 +1193,7 @@ public struct Gateway: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
 #if swift(>=5.9)
-        @UnstableEnum<Int>
+        @UnstableEnum<UInt>
         public enum Kind: RawRepresentable, Sendable, Codable {
             case game // 0
             case streaming // 1
@@ -1202,7 +1203,7 @@ public struct Gateway: Sendable, Codable {
             case competing // 5
         }
 #else
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
+        public enum Kind: UInt, Sendable, Codable, ToleratesIntDecodeMarker {
             case game = 0
             case streaming = 1
             case listening = 2
@@ -1276,6 +1277,20 @@ public struct Gateway: Sendable, Codable {
         }
         
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-flags
+#if swift(>=5.9)
+        @UnstableEnum<UInt>
+        public enum Flag: RawRepresentable, Sendable {
+            case instance // 0
+            case join // 1
+            case spectate // 2
+            case joinRequest // 3
+            case sync // 4
+            case play // 5
+            case partyPrivacyFriends // 6
+            case partyPrivacyVoiceChannel // 7
+            case embedded // 8
+        }
+#else
         public enum Flag: UInt, Sendable {
             case instance = 0
             case join = 1
@@ -1287,7 +1302,8 @@ public struct Gateway: Sendable, Codable {
             case partyPrivacyVoiceChannel = 7
             case embedded = 8
         }
-        
+#endif
+
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-buttons
         public struct Button: Sendable, Codable {
             public var label: String

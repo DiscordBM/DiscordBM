@@ -21,6 +21,26 @@ public struct DiscordUser: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/user#user-object-user-flags
+#if swift(>=5.9)
+    @UnstableEnum<UInt>
+    public enum Flag: RawRepresentable, Sendable {
+        case staff // 0
+        case partner // 1
+        case hypeSquad // 2
+        case BugHunterLevel1 // 3
+        case hypeSquadOnlineHouse1 // 6
+        case hypeSquadOnlineHouse2 // 7
+        case hypeSquadOnlineHouse3 // 8
+        case premiumEarlySupporter // 9
+        case teamPseudoUser // 10
+        case bugHunterLevel2 // 14
+        case verifiedBot // 16
+        case verifiedDeveloper // 17
+        case certifiedModerator // 18
+        case botHttpInteractions // 19
+        case activeDeveloper // 22
+    }
+#else
     public enum Flag: UInt, Sendable {
         case staff = 0
         case partner = 1
@@ -38,7 +58,8 @@ public struct DiscordUser: Sendable, Codable {
         case botHttpInteractions = 19
         case activeDeveloper = 22
     }
-    
+#endif
+
     public var id: UserSnowflake
     public var username: String
     public var discriminator: String

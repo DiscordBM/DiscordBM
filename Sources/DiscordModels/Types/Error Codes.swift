@@ -1,5 +1,6 @@
 
 /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
+
 public enum GatewayCloseCode: UInt16, Sendable, Codable {
     case unknownError = 4000
     case unknownOpcode = 4001

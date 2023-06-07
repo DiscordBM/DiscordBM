@@ -5,7 +5,7 @@ public struct ApplicationCommand: Sendable, Codable {
     
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
 #if swift(>=5.9)
-    @UnstableEnum<Int>
+    @UnstableEnum<UInt>
     public enum Kind: RawRepresentable, Sendable, Codable {
         case chatInput // 1
         case user // 2
@@ -24,7 +24,7 @@ public struct ApplicationCommand: Sendable, Codable {
         
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
 #if swift(>=5.9)
-        @UnstableEnum<Int>
+        @UnstableEnum<UInt>
         public enum Kind: RawRepresentable, Sendable, Codable {
             case subCommand // 1
             case subCommandGroup // 2

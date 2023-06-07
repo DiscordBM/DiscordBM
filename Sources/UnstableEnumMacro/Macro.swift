@@ -22,13 +22,7 @@ public struct UnstableEnumMacro: MemberMacro {
             throw MacroError.macroDoesNotHaveRequiredGenericArgument
         }
 
-        let rawType: RawKind
-        switch genericType.name.text {
-        case "String":
-            rawType = .String
-        case "Int":
-            rawType = .Int
-        default:
+        guard let rawType = RawKind(rawValue: genericType.name.text) else {
             throw MacroError.unexpectedGenericArgument
         }
 
@@ -103,7 +97,7 @@ public struct UnstableEnumMacro: MemberMacro {
             if values.allSatisfy({ Int($0) != nil }) {
                 throw MacroError.enumSeemsToHaveIntValuesButGenericArgumentSpecifiesString
             }
-        case .Int:
+        case .Int, .UInt:
             if !values.allSatisfy({ Int($0.filter({ $0 != "_" })) != nil }) {
                 throw MacroError.intEnumMustOnlyHaveIntValues
             }
@@ -130,7 +124,7 @@ public struct UnstableEnumMacro: MemberMacro {
                     let description = switch rawType {
                     case .String:
                         #""\#(value)""#
-                    case .Int:
+                    case .Int, .UInt:
                         value
                     }
                     SwitchCaseSyntax(
@@ -167,7 +161,7 @@ public struct UnstableEnumMacro: MemberMacro {
                     let description = switch rawType {
                     case .String:
                         #""\#(value)""#
-                    case .Int:
+                    case .Int, .UInt:
                         value
                     }
                     SwitchCaseSyntax(
@@ -194,4 +188,5 @@ public struct UnstableEnumMacro: MemberMacro {
 enum RawKind: String {
     case String
     case Int
+    case UInt
 }
