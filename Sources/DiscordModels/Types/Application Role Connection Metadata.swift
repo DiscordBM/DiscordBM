@@ -3,7 +3,7 @@
 public struct ApplicationRoleConnectionMetadata: Sendable, Codable, ValidatablePayload {
 
     /// https://discord.com/developers/docs/resources/application-role-connection-metadata#application-role-connection-metadata-object-application-role-connection-metadata-type
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum Kind: RawRepresentable, Sendable, Codable {
         case integerLessThanOrEqual // 1

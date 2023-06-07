@@ -3,7 +3,7 @@
 public struct Sticker: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum Kind: RawRepresentable, Sendable, Codable {
         case standard // 1
@@ -17,7 +17,7 @@ public struct Sticker: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-format-types
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum FormatKind: RawRepresentable, Sendable, Codable {
         case png // 1

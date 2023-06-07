@@ -35,7 +35,7 @@ public struct Interaction: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum Kind: RawRepresentable, Sendable, Codable {
         case ping // 1
@@ -334,7 +334,7 @@ public struct Interaction: Sendable, Codable {
             )
         case .ping:
             self.data = nil
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
         case .unknown: self.data = nil
 #endif
         }
@@ -425,7 +425,7 @@ extension Interaction {
     public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral {
 
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
         public enum Kind: RawRepresentable, Sendable, Codable {
             case actionRow // 1
@@ -454,7 +454,7 @@ extension Interaction {
         public struct Button: Sendable, Codable {
             
             /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
             @UnstableEnum<Int>
             public enum Style: RawRepresentable, Sendable, Codable {
                 case primary // 1
@@ -497,7 +497,7 @@ extension Interaction {
                     case .success: self = .success
                     case .danger: self = .danger
                     case .link: return nil
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
                     case .unknown: return nil
 #endif
                     }
@@ -672,7 +672,7 @@ extension Interaction {
         public struct TextInput: Sendable, Codable {
             
         /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
             @UnstableEnum<Int>
             public enum Style: RawRepresentable, Sendable, Codable {
                 case short // 1
@@ -714,7 +714,7 @@ extension Interaction {
             case roleSelect(SelectMenu)
             case mentionableSelect(SelectMenu)
             case channelSelect(ChannelSelectMenu)
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
             case unknown
 #endif
             #warning("pass container in unknown?! or not?")
@@ -735,7 +735,7 @@ extension Interaction {
                     return value.custom_id
                 case let .channelSelect(value):
                     return value.custom_id
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
                 case .unknown:
                     return nil
 #endif
@@ -766,7 +766,7 @@ extension Interaction {
                     self = try .channelSelect(.init(from: decoder))
                 case .textInput:
                     self = try .textInput(.init(from: decoder))
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
                 case .unknown:
                     self = .unknown
 #endif
@@ -797,7 +797,7 @@ extension Interaction {
                 case let .channelSelect(selectMenu):
                     try container.encode(Kind.channelSelect, forKey: .type)
                     try selectMenu.encode(to: encoder)
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
                 case .unknown: break
 #endif
                 }

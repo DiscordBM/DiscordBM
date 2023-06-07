@@ -126,7 +126,7 @@ public struct AuditLog: Sendable, Codable {
         }
         
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
         public enum ActionKind: RawRepresentable, Sendable, Codable {
             case guildUpdate // 1
@@ -555,7 +555,7 @@ public struct AuditLog: Sendable, Codable {
                 case .autoModerationUserCommunicationDisabled:
                     let moderationInfo = try container.decode(AutoModerationInfo.self, forKey: .options)
                     self = .autoModerationUserCommunicationDisabled(moderationInfo)
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
                 case .unknown:
                     #warning("better handling than adding a `unknown` case to that enum")
                     self = .unknown
@@ -655,7 +655,7 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(moderationInfo, forKey: .options)
                 case let .autoModerationUserCommunicationDisabled(moderationInfo):
                     try container.encode(moderationInfo, forKey: .options)
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
                 case .unknown: break
 #endif
                 }
@@ -762,7 +762,7 @@ extension AuditLog.Entry.ActionKind {
         case .autoModerationBlockMessage: self = .autoModerationBlockMessage
         case .autoModerationFlagToChannel: self = .autoModerationFlagToChannel
         case .autoModerationUserCommunicationDisabled: self = .autoModerationUserCommunicationDisabled
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
         case .unknown:
             self = .unknown(0)
 #endif

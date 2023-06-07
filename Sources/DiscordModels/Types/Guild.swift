@@ -6,7 +6,7 @@ public struct Guild: Sendable, Codable {
     public struct Member: Sendable, Codable {
         #warning("BitFields don't need to take care of unknown values anymore?")
         /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
         @UnstableEnum<UInt>
         public enum Flag: RawRepresentable, Sendable {
             case didRejoin // 0
@@ -52,7 +52,7 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum VerificationLevel: RawRepresentable, Sendable, Codable {
         case none // 0
@@ -72,7 +72,7 @@ public struct Guild: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-default-message-notification-level
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum DefaultMessageNotificationLevel: RawRepresentable, Sendable, Codable {
         case allMessages // 0
@@ -86,7 +86,7 @@ public struct Guild: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-explicit-content-filter-level
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum ExplicitContentFilterLevel: RawRepresentable, Sendable, Codable {
         case disabled // 0
@@ -102,7 +102,7 @@ public struct Guild: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-features
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<String>
     public enum Feature: RawRepresentable, Sendable, Codable {
         case animatedBanner // "ANIMATED_BANNER"
@@ -184,7 +184,7 @@ public struct Guild: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum MFALevel: RawRepresentable, Sendable, Codable {
         case none // 0
@@ -198,7 +198,7 @@ public struct Guild: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-system-channel-flags
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>
     public enum SystemChannelFlag: RawRepresentable, Sendable {
         case suppressJoinNotifications // 0
@@ -220,7 +220,7 @@ public struct Guild: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum PremiumTier: RawRepresentable, Sendable, Codable {
         case none // 0
@@ -260,7 +260,7 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-nsfw-level
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum NSFWLevel: RawRepresentable, Sendable, Codable {
         case `default` // 0
@@ -278,7 +278,7 @@ public struct Guild: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/guild#create-guild-json-params
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum AFKTimeout: RawRepresentable, Sendable, Codable {
         case oneMinute // 60
@@ -438,7 +438,7 @@ extension Guild {
             }
 
             /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-types
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
             @UnstableEnum<Int>
             public enum Kind: RawRepresentable, Sendable, Codable {
                 case multipleChoice // 0

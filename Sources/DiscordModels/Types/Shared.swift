@@ -164,7 +164,7 @@ public enum IntOrDouble: Sendable, Codable {
 //MARK: - DiscordLocale
 
 /// https://discord.com/developers/docs/reference#locales
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
 @UnstableEnum<String>
 public enum DiscordLocale: RawRepresentable, Sendable, Codable {
     case danish // "da"
@@ -337,7 +337,7 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
                 case .japanese: self.japanese = value
                 case .chineseTaiwan: self.chineseTaiwan = value
                 case .korean: self.korean = value
-#if swift(>=5.9)
+#if swift(>=5.9) && $Macros
                 case .unknown: break // Ignore
 #endif
                 }
