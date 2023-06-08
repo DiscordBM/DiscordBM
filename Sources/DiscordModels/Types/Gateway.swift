@@ -508,8 +508,31 @@ public struct Gateway: Sendable, Codable {
         }
     }
 
-    #warning("make the macro work with CaseIterable")
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
+#if swift(>=5.9) && $Macros
+    @UnstableEnum<UInt>
+    public enum Intent: Sendable, Codable, CaseIterable {
+        case guilds // 0
+        case guildMembers // 1
+        case guildModeration // 2
+        case guildEmojisAndStickers // 3
+        case guildIntegrations // 4
+        case guildWebhooks // 5
+        case guildInvites // 6
+        case guildVoiceStates // 7
+        case guildPresences // 8
+        case guildMessages // 9
+        case guildMessageReactions // 10
+        case guildMessageTyping // 11
+        case directMessages // 12
+        case directMessageReactions // 13
+        case directMessageTyping // 14
+        case messageContent // 15
+        case guildScheduledEvents // 16
+        case autoModerationConfiguration // 20
+        case autoModerationExecution // 21
+    }
+#else
     public enum Intent: UInt, Sendable, Codable, CaseIterable {
         case guilds = 0
         case guildMembers = 1
@@ -530,38 +553,8 @@ public struct Gateway: Sendable, Codable {
         case guildScheduledEvents = 16
         case autoModerationConfiguration = 20
         case autoModerationExecution = 21
-
-        /// All intents that require no privileges.
-        /// https://discord.com/developers/docs/topics/gateway#privileged-intents
-        public static var unprivileged: [Intent] {
-            .init(Gateway.Intent.allCases.filter(\.isPrivileged))
-        }
-
-        /// https://discord.com/developers/docs/topics/gateway#privileged-intents
-        public var isPrivileged: Bool {
-            switch self {
-            case .guilds: return false
-            case .guildMembers: return true
-            case .guildModeration: return false
-            case .guildEmojisAndStickers: return false
-            case .guildIntegrations: return false
-            case .guildWebhooks: return false
-            case .guildInvites: return false
-            case .guildVoiceStates: return false
-            case .guildPresences: return true
-            case .guildMessages: return false
-            case .guildMessageReactions: return false
-            case .guildMessageTyping: return false
-            case .directMessages: return false
-            case .directMessageReactions: return false
-            case .directMessageTyping: return false
-            case .messageContent: return true
-            case .guildScheduledEvents: return false
-            case .autoModerationConfiguration: return false
-            case .autoModerationExecution: return false
-            }
-        }
     }
+#endif
 
     /// https://discord.com/developers/docs/topics/gateway-events#resume-resume-structure
     public struct Resume: Sendable, Codable {
@@ -1390,5 +1383,43 @@ public struct Gateway: Sendable, Codable {
         public var url: String
         public var shards: Int
         public var session_start_limit: SessionStartLimit
+    }
+}
+
+// MARK: + Gateway.Intent
+extension Gateway.Intent {
+    /// All intents that require no privileges.
+    /// https://discord.com/developers/docs/topics/gateway#privileged-intents
+    public static var unprivileged: [Gateway.Intent] {
+        Gateway.Intent.allCases.filter(\.isPrivileged)
+    }
+
+    /// https://discord.com/developers/docs/topics/gateway#privileged-intents
+    public var isPrivileged: Bool {
+        switch self {
+        case .guilds: return false
+        case .guildMembers: return true
+        case .guildModeration: return false
+        case .guildEmojisAndStickers: return false
+        case .guildIntegrations: return false
+        case .guildWebhooks: return false
+        case .guildInvites: return false
+        case .guildVoiceStates: return false
+        case .guildPresences: return true
+        case .guildMessages: return false
+        case .guildMessageReactions: return false
+        case .guildMessageTyping: return false
+        case .directMessages: return false
+        case .directMessageReactions: return false
+        case .directMessageTyping: return false
+        case .messageContent: return true
+        case .guildScheduledEvents: return false
+        case .autoModerationConfiguration: return false
+        case .autoModerationExecution: return false
+#if swift(>=5.9) && $Macros
+            /// Unknown cases are considered privileged just to safe than sorry
+        case .unknown: return true
+#endif
+        }
     }
 }

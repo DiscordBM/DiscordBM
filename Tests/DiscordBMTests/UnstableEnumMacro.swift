@@ -135,7 +135,7 @@ class UnstableEnumMacroTests: XCTestCase {
         )
     }
 
-    func testCodableEnum() throws {
+    func testDecodableEnum() throws {
         assertMacroExpansion(
             """
             @UnstableEnum<Int>

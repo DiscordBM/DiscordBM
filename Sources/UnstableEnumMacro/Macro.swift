@@ -3,6 +3,19 @@ import SwiftDiagnostics
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
+/// A to stabilize enums that might get more cases, to some extent.
+/// The main goal is to not fail json decodings if Discord adds a new case.
+///
+/// This is supposed to be used with enums that are supposed to be raw-representable.
+/// The macro accepts one and only one of these types as a generic argument:
+/// `String`, `Int`, `UInt`. More types can be added on demand.
+/// The generic argument represents the `RawValue` of a `RawRepresentable` type.
+///
+/// How it manipulates the code:
+/// Adds a new `.unknown(<Type>)` case where Type is the generic argument of the macro.
+/// Adds `RawRepresentable` conformance where `RawValue` is the generic argument of the macro.
+/// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
+/// If `CaseIterable`, repairs the `static var allCases` requirement.
 public struct UnstableEnumMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
@@ -208,11 +221,28 @@ public struct UnstableEnumMacro: MemberMacro {
             }
         }
 
+        var caseIterableSyntaxContainer = [DeclSyntax]()
+
+        let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
+            $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.text == "CaseIterable"
+        }
+
+        if conformsToCaseIterable == true {
+            let caseIterableConformance: DeclSyntax = """
+            \(raw: publicModifier)static var allCases: [\(enumDecl.identifier)] {
+                [
+                    \(raw: caseToRawValueTable.map(\.0).map { ".\($0)" }.joined(separator: ",\n"))
+                ]
+            }
+            """
+            caseIterableSyntaxContainer.append(caseIterableConformance)
+        }
+
         return [
             DeclSyntax(unknownCase),
             DeclSyntax(rawValueVar),
             DeclSyntax(initializer)
-        ] + decodableSyntaxContainer
+        ] + caseIterableSyntaxContainer + decodableSyntaxContainer
     }
 }
 
@@ -222,28 +252,12 @@ extension UnstableEnumMacro: ConformanceMacro {
         providingConformancesOf declaration: Declaration,
         in context: Context
     ) throws -> [(TypeSyntax, GenericWhereClauseSyntax?)] {
-        let inheritanceList: InheritedTypeListSyntax?
-        if let classDecl = declaration.as(ClassDeclSyntax.self) {
-            inheritanceList = classDecl.inheritanceClause?.inheritedTypeCollection
-        } else if let structDecl = declaration.as(StructDeclSyntax.self) {
-            inheritanceList = structDecl.inheritanceClause?.inheritedTypeCollection
-        } else {
-            inheritanceList = nil
-        }
-
-        if let inheritanceList {
-            for inheritance in inheritanceList {
-                if inheritance.typeName.as(SimpleTypeIdentifierSyntax.self)?.name == "RawRepresentable" {
-                    return []
-                }
-            }
-        }
-
+        /// Always add a new ``RawRepresentable`` conformance.
         return [("RawRepresentable", nil)]
     }
 }
 
-enum RawKind: String {
+private enum RawKind: String {
     case String
     case Int
     case UInt
