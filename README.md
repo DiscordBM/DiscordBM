@@ -643,7 +643,7 @@ Read more about it at https://github.com/DiscordBM/DiscordReactToRole.
   <summary> Click to expand </summary>
 
 These are some general implementation detail notes about the `DefaultDiscordClient`.   
-Generally, the `DefaultDiscordClient` will try to be as smart as possible with minimal compromises.
+Generally, the `DefaultDiscordClient` will try to be as smart as possible with minimal compromise.
 
 > I'll refer to `DefaultDiscordClient` as "DDC" to be more concise.
 
