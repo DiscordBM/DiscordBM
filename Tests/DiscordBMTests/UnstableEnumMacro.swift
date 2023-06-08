@@ -445,7 +445,6 @@ class UnstableEnumMacroTests: XCTestCase {
         }
     }
 }
-#endif
 
 private struct CodableContainer: Codable {
 
@@ -457,3 +456,4 @@ private struct CodableContainer: Codable {
 
     var some: UnstableEnumCodableTester
 }
+#endif
