@@ -9,7 +9,7 @@ import Logging
  */
 
 /// UnstableEnum macro solves this problem in Swift 5.9+
-#if swift(<5.9)
+#if swift(>=5.9) && $Macros
 protocol _ToleratesDecode { }
 protocol ToleratesStringDecodeMarker: _ToleratesDecode { }
 protocol ToleratesIntDecodeMarker: _ToleratesDecode { }
