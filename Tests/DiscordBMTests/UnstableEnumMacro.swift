@@ -1,3 +1,4 @@
+#if swift(>=5.9) && $Macros
 import UnstableEnumMacro
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
@@ -319,3 +320,4 @@ class UnstableEnumMacroTests: XCTestCase {
         )
     }
 }
+#endif
