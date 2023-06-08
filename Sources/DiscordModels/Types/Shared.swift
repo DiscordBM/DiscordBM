@@ -166,7 +166,7 @@ public enum IntOrDouble: Sendable, Codable {
 /// https://discord.com/developers/docs/reference#locales
 #if swift(>=5.9) && $Macros
 @UnstableEnum<String>
-public enum DiscordLocale: RawRepresentable, Sendable, Codable {
+public enum DiscordLocale: Sendable, Codable {
     case danish // "da"
     case german // "de"
     case englishUK // "en-GB"

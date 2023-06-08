@@ -6,7 +6,7 @@ public struct ApplicationCommand: Sendable, Codable {
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
 #if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>
-    public enum Kind: RawRepresentable, Sendable, Codable {
+    public enum Kind: Sendable, Codable {
         case chatInput // 1
         case user // 2
         case message // 3
@@ -25,7 +25,7 @@ public struct ApplicationCommand: Sendable, Codable {
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
 #if swift(>=5.9) && $Macros
         @UnstableEnum<UInt>
-        public enum Kind: RawRepresentable, Sendable, Codable {
+        public enum Kind: Sendable, Codable {
             case subCommand // 1
             case subCommandGroup // 2
             case string // 3
@@ -168,7 +168,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-application-command-permission-type
 #if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
-        public enum Kind: RawRepresentable, Sendable, Codable {
+        public enum Kind: Sendable, Codable {
             case role // 1
             case user // 2
             case channel // 3

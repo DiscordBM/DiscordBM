@@ -37,7 +37,7 @@ public struct Interaction: Sendable, Codable {
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
 #if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
-    public enum Kind: RawRepresentable, Sendable, Codable {
+    public enum Kind: Sendable, Codable {
         case ping // 1
         case applicationCommand // 2
         case messageComponent // 3
@@ -427,7 +427,7 @@ extension Interaction {
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
 #if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
-        public enum Kind: RawRepresentable, Sendable, Codable {
+        public enum Kind: Sendable, Codable {
             case actionRow // 1
             case button // 2
             case stringSelect // 3
@@ -456,7 +456,7 @@ extension Interaction {
             /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
 #if swift(>=5.9) && $Macros
             @UnstableEnum<Int>
-            public enum Style: RawRepresentable, Sendable, Codable {
+            public enum Style: Sendable, Codable {
                 case primary // 1
                 case secondary // 2
                 case success // 3
@@ -674,7 +674,7 @@ extension Interaction {
         /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
 #if swift(>=5.9) && $Macros
             @UnstableEnum<Int>
-            public enum Style: RawRepresentable, Sendable, Codable {
+            public enum Style: Sendable, Codable {
                 case short // 1
                 case paragraph // 2
             }

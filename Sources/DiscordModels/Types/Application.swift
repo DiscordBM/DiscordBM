@@ -5,7 +5,7 @@ public struct DiscordApplication: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/application#application-object-application-flags
 #if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>
-    public enum Flag: RawRepresentable, Sendable {
+    public enum Flag: Sendable {
         case applicationAutoModerationRuleCreateBadge // 6
         case gatewayPresence // 12
         case gatewayPresenceLimited // 13

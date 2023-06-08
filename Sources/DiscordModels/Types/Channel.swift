@@ -8,7 +8,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
 #if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>
-    public enum Kind: RawRepresentable, Sendable, Codable {
+    public enum Kind: Sendable, Codable {
         case guildText // 0
         case dm // 1
         case guildVoice // 2
@@ -45,7 +45,7 @@ public struct DiscordChannel: Sendable, Codable {
         /// https://discord.com/developers/docs/resources/channel#overwrite-object
 #if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
-        public enum Kind: RawRepresentable, Sendable, Codable {
+        public enum Kind: Sendable, Codable {
             case role // 0
             case member // 1
         }
@@ -65,7 +65,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/channel#channel-object-sort-order-types
 #if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
-    public enum SortOrder: RawRepresentable, Sendable, Codable {
+    public enum SortOrder: Sendable, Codable {
         case latestActivity // 0
         case creationDate // 1
     }
@@ -79,7 +79,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types
 #if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
-    public enum ForumLayout: RawRepresentable, Sendable, Codable {
+    public enum ForumLayout: Sendable, Codable {
         case notSet // 0
         case listView // 1
         case galleryView // 2
@@ -96,7 +96,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
 #if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>
-    public enum Flag: RawRepresentable, Sendable {
+    public enum Flag: Sendable {
         case pinned // 1
         case requireTag // 4
     }
@@ -110,7 +110,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
 #if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
-    public enum VideoQualityMode: RawRepresentable, Sendable, Codable {
+    public enum VideoQualityMode: Sendable, Codable {
         case auto // 1
         case full // 2
     }
@@ -126,7 +126,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
 #if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
-    public enum AutoArchiveDuration: RawRepresentable, Sendable, Codable {
+    public enum AutoArchiveDuration: Sendable, Codable {
         case oneHour // 60
         case oneDay // 1_440
         case threeDays // 4_320
@@ -233,7 +233,7 @@ extension DiscordChannel {
         /// https://discord.com/developers/docs/resources/channel#message-object-message-types
 #if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
-        public enum Kind: RawRepresentable, Sendable, Codable {
+        public enum Kind: Sendable, Codable {
             case `default` // 0
             case recipientAdd // 1
             case recipientRemove // 2
@@ -305,7 +305,7 @@ extension DiscordChannel {
         /// https://discord.com/developers/docs/resources/channel#message-object-message-flags
 #if swift(>=5.9) && $Macros
         @UnstableEnum<UInt>
-        public enum Flag: RawRepresentable, Sendable {
+        public enum Flag: Sendable {
             case crossposted // 0
             case isCrosspost // 1
             case suppressEmbeds // 2
@@ -377,7 +377,7 @@ extension DiscordChannel {
             /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-types
 #if swift(>=5.9) && $Macros
             @UnstableEnum<Int>
-            public enum Kind: RawRepresentable, Sendable, Codable {
+            public enum Kind: Sendable, Codable {
                 case join // 1
                 case spectate // 2
                 case listen // 3
@@ -521,7 +521,7 @@ public struct ThreadMemberWithMember: Sendable, Codable {
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
 #if swift(>=5.9) && $Macros
 @UnstableEnum<Int>
-public enum ThreadKind: RawRepresentable, Sendable, Codable {
+public enum ThreadKind: Sendable, Codable {
     case announcementThread // 10
     case publicThread // 11
     case privateThread // 12
@@ -541,7 +541,7 @@ extension DiscordChannel {
         /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
 #if swift(>=5.9) && $Macros
         @UnstableEnum<String>
-        public enum Kind: RawRepresentable, Sendable, Codable {
+        public enum Kind: Sendable, Codable {
             case roles
             case users
             case everyone
@@ -567,7 +567,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
 #if swift(>=5.9) && $Macros
     @UnstableEnum<String>
-    public enum Kind: RawRepresentable, Sendable, Codable {
+    public enum Kind: Sendable, Codable {
         case rich // "rich"
         case image // "image"
         case video // "video"

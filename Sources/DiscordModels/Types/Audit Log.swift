@@ -128,7 +128,7 @@ public struct AuditLog: Sendable, Codable {
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
 #if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
-        public enum ActionKind: RawRepresentable, Sendable, Codable {
+        public enum ActionKind: Sendable, Codable {
             case guildUpdate // 1
             case channelCreate // 10
             case channelUpdate // 11

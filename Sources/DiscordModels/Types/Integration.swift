@@ -5,7 +5,7 @@ public struct Integration: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/guild#integration-object-integration-structure
 #if swift(>=5.9) && $Macros
     @UnstableEnum<String>
-    public enum Kind: RawRepresentable, Sendable, Codable {
+    public enum Kind: Sendable, Codable {
         case twitch
         case youtube
         case discord
@@ -23,7 +23,7 @@ public struct Integration: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors
 #if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
-    public enum ExpireBehavior: RawRepresentable, Sendable, Codable {
+    public enum ExpireBehavior: Sendable, Codable {
         case removeRole // 0
         case kick // 1
     }

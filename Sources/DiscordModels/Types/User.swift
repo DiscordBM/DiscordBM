@@ -5,7 +5,7 @@ public struct DiscordUser: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/user#user-object-premium-types
 #if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
-    public enum PremiumKind: RawRepresentable, Sendable, Codable {
+    public enum PremiumKind: Sendable, Codable {
         case none // 0
         case nitroClassic // 1
         case nitro // 2
@@ -23,7 +23,7 @@ public struct DiscordUser: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/user#user-object-user-flags
 #if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>
-    public enum Flag: RawRepresentable, Sendable {
+    public enum Flag: Sendable {
         case staff // 0
         case partner // 1
         case hypeSquad // 2
@@ -130,7 +130,7 @@ extension DiscordUser {
         /// https://discord.com/developers/docs/resources/user#connection-object-services
 #if swift(>=5.9) && $Macros
         @UnstableEnum<String>
-        public enum Service: RawRepresentable, Sendable, Codable {
+        public enum Service: Sendable, Codable {
             case battleNet // "Battle.net"
             case ebay // "eBay"
             case epicGames // "Epic Games"
@@ -178,7 +178,7 @@ extension DiscordUser {
         /// https://discord.com/developers/docs/resources/user#connection-object-visibility-types
 #if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
-        public enum VisibilityKind: RawRepresentable, Sendable, Codable {
+        public enum VisibilityKind: Sendable, Codable {
             case none // 0
             case everyone // 1
         }

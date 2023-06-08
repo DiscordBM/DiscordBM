@@ -32,7 +32,7 @@ public struct UnstableEnumMacro: MemberMacro {
 
         var useDefaultCase = false
 
-        var caseToRawValueTable: [(String, String)] = try elements.compactMap { element in
+        let caseToRawValueTable: [(String, String)] = try elements.compactMap { element in
             if let rawValue = element.rawValue {
                 var modifiedElement = EnumCaseElementSyntax(element)!
                 modifiedElement.rawValue = nil
@@ -82,11 +82,11 @@ public struct UnstableEnumMacro: MemberMacro {
 
         /// Catching some programmer errors
 
-        if caseToRawValueTable.isEmpty {
+        let values = caseToRawValueTable.map(\.1)
+
+        if values.isEmpty {
             return []
         }
-
-        let values = caseToRawValueTable.map(\.1)
 
         if Set(values).count != values.count {
             throw MacroError.valuesMustBeUnique
@@ -181,7 +181,99 @@ public struct UnstableEnumMacro: MemberMacro {
             }
         }
 
-        return [DeclSyntax(unknownCase), DeclSyntax(rawValueVar), DeclSyntax(initializer)]
+        let inheritance = TypeInheritanceClauseSyntax(inheritedTypeCollection: [
+            .init(typeName: SimpleTypeIdentifierSyntax(name: .identifier("RawRepresentable")))
+        ])
+
+//        if enumDecl.inheritanceClause == nil {
+//            enumDecl.inheritanceClause = TypeInheritanceClauseSyntax(inheritedTypeCollection: [])
+//        }
+//
+//        enumDecl.inheritanceClause!.inheritedTypeCollection = enumDecl.inheritanceClause!.inheritedTypeCollection.appending(
+//            .init(typeName: SimpleTypeIdentifierSyntax(name: .identifier("RawRepresentable")))
+//        )
+
+        let inherit = InheritedTypeSyntax(
+            typeName: SimpleTypeIdentifierSyntax(
+                name: .identifier("RawRepresentable")
+            )
+        )
+//        let rawRepExtension = try ExtensionDeclSyntax("extension \(enumDecl.identifier)") {
+//            [
+//                MemberDeclListItemSyntax.init(decl: <#T##DeclSyntaxProtocol#>)
+//            ]
+//        }
+
+//        ExtensionDeclSyntax(extendedType: enumDecl, memberBlock: .init(members: [
+//            .init(decl: )
+//        ]))
+
+        let ext = ExtensionDeclSyntax(
+            extendedType: SimpleTypeIdentifierSyntax(name: enumDecl.identifier),
+            inheritanceClause: .init(inheritedTypeCollection: [inherit]),
+            memberBlock: .init(members: [])
+        )
+
+        return [
+            DeclSyntax(unknownCase),
+            DeclSyntax(rawValueVar),
+            DeclSyntax(initializer)
+        ]
+    }
+    /*
+     ExtensionDeclSyntax
+     ├─attributes: AttributeListSyntax
+     │ ╰─[0]: AttributeSyntax
+     │   ├─atSignToken: atSign
+     │   ╰─attributeName: SimpleTypeIdentifierSyntax
+     │     ├─name: identifier("UnstableEnum")
+     │     ╰─genericArgumentClause: GenericArgumentClauseSyntax
+     │       ├─leftAngleBracket: leftAngle
+     │       ├─arguments: GenericArgumentListSyntax
+     │       │ ╰─[0]: GenericArgumentSyntax
+     │       │   ╰─argumentType: SimpleTypeIdentifierSyntax
+     │       │     ╰─name: identifier("Int")
+     │       ╰─rightAngleBracket: rightAngle
+     ├─extensionKeyword: keyword(SwiftSyntax.Keyword.extension)
+     ├─extendedType: SimpleTypeIdentifierSyntax
+     │ ╰─name: identifier("Some")
+     ├─inheritanceClause: TypeInheritanceClauseSyntax
+     │ ├─colon: colon
+     │ ╰─inheritedTypeCollection: InheritedTypeListSyntax
+     │   ╰─[0]: InheritedTypeSyntax
+     │     ╰─typeName: SimpleTypeIdentifierSyntax
+     │       ╰─name: identifier("RawRepresentable")
+     ╰─memberBlock: MemberDeclBlockSyntax
+     ├─leftBrace: leftBrace
+     ├─members: MemberDeclListSyntax
+     ╰─rightBrace: rightBrace
+     */
+}
+
+extension UnstableEnumMacro: ConformanceMacro {
+    public static func expansion<Declaration: DeclGroupSyntax, Context: MacroExpansionContext>(
+        of node: AttributeSyntax,
+        providingConformancesOf declaration: Declaration,
+        in context: Context
+    ) throws -> [(TypeSyntax, GenericWhereClauseSyntax?)] {
+        let inheritanceList: InheritedTypeListSyntax?
+        if let classDecl = declaration.as(ClassDeclSyntax.self) {
+            inheritanceList = classDecl.inheritanceClause?.inheritedTypeCollection
+        } else if let structDecl = declaration.as(StructDeclSyntax.self) {
+            inheritanceList = structDecl.inheritanceClause?.inheritedTypeCollection
+        } else {
+            inheritanceList = nil
+        }
+
+        if let inheritanceList {
+            for inheritance in inheritanceList {
+                if inheritance.typeName.as(SimpleTypeIdentifierSyntax.self)?.name == "RawRepresentable" {
+                    return []
+                }
+            }
+        }
+
+        return [("RawRepresentable", nil)]
     }
 }
 

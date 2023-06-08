@@ -2,9 +2,13 @@
 import UnstableEnumMacro
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
+@testable import DiscordModels
 import XCTest
 
 class UnstableEnumMacroTests: XCTestCase {
+
+    /// TODO: test **conformance** macro expansion too
+    /// `assertMacroExpansion` seems to not to do that
 
     let macros: [String: any Macro.Type] = [
         "UnstableEnum": UnstableEnumMacro.self
@@ -270,31 +274,6 @@ class UnstableEnumMacroTests: XCTestCase {
         )
     }
 
-    func testStringValuesNoQuotation() throws {
-        assertMacroExpansion(
-            """
-            @UnstableEnum<String>
-            enum MyEnum: RawRepresentable {
-                case a // "g"
-                case b // "gg"
-            }
-            """,
-            expandedSource: """
-
-            enum MyEnum: RawRepresentable {
-                case a // "g"
-                case b // "gg"
-            }
-            """,
-            diagnostics: [.init(
-                message: "stringValuesMustNotHaveQuotation",
-                line: 1,
-                column: 1
-            )],
-            macros: macros
-        )
-    }
-
     func testNoRawValues() throws {
         assertMacroExpansion(
             """
@@ -311,11 +290,20 @@ class UnstableEnumMacroTests: XCTestCase {
                 case b = "gg"
             }
             """,
-            diagnostics: [.init(
-                message: "rawValuesNotAcceptable",
-                line: 1,
-                column: 1
-            )],
+            diagnostics: [
+                .init(
+                    message: "rawValuesNotAcceptable",
+                    line: 3,
+                    column: 12,
+                    fixIts: [.init(message: "useCommentsInstead")]
+                ),
+                .init(
+                    message: "rawValuesNotAcceptable",
+                    line: 4,
+                    column: 12,
+                    fixIts: [.init(message: "useCommentsInstead")]
+                )
+            ],
             macros: macros
         )
     }

@@ -579,7 +579,7 @@ public struct Gateway: Sendable, Codable {
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence-status-types
 #if swift(>=5.9) && $Macros
     @UnstableEnum<String>
-    public enum Status: RawRepresentable, Sendable, Codable {
+    public enum Status: Sendable, Codable {
         case online // "online"
         case doNotDisturb // "dnd"
         case afk // "idle"
@@ -940,7 +940,7 @@ public struct Gateway: Sendable, Codable {
         /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
 #if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
-        public enum TargetKind: RawRepresentable, Sendable, Codable {
+        public enum TargetKind: Sendable, Codable {
             case stream // 1
             case embeddedApplication // 2
         }
@@ -1094,7 +1094,7 @@ public struct Gateway: Sendable, Codable {
 
 #if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
-    public enum ReactionKind: RawRepresentable, Sendable, Codable {
+    public enum ReactionKind: Sendable, Codable {
         case normal // 0
         case `super` // 1
     }
@@ -1194,7 +1194,7 @@ public struct Gateway: Sendable, Codable {
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
 #if swift(>=5.9) && $Macros
         @UnstableEnum<UInt>
-        public enum Kind: RawRepresentable, Sendable, Codable {
+        public enum Kind: Sendable, Codable {
             case game // 0
             case streaming // 1
             case listening // 2
@@ -1279,7 +1279,7 @@ public struct Gateway: Sendable, Codable {
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-flags
 #if swift(>=5.9) && $Macros
         @UnstableEnum<UInt>
-        public enum Flag: RawRepresentable, Sendable {
+        public enum Flag: Sendable {
             case instance // 0
             case join // 1
             case spectate // 2
