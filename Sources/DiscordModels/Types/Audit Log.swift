@@ -301,7 +301,9 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationBlockMessage(AutoModerationInfo)
             case autoModerationFlagToChannel(AutoModerationInfo)
             case autoModerationUserCommunicationDisabled(AutoModerationInfo)
+#if swift(>=5.9) && $Macros
             case unknown
+#endif
 
             public struct OverwriteInfo: Sendable, Codable {
                 
