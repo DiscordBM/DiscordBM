@@ -4,7 +4,6 @@ public struct Guild: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
     public struct Member: Sendable, Codable {
-        #warning("BitFields don't need to take care of unknown values anymore?")
         /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags
 #if swift(>=5.9) && $Macros
         @UnstableEnum<UInt>

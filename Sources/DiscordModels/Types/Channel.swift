@@ -92,7 +92,6 @@ public struct DiscordChannel: Sendable, Codable {
     }
 #endif
 
-    #warning("UInt ?! also take care of these in the macro")
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
 #if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>

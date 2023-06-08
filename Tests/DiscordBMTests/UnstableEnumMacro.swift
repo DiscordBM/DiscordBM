@@ -135,6 +135,114 @@ class UnstableEnumMacroTests: XCTestCase {
         )
     }
 
+    func testCodableEnum() throws {
+        assertMacroExpansion(
+            """
+            @UnstableEnum<Int>
+            enum MyEnum: RawRepresentable, Codable {
+                case a // 1
+                case b // 5
+            }
+            """,
+            expandedSource: #"""
+
+            enum MyEnum: RawRepresentable, Codable {
+                case a // 1
+                case b // 5
+                case unknown(Int)
+                var rawValue: Int {
+                    switch self {
+                    case .a:
+                        return 1
+                    case .b:
+                        return 5
+                    case let .unknown(value):
+                        return value
+                    }
+                }
+                init? (rawValue: Int) {
+                    switch rawValue {
+                    case 1:
+                        self = .a
+                    case 5:
+                        self = .b
+                    default:
+                        self = .unknown(rawValue)
+                    }
+                }
+                init(from decoder: any Decoder) throws {
+                    try self.init(rawValue: Int(from: decoder))!
+                    #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
+                    if case let .unknown(value) = self {
+                        DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning(
+                            "Found an unknown value", metadata: [
+                                "value": "\(value)",
+                                "typeName": "MyEnum",
+                                "location": "TestModule/test.swift:1"
+                            ]
+                        )
+                    }
+                    #endif
+                }
+            }
+            """#,
+            macros: macros
+        )
+
+        assertMacroExpansion(
+            """
+            @UnstableEnum<Int>
+            enum MyEnum: RawRepresentable, Decodable, SomethingElse {
+                case a // 1
+                case b // 5
+            }
+            """,
+            expandedSource: #"""
+
+            enum MyEnum: RawRepresentable, Decodable, SomethingElse {
+                case a // 1
+                case b // 5
+                case unknown(Int)
+                var rawValue: Int {
+                    switch self {
+                    case .a:
+                        return 1
+                    case .b:
+                        return 5
+                    case let .unknown(value):
+                        return value
+                    }
+                }
+                init? (rawValue: Int) {
+                    switch rawValue {
+                    case 1:
+                        self = .a
+                    case 5:
+                        self = .b
+                    default:
+                        self = .unknown(rawValue)
+                    }
+                }
+                init(from decoder: any Decoder) throws {
+                    try self.init(rawValue: Int(from: decoder))!
+                    #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
+                    if case let .unknown(value) = self {
+                        DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning(
+                            "Found an unknown value", metadata: [
+                                "value": "\(value)",
+                                "typeName": "MyEnum",
+                                "location": "TestModule/test.swift:1"
+                            ]
+                        )
+                    }
+                    #endif
+                }
+            }
+            """#,
+            macros: macros
+        )
+    }
+
     func testKeepsPublicAccessModifier() throws {
         assertMacroExpansion(
             """
@@ -307,5 +415,45 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
+
+    func testCodableConformance() throws {
+        do {
+            let json = #"{"some":100}"#
+            let data = Data(json.utf8)
+            let value = try JSONDecoder().decode(CodableContainer.self, from: data)
+            XCTAssertEqual(value.some, .h)
+        }
+
+        do {
+            let json = #"{"some": 12}"#
+            let data = Data(json.utf8)
+            let value = try JSONDecoder().decode(CodableContainer.self, from: data)
+            XCTAssertEqual(value.some, .a)
+        }
+
+        do {
+            let json = #"{"some":1}"#
+            let data = Data(json.utf8)
+            let value = try JSONDecoder().decode(CodableContainer.self, from: data)
+            XCTAssertEqual(value.some, .unknown(1))
+        }
+
+        do {
+            let json = #"{"some":"12"}"#
+            let data = Data(json.utf8)
+            XCTAssertThrowsError(try JSONDecoder().decode(CodableContainer.self, from: data))
+        }
+    }
 }
 #endif
+
+private struct CodableContainer: Codable {
+
+    @UnstableEnum<Int>
+    enum UnstableEnumCodableTester: Codable {
+        case a // 12
+        case h // 100
+    }
+
+    var some: UnstableEnumCodableTester
+}

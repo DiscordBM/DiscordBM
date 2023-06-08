@@ -2,10 +2,8 @@ import Foundation
 
 /// https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-structure
 public struct Webhook: Sendable, Codable {
-    #warning("no need for manual conformance to `RawRepresentable`? Macro can provide that?")
     /// https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-types
 #if swift(>=5.9) && $Macros
-    #warning("conformance to raw-rep")
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
         case incoming // 1

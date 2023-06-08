@@ -104,6 +104,37 @@ public struct UnstableEnumMacro: MemberMacro {
         }
 
 
+        let isPublic = enumDecl.modifiers?.contains(where: { $0.name.text == "public" }) == true
+        let publicModifier = isPublic ? "public " : ""
+
+        var decodableSyntaxContainer = [DeclSyntax]()
+
+        let conformsToDecodable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
+            let name = $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.text
+            return name == "Codable" || name == "Decodable"
+        }
+
+        if conformsToDecodable == true {
+            let location: AbstractSourceLocation? = context.location(of: node)
+            let decodableInit: DeclSyntax = #"""
+            \#(raw: publicModifier)init(from decoder: any Decoder) throws {
+                try self.init(rawValue: \#(raw: rawType)(from: decoder))!
+                #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
+                if case let .unknown(value) = self {
+                    DiscordGlobalConfiguration.makeDecodeLogger("\#(enumDecl.identifier)").warning(
+                        "Found an unknown value", metadata: [
+                            "value": "\(value)",
+                            "typeName": "\#(enumDecl.identifier)",
+                            "location": "\#(raw: location?.description ?? "nil")"
+                        ]
+                    )
+                }
+                #endif
+            }
+            """#
+            decodableSyntaxContainer.append(decodableInit)
+        }
+
         let unknownCase = EnumCaseDeclSyntax(elements: [.init(
             identifier: .identifier("unknown"),
             associatedValue: .init(parameterList: [
@@ -112,9 +143,6 @@ public struct UnstableEnumMacro: MemberMacro {
                 )
             ])
         )])
-
-        let isPublic = enumDecl.modifiers?.contains(where: { $0.name.text == "public" }) == true
-        let publicModifier = isPublic ? "public " : ""
 
         let rawValueVar = try VariableDeclSyntax(
             "\(raw: publicModifier)var rawValue: \(raw: rawType.rawValue)"
@@ -152,7 +180,6 @@ public struct UnstableEnumMacro: MemberMacro {
             }
         }
 
-
         let initializer = try InitializerDeclSyntax(
             "\(raw: publicModifier)init? (rawValue: \(raw: rawType.rawValue))"
         ) {
@@ -181,73 +208,12 @@ public struct UnstableEnumMacro: MemberMacro {
             }
         }
 
-        let inheritance = TypeInheritanceClauseSyntax(inheritedTypeCollection: [
-            .init(typeName: SimpleTypeIdentifierSyntax(name: .identifier("RawRepresentable")))
-        ])
-
-//        if enumDecl.inheritanceClause == nil {
-//            enumDecl.inheritanceClause = TypeInheritanceClauseSyntax(inheritedTypeCollection: [])
-//        }
-//
-//        enumDecl.inheritanceClause!.inheritedTypeCollection = enumDecl.inheritanceClause!.inheritedTypeCollection.appending(
-//            .init(typeName: SimpleTypeIdentifierSyntax(name: .identifier("RawRepresentable")))
-//        )
-
-        let inherit = InheritedTypeSyntax(
-            typeName: SimpleTypeIdentifierSyntax(
-                name: .identifier("RawRepresentable")
-            )
-        )
-//        let rawRepExtension = try ExtensionDeclSyntax("extension \(enumDecl.identifier)") {
-//            [
-//                MemberDeclListItemSyntax.init(decl: <#T##DeclSyntaxProtocol#>)
-//            ]
-//        }
-
-//        ExtensionDeclSyntax(extendedType: enumDecl, memberBlock: .init(members: [
-//            .init(decl: )
-//        ]))
-
-        let ext = ExtensionDeclSyntax(
-            extendedType: SimpleTypeIdentifierSyntax(name: enumDecl.identifier),
-            inheritanceClause: .init(inheritedTypeCollection: [inherit]),
-            memberBlock: .init(members: [])
-        )
-
         return [
             DeclSyntax(unknownCase),
             DeclSyntax(rawValueVar),
             DeclSyntax(initializer)
-        ]
+        ] + decodableSyntaxContainer
     }
-    /*
-     ExtensionDeclSyntax
-     ├─attributes: AttributeListSyntax
-     │ ╰─[0]: AttributeSyntax
-     │   ├─atSignToken: atSign
-     │   ╰─attributeName: SimpleTypeIdentifierSyntax
-     │     ├─name: identifier("UnstableEnum")
-     │     ╰─genericArgumentClause: GenericArgumentClauseSyntax
-     │       ├─leftAngleBracket: leftAngle
-     │       ├─arguments: GenericArgumentListSyntax
-     │       │ ╰─[0]: GenericArgumentSyntax
-     │       │   ╰─argumentType: SimpleTypeIdentifierSyntax
-     │       │     ╰─name: identifier("Int")
-     │       ╰─rightAngleBracket: rightAngle
-     ├─extensionKeyword: keyword(SwiftSyntax.Keyword.extension)
-     ├─extendedType: SimpleTypeIdentifierSyntax
-     │ ╰─name: identifier("Some")
-     ├─inheritanceClause: TypeInheritanceClauseSyntax
-     │ ├─colon: colon
-     │ ╰─inheritedTypeCollection: InheritedTypeListSyntax
-     │   ╰─[0]: InheritedTypeSyntax
-     │     ╰─typeName: SimpleTypeIdentifierSyntax
-     │       ╰─name: identifier("RawRepresentable")
-     ╰─memberBlock: MemberDeclBlockSyntax
-     ├─leftBrace: leftBrace
-     ├─members: MemberDeclListSyntax
-     ╰─rightBrace: rightBrace
-     */
 }
 
 extension UnstableEnumMacro: ConformanceMacro {
@@ -281,4 +247,11 @@ enum RawKind: String {
     case String
     case Int
     case UInt
+}
+
+private extension AbstractSourceLocation {
+    var description: String {
+        let file = self.file.description.filter({ ![" ", #"""#].contains($0) })
+        return "\(file):\(self.line.description)"
+    }
 }

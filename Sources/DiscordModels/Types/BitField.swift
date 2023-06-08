@@ -102,18 +102,6 @@ where R: RawRepresentable & Hashable, R.RawValue == UInt {
 extension IntBitField: Codable {
     public init(from decoder: any Decoder) throws {
         self.rawValue = try UInt(from: decoder)
-
-#if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
-        let (values, unknownValues) = self.representableValues()
-        if !unknownValues.isEmpty {
-            bitFieldLogger.warning("Found bit-field unknown values", metadata: [
-                "unknownValues": .stringConvertible(unknownValues),
-                "values": .stringConvertible(values.map(\.rawValue)),
-                "rawType": .string(Swift._typeName(R.self)),
-                "codingPath": .stringConvertible(decoder.codingPath.map(\.stringValue))
-            ])
-        }
-#endif
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -157,18 +145,6 @@ extension StringBitField: Codable {
             throw DecodingError.notRepresentingInt(string)
         }
         self.rawValue = int
-
-#if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
-        let (values, unknownValues) = self.representableValues()
-        if !unknownValues.isEmpty {
-            bitFieldLogger.warning("Found bit-field unknown values", metadata: [
-                "unknownValues": .stringConvertible(unknownValues),
-                "values": .stringConvertible(values.map(\.rawValue)),
-                "rawType": .string(Swift._typeName(R.self)),
-                "codingPath": .stringConvertible(decoder.codingPath.map(\.stringValue))
-            ])
-        }
-#endif
     }
 
     public func encode(to encoder: any Encoder) throws {
