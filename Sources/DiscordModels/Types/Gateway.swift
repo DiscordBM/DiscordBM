@@ -1193,7 +1193,7 @@ public struct Gateway: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
 #if swift(>=5.9) && $Macros
-        @UnstableEnum<UInt>
+        @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case game // 0
             case streaming // 1
@@ -1203,7 +1203,7 @@ public struct Gateway: Sendable, Codable {
             case competing // 5
         }
 #else
-        public enum Kind: UInt, Sendable, Codable, ToleratesIntDecodeMarker {
+        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
             case game = 0
             case streaming = 1
             case listening = 2

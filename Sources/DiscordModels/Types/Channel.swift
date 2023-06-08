@@ -7,7 +7,7 @@ public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
 #if swift(>=5.9) && $Macros
-    @UnstableEnum<UInt>
+    @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
         case guildText // 0
         case dm // 1
@@ -23,7 +23,7 @@ public struct DiscordChannel: Sendable, Codable {
         case guildForum // 15
     }
 #else
-    public enum Kind: UInt, Sendable, Codable, ToleratesIntDecodeMarker {
+    public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
         case guildText = 0
         case dm = 1
         case guildVoice = 2
