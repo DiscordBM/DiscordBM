@@ -228,10 +228,11 @@ public struct UnstableEnumMacro: MemberMacro {
         }
 
         if conformsToCaseIterable == true {
+            let cases = caseToRawValueTable.map(\.0).map { ".\($0)" }.joined(separator: ",\n")
             let caseIterableConformance: DeclSyntax = """
             \(raw: publicModifier)static var allCases: [\(enumDecl.identifier)] {
                 [
-                    \(raw: caseToRawValueTable.map(\.0).map { ".\($0)" }.joined(separator: ",\n"))
+                    \(raw: cases)
                 ]
             }
             """

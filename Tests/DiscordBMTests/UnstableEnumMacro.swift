@@ -243,6 +243,53 @@ class UnstableEnumMacroTests: XCTestCase {
         )
     }
 
+    func testCaseIterableEnum() throws {
+        assertMacroExpansion(
+            """
+            @UnstableEnum<String>
+            enum StringEnum: RawRepresentable, CaseIterable {
+                case a
+                case b
+            }
+            """,
+            expandedSource: #"""
+
+            enum StringEnum: RawRepresentable, CaseIterable {
+                case a
+                case b
+                case unknown(String)
+                var rawValue: String {
+                    switch self {
+                    case .a:
+                        return "a"
+                    case .b:
+                        return "b"
+                    case let .unknown(value):
+                        return value
+                    }
+                }
+                init? (rawValue: String) {
+                    switch rawValue {
+                    case "a":
+                        self = .a
+                    case "b":
+                        self = .b
+                    default:
+                        self = .unknown(rawValue)
+                    }
+                }
+                static var allCases: [StringEnum] {
+                    [
+                        .a,
+                    .b
+                    ]
+                }
+            }
+            """#,
+            macros: macros
+        )
+    }
+
     func testKeepsPublicAccessModifier() throws {
         assertMacroExpansion(
             """
