@@ -39,7 +39,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         return value
                     }
                 }
-                init? (rawValue: String) {
+                init?(rawValue: String) {
                     switch rawValue {
                     case "a":
                         self = .a
@@ -78,7 +78,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         return value
                     }
                 }
-                init? (rawValue: String) {
+                init?(rawValue: String) {
                     switch rawValue {
                     case "oo":
                         self = .a
@@ -119,7 +119,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         return value
                     }
                 }
-                init? (rawValue: Int) {
+                init?(rawValue: Int) {
                     switch rawValue {
                     case 1:
                         self = .a
@@ -160,7 +160,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         return value
                     }
                 }
-                init? (rawValue: Int) {
+                init?(rawValue: Int) {
                     switch rawValue {
                     case 1:
                         self = .a
@@ -174,13 +174,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     try self.init(rawValue: Int(from: decoder))!
                     #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
                     if case let .unknown(value) = self {
-                        DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning(
-                            "Found an unknown value", metadata: [
-                                "value": "\(value)",
-                                "typeName": "MyEnum",
-                                "location": "TestModule/test.swift:1"
-                            ]
-                        )
+                        DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning("Found an unknown value", metadata: ["value": "\(value)", "typeName": "MyEnum", "location": "TestModule/test.swift:1"])
                     }
                     #endif
                 }
@@ -213,7 +207,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         return value
                     }
                 }
-                init? (rawValue: Int) {
+                init?(rawValue: Int) {
                     switch rawValue {
                     case 1:
                         self = .a
@@ -227,13 +221,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     try self.init(rawValue: Int(from: decoder))!
                     #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
                     if case let .unknown(value) = self {
-                        DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning(
-                            "Found an unknown value", metadata: [
-                                "value": "\(value)",
-                                "typeName": "MyEnum",
-                                "location": "TestModule/test.swift:1"
-                            ]
-                        )
+                        DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning("Found an unknown value", metadata: ["value": "\(value)", "typeName": "MyEnum", "location": "TestModule/test.swift:1"])
                     }
                     #endif
                 }
@@ -268,7 +256,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         return value
                     }
                 }
-                init? (rawValue: String) {
+                init?(rawValue: String) {
                     switch rawValue {
                     case "a":
                         self = .a
@@ -279,10 +267,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
                 static var allCases: [StringEnum] {
-                    [
-                        .a,
-                    .b
-                    ]
+                    [.a, .b,]
                 }
             }
             """#,
@@ -315,7 +300,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         return value
                     }
                 }
-                public init? (rawValue: String) {
+                public init?(rawValue: String) {
                     switch rawValue {
                     case "a":
                         self = .a
