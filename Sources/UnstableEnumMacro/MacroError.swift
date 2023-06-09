@@ -11,6 +11,7 @@ enum MacroError: String, Error {
     case valuesMustBeUnique
     case badEnumCaseTrailingTrivia
     case badEnumCaseComment
+    case couldNotFindLocationOfNode
 }
 
 extension MacroError: DiagnosticMessage {
