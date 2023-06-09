@@ -559,7 +559,6 @@ public struct AuditLog: Sendable, Codable {
                     self = .autoModerationUserCommunicationDisabled(moderationInfo)
 #if swift(>=5.9) && $Macros
                 case .unknown:
-                    #warning("better handling than adding a `unknown` case to that enum")
                     self = .unknown
 #endif
                 }
@@ -766,9 +765,8 @@ extension AuditLog.Entry.ActionKind {
         case .autoModerationUserCommunicationDisabled: self = .autoModerationUserCommunicationDisabled
 #if swift(>=5.9) && $Macros
         case .unknown:
-            self = .unknown(0)
+            self = .unknown(-1)
 #endif
         }
     }
 }
-#warning("better handling ")

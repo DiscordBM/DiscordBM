@@ -3,13 +3,19 @@ import SwiftDiagnostics
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-/// A to stabilize enums that might get more cases, to some extent.
+/// A macro to stabilize enums that might get more cases, to some extent.
 /// The main goal is to not fail json decodings if Discord adds a new case.
 ///
 /// This is supposed to be used with enums that are supposed to be raw-representable.
 /// The macro accepts one and only one of these types as a generic argument:
 /// `String`, `Int`, `UInt`. More types can be added on demand.
 /// The generic argument represents the `RawValue` of a `RawRepresentable` type.
+/// You can manually declare the raw value of a case, using a comment in front of it like so:
+/// ```swift
+/// case something // "actually nothing!"
+///
+/// case value12 // 12
+/// ```
 ///
 /// How it manipulates the code:
 /// Adds a new `.unknown(<Type>)` case where Type is the generic argument of the macro.
@@ -45,69 +51,29 @@ public struct UnstableEnumMacro: MemberMacro {
         let caseDecls = members.compactMap { $0.decl.as(EnumCaseDeclSyntax.self) }
         let elements = caseDecls.flatMap { $0.elements }
 
-        let caseToRawValueTable: [(String, String)] = try elements.compactMap { element in
-            if let rawValue = element.rawValue {
-                var modifiedElement = EnumCaseElementSyntax(element)!
-                modifiedElement.rawValue = nil
-                /// Can't use trailing trivia because it won't show up in the code
-                modifiedElement.identifier = .identifier(
-                    modifiedElement.identifier.text + " // \(rawValue.value)"
-                )
-                let diagnostic = Diagnostic(
-                    node: Syntax(rawValue),
-                    message: MacroError.rawValuesNotAcceptable,
-                    fixIts: [.init(
-                        message: FixMessage.useCommentsInstead,
-                        changes: [.replace(
-                            oldNode: Syntax(element),
-                            newNode: Syntax(modifiedElement)
-                        )]
-                    )]
-                )
-                context.diagnose(diagnostic)
-                return nil
-            } else if element.trailingTrivia.pieces.isEmpty {
-                if rawType == .Int {
-                    throw MacroError.allEnumCasesWithIntTypeMustHaveACommentForValue
-                }
-                return (element.identifier.text, element.identifier.text)
-            } else {
-                if element.trailingTrivia.pieces.count == 2,
-                   element.trailingTrivia.pieces[0] == .spaces(1),
-                   case let .lineComment(comment) = element.trailingTrivia.pieces[1] {
-                    if comment.hasPrefix("// ") {
-                        var value = String(comment.dropFirst(3))
-                        if value.hasPrefix(#"""#) && value.hasSuffix(#"""#) {
-                            value = String(value.dropFirst().dropLast())
-                        }
-                        return (element.identifier.text, value)
-                    } else {
-                        throw MacroError.badEnumCaseComment
-                    }
-                } else {
-                    throw MacroError.badEnumCaseTrailingTrivia
-                }
-            }
-        }
+        let cases = try makeCases(elements: elements, rawType: rawType, context: context)
 
         /// Catching some programmer errors
 
-        let values = caseToRawValueTable.map(\.1)
+        let values = cases.map(\.1)
 
         if values.isEmpty {
             return []
         }
 
+        /// All values must be unique
         if Set(values).count != values.count {
             throw MacroError.valuesMustBeUnique
         }
 
         switch rawType {
         case .String:
+            /// All values must be string
             if values.allSatisfy({ Int($0) != nil }) {
                 throw MacroError.enumSeemsToHaveIntValuesButGenericArgumentSpecifiesString
             }
         case .Int, .UInt:
+            /// All values must be integer
             if !values.allSatisfy({ Int($0.filter({ $0 != "_" })) != nil }) {
                 throw MacroError.intEnumMustOnlyHaveIntValues
             }
@@ -115,18 +81,12 @@ public struct UnstableEnumMacro: MemberMacro {
 
 
         let isPublic = enumDecl.modifiers?.contains(where: { $0.name.text == "public" }) == true
-        let publicModifier = isPublic ? "public " : ""
 
-        var syntaxes = [DeclSyntax]()
-
-        let unknownCase = makeUnknownEnumCase(rawType: rawType)
-        syntaxes.append(DeclSyntax(unknownCase))
-
-        let rawValueVar = makeRawValueVar(isPublic: isPublic, rawType: rawType, cases: caseToRawValueTable)
-        syntaxes.append(DeclSyntax(rawValueVar))
-
-        let initializer = makeInitializer(isPublic: isPublic, rawType: rawType, cases: caseToRawValueTable)
-        syntaxes.append(DeclSyntax(initializer))
+        var syntaxes = [
+            DeclSyntax(makeUnknownEnumCase(rawType: rawType)),
+            DeclSyntax(makeRawValueVar(isPublic: isPublic, rawType: rawType, cases: cases)),
+            DeclSyntax(makeInitializer(isPublic: isPublic, rawType: rawType, cases: cases))
+        ]
 
         let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
             $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.text == "CaseIterable"
@@ -136,7 +96,7 @@ public struct UnstableEnumMacro: MemberMacro {
             let conformance = makeCaseIterable(
                 isPublic: isPublic,
                 enumIdentifier: enumDecl.identifier,
-                cases: caseToRawValueTable
+                cases: cases
             )
             syntaxes.append(DeclSyntax(conformance))
         }
@@ -155,7 +115,7 @@ public struct UnstableEnumMacro: MemberMacro {
                 enumIdentifier: enumDecl.identifier,
                 location: location,
                 rawType: rawType,
-                cases: caseToRawValueTable
+                cases: cases
             )
             syntaxes.append(DeclSyntax(decodableInit))
         }
@@ -188,10 +148,63 @@ private enum RawKind: String {
     }
 }
 
-private extension AbstractSourceLocation {
-    var description: String {
-        let file = self.file.description.filter({ ![" ", #"""#].contains($0) })
-        return "\(file):\(self.line.description)"
+private func makeCases(
+    elements: [EnumCaseElementSyntax],
+    rawType: RawKind,
+    context: some MacroExpansionContext
+) throws -> [(key: String, value: String)] {
+    try elements.compactMap {
+        element -> (key: String, value: String)? in
+        if let rawValue = element.rawValue {
+            var modifiedElement = EnumCaseElementSyntax(element)!
+            modifiedElement.rawValue = nil
+            /// Can't use trailing trivia because it won't show up in the code
+            modifiedElement.identifier = .identifier(
+                modifiedElement.identifier.text + " // \(rawValue.value)"
+            )
+            let diagnostic = Diagnostic(
+                node: Syntax(rawValue),
+                message: MacroError.rawValuesNotAcceptable,
+                fixIts: [.init(
+                    message: FixMessage.useCommentsInstead,
+                    changes: [.replace(
+                        oldNode: Syntax(element),
+                        newNode: Syntax(modifiedElement)
+                    )]
+                )]
+            )
+            context.diagnose(diagnostic)
+            return nil
+        } else if element.trailingTrivia.pieces.isEmpty {
+            if rawType == .Int {
+                throw MacroError.allEnumCasesWithIntTypeMustHaveACommentForValue
+            }
+            return (element.identifier.text, element.identifier.text)
+        } else {
+            if element.trailingTrivia.pieces.count == 2,
+               element.trailingTrivia.pieces[0] == .spaces(1),
+               case let .lineComment(comment) = element.trailingTrivia.pieces[1] {
+                if comment.hasPrefix("// ") {
+                    var value = String(comment.dropFirst(3))
+                    let hasPrefix = value.hasPrefix(#"""#)
+                    let hasSuffix = value.hasSuffix(#"""#)
+                    if hasPrefix && hasSuffix {
+                        value = String(value.dropFirst().dropLast())
+                    } else if hasPrefix || hasSuffix {
+                        let diagnostic = Diagnostic(
+                            node: Syntax(element),
+                            message: MacroError.inconsistentQuotesAroundComment
+                        )
+                        context.diagnose(diagnostic)
+                    }
+                    return (element.identifier.text, value)
+                } else {
+                    throw MacroError.badEnumCaseComment
+                }
+            } else {
+                throw MacroError.badEnumCaseTrailingTrivia
+            }
+        }
     }
 }
 
@@ -199,8 +212,8 @@ private func makeExpression(rawType: RawKind, value: String) -> any ExprSyntaxPr
     if rawType.isString {
         return StringLiteralExprSyntax(content: value)
     } else {
-        /// Should have been checked before that this is an `Int`
         let integerValue = value.filter({ !["_", #"""#].contains($0) })
+        /// Should have been checked before that this is an `Int`
         return IntegerLiteralExprSyntax(integerLiteral: Int(integerValue)!)
     }
 }
@@ -695,6 +708,13 @@ private func makeDecodableInitBody(
             )
         ]
     )
+}
+
+private extension AbstractSourceLocation {
+    var description: String {
+        let file = self.file.description.filter({ ![" ", #"""#].contains($0) })
+        return "\(file):\(self.line.description)"
+    }
 }
 
 private func + (lhs: [SwitchCaseSyntax], rhs: [SwitchCaseSyntax]) -> SwitchCaseListSyntax {

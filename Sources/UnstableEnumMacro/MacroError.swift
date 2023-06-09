@@ -5,6 +5,7 @@ enum MacroError: String, Error {
     case macroDoesNotHaveRequiredGenericArgument
     case unexpectedGenericArgument
     case rawValuesNotAcceptable
+    case inconsistentQuotesAroundComment
     case allEnumCasesWithIntTypeMustHaveACommentForValue
     case enumSeemsToHaveIntValuesButGenericArgumentSpecifiesString
     case intEnumMustOnlyHaveIntValues

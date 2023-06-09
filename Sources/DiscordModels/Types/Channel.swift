@@ -770,9 +770,8 @@ extension DiscordChannel.Message.Kind {
         case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
             return false
 #if swift(>=5.9) && $Macros
-        case .unknown: return true
+        case .unknown: return false
 #endif
-            #warning("return true?! or false?")
         }
     }
 }

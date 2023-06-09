@@ -404,6 +404,52 @@ class UnstableEnumMacroTests: XCTestCase {
         )
     }
 
+    func testInconsistentQuotes() throws {
+        assertMacroExpansion(
+            """
+            @UnstableEnum<String>
+            enum MyEnum: RawRepresentable {
+                case a // a
+                case b // "1
+            }
+            """,
+            expandedSource: """
+
+            enum MyEnum: RawRepresentable {
+                case a // a
+                case b // "1
+                case unknown(String)
+                var rawValue: String {
+                    switch self {
+                    case .a:
+                        return "a"
+                    case .b:
+                        return #""1"#
+                    case let .unknown(value):
+                        return value
+                    }
+                }
+                init?(rawValue: String) {
+                    switch rawValue {
+                    case "a":
+                        self = .a
+                    case #""1"#:
+                        self = .b
+                    default:
+                        self = .unknown(rawValue)
+                    }
+                }
+            }
+            """,
+            diagnostics: [.init(
+                message: "inconsistentQuotesAroundComment",
+                line: 4,
+                column: 10
+            )],
+            macros: macros
+        )
+    }
+
     func testValuesNotUnique() throws {
         assertMacroExpansion(
             """

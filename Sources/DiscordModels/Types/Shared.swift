@@ -341,7 +341,6 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
                 case .unknown: break // Ignore
 #endif
                 }
-                #warning("better?")
             }
         }
         
