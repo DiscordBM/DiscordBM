@@ -30,7 +30,7 @@ let swiftSettings: [SwiftSetting] = [
     /// `DiscordBM` passes the `complete` level.
     ///
     /// `minimal` / `targeted` / `complete`
-//    .unsafeFlags(["-strict-concurrency=complete"])
+    /// .unsafeFlags(["-strict-concurrency=complete"])
 ] + upcomingFeatureFlags
 
 let package = Package(
@@ -82,7 +82,7 @@ let package = Package(
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
         .package(
             url: "https://github.com/apple/swift-syntax.git",
-            from: "509.0.0-swift-5.9-DEVELOPMENT-SNAPSHOT-2023-06-05-a"
+            from: "509.0.0-swift-5.9-DEVELOPMENT-SNAPSHOT-2023-06-09-a"
         )
     ],
     targets: [
@@ -201,6 +201,7 @@ let package = Package(
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ],
+            path: "./Macros/UnstableEnumMacro",
             swiftSettings: swiftSettings
         ),
         .testTarget(
