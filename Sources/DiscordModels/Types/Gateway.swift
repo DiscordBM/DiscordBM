@@ -1419,6 +1419,8 @@ extension Gateway.Intent {
 #if swift(>=5.9) && $Macros
             /// Unknown cases are considered privileged just to safe than sorry
         case .unknown: return true
+        case .__DO_NOT_USE_THIS_CASE__:
+            fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
 #endif
         }
     }

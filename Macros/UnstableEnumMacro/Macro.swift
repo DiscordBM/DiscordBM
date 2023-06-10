@@ -3,6 +3,8 @@ import SwiftDiagnostics
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
+private let doNotUseCase = "__DO_NOT_USE_THIS_CASE__"
+
 /// A macro to stabilize enums that might get more cases, to some extent.
 /// The main goal is to not fail json decodings if Discord adds a new case.
 ///
@@ -19,6 +21,8 @@ import SwiftSyntaxMacros
 ///
 /// How it manipulates the code:
 /// Adds a new `.unknown(<Type>)` case where Type is the generic argument of the macro.
+/// Adds a new `__DO_NOT_USE_THIS_CASE__` case to discourage exhaustive
+/// switch statements which can too easily result in code breakage.
 /// Adds `RawRepresentable` conformance where `RawValue` is the generic argument of the macro.
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
 /// If `CaseIterable`, repairs the `static var allCases` requirement.
@@ -82,8 +86,9 @@ public struct UnstableEnumMacro: MemberMacro {
 
         let isPublic = enumDecl.modifiers?.contains(where: { $0.name.text == "public" }) == true
 
-        var syntaxes = [
+        var syntaxes: [DeclSyntax] = [
             DeclSyntax(makeUnknownEnumCase(rawType: rawType)),
+            DeclSyntax(doNotUseCaseDeclaration),
             DeclSyntax(makeRawValueVar(isPublic: isPublic, rawType: rawType, cases: cases)),
             DeclSyntax(makeInitializer(isPublic: isPublic, rawType: rawType, cases: cases))
         ]
@@ -237,6 +242,14 @@ private func makeUnknownEnumCase(rawType: RawKind) -> EnumCaseDeclSyntax {
     )
 }
 
+private let doNotUseCaseDeclaration = EnumCaseDeclSyntax(
+    elements: [
+        EnumCaseElementSyntax(
+            identifier: .identifier(doNotUseCase)
+        )
+    ]
+)
+
 private func makeRawValueVar(
     isPublic: Bool,
     rawType: RawKind,
@@ -281,13 +294,12 @@ private func makeRawValueVar(
                                         ),
                                         statements: [
                                             CodeBlockItemSyntax(
-                                                item: .stmt(.init(fromProtocol:  ReturnStmtSyntax(
+                                                item: .stmt(.init(fromProtocol: ReturnStmtSyntax(
                                                     expression: makeExpression(
                                                         rawType: rawType,
                                                         value: value
                                                     )
-                                                )
-                                                ))
+                                                )))
                                             )
                                         ]
                                     )
@@ -329,6 +341,39 @@ private func makeRawValueVar(
                                                         )
                                                     )
                                                 ))
+                                            )
+                                        ]
+                                    ),
+                                    SwitchCaseSyntax(
+                                        label: .case(
+                                            SwitchCaseLabelSyntax(
+                                                caseItems: [
+                                                    CaseItemSyntax(
+                                                        pattern: ExpressionPatternSyntax(
+                                                            expression: MemberAccessExprSyntax(
+                                                                name: .identifier(doNotUseCase)
+                                                            )
+                                                        )
+                                                    )
+                                                ]
+                                            )
+                                        ),
+                                        statements: [
+                                            CodeBlockItemSyntax(
+                                                item: .expr(.init(fromProtocol: FunctionCallExprSyntax(
+                                                    calledExpression: IdentifierExprSyntax(
+                                                        identifier: .identifier("fatalError")
+                                                    ),
+                                                    leftParen: .leftParenToken(),
+                                                    argumentList: [
+                                                        .init(
+                                                            expression: StringLiteralExprSyntax(
+                                                                content: "Must not use the '\(doNotUseCase)' case. This case serves as a way of discouraging exhaustive switch statements"
+                                                            )
+                                                        )
+                                                    ],
+                                                    rightParen: .rightParenToken()
+                                                )))
                                             )
                                         ]
                                     )

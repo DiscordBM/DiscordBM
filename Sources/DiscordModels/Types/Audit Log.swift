@@ -560,6 +560,8 @@ public struct AuditLog: Sendable, Codable {
 #if swift(>=5.9) && $Macros
                 case .unknown:
                     self = .unknown
+                case .__DO_NOT_USE_THIS_CASE__:
+                    fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
 #endif
                 }
             }
