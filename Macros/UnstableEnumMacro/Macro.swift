@@ -21,8 +21,8 @@ private let doNotUseCase = "__DO_NOT_USE_THIS_CASE"
 ///
 /// How it manipulates the code:
 /// Adds a new `.unknown(<Type>)` case where Type is the generic argument of the macro.
-/// Adds a new `__DO_NOT_USE_THIS_CASE` case to discourage exhaustive
-/// switch statements which can too easily result in code breakage.
+/// Adds a new `__DO_NOT_USE_THIS_CASE` case to discourage exhaustive switch statements
+/// which can too easily result in code breakage.
 /// Adds `RawRepresentable` conformance where `RawValue` is the generic argument of the macro.
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
 /// If `CaseIterable`, repairs the `static var allCases` requirement.
@@ -55,16 +55,16 @@ public struct UnstableEnumMacro: MemberMacro {
         let caseDecls = members.compactMap { $0.decl.as(EnumCaseDeclSyntax.self) }
         let elements = caseDecls.flatMap { $0.elements }
 
-        let cases = try makeCases(elements: elements, rawType: rawType, context: context)
+        let (cases, hasError) = makeCases(elements: elements, rawType: rawType, context: context)
+
+        if hasError { return [] }
 
 
         /// Some validations
 
         let values = cases.map(\.1)
 
-        if values.isEmpty {
-            return []
-        }
+        if values.isEmpty { return [] }
 
         /// All values must be unique
         if Set(values).count != values.count {
@@ -158,8 +158,8 @@ private func makeCases(
     elements: [EnumCaseElementSyntax],
     rawType: RawKind,
     context: some MacroExpansionContext
-) throws -> [(key: String, value: String)] {
-    try elements.compactMap {
+) -> (cases: [(key: String, value: String)], hasError: Bool) {
+    let cases = elements.compactMap {
         element -> (key: String, value: String)? in
         if let rawValue = element.rawValue {
             var modifiedElement = EnumCaseElementSyntax(element)!
@@ -183,7 +183,12 @@ private func makeCases(
             return nil
         } else if element.trailingTrivia.pieces.isEmpty {
             if rawType == .Int {
-                throw MacroError.allEnumCasesWithIntTypeMustHaveACommentForValue
+                let diagnostic = Diagnostic(
+                    node: Syntax(element),
+                    message: MacroError.allEnumCasesWithIntTypeMustHaveACommentForValue
+                )
+                context.diagnose(diagnostic)
+                return nil
             }
             return (element.identifier.text, element.identifier.text)
         } else {
@@ -202,16 +207,37 @@ private func makeCases(
                             message: MacroError.inconsistentQuotesAroundComment
                         )
                         context.diagnose(diagnostic)
+                        return nil
+                    }
+                    if value.filter({ !$0.isWhitespace }).isEmpty {
+                        let diagnostic = Diagnostic(
+                            node: Syntax(element),
+                            message: MacroError.emptyValuesAreNotAcceptable
+                        )
+                        context.diagnose(diagnostic)
+                        return nil
                     }
                     return (element.identifier.text, value)
                 } else {
-                    throw MacroError.badEnumCaseComment
+                    let diagnostic = Diagnostic(
+                        node: Syntax(element),
+                        message: MacroError.badEnumCaseComment
+                    )
+                    context.diagnose(diagnostic)
+                    return nil
                 }
             } else {
-                throw MacroError.badEnumCaseTrailingTrivia
+                let diagnostic = Diagnostic(
+                    node: Syntax(element),
+                    message: MacroError.badEnumCaseTrailingTrivia
+                )
+                context.diagnose(diagnostic)
+                return nil
             }
         }
     }
+    let hasError = elements.count != cases.count
+    return (cases, hasError)
 }
 
 private func makeExpression(rawType: RawKind, value: String) -> any ExprSyntaxProtocol {
@@ -244,6 +270,12 @@ private func makeUnknownEnumCase(rawType: RawKind) -> EnumCaseDeclSyntax {
 }
 
 private let doNotUseCaseDeclaration = EnumCaseDeclSyntax(
+    leadingTrivia: [
+        .spaces(4),
+        .docLineComment("/// This case serves as a way of discouraging exhaustive switch statements"),
+        .newlines(1),
+        .spaces(4),
+    ],
     elements: [
         EnumCaseElementSyntax(
             identifier: .identifier(doNotUseCase)

@@ -29,6 +29,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a
                 case b // bb
                 case unknown(String)
+                /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
                     switch self {
@@ -71,6 +72,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // "oo"
                 case b // "bb"
                 case unknown(String)
+                /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
                     switch self {
@@ -115,6 +117,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // 1
                 case b // 5
                 case unknown(Int)
+                /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: Int {
                     switch self {
@@ -159,6 +162,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // 1
                 case b // 5
                 case unknown(Int)
+                /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: Int {
                     switch self {
@@ -209,6 +213,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // 1
                 case b // 5
                 case unknown(Int)
+                /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: Int {
                     switch self {
@@ -261,6 +266,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a
                 case b
                 case unknown(String)
+                /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
                     switch self {
@@ -308,6 +314,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a
                 case b // bb
                 case unknown(String)
+                /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 public var rawValue: String {
                     switch self {
@@ -355,8 +362,8 @@ class UnstableEnumMacroTests: XCTestCase {
             """,
             diagnostics: [.init(
                 message: "allEnumCasesWithIntTypeMustHaveACommentForValue",
-                line: 1,
-                column: 1
+                line: 4,
+                column: 10
             )],
             macros: macros
         )
@@ -424,30 +431,6 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // a
                 case b // "1
-                case unknown(String)
-                case __DO_NOT_USE_THIS_CASE
-                var rawValue: String {
-                    switch self {
-                    case .a:
-                        return "a"
-                    case .b:
-                        return #""1"#
-                    case let .unknown(value):
-                        return value
-                    case .__DO_NOT_USE_THIS_CASE:
-                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
-                    }
-                }
-                init?(rawValue: String) {
-                    switch rawValue {
-                    case "a":
-                        self = .a
-                    case #""1"#:
-                        self = .b
-                    default:
-                        self = .unknown(rawValue)
-                    }
-                }
             }
             """,
             diagnostics: [.init(

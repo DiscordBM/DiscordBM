@@ -6,6 +6,7 @@ enum MacroError: String, Error {
     case unexpectedGenericArgument
     case rawValuesNotAcceptable
     case inconsistentQuotesAroundComment
+    case emptyValuesAreNotAcceptable
     case allEnumCasesWithIntTypeMustHaveACommentForValue
     case enumSeemsToHaveIntValuesButGenericArgumentSpecifiesString
     case intEnumMustOnlyHaveIntValues
