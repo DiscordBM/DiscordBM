@@ -16,7 +16,7 @@
 ///
 /// How it manipulates the code:
 /// Adds a new `.unknown(<Type>)` case where Type is the generic argument of the macro.
-/// Adds a new `__DO_NOT_USE_THIS_CASE__` case to discourage exhaustive
+/// Adds a new `__DO_NOT_USE_THIS_CASE` case to discourage exhaustive
 /// switch statements which can too easily result in code breakage.
 /// Adds `RawRepresentable` conformance where `RawValue` is the generic argument of the macro.
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
@@ -27,7 +27,7 @@
     named(rawValue),
     named(unknown),
     named(allCases),
-    named(__DO_NOT_USE_THIS_CASE__)
+    named(__DO_NOT_USE_THIS_CASE)
 )
 @attached(conformance)
 macro UnstableEnum() = #externalMacro(module: "UnstableEnumMacro", type: "UnstableEnumMacro")

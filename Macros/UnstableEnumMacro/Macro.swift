@@ -3,7 +3,7 @@ import SwiftDiagnostics
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-private let doNotUseCase = "__DO_NOT_USE_THIS_CASE__"
+private let doNotUseCase = "__DO_NOT_USE_THIS_CASE"
 
 /// A macro to stabilize enums that might get more cases, to some extent.
 /// The main goal is to not fail json decodings if Discord adds a new case.
@@ -21,7 +21,7 @@ private let doNotUseCase = "__DO_NOT_USE_THIS_CASE__"
 ///
 /// How it manipulates the code:
 /// Adds a new `.unknown(<Type>)` case where Type is the generic argument of the macro.
-/// Adds a new `__DO_NOT_USE_THIS_CASE__` case to discourage exhaustive
+/// Adds a new `__DO_NOT_USE_THIS_CASE` case to discourage exhaustive
 /// switch statements which can too easily result in code breakage.
 /// Adds `RawRepresentable` conformance where `RawValue` is the generic argument of the macro.
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
@@ -57,7 +57,8 @@ public struct UnstableEnumMacro: MemberMacro {
 
         let cases = try makeCases(elements: elements, rawType: rawType, context: context)
 
-        /// Catching some programmer errors
+
+        /// Some validations
 
         let values = cases.map(\.1)
 
@@ -84,13 +85,13 @@ public struct UnstableEnumMacro: MemberMacro {
         }
 
 
-        let isPublic = enumDecl.modifiers?.contains(where: { $0.name.text == "public" }) == true
+        let modifiers = enumDecl.modifiers
 
         var syntaxes: [DeclSyntax] = [
             DeclSyntax(makeUnknownEnumCase(rawType: rawType)),
             DeclSyntax(doNotUseCaseDeclaration),
-            DeclSyntax(makeRawValueVar(isPublic: isPublic, rawType: rawType, cases: cases)),
-            DeclSyntax(makeInitializer(isPublic: isPublic, rawType: rawType, cases: cases))
+            DeclSyntax(makeRawValueVar(modifiers: modifiers, rawType: rawType, cases: cases)),
+            DeclSyntax(makeInitializer(modifiers: modifiers, rawType: rawType, cases: cases))
         ]
 
         let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
@@ -99,7 +100,7 @@ public struct UnstableEnumMacro: MemberMacro {
 
         if conformsToCaseIterable == true {
             let conformance = makeCaseIterable(
-                isPublic: isPublic,
+                modifiers: modifiers,
                 enumIdentifier: enumDecl.identifier,
                 cases: cases
             )
@@ -116,7 +117,7 @@ public struct UnstableEnumMacro: MemberMacro {
                 throw MacroError.couldNotFindLocationOfNode
             }
             let decodableInit = makeDecodableInitializer(
-                isPublic: isPublic,
+                modifiers: modifiers,
                 enumIdentifier: enumDecl.identifier,
                 location: location,
                 rawType: rawType,
@@ -251,14 +252,12 @@ private let doNotUseCaseDeclaration = EnumCaseDeclSyntax(
 )
 
 private func makeRawValueVar(
-    isPublic: Bool,
+    modifiers: ModifierListSyntax?,
     rawType: RawKind,
     cases: [(String, String)]
 ) -> VariableDeclSyntax {
     VariableDeclSyntax(
-        modifiers: !isPublic ? [] : [
-            .init(name: .keyword(.`public`))
-        ],
+        modifiers: modifiers,
         bindingKeyword: .keyword(.var),
         bindings: [
             PatternBindingSyntax(
@@ -388,14 +387,12 @@ private func makeRawValueVar(
 }
 
 private func makeInitializer(
-    isPublic: Bool,
+    modifiers: ModifierListSyntax?,
     rawType: RawKind,
     cases: [(String, String)]
 ) -> InitializerDeclSyntax {
     InitializerDeclSyntax(
-        modifiers: !isPublic ? [] : [
-            .init(name: .keyword(.`public`))
-        ],
+        modifiers: modifiers,
         optionalMark: .postfixQuestionMarkToken(),
         signature: FunctionSignatureSyntax(
             input: ParameterClauseSyntax(
@@ -479,17 +476,12 @@ private func makeInitializer(
 }
 
 func makeCaseIterable(
-    isPublic: Bool,
+    modifiers: ModifierListSyntax?,
     enumIdentifier: TokenSyntax,
     cases: [(String, String)]
 ) -> VariableDeclSyntax {
     VariableDeclSyntax(
-        modifiers: !isPublic ? [
-            .init(name: .keyword(.`static`))
-        ] : [
-            .init(name: .keyword(.`public`)),
-            .init(name: .keyword(.`static`))
-        ],
+        modifiers: (modifiers ?? []) + [DeclModifierSyntax(name: .keyword(.`static`))],
         bindingKeyword: .keyword(.`var`),
         bindings: [
             PatternBindingSyntax(
@@ -525,16 +517,14 @@ func makeCaseIterable(
 }
 
 private func makeDecodableInitializer(
-    isPublic: Bool,
+    modifiers: ModifierListSyntax?,
     enumIdentifier: TokenSyntax,
     location: AbstractSourceLocation,
     rawType: RawKind,
     cases: [(String, String)]
 ) -> InitializerDeclSyntax {
     InitializerDeclSyntax(
-        modifiers: !isPublic ? [] : [
-            .init(name: .keyword(.`public`))
-        ],
+        modifiers: modifiers,
         signature: FunctionSignatureSyntax(
             input: ParameterClauseSyntax(
                 parameterList: [
@@ -609,7 +599,6 @@ private func makeDecodableInitializer(
                                             expression: IfExprSyntax(
                                                 conditions: makeDecodableInitConditions(),
                                                 body: makeDecodableInitBody(
-                                                    isPublic: isPublic,
                                                     enumIdentifier: enumIdentifier,
                                                     location: location,
                                                     rawType: rawType,
@@ -663,7 +652,6 @@ private func makeDecodableInitConditions() -> ConditionElementListSyntax {
 }
 
 private func makeDecodableInitBody(
-    isPublic: Bool,
     enumIdentifier: TokenSyntax,
     location: AbstractSourceLocation,
     rawType: RawKind,
@@ -768,4 +756,12 @@ private func + (lhs: [SwitchCaseSyntax], rhs: [SwitchCaseSyntax]) -> SwitchCaseL
         lhs.append(item)
     }
     return .init(lhs.map { .switchCase($0) })
+}
+
+private func + (lhs: ModifierListSyntax, rhs: [DeclModifierSyntax]) -> ModifierListSyntax {
+    var lhs = lhs
+    for item in rhs {
+        lhs = lhs.appending(item)
+    }
+    return lhs
 }

@@ -29,7 +29,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a
                 case b // bb
                 case unknown(String)
-                case __DO_NOT_USE_THIS_CASE__
+                case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
                     switch self {
                     case .a:
@@ -38,8 +38,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return "bb"
                     case let .unknown(value):
                         return value
-                    case .__DO_NOT_USE_THIS_CASE__:
-                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE__' case. This case serves as a way of discouraging exhaustive switch statements")
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
                 init?(rawValue: String) {
@@ -71,7 +71,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // "oo"
                 case b // "bb"
                 case unknown(String)
-                case __DO_NOT_USE_THIS_CASE__
+                case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
                     switch self {
                     case .a:
@@ -80,8 +80,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return "bb"
                     case let .unknown(value):
                         return value
-                    case .__DO_NOT_USE_THIS_CASE__:
-                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE__' case. This case serves as a way of discouraging exhaustive switch statements")
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
                 init?(rawValue: String) {
@@ -115,7 +115,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // 1
                 case b // 5
                 case unknown(Int)
-                case __DO_NOT_USE_THIS_CASE__
+                case __DO_NOT_USE_THIS_CASE
                 var rawValue: Int {
                     switch self {
                     case .a:
@@ -124,8 +124,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return 5
                     case let .unknown(value):
                         return value
-                    case .__DO_NOT_USE_THIS_CASE__:
-                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE__' case. This case serves as a way of discouraging exhaustive switch statements")
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
                 init?(rawValue: Int) {
@@ -159,7 +159,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // 1
                 case b // 5
                 case unknown(Int)
-                case __DO_NOT_USE_THIS_CASE__
+                case __DO_NOT_USE_THIS_CASE
                 var rawValue: Int {
                     switch self {
                     case .a:
@@ -168,8 +168,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return 5
                     case let .unknown(value):
                         return value
-                    case .__DO_NOT_USE_THIS_CASE__:
-                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE__' case. This case serves as a way of discouraging exhaustive switch statements")
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
                 init?(rawValue: Int) {
@@ -209,7 +209,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // 1
                 case b // 5
                 case unknown(Int)
-                case __DO_NOT_USE_THIS_CASE__
+                case __DO_NOT_USE_THIS_CASE
                 var rawValue: Int {
                     switch self {
                     case .a:
@@ -218,8 +218,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return 5
                     case let .unknown(value):
                         return value
-                    case .__DO_NOT_USE_THIS_CASE__:
-                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE__' case. This case serves as a way of discouraging exhaustive switch statements")
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
                 init?(rawValue: Int) {
@@ -261,7 +261,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a
                 case b
                 case unknown(String)
-                case __DO_NOT_USE_THIS_CASE__
+                case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
                     switch self {
                     case .a:
@@ -270,8 +270,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return "b"
                     case let .unknown(value):
                         return value
-                    case .__DO_NOT_USE_THIS_CASE__:
-                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE__' case. This case serves as a way of discouraging exhaustive switch statements")
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
                 init?(rawValue: String) {
@@ -308,7 +308,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a
                 case b // bb
                 case unknown(String)
-                case __DO_NOT_USE_THIS_CASE__
+                case __DO_NOT_USE_THIS_CASE
                 public var rawValue: String {
                     switch self {
                     case .a:
@@ -317,8 +317,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return "bb"
                     case let .unknown(value):
                         return value
-                    case .__DO_NOT_USE_THIS_CASE__:
-                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE__' case. This case serves as a way of discouraging exhaustive switch statements")
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
                 public init?(rawValue: String) {
@@ -425,7 +425,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // a
                 case b // "1
                 case unknown(String)
-                case __DO_NOT_USE_THIS_CASE__
+                case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
                     switch self {
                     case .a:
@@ -434,8 +434,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return #""1"#
                     case let .unknown(value):
                         return value
-                    case .__DO_NOT_USE_THIS_CASE__:
-                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE__' case. This case serves as a way of discouraging exhaustive switch statements")
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
                 init?(rawValue: String) {
