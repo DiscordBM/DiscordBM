@@ -15,7 +15,7 @@ extension Optional {
     /// One reason why I named it `requireValue()` and not just `require()`, is to
     /// reduce chances of name collisions.
 
-    /// Utility function to require a value from optional values, or throw an error.
+    /// Utility function to require a value from the optional value, or throw an error.
     ///
     /// Examples:
     /// ```swift

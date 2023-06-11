@@ -20,10 +20,10 @@ private let doNotUseCase = "__DO_NOT_USE_THIS_CASE"
 /// ```
 ///
 /// How it manipulates the code:
-/// Adds a new `.unknown(<Type>)` case where Type is the generic argument of the macro.
+/// Adds `RawRepresentable` conformance where `RawValue` is the generic argument of the macro.
+/// Adds a new `.unknown(RawValue)` case.
 /// Adds a new `__DO_NOT_USE_THIS_CASE` case to discourage exhaustive switch statements
 /// which can too easily result in code breakage.
-/// Adds `RawRepresentable` conformance where `RawValue` is the generic argument of the macro.
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
 /// If `CaseIterable`, repairs the `static var allCases` requirement.
 public struct UnstableEnumMacro: MemberMacro {
