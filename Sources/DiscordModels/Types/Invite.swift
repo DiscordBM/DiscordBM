@@ -3,7 +3,7 @@
 public struct Invite: Sendable, Codable {
 
     /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<Int>
     public enum TargetKind: Sendable, Codable {
         case stream // 1

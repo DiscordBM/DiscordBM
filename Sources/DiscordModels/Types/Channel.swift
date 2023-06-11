@@ -6,7 +6,7 @@ import Foundation
 public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
         case guildText // 0
@@ -43,7 +43,7 @@ public struct DiscordChannel: Sendable, Codable {
     public struct Overwrite: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/channel#overwrite-object
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case role // 0
@@ -63,7 +63,7 @@ public struct DiscordChannel: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-sort-order-types
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<Int>
     public enum SortOrder: Sendable, Codable {
         case latestActivity // 0
@@ -77,7 +77,7 @@ public struct DiscordChannel: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<Int>
     public enum ForumLayout: Sendable, Codable {
         case notSet // 0
@@ -93,7 +93,7 @@ public struct DiscordChannel: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<UInt>
     public enum Flag: Sendable {
         case pinned // 1
@@ -107,7 +107,7 @@ public struct DiscordChannel: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<Int>
     public enum VideoQualityMode: Sendable, Codable {
         case auto // 1
@@ -123,7 +123,7 @@ public struct DiscordChannel: Sendable, Codable {
     /// Not exactly documented, but they do mention these times in a few different places.
     /// Times are in minutes.
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<Int>
     public enum AutoArchiveDuration: Sendable, Codable {
         case oneHour // 60
@@ -230,7 +230,7 @@ extension DiscordChannel {
         }
         
         /// https://discord.com/developers/docs/resources/channel#message-object-message-types
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case `default` // 0
@@ -302,7 +302,7 @@ extension DiscordChannel {
 #endif
 
         /// https://discord.com/developers/docs/resources/channel#message-object-message-flags
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<UInt>
         public enum Flag: Sendable {
             case crossposted // 0
@@ -374,7 +374,7 @@ extension DiscordChannel {
         public struct Activity: Sendable, Codable {
             
             /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-types
-#if swift(>=5.9) && $Macros
+#if $Macros
             @UnstableEnum<Int>
             public enum Kind: Sendable, Codable {
                 case join // 1
@@ -518,7 +518,7 @@ public struct ThreadMemberWithMember: Sendable, Codable {
 
 /// Thread-related subset of `DiscordChannel.Kind`
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-#if swift(>=5.9) && $Macros
+#if $Macros
 @UnstableEnum<Int>
 public enum ThreadKind: Sendable, Codable {
     case announcementThread // 10
@@ -538,7 +538,7 @@ extension DiscordChannel {
     public struct AllowedMentions: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<String>
         public enum Kind: Sendable, Codable {
             case roles
@@ -564,7 +564,7 @@ extension DiscordChannel {
 public struct Embed: Sendable, Codable, ValidatablePayload {
     
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<String>
     public enum Kind: Sendable, Codable {
         case rich // "rich"
@@ -769,7 +769,7 @@ extension DiscordChannel.Message.Kind {
             return true
         case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
             return false
-#if swift(>=5.9) && $Macros
+#if $Macros
         case .unknown: return false
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")

@@ -509,7 +509,7 @@ public struct Gateway: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<UInt>
     public enum Intent: Sendable, Codable, CaseIterable {
         case guilds // 0
@@ -570,7 +570,7 @@ public struct Gateway: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence-status-types
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<String>
     public enum Status: Sendable, Codable {
         case online // "online"
@@ -931,7 +931,7 @@ public struct Gateway: Sendable, Codable {
     public struct InviteCreate: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<Int>
         public enum TargetKind: Sendable, Codable {
             case stream // 1
@@ -1085,7 +1085,7 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: GuildSnowflake?
     }
 
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<Int>
     public enum ReactionKind: Sendable, Codable {
         case normal // 0
@@ -1185,7 +1185,7 @@ public struct Gateway: Sendable, Codable {
     public struct Activity: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case game // 0
@@ -1270,7 +1270,7 @@ public struct Gateway: Sendable, Codable {
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-flags
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<UInt>
         public enum Flag: Sendable {
             case instance // 0
@@ -1416,7 +1416,7 @@ extension Gateway.Intent {
         case .guildScheduledEvents: return false
         case .autoModerationConfiguration: return false
         case .autoModerationExecution: return false
-#if swift(>=5.9) && $Macros
+#if $Macros
             /// Unknown cases are considered privileged just to safe than sorry
         case .unknown: return true
         case .__DO_NOT_USE_THIS_CASE:

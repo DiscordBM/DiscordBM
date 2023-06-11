@@ -4,7 +4,7 @@ import Foundation
 public struct ApplicationCommand: Sendable, Codable {
     
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<UInt>
     public enum Kind: Sendable, Codable {
         case chatInput // 1
@@ -23,7 +23,7 @@ public struct ApplicationCommand: Sendable, Codable {
     public struct Option: Sendable, Codable, ValidatablePayload {
         
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<UInt>
         public enum Kind: Sendable, Codable {
             case subCommand // 1
@@ -166,7 +166,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
     public struct Permission: Sendable, Codable {
         
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-application-command-permission-type
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case role // 1

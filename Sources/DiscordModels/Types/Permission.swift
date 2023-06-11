@@ -1,6 +1,6 @@
 
 /// https://discord.com/developers/docs/topics/permissions#permissions-bitwise-permission-flags
-#if swift(>=5.9) && $Macros
+#if $Macros
 @UnstableEnum<UInt>
 public enum Permission: Sendable, Hashable, Codable {
     case createInstantInvite // 0

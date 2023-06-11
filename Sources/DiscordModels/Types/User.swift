@@ -3,7 +3,7 @@
 public struct DiscordUser: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/user#user-object-premium-types
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<Int>
     public enum PremiumKind: Sendable, Codable {
         case none // 0
@@ -21,7 +21,7 @@ public struct DiscordUser: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/user#user-object-user-flags
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<UInt>
     public enum Flag: Sendable {
         case staff // 0
@@ -128,7 +128,7 @@ extension DiscordUser {
     public struct Connection: Sendable, Codable {
 
         /// https://discord.com/developers/docs/resources/user#connection-object-services
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<String>
         public enum Service: Sendable, Codable {
             case battleNet // "Battle.net"
@@ -176,7 +176,7 @@ extension DiscordUser {
 #endif
 
         /// https://discord.com/developers/docs/resources/user#connection-object-visibility-types
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<Int>
         public enum VisibilityKind: Sendable, Codable {
             case none // 0

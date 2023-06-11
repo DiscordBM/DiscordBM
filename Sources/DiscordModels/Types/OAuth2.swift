@@ -1,6 +1,6 @@
 
 /// https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes
-#if swift(>=5.9) && $Macros
+#if $Macros
 @UnstableEnum<String>
 public enum OAuth2Scope: Sendable, Codable {
     case activitiesRead // "activities.read"

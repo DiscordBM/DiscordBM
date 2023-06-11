@@ -1,6 +1,5 @@
 import SwiftSyntax
 import SwiftDiagnostics
-import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
 private let doNotUseCase = "__DO_NOT_USE_THIS_CASE"
@@ -143,15 +142,6 @@ extension UnstableEnumMacro: ConformanceMacro {
 
 private enum RawKind: String {
     case String, Int, UInt
-
-    var isString: Bool {
-        switch self {
-        case .String:
-            return true
-        case .Int, .UInt:
-            return false
-        }
-    }
 }
 
 private func makeCases(
@@ -241,7 +231,7 @@ private func makeCases(
 }
 
 private func makeExpression(rawType: RawKind, value: String) -> any ExprSyntaxProtocol {
-    if rawType.isString {
+    if rawType == .String {
         return StringLiteralExprSyntax(content: value)
     } else {
         let integerValue = value.filter({ !["_", #"""#].contains($0) })

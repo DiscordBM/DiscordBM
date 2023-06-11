@@ -1,4 +1,4 @@
-#if swift(>=5.9) && $Macros
+#if $Macros
 import UnstableEnumMacro
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport

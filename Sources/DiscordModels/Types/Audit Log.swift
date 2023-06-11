@@ -126,7 +126,7 @@ public struct AuditLog: Sendable, Codable {
         }
         
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<Int>
         public enum ActionKind: Sendable, Codable {
             case guildUpdate // 1
@@ -301,7 +301,7 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationBlockMessage(AutoModerationInfo)
             case autoModerationFlagToChannel(AutoModerationInfo)
             case autoModerationUserCommunicationDisabled(AutoModerationInfo)
-#if swift(>=5.9) && $Macros
+#if $Macros
             case unknown
 #endif
 
@@ -557,7 +557,7 @@ public struct AuditLog: Sendable, Codable {
                 case .autoModerationUserCommunicationDisabled:
                     let moderationInfo = try container.decode(AutoModerationInfo.self, forKey: .options)
                     self = .autoModerationUserCommunicationDisabled(moderationInfo)
-#if swift(>=5.9) && $Macros
+#if $Macros
                 case .unknown:
                     self = .unknown
                 case .__DO_NOT_USE_THIS_CASE:
@@ -658,7 +658,7 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(moderationInfo, forKey: .options)
                 case let .autoModerationUserCommunicationDisabled(moderationInfo):
                     try container.encode(moderationInfo, forKey: .options)
-#if swift(>=5.9) && $Macros
+#if $Macros
                 case .unknown: break
 #endif
                 }
@@ -765,7 +765,7 @@ extension AuditLog.Entry.ActionKind {
         case .autoModerationBlockMessage: self = .autoModerationBlockMessage
         case .autoModerationFlagToChannel: self = .autoModerationFlagToChannel
         case .autoModerationUserCommunicationDisabled: self = .autoModerationUserCommunicationDisabled
-#if swift(>=5.9) && $Macros
+#if $Macros
         case .unknown:
             self = .unknown(-1)
 #endif

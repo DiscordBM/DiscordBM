@@ -3,7 +3,7 @@
 public struct AutoModerationRule: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-event-types
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<Int>
     public enum EventKind: Sendable, Codable {
         case messageSend // 1
@@ -15,7 +15,7 @@ public struct AutoModerationRule: Sendable, Codable {
 #endif
 
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types
-#if swift(>=5.9) && $Macros
+#if $Macros
     @UnstableEnum<Int>
     public enum TriggerKind: Sendable, Codable {
         case keyword // 1
@@ -36,7 +36,7 @@ public struct AutoModerationRule: Sendable, Codable {
     public struct TriggerMetadata: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-preset-types
-#if swift(>=5.9) && $Macros
+#if $Macros
         @UnstableEnum<Int>
         public enum KeywordPreset: Sendable, Codable {
             case profanity // 1

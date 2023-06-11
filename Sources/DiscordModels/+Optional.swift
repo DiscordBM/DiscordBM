@@ -1,11 +1,11 @@
 
 public enum OptionalError: Error, CustomStringConvertible {
-    case nilValue(typeName: String, file: String, function: String, line: UInt)
+    case nilValue(file: String, function: String, line: UInt)
 
     public var description: String {
         switch self {
-        case let .nilValue(typeName, file, function, line):
-            return "OptionalError.nilValue(typeName: \(typeName), file: \(file), function: \(function), line: \(line))"
+        case let .nilValue(file, function, line):
+            return "OptionalError.nilValue(file: \(file), function: \(function), line: \(line))"
         }
     }
 }
@@ -36,7 +36,6 @@ extension Optional {
             return wrapped
         case .none:
             throw OptionalError.nilValue(
-                typeName: Swift._typeName(Self.self, qualified: false),
                 file: file,
                 function: function,
                 line: line

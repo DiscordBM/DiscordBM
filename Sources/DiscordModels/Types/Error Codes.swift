@@ -38,7 +38,7 @@ public enum GatewayCloseCode: UInt16, Sendable, Codable {
 }
 
 /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
-#if swift(>=5.9) && $Macros
+#if $Macros
 @UnstableEnum<Int>
 public enum JSONErrorCode: Sendable, Codable {
     case generalError // 0
