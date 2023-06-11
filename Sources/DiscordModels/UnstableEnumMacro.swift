@@ -1,5 +1,5 @@
 
-#if $Macros
+#if swift(>=5.9) && $Macros
 /// A macro to stabilize enums that might get more cases, to some extent.
 /// The main goal is to not fail json decodings if Discord adds a new case.
 ///

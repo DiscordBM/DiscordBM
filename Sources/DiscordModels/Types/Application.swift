@@ -3,7 +3,7 @@
 public struct DiscordApplication: Sendable, Codable {
 
     /// https://discord.com/developers/docs/resources/application#application-object-application-flags
-#if $Macros
+#if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>
     public enum Flag: Sendable {
         case applicationAutoModerationRuleCreateBadge // 6

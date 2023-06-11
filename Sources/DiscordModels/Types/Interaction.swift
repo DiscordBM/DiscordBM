@@ -35,7 +35,7 @@ public struct Interaction: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
-#if $Macros
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
         case ping // 1
@@ -334,7 +334,7 @@ public struct Interaction: Sendable, Codable {
             )
         case .ping:
             self.data = nil
-#if $Macros
+#if swift(>=5.9) && $Macros
         case .unknown: self.data = nil
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
@@ -427,7 +427,7 @@ extension Interaction {
     public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral {
 
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
-#if $Macros
+#if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case actionRow // 1
@@ -456,7 +456,7 @@ extension Interaction {
         public struct Button: Sendable, Codable {
             
             /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
-#if $Macros
+#if swift(>=5.9) && $Macros
             @UnstableEnum<Int>
             public enum Style: Sendable, Codable {
                 case primary // 1
@@ -499,7 +499,7 @@ extension Interaction {
                     case .success: self = .success
                     case .danger: self = .danger
                     case .link: return nil
-#if $Macros
+#if swift(>=5.9) && $Macros
                     case .unknown: return nil
                     case .__DO_NOT_USE_THIS_CASE:
                         fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
@@ -676,7 +676,7 @@ extension Interaction {
         public struct TextInput: Sendable, Codable {
             
         /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
-#if $Macros
+#if swift(>=5.9) && $Macros
             @UnstableEnum<Int>
             public enum Style: Sendable, Codable {
                 case short // 1
@@ -718,7 +718,7 @@ extension Interaction {
             case roleSelect(SelectMenu)
             case mentionableSelect(SelectMenu)
             case channelSelect(ChannelSelectMenu)
-#if $Macros
+#if swift(>=5.9) && $Macros
             case unknown
 #endif
 
@@ -738,7 +738,7 @@ extension Interaction {
                     return value.custom_id
                 case let .channelSelect(value):
                     return value.custom_id
-#if $Macros
+#if swift(>=5.9) && $Macros
                 case .unknown:
                     return nil
 #endif
@@ -769,7 +769,7 @@ extension Interaction {
                     self = try .channelSelect(.init(from: decoder))
                 case .textInput:
                     self = try .textInput(.init(from: decoder))
-#if $Macros
+#if swift(>=5.9) && $Macros
                 case .unknown:
                     self = .unknown
                 case .__DO_NOT_USE_THIS_CASE:
@@ -802,7 +802,7 @@ extension Interaction {
                 case let .channelSelect(selectMenu):
                     try container.encode(Kind.channelSelect, forKey: .type)
                     try selectMenu.encode(to: encoder)
-#if $Macros
+#if swift(>=5.9) && $Macros
                 case .unknown: break
 #endif
                 }

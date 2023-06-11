@@ -3,7 +3,7 @@ import Foundation
 /// https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-structure
 public struct Webhook: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-types
-#if $Macros
+#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
         case incoming // 1
