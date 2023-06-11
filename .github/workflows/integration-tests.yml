@@ -12,7 +12,7 @@ jobs:
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
     runs-on: ubuntu-latest
-    container: swift:5.8-jammy
+    container: swiftlang/swift:nightly-5.9-jammy
     steps:
       - name: Check out package
         uses: actions/checkout@v3

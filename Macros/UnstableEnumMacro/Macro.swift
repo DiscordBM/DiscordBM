@@ -25,7 +25,7 @@ private let doNotUseCase = "__DO_NOT_USE_THIS_CASE"
 /// which can too easily result in code breakage.
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
 /// If `CaseIterable`, repairs the `static var allCases` requirement.
-public struct UnstableEnumMacro: MemberMacro {
+public struct UnstableEnum: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
@@ -129,14 +129,16 @@ public struct UnstableEnumMacro: MemberMacro {
     }
 }
 
-extension UnstableEnumMacro: ConformanceMacro {
+extension UnstableEnum: ConformanceMacro {
     public static func expansion<Declaration: DeclGroupSyntax, Context: MacroExpansionContext>(
         of node: AttributeSyntax,
         providingConformancesOf declaration: Declaration,
         in context: Context
     ) throws -> [(TypeSyntax, GenericWhereClauseSyntax?)] {
-        /// Always add a new ``RawRepresentable`` conformance.
-        return [("RawRepresentable", nil)]
+        return [
+            ("RawRepresentable", nil),
+            ("LosslessRawRepresentable", nil)
+        ]
     }
 }
 

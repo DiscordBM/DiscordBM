@@ -3,20 +3,12 @@ import Foundation
 /// https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-structure
 public struct Webhook: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-types
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
         case incoming // 1
         case channelFollower // 2
         case application // 3
     }
-#else
-    public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case incoming = 1
-        case channelFollower = 2
-        case application = 3
-    }
-#endif
 
     public var id: WebhookSnowflake
     public var type: Kind

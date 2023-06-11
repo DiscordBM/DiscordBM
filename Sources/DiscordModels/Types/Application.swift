@@ -3,7 +3,6 @@
 public struct DiscordApplication: Sendable, Codable {
 
     /// https://discord.com/developers/docs/resources/application#application-object-application-flags
-#if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>
     public enum Flag: Sendable {
         case applicationAutoModerationRuleCreateBadge // 6
@@ -17,20 +16,6 @@ public struct DiscordApplication: Sendable, Codable {
         case gatewayMessageContentLimited // 19
         case applicationCommandBadge // 23
     }
-#else
-    public enum Flag: UInt, Sendable {
-        case applicationAutoModerationRuleCreateBadge = 6
-        case gatewayPresence = 12
-        case gatewayPresenceLimited = 13
-        case gatewayGuildMembers = 14
-        case gatewayGuildMembersLimited = 15
-        case verificationPendingGuildLimit = 16
-        case embedded = 17
-        case gatewayMessageContent = 18
-        case gatewayMessageContentLimited = 19
-        case applicationCommandBadge = 23
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/application#install-params-object
     public struct InstallParams: Sendable, Codable {

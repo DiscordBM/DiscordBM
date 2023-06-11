@@ -3,18 +3,11 @@
 public struct Invite: Sendable, Codable {
 
     /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum TargetKind: Sendable, Codable {
         case stream // 1
         case embeddedApplication // 2
     }
-#else
-    public enum TargetKind: Int, Sendable, Codable {
-        case stream = 1
-        case embeddedApplication = 2
-    }
-#endif
 
     public var code: String
     public var guild: PartialGuild?

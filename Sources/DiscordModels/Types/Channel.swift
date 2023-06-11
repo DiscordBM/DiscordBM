@@ -6,7 +6,6 @@ import Foundation
 public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
         case guildText // 0
@@ -22,39 +21,16 @@ public struct DiscordChannel: Sendable, Codable {
         case guildDirectory // 14
         case guildForum // 15
     }
-#else
-    public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case guildText = 0
-        case dm = 1
-        case guildVoice = 2
-        case groupDm = 3
-        case guildCategory = 4
-        case guildAnnouncement = 5
-        case announcementThread = 10
-        case publicThread = 11
-        case privateThread = 12
-        case guildStageVoice = 13
-        case guildDirectory = 14
-        case guildForum = 15
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/channel#overwrite-object
     public struct Overwrite: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/channel#overwrite-object
-#if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case role // 0
             case member // 1
         }
-#else
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case role = 0
-            case member = 1
-        }
-#endif
 
         public var id: AnySnowflake
         public var type: Kind
@@ -63,67 +39,37 @@ public struct DiscordChannel: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-sort-order-types
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum SortOrder: Sendable, Codable {
         case latestActivity // 0
         case creationDate // 1
     }
-#else
-    public enum SortOrder: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case latestActivity = 0
-        case creationDate = 1
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum ForumLayout: Sendable, Codable {
         case notSet // 0
         case listView // 1
         case galleryView // 2
     }
-#else
-    public enum ForumLayout: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case notSet = 0
-        case listView = 1
-        case galleryView = 2
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
-#if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>
     public enum Flag: Sendable {
         case pinned // 1
         case requireTag // 4
     }
-#else
-    public enum Flag: UInt, Sendable {
-        case pinned = 1
-        case requireTag = 4
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum VideoQualityMode: Sendable, Codable {
         case auto // 1
         case full // 2
     }
-#else
-    public enum VideoQualityMode: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case auto = 1
-        case full = 2
-    }
-#endif
 
     /// Not exactly documented, but they do mention these times in a few different places.
     /// Times are in minutes.
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum AutoArchiveDuration: Sendable, Codable {
         case oneHour // 60
@@ -131,14 +77,6 @@ public struct DiscordChannel: Sendable, Codable {
         case threeDays // 4_320
         case sevenDays // 10_080
     }
-#else
-    public enum AutoArchiveDuration: Int, Sendable, Codable {
-        case oneHour = 60
-        case oneDay = 1_440
-        case threeDays = 4_320
-        case sevenDays = 10_080
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/channel#default-reaction-object-default-reaction-structure
     public struct DefaultReaction: Sendable, Codable {
@@ -230,7 +168,6 @@ extension DiscordChannel {
         }
         
         /// https://discord.com/developers/docs/resources/channel#message-object-message-types
-#if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case `default` // 0
@@ -265,44 +202,8 @@ extension DiscordChannel {
             case stageTopic // 31
             case guildApplicationPremiumSubscription // 32
         }
-#else
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case `default` = 0
-            case recipientAdd = 1
-            case recipientRemove = 2
-            case call = 3
-            case channelNameChange = 4
-            case channelIconChange = 5
-            case channelPinnedMessage = 6
-            case guildMemberJoin = 7
-            case userPremiumGuildSubscription = 8
-            case userPremiumGuildSubscriptionTier1 = 9
-            case userPremiumGuildSubscriptionTier2 = 10
-            case userPremiumGuildSubscriptionTier3 = 11
-            case channelFollowAdd = 12
-            case guildDiscoveryDisqualified = 14
-            case guildDiscoveryRequalified = 15
-            case guildDiscoveryGracePeriodInitialWarning = 16
-            case guildDiscoveryGracePeriodFinalWarning = 17
-            case threadCreated = 18
-            case reply = 19
-            case chatInputCommand = 20
-            case threadStarterMessage = 21
-            case guildInviteReminder = 22
-            case contextMenuCommand = 23
-            case autoModerationAction = 24
-            case roleSubscriptionPurchase = 25
-            case interactionPremiumUpsell = 26
-            case stageStart = 27
-            case stageEnd = 28
-            case stageSpeaker = 29
-            case stageTopic = 31
-            case guildApplicationPremiumSubscription = 32
-        }
-#endif
 
         /// https://discord.com/developers/docs/resources/channel#message-object-message-flags
-#if swift(>=5.9) && $Macros
         @UnstableEnum<UInt>
         public enum Flag: Sendable {
             case crossposted // 0
@@ -317,21 +218,6 @@ extension DiscordChannel {
             case suppressNotifications // 12
             case isVoiceMessage // 13
         }
-#else
-        public enum Flag: UInt, Sendable {
-            case crossposted = 0
-            case isCrosspost = 1
-            case suppressEmbeds = 2
-            case sourceMessageDeleted = 3
-            case urgent = 4
-            case hasThread = 5
-            case ephemeral = 6
-            case loading = 7
-            case failedToMentionSomeRolesInThread = 8
-            case suppressNotifications = 12
-            case isVoiceMessage = 13
-        }
-#endif
 
         /// https://discord.com/developers/docs/resources/channel#channel-mention-object
         public struct ChannelMention: Sendable, Codable {
@@ -374,7 +260,6 @@ extension DiscordChannel {
         public struct Activity: Sendable, Codable {
             
             /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-types
-#if swift(>=5.9) && $Macros
             @UnstableEnum<Int>
             public enum Kind: Sendable, Codable {
                 case join // 1
@@ -382,14 +267,6 @@ extension DiscordChannel {
                 case listen // 3
                 case joinRequest // 5
             }
-#else
-            public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-                case join = 1
-                case spectate = 2
-                case listen = 3
-                case joinRequest = 5
-            }
-#endif
 
             public var type: Kind
             /// Not a Snowflake. Example: `spotify:715622804258684938`.
@@ -518,40 +395,24 @@ public struct ThreadMemberWithMember: Sendable, Codable {
 
 /// Thread-related subset of `DiscordChannel.Kind`
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-#if swift(>=5.9) && $Macros
 @UnstableEnum<Int>
 public enum ThreadKind: Sendable, Codable {
     case announcementThread // 10
     case publicThread // 11
     case privateThread // 12
 }
-#else
-public enum ThreadKind: Int, Sendable, Codable {
-    case announcementThread = 10
-    case publicThread = 11
-    case privateThread = 12
-}
-#endif
 
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
     public struct AllowedMentions: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
-#if swift(>=5.9) && $Macros
         @UnstableEnum<String>
         public enum Kind: Sendable, Codable {
             case roles
             case users
             case everyone
         }
-#else
-        public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
-            case roles
-            case users
-            case everyone
-        }
-#endif
 
         public var parse: [Kind]
         public var roles: [RoleSnowflake]
@@ -564,7 +425,6 @@ extension DiscordChannel {
 public struct Embed: Sendable, Codable, ValidatablePayload {
     
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
-#if swift(>=5.9) && $Macros
     @UnstableEnum<String>
     public enum Kind: Sendable, Codable {
         case rich // "rich"
@@ -575,17 +435,6 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         case link // "link"
         case autoModerationMessage // "auto_moderation_message"
     }
-#else
-    public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
-        case rich = "rich"
-        case image = "image"
-        case video = "video"
-        case gifv = "gifv"
-        case article = "article"
-        case link = "link"
-        case autoModerationMessage = "auto_moderation_message"
-    }
-#endif
 
     public enum DynamicURL: Sendable, Codable, ExpressibleByStringLiteral {
         public typealias StringLiteralType = String
@@ -769,11 +618,9 @@ extension DiscordChannel.Message.Kind {
             return true
         case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
             return false
-#if swift(>=5.9) && $Macros
         case .unknown: return false
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
-#endif
         }
     }
 }

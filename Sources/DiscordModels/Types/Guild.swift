@@ -5,7 +5,6 @@ public struct Guild: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
     public struct Member: Sendable, Codable {
         /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags
-#if swift(>=5.9) && $Macros
         @UnstableEnum<UInt>
         public enum Flag: Sendable {
             case didRejoin // 0
@@ -13,14 +12,6 @@ public struct Guild: Sendable, Codable {
             case bypassVerification // 2
             case startedOnboarding // 3
         }
-#else
-        public enum Flag: UInt, Sendable {
-            case didRejoin = 0
-            case completedOnboarding = 1
-            case bypassVerification = 2
-            case startedOnboarding = 3
-        }
-#endif
 
         public var user: DiscordUser?
         public var nick: String?
@@ -51,7 +42,6 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum VerificationLevel: Sendable, Codable {
         case none // 0
@@ -60,48 +50,23 @@ public struct Guild: Sendable, Codable {
         case high // 3
         case veryHigh // 4
     }
-#else
-    public enum VerificationLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case none = 0
-        case low = 1
-        case medium = 2
-        case high = 3
-        case veryHigh = 4
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-default-message-notification-level
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum DefaultMessageNotificationLevel: Sendable, Codable {
         case allMessages // 0
         case onlyMentions // 1
     }
-#else
-    public enum DefaultMessageNotificationLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case allMessages = 0
-        case onlyMentions = 1
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-explicit-content-filter-level
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum ExplicitContentFilterLevel: Sendable, Codable {
         case disabled // 0
         case memberWithoutRoles // 1
         case allMembers // 2
     }
-#else
-    public enum ExplicitContentFilterLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case disabled = 0
-        case memberWithoutRoles = 1
-        case allMembers = 2
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-features
-#if swift(>=5.9) && $Macros
     @UnstableEnum<String>
     public enum Feature: Sendable, Codable {
         case animatedBanner // "ANIMATED_BANNER"
@@ -131,36 +96,6 @@ public struct Guild: Sendable, Codable {
         case verified // "VERIFIED"
         case vipRegions // "VIP_REGIONS"
         case welcomeScreenEnabled // "WELCOME_SCREEN_ENABLED"
-    }
-#else
-    public enum Feature: String, Sendable, Codable, ToleratesStringDecodeMarker {
-        case animatedBanner = "ANIMATED_BANNER"
-        case animatedIcon = "ANIMATED_ICON"
-        case applicationCommandPermissionsV2 = "APPLICATION_COMMAND_PERMISSIONS_V2"
-        case autoModeration = "AUTO_MODERATION"
-        case banner = "BANNER"
-        case community = "COMMUNITY"
-        case creatorMonetizableProvisional = "CREATOR_MONETIZABLE_PROVISIONAL"
-        case creatorStorePage = "CREATOR_STORE_PAGE"
-        case developerSupportServer = "DEVELOPER_SUPPORT_SERVER"
-        case discoverable = "DISCOVERABLE"
-        case featurable = "FEATURABLE"
-        case invitesDisabled = "INVITES_DISABLED"
-        case inviteSplash = "INVITE_SPLASH"
-        case memberVerificationGateEnabled = "MEMBER_VERIFICATION_GATE_ENABLED"
-        case moreStickers = "MORE_STICKERS"
-        case news = "NEWS"
-        case partnered = "PARTNERED"
-        case previewEnabled = "PREVIEW_ENABLED"
-        case raidAlertsDisabled = "RAID_ALERTS_DISABLED"
-        case roleIcons = "ROLE_ICONS"
-        case roleSubscriptionsAvailableForPurchase = "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE"
-        case roleSubscriptionsEnabled = "ROLE_SUBSCRIPTIONS_ENABLED"
-        case ticketedEventsEnabled = "TICKETED_EVENTS_ENABLED"
-        case vanityURL = "VANITY_URL"
-        case verified = "VERIFIED"
-        case vipRegions = "VIP_REGIONS"
-        case welcomeScreenEnabled = "WELCOME_SCREEN_ENABLED"
 
         /// These ones are not mentioned in the Discord docs (There are even more of these).
         /// Might not even be valid anymore.
@@ -180,24 +115,15 @@ public struct Guild: Sendable, Codable {
 //        case soundboard = "SOUNDBOARD"
 //        case monetizationEnabled = "MONETIZATION_ENABLED"
     }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum MFALevel: Sendable, Codable {
         case none // 0
         case elevated // 1
     }
-#else
-    public enum MFALevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case none = 0
-        case elevated = 1
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-system-channel-flags
-#if swift(>=5.9) && $Macros
     @UnstableEnum<UInt>
     public enum SystemChannelFlag: Sendable {
         case suppressJoinNotifications // 0
@@ -207,19 +133,8 @@ public struct Guild: Sendable, Codable {
         case suppressRoleSubscriptionPurchaseNotifications // 4
         case suppressRoleSubscriptionPurchaseNotificationReplies // 5
     }
-#else
-    public enum SystemChannelFlag: UInt, Sendable {
-        case suppressJoinNotifications = 0
-        case suppressPremiumSubscriptions = 1
-        case suppressGuildReminderNotifications = 2
-        case suppressJoinNotificationReplies = 3
-        case suppressRoleSubscriptionPurchaseNotifications = 4
-        case suppressRoleSubscriptionPurchaseNotificationReplies = 5
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum PremiumTier: Sendable, Codable {
         case none // 0
@@ -227,14 +142,6 @@ public struct Guild: Sendable, Codable {
         case tier2 // 2
         case tier3 // 3
     }
-#else
-    public enum PremiumTier: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case none = 0
-        case tier1 = 1
-        case tier2 = 2
-        case tier3 = 3
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-structure
     public struct WelcomeScreen: Sendable, Codable {
@@ -259,7 +166,6 @@ public struct Guild: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-nsfw-level
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum NSFWLevel: Sendable, Codable {
         case `default` // 0
@@ -267,17 +173,8 @@ public struct Guild: Sendable, Codable {
         case safe // 2
         case ageRestricted // 3
     }
-#else
-    public enum NSFWLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case `default` = 0
-        case explicit = 1
-        case safe = 2
-        case ageRestricted = 3
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild#create-guild-json-params
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum AFKTimeout: Sendable, Codable {
         case oneMinute // 60
@@ -286,15 +183,6 @@ public struct Guild: Sendable, Codable {
         case halfAnHour // 1800
         case anHour // 3600
     }
-#else
-    public enum AFKTimeout: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case oneMinute = 60
-        case fiveMinutes = 300
-        case fifteenMinutes = 900
-        case halfAnHour = 1800
-        case anHour = 3600
-    }
-#endif
 
     public var id: GuildSnowflake
     public var name: String
@@ -437,18 +325,11 @@ extension Guild {
             }
 
             /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-types
-#if swift(>=5.9) && $Macros
             @UnstableEnum<Int>
             public enum Kind: Sendable, Codable {
                 case multipleChoice // 0
                 case dropdown // 1
             }
-#else
-            public enum Kind: Int, Sendable, Codable {
-                case multipleChoice = 0
-                case dropdown = 1
-            }
-#endif
 
             public var id: OnboardingPromptSnowflake
             public var type: Kind

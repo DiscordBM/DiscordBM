@@ -1,4 +1,3 @@
-#if swift(>=5.9) && $Macros
 import UnstableEnumMacro
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
@@ -11,7 +10,7 @@ class UnstableEnumMacroTests: XCTestCase {
     /// `assertMacroExpansion` seems to not to do that
 
     let macros: [String: any Macro.Type] = [
-        "UnstableEnum": UnstableEnumMacro.self
+        "UnstableEnum": UnstableEnum.self
     ]
 
     func testStringEnum() throws {
@@ -541,4 +540,3 @@ private struct CodableContainer: Codable {
 
     var some: UnstableEnumCodableTester
 }
-#endif

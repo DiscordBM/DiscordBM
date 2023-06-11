@@ -3,19 +3,12 @@
 public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
     
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum PrivacyLevel: Sendable, Codable {
         case guildOnly // 2
     }
-#else
-    public enum PrivacyLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case guildOnly = 2
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum Status: Sendable, Codable {
         case scheduled // 1
@@ -23,30 +16,14 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
         case completed // 3
         case canceled // 4
     }
-#else
-    public enum Status: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case scheduled = 1
-        case active = 2
-        case completed = 3
-        case canceled = 4
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
-#if swift(>=5.9) && $Macros
     @UnstableEnum<Int>
     public enum EntityKind: Sendable, Codable {
         case stageInstance // 1
         case voice // 2
         case external // 3
     }
-#else
-    public enum EntityKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case stageInstance = 1
-        case voice = 2
-        case external = 3
-    }
-#endif
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-metadata
     public struct EntityMetadata: Sendable, Codable, ValidatablePayload {

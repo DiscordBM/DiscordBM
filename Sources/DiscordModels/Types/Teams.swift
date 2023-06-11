@@ -6,18 +6,11 @@ public struct Team: Sendable, Codable {
     public struct Member: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/teams#data-models-membership-state-enum
-#if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
         public enum State: Sendable, Codable {
             case invited // 1
             case accepted // 2
         }
-#else
-        public enum State: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case invited = 1
-            case accepted = 2
-        }
-#endif
 
         public var membership_state: State
         public var permissions: [String]

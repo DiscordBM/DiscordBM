@@ -919,7 +919,7 @@ public actor DiscordCache {
     ) -> Set<Gateway.Intent> {
         var intentsSum = Set<Gateway.Intent>()
 
-        let (managerIntents, _) = manager.identifyPayload.intents.representableValues()
+        let managerIntents = manager.identifyPayload.intents.representableValues()
 
         switch intents {
         case .all:

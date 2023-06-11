@@ -1,5 +1,6 @@
 
-#if swift(>=5.9) && $Macros
+import UnstableEnumMacro
+
 /// A macro to stabilize enums that might get more cases, to some extent.
 /// The main goal is to not fail json decodings if Discord adds a new case.
 ///
@@ -30,5 +31,6 @@
     named(__DO_NOT_USE_THIS_CASE)
 )
 @attached(conformance)
-macro UnstableEnum() = #externalMacro(module: "UnstableEnumMacro", type: "UnstableEnumMacro")
-#endif
+macro UnstableEnum() = #externalMacro(module: "UnstableEnumMacro", type: "UnstableEnum")
+
+public typealias LosslessRawRepresentable = UnstableEnumMacro.LosslessRawRepresentable

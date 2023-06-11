@@ -2,7 +2,8 @@
 private let bitFieldLogger = DiscordGlobalConfiguration.makeDecodeLogger("DBM.BitField")
 
 public protocol BitField: OptionSet, CustomStringConvertible where RawValue == UInt {
-    associatedtype R: RawRepresentable where R: Hashable, R.RawValue == UInt
+    associatedtype R: RawRepresentable & LosslessRawRepresentable
+    where R: Hashable, R.RawValue == UInt
     var rawValue: UInt { get set }
 }
 
@@ -48,24 +49,20 @@ public extension BitField {
     }
 
     /// Returns the `R` values in this bit field.
-    func representableValues() -> (values: Set<R>, unknown: Set<UInt>) {
+    func representableValues() -> Set<R> {
         var bitValue = self.rawValue
         var values: ContiguousArray<R> = []
-        var unknownValues: Set<UInt> = []
-        guard bitValue > 0 else { return ([], []) }
+        guard bitValue > 0 else { return [] }
         var counter: UInt = 0
         while bitValue != 0 {
             if (bitValue & 1) == 1 {
-                if let newValue = R(rawValue: counter) {
-                    values.append(newValue)
-                } else {
-                    unknownValues.insert(counter)
-                }
+                /// `R` is ``LosslessRawRepresentable``. Safe to force-unwrap.
+                values.append(R(rawValue: counter)!)
             }
             bitValue = bitValue >> 1
             counter += 1
         }
-        return (Set(values), unknownValues)
+        return Set(values)
     }
 
     /// Creates a `BitField` from a `Sequence`.
@@ -87,7 +84,7 @@ public extension BitField {
 }
 
 public struct IntBitField<R>: BitField
-where R: RawRepresentable & Hashable, R.RawValue == UInt {
+where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == UInt {
     public var rawValue: UInt
 
     public init() {
@@ -113,7 +110,7 @@ extension IntBitField: Sendable where R: Sendable { }
 
 /// A bit-field that decode/encodes itself as a string.
 public struct StringBitField<R>: BitField
-where R: RawRepresentable, R: Hashable, R.RawValue == UInt {
+where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == UInt {
 
     public enum DecodingError: Swift.Error, CustomStringConvertible {
         /// The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/DiscordBM/DiscordBM/issues.
@@ -158,12 +155,12 @@ extension StringBitField: Sendable where R: Sendable { }
 public extension RangeReplaceableCollection {
     @inlinable
     init<Field>(_ bitField: Field) where Field: BitField, Self.Element == Field.R {
-        self.init(bitField.representableValues().values)
+        self.init(bitField.representableValues())
     }
 
     @inlinable
     init? <Field>(_ bitField: Field?) where Field: BitField, Self.Element == Field.R {
-        if let values = bitField?.representableValues().values {
+        if let values = bitField?.representableValues() {
             self.init(values)
         } else {
             return nil

@@ -126,7 +126,6 @@ public struct AuditLog: Sendable, Codable {
         }
         
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
-#if swift(>=5.9) && $Macros
         @UnstableEnum<Int>
         public enum ActionKind: Sendable, Codable {
             case guildUpdate // 1
@@ -184,64 +183,6 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationFlagToChannel // 144
             case autoModerationUserCommunicationDisabled // 145
         }
-#else
-        public enum ActionKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case guildUpdate = 1
-            case channelCreate = 10
-            case channelUpdate = 11
-            case channelDelete = 12
-            case channelOverwriteCreate = 13
-            case channelOverwriteUpdate = 14
-            case channelOverwriteDelete = 15
-            case memberKick = 20
-            case memberPrune = 21
-            case memberBanAdd = 22
-            case memberBanRemove = 23
-            case memberUpdate = 24
-            case memberRoleUpdate = 25
-            case memberMove = 26
-            case memberDisconnect = 27
-            case botAdd = 28
-            case roleCreate = 30
-            case roleUpdate = 31
-            case roleDelete = 32
-            case inviteCreate = 40
-            case inviteUpdate = 41
-            case inviteDelete = 42
-            case webhookCreate = 50
-            case webhookUpdate = 51
-            case webhookDelete = 52
-            case emojiCreate = 60
-            case emojiUpdate = 61
-            case emojiDelete = 62
-            case messageDelete = 72
-            case messageBulkDelete = 73
-            case messagePin = 74
-            case messageUnpin = 75
-            case integrationCreate = 80
-            case integrationUpdate = 81
-            case integrationDelete = 82
-            case stageInstanceCreate = 83
-            case stageInstanceUpdate = 84
-            case stageInstanceDelete = 85
-            case stickerCreate = 90
-            case stickerUpdate = 91
-            case stickerDelete = 92
-            case guildScheduledEventCreate = 100
-            case guildScheduledEventUpdate = 101
-            case guildScheduledEventDelete = 102
-            case threadCreate = 110
-            case threadUpdate = 111
-            case threadDelete = 112
-            case applicationCommandPermissionUpdate = 121
-            case autoModerationRuleCreate = 140
-            case autoModerationRuleUpdate = 141
-            case autoModerationRuleDelete = 142
-            case autoModerationBlockMessage = 143
-            case autoModerationFlagToChannel = 144
-            case autoModerationUserCommunicationDisabled = 145
-        }
-#endif
         
         /// A mix of the below two types.
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
@@ -301,9 +242,7 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationBlockMessage(AutoModerationInfo)
             case autoModerationFlagToChannel(AutoModerationInfo)
             case autoModerationUserCommunicationDisabled(AutoModerationInfo)
-#if swift(>=5.9) && $Macros
             case unknown
-#endif
 
             public struct OverwriteInfo: Sendable, Codable {
                 
@@ -557,12 +496,10 @@ public struct AuditLog: Sendable, Codable {
                 case .autoModerationUserCommunicationDisabled:
                     let moderationInfo = try container.decode(AutoModerationInfo.self, forKey: .options)
                     self = .autoModerationUserCommunicationDisabled(moderationInfo)
-#if swift(>=5.9) && $Macros
                 case .unknown:
                     self = .unknown
                 case .__DO_NOT_USE_THIS_CASE:
                     fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
-#endif
                 }
             }
             
@@ -658,9 +595,7 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(moderationInfo, forKey: .options)
                 case let .autoModerationUserCommunicationDisabled(moderationInfo):
                     try container.encode(moderationInfo, forKey: .options)
-#if swift(>=5.9) && $Macros
                 case .unknown: break
-#endif
                 }
             }
         }
@@ -765,10 +700,8 @@ extension AuditLog.Entry.ActionKind {
         case .autoModerationBlockMessage: self = .autoModerationBlockMessage
         case .autoModerationFlagToChannel: self = .autoModerationFlagToChannel
         case .autoModerationUserCommunicationDisabled: self = .autoModerationUserCommunicationDisabled
-#if swift(>=5.9) && $Macros
         case .unknown:
             self = .unknown(-1)
-#endif
         }
     }
 }

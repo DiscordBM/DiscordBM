@@ -164,7 +164,6 @@ public enum IntOrDouble: Sendable, Codable {
 //MARK: - DiscordLocale
 
 /// https://discord.com/developers/docs/reference#locales
-#if swift(>=5.9) && $Macros
 @UnstableEnum<String>
 public enum DiscordLocale: Sendable, Codable {
     case danish // "da"
@@ -198,40 +197,6 @@ public enum DiscordLocale: Sendable, Codable {
     case chineseTaiwan // "zh-TW"
     case korean // "ko"
 }
-#else
-public enum DiscordLocale: String, Sendable, Codable, ToleratesStringDecodeMarker {
-    case danish = "da"
-    case german = "de"
-    case englishUK = "en-GB"
-    case englishUS = "en-US"
-    case spanish = "es-ES"
-    case french = "fr"
-    case croatian = "hr"
-    case italian = "it"
-    case lithuanian = "lt"
-    case hungarian = "hu"
-    case dutch = "nl"
-    case norwegian = "no"
-    case polish = "pl"
-    case portuguese = "pt-BR"
-    case romanian = "ro"
-    case finnish = "fi"
-    case swedish = "sv-SE"
-    case vietnamese = "vi"
-    case turkish = "tr"
-    case czech = "cs"
-    case greek = "el"
-    case bulgarian = "bg"
-    case russian = "ru"
-    case ukrainian = "uk"
-    case hindi = "hi"
-    case thai = "th"
-    case chineseChina = "zh-CN"
-    case japanese = "ja"
-    case chineseTaiwan = "zh-TW"
-    case korean = "ko"
-}
-#endif
 
 //MARK: - DiscordLocaleDict
 
@@ -337,11 +302,9 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
                 case .japanese: self.japanese = value
                 case .chineseTaiwan: self.chineseTaiwan = value
                 case .korean: self.korean = value
-#if swift(>=5.9) && $Macros
                 case .unknown: break // Ignore
                 case .__DO_NOT_USE_THIS_CASE:
                     fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
-#endif
                 }
             }
         }
