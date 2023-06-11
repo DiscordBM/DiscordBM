@@ -52,7 +52,6 @@ public extension BitField {
     func representableValues() -> Set<R> {
         var bitValue = self.rawValue
         var values: ContiguousArray<R> = []
-        guard bitValue > 0 else { return [] }
         var counter: UInt = 0
         while bitValue != 0 {
             if (bitValue & 1) == 1 {
@@ -87,11 +86,7 @@ public struct IntBitField<R>: BitField
 where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == UInt {
     public var rawValue: UInt
 
-    public init() {
-        self.rawValue = 0
-    }
-
-    public init(rawValue: UInt) {
+    public init(rawValue: UInt = 0) {
         self.rawValue = rawValue
     }
 }
@@ -111,35 +106,31 @@ extension IntBitField: Sendable where R: Sendable { }
 /// A bit-field that decode/encodes itself as a string.
 public struct StringBitField<R>: BitField
 where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == UInt {
-
-    public enum DecodingError: Swift.Error, CustomStringConvertible {
-        /// The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/DiscordBM/DiscordBM/issues.
-        case notRepresentingInt(String)
-
-        public var description: String {
-            switch self {
-            case let .notRepresentingInt(string):
-                return "StringBitField.DecodingError.notRepresentingInt(\(string))"
-            }
-        }
-    }
-
     public var rawValue: UInt
 
-    public init() {
-        self.rawValue = 0
-    }
-
-    public init(rawValue: UInt) {
+    public init(rawValue: UInt = 0) {
         self.rawValue = rawValue
     }
 }
 
 extension StringBitField: Codable {
+
+    public enum DecodingError: Error, CustomStringConvertible {
+        /// The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/DiscordBM/DiscordBM/issues.
+        case notRepresentingUInt(String)
+
+        public var description: String {
+            switch self {
+            case let .notRepresentingUInt(string):
+                return "StringBitField.DecodingError.notRepresentingUInt(\(string))"
+            }
+        }
+    }
+
     public init(from decoder: any Decoder) throws {
         let string = try String(from: decoder)
         guard let int = UInt(string) else {
-            throw DecodingError.notRepresentingInt(string)
+            throw DecodingError.notRepresentingUInt(string)
         }
         self.rawValue = int
     }
