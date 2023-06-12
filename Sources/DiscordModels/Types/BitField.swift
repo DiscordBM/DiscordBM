@@ -50,7 +50,7 @@ public extension BitField {
     /// Returns the `R` values in this bit field.
     func representableValues() -> (values: Set<R>, unknown: Set<UInt>) {
         var bitValue = self.rawValue
-        var values: ContiguousArray<R> = []
+        var values: [R] = []
         var unknownValues: Set<UInt> = []
         guard bitValue > 0 else { return ([], []) }
         var counter: UInt = 0

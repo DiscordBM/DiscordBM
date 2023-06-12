@@ -19,7 +19,7 @@ public struct AuditLog: Sendable, Codable {
             
             public struct NameID: Sendable, Codable {
                 public var name: String
-                public var id: String
+                public var id: String?
             }
             
             public struct Other: @unchecked Sendable {
