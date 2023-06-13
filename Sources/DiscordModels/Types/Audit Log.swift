@@ -11,6 +11,7 @@ public struct AuditLog: Sendable, Codable {
             case double(Double)
             case bool(Bool)
             case strings([String])
+            case nameId(NameID)
             case nameIds([NameID])
             case permissionOverwrites([DiscordChannel.Overwrite])
             case permission(GuildApplicationCommandPermissions.Permission)
@@ -37,18 +38,12 @@ public struct AuditLog: Sendable, Codable {
                 case let .double(double): return "\(double)"
                 case let .bool(bool): return "\(bool)"
                 case let .strings(array): return "\(array)"
+                case let .nameId(nameId): return "\(nameId)"
                 case let .nameIds(nameIds): return "\(nameIds)"
                 case let .permissionOverwrites(overwrites): return "\(overwrites)"
                 case let .permission(permission): return "\(permission)"
                 case let .actions(actions): return "\(actions)"
-                case let .other(other): return "\(other)"
-                }
-            }
-            
-            public var boolValue: Bool? {
-                switch self {
-                case let .bool(bool): return bool
-                default: return nil
+                case let .other(other): return "\(other.container)"
                 }
             }
             
@@ -64,6 +59,8 @@ public struct AuditLog: Sendable, Codable {
                     self = .double(double)
                 } else if let array = try? container.decode([String].self) {
                     self = .strings(array)
+                } else if let nameId = try? container.decode(NameID.self) {
+                    self = .nameId(nameId)
                 } else if let nameIds = try? container.decode([NameID].self) {
                     self = .nameIds(nameIds)
                 } else if let overwrites = try? container.decode([DiscordChannel.Overwrite].self) {
@@ -99,6 +96,8 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(bool)
                 case let .strings(array):
                     try container.encode(array)
+                case let .nameId(nameId):
+                    try container.encode(nameId)
                 case let .nameIds(nameIds):
                     try container.encode(nameIds)
                 case let .permissionOverwrites(overwrites):
