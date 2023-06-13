@@ -687,7 +687,7 @@ class DiscordClientTests: XCTestCase {
         ).decode()
 
         XCTAssertTrue((1...5).contains(search.count), search.count.description)
-        XCTAssertTrue(search.allSatisfy({ $0.user?.username.contains("Mahdi") == true }))
+        XCTAssertTrue(search.allSatisfy({ $0.user?.global_name.contains("mahdi") == true }))
 
         /// Search Guild members with invalid limit
         do {
