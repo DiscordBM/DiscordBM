@@ -275,7 +275,7 @@ extension DiscordChannel {
         public var id: MessageSnowflake
         public var channel_id: ChannelSnowflake
         public var guild_id: GuildSnowflake?
-        public var author: PartialUser?
+        public var author: DiscordUser?
         public var member: Guild.PartialMember?
         public var content: String
         public var timestamp: DiscordTimestamp
