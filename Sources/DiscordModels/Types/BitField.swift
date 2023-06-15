@@ -51,7 +51,7 @@ public extension BitField {
     /// Returns the `R` values in this bit field.
     func representableValues() -> Set<R> {
         var bitValue = self.rawValue
-        var values: ContiguousArray<R> = []
+        var values: [R] = []
         var counter: UInt = 0
         while bitValue != 0 {
             if (bitValue & 1) == 1 {
@@ -66,7 +66,7 @@ public extension BitField {
 
     /// Creates a `BitField` from a `Sequence`.
     @inlinable
-    init<S: Sequence>(_ elements: S) where S.Element == R {
+    init(_ elements: some Sequence<R>) {
         self.init(
             rawValue: elements
                 .map(\.rawValue)
@@ -149,6 +149,7 @@ public extension RangeReplaceableCollection {
         self.init(bitField.representableValues())
     }
 
+    // Useful for optional-field conversions
     @inlinable
     init? <Field>(_ bitField: Field?) where Field: BitField, Self.Element == Field.R {
         if let values = bitField?.representableValues() {

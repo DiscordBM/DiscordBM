@@ -14,6 +14,7 @@ private let doNotUseCase = "__DO_NOT_USE_THIS_CASE"
 /// You can manually declare the raw value of a case, using a comment in front of it like so:
 /// ```swift
 /// case something // "actually nothing!"
+/// case anything // still nothing!
 ///
 /// case value12 // 12
 /// ```

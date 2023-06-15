@@ -11,6 +11,7 @@ import UnstableEnumMacro
 /// You can manually declare the raw value of a case, using a comment in front of it like so:
 /// ```swift
 /// case something // "actually nothing!"
+/// case anything // still nothing!
 ///
 /// case value12 // 12
 /// ```
