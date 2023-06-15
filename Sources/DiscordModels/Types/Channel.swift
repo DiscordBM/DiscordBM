@@ -313,7 +313,7 @@ extension DiscordChannel {
     public struct PartialMessage: Sendable, Codable {
         public var id:  MessageSnowflake
         public var channel_id: ChannelSnowflake
-        public var author: PartialUser?
+        public var author: DiscordUser?
         public var content: String?
         public var timestamp: DiscordTimestamp?
         public var edited_timestamp: DiscordTimestamp?
