@@ -140,6 +140,7 @@ public struct SnowflakeInfo: Sendable {
         Date(timeIntervalSince1970: Double(self.timestamp) / 1_000)
     }
 
+    @usableFromInline
     static let discordEpochConstant: UInt64 = 1_420_070_400_000
 
     /// - Parameters:
@@ -214,7 +215,7 @@ public struct SnowflakeInfo: Sendable {
         try SnowflakeInfo(date: date, workerId: 0, processId: 0, sequenceNumber: 0)
     }
 
-    @usableFromInline
+    @inlinable
     internal init? (from snowflake: String) {
         guard let value = UInt64(snowflake) else { return nil }
         self.timestamp = (value >> 22) + SnowflakeInfo.discordEpochConstant
@@ -228,7 +229,7 @@ public struct SnowflakeInfo: Sendable {
         self.init(from: snowflake.rawValue)
     }
 
-    @usableFromInline
+    @inlinable
     internal func toSnowflake<S: SnowflakeProtocol>(as type: S.Type) -> S {
         let timestamp = (self.timestamp - SnowflakeInfo.discordEpochConstant) << 22
         let workerId = UInt64(self.workerId) << 17
