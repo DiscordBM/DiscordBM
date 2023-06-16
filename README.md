@@ -10,9 +10,6 @@
     <a href="https://codecov.io/gh/DiscordBM/DiscordBM">
         <img src="https://codecov.io/gh/DiscordBM/DiscordBM/branch/main/graph/badge.svg?token=P4DYX2FWYT" alt="Codecov">
     </a>
-    <a href="https://github.com/DiscordBM/DiscordBM">
-        <img src="https://tokei.rs/b1/github/DiscordBM/DiscordBM" alt="Lines of Code">
-    </a>
     <a href="https://swift.org">
         <img src="https://img.shields.io/badge/swift-5.8%20/%205.7-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
