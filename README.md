@@ -244,7 +244,7 @@ struct EventHandler: GatewayEventHandler {
             case let .applicationCommand(applicationCommand):
                 switch DiscordCommand(rawValue: applicationCommand.name) {
                 case .echo:
-                    if let echo = applicationCommand.options?.first?.value?.asString {
+                    if let echo = applicationCommand.option(named: "text")?.value?.asString {
                         /// Edits the interaction response.
                         /// This response is intentionally too fancy just so you see what's possible :)
                         try await client.updateOriginalInteractionResponse(
@@ -352,7 +352,7 @@ enum DiscordCommand: String, CaseIterable {
         case .echo:
             return [ApplicationCommand.Option(
                 type: .string,
-                name: "string",
+                name: "text",
                 description: "What to echo :)"
             )]
         case .link:
