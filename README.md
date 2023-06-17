@@ -10,9 +10,6 @@
     <a href="https://codecov.io/gh/DiscordBM/DiscordBM">
         <img src="https://codecov.io/gh/DiscordBM/DiscordBM/branch/main/graph/badge.svg?token=P4DYX2FWYT" alt="Codecov">
     </a>
-    <a href="https://github.com/DiscordBM/DiscordBM">
-        <img src="https://tokei.rs/b1/github/DiscordBM/DiscordBM" alt="Lines of Code">
-    </a>
     <a href="https://swift.org">
         <img src="https://img.shields.io/badge/swift-5.8%20/%205.7-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
@@ -244,7 +241,7 @@ struct EventHandler: GatewayEventHandler {
             case let .applicationCommand(applicationCommand):
                 switch DiscordCommand(rawValue: applicationCommand.name) {
                 case .echo:
-                    if let echo = applicationCommand.options?.first?.value?.asString {
+                    if let echo = applicationCommand.option(named: "text")?.value?.asString {
                         /// Edits the interaction response.
                         /// This response is intentionally too fancy just so you see what's possible :)
                         try await client.updateOriginalInteractionResponse(
@@ -352,7 +349,7 @@ enum DiscordCommand: String, CaseIterable {
         case .echo:
             return [ApplicationCommand.Option(
                 type: .string,
-                name: "string",
+                name: "text",
                 description: "What to echo :)"
             )]
         case .link:

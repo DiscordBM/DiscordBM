@@ -96,9 +96,17 @@ public enum DiscordUtils {
     }
     
     /// Escapes the special characters in the text, for the specified channel type.
+    /// - Parameters:
+    ///   - text: The text to be escaped.
+    ///   - keepLinks: Whether or not to _try_ to keep any kind of protocol links.
+    ///   The function will try to not escape protocol schemes such as `http://` and `https://`.
+    /// - Returns: The text, but escaped.
     @inlinable
-    public static func escapingSpecialCharacters(_ text: String) -> String {
-        text
+    public static func escapingSpecialCharacters(
+        _ text: String,
+        keepLinks: Bool = false
+    ) -> String {
+        let text = text
             .replacingOccurrences(of: #"\"#, with: #"\\"#)
             .replacingOccurrences(of: #"|"#, with: #"\|"#) /// Makes invisible
             .replacingOccurrences(of: #">"#, with: #"\>"#) /// Quotes
@@ -111,5 +119,10 @@ public enum DiscordUtils {
             .replacingOccurrences(of: #"_"#, with: #"\_"#) /// Italic
             .replacingOccurrences(of: #"*"#, with: #"\*"#) /// Bold
             .replacingOccurrences(of: #":"#, with: #"\:"#) /// Emojis, e.g. `:thumbsup:`
+        if keepLinks {
+            return text.replacingOccurrences(of: #"\://"#, with: "://")
+        } else {
+            return text
+        }
     }
 }

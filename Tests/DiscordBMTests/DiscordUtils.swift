@@ -110,5 +110,9 @@ class DiscordUtilsTests: XCTestCase {
         """#
         let escaped = DiscordUtils.escapingSpecialCharacters(text)
         XCTAssertEqual(escaped, expected)
+
+        let link = #"https://raw.githubusercontent.com/apple/swift-evolution/proposals/0401-remove-property-wrapper-isolation.md"#
+        let escapedLink = DiscordUtils.escapingSpecialCharacters(link, keepLinks: true)
+        XCTAssertEqual(escapedLink, link)
     }
 }
