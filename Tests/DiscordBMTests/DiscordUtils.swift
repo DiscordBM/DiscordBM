@@ -112,7 +112,11 @@ class DiscordUtilsTests: XCTestCase {
         XCTAssertEqual(escaped, expected)
 
         let link = #"https://raw.githubusercontent.com/apple/swift-evolution/proposals/0401-remove-property-wrapper-isolation.md"#
-        let escapedLink = DiscordUtils.escapingSpecialCharacters(link, keepLinks: true)
+        let escapedLink = DiscordUtils.escapingSpecialCharacters(link, options: .keepLinks)
         XCTAssertEqual(escapedLink, link)
+
+        let noNewLines = #"\*Hello!\*\n\_\_\*\*\*How are you?\*\*\*\_\_\n\> \_I'm fine thank you!\_\n\> \~Not really \:\\(\~\n\|\| Just Kidding! \|\| LOL \| HEHE"#
+        let escapedLines = DiscordUtils.escapingSpecialCharacters(text, options: .escapeNewLines)
+        XCTAssertEqual(escapedLines, noNewLines)
     }
 }

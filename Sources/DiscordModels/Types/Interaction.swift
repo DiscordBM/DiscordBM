@@ -408,7 +408,7 @@ extension Interaction {
     /// `ActionRow` is an attempt to simplify/beautify Discord's messy components.
     /// Anything inside `ActionRow` must not be used on its own for decoding/encoding purposes.
     /// For example you always need to use `[ActionRow]` instead of `[ActionRow.Component]`.
-    public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral {
+    public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral, ValidatablePayload {
 
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
         public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
@@ -423,8 +423,8 @@ extension Interaction {
         }
         
         /// https://discord.com/developers/docs/interactions/message-components#button-object-button-structure
-        public struct Button: Sendable, Codable {
-            
+        public struct Button: Sendable, Codable, ValidatablePayload {
+
             /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
             public enum Style: Int, Sendable, Codable, ToleratesIntDecodeMarker {
                 case primary = 1
@@ -551,13 +551,18 @@ extension Interaction {
                 self.url = url
                 self.disabled = disabled
             }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountDoesNotExceed(label, max: 80, name: "label")
+                validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
+            }
         }
         
         /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
-        public struct StringSelectMenu: Sendable, Codable {
-            
+        public struct StringSelectMenu: Sendable, Codable, ValidatablePayload {
+
         /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure
-            public struct Option: Sendable, Codable {
+            public struct Option: Sendable, Codable, ValidatablePayload {
                 public var label: String
                 public var value: String
                 public var description: String?
@@ -570,6 +575,12 @@ extension Interaction {
                     self.description = description
                     self.emoji = emoji
                     self.`default` = `default`
+                }
+
+                public func validate() -> [ValidationFailure] {
+                    validateCharacterCountDoesNotExceed(label, max: 100, name: "label")
+                    validateCharacterCountDoesNotExceed(value, max: 100, name: "value")
+                    validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
                 }
             }
             
@@ -588,10 +599,19 @@ extension Interaction {
                 self.max_values = max_values
                 self.disabled = disabled
             }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
+                validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
+                validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
+                validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
+                validateElementCountDoesNotExceed(options, max: 25, name: "options")
+                options.validate()
+            }
         }
 
         /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
-        public struct ChannelSelectMenu: Sendable, Codable {
+        public struct ChannelSelectMenu: Sendable, Codable, ValidatablePayload {
             public var custom_id: String
             public var channel_types: [DiscordChannel.Kind]?
             public var placeholder: String?
@@ -607,10 +627,17 @@ extension Interaction {
                 self.max_values = max_values
                 self.disabled = disabled
             }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
+                validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
+                validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
+                validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
+            }
         }
 
         /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
-        public struct SelectMenu: Sendable, Codable {
+        public struct SelectMenu: Sendable, Codable, ValidatablePayload {
             public var custom_id: String
             public var placeholder: String?
             public var min_values: Int?
@@ -624,11 +651,18 @@ extension Interaction {
                 self.max_values = max_values
                 self.disabled = disabled
             }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
+                validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
+                validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
+                validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
+            }
         }
         
         /// https://discord.com/developers/docs/interactions/message-components#text-inputs
-        public struct TextInput: Sendable, Codable {
-            
+        public struct TextInput: Sendable, Codable, ValidatablePayload {
+
         /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
             public enum Style: Int, Sendable, Codable, ToleratesIntDecodeMarker {
                 case short = 1
@@ -654,9 +688,18 @@ extension Interaction {
                 self.value = value
                 self.placeholder = placeholder
             }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
+                validateCharacterCountDoesNotExceed(label, max: 45, name: "label")
+                validateNumberInRangeOrNil(min_length, min: 0, max: 4_000, name: "min_length")
+                validateNumberInRangeOrNil(max_length, min: 1, max: 4_000, name: "max_length")
+                validateCharacterCountDoesNotExceed(value, max: 4_000, name: "value")
+                validateCharacterCountDoesNotExceed(placeholder, max: 100, name: "value")
+            }
         }
 
-        public enum Component: Sendable, Codable {
+        public enum Component: Sendable, Codable, ValidatablePayload {
             case button(Button)
             case stringSelect(StringSelectMenu)
             case textInput(TextInput)
@@ -821,6 +864,25 @@ extension Interaction {
                     throw Error.componentWasNotOfKind(kind: "channelSelect", component: self)
                 }
             }
+
+            public func validate() -> [ValidationFailure] {
+                switch self {
+                case .button(let button):
+                    button.validate()
+                case .stringSelect(let stringSelectMenu):
+                    stringSelectMenu.validate()
+                case .textInput(let textInput):
+                    textInput.validate()
+                case .userSelect(let selectMenu):
+                    selectMenu.validate()
+                case .roleSelect(let selectMenu):
+                    selectMenu.validate()
+                case .mentionableSelect(let selectMenu):
+                    selectMenu.validate()
+                case .channelSelect(let channelSelectMenu):
+                    channelSelectMenu.validate()
+                }
+            }
         }
 
         public var components: [Component]
@@ -883,6 +945,10 @@ extension Interaction {
             } else {
                 throw Error.componentNotFoundInActionRow(customId: customId, actionRow: self)
             }
+        }
+
+        public func validate() -> [ValidationFailure] {
+            components.validate()
         }
     }
 }

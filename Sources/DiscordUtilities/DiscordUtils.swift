@@ -4,26 +4,6 @@ import DiscordModels
 /// Utilities for writing Discord messages.
 /// https://discord.com/developers/docs/reference#message-formatting-formats
 public enum DiscordUtils {
-    
-    /// https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
-    public enum TimestampStyle: String {
-        /// `16:20`
-        case shortTime = "t"
-        /// `16:20:30`
-        case longTime = "T"
-        /// `20/04/2021`
-        case shortDate = "d"
-        /// `20 April 2021`
-        case longDate = "D"
-        /// Discord's default.
-        /// `20 April 2021 16:20`
-        case shortDateTime = "f"
-        /// `Tuesday, 20 April 2021 16:20`
-        case longDateTime = "F"
-        /// `2 months ago` / `in 2 months`
-        case relativeTime = "R"
-    }
-    
     /// When used in a Discord message, shows up as mentioning a user.
     @inlinable
     public static func mention(id: UserSnowflake) -> String {
@@ -94,7 +74,7 @@ public enum DiscordUtils {
         let style = style.map { ":\($0.rawValue)" } ?? ""
         return "<t:\(unixTimestamp)\(style)>"
     }
-    
+
     /// Escapes the special characters in the text, for the specified channel type.
     /// - Parameters:
     ///   - text: The text to be escaped.
@@ -104,9 +84,9 @@ public enum DiscordUtils {
     @inlinable
     public static func escapingSpecialCharacters(
         _ text: String,
-        keepLinks: Bool = false
+        options: EscapeOption? = nil
     ) -> String {
-        let text = text
+        var text = text
             .replacingOccurrences(of: #"\"#, with: #"\\"#)
             .replacingOccurrences(of: #"|"#, with: #"\|"#) /// Makes invisible
             .replacingOccurrences(of: #">"#, with: #"\>"#) /// Quotes
@@ -119,10 +99,50 @@ public enum DiscordUtils {
             .replacingOccurrences(of: #"_"#, with: #"\_"#) /// Italic
             .replacingOccurrences(of: #"*"#, with: #"\*"#) /// Bold
             .replacingOccurrences(of: #":"#, with: #"\:"#) /// Emojis, e.g. `:thumbsup:`
-        if keepLinks {
-            return text.replacingOccurrences(of: #"\://"#, with: "://")
-        } else {
-            return text
+        if options?.contains(.keepLinks) == true {
+            text = text.replacingOccurrences(of: #"\://"#, with: "://")
         }
+        if options?.contains(.escapeNewLines) == true {
+            text = text.replacingOccurrences(of: "\n", with: "\\n")
+        }
+        return text
     }
+}
+
+/// https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
+public enum TimestampStyle: String {
+    /// `16:20`
+    case shortTime = "t"
+    /// `16:20:30`
+    case longTime = "T"
+    /// `20/04/2021`
+    case shortDate = "d"
+    /// `20 April 2021`
+    case longDate = "D"
+    /// Discord's default.
+    /// `20 April 2021 16:20`
+    case shortDateTime = "f"
+    /// `Tuesday, 20 April 2021 16:20`
+    case longDateTime = "F"
+    /// `2 months ago` / `in 2 months`
+    case relativeTime = "R"
+}
+
+/// Options for escaping special characters.
+public struct EscapeOption: OptionSet {
+    public var rawValue: UInt8
+
+    public init(rawValue: UInt8) {
+        self.rawValue = rawValue
+    }
+
+    public init(_ rawValue: some BinaryInteger) {
+        self.rawValue = .init(rawValue)
+    }
+
+    /// _Try_ to keep links and not escape them.
+    public static let keepLinks = EscapeOption(rawValue: 1 << 0)
+
+    /// Escape new lines.
+    public static let escapeNewLines = EscapeOption(rawValue: 1 << 1)
 }
