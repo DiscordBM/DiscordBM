@@ -85,13 +85,13 @@ public struct ApplicationCommand: Sendable, Codable {
             validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
             validateCharacterCountInRange(description, min: 1, max: 100, name: "description")
             validateHasPrecondition(
-                condition: autocomplete != nil,
+                condition: autocomplete == true,
                 allowedIf: [.string, .integer, .number].contains(type),
                 name: "autocomplete",
                 reason: "'autocomplete' is only allowed if 'type' is 'string' or 'integer' or 'number'"
             )
             validateHasPrecondition(
-                condition: autocomplete != nil,
+                condition: autocomplete == true,
                 allowedIf: choices?.isEmpty != false,
                 name: "autocomplete",
                 reason: "'autocomplete' is only allowed if 'choices' is not present"

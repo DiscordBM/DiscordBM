@@ -28,7 +28,7 @@
 * Abstractions for easier testability.
 
 ## Showcase
-Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Penny.swift#L1).
+Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/DiscordFactory.swift#L1).
 
 * Penny's primary purpose is to give coins to the helpful members of the Vapor community.
 * She also pings members for their specified keywords (similar to Slackbot). 
@@ -651,9 +651,9 @@ The behavior specified below is enabled by default.
 
 * Before each request, DDC will ask the rate-limiter if the headers allow a request.
 * The rate-limiter will respond with `yes, you can`, `no, you can't` or `yes, but you must wait x seconds first, otherwise no`.
-* If the response `yes`, the DDC will continue performing the request.
-* If the response `no`, the DDC will throw a "rate-limited" error.
-* If the response `yes, but you must wait x seconds first, otherwise no`, then the DDC will look at the `retryPolicy` of its `configuration`.
+* If the response is `yes`, the DDC will continue performing the request.
+* If the response is `no`, the DDC will throw a "rate-limited" error.
+* If the response is `yes, but you must wait x seconds first, otherwise no`, then the DDC will look at the `retryPolicy` of its `configuration`.
 * The DDC will act like there has been a `429` error, and will ask the `retryPolicy` if it's possible to retry such a failure, and under what circumstances.
 * The `retryPolicy` may specify that `429` requests can be retried `basedOnHeaders` if not longer than `maxAllowed` seconds.
 * The DDC will wait as long as `x seconds` which the rate-limiter specified, then will perform the request. This only happens if the `x seconds` is not longer than the `maxAllowed`.
