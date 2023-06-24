@@ -27,7 +27,7 @@ public struct Emoji: Sendable, Codable {
 }
 
 /// A reaction emoji.
-public struct Reaction: Sendable, Hashable, Codable {
+public struct Reaction: Sendable, Codable, Hashable {
     
     private enum Base: Sendable, Codable, Hashable {
         case unicodeEmoji(String)

@@ -257,7 +257,7 @@ public struct AuditLog: Sendable, Codable {
             case memberBanAdd
             case memberBanRemove
             case memberUpdate
-            case memberRoleUpdate
+            case memberRoleUpdate(integration_type: Integration.Kind)
             case memberMove(channel_id: ChannelSnowflake, count: String)
             case memberDisconnect(count: String)
             case botAdd
@@ -412,6 +412,7 @@ public struct AuditLog: Sendable, Codable {
                 case channel_id
                 case count
                 case application_id
+                case integration_type
             }
             
             public init(from decoder: any Decoder) throws {
@@ -448,7 +449,13 @@ public struct AuditLog: Sendable, Codable {
                 case .memberBanAdd: self = .memberBanAdd
                 case .memberBanRemove: self = .memberBanRemove
                 case .memberUpdate: self = .memberUpdate
-                case .memberRoleUpdate: self = .memberRoleUpdate
+                case .memberRoleUpdate:
+                    let container = try optionsNestedContainer()
+                    let integration_type = try container.decode(
+                        Integration.Kind.self,
+                        forKey: .integration_type
+                    )
+                    self = .memberRoleUpdate(integration_type: integration_type)
                 case .memberMove:
                     let container = try optionsNestedContainer()
                     let channel_id = try container.decode(
