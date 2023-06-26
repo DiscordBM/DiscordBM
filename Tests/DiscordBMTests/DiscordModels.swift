@@ -6,7 +6,7 @@ import XCTest
 class DiscordModelsTests: XCTestCase {
     
     func testEventDecode() throws {
-        
+
         do {
             let text = """
             {
@@ -22,7 +22,7 @@ class DiscordModelsTests: XCTestCase {
             XCTAssertEqual(decoded.type, nil)
             XCTAssertTrue(decoded.data == nil)
         }
-        
+
         do {
             let text = """
             {
@@ -116,7 +116,7 @@ class DiscordModelsTests: XCTestCase {
             XCTAssertTrue(message.attachments.isEmpty)
             XCTAssertEqual(message.guild_id, "439103874612675485")
         }
-        
+
         do {
             let text = """
             {
@@ -154,6 +154,54 @@ class DiscordModelsTests: XCTestCase {
                 XCTFail("Unexpected action: \(String(describing: auditLog.action))")
             }
             XCTAssertEqual(auditLog.reason, nil)
+        }
+
+        do {
+            let text = """
+            {
+                "t": "VOICE_STATE_UPDATE",
+                "s": 134275,
+                "op": 0,
+                "d": {
+                    "member": {
+                        "user": {
+                            "username": "djsole18",
+                            "public_flags": 0,
+                            "id": "984302584959500299",
+                            "global_name": null,
+                            "display_name": null,
+                            "discriminator": "3901",
+                            "bot": false,
+                            "avatar_decoration": null,
+                            "avatar": "561939e4a1550313f5cfdf2bd6dc3732"
+                        },
+                        "roles": [],
+                        "premium_since": null,
+                        "pending": false,
+                        "nick": null,
+                        "mute": false,
+                        "joined_at": null,
+                        "flags": 16,
+                        "deaf": false,
+                        "communication_disabled_until": null,
+                        "avatar": null
+                    },
+                    "user_id": "984302584959500299",
+                    "suppress": false,
+                    "session_id": "8876d2ad2842d6d6e318267227de6eec",
+                    "self_video": false,
+                    "self_stream": true,
+                    "self_mute": false,
+                    "self_deaf": false,
+                    "request_to_speak_timestamp": null,
+                    "mute": false,
+                    "guild_id": "1002085020187492383",
+                    "deaf": false,
+                    "channel_id": "1006294105111920822"
+                }
+            }
+            """
+            _ = try JSONDecoder().decode(Gateway.Event.self, from: Data(text.utf8))
         }
     }
     

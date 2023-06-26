@@ -286,14 +286,12 @@ extension Guild {
         public var user: DiscordUser?
         public var nick: String?
         public var avatar: String?
-        public var roles: [String]?
-        public var hoisted_role: String?
+        public var roles: [RoleSnowflake]?
         public var joined_at: DiscordTimestamp?
         public var premium_since: DiscordTimestamp?
         public var deaf: Bool?
         public var mute: Bool?
         public var pending: Bool?
-        public var is_pending: Bool?
         public var flags: IntBitField<Member.Flag>?
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
