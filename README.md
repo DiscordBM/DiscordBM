@@ -1,6 +1,9 @@
 <p align="center">
     <img src="https://user-images.githubusercontent.com/54685446/201329617-9fd91ab0-35c2-42c2-8963-47b68c6a490a.png" alt="DiscordBM">
     <br>
+    <a href="https://discord.gg/kxfs5n7HVE">
+        <img src="https://img.shields.io/discord/1125181416481771651.svg" alt="DiscordBM Server">
+    </a>
     <a href="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml">
         <img src="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
     </a>
@@ -13,10 +16,6 @@
     <a href="https://swift.org">
         <img src="https://img.shields.io/badge/swift-5.8%20/%205.7-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
-</p>
-
-<p align="center">
-     🌟 Just a reminder that there is a 🌟 button up there if you liked this project 😅 🌟
 </p>
 
 ## Notable Features
@@ -738,6 +737,7 @@ Finally, add `import DiscordBM` to your source code.
 * This includes adding new cases to enums. If you want to try to avoid breaking changes, make sure you have a `default` case in your `switch` statements or use `if case let`/`if case`.
 
 ## Contribution & Support
-* Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.gg/vapor) to discuss your ideas.    
+* If you need help with anything, ask in [DiscordBM's Discord server](https://discord.gg/kxfs5n7HVE).
+* Any contribution is more than welcome. You can find me in the server to discuss your ideas.    
 * If there is missing/upcoming feature, you can make an issue/PR for it with a link to the related Discord docs page or the related issue/PR in [Discord docs repository](https://github.com/discord/discord-api-docs).   
 * Passing the `linux-integration` tests is not required for PRs because of token/access problems.
