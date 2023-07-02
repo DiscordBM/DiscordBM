@@ -598,6 +598,57 @@ let hasRole = guild.userHasRole(
 
 </details>
 
+### Sharding
+<details>
+  <summary> Click to expand </summary>
+
+Sharding is a way of splitting up your bot's load accross different `GatewayManager`s. It is useful if:
+* You want to implement zero-down-time scaling/updating.
+* You have too many guilds to be handeled by just 1 `GatewayManager`.
+> **Note**   
+> Discord says sharding is required for bots with 2500 and more guilds. For more info, refer to the [Discord docs](https://discord.com/developers/docs/topics/gateway#sharding)
+
+To enable sharding, simply replace your `BotGatewayManager` with `ShardingGatewayManager`:
+```swift
+let bot = await ShardingGatewayManager(
+    eventLoopGroup: httpClient.eventLoopGroup,
+    httpClient: httpClient,
+    token: <#Your Bot Token#>,
+    presence: .init( /// Set up bot's initial presence
+        /// Will show up as "Playing Fortnite"
+        activities: [.init(name: "Fortnite", type: .game)], 
+        status: .online,
+        afk: false
+    ),
+    /// Add all the intents you want
+    /// You can also use `Gateway.Intent.unprivileged` or `Gateway.Intent.allCases`
+    intents: [.guildMessages, .messageContent]
+)
+```
+And that's it! You've already enabled sharding. `DiscordBM` will create as many `BotGatewayManager`s as Discord suggests under the hood of `ShardingGatewayManager`, and will automatically handle them. 
+> **Note**   
+> `ShardingGatewayManager` might still only create 1 `BotGatewayManager` if that's what Discord suggests.
+
+`ShardingGatewayManager` takes a few more options than `BotGatewayManager` to customize how you want to perform sharding:
+```swift
+let bot: any GatewayManager = await ShardingGatewayManager(
+    eventLoopGroup: httpClient.eventLoopGroup,
+    httpClient: httpClient,
+    configuration: .init(
+        /// You can request an exact amount of shard counts using `.exact(<number>)`.
+        /// Defaults to `.automatic` which means it will ask Discord for a suggestion of how many shards to spin up.
+        shardCount: .exact(<#number#>),
+        /// This is an opportunity to customize what shard takes care of which intents.
+        /// By default, all intents are passed to all shards.
+        makeIntents: { (indexOfShard: Int, totalShardCount: Int) -> [Gateway.Intent] in
+            /// return a value of type `[Gateway.Intent]` based on `indexOfShard` and `totalShardCount`.
+        }
+    ),
+    ...
+)
+```
+</details>
+
 ## Related Projects
 
 ### Discord Logger
