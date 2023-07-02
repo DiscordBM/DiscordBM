@@ -135,10 +135,12 @@ public struct ApplicationCommand: Sendable, Codable {
     public var guild_id: GuildSnowflake?
     public var name: String
     public var name_localizations: DiscordLocaleDict<String>?
-    public var name_localized: String? /// Only for endpoints like get-application-commands
+    /// Only for endpoints like get-application-commands
+    public var name_localized: String?
     public var description: String
     public var description_localizations: DiscordLocaleDict<String>?
-    public var description_localized: String? /// Only for endpoints like get-application-commands
+    /// Only for endpoints like get-application-commands
+    public var description_localized: String?
     public var options: [Option]?
     public var default_member_permissions: StringBitField<Permission>?
     public var dm_permission: Bool?

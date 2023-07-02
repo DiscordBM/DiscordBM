@@ -2558,6 +2558,7 @@ extension DiscordClient {
             return appId
         } else {
             /// You have not passed your app-id in the init of `DiscordClient`/`GatewayManager`.
+            /// And the `DiscordClient` was also not able to find your app id using your token.
             /// You need to pass it in the function parameters at least.
             throw DiscordHTTPError.appIdParameterRequired
         }
