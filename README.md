@@ -165,10 +165,6 @@ In most cases, the library doesn't try to abstract away Discord's stuff.
 * If there is a HTTP request you want to make, you'll need to use `DiscordClient`.
 * You should read Discord documentation's related notes when you want to use something of this library.   
   Everything in the library has its related Discord documentation section linked near it.
-  
-> **Warning**   
-> `DiscordBM` is still in beta so new releases can come with breaking changes.   
-> [**Read the release notes**](https://github.com/DiscordBM/DiscordBM/releases) to fix the breaking changes that you encounter and become aware of new features.
 
 ### Finding Your Bot Token
 <details>
@@ -672,7 +668,7 @@ To use the `DiscordBM` library in a SwiftPM project,
 add the following line to the dependencies in your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/DiscordBM/DiscordBM", from: "1.0.0-beta.1"),
+.package(url: "https://github.com/DiscordBM/DiscordBM", from: "1.0.0"),
 ```
 
 Include `DiscordBM` as a dependency for your targets:
