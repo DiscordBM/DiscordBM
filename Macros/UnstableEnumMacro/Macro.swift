@@ -138,7 +138,9 @@ extension UnstableEnum: ConformanceMacro {
     ) throws -> [(TypeSyntax, GenericWhereClauseSyntax?)] {
         return [
             ("RawRepresentable", nil),
-            ("LosslessRawRepresentable", nil)
+            ("LosslessRawRepresentable", nil),
+            ("Equatable", nil),
+            ("Hashable", nil),
         ]
     }
 }

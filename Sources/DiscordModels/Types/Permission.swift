@@ -1,7 +1,7 @@
 
 /// https://discord.com/developers/docs/topics/permissions#permissions-bitwise-permission-flags
 @UnstableEnum<UInt>
-public enum Permission: Sendable, Hashable, Codable {
+public enum Permission: Sendable, Codable {
     case createInstantInvite // 0
     case kickMembers // 1
     case banMembers // 2

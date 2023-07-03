@@ -899,6 +899,8 @@ extension Interaction {
                     selectMenu.validate()
                 case .channelSelect(let channelSelectMenu):
                     channelSelectMenu.validate()
+                case .unknown:
+                    Optional<ValidationFailure>.none
                 }
             }
         }
