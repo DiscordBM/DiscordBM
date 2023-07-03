@@ -27,11 +27,7 @@
 * Abstractions for easier testability.
 
 ## Showcase
-Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/DiscordFactory.swift#L1).
-
-* Penny's primary purpose is to give coins to the helpful members of the Vapor community.
-* She also pings members for their specified keywords (similar to Slackbot). 
-* And notifies everyone of Swift's evolution proposals.    
+Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/DiscordFactory.swift#L1). 
 
 ## How To Use
   
