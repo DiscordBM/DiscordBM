@@ -9,23 +9,27 @@ jobs:
     steps:
       - name: Checkout out package
         uses: actions/checkout@v3
-      - name: Calculate LOC
-        uses: shadowmoose/GHA-LoC-Badge@1.0.0
-        id: badge
+      - name: Install jq
+        run: sudo apt-get install jq
+      - name: Install tokei
+        uses: giantswarm/install-binary-action@VERSION
         with:
-          debug: true
-          directory: ./
-          badge: ./output/badge.svg
-          patterns: '*.swift'
+          binary: "tokei"
+          version: "12.1.2"
+          download_url: "https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-x86_64-unknown-linux-gnu.tar.gz"
+          smoke_test: "${binary} --version"
+      - name: Calculate LOC
+        id: loc
+        run: tokei -t swift -o json | jq .Swift.code
       - name: Print the output
         run: |
-          echo "Scanned: ${{ steps.badge.outputs.counted_files }}";
-          echo "Line Count: ${{ steps.badge.outputs.total_lines }}";
+          echo "Scanned: ${{ steps.loc.outputs.0 }}";
+          echo "Line Count: ${{ steps.loc.outputs.0 }}";
       - name: "Post"
         uses: indiesdev/curl@v1
         with:
           url: https://rapi.mahdibm.com/v1/loc/DiscordBM
           method: "POST"
           accept: 200
-          params: '{ "loc": "${{ steps.badge.outputs.total_lines }}", "secret": "${{ secrets.GH_LOC_SECRET }}" }'
+          params: '{ "loc": "${{ steps.loc.outputs.0 }}", "secret": "${{ secrets.GH_LOC_SECRET }}" }'
           timeout: 5000
