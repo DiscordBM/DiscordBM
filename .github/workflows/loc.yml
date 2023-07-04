@@ -9,8 +9,6 @@ jobs:
     steps:
       - name: Checkout out package
         uses: actions/checkout@v3
-      - name: Install jq
-        run: sudo apt-get install jq
       - name: Install tokei
         uses: giantswarm/install-binary-action@v1.1.0
         with:
