@@ -17,6 +17,7 @@ jobs:
           binary: "tokei"
           version: "12.1.2"
           download_url: "https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-x86_64-unknown-linux-gnu.tar.gz"
+          tarball_binary_path: "tokei"
           smoke_test: "${binary} --version"
       - name: Calculate LOC
         id: loc
