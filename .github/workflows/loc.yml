@@ -1,4 +1,4 @@
-name: Update LOC
+name: update LOC
 on:
   push: { branches: [ main ] }
 
@@ -21,14 +21,14 @@ jobs:
           smoke_test: "${binary} --version"
       - name: Calculate LOC
         id: loc
-        run: tokei -t swift -o json | jq .Swift.code
+        run: echo "count=$(tokei -t swift -o json | jq .Swift.code)" >> $GITHUB_OUTPUT
       - name: Print the output
-        run: echo "Line count is ${{ steps.loc.outcome }}"
+        run: echo "Line count is ${{ steps.loc.outputs.count }}"
       - name: "Post"
         uses: indiesdev/curl@v1
         with:
           url: https://rapi.mahdibm.com/v1/loc/DiscordBM
           method: "POST"
           accept: 200
-          params: '{ "loc": "${{ steps.loc.outcome }}", "secret": "${{ secrets.GH_LOC_SECRET }}" }'
+          params: '{ "loc": "${{ steps.loc.outputs.count }}", "secret": "${{ secrets.GH_LOC_SECRET }}" }'
           timeout: 5000
