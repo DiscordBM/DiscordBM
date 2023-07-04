@@ -21,11 +21,9 @@ jobs:
           smoke_test: "${binary} --version"
       - name: Calculate LOC
         id: loc
-        run: tokei -t swift -o json | jq .Swift.code
+        run: tokei -t swift -o json | jq .Swift.code >> $GITHUB_OUTPUT
       - name: Print the output
-        run: |
-          echo "Scanned: ${{ steps.loc.outputs }}";
-          echo "Line Count: ${{ steps.loc.outputs }}";
+        run: echo "Line count is ${{ steps.loc.outputs }}"
       - name: "Post"
         uses: indiesdev/curl@v1
         with:
