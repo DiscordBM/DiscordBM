@@ -27,8 +27,5 @@ jobs:
           url: https://rapi.mahdibm.com/v1/loc/DiscordBM
           method: "POST"
           accept: 200
-          # Params can be passed through with a json object string
           params: '{ "loc": "${{ steps.badge.outputs.total_lines }}", "secret": "${{ secrets.GH_LOC_SECRET }}" }'
           timeout: 5000
-          log-response: true
-          retries: 3
