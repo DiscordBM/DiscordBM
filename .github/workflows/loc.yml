@@ -12,7 +12,7 @@ jobs:
       - name: Install jq
         run: sudo apt-get install jq
       - name: Install tokei
-        uses: giantswarm/install-binary-action@VERSION
+        uses: giantswarm/install-binary-action@1
         with:
           binary: "tokei"
           version: "12.1.2"
