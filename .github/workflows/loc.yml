@@ -23,7 +23,7 @@ jobs:
       - name: Print the output
         run: echo "Line count is ${{ steps.loc.outputs.count }}"
       - name: "Post"
-        uses: indiesdev/curl@v1
+        uses: indiesdev/curl@v1.1
         with:
           url: https://rapi.mahdibm.com/v1/loc/DiscordBM
           method: "POST"
