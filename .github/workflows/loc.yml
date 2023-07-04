@@ -1,5 +1,6 @@
-on: [push]
 name: Update LOC
+on:
+  push: { branches: [ main ] }
 
 jobs:
   loc_post:
