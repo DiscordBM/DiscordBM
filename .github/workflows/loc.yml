@@ -1,0 +1,35 @@
+on: [push]
+name: Update LOC
+
+jobs:
+  loc_post:
+    runs-on: ubuntu-latest
+    name: Test Run
+    steps:
+      - name: Checkout out package
+        uses: actions/checkout@v3
+      - name: Launch the local action
+        uses: ./ # Uses an action in the root directory
+        id: badge
+        with:
+          debug: true
+          directory: ./
+          badge: ./output/badge.svg
+          patterns: '*.swift'
+          ignore: 'node_modules/|README'
+      - name: Print the output
+        run: |
+          echo "Scanned: ${{ steps.badge.outputs.counted_files }}";
+          echo "Line Count: ${{ steps.badge.outputs.total_lines }}";
+          
+      - name: "Post"
+        uses: indiesdev/curl@v1
+        with:
+          url: https://rapi.mahdibm.com/v1/loc/DiscordBM
+          method: "POST"
+          accept: 200
+          # Params can be passed through with a json object string
+          params: '{ "loc": "${{ steps.badge.outputs.total_lines }}", "secret": "${{ secrets.GH_LOC_SECRET }}" }'
+          timeout: 5000
+          log-response: true
+          retries: 3
