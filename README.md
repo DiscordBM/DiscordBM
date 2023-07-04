@@ -9,6 +9,9 @@
     </a>
     <a href="https://github.com/DiscordBM/DiscordBM/actions/workflows/integration-tests.yml">
         <img src="https://github.com/DiscordBM/DiscordBM/actions/workflows/integration-tests.yml/badge.svg" alt="Integration Tests Badge">
+    <a href="https://github.com/DiscordBM/DiscordBM">
+        <img src="https://img.shields.io/badge/dynamic/json?url=https://rapi.mahdibm.com/v1/loc/DiscordBM/count&query=$.count&label=Swift%20lines" alt="Swift lines of code">
+    </a>
     </a>
     <a href="https://codecov.io/gh/DiscordBM/DiscordBM">
         <img src="https://codecov.io/gh/DiscordBM/DiscordBM/branch/main/graph/badge.svg?token=P4DYX2FWYT" alt="Codecov">
