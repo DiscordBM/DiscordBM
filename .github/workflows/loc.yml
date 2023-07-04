@@ -23,13 +23,13 @@ jobs:
         run: tokei -t swift -o json | jq .Swift.code
       - name: Print the output
         run: |
-          echo "Scanned: ${{ steps.loc.outputs.0 }}";
-          echo "Line Count: ${{ steps.loc.outputs.0 }}";
+          echo "Scanned: ${{ steps.loc.outputs }}";
+          echo "Line Count: ${{ steps.loc.outputs }}";
       - name: "Post"
         uses: indiesdev/curl@v1
         with:
           url: https://rapi.mahdibm.com/v1/loc/DiscordBM
           method: "POST"
           accept: 200
-          params: '{ "loc": "${{ steps.loc.outputs.0 }}", "secret": "${{ secrets.GH_LOC_SECRET }}" }'
+          params: '{ "loc": "${{ steps.loc.outputs }}", "secret": "${{ secrets.GH_LOC_SECRET }}" }'
           timeout: 5000
