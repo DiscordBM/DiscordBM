@@ -10,7 +10,7 @@ jobs:
       - name: Checkout out package
         uses: actions/checkout@v3
       - name: Calculate LOC
-        uses: shadowmoose/GHA-LoC-Badge@1
+        uses: shadowmoose/GHA-LoC-Badge@1.0.0
         id: badge
         with:
           debug: true
