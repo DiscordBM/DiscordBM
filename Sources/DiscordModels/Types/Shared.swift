@@ -608,11 +608,13 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
     }
     
     public init(from decoder: any Decoder) throws {
-        self.value = try .init(from: decoder)
+        let container = try decoder.singleValueContainer()
+        self.value = try container.decode(Int.self)
     }
     
     public func encode(to encoder: any Encoder) throws {
-        try self.value.encode(to: encoder)
+        var container = encoder.singleValueContainer()
+        try container.encode(self.value)
     }
 }
 
@@ -638,10 +640,9 @@ public struct Secret:
     }
     
     public var description: String {
-        let count = value.count
-        let keepCount = count > 24 ? 4 : 0
-        let dropped = value.dropLast(count - keepCount)
-        return #"Secret("\#(dropped)****")"#
+        let count = Swift.min((self.value.unicodeScalars.count / 4), 6)
+        let prefixed = value.prefix(count)
+        return #"Secret("\#(prefixed)****")"#
     }
     
     public var debugDescription: String {
@@ -649,11 +650,13 @@ public struct Secret:
     }
     
     public init(from decoder: any Decoder) throws {
-        self.value = try .init(from: decoder)
+        let container = try decoder.singleValueContainer()
+        self.value = try container.decode(String.self)
     }
     
     public func encode(to encoder: any Encoder) throws {
-        try self.value.encode(to: encoder)
+        var container = encoder.singleValueContainer()
+        try container.encode(self.value)
     }
 }
 
@@ -668,11 +671,13 @@ public final class DereferenceBox<C>: Codable where C: Codable {
     }
     
     public init(from decoder: any Decoder) throws {
-        self.value = try .init(from: decoder)
+        let container = try decoder.singleValueContainer()
+        self.value = try container.decode(C.self)
     }
     
     public func encode(to encoder: any Encoder) throws {
-        try self.value.encode(to: encoder)
+        var container = encoder.singleValueContainer()
+        try container.encode(self.value)
     }
 }
 
