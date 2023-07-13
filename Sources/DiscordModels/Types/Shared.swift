@@ -798,6 +798,9 @@ extension DiscordColor {
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static var brown: DiscordColor { .brown() }
 
+    /// iOS light system gray1 color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-gray-colors
+    public static var gray: DiscordColor { .gray() }
 
     /// The gray levels in Apple's color HIG.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-gray-colors
