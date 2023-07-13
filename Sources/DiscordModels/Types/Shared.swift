@@ -812,7 +812,10 @@ extension DiscordColor {
 
     /// iOS system gray colors.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-gray-colors
-    public static func gray(level: GrayLevel = .level1, scheme: ColorScheme) -> DiscordColor {
+    public static func gray(
+        level: GrayLevel = .level1,
+        scheme: ColorScheme = .light
+    ) -> DiscordColor {
         switch scheme {
         case .light:
             switch level {
