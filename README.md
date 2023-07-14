@@ -4,9 +4,6 @@
     <a href="https://discord.gg/kxfs5n7HVE">
         <img src="https://dcbadge.vercel.app/api/server/kxfs5n7HVE?style=flat" alt="DiscordBM Server">
     </a>
-    <a href="https://discord.gg/kxfs5n7HVE">
-        <img src="https://img.shields.io/discord/1125181416481771651.svg" alt="DiscordBM Server">
-    </a>
     <a href="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml">
         <img src="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
     </a>
