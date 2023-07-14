@@ -23,7 +23,6 @@ public struct GuildTemplate: Codable, Sendable {
         public var mentionable: Bool
         public var tags: DiscordModels.Role.Tags?
         public var version: Int?
-        public var flags: IntBitField<DiscordModels.Role.Flag>
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
