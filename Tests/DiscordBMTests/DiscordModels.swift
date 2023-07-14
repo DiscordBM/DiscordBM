@@ -204,7 +204,7 @@ class DiscordModelsTests: XCTestCase {
             _ = try JSONDecoder().decode(Gateway.Event.self, from: Data(text.utf8))
         }
     }
-    
+
     func testImageData() throws {
         typealias ImageData = Payloads.ImageData
         let data = ByteBuffer(data: resource(name: "1kb.png"))
