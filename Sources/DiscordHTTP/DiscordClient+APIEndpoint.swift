@@ -1067,7 +1067,7 @@ public extension DiscordClient {
         let endpoint = APIEndpoint.getGuild(guildId: id)
         return try await self.send(request: .init(
             to: endpoint,
-            queries: [("with_counts", withCounts?.description)]
+            queries: [("with_counts", withCounts.map { "\($0)" })]
         ))
     }
 
@@ -1162,7 +1162,6 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// NOTE: `limit`, if provided, must be between `1` and `1_000`.
     /// https://discord.com/developers/docs/resources/guild#list-guild-members
     @inlinable
     func listGuildMembers(
@@ -1170,6 +1169,7 @@ public extension DiscordClient {
         limit: Int? = nil,
         after: UserSnowflake? = nil
     ) async throws -> DiscordClientResponse<[Guild.Member]> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = APIEndpoint.listGuildMembers(guildId: guildId)
         return try await self.send(request: .init(
             to: endpoint,
@@ -1301,7 +1301,6 @@ public extension DiscordClient {
         ))
     }
 
-    /// NOTE: `limit`, if provided, must be between `1` and `1_000`.
     /// https://discord.com/developers/docs/resources/guild#get-guild-bans
     @inlinable
     func listGuildBans(
@@ -1310,6 +1309,7 @@ public extension DiscordClient {
         before: UserSnowflake? = nil,
         after: UserSnowflake? = nil
     ) async throws -> DiscordClientResponse<[Guild.Ban]> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = APIEndpoint.listGuildBans(guildId: guildId)
         return try await self.send(request: .init(
             to: endpoint,
@@ -1628,6 +1628,23 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-onboarding
+    @inlinable
+    func updateGuildOnboarding(
+        guildId: GuildSnowflake,
+        reason: String? = nil,
+        payload: Payloads.UpdateGuildOnboarding
+    ) async throws -> DiscordClientResponse<Guild.Onboarding> {
+        let endpoint = APIEndpoint.updateGuildOnboarding(guildId: guildId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
     /// https://discord.com/developers/docs/resources/guild#modify-current-user-voice-state
     @inlinable
     func updateSelfVoiceState(
@@ -1739,7 +1756,6 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// NOTE: `limit`, if provided, must be between `1` and `100`.
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users
     @inlinable
     func listGuildScheduledEventUsers(
@@ -2185,6 +2201,13 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
+    /// https://discord.com/developers/docs/topics/oauth2#get-current-application
+    @inlinable
+    func getOwnApplication() async throws -> DiscordClientResponse<DiscordApplication> {
+        let endpoint = APIEndpoint.getOwnApplication
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     /// https://discord.com/developers/docs/resources/user#get-user
     @inlinable
     func getUser(id: UserSnowflake) async throws -> DiscordClientResponse<DiscordUser> {
@@ -2209,15 +2232,18 @@ public extension DiscordClient {
     func listOwnGuilds(
         before: GuildSnowflake? = nil,
         after: GuildSnowflake? = nil,
-        limit: Int? = nil
+        limit: Int? = nil,
+        withCounts: Bool? = nil
     ) async throws -> DiscordClientResponse<[PartialGuild]> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 200)
         let endpoint = APIEndpoint.listOwnGuilds
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
                 ("before", before?.rawValue),
                 ("after", after?.rawValue),
-                ("limit", limit.map { "\($0)" })
+                ("limit", limit.map { "\($0)" }),
+                ("with_counts", withCounts.map { "\($0)" }),
             ]
         ))
     }
@@ -2593,8 +2619,8 @@ extension DiscordClient {
             throw DiscordHTTPError.queryParameterOutOfBounds(
                 name: name,
                 value: value?.description,
-                lowerBound: 1,
-                upperBound: 1_000
+                lowerBound: lowerBound,
+                upperBound: upperBound
             )
         }
     }

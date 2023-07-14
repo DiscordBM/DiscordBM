@@ -182,6 +182,7 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationUserCommunicationDisabled = 145
             case creatorMonetizationRequestCreated = 150
             case creatorMonetizationTermsAccepted = 151
+            case _undocumented = 9223372036854775807 /// Int.max
 
             init(action: Action) {
                 switch action {
@@ -241,6 +242,7 @@ public struct AuditLog: Sendable, Codable {
                 case .autoModerationUserCommunicationDisabled: self = .autoModerationUserCommunicationDisabled
                 case .creatorMonetizationRequestCreated: self = .creatorMonetizationRequestCreated
                 case .creatorMonetizationTermsAccepted: self = .creatorMonetizationTermsAccepted
+                case ._undocumented: self = ._undocumented
                 }
             }
         }
@@ -305,6 +307,7 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationUserCommunicationDisabled(AutoModerationInfo)
             case creatorMonetizationRequestCreated
             case creatorMonetizationTermsAccepted
+            case _undocumented
 
             public struct OverwriteInfo: Sendable, Codable {
                 
@@ -423,7 +426,7 @@ public struct AuditLog: Sendable, Codable {
             
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
-                let actionType = try container.decode(ActionKind.self, forKey: .action_type)
+                let actionType = try? container.decode(ActionKind.self, forKey: .action_type)
                 func optionsNestedContainer() throws -> KeyedDecodingContainer<OptionsCodingKeys> {
                     try container.nestedContainer(
                         keyedBy: OptionsCodingKeys.self,
@@ -569,10 +572,14 @@ public struct AuditLog: Sendable, Codable {
                     self = .creatorMonetizationRequestCreated
                 case .creatorMonetizationTermsAccepted:
                     self = .creatorMonetizationTermsAccepted
+                case ._undocumented, .none:
+                    self = ._undocumented
                 }
             }
             
             public func encode(to encoder: any Encoder) throws {
+                if case ._undocumented = self { return }
+
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 let type = ActionKind(action: self)
                 try container.encode(type, forKey: .action_type)
@@ -666,6 +673,7 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(moderationInfo, forKey: .options)
                 case .creatorMonetizationRequestCreated: break
                 case .creatorMonetizationTermsAccepted: break
+                case ._undocumented: break
                 }
             }
         }
@@ -699,6 +707,19 @@ public struct AuditLog: Sendable, Codable {
             self.id = try container.decode(AuditLogEntrySnowflake.self, forKey: .id)
             self.action = try Action(from: decoder)
             self.reason = try container.decodeIfPresent(String.self, forKey: .reason)
+        }
+
+        public func encode(to encoder: any Encoder) throws {
+            if case ._undocumented = action { return }
+
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encodeIfPresent(self.guild_id, forKey: .guild_id)
+            try container.encodeIfPresent(self.target_id, forKey: .target_id)
+            try container.encodeIfPresent(self.changes, forKey: .changes)
+            try container.encodeIfPresent(self.user_id, forKey: .user_id)
+            try container.encode(self.id, forKey: .id)
+            try container.encodeIfPresent(self.reason, forKey: .reason)
+            try action.encode(to: encoder)
         }
     }
     

@@ -1872,4 +1872,21 @@ public enum Payloads {
             validateCharacterCountDoesNotExceed(platform_username, max: 100, name: "platform_username")
         }
     }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-onboarding-json-params
+    public struct UpdateGuildOnboarding: Sendable, Encodable, ValidatablePayload {
+        public var prompts: [Guild.Onboarding.Prompt]?
+        public var default_channel_ids: [ChannelSnowflake]?
+        public var enabled: Bool?
+        public var mode: Guild.Onboarding.Mode?
+
+        public init(prompts: [Guild.Onboarding.Prompt]? = nil, default_channel_ids: [ChannelSnowflake]? = nil, enabled: Bool? = nil, mode: Guild.Onboarding.Mode? = nil) {
+            self.prompts = prompts
+            self.default_channel_ids = default_channel_ids
+            self.enabled = enabled
+            self.mode = mode
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
 }
