@@ -63,7 +63,12 @@ public struct Role: Sendable, Codable {
 //        public var available_for_purchase: Null
 //        public var guild_connections: Null
     }
-    
+
+    /// https://discord.com/developers/docs/topics/permissions#role-object-role-flags
+    public enum Flag: UInt, Sendable {
+        case inPrompt = 1
+    }
+
     public var id: RoleSnowflake
     public var name: String
     public var description: String?
@@ -77,4 +82,5 @@ public struct Role: Sendable, Codable {
     public var mentionable: Bool
     public var tags: Tags?
     public var version: Int?
+    public var flags: IntBitField<Flag>
 }

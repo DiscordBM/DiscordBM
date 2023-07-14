@@ -2847,6 +2847,18 @@ paths:
           required: true
           description: '(Required) '
           example: <snowflake>
+    put:
+      tags:
+        - Guilds
+      summary: update guild onboarding
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: '(Required) '
+          example: <snowflake>
   /guilds/templates/{code}:
     get:
       tags:
@@ -4419,6 +4431,25 @@ paths:
               schema:
                 type: string
               example: ''
+  /applications/@me:
+    get:
+      tags:
+        - Users
+      summary: get own application
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ''
+
   /oauth2/applications/@me:
     get:
       tags:

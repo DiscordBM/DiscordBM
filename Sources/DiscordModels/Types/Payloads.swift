@@ -1068,8 +1068,9 @@ public enum Payloads {
         public var available_tags: [PartialForumTag]?
         public var default_reaction_emoji: DiscordChannel.DefaultReaction?
         public var default_sort_order: DiscordChannel.SortOrder?
+        public var default_forum_layout: DiscordChannel.ForumLayout?
 
-        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_sort_order: DiscordChannel.SortOrder? = nil) {
+        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
             self.name = name
             self.type = type
             self.position = position
@@ -1086,6 +1087,7 @@ public enum Payloads {
             self.available_tags = available_tags
             self.default_reaction_emoji = default_reaction_emoji
             self.default_sort_order = default_sort_order
+            self.default_forum_layout = default_forum_layout
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1869,5 +1871,22 @@ public enum Payloads {
             validateCharacterCountDoesNotExceed(platform_name, max: 50, name: "platform_name")
             validateCharacterCountDoesNotExceed(platform_username, max: 100, name: "platform_username")
         }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-onboarding-json-params
+    public struct UpdateGuildOnboarding: Sendable, Encodable, ValidatablePayload {
+        public var prompts: [Guild.Onboarding.Prompt]?
+        public var default_channel_ids: [ChannelSnowflake]?
+        public var enabled: Bool?
+        public var mode: Guild.Onboarding.Mode?
+
+        public init(prompts: [Guild.Onboarding.Prompt]? = nil, default_channel_ids: [ChannelSnowflake]? = nil, enabled: Bool? = nil, mode: Guild.Onboarding.Mode? = nil) {
+            self.prompts = prompts
+            self.default_channel_ids = default_channel_ids
+            self.enabled = enabled
+            self.mode = mode
+        }
+
+        public func validate() -> [ValidationFailure] { }
     }
 }

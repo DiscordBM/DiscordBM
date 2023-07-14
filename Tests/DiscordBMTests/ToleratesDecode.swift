@@ -1,3 +1,5 @@
+/// Must not import `DiscordModels` as `@testable` to make sure
+/// these tests are run using `public` declarations.
 @testable import DiscordBM
 import XCTest
 
@@ -71,6 +73,16 @@ class ToleratesDecodeTests: XCTestCase {
             )
             XCTAssertEqual(decoded.scopes.count, 5)
             XCTAssertEqual(decoded.permissions.rawValue, 15)
+        }
+
+        do {
+            let text = #"{"values":["BadFeature"]}"#
+            _ = try JSONDecoder().decode(TestContainer<Guild.Feature>.self, from: Data(text.utf8))
+        }
+
+        do {
+            let text = #"[{"id":"1036881950696288277","name":"DiscordBM Test Server","icon":null,"owner":false,"permissions":"140737488355327","features":["NEWS","COMMUNITY","GUILD_ONBOARDING_HAS_PROMPTS","GUILD_ONBOARDING_EVER_ENABLED","GUILD_SERVER_GUIDE","GUILD_ONBOARDING"]}]"#
+            _ = try JSONDecoder().decode([PartialGuild].self, from: Data(text.utf8))
         }
     }
 }

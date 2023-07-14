@@ -27,7 +27,21 @@ extension KeyedDecodingContainer {
             return try foundationPath(Array<D>.self, forKey: key)
         }
     }
-    
+
+    public func decodeIfPresent<D>(
+        _: Array<D>.Type,
+        forKey key: Key
+    ) throws -> Array<D>? where D: Decodable {
+        /// I know this check is rather slow, but I couldn't find a better way.
+        /// Not 100% correct implementation, but i'm going to remove these junk anyway,
+        /// when Swift 5.9 is out.
+        if D.self is any _ToleratesDecode.Type {
+            return try? smartPath(Array<D>.self, forKey: key)
+        } else {
+            return try foundationDecodeIfPresentPath(Array<D>.self, forKey: key)
+        }
+    }
+
     func smartPath<D>(
         _: Array<D>.Type,
         forKey key: Key
@@ -88,6 +102,23 @@ extension KeyedDecodingContainer {
             elements.append(element)
         }
         
+        return elements
+    }
+
+    func foundationDecodeIfPresentPath<D>(
+        _: Array<D>.Type,
+        forKey key: Key
+    ) throws -> Array<D>? where D: Decodable {
+        guard self.contains(key) else { return nil }
+
+        var elements = Array<D>()
+        var container = try self.nestedUnkeyedContainer(forKey: key)
+
+        while !container.isAtEnd {
+            let element = try container.decode(D.self)
+            elements.append(element)
+        }
+
         return elements
     }
 }

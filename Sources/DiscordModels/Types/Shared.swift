@@ -568,7 +568,7 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
     public init(integerLiteral value: Int) {
         self.init(value: value)!
     }
-    
+
     public init? (value: Int) {
         guard value >= 0,
               value < (1 << 24)
@@ -576,8 +576,12 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
         self.value = value
     }
 
-    init(_unsafeRed red: Int, _unsafeGreen green: Int, _unsafeBlue blue: Int) {
-        self.value = red << 16 | green << 8 | blue
+    init(_unvalidatedValue: Int) {
+        self.value = _unvalidatedValue
+    }
+
+    static func unvalidatedRGB(red: Int, green: Int, blue: Int) -> DiscordColor {
+        self.init(_unvalidatedValue: red << 16 | green << 8 | blue)
     }
 
     public init? (red: Int, green: Int, blue: Int) {
@@ -623,9 +627,9 @@ extension DiscordColor {
     public static func red(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 255, _unsafeGreen: 59, _unsafeBlue: 48)
+            return DiscordColor.unvalidatedRGB(red: 255, green: 59, blue: 48)
         case .dark:
-            return DiscordColor(_unsafeRed: 255, _unsafeGreen: 69, _unsafeBlue: 58)
+            return DiscordColor.unvalidatedRGB(red: 255, green: 69, blue: 58)
         }
     }
     
@@ -634,9 +638,9 @@ extension DiscordColor {
     public static func orange(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 255, _unsafeGreen: 149, _unsafeBlue: 0)
+            return DiscordColor.unvalidatedRGB(red: 255, green: 149, blue: 0)
         case .dark:
-            return DiscordColor(_unsafeRed: 255, _unsafeGreen: 159, _unsafeBlue: 10)
+            return DiscordColor.unvalidatedRGB(red: 255, green: 159, blue: 10)
         }
     }
     
@@ -645,9 +649,9 @@ extension DiscordColor {
     public static func yellow(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 255, _unsafeGreen: 204, _unsafeBlue: 0)
+            return DiscordColor.unvalidatedRGB(red: 255, green: 204, blue: 0)
         case .dark:
-            return DiscordColor(_unsafeRed: 255, _unsafeGreen: 214, _unsafeBlue: 10)
+            return DiscordColor.unvalidatedRGB(red: 255, green: 214, blue: 10)
         }
     }
     
@@ -656,9 +660,9 @@ extension DiscordColor {
     public static func green(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 52, _unsafeGreen: 199, _unsafeBlue: 89)
+            return DiscordColor.unvalidatedRGB(red: 52, green: 199, blue: 89)
         case .dark:
-            return DiscordColor(_unsafeRed: 48, _unsafeGreen: 209, _unsafeBlue: 88)
+            return DiscordColor.unvalidatedRGB(red: 48, green: 209, blue: 88)
         }
     }
     
@@ -667,9 +671,9 @@ extension DiscordColor {
     public static func mint(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 0, _unsafeGreen: 199, _unsafeBlue: 190)
+            return DiscordColor.unvalidatedRGB(red: 0, green: 199, blue: 190)
         case .dark:
-            return DiscordColor(_unsafeRed: 99, _unsafeGreen: 230, _unsafeBlue: 226)
+            return DiscordColor.unvalidatedRGB(red: 99, green: 230, blue: 226)
         }
     }
     
@@ -678,9 +682,9 @@ extension DiscordColor {
     public static func teal(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 48, _unsafeGreen: 176, _unsafeBlue: 199)
+            return DiscordColor.unvalidatedRGB(red: 48, green: 176, blue: 199)
         case .dark:
-            return DiscordColor(_unsafeRed: 64, _unsafeGreen: 200, _unsafeBlue: 224)
+            return DiscordColor.unvalidatedRGB(red: 64, green: 200, blue: 224)
         }
     }
     
@@ -689,9 +693,9 @@ extension DiscordColor {
     public static func cyan(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 50, _unsafeGreen: 173, _unsafeBlue: 230)
+            return DiscordColor.unvalidatedRGB(red: 50, green: 173, blue: 230)
         case .dark:
-            return DiscordColor(_unsafeRed: 100, _unsafeGreen: 210, _unsafeBlue: 255)
+            return DiscordColor.unvalidatedRGB(red: 100, green: 210, blue: 255)
         }
     }
     
@@ -700,9 +704,9 @@ extension DiscordColor {
     public static func blue(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 0, _unsafeGreen: 122, _unsafeBlue: 255)
+            return DiscordColor.unvalidatedRGB(red: 0, green: 122, blue: 255)
         case .dark:
-            return DiscordColor(_unsafeRed: 10, _unsafeGreen: 132, _unsafeBlue: 255)
+            return DiscordColor.unvalidatedRGB(red: 10, green: 132, blue: 255)
         }
     }
     
@@ -711,9 +715,9 @@ extension DiscordColor {
     public static func indigo(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 88, _unsafeGreen: 86, _unsafeBlue: 214)
+            return DiscordColor.unvalidatedRGB(red: 88, green: 86, blue: 214)
         case .dark:
-            return DiscordColor(_unsafeRed: 94, _unsafeGreen: 92, _unsafeBlue: 230)
+            return DiscordColor.unvalidatedRGB(red: 94, green: 92, blue: 230)
         }
     }
     
@@ -722,9 +726,9 @@ extension DiscordColor {
     public static func purple(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 175, _unsafeGreen: 82, _unsafeBlue: 222)
+            return DiscordColor.unvalidatedRGB(red: 175, green: 82, blue: 222)
         case .dark:
-            return DiscordColor(_unsafeRed: 191, _unsafeGreen: 90, _unsafeBlue: 242)
+            return DiscordColor.unvalidatedRGB(red: 191, green: 90, blue: 242)
         }
     }
     
@@ -733,9 +737,9 @@ extension DiscordColor {
     public static func pink(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 255, _unsafeGreen: 45, _unsafeBlue: 85)
+            return DiscordColor.unvalidatedRGB(red: 255, green: 45, blue: 85)
         case .dark:
-            return DiscordColor(_unsafeRed: 255, _unsafeGreen: 55, _unsafeBlue: 95)
+            return DiscordColor.unvalidatedRGB(red: 255, green: 55, blue: 95)
         }
     }
     
@@ -744,9 +748,9 @@ extension DiscordColor {
     public static func brown(scheme: ColorScheme = .light) -> DiscordColor {
         switch scheme {
         case .light:
-            return DiscordColor(_unsafeRed: 165, _unsafeGreen: 132, _unsafeBlue: 94)
+            return DiscordColor.unvalidatedRGB(red: 165, green: 132, blue: 94)
         case .dark:
-            return DiscordColor(_unsafeRed: 172, _unsafeGreen: 142, _unsafeBlue: 104)
+            return DiscordColor.unvalidatedRGB(red: 172, green: 142, blue: 104)
         }
     }
     
@@ -804,7 +808,7 @@ extension DiscordColor {
 
     /// The gray levels in Apple's color HIG.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-gray-colors
-    public enum GrayLevel {
+    public enum ColorLevel {
         case level1
         case level2
         case level3
@@ -816,39 +820,39 @@ extension DiscordColor {
     /// iOS system gray colors.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-gray-colors
     public static func gray(
-        level: GrayLevel = .level1,
+        level: ColorLevel = .level1,
         scheme: ColorScheme = .light
     ) -> DiscordColor {
         switch scheme {
         case .light:
             switch level {
             case .level1:
-                return DiscordColor(_unsafeRed: 142, _unsafeGreen: 142, _unsafeBlue: 147)
+                return DiscordColor.unvalidatedRGB(red: 142, green: 142, blue: 147)
             case .level2:
-                return DiscordColor(_unsafeRed: 174, _unsafeGreen: 174, _unsafeBlue: 178)
+                return DiscordColor.unvalidatedRGB(red: 174, green: 174, blue: 178)
             case .level3:
-                return DiscordColor(_unsafeRed: 199, _unsafeGreen: 199, _unsafeBlue: 204)
+                return DiscordColor.unvalidatedRGB(red: 199, green: 199, blue: 204)
             case .level4:
-                return DiscordColor(_unsafeRed: 209, _unsafeGreen: 209, _unsafeBlue: 214)
+                return DiscordColor.unvalidatedRGB(red: 209, green: 209, blue: 214)
             case .level5:
-                return DiscordColor(_unsafeRed: 229, _unsafeGreen: 229, _unsafeBlue: 234)
+                return DiscordColor.unvalidatedRGB(red: 229, green: 229, blue: 234)
             case .level6:
-                return DiscordColor(_unsafeRed: 242, _unsafeGreen: 242, _unsafeBlue: 247)
+                return DiscordColor.unvalidatedRGB(red: 242, green: 242, blue: 247)
             }
         case .dark:
             switch level {
             case .level1:
-                return DiscordColor(_unsafeRed: 142, _unsafeGreen: 142, _unsafeBlue: 147)
+                return DiscordColor.unvalidatedRGB(red: 142, green: 142, blue: 147)
             case .level2:
-                return DiscordColor(_unsafeRed: 99, _unsafeGreen: 99, _unsafeBlue: 102)
+                return DiscordColor.unvalidatedRGB(red: 99, green: 99, blue: 102)
             case .level3:
-                return DiscordColor(_unsafeRed: 72, _unsafeGreen: 72, _unsafeBlue: 74)
+                return DiscordColor.unvalidatedRGB(red: 72, green: 72, blue: 74)
             case .level4:
-                return DiscordColor(_unsafeRed: 58, _unsafeGreen: 58, _unsafeBlue: 60)
+                return DiscordColor.unvalidatedRGB(red: 58, green: 58, blue: 60)
             case .level5:
-                return DiscordColor(_unsafeRed: 44, _unsafeGreen: 44, _unsafeBlue: 46)
+                return DiscordColor.unvalidatedRGB(red: 44, green: 44, blue: 46)
             case .level6:
-                return DiscordColor(_unsafeRed: 28, _unsafeGreen: 28, _unsafeBlue: 30)
+                return DiscordColor.unvalidatedRGB(red: 28, green: 28, blue: 30)
             }
         }
     }

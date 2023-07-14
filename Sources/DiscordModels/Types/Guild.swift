@@ -311,6 +311,15 @@ extension Guild {
                 public var emoji: Emoji
                 public var title: String
                 public var description: String?
+
+                public init(id: OnboardingPromptOptionSnowflake, channel_ids: [ChannelSnowflake], role_ids: [RoleSnowflake], emoji: Emoji, title: String, description: String? = nil) {
+                    self.id = id
+                    self.channel_ids = channel_ids
+                    self.role_ids = role_ids
+                    self.emoji = emoji
+                    self.title = title
+                    self.description = description
+                }
             }
 
             /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-types
@@ -326,12 +335,29 @@ extension Guild {
             public var single_select: Bool
             public var required: Bool
             public var in_onboarding: Bool
+
+            public init(id: OnboardingPromptSnowflake, type: Kind, options: [Option], title: String, single_select: Bool, required: Bool, in_onboarding: Bool) {
+                self.id = id
+                self.type = type
+                self.options = options
+                self.title = title
+                self.single_select = single_select
+                self.required = required
+                self.in_onboarding = in_onboarding
+            }
+        }
+
+        /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-onboarding-mode
+        public enum Mode: Int, Codable, Sendable {
+            case onboardingDefault = 0
+            case onboardingAdvanced = 1
         }
 
         public var guild_id: GuildSnowflake
         public var prompts: [Prompt]
         public var default_channel_ids: [ChannelSnowflake]
         public var enabled: Bool
+        public var mode: Mode
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-preview-object-guild-preview-structure
