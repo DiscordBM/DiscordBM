@@ -2281,6 +2281,14 @@ class DiscordClientTests: XCTestCase {
 //        }
 //
 //        do {
+//            let file = try await client.getCDNUserAvatarDecoration(
+//                userId: UserSnowflake,
+//                avatarDecoration: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
+//        }
+//
+//        do {
 //            let file = try await client.getCDNApplicationIcon(
 //                appId: ApplicationSnowflake, icon: String
 //            ).getFile()
