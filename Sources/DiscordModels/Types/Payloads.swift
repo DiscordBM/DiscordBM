@@ -1068,8 +1068,9 @@ public enum Payloads {
         public var available_tags: [PartialForumTag]?
         public var default_reaction_emoji: DiscordChannel.DefaultReaction?
         public var default_sort_order: DiscordChannel.SortOrder?
+        public var default_forum_layout: DiscordChannel.ForumLayout?
 
-        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_sort_order: DiscordChannel.SortOrder? = nil) {
+        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
             self.name = name
             self.type = type
             self.position = position
@@ -1086,6 +1087,7 @@ public enum Payloads {
             self.available_tags = available_tags
             self.default_reaction_emoji = default_reaction_emoji
             self.default_sort_order = default_sort_order
+            self.default_forum_layout = default_forum_layout
         }
 
         public func validate() -> [ValidationFailure] {

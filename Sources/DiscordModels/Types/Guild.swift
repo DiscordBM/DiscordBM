@@ -328,10 +328,17 @@ extension Guild {
             public var in_onboarding: Bool
         }
 
+        /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-onboarding-mode
+        public enum Mode: Int, Codable, Sendable {
+            case onboardingDefault = 0
+            case onboardingAdvanced = 1
+        }
+
         public var guild_id: GuildSnowflake
         public var prompts: [Prompt]
         public var default_channel_ids: [ChannelSnowflake]
         public var enabled: Bool
+        public var mode: Mode
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-preview-object-guild-preview-structure

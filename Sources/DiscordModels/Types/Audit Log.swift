@@ -180,7 +180,9 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationBlockMessage = 143
             case autoModerationFlagToChannel = 144
             case autoModerationUserCommunicationDisabled = 145
-            
+            case creatorMonetizationRequestCreated = 150
+            case creatorMonetizationTermsAccepted = 151
+
             init(action: Action) {
                 switch action {
                 case .guildUpdate: self = .guildUpdate
@@ -237,6 +239,8 @@ public struct AuditLog: Sendable, Codable {
                 case .autoModerationBlockMessage: self = .autoModerationBlockMessage
                 case .autoModerationFlagToChannel: self = .autoModerationFlagToChannel
                 case .autoModerationUserCommunicationDisabled: self = .autoModerationUserCommunicationDisabled
+                case .creatorMonetizationRequestCreated: self = .creatorMonetizationRequestCreated
+                case .creatorMonetizationTermsAccepted: self = .creatorMonetizationTermsAccepted
                 }
             }
         }
@@ -299,7 +303,9 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationBlockMessage(AutoModerationInfo)
             case autoModerationFlagToChannel(AutoModerationInfo)
             case autoModerationUserCommunicationDisabled(AutoModerationInfo)
-            
+            case creatorMonetizationRequestCreated
+            case creatorMonetizationTermsAccepted
+
             public struct OverwriteInfo: Sendable, Codable {
                 
                 public enum Kind: Sendable {
@@ -559,6 +565,10 @@ public struct AuditLog: Sendable, Codable {
                 case .autoModerationUserCommunicationDisabled:
                     let moderationInfo = try container.decode(AutoModerationInfo.self, forKey: .options)
                     self = .autoModerationUserCommunicationDisabled(moderationInfo)
+                case .creatorMonetizationRequestCreated:
+                    self = .creatorMonetizationRequestCreated
+                case .creatorMonetizationTermsAccepted:
+                    self = .creatorMonetizationTermsAccepted
                 }
             }
             
@@ -654,6 +664,8 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(moderationInfo, forKey: .options)
                 case let .autoModerationUserCommunicationDisabled(moderationInfo):
                     try container.encode(moderationInfo, forKey: .options)
+                case .creatorMonetizationRequestCreated: break
+                case .creatorMonetizationTermsAccepted: break
                 }
             }
         }

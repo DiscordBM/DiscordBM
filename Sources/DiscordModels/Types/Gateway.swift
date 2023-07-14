@@ -1087,6 +1087,7 @@ public struct Gateway: Sendable, Codable {
         public var burst: Bool?
         public var member: Guild.Member?
         public var emoji: Emoji
+        public var message_author_id: MessageSnowflake?
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove

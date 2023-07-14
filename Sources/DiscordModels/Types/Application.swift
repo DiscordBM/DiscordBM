@@ -35,10 +35,12 @@ public struct DiscordApplication: Sendable, Codable {
     public var verify_key: String
     public var team: Team?
     public var guild_id: GuildSnowflake?
+    public var guild: PartialGuild?
     public var primary_sku_id: AnySnowflake?
     public var slug: String?
     public var cover_image: String?
     public var flags: IntBitField<Flag>?
+    public var approximate_guild_count: Int?
     public var tags: [String]?
     public var install_params: InstallParams?
     public var custom_install_url: String?
@@ -60,10 +62,12 @@ public struct PartialApplication: Sendable, Codable {
     public var verify_key: String?
     public var team: Team?
     public var guild_id: GuildSnowflake?
+    public var guild: PartialGuild?
     public var primary_sku_id: AnySnowflake?
     public var slug: String?
     public var cover_image: String?
     public var flags: IntBitField<DiscordApplication.Flag>?
+    public var approximate_guild_count: Int?
     public var tags: [String]?
     public var install_params: DiscordApplication.InstallParams?
     public var custom_install_url: String?
