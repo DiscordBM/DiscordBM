@@ -11,14 +11,50 @@ extension Gateway.GuildCreate {
         channelId: ChannelSnowflake,
         permissions perms: [Permission]
     ) -> Bool {
-        guard let channel = self.channels.first(where: { $0.id == channelId })
-                ?? self.threads.first(where: { $0.id == channelId }) else {
-            /// Don't even have access to the channel.
+        if let channel = self.channels.first(where: { $0.id == channelId }) {
+            return _memberHasPermissions(
+                member: member,
+                userId: userId,
+                channel: channel,
+                permissions: perms
+            )
+        } else if let thread = self.threads.first(where: { $0.id == channelId }) {
+            if let parentId = thread.parent_id {
+                guard let channel = self.channels.first(where: { $0.id == parentId }) else {
+                    /// Thread parent not available.
+                    return false
+                }
+                return _memberHasPermissions(
+                    member: member,
+                    userId: userId,
+                    channel: channel,
+                    permissions: perms
+                ) && _memberHasPermissions(
+                    member: member,
+                    userId: userId,
+                    channel: thread,
+                    permissions: perms
+                )
+            } else {
+                /// Thread doesn't have a parent id?!
+                return false
+            }
+        }  else {
+            /// No channel or thread found.
             return false
         }
+    }
+
+    /// Use `memberHasPermissions(userId:channelId:permissions:)` instead.
+    func _memberHasPermissions(
+        member: Guild.Member,
+        userId: UserSnowflake,
+        channel: DiscordChannel,
+        permissions perms: [Permission]
+    ) -> Bool {
         /// Guild owner has all permissions.
         if self.owner_id == userId { return true }
-        
+
         /// `administrator` perm is like the guild owner.
         if self.roles.contains(where: { role in
             role.permissions.contains(.administrator) &&
@@ -26,10 +62,10 @@ extension Gateway.GuildCreate {
         }) {
             return true
         }
-        
+
         /// We've already checked for it.
         if perms.contains(.administrator) { return false }
-        
+
         func hasPerm(_ perm: Permission) -> Bool {
             _memberHasPermission(
                 userId: userId,
@@ -38,12 +74,12 @@ extension Gateway.GuildCreate {
                 permission: perm
             )
         }
-        
+
         /// Has the permissions at all.
         for perm in perms {
             if !hasPerm(perm) { return false }
         }
-        
+
         /// Some permission require other permissions first.
         /// These are the ones that Discord has documented.
         let requireSendMessages: [Permission] = [
@@ -57,50 +93,27 @@ extension Gateway.GuildCreate {
            perms.contains(where: { requireSendMessages.contains($0) }) {
             if !hasPerm(.sendMessages) { return false }
         }
-        
+
         /// If perms already contains `viewChannel`, then we've already checked for it.
         if !perms.contains(.viewChannel) {
             /// Member must have `viewChannel` permission for anything else to begin with.
             if !hasPerm(.viewChannel) { return false }
         }
-        
+
         /// For voice and stage channels, `connect` permission is necessary.
         /// If perms already contains `connect`, then we've already checked for it.
         if [.guildVoice, .guildStageVoice].contains(channel.type),
            !perms.contains(.connect) {
             if !hasPerm(.connect) { return false }
         }
-        
+
         return true
-    }
-    
-    /// Whether or not a user has a permission in a guild and channel.
-    /// This a best-effort function based on what Discord has documented.
-    /// - NOTE: You should request all guild member from gateway before calling this function.
-    /// `GatewayManager` has a `requestGuildMembersChunk(payload:)` function, for that.
-    /// `DiscordCache` comes with a configuration option to request all guild members for you.
-    /// https://discord.com/developers/docs/topics/permissions#permission-overwrites
-    public func userHasPermissions(
-        userId: UserSnowflake,
-        channelId: ChannelSnowflake,
-        permissions perms: [Permission]
-    ) -> Bool {
-        guard let member = self.member(withUserId: userId) else {
-            /// Don't even have access to the member.
-            return false
-        }
-        return self.memberHasPermissions(
-            member: member,
-            userId: userId,
-            channelId: channelId,
-            permissions: perms
-        )
     }
     
     /// Use `memberHasPermissions(userId:channelId:permissions:)` instead.
     /// This only checks if the user actually has the permission itself.
     /// Doesn't guarantee the member has the abilities related to the permission _in practice_.
-    private func _memberHasPermission(
+    func _memberHasPermission(
         userId: UserSnowflake,
         member: Guild.Member,
         channel: DiscordChannel,
@@ -198,6 +211,29 @@ extension Gateway.GuildCreate {
         }
 
         return false
+    }
+
+    /// Whether or not a user has a permission in a guild and channel.
+    /// This a best-effort function based on what Discord has documented.
+    /// - NOTE: You should request all guild member from gateway before calling this function.
+    /// `GatewayManager` has a `requestGuildMembersChunk(payload:)` function, for that.
+    /// `DiscordCache` comes with a configuration option to request all guild members for you.
+    /// https://discord.com/developers/docs/topics/permissions#permission-overwrites
+    public func userHasPermissions(
+        userId: UserSnowflake,
+        channelId: ChannelSnowflake,
+        permissions perms: [Permission]
+    ) -> Bool {
+        guard let member = self.member(withUserId: userId) else {
+            /// Don't even have access to the member.
+            return false
+        }
+        return self.memberHasPermissions(
+            member: member,
+            userId: userId,
+            channelId: channelId,
+            permissions: perms
+        )
     }
 
     /// User has permission in guild. Doesn't check for channel overwrites.

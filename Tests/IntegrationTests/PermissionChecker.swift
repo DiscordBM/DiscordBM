@@ -63,6 +63,14 @@ class PermissionChecker: XCTestCase {
 
         await waitFulfillment(of: [expectation], timeout: 10)
 
+        let thread = try await bot.client.createThread(
+            channelId: Constants.Channels.perm1.id,
+            payload: .init(
+                name: "Perm test thread",
+                type: .publicThread
+            )
+        ).decode()
+
         /// For cache to get populated
         try await Task.sleep(for: .seconds(5))
         
@@ -151,7 +159,15 @@ class PermissionChecker: XCTestCase {
             channelId: Constants.Channels.perm3.id,
             permissions: [.manageThreads]
         ))
-        
+
+        XCTAssertFalse(guild.userHasPermissions(
+            userId: Constants.secondAccountId,
+            channelId: thread.id,
+            permissions: [.viewChannel]
+        ))
+
+        try await bot.client.deleteChannel(id: thread.id).guardSuccess()
+
         await bot.disconnect()
     }
 }
