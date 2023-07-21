@@ -18,12 +18,33 @@ extension Gateway.GuildCreate {
                 channel: channel,
                 permissions: perms
             )
-        } else if let thread = self.threads.first(where: { $0.id == channelId }) {
-            if let parentId = thread.parent_id {
-                guard let channel = self.channels.first(where: { $0.id == parentId }) else {
-                    /// Thread parent not available.
+        } else if let thread = self.threads.first(where: { $0.id == channelId }),
+                  let parentId = thread.parent_id,
+                  let channel = self.channels.first(where: { $0.id == parentId }) {
+            if thread.type == .privateThread {
+                /// For private threads you must be a thread member or a guild admin.
+                /// If you are an admin, then you automatically have all perms.
+                if memberHasGuildPermission(
+                    member: member,
+                    userId: userId,
+                    permission: .administrator
+                ) {
+                    return true
+                }
+
+                /// At this point, you must be a thread member or you don't have access.
+                if !(thread.threadMembers?.contains { $0.user_id == userId } ?? false) {
                     return false
                 }
+
+                /// At this point, the perms are the same as the channel.
+                return _memberHasPermissions(
+                    member: member,
+                    userId: userId,
+                    channel: channel,
+                    permissions: perms
+                )
+            } else {
                 return _memberHasPermissions(
                     member: member,
                     userId: userId,
@@ -35,12 +56,9 @@ extension Gateway.GuildCreate {
                     channel: thread,
                     permissions: perms
                 )
-            } else {
-                /// Thread doesn't have a parent id?!
-                return false
             }
-        }  else {
-            /// No channel or thread found.
+        } else {
+            /// No proper channel or thread found.
             return false
         }
     }
