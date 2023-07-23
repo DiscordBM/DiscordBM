@@ -50,11 +50,13 @@ class SnowflakeTests: XCTestCase {
 
     func testMakeFake() throws {
         _ = try AnySnowflake.makeFake(date: Date())
+        _ = try AnySnowflake.makeFake(date: Date(timeIntervalSince1970: 1_420_070_400))
+        _ = try AnySnowflake.makeFake(date: Date(timeIntervalSince1970: 4_398_046_511))
 
         XCTAssertThrowsError(try AnySnowflake.makeFake(date: Date.distantPast)) { error in
             let error = error as! SnowflakeInfo.Error
             switch error {
-            case .fieldTooSmall("date", value: "-62135769600.0", min: 1420070400000): break
+            case .fieldTooSmall("date", value: "-62135769600.0", min: 1_420_070_400): break
             default:
                 XCTFail("Unexpected SnowflakeInfo.Error: \(error)")
             }
@@ -63,7 +65,7 @@ class SnowflakeTests: XCTestCase {
         XCTAssertThrowsError(try AnySnowflake.makeFake(date: Date.distantFuture)) { error in
             let error = error as! SnowflakeInfo.Error
             switch error {
-            case .fieldTooBig("date", value: "64092211200", max: 4398046511): break
+            case .fieldTooBig("date", value: "64092211200", max: 4_398_046_511): break
             default:
                 XCTFail("Unexpected SnowflakeInfo.Error: \(error)")
             }

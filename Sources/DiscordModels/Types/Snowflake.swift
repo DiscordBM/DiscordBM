@@ -179,11 +179,15 @@ public struct SnowflakeInfo: Sendable {
     ///   Throws `SnowflakeInfo.Error`
     public init(date: Date, workerId: UInt8, processId: UInt8, sequenceNumber: UInt16) throws {
         guard date.timeIntervalSince1970 >= Double(SnowflakeInfo.discordEpochConstant / 1_000) else {
-            throw Error.fieldTooSmall("date", value: "\(date.timeIntervalSince1970)", min: SnowflakeInfo.discordEpochConstant)
+            throw Error.fieldTooSmall(
+                "date",
+                value: "\(date.timeIntervalSince1970)",
+                min: SnowflakeInfo.discordEpochConstant / 1_000
+            )
         }
 
         let timeSince1970 = UInt64(date.timeIntervalSince1970)
-        guard timeSince1970 < (1 << 42 / 1_000) else {
+        guard timeSince1970 <= (1 << 42 / 1_000) else {
             throw Error.fieldTooBig("date", value: "\(timeSince1970)", max: (1 << 42 / 1_000))
         }
 
