@@ -215,7 +215,7 @@ class PermissionChecker: XCTestCase {
         XCTAssertTrue(updatedGuild.userHasPermissions(
             userId: Constants.secondAccountId,
             channelId: privateThread.id,
-            permissions: [.viewChannel]
+            permissions: [.viewChannel, .sendMessages, .readMessageHistory]
         ))
 
         /// The account has access to the channel, and is joined to the thread,
