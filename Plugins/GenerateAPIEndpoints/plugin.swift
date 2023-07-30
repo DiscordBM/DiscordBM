@@ -9,5 +9,6 @@ struct GenerateAPIEndpoints: CommandPlugin {
         let process = Process()
         process.executableURL = toolUrl
         try process.run()
+        process.waitUntilExit()
     }
 }

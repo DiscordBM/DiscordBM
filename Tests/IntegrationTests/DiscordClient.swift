@@ -2705,7 +2705,7 @@ private actor Responses {
     }
 }
 
-/// These are used for a hack-ily run a bot manager
+/// This is used for a hack-ily run a bot manager
 /// in the background while these tests are running.
 /// This is to test `GatewayEventHandler` protocol and `DiscordCache`.
 /// These tests don't assert anything. They're here just because the
