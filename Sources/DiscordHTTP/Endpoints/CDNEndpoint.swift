@@ -13,6 +13,7 @@ public enum CDNEndpoint: Endpoint {
     case defaultUserAvatar(discriminator: String)
     case userAvatar(userId: UserSnowflake, avatar: String)
     case guildMemberAvatar(guildId: GuildSnowflake, userId: UserSnowflake, avatar: String)
+    case userAvatarDecoration(userId: UserSnowflake, avatarDecoration: String)
     case applicationIcon(appId: ApplicationSnowflake, icon: String)
     case applicationCover(appId: ApplicationSnowflake, cover: String)
     case applicationAsset(
@@ -62,6 +63,8 @@ public enum CDNEndpoint: Endpoint {
             suffix = "avatars/\(userId.rawValue)/\(avatar)"
         case let .guildMemberAvatar(guildId, userId, avatar):
             suffix = "guilds/\(guildId.rawValue)/users/\(userId.rawValue)/avatars/\(avatar)"
+        case let .userAvatarDecoration(userId, avatarDecoration):
+            suffix = "avatar-decorations/\(userId.rawValue)/\(avatarDecoration)"
         case let .applicationIcon(appId, icon):
             suffix = "app-icons/\(appId.rawValue)/\(icon)"
         case let .applicationCover(appId, cover):
@@ -102,28 +105,7 @@ public enum CDNEndpoint: Endpoint {
     }
     
     public var httpMethod: HTTPMethod {
-        switch self {
-        case .customEmoji: return .GET
-        case .guildIcon: return .GET
-        case .guildSplash: return .GET
-        case .guildDiscoverySplash: return .GET
-        case .guildBanner: return .GET
-        case .userBanner: return .GET
-        case .defaultUserAvatar: return .GET
-        case .userAvatar: return .GET
-        case .guildMemberAvatar: return .GET
-        case .applicationIcon: return .GET
-        case .applicationCover: return .GET
-        case .applicationAsset: return .GET
-        case .achievementIcon: return .GET
-        case .storePageAsset: return .GET
-        case .stickerPackBanner: return .GET
-        case .teamIcon: return .GET
-        case .sticker: return .GET
-        case .roleIcon: return .GET
-        case .guildScheduledEventCover: return .GET
-        case .guildMemberBanner: return .GET
-        }
+        .GET
     }
     
     /// Interaction endpoints don't count against the global rate limit.
@@ -159,6 +141,8 @@ public enum CDNEndpoint: Endpoint {
             return [userId.rawValue, avatar]
         case .guildMemberAvatar(let guildId, let userId, let avatar):
             return [guildId.rawValue, userId.rawValue, avatar]
+        case .userAvatarDecoration(let userId, let avatarDecoration):
+            return [userId.rawValue, avatarDecoration]
         case .applicationIcon(let appId, let icon):
             return [appId.rawValue, icon]
         case .applicationCover(let appId, let cover):
@@ -195,17 +179,18 @@ public enum CDNEndpoint: Endpoint {
         case .defaultUserAvatar: return 7
         case .userAvatar: return 8
         case .guildMemberAvatar: return 9
-        case .applicationIcon: return 10
-        case .applicationCover: return 11
-        case .applicationAsset: return 12
-        case .achievementIcon: return 13
-        case .storePageAsset: return 14
-        case .stickerPackBanner: return 15
-        case .teamIcon: return 16
-        case .sticker: return 17
-        case .roleIcon: return 18
-        case .guildScheduledEventCover: return 19
-        case .guildMemberBanner: return 20
+        case .userAvatarDecoration: return 10
+        case .applicationIcon: return 11
+        case .applicationCover: return 12
+        case .applicationAsset: return 13
+        case .achievementIcon: return 14
+        case .storePageAsset: return 15
+        case .stickerPackBanner: return 16
+        case .teamIcon: return 17
+        case .sticker: return 18
+        case .roleIcon: return 19
+        case .guildScheduledEventCover: return 20
+        case .guildMemberBanner: return 21
         }
     }
     
@@ -229,6 +214,8 @@ public enum CDNEndpoint: Endpoint {
             return "userAvatar(userId: \(userId), avatar: \(avatar))"
         case let .guildMemberAvatar(guildId, userId, avatar):
             return "guildMemberAvatar(guildId: \(guildId), userId: \(userId), avatar: \(avatar))"
+        case let .userAvatarDecoration(userId, avatarDecoration):
+            return "userAvatarDecoration(userId: \(userId), avatarDecoration: \(avatarDecoration))"
         case let .applicationIcon(appId, icon):
             return "applicationIcon(appId: \(appId), icon: \(icon))"
         case let .applicationCover(appId, cover):
@@ -265,6 +252,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
     case defaultUserAvatar
     case userAvatar
     case guildMemberAvatar
+    case userAvatarDecoration
     case applicationIcon
     case applicationCover
     case applicationAsset
@@ -288,6 +276,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
         case .defaultUserAvatar: return "defaultUserAvatar"
         case .userAvatar: return "userAvatar"
         case .guildMemberAvatar: return "guildMemberAvatar"
+        case .userAvatarDecoration: return "userAvatarDecoration"
         case .applicationIcon: return "applicationIcon"
         case .applicationCover: return "applicationCover"
         case .applicationAsset: return "applicationAsset"
@@ -313,6 +302,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
         case .defaultUserAvatar: self = .defaultUserAvatar
         case .userAvatar: self = .userAvatar
         case .guildMemberAvatar: self = .guildMemberAvatar
+        case .userAvatarDecoration: self = .userAvatarDecoration
         case .applicationIcon: self = .applicationIcon
         case .applicationCover: self = .applicationCover
         case .applicationAsset: self = .applicationAsset

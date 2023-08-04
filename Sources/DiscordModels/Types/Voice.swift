@@ -4,7 +4,7 @@ public struct VoiceState: Sendable, Codable {
     public var guild_id: GuildSnowflake
     public var channel_id: ChannelSnowflake?
     public var user_id: UserSnowflake
-    public var member: Guild.Member?
+    public var member: Guild.PartialMember?
     public var session_id: String
     public var deaf: Bool
     public var mute: Bool
@@ -20,7 +20,7 @@ public struct VoiceState: Sendable, Codable {
 public struct PartialVoiceState: Sendable, Codable {
     public var channel_id: ChannelSnowflake?
     public var user_id: UserSnowflake
-    public var member: Guild.Member?
+    public var member: Guild.PartialMember?
     public var session_id: String
     public var deaf: Bool
     public var mute: Bool

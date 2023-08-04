@@ -63,6 +63,22 @@ class PermissionChecker: XCTestCase {
 
         await waitFulfillment(of: [expectation], timeout: 10)
 
+        let publicThread = try await bot.client.createThread(
+            channelId: Constants.Channels.perm1.id,
+            payload: .init(
+                name: "Perm test thread",
+                type: .publicThread
+            )
+        ).decode()
+
+        let privateThread = try await bot.client.createThread(
+            channelId: Constants.Channels.spam.id,
+            payload: .init(
+                name: "Perm private test thread",
+                type: .privateThread
+            )
+        ).decode()
+
         /// For cache to get populated
         try await Task.sleep(for: .seconds(5))
         
@@ -151,7 +167,68 @@ class PermissionChecker: XCTestCase {
             channelId: Constants.Channels.perm3.id,
             permissions: [.manageThreads]
         ))
-        
+
+        /// The account doesn't have access to the channel, so
+        /// doesn't have access to the thread either.
+        XCTAssertFalse(guild.userHasPermissions(
+            userId: Constants.secondAccountId,
+            channelId: publicThread.id,
+            permissions: [.viewChannel]
+        ))
+
+        /// The account has access to the channel, but the thread is private.
+        XCTAssertFalse(guild.userHasPermissions(
+            userId: Constants.secondAccountId,
+            channelId: privateThread.id,
+            permissions: [.viewChannel]
+        ))
+
+        /// Is not in the private thread but is guild owner, so has access.
+        XCTAssertTrue(guild.userHasPermissions(
+            userId: Constants.personalId,
+            channelId: privateThread.id,
+            permissions: [.viewChannel]
+        ))
+
+        /// Is thread creator, so has access.
+        XCTAssertTrue(guild.userHasPermissions(
+            userId: Constants.botId,
+            channelId: privateThread.id,
+            permissions: [.viewChannel]
+        ))
+
+        /// Mention the second account so it is added to the members list.
+        try await bot.client.createMessage(
+            channelId: privateThread.id,
+            payload: .init(
+                content: DiscordUtils.mention(id: Constants.secondAccountId)
+            )
+        ).guardSuccess()
+
+        /// For cache to get populated
+        try await Task.sleep(for: .seconds(3))
+
+        let _updatedGuild = await cache.guilds[Constants.guildId]
+        let updatedGuild = try XCTUnwrap(_updatedGuild)
+
+        /// The account has access to the channel, and is joined to the thread.
+        XCTAssertTrue(updatedGuild.userHasPermissions(
+            userId: Constants.secondAccountId,
+            channelId: privateThread.id,
+            permissions: [.viewChannel, .sendMessages, .readMessageHistory]
+        ))
+
+        /// The account has access to the channel, and is joined to the thread,
+        /// but doesn't have the perm.
+        XCTAssertFalse(updatedGuild.userHasPermissions(
+            userId: Constants.secondAccountId,
+            channelId: privateThread.id,
+            permissions: [.manageGuild]
+        ))
+
+        try await bot.client.deleteChannel(id: publicThread.id).guardSuccess()
+        try await bot.client.deleteChannel(id: privateThread.id).guardSuccess()
+
         await bot.disconnect()
     }
 }

@@ -229,6 +229,12 @@ extension DiscordChannel {
         
         /// https://discord.com/developers/docs/resources/channel#attachment-object
         public struct Attachment: Sendable, Codable {
+
+            /// https://discord.com/developers/docs/resources/channel#attachment-object-attachment-flags
+            public enum Flag: UInt, Sendable {
+                case isRemix = 2
+            }
+
             public var id: AttachmentSnowflake
             public var filename: String
             public var description: String?
@@ -241,6 +247,7 @@ extension DiscordChannel {
             public var ephemeral: Bool?
             public var duration_secs: Double?
             public var waveform: String?
+            public var flags: IntBitField<Flag>?
         }
         
         /// https://discord.com/developers/docs/resources/channel#reaction-object

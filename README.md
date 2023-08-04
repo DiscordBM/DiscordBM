@@ -1,22 +1,21 @@
 <p align="center">
     <img src="https://user-images.githubusercontent.com/54685446/201329617-9fd91ab0-35c2-42c2-8963-47b68c6a490a.png" alt="DiscordBM">
     <br>
+    <a href="https://discord.gg/kxfs5n7HVE">
+        <img src="https://dcbadge.vercel.app/api/server/kxfs5n7HVE?style=flat" alt="DiscordBM Server">
+    </a>
     <a href="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml">
         <img src="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
     </a>
     <a href="https://github.com/DiscordBM/DiscordBM/actions/workflows/integration-tests.yml">
         <img src="https://github.com/DiscordBM/DiscordBM/actions/workflows/integration-tests.yml/badge.svg" alt="Integration Tests Badge">
+    <a href="https://github.com/DiscordBM/DiscordBM">
+        <img src="https://img.shields.io/badge/dynamic/json?url=https://rapi.mahdibm.com/v1/loc/DiscordBM/count&query=$.count&label=Swift%20lines" alt="Swift lines of code">
     </a>
-    <a href="https://codecov.io/gh/DiscordBM/DiscordBM">
-        <img src="https://codecov.io/gh/DiscordBM/DiscordBM/branch/main/graph/badge.svg?token=P4DYX2FWYT" alt="Codecov">
     </a>
     <a href="https://swift.org">
         <img src="https://img.shields.io/badge/swift-5.8%20/%205.7-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
-</p>
-
-<p align="center">
-     🌟 Just a reminder that there is a 🌟 button up there if you liked this project 😅 🌟
 </p>
 
 ## Notable Features
@@ -28,11 +27,7 @@
 * Abstractions for easier testability.
 
 ## Showcase
-Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/DiscordFactory.swift#L1).
-
-* Penny's primary purpose is to give coins to the helpful members of the Vapor community.
-* She also pings members for their specified keywords (similar to Slackbot). 
-* And notifies everyone of Swift's evolution proposals.    
+Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/DiscordFactory.swift#L1). 
 
 ## How To Use
   
@@ -165,10 +160,6 @@ In most cases, the library doesn't try to abstract away Discord's stuff.
 * If there is a HTTP request you want to make, you'll need to use `DiscordClient`.
 * You should read Discord documentation's related notes when you want to use something of this library.   
   Everything in the library has its related Discord documentation section linked near it.
-  
-> **Warning**   
-> `DiscordBM` is still in beta so new releases can come with breaking changes.   
-> [**Read the release notes**](https://github.com/DiscordBM/DiscordBM/releases) to fix the breaking changes that you encounter and become aware of new features.
 
 ### Finding Your Bot Token
 <details>
@@ -602,6 +593,57 @@ let hasRole = guild.userHasRole(
 
 </details>
 
+### Sharding
+<details>
+  <summary> Click to expand </summary>
+
+Sharding is a way of splitting up your bot's load accross different `GatewayManager`s. It is useful if:
+* You want to implement zero-down-time scaling/updating.
+* You have too many guilds to be handeled by just 1 `GatewayManager`.
+> **Note**   
+> Discord says sharding is required for bots with 2500 and more guilds. For more info, refer to the [Discord docs](https://discord.com/developers/docs/topics/gateway#sharding)
+
+To enable sharding, simply replace your `BotGatewayManager` with `ShardingGatewayManager`:
+```swift
+let bot = await ShardingGatewayManager(
+    eventLoopGroup: httpClient.eventLoopGroup,
+    httpClient: httpClient,
+    token: <#Your Bot Token#>,
+    presence: .init( /// Set up bot's initial presence
+        /// Will show up as "Playing Fortnite"
+        activities: [.init(name: "Fortnite", type: .game)], 
+        status: .online,
+        afk: false
+    ),
+    /// Add all the intents you want
+    /// You can also use `Gateway.Intent.unprivileged` or `Gateway.Intent.allCases`
+    intents: [.guildMessages, .messageContent]
+)
+```
+And that's it! You've already enabled sharding. `DiscordBM` will create as many `BotGatewayManager`s as Discord suggests under the hood of `ShardingGatewayManager`, and will automatically handle them. 
+> **Note**   
+> `ShardingGatewayManager` might still only create 1 `BotGatewayManager` if that's what Discord suggests.
+
+`ShardingGatewayManager` takes a few more options than `BotGatewayManager` to customize how you want to perform sharding:
+```swift
+let bot: any GatewayManager = await ShardingGatewayManager(
+    eventLoopGroup: httpClient.eventLoopGroup,
+    httpClient: httpClient,
+    configuration: .init(
+        /// You can request an exact amount of shard counts using `.exact(<number>)`.
+        /// Defaults to `.automatic` which means it will ask Discord for a suggestion of how many shards to spin up.
+        shardCount: .exact(<#number#>),
+        /// This is an opportunity to customize what shard takes care of which intents.
+        /// By default, all intents are passed to all shards.
+        makeIntents: { (indexOfShard: Int, totalShardCount: Int) -> [Gateway.Intent] in
+            /// return a value of type `[Gateway.Intent]` based on `indexOfShard` and `totalShardCount`.
+        }
+    ),
+    ...
+)
+```
+</details>
+
 ## Related Projects
 
 ### Discord Logger
@@ -672,7 +714,7 @@ To use the `DiscordBM` library in a SwiftPM project,
 add the following line to the dependencies in your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/DiscordBM/DiscordBM", from: "1.0.0-beta.1"),
+.package(url: "https://github.com/DiscordBM/DiscordBM", from: "1.0.0"),
 ```
 
 Include `DiscordBM` as a dependency for your targets:
@@ -691,6 +733,7 @@ Finally, add `import DiscordBM` to your source code.
 * `DiscordBM` tries to minimize the effect of this requirement. For example most enums have an underscored case named like `__DO_NOT_USE_THIS_CASE` which forces users to use non-exhaustive switch statements, preventing future code-breakages.  
 
 ## Contribution & Support
-* Any contribution is more than welcome. You can find me in [Vapor's Discord server](https://discord.gg/vapor) to discuss your ideas.    
+* If you need help with anything, ask in [DiscordBM's Discord server](https://discord.gg/kxfs5n7HVE).
+* Any contribution is more than welcome. You can find me in the server to discuss your ideas.    
 * If there is missing/upcoming feature, you can make an issue/PR for it with a link to the related Discord docs page or the related issue/PR in [Discord docs repository](https://github.com/discord/discord-api-docs).   
 * Passing the `linux-integration` tests is not required for PRs because of token/access problems.

@@ -31,12 +31,11 @@ public struct ApplicationCommand: Sendable, Codable {
         }
 
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-choice-structure
-        public struct Choice: Sendable, Codable {
-            
+        public struct Choice: Sendable, Codable, ValidatablePayload {
             public var name: String
             public var name_localizations: DiscordLocaleDict<String>?
             public var value: StringIntDoubleBool
-            
+
             public var name_localized: String?
             
             public init(name: String, name_localizations: [DiscordLocale : String]? = nil, value: StringIntDoubleBool) {
@@ -44,8 +43,21 @@ public struct ApplicationCommand: Sendable, Codable {
                 self.name_localizations = .init(name_localizations)
                 self.value = value
             }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
+                if case let .string(string) = value {
+                    validateCharacterCountInRange(string, min: 1, max: 100, name: "value")
+                }
+                for (key, value) in name_localizations?.values ?? [:] {
+                    validateCharacterCountInRange(
+                        value, min: 1, max: 100,
+                        name: "name_localizations.\(key.rawValue)"
+                    )
+                }
+            }
         }
-        
+
         public var type: Kind
         public var name: String
         public var name_localizations: DiscordLocaleDict<String>?
@@ -60,7 +72,7 @@ public struct ApplicationCommand: Sendable, Codable {
         public var min_length: Int?
         public var max_length: Int?
         public var autocomplete: Bool?
-        
+
         public init(type: Kind, name: String, name_localizations: [DiscordLocale : String]? = nil, description: String, description_localizations: [DiscordLocale : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [Option]? = nil, channel_types: [DiscordChannel.Kind]? = nil, min_value: IntOrDouble? = nil, max_value: IntOrDouble? = nil, min_length: Int? = nil, max_length: Int? = nil, autocomplete: Bool? = nil) {
             self.type = type
             self.name = name
@@ -114,6 +126,7 @@ public struct ApplicationCommand: Sendable, Codable {
                 name: "choices",
                 reason: "'choices' is only allowed if 'type' is 'string' or 'integer' or 'number'"
             )
+            choices?.validate()
             options?.validate()
         }
     }
@@ -124,10 +137,12 @@ public struct ApplicationCommand: Sendable, Codable {
     public var guild_id: GuildSnowflake?
     public var name: String
     public var name_localizations: DiscordLocaleDict<String>?
-    public var name_localized: String? /// Only for endpoints like get-application-commands
+    /// Only for endpoints like get-application-commands
+    public var name_localized: String?
     public var description: String
     public var description_localizations: DiscordLocaleDict<String>?
-    public var description_localized: String? /// Only for endpoints like get-application-commands
+    /// Only for endpoints like get-application-commands
+    public var description_localized: String?
     public var options: [Option]?
     public var default_member_permissions: StringBitField<Permission>?
     public var dm_permission: Bool?

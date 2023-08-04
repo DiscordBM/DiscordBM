@@ -1,9 +1,7 @@
 import Foundation
 
 public protocol ValidatablePayload: Sendable {
-    /// Returns a list of validations for the type.
-    ///
-    /// Default library functions only throw ``ValidationError``.
+    /// Validates the value of self and returns an array of the failed validations.
     @ValidationAccumulator func validate() -> [ValidationFailure]
 }
 

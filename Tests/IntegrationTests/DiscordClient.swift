@@ -1330,6 +1330,41 @@ class DiscordClientTests: XCTestCase {
             .decode()
 
         XCTAssertEqual(onboarding.guild_id, Constants.guildId)
+
+        let firstPrompt = try XCTUnwrap(onboarding.prompts.first)
+        let firstPromptOption = try XCTUnwrap(firstPrompt.options.first)
+
+        let updatedOnboardingError = try await client.updateGuildOnboarding(
+            guildId: Constants.guildId,
+            reason: "Guild Onboarding Test Update Reason.",
+            payload: .init(
+                prompts: [.init(
+                    id: firstPrompt.id,
+                    type: firstPrompt.type,
+                    options: [.init(
+                        id: firstPromptOption.id,
+                        channel_ids: firstPromptOption.channel_ids,
+                        role_ids: firstPromptOption.role_ids,
+                        emoji: firstPromptOption.emoji,
+                        title: "Test title \(UUID().uuidString)",
+                        description: "Test desc \(UUID().uuidString)"
+                    )],
+                    title: "Test onboarding title \(UUID().uuidString)",
+                    single_select: false,
+                    required: false,
+                    in_onboarding: false
+                )],
+                default_channel_ids: [Constants.Channels.moderation.id],
+                enabled: nil,
+                mode: .onboardingAdvanced
+            )
+        ).decodeJSONError()
+
+        switch updatedOnboardingError.code {
+        case .cannotUpdateOnboardingWhileBelowRequirements: break
+        default:
+            XCTFail("Unexpected error: \(updatedOnboardingError)")
+        }
     }
 
     func testStageInstance() async throws {
@@ -1489,6 +1524,10 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertEqual(selfUser.id, Constants.botId)
 
+        let selfApplication = try await client.getOwnApplication().decode()
+
+        XCTAssertEqual(selfApplication.id.rawValue, Constants.botId.rawValue)
+
         let user = try await client.getUser(id: Constants.secondAccountId).decode()
 
         XCTAssertEqual(user.id, Constants.secondAccountId)
@@ -1522,13 +1561,16 @@ class DiscordClientTests: XCTestCase {
         ).decode()
 
         XCTAssertGreaterThan(guildsWithBefore.count, 1, "\(guildsWithBefore)")
+        XCTAssertNil(guildsWithBefore.first?.approximate_member_count)
 
-        let guildsWithAfter = try await client.listOwnGuilds(
+        let guildsWithAfterAndCounts = try await client.listOwnGuilds(
             after: guilds.first?.guild_id,
-            limit: 10
+            limit: 10,
+            withCounts: true
         ).decode()
 
-        XCTAssertGreaterThan(guildsWithAfter.count, 1, "\(guildsWithAfter)")
+        XCTAssertGreaterThan(guildsWithAfterAndCounts.count, 1, "\(guildsWithAfterAndCounts)")
+        XCTAssertNotNil(guildsWithAfterAndCounts.first?.approximate_member_count)
     }
 
     func testConnections() async throws {
@@ -2239,6 +2281,14 @@ class DiscordClientTests: XCTestCase {
 //        }
 //
 //        do {
+//            let file = try await client.getCDNUserAvatarDecoration(
+//                userId: UserSnowflake,
+//                avatarDecoration: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
+//        }
+//
+//        do {
 //            let file = try await client.getCDNApplicationIcon(
 //                appId: ApplicationSnowflake, icon: String
 //            ).getFile()
@@ -2655,7 +2705,7 @@ private actor Responses {
     }
 }
 
-/// These are used for a hack-ily run a bot manager
+/// This is used for a hack-ily run a bot manager
 /// in the background while these tests are running.
 /// This is to test `GatewayEventHandler` protocol and `DiscordCache`.
 /// These tests don't assert anything. They're here just because the

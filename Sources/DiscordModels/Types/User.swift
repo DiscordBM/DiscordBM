@@ -47,6 +47,7 @@ public struct DiscordUser: Sendable, Codable {
     public var flags: IntBitField<Flag>?
     public var premium_type: PremiumKind?
     public var public_flags: IntBitField<Flag>?
+    public var avatar_decoration: String?
 }
 
 /// A partial ``DiscordUser`` object.
@@ -68,6 +69,7 @@ public struct PartialUser: Sendable, Codable {
     public var flags: IntBitField<DiscordUser.Flag>?
     public var premium_type: DiscordUser.PremiumKind?
     public var public_flags: IntBitField<DiscordUser.Flag>?
+    public var avatar_decoration: String?
 }
 
 /// A ``DiscordUser`` with an extra `member` field.
@@ -90,6 +92,7 @@ public struct MentionUser: Sendable, Codable {
     public var flags: IntBitField<DiscordUser.Flag>?
     public var premium_type: DiscordUser.PremiumKind?
     public var public_flags: IntBitField<DiscordUser.Flag>?
+    public var avatar_decoration: String?
     public var member: Guild.PartialMember?
 }
 

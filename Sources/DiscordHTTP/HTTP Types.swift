@@ -252,7 +252,7 @@ public struct DiscordCDNResponse: Sendable, CustomStringConvertible {
 
 /// Represents a possible Discord HTTP error.
 /// Is conformed to `Error` so users can conveniently throw it.
-public enum DiscordHTTPErrorResponse: Sendable, Error, CustomStringConvertible {
+public enum DiscordHTTPErrorResponse: Error, CustomStringConvertible {
     /// The error is in a recognizable format and you can attempt to recover from it.
     case jsonError(JSONError)
     /// The error was not in a recognizable format, but the status code still indicates a failure.

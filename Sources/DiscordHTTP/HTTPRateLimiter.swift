@@ -7,11 +7,11 @@ private let logger = DiscordGlobalConfiguration.makeLogger("DBM.HTTPRateLimiter"
 actor HTTPRateLimiter {
     
     private struct Bucket: Hashable, CustomStringConvertible {
-        fileprivate var bucket: String
-        private var limit: Int
-        private var remaining: Int
-        private var reset: Double
-        
+        let bucket: String
+        let limit: Int
+        let remaining: Int
+        let reset: Double
+
         var description: String {
             "Bucket(" +
             "bucket: \(bucket.debugDescription), " +
@@ -154,7 +154,7 @@ actor HTTPRateLimiter {
     }
 
     /// Should request to the endpoint or not.
-    /// This also adds a record to the global rate-limit, so if this returns true,
+    /// This also adds a record to the global rate-limit, so if this returns `true`,
     /// you should make sure the request is sent, or otherwise this rate-limiter's
     /// global rate-limit will be less than the max amount and might not allow you
     /// to make too many requests per second, when it should.

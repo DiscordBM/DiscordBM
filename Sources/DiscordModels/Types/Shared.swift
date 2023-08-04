@@ -557,15 +557,7 @@ public struct IntPair: Sendable, Codable, CustomStringConvertible {
 public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLiteral {
     
     public let value: Int
-    
-    public static let purple = DiscordColor(_unsafeValue: 7414159)
-    public static let red = DiscordColor(_unsafeValue: 16711680)
-    public static let orange = DiscordColor(_unsafeValue: 16753920)
-    public static let brown = DiscordColor(_unsafeValue: 12756051)
-    public static let yellow = DiscordColor(_unsafeValue: 16770610)
-    public static let green = DiscordColor(_unsafeValue: 65280)
-    public static let blue = DiscordColor(_unsafeValue: 255)
-    
+
     public func asRGB() -> (red: Int, green: Int, blue: Int) {
         let red = value >> 16
         let green = (value >> 8) & 0x00FF
@@ -577,21 +569,25 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
         "#" + String(self.value, radix: 16, uppercase: true)
     }
     
-    init(_unsafeValue value: Int) {
-        self.value = value
-    }
-    
     public init(integerLiteral value: Int) {
         self.init(value: value)!
     }
-    
+
     public init? (value: Int) {
         guard value >= 0,
               value < (1 << 24)
         else { return nil }
         self.value = value
     }
-    
+
+    init(_unvalidatedValue: Int) {
+        self.value = _unvalidatedValue
+    }
+
+    static func unvalidatedRGB(red: Int, green: Int, blue: Int) -> DiscordColor {
+        self.init(_unvalidatedValue: red << 16 | green << 8 | blue)
+    }
+
     public init? (red: Int, green: Int, blue: Int) {
         guard (0..<256).contains(red),
               (0..<256).contains(green),
@@ -612,11 +608,257 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
     }
     
     public init(from decoder: any Decoder) throws {
-        self.value = try .init(from: decoder)
+        let container = try decoder.singleValueContainer()
+        self.value = try container.decode(Int.self)
     }
     
     public func encode(to encoder: any Encoder) throws {
-        try self.value.encode(to: encoder)
+        var container = encoder.singleValueContainer()
+        try container.encode(self.value)
+    }
+}
+
+extension DiscordColor {
+    
+    /// Light mode or dark mode.
+    public enum ColorScheme {
+        case light
+        case dark
+    }
+    
+    /// iOS system red color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func red(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 255, green: 59, blue: 48)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 255, green: 69, blue: 58)
+        }
+    }
+    
+    /// iOS system orange color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func orange(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 255, green: 149, blue: 0)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 255, green: 159, blue: 10)
+        }
+    }
+    
+    /// iOS system yellow color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func yellow(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 255, green: 204, blue: 0)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 255, green: 214, blue: 10)
+        }
+    }
+    
+    /// iOS system green color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func green(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 52, green: 199, blue: 89)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 48, green: 209, blue: 88)
+        }
+    }
+    
+    /// iOS system mint color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func mint(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 0, green: 199, blue: 190)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 99, green: 230, blue: 226)
+        }
+    }
+    
+    /// iOS system teal color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func teal(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 48, green: 176, blue: 199)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 64, green: 200, blue: 224)
+        }
+    }
+    
+    /// iOS system cyan color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func cyan(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 50, green: 173, blue: 230)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 100, green: 210, blue: 255)
+        }
+    }
+    
+    /// iOS system blue color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func blue(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 0, green: 122, blue: 255)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 10, green: 132, blue: 255)
+        }
+    }
+    
+    /// iOS system indigo color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func indigo(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 88, green: 86, blue: 214)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 94, green: 92, blue: 230)
+        }
+    }
+    
+    /// iOS system purple color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func purple(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 175, green: 82, blue: 222)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 191, green: 90, blue: 242)
+        }
+    }
+    
+    /// iOS system pink color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func pink(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 255, green: 45, blue: 85)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 255, green: 55, blue: 95)
+        }
+    }
+    
+    /// iOS system brown color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static func brown(scheme: ColorScheme = .light) -> DiscordColor {
+        switch scheme {
+        case .light:
+            return DiscordColor.unvalidatedRGB(red: 165, green: 132, blue: 94)
+        case .dark:
+            return DiscordColor.unvalidatedRGB(red: 172, green: 142, blue: 104)
+        }
+    }
+    
+    /// iOS light system red color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var red: DiscordColor { .red() }
+
+    /// iOS light system orange color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var orange: DiscordColor { .orange() }
+
+    /// iOS light system yellow color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var yellow: DiscordColor { .yellow() }
+
+    /// iOS light system green color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var green: DiscordColor { .green() }
+
+    /// iOS light system mint color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var mint: DiscordColor { .mint() }
+
+    /// iOS light system teal color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var teal: DiscordColor { .teal() }
+
+    /// iOS light system cyan color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var cyan: DiscordColor { .cyan() }
+
+    /// iOS light system blue color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var blue: DiscordColor { .blue() }
+
+    /// iOS light system indigo color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var indigo: DiscordColor { .indigo() }
+
+    /// iOS light system purple color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var purple: DiscordColor { .purple() }
+
+    /// iOS light system pink color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var pink: DiscordColor { .pink() }
+
+    /// iOS light system brown color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
+    public static var brown: DiscordColor { .brown() }
+
+    /// iOS light system gray1 color.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-gray-colors
+    public static var gray: DiscordColor { .gray() }
+
+    /// The gray levels in Apple's color HIG.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-gray-colors
+    public enum ColorLevel {
+        case level1
+        case level2
+        case level3
+        case level4
+        case level5
+        case level6
+    }
+
+    /// iOS system gray colors.
+    /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-gray-colors
+    public static func gray(
+        level: ColorLevel = .level1,
+        scheme: ColorScheme = .light
+    ) -> DiscordColor {
+        switch scheme {
+        case .light:
+            switch level {
+            case .level1:
+                return DiscordColor.unvalidatedRGB(red: 142, green: 142, blue: 147)
+            case .level2:
+                return DiscordColor.unvalidatedRGB(red: 174, green: 174, blue: 178)
+            case .level3:
+                return DiscordColor.unvalidatedRGB(red: 199, green: 199, blue: 204)
+            case .level4:
+                return DiscordColor.unvalidatedRGB(red: 209, green: 209, blue: 214)
+            case .level5:
+                return DiscordColor.unvalidatedRGB(red: 229, green: 229, blue: 234)
+            case .level6:
+                return DiscordColor.unvalidatedRGB(red: 242, green: 242, blue: 247)
+            }
+        case .dark:
+            switch level {
+            case .level1:
+                return DiscordColor.unvalidatedRGB(red: 142, green: 142, blue: 147)
+            case .level2:
+                return DiscordColor.unvalidatedRGB(red: 99, green: 99, blue: 102)
+            case .level3:
+                return DiscordColor.unvalidatedRGB(red: 72, green: 72, blue: 74)
+            case .level4:
+                return DiscordColor.unvalidatedRGB(red: 58, green: 58, blue: 60)
+            case .level5:
+                return DiscordColor.unvalidatedRGB(red: 44, green: 44, blue: 46)
+            case .level6:
+                return DiscordColor.unvalidatedRGB(red: 28, green: 28, blue: 30)
+            }
+        }
     }
 }
 
@@ -642,10 +884,9 @@ public struct Secret:
     }
     
     public var description: String {
-        let count = value.count
-        let keepCount = count > 24 ? 4 : 0
-        let dropped = value.dropLast(count - keepCount)
-        return #"Secret("\#(dropped)****")"#
+        let count = Swift.min((self.value.unicodeScalars.count / 4), 6)
+        let prefixed = value.prefix(count)
+        return #"Secret("\#(prefixed)****")"#
     }
     
     public var debugDescription: String {
@@ -653,11 +894,13 @@ public struct Secret:
     }
     
     public init(from decoder: any Decoder) throws {
-        self.value = try .init(from: decoder)
+        let container = try decoder.singleValueContainer()
+        self.value = try container.decode(String.self)
     }
     
     public func encode(to encoder: any Encoder) throws {
-        try self.value.encode(to: encoder)
+        var container = encoder.singleValueContainer()
+        try container.encode(self.value)
     }
 }
 
@@ -672,11 +915,13 @@ public final class DereferenceBox<C>: Codable where C: Codable {
     }
     
     public init(from decoder: any Decoder) throws {
-        self.value = try .init(from: decoder)
+        let container = try decoder.singleValueContainer()
+        self.value = try container.decode(C.self)
     }
     
     public func encode(to encoder: any Encoder) throws {
-        try self.value.encode(to: encoder)
+        var container = encoder.singleValueContainer()
+        try container.encode(self.value)
     }
 }
 

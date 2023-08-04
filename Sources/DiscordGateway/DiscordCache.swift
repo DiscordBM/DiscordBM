@@ -496,13 +496,13 @@ public actor DiscordCache {
                     }
                 } else {
                     if let removed = update.removed_member_ids {
-                        self.guilds[update.guild_id]!.threads[idx].threadMembers?.removeAll {
+                        self.guilds[update.guild_id]!.threads[idx].threadMembers!.removeAll {
                             guard let id = $0.member.user?.id ?? $0.user_id else { return false }
                             return removed.contains(id)
                         }
                     }
                     if let added = update.added_members {
-                        self.guilds[update.guild_id]!.threads[idx].threadMembers?
+                        self.guilds[update.guild_id]!.threads[idx].threadMembers!
                             .append(contentsOf: added)
                     }
                 }

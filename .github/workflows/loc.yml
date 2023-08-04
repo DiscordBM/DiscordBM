@@ -1,0 +1,32 @@
+name: update LOC
+on:
+  push: { branches: [ main ] }
+
+jobs:
+  loc_post:
+    runs-on: ubuntu-latest
+    name: Post LOC
+    steps:
+      - name: Checkout out package
+        uses: actions/checkout@v3
+      - name: Install tokei
+        uses: giantswarm/install-binary-action@v1.1.0
+        with:
+          binary: "tokei"
+          version: "12.1.2"
+          download_url: "https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-x86_64-unknown-linux-gnu.tar.gz"
+          tarball_binary_path: "tokei"
+          smoke_test: "${binary} --version"
+      - name: Calculate LOC
+        id: loc
+        run: echo "count=$(tokei -t swift -o json | jq .Swift.code)" >> $GITHUB_OUTPUT
+      - name: Print the output
+        run: echo "Line count is ${{ steps.loc.outputs.count }}"
+      - name: "Post"
+        uses: indiesdev/curl@v1.1
+        with:
+          url: https://rapi.mahdibm.com/v1/loc/DiscordBM
+          method: "POST"
+          accept: 200
+          params: '{ "loc": "${{ steps.loc.outputs.count }}", "secret": "${{ secrets.GH_LOC_SECRET }}" }'
+          timeout: 5000
