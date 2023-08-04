@@ -231,8 +231,9 @@ extension DiscordChannel {
         public struct Attachment: Sendable, Codable {
 
             /// https://discord.com/developers/docs/resources/channel#attachment-object-attachment-flags
-            public enum Flag: UInt, Sendable {
-                case isRemix = 2
+            @UnstableEnum<UInt>
+            public enum Flag: Sendable {
+                case isRemix // 2
             }
 
             public var id: AttachmentSnowflake

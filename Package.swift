@@ -26,12 +26,16 @@ let upcomingFeatureFlags: [SwiftSetting] = [
     /// `ImportObjcForwardDeclarations` not enabled because it's objc-related.
 ]
 
+let experimentalFeatureFlags: [SwiftSetting] = [
+    .enableExperimentalFeature("Macros")
+]
+
 let swiftSettings: [SwiftSetting] = [
     /// `DiscordBM` passes the `complete` level.
     ///
     /// `minimal` / `targeted` / `complete`
     /// .unsafeFlags(["-strict-concurrency=complete"])
-] + upcomingFeatureFlags
+] + upcomingFeatureFlags + experimentalFeatureFlags
 
 let package = Package(
     name: "DiscordBM",

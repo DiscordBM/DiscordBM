@@ -66,8 +66,9 @@ public struct Role: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/topics/permissions#role-object-role-flags
-    public enum Flag: UInt, Sendable {
-        case inPrompt = 0
+    @UnstableEnum<UInt>
+    public enum Flag: Sendable {
+        case inPrompt // 0
     }
 
     public var id: RoleSnowflake
