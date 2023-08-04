@@ -31,7 +31,10 @@ import UnstableEnumMacro
     named(allCases),
     named(__DO_NOT_USE_THIS_CASE)
 )
-@attached(conformance)
+@attached(
+    extension,
+    conformances: RawRepresentable, Equatable, Hashable, LosslessRawRepresentable
+)
 macro UnstableEnum() = #externalMacro(module: "UnstableEnumMacro", type: "UnstableEnum")
 
 public typealias LosslessRawRepresentable = UnstableEnumMacro.LosslessRawRepresentable
