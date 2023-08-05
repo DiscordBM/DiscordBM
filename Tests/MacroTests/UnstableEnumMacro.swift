@@ -1,18 +1,17 @@
 import UnstableEnumMacro
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
-@testable import DiscordModels
 import XCTest
 
 class UnstableEnumMacroTests: XCTestCase {
-
+    
     /// TODO: test **conformance** macro expansion too
     /// `assertMacroExpansion` seems to not to do that
-
+    
     let macros: [String: any Macro.Type] = [
         "UnstableEnum": UnstableEnum.self
     ]
-
+    
     func testStringEnum() throws {
         assertMacroExpansion(
             """
@@ -23,7 +22,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-
+            
             enum MyEnum: RawRepresentable {
                 case a
                 case b // bb
@@ -56,7 +55,50 @@ class UnstableEnumMacroTests: XCTestCase {
             """,
             macros: macros
         )
-
+        
+        assertMacroExpansion(
+            """
+            @UnstableEnum<String>
+            enum MyEnum {
+                case a
+                case b // bb
+            }
+            """,
+            expandedSource: """
+            
+            enum MyEnum {
+                case a
+                case b // bb
+                case unknown(String)
+                /// This case serves as a way of discouraging exhaustive switch statements
+                case __DO_NOT_USE_THIS_CASE
+                var rawValue: String {
+                    switch self {
+                    case .a:
+                        return "a"
+                    case .b:
+                        return "bb"
+                    case let .unknown(value):
+                        return value
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
+                    }
+                }
+                init?(rawValue: String) {
+                    switch rawValue {
+                    case "a":
+                        self = .a
+                    case "bb":
+                        self = .b
+                    default:
+                        self = .unknown(rawValue)
+                    }
+                }
+            }
+            """,
+            macros: macros
+        )
+        
         assertMacroExpansion(
             """
             @UnstableEnum<String>
@@ -66,7 +108,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-
+            
             enum MyEnum: RawRepresentable {
                 case a // "oo"
                 case b // "bb"
@@ -100,7 +142,7 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
-
+    
     func testIntEnum() throws {
         assertMacroExpansion(
             """
@@ -111,7 +153,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-
+            
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 5
@@ -145,7 +187,7 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
-
+    
     func testDecodableEnum() throws {
         assertMacroExpansion(
             """
@@ -156,7 +198,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: #"""
-
+            
             enum MyEnum: RawRepresentable, Codable {
                 case a // 1
                 case b // 5
@@ -197,7 +239,7 @@ class UnstableEnumMacroTests: XCTestCase {
             """#,
             macros: macros
         )
-
+        
         assertMacroExpansion(
             """
             @UnstableEnum<Int>
@@ -207,7 +249,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: #"""
-
+            
             enum MyEnum: RawRepresentable, Decodable, SomethingElse {
                 case a // 1
                 case b // 5
@@ -249,7 +291,7 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
-
+    
     func testCaseIterableEnum() throws {
         assertMacroExpansion(
             """
@@ -260,7 +302,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: #"""
-
+            
             enum StringEnum: RawRepresentable, CaseIterable {
                 case a
                 case b
@@ -297,7 +339,7 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
-
+    
     func testKeepsPublicAccessModifier() throws {
         assertMacroExpansion(
             """
@@ -308,7 +350,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-
+            
             public enum MyEnum: RawRepresentable {
                 case a
                 case b // bb
@@ -342,7 +384,7 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
-
+    
     func testBadIntEnum() throws {
         assertMacroExpansion(
             """
@@ -353,7 +395,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-
+            
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b
@@ -367,7 +409,7 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
-
+    
     func testProgrammerErrorWrongArgumentType() throws {
         assertMacroExpansion(
             """
@@ -378,7 +420,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-
+            
             enum MyEnum: RawRepresentable {
                 case a // bb
                 case b // 1
@@ -391,7 +433,7 @@ class UnstableEnumMacroTests: XCTestCase {
             )],
             macros: macros
         )
-
+        
         assertMacroExpansion(
             """
             @UnstableEnum<String>
@@ -401,7 +443,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-
+            
             enum MyEnum: RawRepresentable {
                 case a // 2
                 case b // 1
@@ -415,7 +457,7 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
-
+    
     func testInconsistentQuotes() throws {
         assertMacroExpansion(
             """
@@ -426,7 +468,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-
+            
             enum MyEnum: RawRepresentable {
                 case a // a
                 case b // "1
@@ -440,7 +482,7 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
-
+    
     func testValuesNotUnique() throws {
         assertMacroExpansion(
             """
@@ -451,7 +493,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-
+            
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 1
@@ -465,7 +507,7 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
-
+    
     func testNoRawValues() throws {
         assertMacroExpansion(
             """
@@ -476,7 +518,7 @@ class UnstableEnumMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-
+            
             enum MyEnum: RawRepresentable {
                 case a = "g"
                 case b = "gg"
@@ -499,44 +541,4 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
-
-    func testCodableConformance() throws {
-        do {
-            let json = #"{"some":100}"#
-            let data = Data(json.utf8)
-            let value = try JSONDecoder().decode(CodableContainer.self, from: data)
-            XCTAssertEqual(value.some, .h)
-        }
-
-        do {
-            let json = #"{"some": 12}"#
-            let data = Data(json.utf8)
-            let value = try JSONDecoder().decode(CodableContainer.self, from: data)
-            XCTAssertEqual(value.some, .a)
-        }
-
-        do {
-            let json = #"{"some":1}"#
-            let data = Data(json.utf8)
-            let value = try JSONDecoder().decode(CodableContainer.self, from: data)
-            XCTAssertEqual(value.some, .unknown(1))
-        }
-
-        do {
-            let json = #"{"some":"12"}"#
-            let data = Data(json.utf8)
-            XCTAssertThrowsError(try JSONDecoder().decode(CodableContainer.self, from: data))
-        }
-    }
-}
-
-private struct CodableContainer: Codable {
-
-    @UnstableEnum<Int>
-    enum UnstableEnumCodableTester: Codable {
-        case a // 12
-        case h // 100
-    }
-
-    var some: UnstableEnumCodableTester
 }

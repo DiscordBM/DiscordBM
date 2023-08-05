@@ -93,12 +93,12 @@ let package = Package(
         .target(
             name: "DiscordBM",
             dependencies: [
-                "DiscordAuth",
-                "DiscordHTTP",
-                "DiscordCore",
-                "DiscordGateway",
-                "DiscordModels",
-                "DiscordUtilities",
+                .target(name: "DiscordAuth"),
+                .target(name: "DiscordHTTP"),
+                .target(name: "DiscordCore"),
+                .target(name: "DiscordGateway"),
+                .target(name: "DiscordModels"),
+                .target(name: "DiscordUtilities"),
             ],
             swiftSettings: swiftSettings
         ),
@@ -114,7 +114,7 @@ let package = Package(
             name: "DiscordHTTP",
             dependencies: [
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                "DiscordModels",
+                .target(name: "DiscordModels"),
             ],
             swiftSettings: swiftSettings
         ),
@@ -123,8 +123,8 @@ let package = Package(
             dependencies: [
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                "DiscordWebSocket",
-                "DiscordHTTP",
+                .target(name: "DiscordWebSocket"),
+                .target(name: "DiscordHTTP"),
             ],
             swiftSettings: swiftSettings
         ),
@@ -133,22 +133,22 @@ let package = Package(
             dependencies: [
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
-                "DiscordCore",
-                "UnstableEnumMacro"
+                .target(name: "DiscordCore"),
+                .target(name: "UnstableEnumMacro"),
             ],
             swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordUtilities",
             dependencies: [
-                "DiscordModels"
+                .target(name: "DiscordModels")
             ],
             swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordAuth",
             dependencies: [
-                "DiscordModels"
+                .target(name: "DiscordModels")
             ],
             swiftSettings: swiftSettings
         ),
@@ -165,7 +165,7 @@ let package = Package(
                 .product(name: "NIOWebSocket", package: "swift-nio"),
                 .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
                 .product(name: "Atomics", package: "swift-atomics"),
-                "CZlib"
+                .target(name: "CZlib"),
             ],
             swiftSettings: swiftSettings
         ),
@@ -187,7 +187,9 @@ let package = Package(
                     .writeToPackageDirectory(reason: "Add Generated Endpoints")
                 ]
             ),
-            dependencies: ["GenerateAPIEndpointsExec"]
+            dependencies: [
+                .target(name: "GenerateAPIEndpointsExec")
+            ]
         ),
         .executableTarget(
             name: "GenerateAPIEndpointsExec",
@@ -211,20 +213,31 @@ let package = Package(
         .testTarget(
             name: "DiscordBMTests",
             dependencies: [
+                .target(name: "DiscordBM")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "MacroTests",
+            dependencies: [
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
-                "DiscordBM"
+                .target(name: "UnstableEnumMacro")
             ],
             swiftSettings: swiftSettings
         ),
         /// Vapor's `WebSocketKit` tests with modifications to fit `DiscordBM` better.
         .testTarget(
             name: "WebSocketTests",
-            dependencies: ["DiscordWebSocket"],
+            dependencies: [
+                .target(name: "DiscordWebSocket")
+            ],
             swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["DiscordBM"],
+            dependencies: [
+                .target(name: "DiscordBM")
+            ],
             swiftSettings: swiftSettings
         ),
     ]
