@@ -8,7 +8,7 @@ on:
 
 jobs:
   main-tests:
-    uses: vapor/ci/.github/workflows/run-unit-tests.yml@reusable-workflows
+    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
       with_tsan: true
@@ -16,7 +16,7 @@ jobs:
       coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
       test_filter: '^DiscordBMTests'
   websocket-tests:
-    uses: vapor/ci/.github/workflows/run-unit-tests.yml@reusable-workflows
+    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
       with_tsan: false
