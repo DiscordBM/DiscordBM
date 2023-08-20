@@ -9,13 +9,12 @@ import XCTest
 
 class DiscordClientTests: XCTestCase {
     
-    var httpClient: HTTPClient!
+    let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
     var client: (any DiscordClient)!
 
     let permanentTestCommandName = "permanent-test-command"
 
     override func setUp() async throws {
-        self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
@@ -27,6 +26,7 @@ class DiscordClientTests: XCTestCase {
 
     override func tearDown() async throws {
         await GatewayTester.shared.endIfNeeded()
+        try await httpClient.shutdown()
     }
 
     func testAppIdSetting() async throws {

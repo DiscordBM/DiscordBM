@@ -5,21 +5,17 @@ import XCTest
 
 class PermissionChecker: XCTestCase {
     
-    var httpClient: HTTPClient!
+    let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
     
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
             Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
         }
-        self.httpClient = self.httpClient ?? HTTPClient(eventLoopGroupProvider: .createNew)
     }
     
     override func tearDown() async throws {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
-    }
-
-    deinit {
-        try! httpClient.syncShutdown()
+        try await httpClient.shutdown()
     }
     
     /// Checks to see if the permission checker functions work properly.
