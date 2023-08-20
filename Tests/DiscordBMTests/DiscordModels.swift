@@ -521,21 +521,21 @@ class DiscordModelsTests: XCTestCase {
         }
     }
 
-    func testCollectionContainsAnything() throws {
+    func testCollectionisNotEmpty() throws {
         let array1: [String]? = nil
-        XCTAssertEqual(array1.containsAnything, false)
+        XCTAssertEqual(array1.isNotEmpty, false)
         
         let array2: [String]? = []
-        XCTAssertEqual(array2.containsAnything, false)
+        XCTAssertEqual(array2.isNotEmpty, false)
         
         let array3: [String]? = ["a"]
-        XCTAssertEqual(array3.containsAnything, true)
+        XCTAssertEqual(array3.isNotEmpty, true)
         
         let array4: [String] = []
-        XCTAssertEqual(array4.containsAnything, false)
+        XCTAssertEqual(array4.isNotEmpty, false)
         
         let array5: [String] = ["a"]
-        XCTAssertEqual(array5.containsAnything, true)
+        XCTAssertEqual(array5.isNotEmpty, true)
     }
 }
 

@@ -1287,11 +1287,12 @@ public struct Gateway: Sendable, Codable {
         public var flags: IntBitField<Flag>?
         public var buttons: [Button]?
 
-        /// Bots are only able to send `name`, `type`, and optionally `url`.
-        public init(name: String, type: Kind, url: String? = nil) {
+        /// Bot users are only able to set `name`, `state`, `type`, and `url`.
+        public init(name: String, type: Kind, url: String? = nil, state: String? = nil) {
             self.name = name
             self.type = type
             self.url = url
+            self.state = state
         }
     }
     
