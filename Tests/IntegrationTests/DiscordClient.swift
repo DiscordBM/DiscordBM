@@ -2788,6 +2788,7 @@ private actor GatewayTester {
     }
 }
 
+/// To make sure the handler always provides a default value for all the functions.
 private struct EventHandler: GatewayEventHandler {
     let event: Gateway.Event
 }
