@@ -721,6 +721,13 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertEqual(anotherMember.user?.id, Constants.personalId)
 
+        let avatar = try XCTUnwrap(anotherMember.user?.avatar)
+        let file = try await client.getCDNUserAvatar(
+            userId: Constants.personalId,
+            avatar: avatar
+        ).getFile()
+        XCTAssertGreaterThan(file.data.readableBytes, 100)
+
         /// Can't add anyone since don't have access token.
         let addMemberError = try await client.addGuildMember(
             guildId: Constants.guildId,
@@ -2263,14 +2270,6 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(file.extension, "png")
         }
         
-        do {
-            let file = try await client.getCDNUserAvatar(
-                userId: "290483761559240704",
-                avatar: "2df0a0198e00ba23bf2dc728c4db94d9"
-            ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 100)
-        }
-        
 //        do {
 //            let file = try await client.getCDNGuildMemberAvatar(
 //                guildId: "922186320275722322",
@@ -2357,6 +2356,7 @@ class DiscordClientTests: XCTestCase {
 
         /// `getCDNGuildScheduledEventCover()` is tested with guild-scheduled-event tests.
         /// `getCDNStickerPackBanner()` is tested with sticker tests.
+        /// `getCDNUserAvatar()` is tested with guild-members tests.
     }
     
     func testMultipartPayload() async throws {
