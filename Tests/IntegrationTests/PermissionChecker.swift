@@ -15,9 +15,13 @@ class PermissionChecker: XCTestCase {
     
     override func tearDown() async throws {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
-        try await httpClient.shutdown()
     }
-    
+
+    /// Can't use the async `shutdown()`. Will get `Fatal error: leaking promise created at (file: "NIOPosix/HappyEyeballs.swift", line: 300)`
+    override func tearDownWithError() throws {
+        try httpClient.syncShutdown()
+    }
+
     /// Checks to see if the permission checker functions work properly.
     func testCheckPermissions() async throws {
         /// Make sure last tests don't affect this test's gateway connection

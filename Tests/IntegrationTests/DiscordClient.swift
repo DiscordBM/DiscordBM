@@ -26,7 +26,11 @@ class DiscordClientTests: XCTestCase {
 
     override func tearDown() async throws {
         await GatewayTester.shared.endIfNeeded()
-        try await httpClient.shutdown()
+    }
+
+    /// Can't use the async `shutdown()`. Will get `Fatal error: leaking promise created at (file: "NIOPosix/HappyEyeballs.swift", line: 300)`
+    override func tearDownWithError() throws {
+        try httpClient.syncShutdown()
     }
 
     func testAppIdSetting() async throws {
