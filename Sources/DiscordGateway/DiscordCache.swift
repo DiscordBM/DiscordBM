@@ -720,14 +720,29 @@ public actor DiscordCache {
         case let .messageReactionAdd(reaction):
             if let idx = self.messages[reaction.channel_id]?
                 .firstIndex(where: { $0.id == reaction.message_id }) {
-                if let index = self.messages[reaction.channel_id]?[idx].reactions?
+                let me = reaction.user_id == self.botUser?.id
+                let isBurst = reaction.type == .super
+                if let index = self.messages[reaction.channel_id]![idx].reactions?
                     .firstIndex(where: { $0.emoji == reaction.emoji }) {
                     self.messages[reaction.channel_id]![idx].reactions![index].count += 1
+                    if isBurst {
+                        self.messages[reaction.channel_id]![idx].reactions![index].count_details.burst += 1
+                    } else {
+                        self.messages[reaction.channel_id]![idx].reactions![index].count_details.normal += 1
+                    }
                 } else {
-                    self.messages[reaction.channel_id]![idx].reactions?.append(.init(
+                    self.messages[reaction.channel_id]![idx].reactions =
+                    self.messages[reaction.channel_id]![idx].reactions ?? []
+                    self.messages[reaction.channel_id]![idx].reactions!.append(.init(
                         count: 1,
-                        me: false,
-                        emoji: reaction.emoji
+                        count_details: .init(
+                            burst: isBurst ? 1 : 0,
+                            normal: isBurst ? 0 : 1
+                        ),
+                        me: me,
+                        me_burst: reaction.type == .super && me,
+                        emoji: reaction.emoji,
+                        burst_colors: []
                     ))
                 }
             }

@@ -1074,6 +1074,7 @@ public struct Gateway: Sendable, Codable {
     
     public enum ReactionKind: Int, Sendable, Codable {
         case normal = 0
+        /// FIXME: Discord calls this 'burst'. Can't change it to not break API
         case `super` = 1
     }
     
