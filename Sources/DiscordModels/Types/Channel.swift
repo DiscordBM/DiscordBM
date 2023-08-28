@@ -280,6 +280,16 @@ extension DiscordChannel {
                 case burst_colors
             }
 
+            @available(*, deprecated, renamed: "init(count:count_details:me:me_burst:emoji:burst_colors:)")
+            public init(count: Int, me: Bool, emoji: Emoji) {
+                self.count = count
+                self.count_details = .init(burst: 0, normal: 0)
+                self.me = me
+                self.me_burst = false
+                self.emoji = emoji
+                self.burst_colors = []
+            }
+
             public init(count: Int, count_details: CountDetails, me: Bool, me_burst: Bool, emoji: Emoji, burst_colors: [DiscordColor]) {
                 self.count = count
                 self.count_details = count_details
