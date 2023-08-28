@@ -11,34 +11,14 @@ let package = Package(
         .watchOS(.v9),
     ],
     products: [
-        .library(
-            name: "DiscordBM",
-            targets: ["DiscordBM"]
-        ),
-        .library(
-            name: "DiscordCore",
-            targets: ["DiscordCore"]
-        ),
-        .library(
-            name: "DiscordHTTP",
-            targets: ["DiscordHTTP"]
-        ),
-        .library(
-            name: "DiscordGateway",
-            targets: ["DiscordGateway"]
-        ),
-        .library(
-            name: "DiscordModels",
-            targets: ["DiscordModels"]
-        ),
-        .library(
-            name: "DiscordUtilities",
-            targets: ["DiscordUtilities"]
-        ),
-        .library(
-            name: "DiscordAuth",
-            targets: ["DiscordAuth"]
-        )
+        .library(name: "DiscordBM", targets: ["DiscordBM"]),
+        .library(name: "DiscordGateway", targets: ["DiscordGateway"]),
+        .library(name: "DiscordCommands", targets: ["DiscordCommands"]),
+        .library(name: "DiscordHTTP", targets: ["DiscordHTTP"]),
+        .library(name: "DiscordModels", targets: ["DiscordModels"]),
+        .library(name: "DiscordUtilities", targets: ["DiscordUtilities"]),
+        .library(name: "DiscordAuth", targets: ["DiscordAuth"]),
+        .library(name: "DiscordCore", targets: ["DiscordCore"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.49.0"),
@@ -60,6 +40,7 @@ let package = Package(
                 "DiscordGateway",
                 "DiscordModels",
                 "DiscordUtilities",
+                "DiscordCommands","
             ]
         ),
         .target(
@@ -67,6 +48,13 @@ let package = Package(
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
+            ]
+        ),
+        .target(
+            name: "DiscordCommands",
+            dependencies: [
+                "DiscordHTTP",
+                "DiscordModels",
             ]
         ),
         .target(

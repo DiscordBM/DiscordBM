@@ -87,7 +87,7 @@ public struct ApplicationCommand: Sendable, Codable {
             self.max_length = max_length
             self.autocomplete = autocomplete
         }
-        
+
         public func validate() -> [ValidationFailure] {
             validateNumberInRangeOrNil(min_length, min: 0, max: 6_000, name: "min_length")
             validateNumberInRangeOrNil(max_length, min: 0, max: 6_000, name: "max_length")

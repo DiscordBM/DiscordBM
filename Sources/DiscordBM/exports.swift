@@ -1,5 +1,6 @@
 @_exported import DiscordAuth
 @_exported import DiscordHTTP
+@_exported import DiscordCommands
 @_exported import DiscordCore
 @_exported import DiscordGateway
 @_exported import DiscordModels
