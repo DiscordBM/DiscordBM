@@ -2370,13 +2370,13 @@ class DiscordClientTests: XCTestCase {
             let response = try await client.createMessage(
                 channelId: Constants.Channels.spam.id,
                 payload: .init(
-                    content: "Multipart message!",
+                    content: "Multipart message normal attachment!",
                     files: [.init(data: image, filename: "discordbm.png")],
                     attachments: [.init(index: 0, description: "Test attachment!")]
                 )
             ).decode()
             
-            XCTAssertEqual(response.content, "Multipart message!")
+            XCTAssertEqual(response.content, "Multipart message normal attachment!")
             XCTAssertEqual(response.attachments.count, 1)
             
             let attachment = try XCTUnwrap(response.attachments.first)
@@ -2400,7 +2400,7 @@ class DiscordClientTests: XCTestCase {
             let response = try await client.createMessage(
                 channelId: Constants.Channels.spam.id,
                 payload: .init(
-                    content: "Multipart message!",
+                    content: "Multipart message embed attachment!",
                     embeds: [.init(
                         title: "Multipart embed!",
                         timestamp: Date(),
@@ -2410,7 +2410,7 @@ class DiscordClientTests: XCTestCase {
                 )
             ).decode()
             
-            XCTAssertEqual(response.content, "Multipart message!")
+            XCTAssertEqual(response.content, "Multipart message embed attachment!")
             XCTAssertEqual(response.attachments.count, 0)
 
             let embed = try XCTUnwrap(response.embeds.first)
@@ -2427,6 +2427,23 @@ class DiscordClientTests: XCTestCase {
                 .getFile()
             XCTAssertGreaterThan(redownloaded.data.readableBytes, 100)
         }
+
+        do {
+            let response = try await client.createMessage(
+                channelId: Constants.Channels.spam.id,
+                payload: .init(
+                    content: "Multipart message filename no extension!",
+                    files: [.init(data: image, filename: "discordbm")],
+                    attachments: [.init(index: 0, filename: "discordbm")]
+                )
+            ).decode()
+
+            XCTAssertEqual(response.content, "Multipart message filename no extension!")
+            XCTAssertEqual(response.attachments.count, 1)
+
+            let attachment = try XCTUnwrap(response.attachments.first)
+            XCTAssertGreaterThan(attachment.size, 100)
+        }
     }
     
     /// Rate-limiting has theoretical tests too, but this tests it in a practical situation.
@@ -2442,12 +2459,9 @@ class DiscordClientTests: XCTestCase {
             /// Disable retrials.
             configuration: .init(retryPolicy: nil)
         )
-        
-        let isFirstRequest = ManagedAtomic(false)
+
         Task {
             for _ in 0..<count {
-                let isFirst = isFirstRequest.load(ordering: .relaxed)
-                isFirstRequest.store(false, ordering: .relaxed)
                 do {
                     _ = try await client.createMessage(
                         channelId: Constants.Channels.spam.id,
@@ -2459,16 +2473,6 @@ class DiscordClientTests: XCTestCase {
                     switch error {
                     case DiscordHTTPError.rateLimited:
                         rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
-                    case DiscordHTTPError.badStatusCode(let response)
-                        where response.status == .tooManyRequests:
-                        /// If its the first request and we're having this error, then
-                        /// it means the last tests have exhausted our rate-limit and
-                        /// it's not this test's fault.
-                        if isFirst {
-                            break
-                        } else {
-                            XCTFail("Received unexpected error: \(error)")
-                        }
                     default:
                         XCTFail("Received unexpected error: \(error)")
                     }
