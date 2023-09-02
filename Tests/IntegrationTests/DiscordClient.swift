@@ -15,7 +15,7 @@ class DiscordClientTests: XCTestCase {
     let permanentTestCommandName = "permanent-test-command"
 
     override func setUp() async throws {
-        self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+        self.httpClient = HTTPClient()
         self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,

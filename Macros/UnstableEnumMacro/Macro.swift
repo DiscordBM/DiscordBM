@@ -38,11 +38,11 @@ public struct UnstableEnum: MemberMacro {
             throw MacroError.isNotEnum
         }
 
-        guard let name = node.attributeName.as(SimpleTypeIdentifierSyntax.self),
+        guard let name = node.attributeName.as(IdentifierTypeSyntax.self),
               let generic = name.genericArgumentClause,
               generic.arguments.count == 1,
-              let genericTypeSyntax = generic.arguments.first?.argumentType,
-              let genericType = genericTypeSyntax.as(SimpleTypeIdentifierSyntax.self)
+              let genericTypeSyntax = generic.arguments.first?.argument,
+              let genericType = genericTypeSyntax.as(IdentifierTypeSyntax.self)
         else {
             throw MacroError.macroDoesNotHaveRequiredGenericArgument
         }
@@ -94,21 +94,21 @@ public struct UnstableEnum: MemberMacro {
             DeclSyntax(makeInitializer(modifiers: modifiers, rawType: rawType, cases: cases))
         ]
 
-        let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
-            $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.text == "CaseIterable"
+        let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypes.contains {
+            $0.type.as(IdentifierTypeSyntax.self)?.name.text == "CaseIterable"
         }
 
         if conformsToCaseIterable == true {
             let conformance = makeCaseIterable(
                 modifiers: modifiers,
-                enumIdentifier: enumDecl.identifier,
+                enumIdentifier: enumDecl.name,
                 cases: cases
             )
             syntaxes.append(DeclSyntax(conformance))
         }
 
-        let conformsToDecodable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
-            let name = $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.text
+        let conformsToDecodable = enumDecl.inheritanceClause?.inheritedTypes.contains {
+            let name = $0.type.as(IdentifierTypeSyntax.self)?.name.text
             return name == "Codable" || name == "Decodable"
         }
 
@@ -118,7 +118,7 @@ public struct UnstableEnum: MemberMacro {
             }
             let decodableInit = makeDecodableInitializer(
                 modifiers: modifiers,
-                enumIdentifier: enumDecl.identifier,
+                enumIdentifier: enumDecl.name,
                 location: location,
                 rawType: rawType,
                 cases: cases
@@ -130,18 +130,25 @@ public struct UnstableEnum: MemberMacro {
     }
 }
 
-extension UnstableEnum: ConformanceMacro {
-    public static func expansion<Declaration: DeclGroupSyntax, Context: MacroExpansionContext>(
+extension UnstableEnum: ExtensionMacro {
+    public static func expansion(
         of node: AttributeSyntax,
-        providingConformancesOf declaration: Declaration,
-        in context: Context
-    ) throws -> [(TypeSyntax, GenericWhereClauseSyntax?)] {
-        return [
-            ("RawRepresentable", nil),
-            ("LosslessRawRepresentable", nil),
-            ("Equatable", nil),
-            ("Hashable", nil),
-        ]
+        attachedTo declaration: some DeclGroupSyntax,
+        providingExtensionsOf type: some TypeSyntaxProtocol,
+        conformingTo protocols: [TypeSyntax],
+        in context: some MacroExpansionContext
+    ) throws -> [ExtensionDeclSyntax] {
+        if declaration.hasError { return [] }
+
+        guard let enumDecl = declaration.as(EnumDeclSyntax.self) else {
+            throw MacroError.isNotEnum
+        }
+
+        let ext: ExtensionDeclSyntax = try ExtensionDeclSyntax("""
+        extension \(raw: enumDecl.name.text): RawRepresentable, LosslessRawRepresentable { }
+        """)
+
+        return [ext]
     }
 }
 
@@ -160,8 +167,8 @@ private func makeCases(
             var modifiedElement = EnumCaseElementSyntax(element)!
             modifiedElement.rawValue = nil
             /// Can't use trailing trivia because it won't show up in the code
-            modifiedElement.identifier = .identifier(
-                modifiedElement.identifier.text + " // \(rawValue.value)"
+            modifiedElement.name = .identifier(
+                modifiedElement.name.text + " // \(rawValue.value)"
             )
             let diagnostic = Diagnostic(
                 node: Syntax(rawValue),
@@ -185,7 +192,7 @@ private func makeCases(
                 context.diagnose(diagnostic)
                 return nil
             }
-            return (element.identifier.text, element.identifier.text)
+            return (element.name.text, element.name.text)
         } else {
             if element.trailingTrivia.pieces.count == 2,
                element.trailingTrivia.pieces[0] == .spaces(1),
@@ -212,7 +219,7 @@ private func makeCases(
                         context.diagnose(diagnostic)
                         return nil
                     }
-                    return (element.identifier.text, value)
+                    return (element.name.text, value)
                 } else {
                     let diagnostic = Diagnostic(
                         node: Syntax(element),
@@ -249,11 +256,11 @@ private func makeUnknownEnumCase(rawType: RawKind) -> EnumCaseDeclSyntax {
     EnumCaseDeclSyntax(
         elements: [
             EnumCaseElementSyntax(
-                identifier: .identifier("unknown"),
-                associatedValue: EnumCaseParameterClauseSyntax(
-                    parameterList: [
+                name: .identifier("unknown"),
+                parameterClause: EnumCaseParameterClauseSyntax(
+                    parameters: [
                         EnumCaseParameterSyntax(
-                            type: SimpleTypeIdentifierSyntax(
+                            type: IdentifierTypeSyntax(
                                 name: .identifier(rawType.rawValue)
                             )
                         )
@@ -273,42 +280,42 @@ private let doNotUseCaseDeclaration = EnumCaseDeclSyntax(
     ],
     elements: [
         EnumCaseElementSyntax(
-            identifier: .identifier(doNotUseCase)
+            name: .identifier(doNotUseCase)
         )
     ]
 )
 
 private func makeRawValueVar(
-    modifiers: ModifierListSyntax?,
+    modifiers: DeclModifierListSyntax?,
     rawType: RawKind,
     cases: [(String, String)]
 ) -> VariableDeclSyntax {
     VariableDeclSyntax(
-        modifiers: modifiers,
-        bindingKeyword: .keyword(.var),
+        modifiers: modifiers ?? .init([]),
+        bindingSpecifier: .keyword(.var),
         bindings: [
             PatternBindingSyntax(
                 pattern: IdentifierPatternSyntax(
                     identifier: .identifier("rawValue")
                 ),
                 typeAnnotation: TypeAnnotationSyntax(
-                    type: SimpleTypeIdentifierSyntax(
+                    type: IdentifierTypeSyntax(
                         name: .identifier(rawType.rawValue)
                     )
                 ),
-                accessor: .getter(CodeBlockSyntax(
-                    statements: [
+                accessorBlock: AccessorBlockSyntax(
+                    accessors: .getter([
                         CodeBlockItemSyntax(
                             item: .expr(.init(fromProtocol: SwitchExprSyntax(
-                                expression: IdentifierExprSyntax(
-                                    identifier: .keyword(.`self`)
+                                subject: DeclReferenceExprSyntax(
+                                    baseName: .keyword(.`self`)
                                 ),
                                 cases: cases.map { key, value in
                                     SwitchCaseSyntax(
                                         label: .case(
                                             SwitchCaseLabelSyntax(
                                                 caseItems: [
-                                                    CaseItemSyntax(
+                                                    SwitchCaseItemSyntax(
                                                         pattern: ExpressionPatternSyntax(
                                                             expression: MemberAccessExprSyntax(
                                                                 name: .identifier(key)
@@ -333,18 +340,18 @@ private func makeRawValueVar(
                                     SwitchCaseSyntax(
                                         label: .case(SwitchCaseLabelSyntax(
                                             caseItems: [
-                                                CaseItemSyntax(
+                                                SwitchCaseItemSyntax(
                                                     pattern: ValueBindingPatternSyntax(
-                                                        bindingKeyword: .keyword(.let),
-                                                        valuePattern: ExpressionPatternSyntax(
+                                                        bindingSpecifier: .keyword(.let),
+                                                        pattern: ExpressionPatternSyntax(
                                                             expression: FunctionCallExprSyntax(
                                                                 calledExpression: MemberAccessExprSyntax(
                                                                     name: .identifier("unknown")
                                                                 ),
                                                                 leftParen: .leftParenToken(),
-                                                                argumentList: [
-                                                                    TupleExprElementSyntax(
-                                                                        expression: UnresolvedPatternExprSyntax(
+                                                                arguments: [
+                                                                    LabeledExprSyntax(
+                                                                        expression: PatternExprSyntax(
                                                                             pattern: IdentifierPatternSyntax(
                                                                                 identifier: .identifier("value")
                                                                             )
@@ -362,8 +369,8 @@ private func makeRawValueVar(
                                             CodeBlockItemSyntax(
                                                 item: .stmt(.init(
                                                     fromProtocol: ReturnStmtSyntax(
-                                                        expression: IdentifierExprSyntax(
-                                                            identifier: .identifier("value")
+                                                        expression: DeclReferenceExprSyntax(
+                                                            baseName: .identifier("value")
                                                         )
                                                     )
                                                 ))
@@ -374,7 +381,7 @@ private func makeRawValueVar(
                                         label: .case(
                                             SwitchCaseLabelSyntax(
                                                 caseItems: [
-                                                    CaseItemSyntax(
+                                                    SwitchCaseItemSyntax(
                                                         pattern: ExpressionPatternSyntax(
                                                             expression: MemberAccessExprSyntax(
                                                                 name: .identifier(doNotUseCase)
@@ -387,11 +394,11 @@ private func makeRawValueVar(
                                         statements: [
                                             CodeBlockItemSyntax(
                                                 item: .expr(.init(fromProtocol: FunctionCallExprSyntax(
-                                                    calledExpression: IdentifierExprSyntax(
-                                                        identifier: .identifier("fatalError")
+                                                    calledExpression: DeclReferenceExprSyntax(
+                                                        baseName: .identifier("fatalError")
                                                     ),
                                                     leftParen: .leftParenToken(),
-                                                    argumentList: [
+                                                    arguments: [
                                                         .init(
                                                             expression: StringLiteralExprSyntax(
                                                                 content: "Must not use the '\(doNotUseCase)' case. This case serves as a way of discouraging exhaustive switch statements"
@@ -406,27 +413,27 @@ private func makeRawValueVar(
                                 ]
                             )))
                         )
-                    ]
-                ))
+                    ])
+                )
             )
         ]
     )
 }
 
 private func makeInitializer(
-    modifiers: ModifierListSyntax?,
+    modifiers: DeclModifierListSyntax?,
     rawType: RawKind,
     cases: [(String, String)]
 ) -> InitializerDeclSyntax {
     InitializerDeclSyntax(
-        modifiers: modifiers,
+        modifiers: modifiers ?? .init([]),
         optionalMark: .postfixQuestionMarkToken(),
         signature: FunctionSignatureSyntax(
-            input: ParameterClauseSyntax(
-                parameterList: [
+            parameterClause: FunctionParameterClauseSyntax(
+                parameters: [
                     FunctionParameterSyntax(
                         firstName: .identifier("rawValue"),
-                        type: SimpleTypeIdentifierSyntax(
+                        type: IdentifierTypeSyntax(
                             name: .identifier(rawType.rawValue)
                         )
                     )
@@ -436,15 +443,15 @@ private func makeInitializer(
         body: CodeBlockSyntax(
             statements: [
                 .init(item: .expr(.init(fromProtocol: SwitchExprSyntax(
-                    expression: IdentifierExprSyntax(
-                        identifier: .identifier("rawValue")
+                    subject: DeclReferenceExprSyntax(
+                        baseName: .identifier("rawValue")
                     ),
                     cases: cases.map { key, value in
                         SwitchCaseSyntax(
                             label: .case(
                                 SwitchCaseLabelSyntax(
                                     caseItems: [
-                                        CaseItemSyntax(
+                                        SwitchCaseItemSyntax(
                                             pattern: ExpressionPatternSyntax(
                                                 expression: makeExpression(
                                                     rawType: rawType,
@@ -459,9 +466,19 @@ private func makeInitializer(
                                 CodeBlockItemSyntax(
                                     item: .expr(.init(fromProtocol: SequenceExprSyntax(
                                         elements: [
-                                            IdentifierExprSyntax(identifier: .keyword(.`self`)),
-                                            AssignmentExprSyntax(),
-                                            MemberAccessExprSyntax(name: .identifier(key))
+                                            ExprSyntax(
+                                                fromProtocol: DeclReferenceExprSyntax(
+                                                    baseName: .keyword(.`self`)
+                                                )
+                                            ),
+                                            ExprSyntax(
+                                                fromProtocol: AssignmentExprSyntax()
+                                            ),
+                                            ExprSyntax(
+                                                fromProtocol: MemberAccessExprSyntax(
+                                                    name: .identifier(key)
+                                                )
+                                            )
                                         ]
                                     )))
                                 )
@@ -474,22 +491,30 @@ private func makeInitializer(
                                 CodeBlockItemSyntax(
                                     item: .expr(.init(fromProtocol: SequenceExprSyntax(
                                         elements: [
-                                            IdentifierExprSyntax(identifier: .keyword(.`self`)),
-                                            AssignmentExprSyntax(),
-                                            FunctionCallExprSyntax(
-                                                calledExpression: MemberAccessExprSyntax(
-                                                    name: .identifier("unknown")
-                                                ),
-                                                leftParen: .leftParenToken(),
-                                                argumentList: [
-                                                    TupleExprElementSyntax(
-                                                        expression: IdentifierExprSyntax(
-                                                            identifier: .identifier("rawValue")
+                                            ExprSyntax(
+                                                fromProtocol: DeclReferenceExprSyntax(
+                                                    baseName: .keyword(.`self`)
+                                                )
+                                            ),
+                                            ExprSyntax(
+                                                fromProtocol: AssignmentExprSyntax()
+                                            ),
+                                            ExprSyntax(
+                                                fromProtocol: FunctionCallExprSyntax(
+                                                    calledExpression: MemberAccessExprSyntax(
+                                                        name: .identifier("unknown")
+                                                    ),
+                                                    leftParen: .leftParenToken(),
+                                                    arguments: [
+                                                        LabeledExprSyntax(
+                                                            expression: DeclReferenceExprSyntax(
+                                                                baseName: .identifier("rawValue")
+                                                            )
                                                         )
-                                                    )
-                                                ],
-                                                rightParen: .rightParenToken()
-                                            )
+                                                    ],
+                                                    rightParen: .rightParenToken()
+                                                )
+                                            ),
                                         ]
                                     )))
                                 )
@@ -503,13 +528,13 @@ private func makeInitializer(
 }
 
 func makeCaseIterable(
-    modifiers: ModifierListSyntax?,
+    modifiers: DeclModifierListSyntax?,
     enumIdentifier: TokenSyntax,
     cases: [(String, String)]
 ) -> VariableDeclSyntax {
     VariableDeclSyntax(
         modifiers: (modifiers ?? []) + [DeclModifierSyntax(name: .keyword(.`static`))],
-        bindingKeyword: .keyword(.`var`),
+        bindingSpecifier: .keyword(.`var`),
         bindings: [
             PatternBindingSyntax(
                 pattern: IdentifierPatternSyntax(
@@ -517,13 +542,13 @@ func makeCaseIterable(
                 ),
                 typeAnnotation: TypeAnnotationSyntax(
                     type: ArrayTypeSyntax(
-                        elementType: SimpleTypeIdentifierSyntax(
+                        element: IdentifierTypeSyntax(
                             name: enumIdentifier
                         )
                     )
                 ),
-                accessor: .getter(CodeBlockSyntax(
-                    statements: [
+                accessorBlock:  .init(
+                    accessors: .getter([
                         CodeBlockItemSyntax(
                             item: .expr(.init(fromProtocol: ArrayExprSyntax(
                                 elements: ArrayElementListSyntax(cases.map { key, _ in
@@ -536,31 +561,31 @@ func makeCaseIterable(
                                 })
                             )))
                         )
-                    ]
-                ))
+                    ])
+                )
             )
         ]
     )
 }
 
 private func makeDecodableInitializer(
-    modifiers: ModifierListSyntax?,
+    modifiers: DeclModifierListSyntax?,
     enumIdentifier: TokenSyntax,
     location: AbstractSourceLocation,
     rawType: RawKind,
     cases: [(String, String)]
 ) -> InitializerDeclSyntax {
     InitializerDeclSyntax(
-        modifiers: modifiers,
+        modifiers: modifiers ?? .init(),
         signature: FunctionSignatureSyntax(
-            input: ParameterClauseSyntax(
-                parameterList: [
+            parameterClause: FunctionParameterClauseSyntax(
+                parameters: [
                     FunctionParameterSyntax(
                         firstName: .identifier("from"),
                         secondName: .identifier("decoder"),
-                        type: ConstrainedSugarTypeSyntax(
+                        type: SomeOrAnyTypeSyntax(
                             someOrAnySpecifier: .keyword(.`any`),
-                            baseType: SimpleTypeIdentifierSyntax(
+                            constraint: IdentifierTypeSyntax(
                                 name: .identifier("Decoder")
                             )
                         )
@@ -575,30 +600,30 @@ private func makeDecodableInitializer(
             statements: [
                 CodeBlockItemSyntax(
                     item: .expr(.init(fromProtocol: TryExprSyntax(
-                        expression: ForcedValueExprSyntax(
+                        expression: ForceUnwrapExprSyntax(
                             expression: FunctionCallExprSyntax(
                                 calledExpression: MemberAccessExprSyntax(
-                                    base: IdentifierExprSyntax(
-                                        identifier: .keyword(.`self`)
+                                    base: DeclReferenceExprSyntax(
+                                        baseName: .keyword(.`self`)
                                     ),
                                     name: .keyword(.`init`)
                                 ),
                                 leftParen: .leftParenToken(),
-                                argumentList: [
-                                    TupleExprElementSyntax(
+                                arguments: [
+                                    LabeledExprSyntax(
                                         label: .identifier("rawValue"),
                                         colon: .colonToken(),
                                         expression: FunctionCallExprSyntax(
-                                            calledExpression: IdentifierExprSyntax(
-                                                identifier: .identifier(rawType.rawValue)
+                                            calledExpression: DeclReferenceExprSyntax(
+                                                baseName: .identifier(rawType.rawValue)
                                             ),
                                             leftParen: .leftParenToken(),
-                                            argumentList: [
-                                                TupleExprElementSyntax(
+                                            arguments: [
+                                                LabeledExprSyntax(
                                                     label: .identifier("from"),
                                                     colon: .colonToken(),
-                                                    expression: IdentifierExprSyntax(
-                                                        identifier: .identifier("decoder")
+                                                    expression: DeclReferenceExprSyntax(
+                                                        baseName: .identifier("decoder")
                                                     )
                                                 )
                                             ],
@@ -616,9 +641,9 @@ private func makeDecodableInitializer(
                     item: .decl(.init(fromProtocol: IfConfigDeclSyntax(
                         clauses: [
                             IfConfigClauseSyntax(
-                                poundKeyword: .poundIfKeyword(),
-                                condition: IdentifierExprSyntax(
-                                    identifier: .identifier("DISCORDBM_ENABLE_LOGGING_DURING_DECODE")
+                                poundKeyword: .poundIfToken(),
+                                condition: DeclReferenceExprSyntax(
+                                    baseName: .identifier("DISCORDBM_ENABLE_LOGGING_DURING_DECODE")
                                 ),
                                 elements: IfConfigClauseSyntax.Elements.statements([
                                     CodeBlockItemSyntax(
@@ -649,16 +674,16 @@ private func makeDecodableInitConditions() -> ConditionElementListSyntax {
         condition: .matchingPattern(MatchingPatternConditionSyntax(
             caseKeyword: .keyword(.`case`),
             pattern: ValueBindingPatternSyntax(
-                bindingKeyword: .keyword(.let),
-                valuePattern: ExpressionPatternSyntax(
+                bindingSpecifier: .keyword(.let),
+                pattern: ExpressionPatternSyntax(
                     expression: FunctionCallExprSyntax(
                         calledExpression: MemberAccessExprSyntax(
                             name: .identifier("unknown")
                         ),
                         leftParen: .leftParenToken(),
-                        argumentList: [
-                            TupleExprElementSyntax(
-                                expression: UnresolvedPatternExprSyntax(
+                        arguments: [
+                            LabeledExprSyntax(
+                                expression: PatternExprSyntax(
                                     pattern: IdentifierPatternSyntax(
                                         identifier: .identifier("value")
                                     )
@@ -670,8 +695,8 @@ private func makeDecodableInitConditions() -> ConditionElementListSyntax {
                 )
             ),
             initializer: InitializerClauseSyntax(
-                value: IdentifierExprSyntax(
-                    identifier: .keyword(.`self`)
+                value: DeclReferenceExprSyntax(
+                    baseName: .keyword(.`self`)
                 )
             )
         ))
@@ -691,14 +716,14 @@ private func makeDecodableInitBody(
                     calledExpression: MemberAccessExprSyntax(
                         base: FunctionCallExprSyntax(
                             calledExpression: MemberAccessExprSyntax(
-                                base: IdentifierExprSyntax(
-                                    identifier: .identifier("DiscordGlobalConfiguration")
+                                base: DeclReferenceExprSyntax(
+                                    baseName: .identifier("DiscordGlobalConfiguration")
                                 ),
                                 name: .identifier("makeDecodeLogger")
                             ),
                             leftParen: .leftParenToken(),
-                            argumentList: [
-                                TupleExprElementSyntax(
+                            arguments: [
+                                LabeledExprSyntax(
                                     expression: StringLiteralExprSyntax(
                                         content: enumIdentifier.text
                                     )
@@ -709,53 +734,53 @@ private func makeDecodableInitBody(
                         name: .identifier("warning")
                     ),
                     leftParen: .leftParenToken(),
-                    argumentList: [
-                        TupleExprElementSyntax(
+                    arguments: [
+                        LabeledExprSyntax(
                             expression: StringLiteralExprSyntax(
                                 content: "Found an unknown value"
                             ),
                             trailingComma: .commaToken()
                         ),
-                        TupleExprElementSyntax(
+                        LabeledExprSyntax(
                             label: .identifier("metadata"),
                             colon: .colonToken(),
                             expression: DictionaryExprSyntax(
                                 content: DictionaryExprSyntax.Content.elements([
                                     DictionaryElementSyntax(
-                                        keyExpression: StringLiteralExprSyntax(
+                                        key: StringLiteralExprSyntax(
                                             content: "value"
                                         ),
-                                        valueExpression: StringLiteralExprSyntax(
-                                            openQuote: .stringQuoteToken(),
+                                        value: StringLiteralExprSyntax(
+                                            openingQuote: .stringQuoteToken(),
                                             segments: [
                                                 .expressionSegment(ExpressionSegmentSyntax(
                                                     expressions: [
-                                                        TupleExprElementSyntax(
-                                                            expression: IdentifierExprSyntax(
-                                                                identifier: .identifier("value")
+                                                        LabeledExprSyntax(
+                                                            expression: DeclReferenceExprSyntax(
+                                                                baseName: .identifier("value")
                                                             )
                                                         )
                                                     ]
                                                 ))
                                             ],
-                                            closeQuote: .stringQuoteToken()
+                                            closingQuote: .stringQuoteToken()
                                         ),
                                         trailingComma: .commaToken()
                                     ),
                                     DictionaryElementSyntax(
-                                        keyExpression: StringLiteralExprSyntax(
+                                        key: StringLiteralExprSyntax(
                                             content: "typeName"
                                         ),
-                                        valueExpression: StringLiteralExprSyntax(
+                                        value: StringLiteralExprSyntax(
                                             content: enumIdentifier.text
                                         ),
                                         trailingComma: .commaToken()
                                     ),
                                     DictionaryElementSyntax(
-                                        keyExpression: StringLiteralExprSyntax(
+                                        key: StringLiteralExprSyntax(
                                             content: "location"
                                         ),
-                                        valueExpression: StringLiteralExprSyntax(
+                                        value: StringLiteralExprSyntax(
                                             content: location.description
                                         )
                                     )
@@ -785,10 +810,12 @@ private func + (lhs: [SwitchCaseSyntax], rhs: [SwitchCaseSyntax]) -> SwitchCaseL
     return .init(lhs.map { .switchCase($0) })
 }
 
-private func + (lhs: ModifierListSyntax, rhs: [DeclModifierSyntax]) -> ModifierListSyntax {
+private func + (lhs: DeclModifierListSyntax, rhs: [DeclModifierSyntax]) -> DeclModifierListSyntax {
     var lhs = lhs
     for item in rhs {
-        lhs = lhs.appending(item)
+        var elements = Array(lhs)
+        elements.append(item)
+        lhs = .init(elements)
     }
     return lhs
 }

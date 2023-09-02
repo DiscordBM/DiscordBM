@@ -353,7 +353,7 @@ public struct AuditLog: Sendable, Codable {
                 case action_type
                 case options
             }
-            
+
             enum OptionsCodingKeys: String, CodingKey {
                 case delete_member_days
                 case channel_id
@@ -364,7 +364,7 @@ public struct AuditLog: Sendable, Codable {
             
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
-                let actionType = try? container.decode(ActionKind.self, forKey: .action_type)
+                let actionType = try container.decode(ActionKind.self, forKey: .action_type)
                 func optionsNestedContainer() throws -> KeyedDecodingContainer<OptionsCodingKeys> {
                     try container.nestedContainer(
                         keyedBy: OptionsCodingKeys.self,
@@ -646,7 +646,7 @@ public struct AuditLog: Sendable, Codable {
         }
 
         public func encode(to encoder: any Encoder) throws {
-            if case ._undocumented = action { return }
+            if case .unknown = action { return }
 
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encodeIfPresent(self.guild_id, forKey: .guild_id)
@@ -727,6 +727,10 @@ extension AuditLog.Entry.ActionKind {
         case .autoModerationBlockMessage: self = .autoModerationBlockMessage
         case .autoModerationFlagToChannel: self = .autoModerationFlagToChannel
         case .autoModerationUserCommunicationDisabled: self = .autoModerationUserCommunicationDisabled
+        case .creatorMonetizationTermsAccepted:
+            self = .creatorMonetizationTermsAccepted
+        case .creatorMonetizationRequestCreated:
+            self = .creatorMonetizationRequestCreated
         case .unknown:
             self = .unknown(-1)
         }
