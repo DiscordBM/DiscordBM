@@ -1944,7 +1944,7 @@ public extension DiscordClient {
     func createFollowupMessage(
         appId: ApplicationSnowflake? = nil,
         token: String,
-        payload: Payloads.InteractionResponse
+        payload: Payloads.ExecuteWebhook
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.createFollowupMessage(
             applicationId: try requireAppId(appId),

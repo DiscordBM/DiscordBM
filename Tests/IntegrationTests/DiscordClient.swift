@@ -9,13 +9,12 @@ import XCTest
 
 class DiscordClientTests: XCTestCase {
     
-    var httpClient: HTTPClient!
+    let httpClient = HTTPClient()
     var client: (any DiscordClient)!
 
     let permanentTestCommandName = "permanent-test-command"
 
     override func setUp() async throws {
-        self.httpClient = HTTPClient()
         self.client = await DefaultDiscordClient(
             httpClient: httpClient,
             token: Constants.token,
@@ -27,6 +26,11 @@ class DiscordClientTests: XCTestCase {
 
     override func tearDown() async throws {
         await GatewayTester.shared.endIfNeeded()
+    }
+
+    /// Can't use the async `shutdown()` in `tearDown()`. Will get `Fatal error: leaking promise created at (file: "NIOPosix/HappyEyeballs.swift", line: 300)`
+    deinit {
+        try! httpClient.syncShutdown()
     }
 
     func testAppIdSetting() async throws {
@@ -720,6 +724,13 @@ class DiscordClientTests: XCTestCase {
         ).decode()
 
         XCTAssertEqual(anotherMember.user?.id, Constants.personalId)
+
+        let avatar = try XCTUnwrap(anotherMember.user?.avatar)
+        let file = try await client.getCDNUserAvatar(
+            userId: Constants.personalId,
+            avatar: avatar
+        ).getFile()
+        XCTAssertGreaterThan(file.data.readableBytes, 100)
 
         /// Can't add anyone since don't have access token.
         let addMemberError = try await client.addGuildMember(
@@ -2263,14 +2274,6 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(file.extension, "png")
         }
         
-        do {
-            let file = try await client.getCDNUserAvatar(
-                userId: "290483761559240704",
-                avatar: "2df0a0198e00ba23bf2dc728c4db94d9"
-            ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 100)
-        }
-        
 //        do {
 //            let file = try await client.getCDNGuildMemberAvatar(
 //                guildId: "922186320275722322",
@@ -2357,6 +2360,7 @@ class DiscordClientTests: XCTestCase {
 
         /// `getCDNGuildScheduledEventCover()` is tested with guild-scheduled-event tests.
         /// `getCDNStickerPackBanner()` is tested with sticker tests.
+        /// `getCDNUserAvatar()` is tested with guild-members tests.
     }
     
     func testMultipartPayload() async throws {
@@ -2366,13 +2370,13 @@ class DiscordClientTests: XCTestCase {
             let response = try await client.createMessage(
                 channelId: Constants.Channels.spam.id,
                 payload: .init(
-                    content: "Multipart message!",
+                    content: "Multipart message normal attachment!",
                     files: [.init(data: image, filename: "discordbm.png")],
                     attachments: [.init(index: 0, description: "Test attachment!")]
                 )
             ).decode()
             
-            XCTAssertEqual(response.content, "Multipart message!")
+            XCTAssertEqual(response.content, "Multipart message normal attachment!")
             XCTAssertEqual(response.attachments.count, 1)
             
             let attachment = try XCTUnwrap(response.attachments.first)
@@ -2396,7 +2400,7 @@ class DiscordClientTests: XCTestCase {
             let response = try await client.createMessage(
                 channelId: Constants.Channels.spam.id,
                 payload: .init(
-                    content: "Multipart message!",
+                    content: "Multipart message embed attachment!",
                     embeds: [.init(
                         title: "Multipart embed!",
                         timestamp: Date(),
@@ -2406,7 +2410,7 @@ class DiscordClientTests: XCTestCase {
                 )
             ).decode()
             
-            XCTAssertEqual(response.content, "Multipart message!")
+            XCTAssertEqual(response.content, "Multipart message embed attachment!")
             XCTAssertEqual(response.attachments.count, 0)
 
             let embed = try XCTUnwrap(response.embeds.first)
@@ -2423,6 +2427,23 @@ class DiscordClientTests: XCTestCase {
                 .getFile()
             XCTAssertGreaterThan(redownloaded.data.readableBytes, 100)
         }
+
+        do {
+            let response = try await client.createMessage(
+                channelId: Constants.Channels.spam.id,
+                payload: .init(
+                    content: "Multipart message filename no extension!",
+                    files: [.init(data: image, filename: "discordbm")],
+                    attachments: [.init(index: 0, filename: "discordbm")]
+                )
+            ).decode()
+
+            XCTAssertEqual(response.content, "Multipart message filename no extension!")
+            XCTAssertEqual(response.attachments.count, 1)
+
+            let attachment = try XCTUnwrap(response.attachments.first)
+            XCTAssertGreaterThan(attachment.size, 100)
+        }
     }
     
     /// Rate-limiting has theoretical tests too, but this tests it in a practical situation.
@@ -2438,12 +2459,9 @@ class DiscordClientTests: XCTestCase {
             /// Disable retrials.
             configuration: .init(retryPolicy: nil)
         )
-        
-        let isFirstRequest = ManagedAtomic(false)
+
         Task {
             for _ in 0..<count {
-                let isFirst = isFirstRequest.load(ordering: .relaxed)
-                isFirstRequest.store(false, ordering: .relaxed)
                 do {
                     _ = try await client.createMessage(
                         channelId: Constants.Channels.spam.id,
@@ -2455,16 +2473,6 @@ class DiscordClientTests: XCTestCase {
                     switch error {
                     case DiscordHTTPError.rateLimited:
                         rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
-                    case DiscordHTTPError.badStatusCode(let response)
-                        where response.status == .tooManyRequests:
-                        /// If its the first request and we're having this error, then
-                        /// it means the last tests have exhausted our rate-limit and
-                        /// it's not this test's fault.
-                        if isFirst {
-                            break
-                        } else {
-                            XCTFail("Received unexpected error: \(error)")
-                        }
                     default:
                         XCTFail("Received unexpected error: \(error)")
                     }
@@ -2784,6 +2792,7 @@ private actor GatewayTester {
     }
 }
 
+/// To make sure the handler always provides a default value for all the functions.
 private struct EventHandler: GatewayEventHandler {
     let event: Gateway.Event
 }

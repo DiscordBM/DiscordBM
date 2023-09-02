@@ -253,14 +253,79 @@ extension DiscordChannel {
         
         /// https://discord.com/developers/docs/resources/channel#reaction-object
         public struct Reaction: Sendable, Codable {
-            public var count: Int
-            public var me: Bool
-            public var emoji: Emoji
 
+            /// https://discord.com/developers/docs/resources/channel#reaction-object-reaction-count-details-structure
+            public struct CountDetails: Sendable, Codable {
+                public var burst: Int
+                public var normal: Int
+
+                public init(burst: Int, normal: Int) {
+                    self.burst = burst
+                    self.normal = normal
+                }
+            }
+
+            public var count: Int
+            public var count_details: CountDetails
+            public var me: Bool
+            public var me_burst: Bool
+            public var emoji: Emoji
+            public var burst_colors: [DiscordColor]
+
+            enum CodingKeys: String, CodingKey {
+                case count
+                case count_details
+                case me
+                case me_burst
+                case emoji
+                case burst_colors
+            }
+
+            @available(*, deprecated, renamed: "init(count:count_details:me:me_burst:emoji:burst_colors:)")
             public init(count: Int, me: Bool, emoji: Emoji) {
                 self.count = count
+                self.count_details = .init(burst: 0, normal: 0)
                 self.me = me
+                self.me_burst = false
                 self.emoji = emoji
+                self.burst_colors = []
+            }
+
+            public init(count: Int, count_details: CountDetails, me: Bool, me_burst: Bool, emoji: Emoji, burst_colors: [DiscordColor]) {
+                self.count = count
+                self.count_details = count_details
+                self.me = me
+                self.me_burst = me_burst
+                self.emoji = emoji
+                self.burst_colors = burst_colors
+            }
+
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.count = try container.decode(Int.self, forKey: .count)
+                self.count_details = try container.decode(CountDetails.self, forKey: .count_details)
+                self.me = try container.decode(Bool.self, forKey: .me)
+                self.me_burst = try container.decode(Bool.self, forKey: .me_burst)
+                self.emoji = try container.decode(Emoji.self, forKey: .emoji)
+                self.burst_colors = try container.decode(
+                    [String].self,
+                    forKey: .burst_colors
+                ).compactMap {
+                    DiscordColor(hex: $0)
+                }
+            }
+
+            public func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(self.count, forKey: .count)
+                try container.encode(self.count_details, forKey: .count_details)
+                try container.encode(self.me, forKey: .me)
+                try container.encode(self.me_burst, forKey: .me_burst)
+                try container.encode(self.emoji, forKey: .emoji)
+                try container.encode(
+                    self.burst_colors.map { $0.asHex() },
+                    forKey: .burst_colors
+                )
             }
         }
         

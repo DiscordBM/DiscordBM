@@ -1,12 +1,12 @@
 
 extension Collection {
-    var containsAnything: Bool {
+    var isNotEmpty: Bool {
         !self.isEmpty
     }
 }
 
 extension Optional where Wrapped: Collection {
-    var containsAnything: Bool {
-        self?.containsAnything == true
+    var isNotEmpty: Bool {
+        self?.isNotEmpty == true
     }
 }

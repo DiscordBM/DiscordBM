@@ -816,14 +816,14 @@ public enum Payloads {
         
         public func validate() -> [ValidationFailure] {
             validateHasPrecondition(
-                condition: options.containsAnything,
+                condition: options.isNotEmpty,
                 allowedIf: (type ?? .chatInput) == .chatInput,
                 name: "options",
                 reason: "'options' is only allowed if 'type' is 'chatInput'"
             )
             validateHasPrecondition(
-                condition: description.containsAnything
-                || (description_localizations?.values).containsAnything,
+                condition: description.isNotEmpty
+                || (description_localizations?.values).isNotEmpty,
                 allowedIf: (type ?? .chatInput) == .chatInput,
                 name: "description+description_localizations",
                 reason: "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput'"

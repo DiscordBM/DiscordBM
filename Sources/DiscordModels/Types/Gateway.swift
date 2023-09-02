@@ -1047,6 +1047,7 @@ public struct Gateway: Sendable, Codable {
     @UnstableEnum<Int>
     public enum ReactionKind: Sendable, Codable {
         case normal // 0
+        /// FIXME: Discord calls this 'burst'. Can't change it to not break API
         case `super` // 1
     }
 
@@ -1262,11 +1263,45 @@ public struct Gateway: Sendable, Codable {
         public var flags: IntBitField<Flag>?
         public var buttons: [Button]?
 
-        /// Bots are only able to send `name`, `type`, and optionally `url`.
-        public init(name: String, type: Kind, url: String? = nil) {
+        public init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            self.name = try container.decodeIfPresent(String.self, forKey: .name)
+            self.type = try container.decodeIfPresent(Kind.self, forKey: .type)
+            self.url = try container.decodeIfPresent(String.self, forKey: .url)
+            self.created_at = try container.decodeIfPresent(Int.self, forKey: .created_at)
+            self.timestamps = try container.decodeIfPresent(Timestamps.self, forKey: .timestamps)
+            self.details = try container.decodeIfPresent(String.self, forKey: .details)
+            self.state = try container.decodeIfPresent(String.self, forKey: .state)
+            self.emoji = try container.decodeIfPresent(ActivityEmoji.self, forKey: .emoji)
+            self.party = try container.decodeIfPresent(Party.self, forKey: .party)
+            self.assets = try container.decodeIfPresent(Assets.self, forKey: .assets)
+            self.secrets = try container.decodeIfPresent(Secrets.self, forKey: .secrets)
+            self.instance = try container.decodeIfPresent(Bool.self, forKey: .instance)
+            self.flags = try container.decodeIfPresent(IntBitField<Flag>.self, forKey: .flags)
+            self.buttons = try container.decodeIfPresent([Button].self, forKey: .buttons)
+
+            /// Discord sometimes sends a `0` number instead of a valid Snowflake `String`.
+            do {
+                self.application_id = try container.decodeIfPresent(
+                    ApplicationSnowflake.self,
+                    forKey: .application_id
+                )
+            } catch let error as DecodingError {
+                if case .typeMismatch = error,
+                   try container.decode(Int.self, forKey: .application_id) == 0 {
+                    self.application_id = nil
+                } else {
+                    throw error
+                }
+            }
+        }
+
+        /// Bot users are only able to set `name`, `state`, `type`, and `url`.
+        public init(name: String, type: Kind, url: String? = nil, state: String? = nil) {
             self.name = name
             self.type = type
             self.url = url
+            self.state = state
         }
     }
     

@@ -17,8 +17,12 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    deinit {
+    override func tearDown() async throws {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
+    }
+
+    /// Can't use the async `shutdown()` in `tearDown()`. Will get `Fatal error: leaking promise created at (file: "NIOPosix/HappyEyeballs.swift", line: 300)`
+    deinit {
         try! httpClient.syncShutdown()
     }
 

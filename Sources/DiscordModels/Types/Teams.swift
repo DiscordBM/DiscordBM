@@ -12,10 +12,20 @@ public struct Team: Sendable, Codable {
             case accepted // 2
         }
 
+        /// https://discord.com/developers/docs/topics/teams#data-models-team-member-role-types
+        @UnstableEnum<String>
+        public enum Role: Sendable, Codable {
+            case admin // admin
+            case developer // developer
+            case readOnly // read_only
+        }
+
         public var membership_state: State
+        @available(*, deprecated, message: "Will always be `[\"*\"]` when sent by Discord")
         public var permissions: [String]
         public var team_id: TeamSnowflake?
         public var user: PartialUser
+        public var role: Role
     }
     
     public var icon: String?

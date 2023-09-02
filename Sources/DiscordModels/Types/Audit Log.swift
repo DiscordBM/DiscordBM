@@ -196,12 +196,12 @@ public struct AuditLog: Sendable, Codable {
             case channelOverwriteCreate(OverwriteInfo)
             case channelOverwriteUpdate(OverwriteInfo)
             case channelOverwriteDelete(OverwriteInfo)
-            case memberKick
+            case memberKick(integration_type: Integration.Kind)
             case memberPrune(delete_member_days: String)
             case memberBanAdd
             case memberBanRemove
             case memberUpdate
-            case memberRoleUpdate(integration_type: Integration.Kind?)
+            case memberRoleUpdate(integration_type: Integration.Kind)
             case memberMove(channel_id: ChannelSnowflake, count: String)
             case memberDisconnect(count: String)
             case botAdd
@@ -385,7 +385,13 @@ public struct AuditLog: Sendable, Codable {
                 case .channelOverwriteDelete:
                     let info = try container.decode(OverwriteInfo.self, forKey: .options)
                     self = .channelOverwriteDelete(info)
-                case .memberKick: self = .memberKick
+                case .memberKick: 
+                    let container = try optionsNestedContainer()
+                    let integration_type = try container.decode(
+                        Integration.Kind.self,
+                        forKey: .integration_type
+                    )
+                    self = .memberKick(integration_type: integration_type)
                 case .memberPrune:
                     let container = try optionsNestedContainer()
                     let delete_member_days = try container.decode(
@@ -397,8 +403,8 @@ public struct AuditLog: Sendable, Codable {
                 case .memberBanRemove: self = .memberBanRemove
                 case .memberUpdate: self = .memberUpdate
                 case .memberRoleUpdate:
-                    let container = try? optionsNestedContainer()
-                    let integration_type = try container?.decode(
+                    let container = try optionsNestedContainer()
+                    let integration_type = try container.decode(
                         Integration.Kind.self,
                         forKey: .integration_type
                     )

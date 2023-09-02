@@ -153,7 +153,7 @@ private class FulfillmentStorage: @unchecked Sendable {
                 self.continuation = nil
             } else {
                 XCTFail(
-                    "Trying to end continuation while it has already ended",
+                    "Trying to end continuation when it has already ended",
                     file: file,
                     line: line
                 )

@@ -74,7 +74,6 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
         self.filename = filename
     }
     
-    
     /// - Parameters:
     ///   - data: The file's contents.
     ///   - nameNoExtension: The file's name without the extension.
