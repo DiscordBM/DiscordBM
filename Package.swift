@@ -3,7 +3,12 @@
 import PackageDescription
 import CompilerPluginSupport
 
-let upcomingFeatureFlags: [SwiftSetting] = [
+let featureFlags: [SwiftSetting] = [
+    /// `DiscordBM` passes the `complete` level.
+    ///
+    /// `minimal` / `targeted` / `complete`
+        .enableExperimentalFeature("strict-concurrency=complete"),
+
     /// `-enable-upcoming-feature` flags will get removed in the future
     /// and we'll need to remove them from here too.
 
@@ -30,12 +35,7 @@ let experimentalFeatureFlags: [SwiftSetting] = [
     .enableExperimentalFeature("Macros")
 ]
 
-let swiftSettings: [SwiftSetting] = [
-    /// `DiscordBM` passes the `complete` level.
-    ///
-    /// `minimal` / `targeted` / `complete`
-    /// .unsafeFlags(["-strict-concurrency=complete"])
-] + upcomingFeatureFlags + experimentalFeatureFlags
+let swiftSettings = featureFlags + experimentalFeatureFlags
 
 let package = Package(
     name: "DiscordBM",
