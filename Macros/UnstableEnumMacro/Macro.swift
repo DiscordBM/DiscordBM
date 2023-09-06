@@ -276,7 +276,6 @@ private let doNotUseCaseDeclaration = EnumCaseDeclSyntax(
         .spaces(4),
         .docLineComment("/// This case serves as a way of discouraging exhaustive switch statements"),
         .newlines(1),
-        .spaces(4),
     ],
     elements: [
         EnumCaseElementSyntax(
