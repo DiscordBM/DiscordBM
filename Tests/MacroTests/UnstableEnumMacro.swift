@@ -615,4 +615,17 @@ class UnstableEnumMacroTests: XCTestCase {
             macros: macros
         )
     }
+
+    func testEnumCodableWorks() async throws {
+        let a = try JSONEncoder().encode(MyEnum.a)
+        let u = try JSONEncoder().encode(MyEnum.unknown(5))
+        _ = try JSONDecoder().decode(MyEnum.self, from: a)
+        _ = try JSONDecoder().decode(MyEnum.self, from: u)
+    }
+}
+
+@UnstableEnum<Int>
+enum MyEnum: Sendable, Codable {
+    case a // 1
+    case b // 2
 }

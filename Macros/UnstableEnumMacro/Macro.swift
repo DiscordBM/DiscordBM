@@ -211,7 +211,7 @@ private func makeCases(
                         context.diagnose(diagnostic)
                         return nil
                     }
-                    if value.filter({ !$0.isWhitespace }).isEmpty {
+                    if value.allSatisfy(\.isWhitespace) {
                         let diagnostic = Diagnostic(
                             node: Syntax(element),
                             message: MacroError.emptyValuesAreNotAcceptable
