@@ -3,7 +3,7 @@
 import PackageDescription
 import CompilerPluginSupport
 
-let swiftSettings: [SwiftSetting] = [
+let featureFlags: [SwiftSetting] = [
     /// `DiscordBM` passes the `complete` level.
     ///
     /// `minimal` / `targeted` / `complete`
@@ -30,6 +30,12 @@ let swiftSettings: [SwiftSetting] = [
     /// https://github.com/apple/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md
     /// `ImportObjcForwardDeclarations` not enabled because it's objc-related.
 ]
+
+let experimentalFeatureFlags: [SwiftSetting] = [
+    .enableExperimentalFeature("Macros")
+]
+
+let swiftSettings = featureFlags + experimentalFeatureFlags
 
 let package = Package(
     name: "DiscordBM",
