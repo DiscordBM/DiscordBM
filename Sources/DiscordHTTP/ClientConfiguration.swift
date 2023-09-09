@@ -156,7 +156,7 @@ public struct ClientConfiguration: Sendable {
 
             public static var `default`: Backoff {
                 .basedOnHeaders(
-                    maxAllowed: 5,
+                    maxAllowed: 6,
                     retryIfGreater: false,
                     else: .exponential(base: 0.2, coefficient: 0.5, rate: 2, upToTimes: 10)
                 )
