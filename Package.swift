@@ -4,11 +4,6 @@ import PackageDescription
 import CompilerPluginSupport
 
 let featureFlags: [SwiftSetting] = [
-    /// `DiscordBM` passes the `complete` level.
-    ///
-    /// `minimal` / `targeted` / `complete`
-        .enableExperimentalFeature("strict-concurrency=complete"),
-
     /// `-enable-upcoming-feature` flags will get removed in the future
     /// and we'll need to remove them from here too.
 
@@ -32,6 +27,12 @@ let featureFlags: [SwiftSetting] = [
 ]
 
 let experimentalFeatureFlags: [SwiftSetting] = [
+    /// `DiscordBM` passes the `complete` level.
+    ///
+    /// `minimal` / `targeted` / `complete`
+    .enableExperimentalFeature("strict-concurrency=complete"),
+
+    /// Enable macros in swift 5.9 nightly.
     .enableExperimentalFeature("Macros")
 ]
 

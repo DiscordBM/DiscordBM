@@ -30,8 +30,6 @@
 Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/DiscordFactory.swift#L1). 
 
 ## How To Use
-  
-> Make sure you have **Xcode 14.1 or above**. Lower Xcode 14 versions have known issues that cause problems for libraries.    
 
 ### Initializing a Gateway Manager
 
