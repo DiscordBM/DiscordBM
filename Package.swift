@@ -85,10 +85,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.23.0"),
         .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.15.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
-        .package(
-            url: "https://github.com/apple/swift-syntax.git",
-            from: "509.0.0-swift-5.9-DEVELOPMENT-SNAPSHOT-2023-08-29-a"
-        )
+        .package(url: "https://github.com/apple/swift-syntax.git", branch: "release/5.9"),
     ],
     targets: [
         .target(

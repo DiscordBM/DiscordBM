@@ -23,12 +23,9 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a
                 case b // bb
-
                 case unknown(String)
-
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
-
                 var rawValue: String {
                     switch self {
                     case .a:
@@ -41,7 +38,6 @@ class UnstableEnumMacroTests: XCTestCase {
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
-
                 init?(rawValue: String) {
                     switch rawValue {
                     case "a":
@@ -53,7 +49,6 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """,
@@ -73,12 +68,9 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum {
                 case a
                 case b // bb
-
                 case unknown(String)
-
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
-
                 var rawValue: String {
                     switch self {
                     case .a:
@@ -91,7 +83,6 @@ class UnstableEnumMacroTests: XCTestCase {
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
-
                 init?(rawValue: String) {
                     switch rawValue {
                     case "a":
@@ -103,8 +94,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
             }
-
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum : RawRepresentable, LosslessRawRepresentable {
             }
             """,
             macros: macros
@@ -123,12 +113,9 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // "oo"
                 case b // "bb"
-
                 case unknown(String)
-
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
-
                 var rawValue: String {
                     switch self {
                     case .a:
@@ -141,7 +128,6 @@ class UnstableEnumMacroTests: XCTestCase {
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
-
                 init?(rawValue: String) {
                     switch rawValue {
                     case "oo":
@@ -153,7 +139,6 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """,
@@ -175,12 +160,9 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 5
-
                 case unknown(Int)
-
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
-
                 var rawValue: Int {
                     switch self {
                     case .a:
@@ -193,7 +175,6 @@ class UnstableEnumMacroTests: XCTestCase {
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
-
                 init?(rawValue: Int) {
                     switch rawValue {
                     case 1:
@@ -205,7 +186,6 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """,
@@ -227,12 +207,9 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable, Codable {
                 case a // 1
                 case b // 5
-            
                 case unknown(Int)
-
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
-
                 var rawValue: Int {
                     switch self {
                     case .a:
@@ -245,7 +222,6 @@ class UnstableEnumMacroTests: XCTestCase {
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
-
                 init?(rawValue: Int) {
                     switch rawValue {
                     case 1:
@@ -256,17 +232,24 @@ class UnstableEnumMacroTests: XCTestCase {
                         self = .unknown(rawValue)
                     }
                 }
-
                 init(from decoder: any Decoder) throws {
-                    try self.init(rawValue: Int(from: decoder))!
+                    let container = try decoder.singleValueContainer()
+                    let value = try container.decode(Int.self)
+                    self.init(rawValue: value)!
                     #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
                     if case let .unknown(value) = self {
-                        DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning("Found an unknown value", metadata: ["value": "\(value)", "typeName": "MyEnum", "location": "TestModule/test.swift:1"])
+                        DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning(
+                            "Found an unknown value",
+                            metadata: [
+                                "value": "\(value)",
+                                "typeName": "MyEnum",
+                                "location": "TestModule/test.swift:1",
+                            ]
+                        )
                     }
                     #endif
                 }
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """#,
@@ -286,12 +269,9 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable, Decodable, SomethingElse {
                 case a // 1
                 case b // 5
-
                 case unknown(Int)
-
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
-
                 var rawValue: Int {
                     switch self {
                     case .a:
@@ -304,7 +284,6 @@ class UnstableEnumMacroTests: XCTestCase {
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
-
                 init?(rawValue: Int) {
                     switch rawValue {
                     case 1:
@@ -315,17 +294,24 @@ class UnstableEnumMacroTests: XCTestCase {
                         self = .unknown(rawValue)
                     }
                 }
-
                 init(from decoder: any Decoder) throws {
-                    try self.init(rawValue: Int(from: decoder))!
+                    let container = try decoder.singleValueContainer()
+                    let value = try container.decode(Int.self)
+                    self.init(rawValue: value)!
                     #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
                     if case let .unknown(value) = self {
-                        DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning("Found an unknown value", metadata: ["value": "\(value)", "typeName": "MyEnum", "location": "TestModule/test.swift:1"])
+                        DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning(
+                            "Found an unknown value",
+                            metadata: [
+                                "value": "\(value)",
+                                "typeName": "MyEnum",
+                                "location": "TestModule/test.swift:1",
+                            ]
+                        )
                     }
                     #endif
                 }
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """#,
@@ -347,12 +333,9 @@ class UnstableEnumMacroTests: XCTestCase {
             enum StringEnum: RawRepresentable, CaseIterable {
                 case a
                 case b
-
                 case unknown(String)
-
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
-
                 var rawValue: String {
                     switch self {
                     case .a:
@@ -365,7 +348,6 @@ class UnstableEnumMacroTests: XCTestCase {
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
-
                 init?(rawValue: String) {
                     switch rawValue {
                     case "a":
@@ -376,12 +358,10 @@ class UnstableEnumMacroTests: XCTestCase {
                         self = .unknown(rawValue)
                     }
                 }
-
                 static var allCases: [StringEnum] {
                     [.a, .b,]
                 }
             }
-
             extension StringEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """#,
@@ -403,12 +383,9 @@ class UnstableEnumMacroTests: XCTestCase {
             public enum MyEnum: RawRepresentable {
                 case a
                 case b // bb
-
                 case unknown(String)
-
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
-
                 public var rawValue: String {
                     switch self {
                     case .a:
@@ -421,7 +398,6 @@ class UnstableEnumMacroTests: XCTestCase {
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
                 }
-
                 public init?(rawValue: String) {
                     switch rawValue {
                     case "a":
@@ -433,7 +409,6 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """,
@@ -456,7 +431,6 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // 1
                 case b
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """,
@@ -484,7 +458,6 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // bb
                 case b // 1
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """,
@@ -510,7 +483,6 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // 2
                 case b // 1
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """,
@@ -538,7 +510,6 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // a
                 case b // "1
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """,
@@ -566,7 +537,6 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a // 1
                 case b // 1
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """,
@@ -594,7 +564,6 @@ class UnstableEnumMacroTests: XCTestCase {
                 case a = "g"
                 case b = "gg"
             }
-
             extension MyEnum: RawRepresentable, LosslessRawRepresentable {
             }
             """,

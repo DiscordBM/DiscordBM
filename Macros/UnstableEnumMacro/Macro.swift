@@ -37,12 +37,13 @@ public struct UnstableEnum: MemberMacro {
         guard let enumDecl = declaration.as(EnumDeclSyntax.self) else {
             throw MacroError.isNotEnum
         }
+        let accessLevel = enumDecl.accessLevelModifier.map { "\($0) " } ?? ""
 
-        guard let name = node.attributeName.as(IdentifierTypeSyntax.self),
+        guard let name = node.attributeName.as(SimpleTypeIdentifierSyntax.self),
               let generic = name.genericArgumentClause,
               generic.arguments.count == 1,
-              let genericTypeSyntax = generic.arguments.first?.argument,
-              let genericType = genericTypeSyntax.as(IdentifierTypeSyntax.self)
+              let genericTypeSyntax = generic.arguments.first?.argumentType,
+              let genericType = genericTypeSyntax.as(SimpleTypeIdentifierSyntax.self)
         else {
             throw MacroError.macroDoesNotHaveRequiredGenericArgument
         }
@@ -62,7 +63,7 @@ public struct UnstableEnum: MemberMacro {
 
         /// Some validations
 
-        let values = cases.map(\.1)
+        let values = cases.map(\.value)
 
         if values.isEmpty { return [] }
 
@@ -90,25 +91,25 @@ public struct UnstableEnum: MemberMacro {
         var syntaxes: [DeclSyntax] = [
             DeclSyntax(makeUnknownEnumCase(rawType: rawType)),
             DeclSyntax(doNotUseCaseDeclaration),
-            DeclSyntax(makeRawValueVar(modifiers: modifiers, rawType: rawType, cases: cases)),
-            DeclSyntax(makeInitializer(modifiers: modifiers, rawType: rawType, cases: cases))
+            DeclSyntax(try makeRawValueVar(accessLevelModifier: accessLevel, rawType: rawType, cases: cases)),
+            DeclSyntax(try makeInitializer(accessLevelModifier: accessLevel, rawType: rawType, cases: cases))
         ]
 
-        let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypes.contains {
-            $0.type.as(IdentifierTypeSyntax.self)?.name.text == "CaseIterable"
+        let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
+            $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.text == "CaseIterable"
         }
 
         if conformsToCaseIterable == true {
             let conformance = makeCaseIterable(
                 modifiers: modifiers,
-                enumIdentifier: enumDecl.name,
+                enumIdentifier: enumDecl.identifier,
                 cases: cases
             )
             syntaxes.append(DeclSyntax(conformance))
         }
 
-        let conformsToDecodable = enumDecl.inheritanceClause?.inheritedTypes.contains {
-            let name = $0.type.as(IdentifierTypeSyntax.self)?.name.text
+        let conformsToDecodable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
+            let name = $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.text
             return name == "Codable" || name == "Decodable"
         }
 
@@ -116,9 +117,9 @@ public struct UnstableEnum: MemberMacro {
             guard let location: AbstractSourceLocation = context.location(of: node) else {
                 throw MacroError.couldNotFindLocationOfNode
             }
-            let decodableInit = makeDecodableInitializer(
-                modifiers: modifiers,
-                enumIdentifier: enumDecl.name,
+            let decodableInit = try makeDecodableInitializer(
+                accessLevelModifier: accessLevel,
+                enumIdentifier: enumDecl.identifier,
                 location: location,
                 rawType: rawType,
                 cases: cases
@@ -144,9 +145,10 @@ extension UnstableEnum: ExtensionMacro {
             throw MacroError.isNotEnum
         }
 
-        let ext: ExtensionDeclSyntax = try ExtensionDeclSyntax("""
-        extension \(raw: enumDecl.name.text): RawRepresentable, LosslessRawRepresentable { }
-        """)
+        let syntax: DeclSyntax = """
+        extension \(enumDecl.identifier): RawRepresentable, LosslessRawRepresentable { }
+        """
+        let ext = ExtensionDeclSyntax(syntax)!
 
         return [ext]
     }
@@ -156,19 +158,24 @@ private enum RawKind: String {
     case String, Int, UInt
 }
 
+struct EnumCase {
+    let key: String
+    let value: String
+}
+
 private func makeCases(
     elements: [EnumCaseElementSyntax],
     rawType: RawKind,
     context: some MacroExpansionContext
-) -> (cases: [(key: String, value: String)], hasError: Bool) {
+) -> (cases: [EnumCase], hasError: Bool) {
     let cases = elements.compactMap {
-        element -> (key: String, value: String)? in
+        element -> EnumCase? in
         if let rawValue = element.rawValue {
             var modifiedElement = EnumCaseElementSyntax(element)!
             modifiedElement.rawValue = nil
             /// Can't use trailing trivia because it won't show up in the code
-            modifiedElement.name = .identifier(
-                modifiedElement.name.text + " // \(rawValue.value)"
+            modifiedElement.identifier = .identifier(
+                modifiedElement.identifier.text + " // \(rawValue.value)"
             )
             let diagnostic = Diagnostic(
                 node: Syntax(rawValue),
@@ -192,7 +199,10 @@ private func makeCases(
                 context.diagnose(diagnostic)
                 return nil
             }
-            return (element.name.text, element.name.text)
+            return .init(
+                key: element.identifier.text,
+                value: element.identifier.text
+            )
         } else {
             if element.trailingTrivia.pieces.count == 2,
                element.trailingTrivia.pieces[0] == .spaces(1),
@@ -219,7 +229,10 @@ private func makeCases(
                         context.diagnose(diagnostic)
                         return nil
                     }
-                    return (element.name.text, value)
+                    return .init(
+                        key: element.identifier.text,
+                        value: value
+                    )
                 } else {
                     let diagnostic = Diagnostic(
                         node: Syntax(element),
@@ -256,11 +269,11 @@ private func makeUnknownEnumCase(rawType: RawKind) -> EnumCaseDeclSyntax {
     EnumCaseDeclSyntax(
         elements: [
             EnumCaseElementSyntax(
-                name: .identifier("unknown"),
-                parameterClause: EnumCaseParameterClauseSyntax(
-                    parameters: [
+                identifier: .identifier("unknown"),
+                associatedValue: EnumCaseParameterClauseSyntax(
+                    parameterList: [
                         EnumCaseParameterSyntax(
-                            type: IdentifierTypeSyntax(
+                            type: SimpleTypeIdentifierSyntax(
                                 name: .identifier(rawType.rawValue)
                             )
                         )
@@ -276,264 +289,93 @@ private let doNotUseCaseDeclaration = EnumCaseDeclSyntax(
         .spaces(4),
         .docLineComment("/// This case serves as a way of discouraging exhaustive switch statements"),
         .newlines(1),
+        .spaces(4),
     ],
     elements: [
         EnumCaseElementSyntax(
-            name: .identifier(doNotUseCase)
+            identifier: .identifier(doNotUseCase)
         )
     ]
 )
 
 private func makeRawValueVar(
-    modifiers: DeclModifierListSyntax?,
+    accessLevelModifier: String,
     rawType: RawKind,
-    cases: [(String, String)]
-) -> VariableDeclSyntax {
-    VariableDeclSyntax(
-        modifiers: modifiers ?? .init([]),
-        bindingSpecifier: .keyword(.var),
-        bindings: [
-            PatternBindingSyntax(
-                pattern: IdentifierPatternSyntax(
-                    identifier: .identifier("rawValue")
-                ),
-                typeAnnotation: TypeAnnotationSyntax(
-                    type: IdentifierTypeSyntax(
-                        name: .identifier(rawType.rawValue)
-                    )
-                ),
-                accessorBlock: AccessorBlockSyntax(
-                    accessors: .getter([
-                        CodeBlockItemSyntax(
-                            item: .expr(.init(fromProtocol: SwitchExprSyntax(
-                                subject: DeclReferenceExprSyntax(
-                                    baseName: .keyword(.`self`)
-                                ),
-                                cases: cases.map { key, value in
-                                    SwitchCaseSyntax(
-                                        label: .case(
-                                            SwitchCaseLabelSyntax(
-                                                caseItems: [
-                                                    SwitchCaseItemSyntax(
-                                                        pattern: ExpressionPatternSyntax(
-                                                            expression: MemberAccessExprSyntax(
-                                                                name: .identifier(key)
-                                                            )
-                                                        )
-                                                    )
-                                                ]
-                                            )
-                                        ),
-                                        statements: [
-                                            CodeBlockItemSyntax(
-                                                item: .stmt(.init(fromProtocol: ReturnStmtSyntax(
-                                                    expression: makeExpression(
-                                                        rawType: rawType,
-                                                        value: value
-                                                    )
-                                                )))
-                                            )
-                                        ]
-                                    )
-                                } + [
-                                    SwitchCaseSyntax(
-                                        label: .case(SwitchCaseLabelSyntax(
-                                            caseItems: [
-                                                SwitchCaseItemSyntax(
-                                                    pattern: ValueBindingPatternSyntax(
-                                                        bindingSpecifier: .keyword(.let),
-                                                        pattern: ExpressionPatternSyntax(
-                                                            expression: FunctionCallExprSyntax(
-                                                                calledExpression: MemberAccessExprSyntax(
-                                                                    name: .identifier("unknown")
-                                                                ),
-                                                                leftParen: .leftParenToken(),
-                                                                arguments: [
-                                                                    LabeledExprSyntax(
-                                                                        expression: PatternExprSyntax(
-                                                                            pattern: IdentifierPatternSyntax(
-                                                                                identifier: .identifier("value")
-                                                                            )
-                                                                        )
-                                                                    )
-                                                                ],
-                                                                rightParen: .rightParenToken()
-                                                            )
-                                                        )
-                                                    )
-                                                )
-                                            ]
-                                        )),
-                                        statements: [
-                                            CodeBlockItemSyntax(
-                                                item: .stmt(.init(
-                                                    fromProtocol: ReturnStmtSyntax(
-                                                        expression: DeclReferenceExprSyntax(
-                                                            baseName: .identifier("value")
-                                                        )
-                                                    )
-                                                ))
-                                            )
-                                        ]
-                                    ),
-                                    SwitchCaseSyntax(
-                                        label: .case(
-                                            SwitchCaseLabelSyntax(
-                                                caseItems: [
-                                                    SwitchCaseItemSyntax(
-                                                        pattern: ExpressionPatternSyntax(
-                                                            expression: MemberAccessExprSyntax(
-                                                                name: .identifier(doNotUseCase)
-                                                            )
-                                                        )
-                                                    )
-                                                ]
-                                            )
-                                        ),
-                                        statements: [
-                                            CodeBlockItemSyntax(
-                                                item: .expr(.init(fromProtocol: FunctionCallExprSyntax(
-                                                    calledExpression: DeclReferenceExprSyntax(
-                                                        baseName: .identifier("fatalError")
-                                                    ),
-                                                    leftParen: .leftParenToken(),
-                                                    arguments: [
-                                                        .init(
-                                                            expression: StringLiteralExprSyntax(
-                                                                content: "Must not use the '\(doNotUseCase)' case. This case serves as a way of discouraging exhaustive switch statements"
-                                                            )
-                                                        )
-                                                    ],
-                                                    rightParen: .rightParenToken()
-                                                )))
-                                            )
-                                        ]
-                                    )
-                                ]
-                            )))
-                        )
-                    ])
-                )
-            )
-        ]
-    )
+    cases: [EnumCase]
+) throws -> VariableDeclSyntax {
+    func maybeQuoted(_ value: String) -> String {
+        switch rawType {
+        case .Int, .UInt:
+            return value
+        case .String:
+            return #""\#(value)""#
+        }
+    }
+    let cases = cases.map { enumCase in
+        """
+        case .\(enumCase.key):
+            return \(maybeQuoted(enumCase.value))
+        """
+    }
+    let syntax: DeclSyntax = #"""
+    \#(raw: accessLevelModifier)var rawValue: \#(raw: rawType.rawValue) {
+        switch self {
+    \#(raw: cases.indented())
+        case let .unknown(value):
+            return value
+        case .\#(raw: doNotUseCase):
+            fatalError("Must not use the '\#(raw: doNotUseCase)' case. This case serves as a way of discouraging exhaustive switch statements")
+        }
+    }
+    """#
+    guard let decl = VariableDeclSyntax(syntax) else {
+        throw MacroError.cannotUnwrapSyntax(type: VariableDeclSyntax.self)
+    }
+    return decl
 }
 
 private func makeInitializer(
-    modifiers: DeclModifierListSyntax?,
+    accessLevelModifier: String,
     rawType: RawKind,
-    cases: [(String, String)]
-) -> InitializerDeclSyntax {
-    InitializerDeclSyntax(
-        modifiers: modifiers ?? .init([]),
-        optionalMark: .postfixQuestionMarkToken(),
-        signature: FunctionSignatureSyntax(
-            parameterClause: FunctionParameterClauseSyntax(
-                parameters: [
-                    FunctionParameterSyntax(
-                        firstName: .identifier("rawValue"),
-                        type: IdentifierTypeSyntax(
-                            name: .identifier(rawType.rawValue)
-                        )
-                    )
-                ]
-            )
-        ),
-        body: CodeBlockSyntax(
-            statements: [
-                .init(item: .expr(.init(fromProtocol: SwitchExprSyntax(
-                    subject: DeclReferenceExprSyntax(
-                        baseName: .identifier("rawValue")
-                    ),
-                    cases: cases.map { key, value in
-                        SwitchCaseSyntax(
-                            label: .case(
-                                SwitchCaseLabelSyntax(
-                                    caseItems: [
-                                        SwitchCaseItemSyntax(
-                                            pattern: ExpressionPatternSyntax(
-                                                expression: makeExpression(
-                                                    rawType: rawType,
-                                                    value: value
-                                                )
-                                            )
-                                        )
-                                    ]
-                                )
-                            ),
-                            statements: [
-                                CodeBlockItemSyntax(
-                                    item: .expr(.init(fromProtocol: SequenceExprSyntax(
-                                        elements: [
-                                            ExprSyntax(
-                                                fromProtocol: DeclReferenceExprSyntax(
-                                                    baseName: .keyword(.`self`)
-                                                )
-                                            ),
-                                            ExprSyntax(
-                                                fromProtocol: AssignmentExprSyntax()
-                                            ),
-                                            ExprSyntax(
-                                                fromProtocol: MemberAccessExprSyntax(
-                                                    name: .identifier(key)
-                                                )
-                                            )
-                                        ]
-                                    )))
-                                )
-                            ]
-                        )
-                    } + [
-                        SwitchCaseSyntax(
-                            label: .default(SwitchDefaultLabelSyntax()),
-                            statements: [
-                                CodeBlockItemSyntax(
-                                    item: .expr(.init(fromProtocol: SequenceExprSyntax(
-                                        elements: [
-                                            ExprSyntax(
-                                                fromProtocol: DeclReferenceExprSyntax(
-                                                    baseName: .keyword(.`self`)
-                                                )
-                                            ),
-                                            ExprSyntax(
-                                                fromProtocol: AssignmentExprSyntax()
-                                            ),
-                                            ExprSyntax(
-                                                fromProtocol: FunctionCallExprSyntax(
-                                                    calledExpression: MemberAccessExprSyntax(
-                                                        name: .identifier("unknown")
-                                                    ),
-                                                    leftParen: .leftParenToken(),
-                                                    arguments: [
-                                                        LabeledExprSyntax(
-                                                            expression: DeclReferenceExprSyntax(
-                                                                baseName: .identifier("rawValue")
-                                                            )
-                                                        )
-                                                    ],
-                                                    rightParen: .rightParenToken()
-                                                )
-                                            ),
-                                        ]
-                                    )))
-                                )
-                            ]
-                        )
-                    ]
-                ))))
-            ]
-        )
-    )
+    cases: [EnumCase]
+) throws -> InitializerDeclSyntax {
+    func maybeQuoted(_ value: String) -> String {
+        switch rawType {
+        case .Int, .UInt:
+            return value
+        case .String:
+            return #""\#(value)""#
+        }
+    }
+    let cases = cases.map { enumCase in
+        """
+        case \(maybeQuoted(enumCase.value)):
+            self = .\(enumCase.key)
+        """
+    }
+    let syntax: DeclSyntax = #"""
+    \#(raw: accessLevelModifier)init?(rawValue: \#(raw: rawType.rawValue)) {
+        switch rawValue {
+    \#(raw: cases.indented())
+        default:
+            self = .unknown(rawValue)
+        }
+    }
+    """#
+    guard let decl = InitializerDeclSyntax(syntax) else {
+        throw MacroError.cannotUnwrapSyntax(type: InitializerDeclSyntax.self)
+    }
+    return decl
 }
 
 func makeCaseIterable(
-    modifiers: DeclModifierListSyntax?,
+    modifiers: ModifierListSyntax?,
     enumIdentifier: TokenSyntax,
-    cases: [(String, String)]
+    cases: [EnumCase]
 ) -> VariableDeclSyntax {
     VariableDeclSyntax(
         modifiers: (modifiers ?? []) + [DeclModifierSyntax(name: .keyword(.`static`))],
-        bindingSpecifier: .keyword(.`var`),
+        bindingKeyword: .keyword(.`var`),
         bindings: [
             PatternBindingSyntax(
                 pattern: IdentifierPatternSyntax(
@@ -541,26 +383,26 @@ func makeCaseIterable(
                 ),
                 typeAnnotation: TypeAnnotationSyntax(
                     type: ArrayTypeSyntax(
-                        element: IdentifierTypeSyntax(
+                        elementType: SimpleTypeIdentifierSyntax(
                             name: enumIdentifier
                         )
                     )
                 ),
-                accessorBlock:  .init(
-                    accessors: .getter([
-                        CodeBlockItemSyntax(
+                accessor: PatternBindingSyntax.Accessor.getter(
+                    CodeBlockSyntax(
+                        statements: [CodeBlockItemSyntax(
                             item: .expr(.init(fromProtocol: ArrayExprSyntax(
-                                elements: ArrayElementListSyntax(cases.map { key, _ in
+                                elements: ArrayElementListSyntax(cases.map { enumCase in
                                     ArrayElementSyntax(
                                         expression: MemberAccessExprSyntax(
-                                            name: .identifier(key)
+                                            name: .identifier(enumCase.key)
                                         ),
                                         trailingComma: .commaToken()
                                     )
                                 })
                             )))
-                        )
-                    ])
+                        )]
+                    )
                 )
             )
         ]
@@ -568,230 +410,35 @@ func makeCaseIterable(
 }
 
 private func makeDecodableInitializer(
-    modifiers: DeclModifierListSyntax?,
+    accessLevelModifier: String,
     enumIdentifier: TokenSyntax,
     location: AbstractSourceLocation,
     rawType: RawKind,
-    cases: [(String, String)]
-) -> InitializerDeclSyntax {
-    InitializerDeclSyntax(
-        modifiers: modifiers ?? .init(),
-        signature: FunctionSignatureSyntax(
-            parameterClause: FunctionParameterClauseSyntax(
-                parameters: [
-                    FunctionParameterSyntax(
-                        firstName: .identifier("from"),
-                        secondName: .identifier("decoder"),
-                        type: SomeOrAnyTypeSyntax(
-                            someOrAnySpecifier: .keyword(.`any`),
-                            constraint: IdentifierTypeSyntax(
-                                name: .identifier("Decoder")
-                            )
-                        )
-                    )
+    cases: [EnumCase]
+) throws -> InitializerDeclSyntax {
+    let syntax: DeclSyntax = #"""
+    \#(raw: accessLevelModifier)init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let value = try container.decode(\#(raw: rawType.rawValue).self)
+        self.init(rawValue: value)!
+        #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
+        if case let .unknown(value) = self {
+            DiscordGlobalConfiguration.makeDecodeLogger("\#(raw: enumIdentifier.trimmedDescription)").warning(
+                "Found an unknown value",
+                metadata: [
+                    "value": "\(value)",
+                    "typeName": "\#(raw: enumIdentifier.trimmedDescription)",
+                    "location": "\#(raw: location.description)",
                 ]
-            ),
-            effectSpecifiers: FunctionEffectSpecifiersSyntax(
-                throwsSpecifier: .keyword(.`throws`)
             )
-        ),
-        body: CodeBlockSyntax(
-            statements: [
-                CodeBlockItemSyntax(
-                    item: .expr(.init(fromProtocol: TryExprSyntax(
-                        expression: ForceUnwrapExprSyntax(
-                            expression: FunctionCallExprSyntax(
-                                calledExpression: MemberAccessExprSyntax(
-                                    base: DeclReferenceExprSyntax(
-                                        baseName: .keyword(.`self`)
-                                    ),
-                                    name: .keyword(.`init`)
-                                ),
-                                leftParen: .leftParenToken(),
-                                arguments: [
-                                    LabeledExprSyntax(
-                                        label: .identifier("rawValue"),
-                                        colon: .colonToken(),
-                                        expression: FunctionCallExprSyntax(
-                                            calledExpression: DeclReferenceExprSyntax(
-                                                baseName: .identifier(rawType.rawValue)
-                                            ),
-                                            leftParen: .leftParenToken(),
-                                            arguments: [
-                                                LabeledExprSyntax(
-                                                    label: .identifier("from"),
-                                                    colon: .colonToken(),
-                                                    expression: DeclReferenceExprSyntax(
-                                                        baseName: .identifier("decoder")
-                                                    )
-                                                )
-                                            ],
-                                            rightParen: .rightParenToken()
-                                        )
-                                    )
-                                ],
-                                rightParen: .rightParenToken()
-                            ),
-                            exclamationMark: .exclamationMarkToken()
-                        )
-                    )))
-                ),
-                CodeBlockItemSyntax(
-                    item: .decl(.init(fromProtocol: IfConfigDeclSyntax(
-                        clauses: [
-                            IfConfigClauseSyntax(
-                                poundKeyword: .poundIfToken(),
-                                condition: DeclReferenceExprSyntax(
-                                    baseName: .identifier("DISCORDBM_ENABLE_LOGGING_DURING_DECODE")
-                                ),
-                                elements: IfConfigClauseSyntax.Elements.statements([
-                                    CodeBlockItemSyntax(
-                                        item: .stmt(.init(fromProtocol: ExpressionStmtSyntax(
-                                            expression: IfExprSyntax(
-                                                conditions: makeDecodableInitConditions(),
-                                                body: makeDecodableInitBody(
-                                                    enumIdentifier: enumIdentifier,
-                                                    location: location,
-                                                    rawType: rawType,
-                                                    cases: cases
-                                                )
-                                            )
-                                        )))
-                                    )
-                                ])
-                            )
-                        ]
-                    )))
-                )
-            ]
-        )
-    )
-}
-
-private func makeDecodableInitConditions() -> ConditionElementListSyntax {
-    [ConditionElementSyntax(
-        condition: .matchingPattern(MatchingPatternConditionSyntax(
-            caseKeyword: .keyword(.`case`),
-            pattern: ValueBindingPatternSyntax(
-                bindingSpecifier: .keyword(.let),
-                pattern: ExpressionPatternSyntax(
-                    expression: FunctionCallExprSyntax(
-                        calledExpression: MemberAccessExprSyntax(
-                            name: .identifier("unknown")
-                        ),
-                        leftParen: .leftParenToken(),
-                        arguments: [
-                            LabeledExprSyntax(
-                                expression: PatternExprSyntax(
-                                    pattern: IdentifierPatternSyntax(
-                                        identifier: .identifier("value")
-                                    )
-                                )
-                            )
-                        ],
-                        rightParen: .rightParenToken()
-                    )
-                )
-            ),
-            initializer: InitializerClauseSyntax(
-                value: DeclReferenceExprSyntax(
-                    baseName: .keyword(.`self`)
-                )
-            )
-        ))
-    )]
-}
-
-private func makeDecodableInitBody(
-    enumIdentifier: TokenSyntax,
-    location: AbstractSourceLocation,
-    rawType: RawKind,
-    cases: [(String, String)]
-) -> CodeBlockSyntax {
-    CodeBlockSyntax(
-        statements: [
-            CodeBlockItemSyntax(
-                item: .expr(.init(fromProtocol: FunctionCallExprSyntax(
-                    calledExpression: MemberAccessExprSyntax(
-                        base: FunctionCallExprSyntax(
-                            calledExpression: MemberAccessExprSyntax(
-                                base: DeclReferenceExprSyntax(
-                                    baseName: .identifier("DiscordGlobalConfiguration")
-                                ),
-                                name: .identifier("makeDecodeLogger")
-                            ),
-                            leftParen: .leftParenToken(),
-                            arguments: [
-                                LabeledExprSyntax(
-                                    expression: StringLiteralExprSyntax(
-                                        content: enumIdentifier.text
-                                    )
-                                )
-                            ],
-                            rightParen: .rightParenToken()
-                        ),
-                        name: .identifier("warning")
-                    ),
-                    leftParen: .leftParenToken(),
-                    arguments: [
-                        LabeledExprSyntax(
-                            expression: StringLiteralExprSyntax(
-                                content: "Found an unknown value"
-                            ),
-                            trailingComma: .commaToken()
-                        ),
-                        LabeledExprSyntax(
-                            label: .identifier("metadata"),
-                            colon: .colonToken(),
-                            expression: DictionaryExprSyntax(
-                                content: DictionaryExprSyntax.Content.elements([
-                                    DictionaryElementSyntax(
-                                        key: StringLiteralExprSyntax(
-                                            content: "value"
-                                        ),
-                                        value: StringLiteralExprSyntax(
-                                            openingQuote: .stringQuoteToken(),
-                                            segments: [
-                                                .expressionSegment(ExpressionSegmentSyntax(
-                                                    expressions: [
-                                                        LabeledExprSyntax(
-                                                            expression: DeclReferenceExprSyntax(
-                                                                baseName: .identifier("value")
-                                                            )
-                                                        )
-                                                    ]
-                                                ))
-                                            ],
-                                            closingQuote: .stringQuoteToken()
-                                        ),
-                                        trailingComma: .commaToken()
-                                    ),
-                                    DictionaryElementSyntax(
-                                        key: StringLiteralExprSyntax(
-                                            content: "typeName"
-                                        ),
-                                        value: StringLiteralExprSyntax(
-                                            content: enumIdentifier.text
-                                        ),
-                                        trailingComma: .commaToken()
-                                    ),
-                                    DictionaryElementSyntax(
-                                        key: StringLiteralExprSyntax(
-                                            content: "location"
-                                        ),
-                                        value: StringLiteralExprSyntax(
-                                            content: location.description
-                                        )
-                                    )
-                                ])
-                            )
-                        )
-                    ],
-                    rightParen: .rightParenToken()
-                )))
-            )
-        ]
-    )
+        }
+        #endif
+    }
+    """#
+    guard let decl = InitializerDeclSyntax(syntax) else {
+        throw MacroError.cannotUnwrapSyntax(type: InitializerDeclSyntax.self)
+    }
+    return decl
 }
 
 private extension AbstractSourceLocation {
@@ -809,7 +456,7 @@ private func + (lhs: [SwitchCaseSyntax], rhs: [SwitchCaseSyntax]) -> SwitchCaseL
     return .init(lhs.map { .switchCase($0) })
 }
 
-private func + (lhs: DeclModifierListSyntax, rhs: [DeclModifierSyntax]) -> DeclModifierListSyntax {
+private func + (lhs: ModifierListSyntax, rhs: [DeclModifierSyntax]) -> ModifierListSyntax {
     var lhs = lhs
     for item in rhs {
         var elements = Array(lhs)
@@ -817,4 +464,39 @@ private func + (lhs: DeclModifierListSyntax, rhs: [DeclModifierSyntax]) -> DeclM
         lhs = .init(elements)
     }
     return lhs
+}
+
+private extension EnumDeclSyntax {
+    var accessLevelModifier: String? {
+        let accessLevelModifiers: [Keyword] = [.open, .public, .internal, .private, .fileprivate]
+        for modifier in (self.modifiers ?? []) {
+            guard let modifier = modifier.as(DeclModifierSyntax.self),
+                  case let .keyword(keyword) = modifier.name.tokenKind else {
+                continue
+            }
+            if accessLevelModifiers.contains(keyword) {
+                return modifier.name.trimmedDescription
+            }
+        }
+        return nil
+    }
+}
+
+private extension String {
+    func indented() -> String {
+        self.split(
+            separator: "\n",
+            omittingEmptySubsequences: false
+        ).map {
+            "    \($0)"
+        }.joined(separator: "\n")
+    }
+}
+
+private extension Array<String> {
+    func indented() -> String {
+        self.map {
+            $0.indented()
+        }.joined(separator: "\n")
+    }
 }
