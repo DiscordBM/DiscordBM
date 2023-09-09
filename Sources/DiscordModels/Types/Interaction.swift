@@ -326,7 +326,7 @@ public struct Interaction: Sendable, Codable {
             self.data = nil
         case .unknown: self.data = nil
         case .__DO_NOT_USE_THIS_CASE:
-            fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
+            fatalError("If the case name wasn't already clear enough: This case MUST NOT be used")
         }
         self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
         self.channel_id = try container.decodeIfPresent(
@@ -447,6 +447,7 @@ extension Interaction {
                 case secondary
                 case success
                 case danger
+                case __DO_NOT_USE_THIS_CASE
 
                 public func toStyle() -> Style {
                     switch self {
@@ -454,6 +455,8 @@ extension Interaction {
                     case .secondary: return .secondary
                     case .success: return .success
                     case .danger: return .danger
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
                     }
                 }
 
@@ -767,7 +770,7 @@ extension Interaction {
                 case .unknown:
                     self = .unknown
                 case .__DO_NOT_USE_THIS_CASE:
-                    fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
+                    fatalError("If the case name wasn't already clear enough: This case MUST NOT be used")
                 }
             }
             

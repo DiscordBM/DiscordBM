@@ -3,8 +3,8 @@
 @testable import DiscordBM
 import XCTest
 
-class ToleratesDecodeTests: XCTestCase {
-    
+class DecodeToleranceTests: XCTestCase {
+
     /// Test that collections of raw-representable codable enums
     /// don't fail on decoding unknown values.
     func testNoThrowEnums() throws {
@@ -21,7 +21,7 @@ class ToleratesDecodeTests: XCTestCase {
             """
             
             /// The values include `500` which is not in `DiscordChannel.Kind`.
-            /// Decoding the `500` normally fails, but based on our `ToleratesDecode` hack,
+            /// Decoding the `500` normally fails, but based on our `UnstableEnum` ,acro,
             /// this should never fail in internal `DiscordBM` decode processes.
             let decoded = try JSONDecoder().decode(
                 TestContainer<DiscordChannel.Kind>.self,
