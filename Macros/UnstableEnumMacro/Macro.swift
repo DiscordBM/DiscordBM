@@ -86,8 +86,6 @@ public struct UnstableEnum: MemberMacro {
         }
 
 
-        let modifiers = enumDecl.modifiers
-
         var syntaxes: [DeclSyntax] = [
             DeclSyntax(makeUnknownEnumCase(rawType: rawType)),
             DeclSyntax(doNotUseCaseDeclaration),
@@ -100,8 +98,8 @@ public struct UnstableEnum: MemberMacro {
         }
 
         if conformsToCaseIterable == true {
-            let conformance = makeCaseIterable(
-                modifiers: modifiers,
+            let conformance = try makeCaseIterable(
+                accessLevelModifier: accessLevel,
                 enumIdentifier: enumDecl.identifier,
                 cases: cases
             )
@@ -284,19 +282,10 @@ private func makeUnknownEnumCase(rawType: RawKind) -> EnumCaseDeclSyntax {
     )
 }
 
-private let doNotUseCaseDeclaration = EnumCaseDeclSyntax(
-    leadingTrivia: [
-        .spaces(4),
-        .docLineComment("/// This case serves as a way of discouraging exhaustive switch statements"),
-        .newlines(1),
-        .spaces(4),
-    ],
-    elements: [
-        EnumCaseElementSyntax(
-            identifier: .identifier(doNotUseCase)
-        )
-    ]
-)
+private let doNotUseCaseDeclaration = EnumCaseDeclSyntax(DeclSyntax("""
+    /// This case serves as a way of discouraging exhaustive switch statements
+    case \(raw: doNotUseCase)
+"""))!
 
 private func makeRawValueVar(
     accessLevelModifier: String,
@@ -369,44 +358,24 @@ private func makeInitializer(
 }
 
 func makeCaseIterable(
-    modifiers: ModifierListSyntax?,
+    accessLevelModifier: String,
     enumIdentifier: TokenSyntax,
     cases: [EnumCase]
-) -> VariableDeclSyntax {
-    VariableDeclSyntax(
-        modifiers: (modifiers ?? []) + [DeclModifierSyntax(name: .keyword(.`static`))],
-        bindingKeyword: .keyword(.`var`),
-        bindings: [
-            PatternBindingSyntax(
-                pattern: IdentifierPatternSyntax(
-                    identifier: .identifier("allCases")
-                ),
-                typeAnnotation: TypeAnnotationSyntax(
-                    type: ArrayTypeSyntax(
-                        elementType: SimpleTypeIdentifierSyntax(
-                            name: enumIdentifier
-                        )
-                    )
-                ),
-                accessor: PatternBindingSyntax.Accessor.getter(
-                    CodeBlockSyntax(
-                        statements: [CodeBlockItemSyntax(
-                            item: .expr(.init(fromProtocol: ArrayExprSyntax(
-                                elements: ArrayElementListSyntax(cases.map { enumCase in
-                                    ArrayElementSyntax(
-                                        expression: MemberAccessExprSyntax(
-                                            name: .identifier(enumCase.key)
-                                        ),
-                                        trailingComma: .commaToken()
-                                    )
-                                })
-                            )))
-                        )]
-                    )
-                )
-            )
-        ]
-    )
+) throws -> VariableDeclSyntax {
+    let cases = cases.map { enumCase in
+        ".\(enumCase.key),"
+    }
+    let syntax: DeclSyntax = """
+    \(raw: accessLevelModifier)static var allCases: [\(enumIdentifier)] {
+    [
+    \(raw: cases.indented())
+    ]
+    }
+    """
+    guard let decl = VariableDeclSyntax(syntax) else {
+        throw MacroError.cannotUnwrapSyntax(type: VariableDeclSyntax.self)
+    }
+    return decl
 }
 
 private func makeDecodableInitializer(

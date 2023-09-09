@@ -31,9 +31,6 @@ let experimentalFeatureFlags: [SwiftSetting] = [
     ///
     /// `minimal` / `targeted` / `complete`
     .enableExperimentalFeature("strict-concurrency=complete"),
-
-    /// Enable macros in swift 5.9 nightly.
-    .enableExperimentalFeature("Macros")
 ]
 
 let swiftSettings = featureFlags + experimentalFeatureFlags

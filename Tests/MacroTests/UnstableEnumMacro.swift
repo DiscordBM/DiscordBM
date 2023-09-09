@@ -359,7 +359,10 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
                 static var allCases: [StringEnum] {
-                    [.a, .b,]
+                    [
+                        .a,
+                        .b,
+                    ]
                 }
             }
             extension StringEnum: RawRepresentable, LosslessRawRepresentable {
