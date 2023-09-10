@@ -728,7 +728,7 @@ Finally, add `import DiscordBM` to your source code.
 ## Versioning
 `DiscordBM` will try to follow Semantic Versioning 2.0.0, with exceptions:    
 * To keep `DiscordBM` up to date with Discord API's frequent changes, `DiscordBM` will **add** any new properties to any types in **minor** versions, even if it's technically a breaking change.   
-* `DiscordBM` tries to minimize the effect of this requirement. For example most enums have an underscored case named like `__DO_NOT_USE_THIS_CASE` which forces users to use non-exhaustive switch statements, preventing future code-breakages.  
+* `DiscordBM` tries to minimize the effect of this requirement. For example most enums have an underscored case named `__DO_NOT_USE_THIS_CASE` which forces users to use non-exhaustive switch statements, preventing future code-breakages.  
 
 ## Contribution & Support
 * If you need help with anything, ask in [DiscordBM's Discord server](https://discord.gg/kxfs5n7HVE).

@@ -23,7 +23,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a
                 case b // bb
-                case unknown(String)
+                case undocumented(String)
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
@@ -32,8 +32,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return "a"
                     case .b:
                         return "bb"
-                    case let .unknown(value):
-                        return value
+                    case let .undocumented(rawValue):
+                        return rawValue
                     case .__DO_NOT_USE_THIS_CASE:
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
@@ -45,7 +45,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case "bb":
                         self = .b
                     default:
-                        self = .unknown(rawValue)
+                        self = .undocumented(rawValue)
                     }
                 }
             }
@@ -68,7 +68,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum {
                 case a
                 case b // bb
-                case unknown(String)
+                case undocumented(String)
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
@@ -77,8 +77,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return "a"
                     case .b:
                         return "bb"
-                    case let .unknown(value):
-                        return value
+                    case let .undocumented(rawValue):
+                        return rawValue
                     case .__DO_NOT_USE_THIS_CASE:
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
@@ -90,7 +90,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case "bb":
                         self = .b
                     default:
-                        self = .unknown(rawValue)
+                        self = .undocumented(rawValue)
                     }
                 }
             }
@@ -113,7 +113,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // "oo"
                 case b // "bb"
-                case unknown(String)
+                case undocumented(String)
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
@@ -122,8 +122,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return "oo"
                     case .b:
                         return "bb"
-                    case let .unknown(value):
-                        return value
+                    case let .undocumented(rawValue):
+                        return rawValue
                     case .__DO_NOT_USE_THIS_CASE:
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
@@ -135,7 +135,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case "bb":
                         self = .b
                     default:
-                        self = .unknown(rawValue)
+                        self = .undocumented(rawValue)
                     }
                 }
             }
@@ -160,7 +160,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 5
-                case unknown(Int)
+                case undocumented(Int)
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: Int {
@@ -169,8 +169,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return 1
                     case .b:
                         return 5
-                    case let .unknown(value):
-                        return value
+                    case let .undocumented(rawValue):
+                        return rawValue
                     case .__DO_NOT_USE_THIS_CASE:
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
@@ -182,7 +182,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case 5:
                         self = .b
                     default:
-                        self = .unknown(rawValue)
+                        self = .undocumented(rawValue)
                     }
                 }
             }
@@ -207,7 +207,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable, Codable {
                 case a // 1
                 case b // 5
-                case unknown(Int)
+                case undocumented(Int)
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: Int {
@@ -216,8 +216,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return 1
                     case .b:
                         return 5
-                    case let .unknown(value):
-                        return value
+                    case let .undocumented(rawValue):
+                        return rawValue
                     case .__DO_NOT_USE_THIS_CASE:
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
@@ -229,19 +229,19 @@ class UnstableEnumMacroTests: XCTestCase {
                     case 5:
                         self = .b
                     default:
-                        self = .unknown(rawValue)
+                        self = .undocumented(rawValue)
                     }
                 }
                 init(from decoder: any Decoder) throws {
                     let container = try decoder.singleValueContainer()
-                    let value = try container.decode(Int.self)
-                    self.init(rawValue: value)!
+                    let rawValue = try container.decode(Int.self)
+                    self.init(rawValue: rawValue)!
                     #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
-                    if case let .unknown(value) = self {
+                    if case let .undocumented(rawValue) = self {
                         DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning(
-                            "Found an unknown value",
+                            "Found an undocumented rawValue",
                             metadata: [
-                                "value": "\(value)",
+                                "rawValue": "\(rawValue)",
                                 "typeName": "MyEnum",
                                 "location": "TestModule/test.swift:1",
                             ]
@@ -269,7 +269,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable, Decodable, SomethingElse {
                 case a // 1
                 case b // 5
-                case unknown(Int)
+                case undocumented(Int)
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: Int {
@@ -278,8 +278,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return 1
                     case .b:
                         return 5
-                    case let .unknown(value):
-                        return value
+                    case let .undocumented(rawValue):
+                        return rawValue
                     case .__DO_NOT_USE_THIS_CASE:
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
@@ -291,19 +291,19 @@ class UnstableEnumMacroTests: XCTestCase {
                     case 5:
                         self = .b
                     default:
-                        self = .unknown(rawValue)
+                        self = .undocumented(rawValue)
                     }
                 }
                 init(from decoder: any Decoder) throws {
                     let container = try decoder.singleValueContainer()
-                    let value = try container.decode(Int.self)
-                    self.init(rawValue: value)!
+                    let rawValue = try container.decode(Int.self)
+                    self.init(rawValue: rawValue)!
                     #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
-                    if case let .unknown(value) = self {
+                    if case let .undocumented(rawValue) = self {
                         DiscordGlobalConfiguration.makeDecodeLogger("MyEnum").warning(
-                            "Found an unknown value",
+                            "Found an undocumented rawValue",
                             metadata: [
-                                "value": "\(value)",
+                                "rawValue": "\(rawValue)",
                                 "typeName": "MyEnum",
                                 "location": "TestModule/test.swift:1",
                             ]
@@ -333,7 +333,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum StringEnum: RawRepresentable, CaseIterable {
                 case a
                 case b
-                case unknown(String)
+                case undocumented(String)
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 var rawValue: String {
@@ -342,8 +342,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return "a"
                     case .b:
                         return "b"
-                    case let .unknown(value):
-                        return value
+                    case let .undocumented(rawValue):
+                        return rawValue
                     case .__DO_NOT_USE_THIS_CASE:
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
@@ -355,7 +355,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case "b":
                         self = .b
                     default:
-                        self = .unknown(rawValue)
+                        self = .undocumented(rawValue)
                     }
                 }
                 static var allCases: [StringEnum] {
@@ -386,7 +386,7 @@ class UnstableEnumMacroTests: XCTestCase {
             public enum MyEnum: RawRepresentable {
                 case a
                 case b // bb
-                case unknown(String)
+                case undocumented(String)
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
                 public var rawValue: String {
@@ -395,8 +395,8 @@ class UnstableEnumMacroTests: XCTestCase {
                         return "a"
                     case .b:
                         return "bb"
-                    case let .unknown(value):
-                        return value
+                    case let .undocumented(rawValue):
+                        return rawValue
                     case .__DO_NOT_USE_THIS_CASE:
                         fatalError("Must not use the '__DO_NOT_USE_THIS_CASE' case. This case serves as a way of discouraging exhaustive switch statements")
                     }
@@ -408,7 +408,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case "bb":
                         self = .b
                     default:
-                        self = .unknown(rawValue)
+                        self = .undocumented(rawValue)
                     }
                 }
             }
@@ -590,7 +590,7 @@ class UnstableEnumMacroTests: XCTestCase {
 
     func testEnumCodableWorks() async throws {
         let b = MyEnum.b
-        let u = MyEnum.unknown(5)
+        let u = MyEnum.undocumented(5)
 
         let b2 = try JSONEncoder().encode(b)
         let u2 = try JSONEncoder().encode(u)

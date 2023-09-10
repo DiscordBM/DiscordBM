@@ -324,7 +324,7 @@ public struct Interaction: Sendable, Codable {
             )
         case .ping:
             self.data = nil
-        case .unknown: self.data = nil
+        case .undocumented: self.data = nil
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: This case MUST NOT be used")
         }
@@ -456,7 +456,7 @@ extension Interaction {
                     case .success: return .success
                     case .danger: return .danger
                     case .__DO_NOT_USE_THIS_CASE:
-                        fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
+                        fatalError("If the case name wasn't already clear enough: This case MUST NOT be used")
                     }
                 }
 
@@ -467,9 +467,9 @@ extension Interaction {
                     case .success: self = .success
                     case .danger: self = .danger
                     case .link: return nil
-                    case .unknown: return nil
+                    case .undocumented: return nil
                     case .__DO_NOT_USE_THIS_CASE:
-                        fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
+                        fatalError("If the case name wasn't already clear enough: This case MUST NOT be used")
                     }
                 }
             }
@@ -720,7 +720,7 @@ extension Interaction {
             case roleSelect(SelectMenu)
             case mentionableSelect(SelectMenu)
             case channelSelect(ChannelSelectMenu)
-            case unknown
+            case undocumented
 
             public var customId: String? {
                 switch self {
@@ -738,7 +738,7 @@ extension Interaction {
                     return value.custom_id
                 case let .channelSelect(value):
                     return value.custom_id
-                case .unknown:
+                case .undocumented:
                     return nil
                 }
             }
@@ -767,8 +767,8 @@ extension Interaction {
                     self = try .channelSelect(.init(from: decoder))
                 case .textInput:
                     self = try .textInput(.init(from: decoder))
-                case .unknown:
-                    self = .unknown
+                case .undocumented:
+                    self = .undocumented
                 case .__DO_NOT_USE_THIS_CASE:
                     fatalError("If the case name wasn't already clear enough: This case MUST NOT be used")
                 }
@@ -798,7 +798,7 @@ extension Interaction {
                 case let .channelSelect(selectMenu):
                     try container.encode(Kind.channelSelect, forKey: .type)
                     try selectMenu.encode(to: encoder)
-                case .unknown: break
+                case .undocumented: break
                 }
             }
 
@@ -902,7 +902,7 @@ extension Interaction {
                     selectMenu.validate()
                 case .channelSelect(let channelSelectMenu):
                     channelSelectMenu.validate()
-                case .unknown:
+                case .undocumented:
                     Optional<ValidationFailure>.none
                 }
             }

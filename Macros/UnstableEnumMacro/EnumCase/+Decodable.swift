@@ -8,17 +8,17 @@ extension [EnumCase] {
         location: AbstractSourceLocation,
         rawType: RawKind
     ) -> DeclSyntax {
-        #"""
+        return #"""
         \#(raw: accessLevel)init(from decoder: any Decoder) throws {
             let container = try decoder.singleValueContainer()
-            let value = try container.decode(\#(raw: rawType.rawValue).self)
-            self.init(rawValue: value)!
+            let rawValue = try container.decode(\#(raw: rawType.rawValue).self)
+            self.init(rawValue: rawValue)!
             #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
-            if case let .unknown(value) = self {
+            if case let .undocumented(rawValue) = self {
                 DiscordGlobalConfiguration.makeDecodeLogger("\#(raw: enumIdentifier.trimmedDescription)").warning(
-                    "Found an unknown value",
+                    "Found an undocumented rawValue",
                     metadata: [
-                        "value": "\(value)",
+                        "rawValue": "\(rawValue)",
                         "typeName": "\#(raw: enumIdentifier.trimmedDescription)",
                         "location": "\#(raw: location.description)",
                     ]

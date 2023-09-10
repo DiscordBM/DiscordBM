@@ -141,7 +141,10 @@ public struct Gateway: Sendable, Codable {
             case autoModerationRuleDelete(AutoModerationRule)
             
             case autoModerationActionExecution(AutoModerationActionExecution)
-            
+
+            /// This case serves as a way of discouraging exhaustive switch statements
+            case __DO_NOT_USE_THIS_CASE
+
             public var correspondingIntents: [Intent] {
                 switch self {
                 case .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate, .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
@@ -180,6 +183,8 @@ public struct Gateway: Sendable, Codable {
                     return [.autoModerationConfiguration]
                 case .autoModerationActionExecution:
                     return [.autoModerationExecution]
+                case .__DO_NOT_USE_THIS_CASE:
+                    return []
                 }
             }
         }
@@ -1379,10 +1384,10 @@ extension Gateway.Intent {
         case .guildScheduledEvents: return false
         case .autoModerationConfiguration: return false
         case .autoModerationExecution: return false
-            /// Unknown cases are considered privileged just to be safe than sorry
-        case .unknown: return true
+            /// Undocumented cases are considered privileged just to be safe than sorry
+        case .undocumented: return true
         case .__DO_NOT_USE_THIS_CASE:
-            fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
+            fatalError("If the case name wasn't already clear enough: This case MUST NOT be used")
         }
     }
 }

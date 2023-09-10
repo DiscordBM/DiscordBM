@@ -15,8 +15,8 @@ extension [EnumCase] {
         \#(raw: accessLevel)var rawValue: \#(raw: rawType.rawValue) {
             switch self {
         \#(raw: cases.indented())
-            case let .unknown(value):
-                return value
+            case let .undocumented(rawValue):
+                return rawValue
             case .\#(raw: String.doNotUseCase):
                 fatalError("Must not use the '\#(raw: String.doNotUseCase)' case. This case serves as a way of discouraging exhaustive switch statements")
             }
