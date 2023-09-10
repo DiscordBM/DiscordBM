@@ -2,8 +2,6 @@ import SwiftSyntax
 import SwiftDiagnostics
 import SwiftSyntaxMacros
 
-private let doNotUseCase = "__DO_NOT_USE_THIS_CASE"
-
 /// A macro to stabilize enums that might get more cases, to some extent.
 /// The main goal is to not fail json decodings if Discord adds a new case.
 ///
@@ -56,7 +54,7 @@ public struct UnstableEnum: MemberMacro {
         let caseDecls = members.compactMap { $0.decl.as(EnumCaseDeclSyntax.self) }
         let elements = caseDecls.flatMap { $0.elements }
 
-        let (cases, hasError) = makeCases(elements: elements, rawType: rawType, context: context)
+        let (cases, hasError) = elements.makeCases(rawType: rawType, context: context)
 
         if hasError { return [] }
 
@@ -87,10 +85,10 @@ public struct UnstableEnum: MemberMacro {
 
 
         var syntaxes: [DeclSyntax] = [
-            DeclSyntax(makeUnknownEnumCase(rawType: rawType)),
-            DeclSyntax(doNotUseCaseDeclaration),
-            DeclSyntax(try makeRawValueVar(accessLevelModifier: accessLevel, rawType: rawType, cases: cases)),
-            DeclSyntax(try makeInitializer(accessLevelModifier: accessLevel, rawType: rawType, cases: cases))
+            makeUnknownEnumCase(rawType: rawType),
+            doNotUseCaseDeclaration,
+            cases.makeRawValueVar(accessLevel: accessLevel, rawType: rawType),
+            cases.makeInitializer(accessLevel: accessLevel, rawType: rawType)
         ]
 
         let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
@@ -98,12 +96,11 @@ public struct UnstableEnum: MemberMacro {
         }
 
         if conformsToCaseIterable == true {
-            let conformance = try makeCaseIterable(
-                accessLevelModifier: accessLevel,
-                enumIdentifier: enumDecl.identifier,
-                cases: cases
+            let conformance = cases.makeCaseIterable(
+                accessLevel: accessLevel,
+                enumIdentifier: enumDecl.identifier
             )
-            syntaxes.append(DeclSyntax(conformance))
+            syntaxes.append(conformance)
         }
 
         let conformsToDecodable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
@@ -115,14 +112,13 @@ public struct UnstableEnum: MemberMacro {
             guard let location: AbstractSourceLocation = context.location(of: node) else {
                 throw MacroError.couldNotFindLocationOfNode
             }
-            let decodableInit = try makeDecodableInitializer(
-                accessLevelModifier: accessLevel,
+            let decodableInit = cases.makeDecodableInitializer(
+                accessLevel: accessLevel,
                 enumIdentifier: enumDecl.identifier,
                 location: location,
-                rawType: rawType,
-                cases: cases
+                rawType: rawType
             )
-            syntaxes.append(DeclSyntax(decodableInit))
+            syntaxes.append(decodableInit)
         }
 
         return syntaxes
@@ -152,288 +148,16 @@ extension UnstableEnum: ExtensionMacro {
     }
 }
 
-private enum RawKind: String {
-    case String, Int, UInt
-}
-
-struct EnumCase {
-    let key: String
-    let value: String
-}
-
-private func makeCases(
-    elements: [EnumCaseElementSyntax],
-    rawType: RawKind,
-    context: some MacroExpansionContext
-) -> (cases: [EnumCase], hasError: Bool) {
-    let cases = elements.compactMap {
-        element -> EnumCase? in
-        if let rawValue = element.rawValue {
-            var modifiedElement = EnumCaseElementSyntax(element)!
-            modifiedElement.rawValue = nil
-            /// Can't use trailing trivia because it won't show up in the code
-            modifiedElement.identifier = .identifier(
-                modifiedElement.identifier.text + " // \(rawValue.value)"
-            )
-            let diagnostic = Diagnostic(
-                node: Syntax(rawValue),
-                message: MacroError.rawValuesNotAcceptable,
-                fixIts: [.init(
-                    message: FixMessage.useCommentsInstead,
-                    changes: [.replace(
-                        oldNode: Syntax(element),
-                        newNode: Syntax(modifiedElement)
-                    )]
-                )]
-            )
-            context.diagnose(diagnostic)
-            return nil
-        } else if element.trailingTrivia.pieces.isEmpty {
-            if rawType == .Int {
-                let diagnostic = Diagnostic(
-                    node: Syntax(element),
-                    message: MacroError.allEnumCasesWithIntTypeMustHaveACommentForValue
-                )
-                context.diagnose(diagnostic)
-                return nil
-            }
-            return .init(
-                key: element.identifier.text,
-                value: element.identifier.text
-            )
-        } else {
-            if element.trailingTrivia.pieces.count == 2,
-               element.trailingTrivia.pieces[0] == .spaces(1),
-               case let .lineComment(comment) = element.trailingTrivia.pieces[1] {
-                if comment.hasPrefix("// ") {
-                    var value = String(comment.dropFirst(3))
-                    let hasPrefix = value.hasPrefix(#"""#)
-                    let hasSuffix = value.hasSuffix(#"""#)
-                    if hasPrefix && hasSuffix {
-                        value = String(value.dropFirst().dropLast())
-                    } else if hasPrefix || hasSuffix {
-                        let diagnostic = Diagnostic(
-                            node: Syntax(element),
-                            message: MacroError.inconsistentQuotesAroundComment
-                        )
-                        context.diagnose(diagnostic)
-                        return nil
-                    }
-                    if value.allSatisfy(\.isWhitespace) {
-                        let diagnostic = Diagnostic(
-                            node: Syntax(element),
-                            message: MacroError.emptyValuesAreNotAcceptable
-                        )
-                        context.diagnose(diagnostic)
-                        return nil
-                    }
-                    return .init(
-                        key: element.identifier.text,
-                        value: value
-                    )
-                } else {
-                    let diagnostic = Diagnostic(
-                        node: Syntax(element),
-                        message: MacroError.badEnumCaseComment
-                    )
-                    context.diagnose(diagnostic)
-                    return nil
-                }
-            } else {
-                let diagnostic = Diagnostic(
-                    node: Syntax(element),
-                    message: MacroError.badEnumCaseTrailingTrivia
-                )
-                context.diagnose(diagnostic)
-                return nil
-            }
-        }
-    }
-    let hasError = elements.count != cases.count
-    return (cases, hasError)
-}
-
-private func makeExpression(rawType: RawKind, value: String) -> any ExprSyntaxProtocol {
-    if rawType == .String {
-        return StringLiteralExprSyntax(content: value)
-    } else {
-        let integerValue = value.filter({ !["_", #"""#].contains($0) })
-        /// Should have been checked before that this is an `Int`
-        return IntegerLiteralExprSyntax(integerLiteral: Int(integerValue)!)
-    }
-}
-
-private func makeUnknownEnumCase(rawType: RawKind) -> EnumCaseDeclSyntax {
-    EnumCaseDeclSyntax(
-        elements: [
-            EnumCaseElementSyntax(
-                identifier: .identifier("unknown"),
-                associatedValue: EnumCaseParameterClauseSyntax(
-                    parameterList: [
-                        EnumCaseParameterSyntax(
-                            type: SimpleTypeIdentifierSyntax(
-                                name: .identifier(rawType.rawValue)
-                            )
-                        )
-                    ]
-                )
-            )
-        ]
-    )
-}
-
-private let doNotUseCaseDeclaration = EnumCaseDeclSyntax(DeclSyntax("""
-    /// This case serves as a way of discouraging exhaustive switch statements
-    case \(raw: doNotUseCase)
-"""))!
-
-private func makeRawValueVar(
-    accessLevelModifier: String,
-    rawType: RawKind,
-    cases: [EnumCase]
-) throws -> VariableDeclSyntax {
-    func maybeQuoted(_ value: String) -> String {
-        switch rawType {
-        case .Int, .UInt:
-            return value
-        case .String:
-            return #""\#(value)""#
-        }
-    }
-    let cases = cases.map { enumCase in
-        """
-        case .\(enumCase.key):
-            return \(maybeQuoted(enumCase.value))
-        """
-    }
-    let syntax: DeclSyntax = #"""
-    \#(raw: accessLevelModifier)var rawValue: \#(raw: rawType.rawValue) {
-        switch self {
-    \#(raw: cases.indented())
-        case let .unknown(value):
-            return value
-        case .\#(raw: doNotUseCase):
-            fatalError("Must not use the '\#(raw: doNotUseCase)' case. This case serves as a way of discouraging exhaustive switch statements")
-        }
-    }
-    """#
-    guard let decl = VariableDeclSyntax(syntax) else {
-        throw MacroError.cannotUnwrapSyntax(type: VariableDeclSyntax.self)
-    }
-    return decl
-}
-
-private func makeInitializer(
-    accessLevelModifier: String,
-    rawType: RawKind,
-    cases: [EnumCase]
-) throws -> InitializerDeclSyntax {
-    func maybeQuoted(_ value: String) -> String {
-        switch rawType {
-        case .Int, .UInt:
-            return value
-        case .String:
-            return #""\#(value)""#
-        }
-    }
-    let cases = cases.map { enumCase in
-        """
-        case \(maybeQuoted(enumCase.value)):
-            self = .\(enumCase.key)
-        """
-    }
-    let syntax: DeclSyntax = #"""
-    \#(raw: accessLevelModifier)init?(rawValue: \#(raw: rawType.rawValue)) {
-        switch rawValue {
-    \#(raw: cases.indented())
-        default:
-            self = .unknown(rawValue)
-        }
-    }
-    """#
-    guard let decl = InitializerDeclSyntax(syntax) else {
-        throw MacroError.cannotUnwrapSyntax(type: InitializerDeclSyntax.self)
-    }
-    return decl
-}
-
-func makeCaseIterable(
-    accessLevelModifier: String,
-    enumIdentifier: TokenSyntax,
-    cases: [EnumCase]
-) throws -> VariableDeclSyntax {
-    let cases = cases.map { enumCase in
-        ".\(enumCase.key),"
-    }
-    let syntax: DeclSyntax = """
-    \(raw: accessLevelModifier)static var allCases: [\(enumIdentifier)] {
-    [
-    \(raw: cases.indented())
-    ]
-    }
+private func makeUnknownEnumCase(rawType: RawKind) -> DeclSyntax {
     """
-    guard let decl = VariableDeclSyntax(syntax) else {
-        throw MacroError.cannotUnwrapSyntax(type: VariableDeclSyntax.self)
-    }
-    return decl
+    case unknown(\(raw: rawType.rawValue))
+    """
 }
 
-private func makeDecodableInitializer(
-    accessLevelModifier: String,
-    enumIdentifier: TokenSyntax,
-    location: AbstractSourceLocation,
-    rawType: RawKind,
-    cases: [EnumCase]
-) throws -> InitializerDeclSyntax {
-    let syntax: DeclSyntax = #"""
-    \#(raw: accessLevelModifier)init(from decoder: any Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let value = try container.decode(\#(raw: rawType.rawValue).self)
-        self.init(rawValue: value)!
-        #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
-        if case let .unknown(value) = self {
-            DiscordGlobalConfiguration.makeDecodeLogger("\#(raw: enumIdentifier.trimmedDescription)").warning(
-                "Found an unknown value",
-                metadata: [
-                    "value": "\(value)",
-                    "typeName": "\#(raw: enumIdentifier.trimmedDescription)",
-                    "location": "\#(raw: location.description)",
-                ]
-            )
-        }
-        #endif
-    }
-    """#
-    guard let decl = InitializerDeclSyntax(syntax) else {
-        throw MacroError.cannotUnwrapSyntax(type: InitializerDeclSyntax.self)
-    }
-    return decl
-}
-
-private extension AbstractSourceLocation {
-    var description: String {
-        let file = self.file.description.filter({ ![" ", #"""#].contains($0) })
-        return "\(file):\(self.line.description)"
-    }
-}
-
-private func + (lhs: [SwitchCaseSyntax], rhs: [SwitchCaseSyntax]) -> SwitchCaseListSyntax {
-    var lhs = lhs
-    for item in rhs {
-        lhs.append(item)
-    }
-    return .init(lhs.map { .switchCase($0) })
-}
-
-private func + (lhs: ModifierListSyntax, rhs: [DeclModifierSyntax]) -> ModifierListSyntax {
-    var lhs = lhs
-    for item in rhs {
-        var elements = Array(lhs)
-        elements.append(item)
-        lhs = .init(elements)
-    }
-    return lhs
-}
+private let doNotUseCaseDeclaration: DeclSyntax = """
+/// This case serves as a way of discouraging exhaustive switch statements
+case \(raw: String.doNotUseCase)
+"""
 
 private extension EnumDeclSyntax {
     var accessLevelModifier: String? {
@@ -448,24 +172,5 @@ private extension EnumDeclSyntax {
             }
         }
         return nil
-    }
-}
-
-private extension String {
-    func indented() -> String {
-        self.split(
-            separator: "\n",
-            omittingEmptySubsequences: false
-        ).map {
-            "    \($0)"
-        }.joined(separator: "\n")
-    }
-}
-
-private extension Array<String> {
-    func indented() -> String {
-        self.map {
-            $0.indented()
-        }.joined(separator: "\n")
     }
 }
