@@ -46,7 +46,7 @@ public struct UnstableEnum: MemberMacro {
             throw MacroError.macroDoesNotHaveRequiredGenericArgument
         }
 
-        guard let rawType = RawKind(rawValue: genericType.name.text) else {
+        guard let rawType = RawKind(rawValue: genericType.name.trimmedDescription) else {
             throw MacroError.unexpectedGenericArgument
         }
 
@@ -92,7 +92,7 @@ public struct UnstableEnum: MemberMacro {
         ]
 
         let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
-            $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.text == "CaseIterable"
+            $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.trimmedDescription == "CaseIterable"
         }
 
         if conformsToCaseIterable == true {
@@ -104,7 +104,7 @@ public struct UnstableEnum: MemberMacro {
         }
 
         let conformsToDecodable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
-            let name = $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.text
+            let name = $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.trimmedDescription
             return name == "Codable" || name == "Decodable"
         }
 
