@@ -40,7 +40,7 @@ Make sure you've added [AsyncHTTPClient](https://github.com/swift-server/async-h
 import DiscordBM
 import AsyncHTTPClient
 
-let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+let httpClient = HTTPClient()
 
 let bot = await BotGatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
