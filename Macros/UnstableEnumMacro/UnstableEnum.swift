@@ -161,7 +161,7 @@ case \(raw: String.doNotUseCase)
 
 private extension EnumDeclSyntax {
     var accessLevelModifier: String? {
-        let accessLevelModifiers: [Keyword] = [.open, .public, .internal, .private, .fileprivate]
+        let accessLevelModifiers: [Keyword] = [.open, .public, .package, .internal, .private, .fileprivate]
         for modifier in (self.modifiers ?? []) {
             guard let modifier = modifier.as(DeclModifierSyntax.self),
                   case let .keyword(keyword) = modifier.name.tokenKind else {
