@@ -37,11 +37,11 @@ public struct UnstableEnum: MemberMacro {
         }
         let accessLevel = enumDecl.accessLevelModifier.map { "\($0) " } ?? ""
 
-        guard let name = node.attributeName.as(SimpleTypeIdentifierSyntax.self),
+        guard let name = node.attributeName.as(IdentifierTypeSyntax.self),
               let generic = name.genericArgumentClause,
               generic.arguments.count == 1,
-              let genericTypeSyntax = generic.arguments.first?.argumentType,
-              let genericType = genericTypeSyntax.as(SimpleTypeIdentifierSyntax.self)
+              let genericTypeSyntax = generic.arguments.first?.argument,
+              let genericType = genericTypeSyntax.as(IdentifierTypeSyntax.self)
         else {
             throw MacroError.macroDoesNotHaveRequiredGenericArgument
         }
@@ -91,20 +91,20 @@ public struct UnstableEnum: MemberMacro {
             cases.makeInitializer(accessLevel: accessLevel, rawType: rawType)
         ]
 
-        let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
-            $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.trimmedDescription == "CaseIterable"
+        let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypes.contains {
+            $0.type.as(IdentifierTypeSyntax.self)?.name.trimmedDescription == "CaseIterable"
         }
 
         if conformsToCaseIterable == true {
             let conformance = cases.makeCaseIterable(
                 accessLevel: accessLevel,
-                enumIdentifier: enumDecl.identifier
+                enumIdentifier: enumDecl.name
             )
             syntaxes.append(conformance)
         }
 
-        let conformsToDecodable = enumDecl.inheritanceClause?.inheritedTypeCollection.contains {
-            let name = $0.typeName.as(SimpleTypeIdentifierSyntax.self)?.name.trimmedDescription
+        let conformsToDecodable = enumDecl.inheritanceClause?.inheritedTypes.contains {
+            let name = $0.type.as(IdentifierTypeSyntax.self)?.name.trimmedDescription
             return name == "Codable" || name == "Decodable"
         }
 
@@ -114,7 +114,7 @@ public struct UnstableEnum: MemberMacro {
             }
             let decodableInit = cases.makeDecodableInitializer(
                 accessLevel: accessLevel,
-                enumIdentifier: enumDecl.identifier,
+                enumIdentifier: enumDecl.name,
                 location: location,
                 rawType: rawType
             )
@@ -140,7 +140,7 @@ extension UnstableEnum: ExtensionMacro {
         }
 
         let syntax: DeclSyntax = """
-        extension \(enumDecl.identifier): RawRepresentable, LosslessRawRepresentable { }
+        extension \(enumDecl.name): RawRepresentable, LosslessRawRepresentable { }
         """
         let ext = ExtensionDeclSyntax(syntax)!
 
@@ -162,7 +162,7 @@ case \(raw: String.doNotUseCase)
 private extension EnumDeclSyntax {
     var accessLevelModifier: String? {
         let accessLevelModifiers: [Keyword] = [.open, .public, .package, .internal, .private, .fileprivate]
-        for modifier in (self.modifiers ?? []) {
+        for modifier in self.modifiers {
             guard let modifier = modifier.as(DeclModifierSyntax.self),
                   case let .keyword(keyword) = modifier.name.tokenKind else {
                 continue

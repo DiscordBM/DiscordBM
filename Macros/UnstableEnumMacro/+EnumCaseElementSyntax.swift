@@ -13,8 +13,8 @@ extension [EnumCaseElementSyntax] {
                 var modifiedElement = EnumCaseElementSyntax(element)!
                 modifiedElement.rawValue = nil
                 /// Can't use trailing trivia because it won't show up in the code
-                modifiedElement.identifier = .identifier(
-                    modifiedElement.identifier.text + " // \(rawValue.value)"
+                modifiedElement.name = .identifier(
+                    modifiedElement.name.text + " // \(rawValue.value)"
                 )
                 let diagnostic = Diagnostic(
                     node: Syntax(rawValue),
@@ -39,8 +39,8 @@ extension [EnumCaseElementSyntax] {
                     return nil
                 }
                 return .init(
-                    key: element.identifier.text,
-                    value: element.identifier.text
+                    key: element.name.text,
+                    value: element.name.text
                 )
             } else {
                 if element.trailingTrivia.pieces.count == 2,
@@ -69,7 +69,7 @@ extension [EnumCaseElementSyntax] {
                             return nil
                         }
                         return .init(
-                            key: element.identifier.text,
+                            key: element.name.text,
                             value: value
                         )
                     } else {
