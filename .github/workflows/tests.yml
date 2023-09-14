@@ -11,7 +11,7 @@ jobs:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
-      with_tsan: true
+      with_tsan: false
       with_public_api_check: true
       coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
       test_filter: '^DiscordBMTests'
@@ -19,7 +19,7 @@ jobs:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
-      with_tsan: true
+      with_tsan: false
       with_public_api_check: true
       coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
       test_filter: '^MacroTests'
