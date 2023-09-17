@@ -19,8 +19,7 @@ import SwiftSyntaxMacros
 ///
 /// How it manipulates the code:
 /// Adds `RawRepresentable` conformance where `RawValue` is the generic argument of the macro.
-/// Adds a new `.undocumented(RawValue)` case.
-/// Adds a new `__DO_NOT_USE_THIS_CASE` case to discourage exhaustive switch statements
+/// Adds a new `._undocumented(RawValue)` case.
 /// which can too easily result in code breakage.
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
 /// If `CaseIterable`, repairs the `static var allCases` requirement.
@@ -86,7 +85,6 @@ public struct UnstableEnum: MemberMacro {
 
         var syntaxes: [DeclSyntax] = [
             makeUnknownEnumCase(rawType: rawType),
-            doNotUseCaseDeclaration,
             cases.makeRawValueVar(accessLevel: accessLevel, rawType: rawType),
             cases.makeInitializer(accessLevel: accessLevel, rawType: rawType)
         ]
@@ -150,14 +148,9 @@ extension UnstableEnum: ExtensionMacro {
 
 private func makeUnknownEnumCase(rawType: RawKind) -> DeclSyntax {
     """
-    case undocumented(\(raw: rawType.rawValue))
+    case _undocumented(\(raw: rawType.rawValue))
     """
 }
-
-private let doNotUseCaseDeclaration: DeclSyntax = """
-/// This case serves as a way of discouraging exhaustive switch statements
-case \(raw: String.doNotUseCase)
-"""
 
 private extension EnumDeclSyntax {
     var accessLevelModifier: String? {

@@ -8,8 +8,6 @@ extension String {
             "    \($0)"
         }.joined(separator: "\n")
     }
-
-    static let doNotUseCase = "__DO_NOT_USE_THIS_CASE"
 }
 
 extension [String] {

@@ -334,7 +334,7 @@ extension GatewayEventHandler {
             await onAutoModerationRuleDelete(payload)
         case let .autoModerationActionExecution(payload):
             await onAutoModerationActionExecution(payload)
-        case .__DO_NOT_USE_THIS_CASE:
+        case ._undocumented:
             break
         }
 

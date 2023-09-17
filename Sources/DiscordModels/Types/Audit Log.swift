@@ -245,7 +245,7 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationUserCommunicationDisabled(AutoModerationInfo)
             case creatorMonetizationRequestCreated
             case creatorMonetizationTermsAccepted
-            case undocumented
+            case _undocumented
 
             public struct OverwriteInfo: Sendable, Codable {
                 
@@ -514,10 +514,8 @@ public struct AuditLog: Sendable, Codable {
                     self = .autoModerationUserCommunicationDisabled(moderationInfo)
                 case .creatorMonetizationRequestCreated: self = .creatorMonetizationRequestCreated
                 case .creatorMonetizationTermsAccepted: self = .creatorMonetizationTermsAccepted
-                case .undocumented:
-                    self = .undocumented
-                case .__DO_NOT_USE_THIS_CASE:
-                    fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
+                case ._undocumented:
+                    self = ._undocumented
                 }
             }
             
@@ -615,7 +613,7 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(moderationInfo, forKey: .options)
                 case .creatorMonetizationRequestCreated: break
                 case .creatorMonetizationTermsAccepted: break
-                case .undocumented: break
+                case ._undocumented: break
                 }
             }
         }
@@ -652,7 +650,7 @@ public struct AuditLog: Sendable, Codable {
         }
 
         public func encode(to encoder: any Encoder) throws {
-            if case .undocumented = action { return }
+            if case ._undocumented = action { return }
 
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encodeIfPresent(self.guild_id, forKey: .guild_id)
@@ -737,8 +735,8 @@ extension AuditLog.Entry.ActionKind {
             self = .creatorMonetizationTermsAccepted
         case .creatorMonetizationRequestCreated:
             self = .creatorMonetizationRequestCreated
-        case .undocumented:
-            self = .undocumented(-1)
+        case ._undocumented:
+            self = ._undocumented(-1)
         }
     }
 }

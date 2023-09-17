@@ -818,7 +818,7 @@ public actor DiscordCache {
             self.autoModerationExecutions[execution.guild_id, default: []].append(execution)
         case let .applicationCommandPermissionsUpdate(update):
             self.applicationCommandPermissions[update.id] = update
-        case .__DO_NOT_USE_THIS_CASE:
+        case ._undocumented:
             break
         }
     }

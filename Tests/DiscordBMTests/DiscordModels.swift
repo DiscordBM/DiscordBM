@@ -271,7 +271,7 @@ class DiscordModelsTests: XCTestCase {
             let json = #"{"some":1}"#
             let data = Data(json.utf8)
             let value = try JSONDecoder().decode(CodableContainer.self, from: data)
-            XCTAssertEqual(value.some, .undocumented(1))
+            XCTAssertEqual(value.some, ._undocumented(1))
         }
 
         do {

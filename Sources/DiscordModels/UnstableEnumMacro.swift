@@ -17,8 +17,7 @@ import UnstableEnumMacro
 ///
 /// How it manipulates the code:
 /// Adds `RawRepresentable` conformance where `RawValue` is the generic argument of the macro.
-/// Adds a new `.undocumented(RawValue)` case.
-/// Adds a new `__DO_NOT_USE_THIS_CASE` case to discourage exhaustive switch statements
+/// Adds a new `._undocumented(RawValue)` case.
 /// which can too easily result in code breakage.
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
 /// If `CaseIterable`, repairs the `static var allCases` requirement.
@@ -26,9 +25,8 @@ import UnstableEnumMacro
     member,
     names: named(init),
     named(rawValue),
-    named(undocumented),
-    named(allCases),
-    named(__DO_NOT_USE_THIS_CASE)
+    named(_undocumented),
+    named(allCases)
 )
 @attached(
     extension,

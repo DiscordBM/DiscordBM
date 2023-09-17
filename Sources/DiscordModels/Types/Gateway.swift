@@ -142,8 +142,7 @@ public struct Gateway: Sendable, Codable {
             
             case autoModerationActionExecution(AutoModerationActionExecution)
 
-            /// This case serves as a way of discouraging exhaustive switch statements
-            case __DO_NOT_USE_THIS_CASE
+            case _undocumented
 
             public var correspondingIntents: [Intent] {
                 switch self {
@@ -183,7 +182,7 @@ public struct Gateway: Sendable, Codable {
                     return [.autoModerationConfiguration]
                 case .autoModerationActionExecution:
                     return [.autoModerationExecution]
-                case .__DO_NOT_USE_THIS_CASE:
+                case ._undocumented:
                     return []
                 }
             }
@@ -1385,9 +1384,7 @@ extension Gateway.Intent {
         case .autoModerationConfiguration: return false
         case .autoModerationExecution: return false
             /// Undocumented cases are considered privileged just to be safe than sorry
-        case .undocumented: return true
-        case .__DO_NOT_USE_THIS_CASE:
-            fatalError("If the case name wasn't already clear enough: This case MUST NOT be used")
+        case ._undocumented: return true
         }
     }
 }

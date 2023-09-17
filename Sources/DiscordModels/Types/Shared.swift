@@ -302,9 +302,7 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
                 case .japanese: self.japanese = value
                 case .chineseTaiwan: self.chineseTaiwan = value
                 case .korean: self.korean = value
-                case .undocumented: break /// Ignore
-                case .__DO_NOT_USE_THIS_CASE:
-                    fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
+                case ._undocumented: break /// Ignore
                 }
             }
         }

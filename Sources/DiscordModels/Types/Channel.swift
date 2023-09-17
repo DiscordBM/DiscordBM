@@ -691,9 +691,7 @@ extension DiscordChannel.Message.Kind {
             return true
         case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
             return false
-        case .undocumented: return false
-        case .__DO_NOT_USE_THIS_CASE:
-            fatalError("If the case name wasn't already clear enough: This case MUST NOT be used under any circumstances")
+        case ._undocumented: return false
         }
     }
 }
