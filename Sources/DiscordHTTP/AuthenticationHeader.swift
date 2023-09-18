@@ -12,9 +12,9 @@ public enum AuthenticationHeader: Sendable {
     var id: String? {
         switch self {
         case .botToken(let secret):
-            return "b.\(secret.value)"
+            return "b-\(secret.value.hash)"
         case .oAuthToken(let secret):
-            return "o.\(secret.value)"
+            return "o-\(secret.value.hash)"
         case .none:
             return nil
         }

@@ -131,9 +131,9 @@ actor ClientCache {
 // MARK: - ClientCacheStorage
 actor ClientCacheStorage {
 
-    /// [Token: ClientCache]
+    /// [AuthHeaderID: ClientCache]
     private var storage = [String: ClientCache]()
-    private var noAuth: ClientCache? = nil
+    private var noAuth = ClientCache()
 
     private init() { }
 
@@ -149,12 +149,7 @@ actor ClientCacheStorage {
                 return cache
             }
         } else {
-            if let noAuth {
-                return noAuth
-            } else {
-                self.noAuth = .init()
-                return self.noAuth!
-            }
+            return self.noAuth
         }
     }
 }
