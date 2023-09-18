@@ -305,6 +305,8 @@ public actor DiscordCache {
     public let messageCachingPolicy: MessageCachingPolicy
     /// Keeps the storage from using too much memory. Removes the oldest items.
     public let itemsLimit: ItemsLimit
+    /// Counter for hitting the items limit.
+    private var itemsLimitCounter = 0
     /// How often to check and enforce the limit above.
     private let checkForLimitEvery: Int
     /// The storage of cached stuff.
@@ -834,8 +836,6 @@ public actor DiscordCache {
             return false
         }
     }
-    
-    private var itemsLimitCounter = 0
     
     private func checkItemsLimit() {
         if case .disabled = itemsLimit { return }
