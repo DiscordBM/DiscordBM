@@ -32,7 +32,12 @@ public struct DefaultDiscordClient: DiscordClient {
     @usableFromInline
     static let rateLimiter = HTTPRateLimiter(label: "DiscordClientRateLimiter")
 
-    /// `token` must be a bot token.
+    /// - Parameters:
+    ///   - httpClient: A ``HTTPClient``.
+    ///   - token: Must be a **bot token**.
+    ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot token.
+    ///   This is used as a default when no app-id is passed to a ``DiscordClient`` function.
+    ///   - configuration: The configuration affecting this ``DefaultDiscordClient``.
     public init(
         httpClient: HTTPClient,
         token: Secret,
@@ -46,7 +51,12 @@ public struct DefaultDiscordClient: DiscordClient {
         self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
-    /// `token` must be a bot token.
+    /// - Parameters:
+    ///   - httpClient: A ``HTTPClient``.
+    ///   - token: Must be a **bot token**.
+    ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot token.
+    ///   This is used as a default when no app-id is passed to a ``DiscordClient`` function.
+    ///   - configuration: The configuration affecting this ``DefaultDiscordClient``.
     public init(
         httpClient: HTTPClient,
         token: String,
@@ -60,7 +70,12 @@ public struct DefaultDiscordClient: DiscordClient {
         self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
-    /// `oAuthToken` must be an OAuth token.
+    /// - Parameters:
+    ///   - httpClient: A ``HTTPClient``.
+    ///   - oAuthToken: Must be an **OAuth token**.
+    ///   - appId: Your Discord application-id. It **can't** be extracted from the token, if not provided.
+    ///   This is used as a default when no app-id is passed to a ``DiscordClient`` function.
+    ///   - configuration: The configuration affecting this ``DefaultDiscordClient``.
     public init(
         httpClient: HTTPClient,
         oAuthToken: Secret,
@@ -75,7 +90,12 @@ public struct DefaultDiscordClient: DiscordClient {
         self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
-    /// `oAuthToken` must be an OAuth token.
+    /// - Parameters:
+    ///   - httpClient: A ``HTTPClient``.
+    ///   - oAuthToken: Must be an **OAuth token**.
+    ///   - appId: Your Discord application-id. It **can't** be extracted from the token, if not provided.
+    ///   This is used as a default when no app-id is passed to a ``DiscordClient`` function.
+    ///   - configuration: The configuration affecting this ``DefaultDiscordClient``.
     public init(
         httpClient: HTTPClient,
         oAuthToken: String,
@@ -90,6 +110,14 @@ public struct DefaultDiscordClient: DiscordClient {
         self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)
     }
 
+    /// - Parameters:
+    ///   - httpClient: A ``HTTPClient``.
+    ///   - authentication: The authentication method when sending requests to Discord.
+    ///   - appId: Your Discord application-id.
+    ///   If `authentication` is a **bot** token, the app-id will be extracted from bot token.
+    ///   Otherwise it can't be automatically extracted.
+    ///   This is used as a default when no app-id is passed to a ``DiscordClient`` function.
+    ///   - configuration: The configuration affecting this ``DefaultDiscordClient``.
     public init(
         httpClient: HTTPClient,
         authentication: AuthenticationHeader,
