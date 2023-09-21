@@ -1814,20 +1814,22 @@ class DiscordClientTests: XCTestCase {
         ).guardSuccess()
         
         let forumThreadName = "Forum thread test"
-        let forumThread = try await client.startThreadInForumChannel(
+        let content = "Hello!"
+        let forumThread = try await client.startThreadInForumOrMediaChannel(
             channelId: Constants.Channels.forum.id,
             reason: "Forum channel thread testing",
             payload: .init(
                 name: forumThreadName,
                 auto_archive_duration: .oneDay,
                 rate_limit_per_user: nil,
-                message: .init(content: "Hello!"),
+                message: .init(content: content),
                 applied_tags: nil
             )
         ).decode()
         
-        XCTAssertEqual(forumThread.name, forumThreadName)
-        
+        XCTAssertEqual(forumThread.channel.name, forumThreadName)
+        XCTAssertEqual(forumThread.message.content, content)
+
         try await client.listPublicArchivedThreads(
             channelId: Constants.Channels.threads.id,
             before: Date().addingTimeInterval(-60),

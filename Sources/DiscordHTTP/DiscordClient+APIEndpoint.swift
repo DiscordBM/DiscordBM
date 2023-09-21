@@ -815,13 +815,31 @@ public extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel
+    /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-or-media-channel
+    @available(*, deprecated, renamed: "startThreadInForumOrMediaChannel(channelId:reason:payload:)")
     @inlinable
     func startThreadInForumChannel(
         channelId: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateThreadInForumChannel
     ) async throws -> DiscordClientResponse<DiscordChannel> {
+        let endpoint = APIEndpoint.createThreadInForumChannel(channelId: channelId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-or-media-channel
+    @inlinable
+    func startThreadInForumOrMediaChannel(
+        channelId: ChannelSnowflake,
+        reason: String? = nil,
+        payload: Payloads.CreateThreadInForumChannel
+    ) async throws -> DiscordClientResponse<Responses.ChannelWithMessage> {
         let endpoint = APIEndpoint.createThreadInForumChannel(channelId: channelId)
         return try await self.send(
             request: .init(
