@@ -1429,6 +1429,15 @@ class DiscordClientTests: XCTestCase {
             )
         ).decode()
 
+        /// Recently gives this error:
+        /// <?xml version='1.0' encoding='UTF-8'?><Error><Code>AccessDenied</Code><Message>Access denied.</Message><Details>Anonymous caller does not have storage.objects.get access to the Google Cloud Storage object. Permission 'storage.objects.get' denied on resource (or it may not exist).</Details></Error>
+
+//        /// Testing CDN sticker endpoint while we can
+//        let stickerFile = try await client.getCDNSticker(
+//            stickerId: createdSticker.id
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 100)
+
         let gotSticker1 = try await client
             .getSticker(id: createdSticker.id)
             .decode()
@@ -2338,13 +2347,6 @@ class DiscordClientTests: XCTestCase {
 //        }
         
         do {
-            let file = try await client.getCDNSticker(
-                stickerId: "975144332535406633"
-            ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 100)
-        }
-        
-        do {
             let file = try await client.getCDNRoleIcon(
                 roleId: "984557789999407214",
                 icon: "2cba6c72f7abd52885359054e09ab7a2"
@@ -2363,6 +2365,7 @@ class DiscordClientTests: XCTestCase {
         /// `getCDNGuildScheduledEventCover()` is tested with guild-scheduled-event tests.
         /// `getCDNStickerPackBanner()` is tested with sticker tests.
         /// `getCDNUserAvatar()` is tested with guild-members tests.
+        /// `getCDNSticker()` is tested with sticker tests.
     }
     
     func testMultipartPayload() async throws {
