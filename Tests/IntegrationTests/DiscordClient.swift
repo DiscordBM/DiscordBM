@@ -2450,7 +2450,7 @@ class DiscordClientTests: XCTestCase {
             XCTAssertGreaterThan(attachment.size, 100)
         }
     }
-    
+
     /// Rate-limiting has theoretical tests too, but this tests it in a practical situation.
     func testRateLimitedInPractice() async throws {
         let content = "Spamming! \(Date())"
@@ -2490,6 +2490,47 @@ class DiscordClientTests: XCTestCase {
         XCTAssertGreaterThan(rateLimitedErrors.load(ordering: .relaxed), 0)
         XCTAssertLessThan(rateLimitedErrors.load(ordering: .relaxed), count)
         
+        /// Waiting 10 seconds to make sure the next tests don't get rate-limited
+        try await Task.sleep(for: .seconds(10))
+    }
+
+    /// `ClientConfiguration.retryPolicy.basedOnHeaders` which is the `.default`
+    /// should not let users notice rate-limits in a for-loop.
+    func testClientConfigurationBasedOnHeadersWorksInPractice() async throws {
+        let content = "Spamming 2! \(Date())"
+        let rateLimitedErrors = ManagedAtomic(0)
+        let count = 50
+        let counter = Counter(target: count, timeout: 60)
+
+        let client: any DiscordClient = await DefaultDiscordClient(
+            httpClient: httpClient,
+            token: Constants.token
+        )
+
+        Task {
+            for _ in 0..<count {
+                do {
+                    _ = try await client.createMessage(
+                        channelId: Constants.Channels.spam2.id,
+                        payload: .init(content: content)
+                    ).decode()
+                    await counter.increase()
+                } catch {
+                    await counter.increase()
+                    switch error {
+                    case DiscordHTTPError.rateLimited:
+                        rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
+                    default:
+                        XCTFail("Received unexpected error: \(error)")
+                    }
+                }
+            }
+        }
+
+        await counter.waitFulfillment()
+
+        XCTAssertEqual(rateLimitedErrors.load(ordering: .relaxed), 0)
+
         /// Waiting 10 seconds to make sure the next tests don't get rate-limited
         try await Task.sleep(for: .seconds(10))
     }
@@ -2729,7 +2770,7 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
-    private let totalTestCount = 37
+    private let totalTestCount = 38
     var isLastTest: Bool {
         self.testsRan == self.totalTestCount
     }
