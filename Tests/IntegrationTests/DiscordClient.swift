@@ -1429,6 +1429,15 @@ class DiscordClientTests: XCTestCase {
             )
         ).decode()
 
+        /// Recently gives this error:
+        /// <?xml version='1.0' encoding='UTF-8'?><Error><Code>AccessDenied</Code><Message>Access denied.</Message><Details>Anonymous caller does not have storage.objects.get access to the Google Cloud Storage object. Permission 'storage.objects.get' denied on resource (or it may not exist).</Details></Error>
+
+//        /// Testing CDN sticker endpoint while we can
+//        let stickerFile = try await client.getCDNSticker(
+//            stickerId: createdSticker.id
+//        ).getFile()
+//        XCTAssertGreaterThan(file.data.readableBytes, 100)
+
         let gotSticker1 = try await client
             .getSticker(id: createdSticker.id)
             .decode()
@@ -1814,20 +1823,22 @@ class DiscordClientTests: XCTestCase {
         ).guardSuccess()
         
         let forumThreadName = "Forum thread test"
-        let forumThread = try await client.startThreadInForumChannel(
+        let content = "Hello!"
+        let forumThread = try await client.startThreadInForumOrMediaChannel(
             channelId: Constants.Channels.forum.id,
             reason: "Forum channel thread testing",
             payload: .init(
                 name: forumThreadName,
                 auto_archive_duration: .oneDay,
                 rate_limit_per_user: nil,
-                message: .init(content: "Hello!"),
+                message: .init(content: content),
                 applied_tags: nil
             )
         ).decode()
         
-        XCTAssertEqual(forumThread.name, forumThreadName)
-        
+        XCTAssertEqual(forumThread.channel.name, forumThreadName)
+        XCTAssertEqual(forumThread.message.content, content)
+
         try await client.listPublicArchivedThreads(
             channelId: Constants.Channels.threads.id,
             before: Date().addingTimeInterval(-60),
@@ -2336,13 +2347,6 @@ class DiscordClientTests: XCTestCase {
 //        }
         
         do {
-            let file = try await client.getCDNSticker(
-                stickerId: "975144332535406633"
-            ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 100)
-        }
-        
-        do {
             let file = try await client.getCDNRoleIcon(
                 roleId: "984557789999407214",
                 icon: "2cba6c72f7abd52885359054e09ab7a2"
@@ -2361,6 +2365,7 @@ class DiscordClientTests: XCTestCase {
         /// `getCDNGuildScheduledEventCover()` is tested with guild-scheduled-event tests.
         /// `getCDNStickerPackBanner()` is tested with sticker tests.
         /// `getCDNUserAvatar()` is tested with guild-members tests.
+        /// `getCDNSticker()` is tested with sticker tests.
     }
     
     func testMultipartPayload() async throws {
@@ -2445,7 +2450,7 @@ class DiscordClientTests: XCTestCase {
             XCTAssertGreaterThan(attachment.size, 100)
         }
     }
-    
+
     /// Rate-limiting has theoretical tests too, but this tests it in a practical situation.
     func testRateLimitedInPractice() async throws {
         let content = "Spamming! \(Date())"
@@ -2485,6 +2490,47 @@ class DiscordClientTests: XCTestCase {
         XCTAssertGreaterThan(rateLimitedErrors.load(ordering: .relaxed), 0)
         XCTAssertLessThan(rateLimitedErrors.load(ordering: .relaxed), count)
         
+        /// Waiting 10 seconds to make sure the next tests don't get rate-limited
+        try await Task.sleep(for: .seconds(10))
+    }
+
+    /// `ClientConfiguration.retryPolicy.basedOnHeaders` which is the `.default`
+    /// should not let users notice rate-limits in a for-loop.
+    func testClientConfigurationBasedOnHeadersWorksInPractice() async throws {
+        let content = "Spamming 2! \(Date())"
+        let rateLimitedErrors = ManagedAtomic(0)
+        let count = 50
+        let counter = Counter(target: count, timeout: 60)
+
+        let client: any DiscordClient = await DefaultDiscordClient(
+            httpClient: httpClient,
+            token: Constants.token
+        )
+
+        Task {
+            for _ in 0..<count {
+                do {
+                    _ = try await client.createMessage(
+                        channelId: Constants.Channels.spam2.id,
+                        payload: .init(content: content)
+                    ).decode()
+                    await counter.increase()
+                } catch {
+                    await counter.increase()
+                    switch error {
+                    case DiscordHTTPError.rateLimited:
+                        rateLimitedErrors.wrappingIncrement(ordering: .relaxed)
+                    default:
+                        XCTFail("Received unexpected error: \(error)")
+                    }
+                }
+            }
+        }
+
+        await counter.waitFulfillment()
+
+        XCTAssertEqual(rateLimitedErrors.load(ordering: .relaxed), 0)
+
         /// Waiting 10 seconds to make sure the next tests don't get rate-limited
         try await Task.sleep(for: .seconds(10))
     }
@@ -2724,7 +2770,7 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
-    private let totalTestCount = 37
+    private let totalTestCount = 38
     var isLastTest: Bool {
         self.testsRan == self.totalTestCount
     }

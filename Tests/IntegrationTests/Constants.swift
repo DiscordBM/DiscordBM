@@ -29,6 +29,7 @@ enum Constants {
     enum Channels: ChannelSnowflake {
         case general = "1036881951463833612"
         case spam = "1038138527877181542"
+        case spam2 = "1154513758106951710"
         case webhooks = "1066277056641503232"
         case webhooks2 = "1067783166074564658"
         case perm1 = "1069609693573554207"

@@ -23,4 +23,28 @@ public enum Responses {
     public struct GuildPrune: Sendable, Codable {
         public var pruned: Int
     }
+
+    /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-or-media-channel
+    public struct ChannelWithMessage: Sendable, Codable {
+        public var channel: DiscordChannel
+        public var message: DiscordChannel.Message
+
+        private enum MessageCodingKeys: String, CodingKey {
+            case message
+        }
+
+        public init(from decoder: any Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            self.channel = try container.decode(DiscordChannel.self)
+            let messageContainer = try decoder.container(keyedBy: MessageCodingKeys.self)
+            self.message = try messageContainer.decode(DiscordChannel.Message.self, forKey: .message)
+        }
+
+        public func encode(to encoder: any Encoder) throws {
+            var container = encoder.singleValueContainer()
+            try container.encode(self.channel)
+            var messageContainer = encoder.container(keyedBy: MessageCodingKeys.self)
+            try messageContainer.encode(self.message, forKey: .message)
+        }
+    }
 }
