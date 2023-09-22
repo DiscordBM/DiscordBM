@@ -214,6 +214,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case twoFactorRequiredForOperation // 60003
     case noUsersWithDiscordTagExist // 80004
     case reactionWasBlocked // 90001
+    case userCannotUseBurstReactions // 90002
     case applicationNotYetAvailable // 110001
     case APIResourceIsCurrentlyOverloaded // 130000
     case stageIsAlreadyOpen // 150006
