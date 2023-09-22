@@ -21,13 +21,13 @@ class DecodeToleranceTests: XCTestCase {
             """
             
             /// The values include `500` which is not in `DiscordChannel.Kind`.
-            /// Decoding the `500` normally fails, but based on our `UnstableEnum` ,acro,
-            /// this should never fail in internal `DiscordBM` decode processes.
+            /// Decoding the `500` normally fails, but based on our `UnstableEnum` macro,
+            /// this should never fail.
             let decoded = try JSONDecoder().decode(
                 TestContainer<DiscordChannel.Kind>.self,
                 from: Data(text.utf8)
             ).values
-            XCTAssertEqual(decoded.count, 3)
+            XCTAssertEqual(decoded.count, 4)
         }
         
         do {
@@ -48,7 +48,7 @@ class DecodeToleranceTests: XCTestCase {
                 TestContainer<Gateway.Status>.self,
                 from: Data(text.utf8)
             ).values
-            XCTAssertEqual(decoded.count, 4)
+            XCTAssertEqual(decoded.count, 5)
         }
         
         do {
@@ -71,7 +71,7 @@ class DecodeToleranceTests: XCTestCase {
                 DiscordApplication.InstallParams.self,
                 from: Data(text.utf8)
             )
-            XCTAssertEqual(decoded.scopes.count, 5)
+            XCTAssertEqual(decoded.scopes.count, 6)
             XCTAssertEqual(decoded.permissions.rawValue, 15)
         }
 

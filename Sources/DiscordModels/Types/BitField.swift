@@ -80,6 +80,7 @@ public extension BitField {
     }
 }
 
+/// A bit-field that decode/encodes itself as an integer.
 public struct IntBitField<R>: BitField
 where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == UInt {
     public var rawValue: UInt
