@@ -15,7 +15,7 @@ jobs:
     container: swiftlang/swift:nightly-5.9-jammy
     steps:
       - name: Check out package
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run tests
         run: swift test --filter IntegrationTests --enable-code-coverage
       - name: Upload code coverage
