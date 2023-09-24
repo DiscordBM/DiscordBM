@@ -293,11 +293,11 @@ public actor BotGatewayManager: GatewayManager {
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     public func updatePresence(payload: Gateway.Identify.Presence) {
-        /// This took a lot of time to figure out, not sure why it needs opcode `9` (works with `10` too?!).
+        /// This took a lot of time to figure out, not sure why it needs opcode `1`.
         self.send(payload: .init(
             opcode: .presenceUpdate,
             data: .requestPresenceUpdate(payload)
-        ), opcode: 9)
+        ), opcode: 1)
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
