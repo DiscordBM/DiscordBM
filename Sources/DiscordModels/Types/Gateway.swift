@@ -477,6 +477,18 @@ public struct Gateway: Sendable, Codable {
                 self.status = status
                 self.afk = afk
             }
+
+            public func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                if let since {
+                    try container.encode(since, forKey: .since)
+                } else {
+                    try container.encodeNil(forKey: .since)
+                }
+                try container.encode(self.activities, forKey: .activities)
+                try container.encode(self.status, forKey: .status)
+                try container.encode(self.afk, forKey: .afk)
+            }
         }
         
         public var token: Secret
