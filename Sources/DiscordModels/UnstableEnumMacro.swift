@@ -30,7 +30,7 @@ import UnstableEnumMacro
 )
 @attached(
     extension,
-    conformances: RawRepresentable, LosslessRawRepresentable
+    conformances: RawRepresentable, LosslessRawRepresentable, Hashable
 )
 macro UnstableEnum() = #externalMacro(module: "UnstableEnumMacro", type: "UnstableEnum")
 

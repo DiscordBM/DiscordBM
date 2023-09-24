@@ -49,7 +49,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 }
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             macros: macros
@@ -94,7 +94,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 }
             }
 
-            extension MyEnum : RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum : RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             macros: macros
@@ -139,7 +139,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 }
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             macros: macros
@@ -186,7 +186,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 }
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             macros: macros
@@ -251,7 +251,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 }
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """#,
             macros: macros
@@ -314,7 +314,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 }
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """#,
             macros: macros
@@ -368,7 +368,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 }
             }
 
-            extension StringEnum: RawRepresentable, LosslessRawRepresentable {
+            extension StringEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """#,
             macros: macros
@@ -415,7 +415,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 }
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             macros: macros
@@ -438,7 +438,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case b
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             diagnostics: [.init(
@@ -466,7 +466,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case b // 1
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             diagnostics: [.init(
@@ -492,7 +492,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case b // 1
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             diagnostics: [.init(
@@ -520,7 +520,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case b // "1
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             diagnostics: [.init(
@@ -548,7 +548,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case b // 1
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             diagnostics: [.init(
@@ -576,7 +576,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 case b = "gg"
             }
 
-            extension MyEnum: RawRepresentable, LosslessRawRepresentable {
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
             }
             """,
             diagnostics: [

@@ -138,7 +138,7 @@ extension UnstableEnum: ExtensionMacro {
         }
 
         let syntax: DeclSyntax = """
-        extension \(enumDecl.name): RawRepresentable, LosslessRawRepresentable { }
+        extension \(enumDecl.name): RawRepresentable, LosslessRawRepresentable, Hashable { }
         """
         let ext = ExtensionDeclSyntax(syntax)!
 

@@ -30,7 +30,7 @@ let experimentalFeatureFlags: [SwiftSetting] = [
     /// `DiscordBM` passes the `complete` level.
     ///
     /// `minimal` / `targeted` / `complete`
-    .enableExperimentalFeature("strict-concurrency=complete"),
+    .enableExperimentalFeature("StrictConcurrency=complete"),
 ]
 
 let swiftSettings = featureFlags + experimentalFeatureFlags
