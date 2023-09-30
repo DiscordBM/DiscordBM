@@ -19,6 +19,14 @@ public struct DiscordChannel: Sendable, Codable {
         case guildStageVoice = 13
         case guildDirectory = 14
         case guildForum = 15
+
+        /// DO NOT USE. WILL BE REMOVED SOON.
+        ///
+        /// Here to only prevent decode failures.
+        /// These non-frequent decode failures are hard to fix with Codable, but they will totally
+        /// go away in near future with a DiscordBM update that includes a macro to take care of these.
+        /// There are already mechanisms in place to prevent most of these failures.
+        case __unknown16 = 16
     }
     
     /// https://discord.com/developers/docs/resources/channel#overwrite-object
