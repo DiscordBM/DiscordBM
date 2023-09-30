@@ -610,19 +610,50 @@ extension Interaction {
             }
         }
 
+        /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-default-value-structure
+        public struct DefaultValue: Sendable, Codable {
+
+            /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-default-value-structure
+            public enum Kind: String, Sendable, Codable {
+                case user
+                case role
+                case channel
+            }
+
+            public var id: AnySnowflake
+            public var type: Kind
+
+            public init(id: UserSnowflake) {
+                self.id = AnySnowflake(id)
+                self.type = .user
+            }
+
+            public init(id: RoleSnowflake) {
+                self.id = AnySnowflake(id)
+                self.type = .role
+            }
+
+            public init(id: ChannelSnowflake) {
+                self.id = AnySnowflake(id)
+                self.type = .channel
+            }
+        }
+
         /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
         public struct ChannelSelectMenu: Sendable, Codable, ValidatablePayload {
             public var custom_id: String
             public var channel_types: [DiscordChannel.Kind]?
             public var placeholder: String?
+            public var default_values: [DefaultValue]?
             public var min_values: Int?
             public var max_values: Int?
             public var disabled: Bool?
 
-            public init(custom_id: String, channel_types: [DiscordChannel.Kind]? = nil, placeholder: String? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
+            public init(custom_id: String, channel_types: [DiscordChannel.Kind]? = nil, placeholder: String? = nil, default_values: [DefaultValue]? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
                 self.custom_id = custom_id
                 self.channel_types = channel_types
                 self.placeholder = placeholder
+                self.default_values = default_values
                 self.min_values = min_values
                 self.max_values = max_values
                 self.disabled = disabled
@@ -640,13 +671,15 @@ extension Interaction {
         public struct SelectMenu: Sendable, Codable, ValidatablePayload {
             public var custom_id: String
             public var placeholder: String?
+            public var default_values: [DefaultValue]?
             public var min_values: Int?
             public var max_values: Int?
             public var disabled: Bool?
 
-            public init(custom_id: String, placeholder: String? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
+            public init(custom_id: String, placeholder: String? = nil, default_values: [DefaultValue]? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
                 self.custom_id = custom_id
                 self.placeholder = placeholder
+                self.default_values = default_values
                 self.min_values = min_values
                 self.max_values = max_values
                 self.disabled = disabled
@@ -657,6 +690,7 @@ extension Interaction {
                 validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
                 validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
                 validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
+                validateElementCountInRange(default_values, min: min_values ?? 0, max: max_values ?? .max, name: "default_values")
             }
         }
         
