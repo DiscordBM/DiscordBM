@@ -379,6 +379,7 @@ extension DiscordChannel {
         public var stickers: [Sticker]?
         public var position: Int?
         public var role_subscription_data: RoleSubscriptionData?
+        public var resolved: Interaction.ApplicationCommand.ResolvedData?
     }
 }
 
@@ -416,8 +417,10 @@ extension DiscordChannel {
         public var stickers: [Sticker]?
         public var position: Int?
         public var role_subscription_data: RoleSubscriptionData?
+        /// Extra fields:
         public var member: Guild.PartialMember?
         public var guild_id: GuildSnowflake?
+        public var resolved: Interaction.ApplicationCommand.ResolvedData?
     }
 }
 

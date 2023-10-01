@@ -954,6 +954,7 @@ public struct Gateway: Sendable, Codable {
         public var mention_everyone: Bool
         public var mention_roles: [RoleSnowflake]
         public var mention_channels: [DiscordChannel.Message.ChannelMention]?
+        public var mentions: [MentionUser]
         public var attachments: [DiscordChannel.Message.Attachment]
         public var embeds: [Embed]
         public var reactions: [DiscordChannel.Message.Reaction]?
@@ -974,11 +975,11 @@ public struct Gateway: Sendable, Codable {
         public var stickers: [Sticker]?
         public var position: Int?
         public var role_subscription_data: RoleSubscriptionData?
-        /// The extra fields:
+        /// Extra fields:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
-        public var mentions: [MentionUser]
-        
+        public var resolved: Interaction.ApplicationCommand.ResolvedData?
+
         public mutating func update(with partialMessage: DiscordChannel.PartialMessage) {
             self.id = partialMessage.id
             self.channel_id = partialMessage.channel_id
@@ -1042,6 +1043,9 @@ public struct Gateway: Sendable, Codable {
             }
             if let guildId = partialMessage.guild_id {
                 self.guild_id = guildId
+            }
+            if let resolved = partialMessage.resolved {
+                self.resolved = resolved
             }
         }
     }

@@ -1069,8 +1069,9 @@ public enum Payloads {
         public var default_reaction_emoji: DiscordChannel.DefaultReaction?
         public var default_sort_order: DiscordChannel.SortOrder?
         public var default_forum_layout: DiscordChannel.ForumLayout?
+        public var default_thread_rate_limit_per_user: Int?
 
-        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil) {
+        public init(name: String, type: DiscordChannel.Kind? = nil, position: Int? = nil, topic: String? = nil, nsfw: Bool? = nil, rate_limit_per_user: Int? = nil, bitrate: Int? = nil, user_limit: Int? = nil, permission_overwrites: [PartialChannelOverwrite]? = nil, parent_id: AnySnowflake? = nil, rtc_region: String? = nil, video_quality_mode: DiscordChannel.VideoQualityMode? = nil, default_auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil, available_tags: [PartialForumTag]? = nil, default_reaction_emoji: DiscordChannel.DefaultReaction? = nil, default_sort_order: DiscordChannel.SortOrder? = nil, default_forum_layout: DiscordChannel.ForumLayout? = nil, default_thread_rate_limit_per_user: Int? = nil) {
             self.name = name
             self.type = type
             self.position = position
@@ -1088,6 +1089,7 @@ public enum Payloads {
             self.default_reaction_emoji = default_reaction_emoji
             self.default_sort_order = default_sort_order
             self.default_forum_layout = default_forum_layout
+            self.default_thread_rate_limit_per_user = default_thread_rate_limit_per_user
         }
 
         public func validate() -> [ValidationFailure] {
