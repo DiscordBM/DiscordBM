@@ -1,6 +1,9 @@
 <p align="center">
     <img src="https://user-images.githubusercontent.com/54685446/201329617-9fd91ab0-35c2-42c2-8963-47b68c6a490a.png" alt="DiscordBM">
     <br>
+    <a href="https://www.swift.org/sswg/">
+        <img src="https://img.shields.io/badge/sswg-sandbox-lightgrey.svg" alt="SSWG Incubation Status: Sandbox">
+    </a>
     <a href="https://discord.gg/kxfs5n7HVE">
         <img src="https://dcbadge.vercel.app/api/server/kxfs5n7HVE?style=flat" alt="DiscordBM Server">
     </a>
