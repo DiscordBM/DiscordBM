@@ -36,6 +36,7 @@ public struct DiscordApplication: Sendable, Codable {
     public var team: Team?
     public var guild_id: GuildSnowflake?
     public var guild: PartialGuild?
+    /// FIXME: Change type to ``SKUSnowflake`` in a new version
     public var primary_sku_id: AnySnowflake?
     public var slug: String?
     public var cover_image: String?
@@ -63,6 +64,7 @@ public struct PartialApplication: Sendable, Codable {
     public var team: Team?
     public var guild_id: GuildSnowflake?
     public var guild: PartialGuild?
+    /// FIXME: Change type to ``SKUSnowflake`` in a new version
     public var primary_sku_id: AnySnowflake?
     public var slug: String?
     public var cover_image: String?

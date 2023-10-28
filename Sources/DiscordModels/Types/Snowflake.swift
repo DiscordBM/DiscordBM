@@ -243,7 +243,7 @@ public struct SnowflakeInfo: Sendable {
     }
 }
 
-//MARK: Snowflake convenience type-aliases
+//MARK: Convenience type-aliases
 
 /// Convenience type-alias for `Snowflake<Guild>`
 public typealias GuildSnowflake = Snowflake<Guild>
@@ -313,3 +313,9 @@ public typealias StageInstanceSnowflake = Snowflake<StageInstance>
 
 /// Convenience type-alias for `Snowflake<Gateway.Activity.Assets>`
 public typealias AssetsSnowflake = Snowflake<Gateway.Activity.Assets>
+
+/// Convenience type-alias for `Snowflake<Entitlement>`
+public typealias EntitlementSnowflake = Snowflake<Entitlement>
+
+/// Convenience type-alias for `Snowflake<SKU>`
+public typealias SKUSnowflake = Snowflake<SKU>

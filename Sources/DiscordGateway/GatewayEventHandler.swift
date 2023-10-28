@@ -53,6 +53,9 @@ public protocol GatewayEventHandler: Sendable {
     func onThreadSyncList(_ payload: Gateway.ThreadListSync) async
     func onThreadMemberUpdate(_ payload: Gateway.ThreadMemberUpdate) async
     func onThreadMembersUpdate(_ payload: Gateway.ThreadMembersUpdate) async
+    func onEntitlementCreate(_ payload: Entitlement) async
+    func onEntitlementUpdate(_ payload: Entitlement) async
+    func onEntitlementDelete(_ payload: Entitlement) async
     func onGuildCreate(_ payload: Gateway.GuildCreate) async
     func onGuildUpdate(_ payload: Guild) async
     func onGuildDelete(_ payload: UnavailableGuild) async
@@ -135,6 +138,9 @@ public extension GatewayEventHandler {
     func onThreadDelete(_: Gateway.ThreadDelete) async { }
     func onThreadSyncList(_: Gateway.ThreadListSync) async { }
     func onThreadMemberUpdate(_: Gateway.ThreadMemberUpdate) async { }
+    func onEntitlementCreate(_: Entitlement) async { }
+    func onEntitlementUpdate(_: Entitlement) async { }
+    func onEntitlementDelete(_: Entitlement) async { }
     func onThreadMembersUpdate(_: Gateway.ThreadMembersUpdate) async { }
     func onGuildCreate(_: Gateway.GuildCreate) async { }
     func onGuildUpdate(_: Guild) async { }
@@ -228,6 +234,12 @@ extension GatewayEventHandler {
             await onThreadSyncList(payload)
         case let .threadMemberUpdate(payload):
             await onThreadMemberUpdate(payload)
+        case let .entitlementCreate(payload):
+            await onEntitlementCreate(payload)
+        case let .entitlementUpdate(payload):
+            await onEntitlementUpdate(payload)
+        case let .entitlementDelete(payload):
+            await onEntitlementDelete(payload)
         case let .threadMembersUpdate(payload):
             await onThreadMembersUpdate(payload)
         case let .guildCreate(payload):

@@ -9,7 +9,7 @@ import XCTest
 
 class DiscordClientTests: XCTestCase {
     
-    let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+    let httpClient = HTTPClient(eventLoopGroupProvider: .singleton)
     var client: (any DiscordClient)!
 
     let permanentTestCommandName = "permanent-test-command"

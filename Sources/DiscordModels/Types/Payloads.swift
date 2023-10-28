@@ -93,6 +93,8 @@ public enum Payloads {
             case applicationCommandAutoCompleteResult = 8
             /// A modal.
             case modal = 9
+            /// Indication that user needs to unlock/buy this capability.
+            case premiumRequired = 10
         }
 
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-messages
@@ -136,6 +138,8 @@ public enum Payloads {
                     reason: "Can only contain 'suppressEmbeds' and 'ephemeral'",
                     allowed: [.suppressEmbeds, .ephemeral]
                 )
+                validateElementCountDoesNotExceed(components, max: 5, name: "components")
+                components?.validate()
                 attachments?.validate()
                 embeds?.validate()
             }
@@ -175,6 +179,33 @@ public enum Payloads {
             }
         }
 
+        ///https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
+        public struct PremiumRequired: Sendable, Encodable, ValidatablePayload {
+            public var flags: IntBitField<DiscordChannel.Message.Flag>?
+            public var components: [Interaction.ActionRow]?
+
+            public init(flags: IntBitField<DiscordChannel.Message.Flag>? = nil, components: [Interaction.ActionRow]? = nil) {
+                self.flags = flags
+                self.components = components
+            }
+
+            public init(isEphemeral: Bool? = nil, components: [Interaction.ActionRow]? = nil) {
+                self.flags = isEphemeral.map { $0 ? .init(arrayLiteral: .ephemeral) : .init() }
+                self.components = components
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateOnlyContains(
+                    flags,
+                    name: "flags",
+                    reason: "Can only contain 'ephemeral'",
+                    allowed: [.ephemeral]
+                )
+                validateElementCountDoesNotExceed(components, max: 5, name: "components")
+                components?.validate()
+            }
+        }
+
         /// A container for message flags.
         struct Flags: Sendable, Encodable, ValidatablePayload {
             var flags: IntBitField<DiscordChannel.Message.Flag>?
@@ -191,13 +222,14 @@ public enum Payloads {
             case message(Message)
             case autocomplete(Autocomplete)
             case modal(Modal)
+            case premiumRequired(PremiumRequired)
             case flags(Flags)
 
             var files: [RawFile]? {
                 switch self {
                 case let .message(message):
                     return message.files
-                case .autocomplete, .modal, .flags:
+                case .autocomplete, .modal, .premiumRequired, .flags:
                     return nil
                 }
             }
@@ -210,6 +242,8 @@ public enum Payloads {
                     autocomplete.validate()
                 case let .modal(modal):
                     modal.validate()
+                case let .premiumRequired(premiumRequired):
+                    premiumRequired.validate()
                 case .flags:
                     /// For the result builder
                     Optional<ValidationFailure>.none
@@ -225,6 +259,8 @@ public enum Payloads {
                     try container.encode(autocomplete)
                 case let .modal(modal):
                     try container.encode(modal)
+                case let .premiumRequired(premiumRequired):
+                    try container.encode(premiumRequired)
                 case let .flags(flags):
                     try container.encode(flags)
                 }
@@ -296,6 +332,11 @@ public enum Payloads {
         /// Creates a response of type `Kind.modal`.
         public static func modal(_ modal: Modal) -> Self {
             .init(type: .modal, data: .modal(modal))
+        }
+
+        /// Creates a response of type `Kind.premiumRequired`.
+        public static func premiumRequired(_ message: PremiumRequired) -> Self {
+            .init(type: .premiumRequired, data: .premiumRequired(message))
         }
     }
 
@@ -696,8 +737,8 @@ public enum Payloads {
         }
     }
     
-    public struct CreateThreadInForumChannel: Sendable, Encodable, ValidatablePayload {
-        
+    public struct CreateThreadInForumChannel: Sendable, MultipartEncodable, ValidatablePayload {
+
         /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel-forum-thread-message-params-object
         public struct ForumMessage: Sendable, MultipartEncodable, ValidatablePayload {
             public var content: String?
@@ -764,7 +805,18 @@ public enum Payloads {
         public var rate_limit_per_user: Int?
         public var message: ForumMessage
         public var applied_tags: [ForumTagSnowflake]?
-        
+        public var files: [RawFile]? {
+            message.files
+        }
+
+        enum CodingKeys: String, CodingKey {
+            case name
+            case auto_archive_duration
+            case rate_limit_per_user
+            case message
+            case applied_tags
+        }
+
         public init(
             name: String,
             auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil,
@@ -1739,12 +1791,14 @@ public enum Payloads {
         public var topic: String
         public var privacy_level: StageInstance.PrivacyLevel?
         public var send_start_notification: Bool?
+        public var guild_scheduled_event_id: GuildScheduledEventSnowflake?
 
-        public init(channel_id: ChannelSnowflake, topic: String, privacy_level: StageInstance.PrivacyLevel? = nil, send_start_notification: Bool? = nil) {
+        public init(channel_id: ChannelSnowflake, topic: String, privacy_level: StageInstance.PrivacyLevel? = nil, send_start_notification: Bool? = nil, guild_scheduled_event_id: GuildScheduledEventSnowflake? = nil) {
             self.channel_id = channel_id
             self.topic = topic
             self.privacy_level = privacy_level
             self.send_start_notification = send_start_notification
+            self.guild_scheduled_event_id = guild_scheduled_event_id
         }
 
         public func validate() -> [ValidationFailure] {
