@@ -179,33 +179,6 @@ public enum Payloads {
             }
         }
 
-        ///https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
-        public struct PremiumRequired: Sendable, Encodable, ValidatablePayload {
-            public var flags: IntBitField<DiscordChannel.Message.Flag>?
-            public var components: [Interaction.ActionRow]?
-
-            public init(flags: IntBitField<DiscordChannel.Message.Flag>? = nil, components: [Interaction.ActionRow]? = nil) {
-                self.flags = flags
-                self.components = components
-            }
-
-            public init(isEphemeral: Bool? = nil, components: [Interaction.ActionRow]? = nil) {
-                self.flags = isEphemeral.map { $0 ? .init(arrayLiteral: .ephemeral) : .init() }
-                self.components = components
-            }
-
-            public func validate() -> [ValidationFailure] {
-                validateOnlyContains(
-                    flags,
-                    name: "flags",
-                    reason: "Can only contain 'ephemeral'",
-                    allowed: [.ephemeral]
-                )
-                validateElementCountDoesNotExceed(components, max: 5, name: "components")
-                components?.validate()
-            }
-        }
-
         /// A container for message flags.
         struct Flags: Sendable, Encodable, ValidatablePayload {
             var flags: IntBitField<DiscordChannel.Message.Flag>?
@@ -222,14 +195,13 @@ public enum Payloads {
             case message(Message)
             case autocomplete(Autocomplete)
             case modal(Modal)
-            case premiumRequired(PremiumRequired)
             case flags(Flags)
 
             var files: [RawFile]? {
                 switch self {
                 case let .message(message):
                     return message.files
-                case .autocomplete, .modal, .premiumRequired, .flags:
+                case .autocomplete, .modal, .flags:
                     return nil
                 }
             }
@@ -242,8 +214,6 @@ public enum Payloads {
                     autocomplete.validate()
                 case let .modal(modal):
                     modal.validate()
-                case let .premiumRequired(premiumRequired):
-                    premiumRequired.validate()
                 case .flags:
                     /// For the result builder
                     Optional<ValidationFailure>.none
@@ -259,8 +229,6 @@ public enum Payloads {
                     try container.encode(autocomplete)
                 case let .modal(modal):
                     try container.encode(modal)
-                case let .premiumRequired(premiumRequired):
-                    try container.encode(premiumRequired)
                 case let .flags(flags):
                     try container.encode(flags)
                 }
@@ -335,8 +303,8 @@ public enum Payloads {
         }
 
         /// Creates a response of type `Kind.premiumRequired`.
-        public static func premiumRequired(_ message: PremiumRequired) -> Self {
-            .init(type: .premiumRequired, data: .premiumRequired(message))
+        public static func premiumRequired(isEphemeral: Bool = false) -> Self {
+            .init(type: .premiumRequired, data: .flags(.init(isEphemeral: isEphemeral)))
         }
     }
 
