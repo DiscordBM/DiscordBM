@@ -4842,6 +4842,12 @@ paths:
       tags:
         - Entitlements
       summary: list entitlements
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         '200':
           description: OK
@@ -4854,6 +4860,12 @@ paths:
       tags:
         - Entitlements
       summary: create test entitlement
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         '200':
           description: OK
@@ -4867,6 +4879,17 @@ paths:
       tags:
         - Entitlements
       summary: delete test entitlement
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: entitlement_id
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         '200':
           description: OK
@@ -4880,6 +4903,12 @@ paths:
       tags:
         - SKUs
       summary: list SKUs
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         '200':
           description: OK

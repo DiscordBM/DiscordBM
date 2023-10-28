@@ -1913,4 +1913,49 @@ public enum Payloads {
 
         public func validate() -> [ValidationFailure] { }
     }
+
+    public struct CreateTestEntitlement: Sendable, Encodable, ValidatablePayload {
+
+        public enum OwnerKind: Int, Sendable, Codable {
+            case guildSubscription = 1
+            case userSubscription = 2
+        }
+
+        public var sku_id: SKUSnowflake
+        public var owner_id: AnySnowflake
+        public var owner_type: OwnerKind
+
+        public init(sku_id: SKUSnowflake, owner_id: GuildSnowflake) {
+            self.sku_id = sku_id
+            self.owner_id = AnySnowflake(owner_id)
+            self.owner_type = .guildSubscription
+        }
+
+        public init(sku_id: SKUSnowflake, owner_id: UserSnowflake) {
+            self.sku_id = sku_id
+            self.owner_id = AnySnowflake(owner_id)
+            self.owner_type = .userSubscription
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    public struct UpdateOwnApplication: Sendable, Encodable, ValidatablePayload {
+        public var custom_install_url: String?
+        public var description: String?
+        public var role_connections_verification_url: String?
+        public var install_params: DiscordApplication.InstallParams?
+        public var flags: IntBitField<DiscordApplication.Flag>?
+        public var icon: ImageData?
+        public var cover_image: ImageData?
+        public var interactions_endpoint_url: String?
+        public var tags: [String]?
+
+        public func validate() -> [ValidationFailure] {
+            validateElementCountDoesNotExceed(tags, max: 5, name: "tags")
+            for (idx, tag) in (tags ?? []).enumerated() {
+                validateCharacterCountDoesNotExceed(tag, max: 20, name: "tags[\(idx)]")
+            }
+        }
+    }
 }

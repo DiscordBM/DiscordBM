@@ -20,6 +20,11 @@ public struct DiscordApplication: Sendable, Codable {
     public struct InstallParams: Sendable, Codable {
         public var scopes: [OAuth2Scope]
         public var permissions: StringBitField<Permission>
+
+        public init(scopes: [OAuth2Scope], permissions: StringBitField<Permission>) {
+            self.scopes = scopes
+            self.permissions = permissions
+        }
     }
 
     public var id: ApplicationSnowflake

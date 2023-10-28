@@ -72,9 +72,9 @@ public enum APIEndpoint: Endpoint {
     // MARK: Entitlements
     /// https://discord.com/developers/docs/monetization/entitlements
     
-    case listEntitlements
-    case createTestEntitlement
-    case deleteTestEntitlement
+    case listEntitlements(applicationId: ApplicationSnowflake)
+    case createTestEntitlement(applicationId: ApplicationSnowflake)
+    case deleteTestEntitlement(applicationId: ApplicationSnowflake, entitlementId: EntitlementSnowflake)
     
     // MARK: Gateway
     /// https://discord.com/developers/docs/topics/gateway
@@ -212,7 +212,7 @@ public enum APIEndpoint: Endpoint {
     // MARK: SKUs
     /// https://discord.com/developers/docs/monetization/skus
     
-    case listSkus
+    case listSkus(applicationId: ApplicationSnowflake)
     
     // MARK: Stages
     /// https://discord.com/developers/docs/resources/stage-instance
@@ -439,12 +439,16 @@ public enum APIEndpoint: Endpoint {
             let guildId = guildId.rawValue
             let emojiId = emojiId.rawValue
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
-        case .listEntitlements:
-            suffix = "applications/application_id/entitlements"
-        case .createTestEntitlement:
-            suffix = "applications/application_id/entitlements"
-        case .deleteTestEntitlement:
-            suffix = "applications/application_id/entitlements/entitlement_id"
+        case let .listEntitlements(applicationId):
+            let applicationId = applicationId.rawValue
+            suffix = "applications/\(applicationId)/entitlements"
+        case let .createTestEntitlement(applicationId):
+            let applicationId = applicationId.rawValue
+            suffix = "applications/\(applicationId)/entitlements"
+        case let .deleteTestEntitlement(applicationId, entitlementId):
+            let applicationId = applicationId.rawValue
+            let entitlementId = entitlementId.rawValue
+            suffix = "applications/\(applicationId)/entitlements/\(entitlementId)"
         case .getBotGateway:
             suffix = "gateway/bot"
         case .getGateway:
@@ -740,8 +744,9 @@ public enum APIEndpoint: Endpoint {
             let guildId = guildId.rawValue
             let guildScheduledEventId = guildScheduledEventId.rawValue
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
-        case .listSkus:
-            suffix = "applications/application_id/skus"
+        case let .listSkus(applicationId):
+            let applicationId = applicationId.rawValue
+            suffix = "applications/\(applicationId)/skus"
         case let .getStageInstance(channelId):
             let channelId = channelId.rawValue
             suffix = "stage-instances/\(channelId)"
@@ -1040,12 +1045,16 @@ public enum APIEndpoint: Endpoint {
             let guildId = guildId.rawValue
             let emojiId = emojiId.rawValue
             suffix = "guilds/\(guildId)/emojis/\(emojiId)"
-        case .listEntitlements:
-            suffix = "applications/application_id/entitlements"
-        case .createTestEntitlement:
-            suffix = "applications/application_id/entitlements"
-        case .deleteTestEntitlement:
-            suffix = "applications/application_id/entitlements/entitlement_id"
+        case let .listEntitlements(applicationId):
+            let applicationId = applicationId.rawValue
+            suffix = "applications/\(applicationId)/entitlements"
+        case let .createTestEntitlement(applicationId):
+            let applicationId = applicationId.rawValue
+            suffix = "applications/\(applicationId)/entitlements"
+        case let .deleteTestEntitlement(applicationId, entitlementId):
+            let applicationId = applicationId.rawValue
+            let entitlementId = entitlementId.rawValue
+            suffix = "applications/\(applicationId)/entitlements/\(entitlementId)"
         case .getBotGateway:
             suffix = "gateway/bot"
         case .getGateway:
@@ -1341,8 +1350,9 @@ public enum APIEndpoint: Endpoint {
             let guildId = guildId.rawValue
             let guildScheduledEventId = guildScheduledEventId.rawValue
             suffix = "guilds/\(guildId)/scheduled-events/\(guildScheduledEventId)"
-        case .listSkus:
-            suffix = "applications/application_id/skus"
+        case let .listSkus(applicationId):
+            let applicationId = applicationId.rawValue
+            suffix = "applications/\(applicationId)/skus"
         case let .getStageInstance(channelId):
             let channelId = channelId.rawValue
             suffix = "stage-instances/\(channelId)"
@@ -2135,12 +2145,12 @@ public enum APIEndpoint: Endpoint {
             return [guildId.rawValue, emojiId.rawValue]
         case let .deleteGuildEmoji(guildId, emojiId):
             return [guildId.rawValue, emojiId.rawValue]
-        case .listEntitlements:
-            return []
-        case .createTestEntitlement:
-            return []
-        case .deleteTestEntitlement:
-            return []
+        case let .listEntitlements(applicationId):
+            return [applicationId.rawValue]
+        case let .createTestEntitlement(applicationId):
+            return [applicationId.rawValue]
+        case let .deleteTestEntitlement(applicationId, entitlementId):
+            return [applicationId.rawValue, entitlementId.rawValue]
         case .getBotGateway:
             return []
         case .getGateway:
@@ -2319,8 +2329,8 @@ public enum APIEndpoint: Endpoint {
             return [guildId.rawValue, guildScheduledEventId.rawValue]
         case let .deleteGuildScheduledEvent(guildId, guildScheduledEventId):
             return [guildId.rawValue, guildScheduledEventId.rawValue]
-        case .listSkus:
-            return []
+        case let .listSkus(applicationId):
+            return [applicationId.rawValue]
         case let .getStageInstance(channelId):
             return [channelId.rawValue]
         case .createStageInstance:
@@ -2685,12 +2695,12 @@ public enum APIEndpoint: Endpoint {
             return "updateGuildEmoji(guildId.rawValue: \(guildId.rawValue), emojiId.rawValue: \(emojiId.rawValue))"
         case let .deleteGuildEmoji(guildId, emojiId):
             return "deleteGuildEmoji(guildId.rawValue: \(guildId.rawValue), emojiId.rawValue: \(emojiId.rawValue))"
-        case .listEntitlements:
-            return "listEntitlements"
-        case .createTestEntitlement:
-            return "createTestEntitlement"
-        case .deleteTestEntitlement:
-            return "deleteTestEntitlement"
+        case let .listEntitlements(applicationId):
+            return "listEntitlements(applicationId.rawValue: \(applicationId.rawValue))"
+        case let .createTestEntitlement(applicationId):
+            return "createTestEntitlement(applicationId.rawValue: \(applicationId.rawValue))"
+        case let .deleteTestEntitlement(applicationId, entitlementId):
+            return "deleteTestEntitlement(applicationId.rawValue: \(applicationId.rawValue), entitlementId.rawValue: \(entitlementId.rawValue))"
         case .getBotGateway:
             return "getBotGateway"
         case .getGateway:
@@ -2869,8 +2879,8 @@ public enum APIEndpoint: Endpoint {
             return "updateGuildScheduledEvent(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"
         case let .deleteGuildScheduledEvent(guildId, guildScheduledEventId):
             return "deleteGuildScheduledEvent(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"
-        case .listSkus:
-            return "listSkus"
+        case let .listSkus(applicationId):
+            return "listSkus(applicationId.rawValue: \(applicationId.rawValue))"
         case let .getStageInstance(channelId):
             return "getStageInstance(channelId.rawValue: \(channelId.rawValue))"
         case .createStageInstance:

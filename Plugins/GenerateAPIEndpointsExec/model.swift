@@ -226,10 +226,6 @@ struct API: Decodable {
                 var `in`: In
                 var schema: Schema
                 var required: Bool?
-                var description: String?
-                var example: String
-                /// var requestBody
-                /// var responses
             }
             
             var tags: [Tag]
@@ -281,6 +277,10 @@ struct API: Decodable {
                                 type = "AnySnowflake"
                             case "webhookId":
                                 type = "WebhookSnowflake"
+                            case "entitlementId":
+                                type = "EntitlementSnowflake"
+                            case "skuId":
+                                type = "SKUSnowflake"
                             case let name where name.hasSuffix("Id"):
                                 print("Unhandled ID type: '\(paramName)'")
                                 fatalError("Unhandled ID type: '\(paramName)'")
