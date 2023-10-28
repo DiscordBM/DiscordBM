@@ -2123,7 +2123,7 @@ class DiscordClientTests: XCTestCase {
             XCTFail("Unexpected error: \(String(describing: deleteError))")
         }
 
-        let allSKUs = try await client.listSKUs().asError()
+        let allSKUs = try await client.listSKUs().decode()
         XCTAssertEqual(allSKUs.count, 0, "\(allSKUs)")
     }
 
