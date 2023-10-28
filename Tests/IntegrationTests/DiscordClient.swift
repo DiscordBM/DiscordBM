@@ -1562,7 +1562,11 @@ class DiscordClientTests: XCTestCase {
                 description: "TEST DESCRIPTION \(Int.random(in: .min ... .max))",
                 role_connections_verification_url: fakeURL(),
                 install_params: nil,
-                flags: [],
+                flags: [
+                    .gatewayPresenceLimited,
+                    .gatewayGuildMembersLimited,
+                    .gatewayMessageContentLimited
+                ],
                 icon: imageData,
                 cover_image: imageData,
                 interactions_endpoint_url: nil,
@@ -2102,12 +2106,11 @@ class DiscordClientTests: XCTestCase {
         ).asError()
 
         switch createError {
-        case let .badStatusCode(response) where response.status == .badRequest:
+        case .jsonError(let jsonError) where jsonError.code == .unknownSKU:
             break
         case .none, .badStatusCode, .jsonError:
             XCTFail("Unexpected error: \(String(describing: createError))")
         }
-
 
         let deleteError = try await client.deleteTestEntitlement(
             entitlementId: .makeFake()
@@ -2120,14 +2123,8 @@ class DiscordClientTests: XCTestCase {
             XCTFail("Unexpected error: \(String(describing: deleteError))")
         }
 
-        let allSKUsError = try await client.listSKUs().asError()
-
-        switch allSKUsError {
-        case .jsonError(let jsonError) where jsonError.code == .unknownSKU:
-            break
-        case .none, .badStatusCode, .jsonError:
-            XCTFail("Unexpected error: \(String(describing: allSKUsError))")
-        }
+        let allSKUs = try await client.listSKUs().asError()
+        XCTAssertEqual(allSKUs.count, 0, "\(allSKUs)")
     }
 
     func testAutoModerationRules() async throws {
