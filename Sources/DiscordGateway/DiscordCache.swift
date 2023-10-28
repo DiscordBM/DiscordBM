@@ -254,6 +254,8 @@ public actor DiscordCache {
         public var autoModerationExecutions: OrderedDictionary<GuildSnowflake, [AutoModerationActionExecution]> = [:]
         /// `[CommandID (or ApplicationID): Permissions]`
         public var applicationCommandPermissions: OrderedDictionary<AnySnowflake, GuildApplicationCommandPermissions> = [:]
+        /// `[EntitlementID: Entitlement]`
+        public var entitlements: OrderedDictionary<EntitlementSnowflake, Entitlement> = [:]
         /// The current bot-application.
         public var application: PartialApplication?
         /// The current bot user.
@@ -271,6 +273,7 @@ public actor DiscordCache {
             autoModerationRules: OrderedDictionary<GuildSnowflake, [AutoModerationRule]> = [:],
             autoModerationExecutions: OrderedDictionary<GuildSnowflake, [AutoModerationActionExecution]> = [:],
             applicationCommandPermissions: OrderedDictionary<AnySnowflake, GuildApplicationCommandPermissions> = [:],
+            entitlements: OrderedDictionary<EntitlementSnowflake, Entitlement> = [:],
             application: PartialApplication? = nil,
             botUser: DiscordUser? = nil
         ) {
@@ -285,6 +288,7 @@ public actor DiscordCache {
             self.autoModerationRules = autoModerationRules
             self.autoModerationExecutions = autoModerationExecutions
             self.applicationCommandPermissions = applicationCommandPermissions
+            self.entitlements = entitlements
             self.application = application
             self.botUser = botUser
         }
@@ -509,6 +513,11 @@ public actor DiscordCache {
                     }
                 }
             }
+        case let .entitlementCreate(entitlement),
+            let .entitlementUpdate(entitlement):
+            self.entitlements[entitlement.id] = entitlement
+        case let .entitlementDelete(entitlement):
+            self.entitlements.removeValue(forKey: entitlement.id)
         case let .guildBanAdd(ban):
             if let idx = self.guilds[ban.guild_id]?.members
                 .firstIndex(where: { $0.user?.id == ban.user.id }) {

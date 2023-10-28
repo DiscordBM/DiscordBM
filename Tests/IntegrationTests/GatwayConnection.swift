@@ -7,7 +7,7 @@ import XCTest
 
 class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
-    let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+    let httpClient = HTTPClient(eventLoopGroupProvider: .singleton)
 
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {

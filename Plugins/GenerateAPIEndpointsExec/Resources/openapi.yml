@@ -4449,6 +4449,18 @@ paths:
               schema:
                 type: string
               example: ''
+    patch:
+      tags:
+        - Users
+      summary: update own application
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
 
   /oauth2/applications/@me:
     get:
@@ -4825,6 +4837,86 @@ paths:
               schema:
                 type: string
               example: ''
+  /applications/{application_id}/entitlements:
+    get:
+      tags:
+        - Entitlements
+      summary: list entitlements
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+    post:
+      tags:
+        - Entitlements
+      summary: create test entitlement
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+  /applications/{application_id}/entitlements/{entitlement_id}:
+    delete:
+      tags:
+        - Entitlements
+      summary: delete test entitlement
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: entitlement_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+  /applications/{application_id}/skus:
+    get:
+      tags:
+        - SKUs
+      summary: list SKUs
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
   /guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}/users:
     get:
       tags:

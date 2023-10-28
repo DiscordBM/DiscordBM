@@ -144,6 +144,7 @@ public enum JSONErrorCode: Int, Sendable, Codable {
     case serviceResourceRateLimited = 40062
     case noTagsAvailableThatCanBeSetByNonModerators = 40066
     case tagRequiredToCreateForumPostInChannel = 40067
+    case anEntitlementHasAlreadyBeenGrantedForThisResource = 40074
     case missingAccess = 50001
     case invalidAccountType = 50002
     case cannotExecuteActionOnDMChannel = 50003
@@ -179,6 +180,7 @@ public enum JSONErrorCode: Int, Sendable, Codable {
     case invalidFileUploaded = 50046
     case cannotSelfRedeemThisGift = 50054
     case invalidGuild = 50055
+    case invalidSKU = 50057
     case invalidRequestOrigin = 50067
     case invalidMessageType = 50068
     case paymentSourceRequiredToRedeemGift = 50070

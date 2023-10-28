@@ -5,8 +5,8 @@ import XCTest
 
 class PermissionChecker: XCTestCase {
     
-    let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-    
+    let httpClient = HTTPClient(eventLoopGroupProvider: .singleton)
+
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
             Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
