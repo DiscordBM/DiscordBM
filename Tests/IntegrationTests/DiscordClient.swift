@@ -1565,7 +1565,7 @@ class DiscordClientTests: XCTestCase {
                 flags: [
                     .gatewayPresenceLimited,
                     .gatewayGuildMembersLimited,
-                    .gatewayMessageContentLimited
+                    .gatewayMessageContentLimited,
                 ],
                 icon: imageData,
                 cover_image: imageData,
