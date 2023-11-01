@@ -1,4 +1,5 @@
 import DiscordModels
+import Logging
 
 /// Convenience protocol for handling gateway payloads.
 ///
@@ -29,325 +30,495 @@ import DiscordModels
 /// ```
 public protocol GatewayEventHandler: Sendable {
     var event: Gateway.Event { get }
-    
+    var logger: Logger { get }
+
     /// To be executed before handling events.
     /// If returns `false`, the event won't be passed to the functions below anymore.
-    func onEventHandlerStart() async -> Bool
-    func onEventHandlerEnd() async
+    func onEventHandlerStart() async throws -> Bool
+    func onEventHandlerEnd() async throws
 
     /// MARK: State-management data
-    func onHeartbeat(lastSequenceNumber: Int?) async
-    func onHello(_ payload: Gateway.Hello) async
-    func onReady(_ payload: Gateway.Ready) async
-    func onResumed() async
-    func onInvalidSession(canResume: Bool) async
+    func onHeartbeat(lastSequenceNumber: Int?) async throws
+    func onHello(_ payload: Gateway.Hello) async throws
+    func onReady(_ payload: Gateway.Ready) async throws
+    func onResumed() async throws
+    func onInvalidSession(canResume: Bool) async throws
 
     /// MARK: Events
-    func onChannelCreate(_ payload: DiscordChannel) async
-    func onChannelUpdate(_ payload: DiscordChannel) async
-    func onChannelDelete(_ payload: DiscordChannel) async
-    func onChannelPinsUpdate(_ payload: Gateway.ChannelPinsUpdate) async
-    func onThreadCreate(_ payload: DiscordChannel) async
-    func onThreadUpdate(_ payload: DiscordChannel) async
-    func onThreadDelete(_ payload: Gateway.ThreadDelete) async
-    func onThreadSyncList(_ payload: Gateway.ThreadListSync) async
-    func onThreadMemberUpdate(_ payload: Gateway.ThreadMemberUpdate) async
-    func onThreadMembersUpdate(_ payload: Gateway.ThreadMembersUpdate) async
-    func onEntitlementCreate(_ payload: Entitlement) async
-    func onEntitlementUpdate(_ payload: Entitlement) async
-    func onEntitlementDelete(_ payload: Entitlement) async
-    func onGuildCreate(_ payload: Gateway.GuildCreate) async
-    func onGuildUpdate(_ payload: Guild) async
-    func onGuildDelete(_ payload: UnavailableGuild) async
-    func onGuildBanAdd(_ payload: Gateway.GuildBan) async
-    func onGuildBanRemove(_ payload: Gateway.GuildBan) async
-    func onGuildEmojisUpdate(_ payload: Gateway.GuildEmojisUpdate) async
-    func onGuildStickersUpdate(_ payload: Gateway.GuildStickersUpdate) async
-    func onGuildIntegrationsUpdate(_ payload: Gateway.GuildIntegrationsUpdate) async
-    func onGuildMemberAdd(_ payload: Gateway.GuildMemberAdd) async
-    func onGuildMemberRemove(_ payload: Gateway.GuildMemberRemove) async
-    func onGuildMemberUpdate(_ payload: Gateway.GuildMemberAdd) async
-    func onGuildMembersChunk(_ payload: Gateway.GuildMembersChunk) async
-    func onRequestGuildMembers(_ payload: Gateway.RequestGuildMembers) async
-    func onGuildRoleCreate(_ payload: Gateway.GuildRole) async
-    func onGuildRoleUpdate(_ payload: Gateway.GuildRole) async
-    func onGuildRoleDelete(_ payload: Gateway.GuildRoleDelete) async
-    func onGuildScheduledEventCreate(_ payload: GuildScheduledEvent) async
-    func onGuildScheduledEventUpdate(_ payload: GuildScheduledEvent) async
-    func onGuildScheduledEventDelete(_ payload: GuildScheduledEvent) async
-    func onGuildScheduledEventUserAdd(_ payload: Gateway.GuildScheduledEventUser) async
-    func onGuildScheduledEventUserRemove(_ payload: Gateway.GuildScheduledEventUser) async
-    func onGuildAuditLogEntryCreate(_ payload: AuditLog.Entry) async
-    func onIntegrationCreate(_ payload: Gateway.IntegrationCreate) async
-    func onIntegrationUpdate(_ payload: Gateway.IntegrationCreate) async
-    func onIntegrationDelete(_ payload: Gateway.IntegrationDelete) async
-    func onInteractionCreate(_ payload: Interaction) async
-    func onInviteCreate(_ payload: Gateway.InviteCreate) async
-    func onInviteDelete(_ payload: Gateway.InviteDelete) async
-    func onMessageCreate(_ payload: Gateway.MessageCreate) async
-    func onMessageUpdate(_ payload: DiscordChannel.PartialMessage) async
-    func onMessageDelete(_ payload: Gateway.MessageDelete) async
-    func onMessageDeleteBulk(_ payload: Gateway.MessageDeleteBulk) async
-    func onMessageReactionAdd(_ payload: Gateway.MessageReactionAdd) async
-    func onMessageReactionRemove(_ payload: Gateway.MessageReactionRemove) async
-    func onMessageReactionRemoveAll(_ payload: Gateway.MessageReactionRemoveAll) async
-    func onMessageReactionRemoveEmoji(_ payload: Gateway.MessageReactionRemoveEmoji) async
-    func onPresenceUpdate(_ payload: Gateway.PresenceUpdate) async
-    func onRequestPresenceUpdate(_ payload: Gateway.Identify.Presence) async
-    func onStageInstanceCreate(_ payload: StageInstance) async
-    func onStageInstanceDelete(_ payload: StageInstance) async
-    func onStageInstanceUpdate(_ payload: StageInstance) async
-    func onTypingStart(_ payload: Gateway.TypingStart) async
-    func onUserUpdate(_ payload: DiscordUser) async
-    func onVoiceStateUpdate(_ payload: VoiceState) async
-    func onRequestVoiceStateUpdate(_ payload: VoiceStateUpdate) async
-    func onVoiceServerUpdate(_ payload: Gateway.VoiceServerUpdate) async
-    func onWebhooksUpdate(_ payload: Gateway.WebhooksUpdate) async
-    func onApplicationCommandPermissionsUpdate(_ payload: GuildApplicationCommandPermissions) async
-    func onAutoModerationRuleCreate(_ payload: AutoModerationRule) async
-    func onAutoModerationRuleUpdate(_ payload: AutoModerationRule) async
-    func onAutoModerationRuleDelete(_ payload: AutoModerationRule) async
-    func onAutoModerationActionExecution(_ payload: AutoModerationActionExecution) async
+    func onChannelCreate(_ payload: DiscordChannel) async throws
+    func onChannelUpdate(_ payload: DiscordChannel) async throws
+    func onChannelDelete(_ payload: DiscordChannel) async throws
+    func onChannelPinsUpdate(_ payload: Gateway.ChannelPinsUpdate) async throws
+    func onThreadCreate(_ payload: DiscordChannel) async throws
+    func onThreadUpdate(_ payload: DiscordChannel) async throws
+    func onThreadDelete(_ payload: Gateway.ThreadDelete) async throws
+    func onThreadSyncList(_ payload: Gateway.ThreadListSync) async throws
+    func onThreadMemberUpdate(_ payload: Gateway.ThreadMemberUpdate) async throws
+    func onThreadMembersUpdate(_ payload: Gateway.ThreadMembersUpdate) async throws
+    func onEntitlementCreate(_ payload: Entitlement) async throws
+    func onEntitlementUpdate(_ payload: Entitlement) async throws
+    func onEntitlementDelete(_ payload: Entitlement) async throws
+    func onGuildCreate(_ payload: Gateway.GuildCreate) async throws
+    func onGuildUpdate(_ payload: Guild) async throws
+    func onGuildDelete(_ payload: UnavailableGuild) async throws
+    func onGuildBanAdd(_ payload: Gateway.GuildBan) async throws
+    func onGuildBanRemove(_ payload: Gateway.GuildBan) async throws
+    func onGuildEmojisUpdate(_ payload: Gateway.GuildEmojisUpdate) async throws
+    func onGuildStickersUpdate(_ payload: Gateway.GuildStickersUpdate) async throws
+    func onGuildIntegrationsUpdate(_ payload: Gateway.GuildIntegrationsUpdate) async throws
+    func onGuildMemberAdd(_ payload: Gateway.GuildMemberAdd) async throws
+    func onGuildMemberRemove(_ payload: Gateway.GuildMemberRemove) async throws
+    func onGuildMemberUpdate(_ payload: Gateway.GuildMemberAdd) async throws
+    func onGuildMembersChunk(_ payload: Gateway.GuildMembersChunk) async throws
+    func onRequestGuildMembers(_ payload: Gateway.RequestGuildMembers) async throws
+    func onGuildRoleCreate(_ payload: Gateway.GuildRole) async throws
+    func onGuildRoleUpdate(_ payload: Gateway.GuildRole) async throws
+    func onGuildRoleDelete(_ payload: Gateway.GuildRoleDelete) async throws
+    func onGuildScheduledEventCreate(_ payload: GuildScheduledEvent) async throws
+    func onGuildScheduledEventUpdate(_ payload: GuildScheduledEvent) async throws
+    func onGuildScheduledEventDelete(_ payload: GuildScheduledEvent) async throws
+    func onGuildScheduledEventUserAdd(_ payload: Gateway.GuildScheduledEventUser) async throws
+    func onGuildScheduledEventUserRemove(_ payload: Gateway.GuildScheduledEventUser) async throws
+    func onGuildAuditLogEntryCreate(_ payload: AuditLog.Entry) async throws
+    func onIntegrationCreate(_ payload: Gateway.IntegrationCreate) async throws
+    func onIntegrationUpdate(_ payload: Gateway.IntegrationCreate) async throws
+    func onIntegrationDelete(_ payload: Gateway.IntegrationDelete) async throws
+    func onInteractionCreate(_ payload: Interaction) async throws
+    func onInviteCreate(_ payload: Gateway.InviteCreate) async throws
+    func onInviteDelete(_ payload: Gateway.InviteDelete) async throws
+    func onMessageCreate(_ payload: Gateway.MessageCreate) async throws
+    func onMessageUpdate(_ payload: DiscordChannel.PartialMessage) async throws
+    func onMessageDelete(_ payload: Gateway.MessageDelete) async throws
+    func onMessageDeleteBulk(_ payload: Gateway.MessageDeleteBulk) async throws
+    func onMessageReactionAdd(_ payload: Gateway.MessageReactionAdd) async throws
+    func onMessageReactionRemove(_ payload: Gateway.MessageReactionRemove) async throws
+    func onMessageReactionRemoveAll(_ payload: Gateway.MessageReactionRemoveAll) async throws
+    func onMessageReactionRemoveEmoji(_ payload: Gateway.MessageReactionRemoveEmoji) async throws
+    func onPresenceUpdate(_ payload: Gateway.PresenceUpdate) async throws
+    func onRequestPresenceUpdate(_ payload: Gateway.Identify.Presence) async throws
+    func onStageInstanceCreate(_ payload: StageInstance) async throws
+    func onStageInstanceDelete(_ payload: StageInstance) async throws
+    func onStageInstanceUpdate(_ payload: StageInstance) async throws
+    func onTypingStart(_ payload: Gateway.TypingStart) async throws
+    func onUserUpdate(_ payload: DiscordUser) async throws
+    func onVoiceStateUpdate(_ payload: VoiceState) async throws
+    func onRequestVoiceStateUpdate(_ payload: VoiceStateUpdate) async throws
+    func onVoiceServerUpdate(_ payload: Gateway.VoiceServerUpdate) async throws
+    func onWebhooksUpdate(_ payload: Gateway.WebhooksUpdate) async throws
+    func onApplicationCommandPermissionsUpdate(_ payload: GuildApplicationCommandPermissions) async throws
+    func onAutoModerationRuleCreate(_ payload: AutoModerationRule) async throws
+    func onAutoModerationRuleUpdate(_ payload: AutoModerationRule) async throws
+    func onAutoModerationRuleDelete(_ payload: AutoModerationRule) async throws
+    func onAutoModerationActionExecution(_ payload: AutoModerationActionExecution) async throws
 }
 
 public extension GatewayEventHandler {
+
+    var logger: Logger {
+        Logger(label: "GatewayEventHandler")
+    }
+
     @inlinable
     func handle() {
         Task {
             await self.handleAsync()
         }
     }
-    
-    // MARK: - Default Do-Nothings
-    
-    @inlinable
-    func onEventHandlerStart() async -> Bool { true }
-    func onEventHandlerEnd() async { }
 
-    func onHeartbeat(lastSequenceNumber _: Int?) async { }
-    func onHello(_: Gateway.Hello) async { }
-    func onReady(_: Gateway.Ready) async { }
-    func onResumed() async { }
-    func onInvalidSession(canResume _: Bool) async { }
-    func onChannelCreate(_: DiscordChannel) async { }
-    func onChannelUpdate(_: DiscordChannel) async { }
-    func onChannelDelete(_: DiscordChannel) async { }
-    func onChannelPinsUpdate(_: Gateway.ChannelPinsUpdate) async { }
-    func onThreadCreate(_: DiscordChannel) async { }
-    func onThreadUpdate(_: DiscordChannel) async { }
-    func onThreadDelete(_: Gateway.ThreadDelete) async { }
-    func onThreadSyncList(_: Gateway.ThreadListSync) async { }
-    func onThreadMemberUpdate(_: Gateway.ThreadMemberUpdate) async { }
-    func onEntitlementCreate(_: Entitlement) async { }
-    func onEntitlementUpdate(_: Entitlement) async { }
-    func onEntitlementDelete(_: Entitlement) async { }
-    func onThreadMembersUpdate(_: Gateway.ThreadMembersUpdate) async { }
-    func onGuildCreate(_: Gateway.GuildCreate) async { }
-    func onGuildUpdate(_: Guild) async { }
-    func onGuildDelete(_: UnavailableGuild) async { }
-    func onGuildBanAdd(_: Gateway.GuildBan) async { }
-    func onGuildBanRemove(_: Gateway.GuildBan) async { }
-    func onGuildEmojisUpdate(_: Gateway.GuildEmojisUpdate) async { }
-    func onGuildStickersUpdate(_: Gateway.GuildStickersUpdate) async { }
-    func onGuildIntegrationsUpdate(_: Gateway.GuildIntegrationsUpdate) async { }
-    func onGuildMemberAdd(_: Gateway.GuildMemberAdd) async { }
-    func onGuildMemberRemove(_: Gateway.GuildMemberRemove) async { }
-    func onGuildMemberUpdate(_: Gateway.GuildMemberAdd) async { }
-    func onGuildMembersChunk(_: Gateway.GuildMembersChunk) async { }
-    func onRequestGuildMembers(_: Gateway.RequestGuildMembers) async { }
-    func onGuildRoleCreate(_: Gateway.GuildRole) async { }
-    func onGuildRoleUpdate(_: Gateway.GuildRole) async { }
-    func onGuildRoleDelete(_: Gateway.GuildRoleDelete) async { }
-    func onGuildScheduledEventCreate(_: GuildScheduledEvent) async { }
-    func onGuildScheduledEventUpdate(_: GuildScheduledEvent) async { }
-    func onGuildScheduledEventDelete(_: GuildScheduledEvent) async { }
-    func onGuildScheduledEventUserAdd(_: Gateway.GuildScheduledEventUser) async { }
-    func onGuildScheduledEventUserRemove(_: Gateway.GuildScheduledEventUser) async { }
-    func onGuildAuditLogEntryCreate(_: AuditLog.Entry) async { }
-    func onIntegrationCreate(_: Gateway.IntegrationCreate) async { }
-    func onIntegrationUpdate(_: Gateway.IntegrationCreate) async { }
-    func onIntegrationDelete(_: Gateway.IntegrationDelete) async { }
-    func onInteractionCreate(_: Interaction) async { }
-    func onInviteCreate(_: Gateway.InviteCreate) async { }
-    func onInviteDelete(_: Gateway.InviteDelete) async { }
-    func onMessageCreate(_: Gateway.MessageCreate) async { }
-    func onMessageUpdate(_: DiscordChannel.PartialMessage) async { }
-    func onMessageDelete(_: Gateway.MessageDelete) async { }
-    func onMessageDeleteBulk(_: Gateway.MessageDeleteBulk) async { }
-    func onMessageReactionAdd(_: Gateway.MessageReactionAdd) async { }
-    func onMessageReactionRemove(_: Gateway.MessageReactionRemove) async { }
-    func onMessageReactionRemoveAll(_: Gateway.MessageReactionRemoveAll) async { }
-    func onMessageReactionRemoveEmoji(_: Gateway.MessageReactionRemoveEmoji) async { }
-    func onPresenceUpdate(_: Gateway.PresenceUpdate) async { }
-    func onRequestPresenceUpdate(_: Gateway.Identify.Presence) async { }
-    func onStageInstanceCreate(_: StageInstance) async { }
-    func onStageInstanceDelete(_: StageInstance) async { }
-    func onStageInstanceUpdate(_: StageInstance) async { }
-    func onTypingStart(_: Gateway.TypingStart) async { }
-    func onUserUpdate(_: DiscordUser) async { }
-    func onVoiceStateUpdate(_: VoiceState) async { }
-    func onRequestVoiceStateUpdate(_: VoiceStateUpdate) async { }
-    func onVoiceServerUpdate(_: Gateway.VoiceServerUpdate) async { }
-    func onWebhooksUpdate(_: Gateway.WebhooksUpdate) async { }
-    func onApplicationCommandPermissionsUpdate(_: GuildApplicationCommandPermissions) async { }
-    func onAutoModerationRuleCreate(_: AutoModerationRule) async { }
-    func onAutoModerationRuleUpdate(_: AutoModerationRule) async { }
-    func onAutoModerationRuleDelete(_: AutoModerationRule) async { }
-    func onAutoModerationActionExecution(_: AutoModerationActionExecution) async { }
+    // MARK: - Default Do-Nothings
+
+    @inlinable
+    func onEventHandlerStart() async throws -> Bool { true }
+    func onEventHandlerEnd() async throws { }
+
+    func onHeartbeat(lastSequenceNumber _: Int?) async throws { }
+    func onHello(_: Gateway.Hello) async throws { }
+    func onReady(_: Gateway.Ready) async throws { }
+    func onResumed() async throws { }
+    func onInvalidSession(canResume _: Bool) async throws { }
+    func onChannelCreate(_: DiscordChannel) async throws { }
+    func onChannelUpdate(_: DiscordChannel) async throws { }
+    func onChannelDelete(_: DiscordChannel) async throws { }
+    func onChannelPinsUpdate(_: Gateway.ChannelPinsUpdate) async throws { }
+    func onThreadCreate(_: DiscordChannel) async throws { }
+    func onThreadUpdate(_: DiscordChannel) async throws { }
+    func onThreadDelete(_: Gateway.ThreadDelete) async throws { }
+    func onThreadSyncList(_: Gateway.ThreadListSync) async throws { }
+    func onThreadMemberUpdate(_: Gateway.ThreadMemberUpdate) async throws { }
+    func onEntitlementCreate(_: Entitlement) async throws { }
+    func onEntitlementUpdate(_: Entitlement) async throws { }
+    func onEntitlementDelete(_: Entitlement) async throws { }
+    func onThreadMembersUpdate(_: Gateway.ThreadMembersUpdate) async throws { }
+    func onGuildCreate(_: Gateway.GuildCreate) async throws { }
+    func onGuildUpdate(_: Guild) async throws { }
+    func onGuildDelete(_: UnavailableGuild) async throws { }
+    func onGuildBanAdd(_: Gateway.GuildBan) async throws { }
+    func onGuildBanRemove(_: Gateway.GuildBan) async throws { }
+    func onGuildEmojisUpdate(_: Gateway.GuildEmojisUpdate) async throws { }
+    func onGuildStickersUpdate(_: Gateway.GuildStickersUpdate) async throws { }
+    func onGuildIntegrationsUpdate(_: Gateway.GuildIntegrationsUpdate) async throws { }
+    func onGuildMemberAdd(_: Gateway.GuildMemberAdd) async throws { }
+    func onGuildMemberRemove(_: Gateway.GuildMemberRemove) async throws { }
+    func onGuildMemberUpdate(_: Gateway.GuildMemberAdd) async throws { }
+    func onGuildMembersChunk(_: Gateway.GuildMembersChunk) async throws { }
+    func onRequestGuildMembers(_: Gateway.RequestGuildMembers) async throws { }
+    func onGuildRoleCreate(_: Gateway.GuildRole) async throws { }
+    func onGuildRoleUpdate(_: Gateway.GuildRole) async throws { }
+    func onGuildRoleDelete(_: Gateway.GuildRoleDelete) async throws { }
+    func onGuildScheduledEventCreate(_: GuildScheduledEvent) async throws { }
+    func onGuildScheduledEventUpdate(_: GuildScheduledEvent) async throws { }
+    func onGuildScheduledEventDelete(_: GuildScheduledEvent) async throws { }
+    func onGuildScheduledEventUserAdd(_: Gateway.GuildScheduledEventUser) async throws { }
+    func onGuildScheduledEventUserRemove(_: Gateway.GuildScheduledEventUser) async throws { }
+    func onGuildAuditLogEntryCreate(_: AuditLog.Entry) async throws { }
+    func onIntegrationCreate(_: Gateway.IntegrationCreate) async throws { }
+    func onIntegrationUpdate(_: Gateway.IntegrationCreate) async throws { }
+    func onIntegrationDelete(_: Gateway.IntegrationDelete) async throws { }
+    func onInteractionCreate(_: Interaction) async throws { }
+    func onInviteCreate(_: Gateway.InviteCreate) async throws { }
+    func onInviteDelete(_: Gateway.InviteDelete) async throws { }
+    func onMessageCreate(_: Gateway.MessageCreate) async throws { }
+    func onMessageUpdate(_: DiscordChannel.PartialMessage) async throws { }
+    func onMessageDelete(_: Gateway.MessageDelete) async throws { }
+    func onMessageDeleteBulk(_: Gateway.MessageDeleteBulk) async throws { }
+    func onMessageReactionAdd(_: Gateway.MessageReactionAdd) async throws { }
+    func onMessageReactionRemove(_: Gateway.MessageReactionRemove) async throws { }
+    func onMessageReactionRemoveAll(_: Gateway.MessageReactionRemoveAll) async throws { }
+    func onMessageReactionRemoveEmoji(_: Gateway.MessageReactionRemoveEmoji) async throws { }
+    func onPresenceUpdate(_: Gateway.PresenceUpdate) async throws { }
+    func onRequestPresenceUpdate(_: Gateway.Identify.Presence) async throws { }
+    func onStageInstanceCreate(_: StageInstance) async throws { }
+    func onStageInstanceDelete(_: StageInstance) async throws { }
+    func onStageInstanceUpdate(_: StageInstance) async throws { }
+    func onTypingStart(_: Gateway.TypingStart) async throws { }
+    func onUserUpdate(_: DiscordUser) async throws { }
+    func onVoiceStateUpdate(_: VoiceState) async throws { }
+    func onRequestVoiceStateUpdate(_: VoiceStateUpdate) async throws { }
+    func onVoiceServerUpdate(_: Gateway.VoiceServerUpdate) async throws { }
+    func onWebhooksUpdate(_: Gateway.WebhooksUpdate) async throws { }
+    func onApplicationCommandPermissionsUpdate(_: GuildApplicationCommandPermissions) async throws { }
+    func onAutoModerationRuleCreate(_: AutoModerationRule) async throws { }
+    func onAutoModerationRuleUpdate(_: AutoModerationRule) async throws { }
+    func onAutoModerationRuleDelete(_: AutoModerationRule) async throws { }
+    func onAutoModerationActionExecution(_: AutoModerationActionExecution) async throws { }
 }
 
 // MARK: - Handle
 extension GatewayEventHandler {
     @inlinable
     func handleAsync() async {
-        guard await self.onEventHandlerStart() else { return }
+        do {
+            guard try await self.onEventHandlerStart() else { return }
+        } catch {
+            logError(function: "onEventHandlerStart", error: error)
+            return
+        }
 
         switch event.data {
         case .none, .resume, .identify:
             /// Only sent, never received.
             break
         case let .heartbeat(lastSequenceNumber):
-            await onHeartbeat(lastSequenceNumber: lastSequenceNumber)
+            await withLogging(for: "onHeartbeat") {
+                try await onHeartbeat(lastSequenceNumber: lastSequenceNumber)
+            }
         case let .hello(hello):
-            await onHello(hello)
+            await withLogging(for: "onHello") {
+                try await onHello(hello)
+            }
         case let .ready(ready):
-            await onReady(ready)
+            await withLogging(for: "onReady") {
+                try await onReady(ready)
+            }
         case .resumed:
-            await onResumed()
+            await withLogging(for: "onResumed") {
+                try await onResumed()
+            }
         case let .invalidSession(canResume):
-            await onInvalidSession(canResume: canResume)
+            await withLogging(for: "onInvalidSession") {
+                try await onInvalidSession(canResume: canResume)
+            }
         case let .channelCreate(payload):
-            await onChannelCreate(payload)
+            await withLogging(for: "onChannelCreate") {
+                try await onChannelCreate(payload)
+            }
         case let .channelUpdate(payload):
-            await onChannelUpdate(payload)
+            await withLogging(for: "onChannelUpdate") {
+                try await onChannelUpdate(payload)
+            }
         case let .channelDelete(payload):
-            await onChannelDelete(payload)
+            await withLogging(for: "onChannelDelete") {
+                try await onChannelDelete(payload)
+            }
         case let .channelPinsUpdate(payload):
-            await onChannelPinsUpdate(payload)
+            await withLogging(for: "onChannelPinsUpdate") {
+                try await onChannelPinsUpdate(payload)
+            }
         case let .threadCreate(payload):
-            await onThreadCreate(payload)
+            await withLogging(for: "onThreadCreate") {
+                try await onThreadCreate(payload)
+            }
         case let .threadUpdate(payload):
-            await onThreadUpdate(payload)
+            await withLogging(for: "onThreadUpdate") {
+                try await onThreadUpdate(payload)
+            }
         case let .threadDelete(payload):
-            await onThreadDelete(payload)
+            await withLogging(for: "onThreadDelete") {
+                try await onThreadDelete(payload)
+            }
         case let .threadSyncList(payload):
-            await onThreadSyncList(payload)
+            await withLogging(for: "onThreadSyncList") {
+                try await onThreadSyncList(payload)
+            }
         case let .threadMemberUpdate(payload):
-            await onThreadMemberUpdate(payload)
+            await withLogging(for: "onThreadMemberUpdate") {
+                try await onThreadMemberUpdate(payload)
+            }
         case let .entitlementCreate(payload):
-            await onEntitlementCreate(payload)
+            await withLogging(for: "onEntitlementCreate") {
+                try await onEntitlementCreate(payload)
+            }
         case let .entitlementUpdate(payload):
-            await onEntitlementUpdate(payload)
+            await withLogging(for: "onEntitlementUpdate") {
+                try await onEntitlementUpdate(payload)
+            }
         case let .entitlementDelete(payload):
-            await onEntitlementDelete(payload)
+            await withLogging(for: "onEntitlementDelete") {
+                try await onEntitlementDelete(payload)
+            }
         case let .threadMembersUpdate(payload):
-            await onThreadMembersUpdate(payload)
+            await withLogging(for: "onThreadMembersUpdate") {
+                try await onThreadMembersUpdate(payload)
+            }
         case let .guildCreate(payload):
-            await onGuildCreate(payload)
+            await withLogging(for: "onGuildCreate") {
+                try await onGuildCreate(payload)
+            }
         case let .guildUpdate(payload):
-            await onGuildUpdate(payload)
+            await withLogging(for: "onGuildUpdate") {
+                try await onGuildUpdate(payload)
+            }
         case let .guildDelete(payload):
-            await onGuildDelete(payload)
+            await withLogging(for: "onGuildDelete") {
+                try await onGuildDelete(payload)
+            }
         case let .guildBanAdd(payload):
-            await onGuildBanAdd(payload)
+            await withLogging(for: "onGuildBanAdd") {
+                try await onGuildBanAdd(payload)
+            }
         case let .guildBanRemove(payload):
-            await onGuildBanRemove(payload)
+            await withLogging(for: "onGuildBanRemove") {
+                try await onGuildBanRemove(payload)
+            }
         case let .guildEmojisUpdate(payload):
-            await onGuildEmojisUpdate(payload)
+            await withLogging(for: "onGuildEmojisUpdate") {
+                try await onGuildEmojisUpdate(payload)
+            }
         case let .guildStickersUpdate(payload):
-            await onGuildStickersUpdate(payload)
+            await withLogging(for: "onGuildStickersUpdate") {
+                try await onGuildStickersUpdate(payload)
+            }
         case let .guildIntegrationsUpdate(payload):
-            await onGuildIntegrationsUpdate(payload)
+            await withLogging(for: "onGuildIntegrationsUpdate") {
+                try await onGuildIntegrationsUpdate(payload)
+            }
         case let .guildMemberAdd(payload):
-            await onGuildMemberAdd(payload)
+            await withLogging(for: "onGuildMemberAdd") {
+                try await onGuildMemberAdd(payload)
+            }
         case let .guildMemberRemove(payload):
-            await onGuildMemberRemove(payload)
+            await withLogging(for: "onGuildMemberRemove") {
+                try await onGuildMemberRemove(payload)
+            }
         case let .guildMemberUpdate(payload):
-            await onGuildMemberUpdate(payload)
+            await withLogging(for: "onGuildMemberUpdate") {
+                try await onGuildMemberUpdate(payload)
+            }
         case let .guildMembersChunk(payload):
-            await onGuildMembersChunk(payload)
+            await withLogging(for: "onGuildMembersChunk") {
+                try await onGuildMembersChunk(payload)
+            }
         case let .requestGuildMembers(payload):
-            await onRequestGuildMembers(payload)
+            await withLogging(for: "onRequestGuildMembers") {
+                try await onRequestGuildMembers(payload)
+            }
         case let .guildRoleCreate(payload):
-            await onGuildRoleCreate(payload)
+            await withLogging(for: "onGuildRoleCreate") {
+                try await onGuildRoleCreate(payload)
+            }
         case let .guildRoleUpdate(payload):
-            await onGuildRoleUpdate(payload)
+            await withLogging(for: "onGuildRoleUpdate") {
+                try await onGuildRoleUpdate(payload)
+            }
         case let .guildRoleDelete(payload):
-            await onGuildRoleDelete(payload)
+            await withLogging(for: "onGuildRoleDelete") {
+                try await onGuildRoleDelete(payload)
+            }
         case let .guildScheduledEventCreate(payload):
-            await onGuildScheduledEventCreate(payload)
+            await withLogging(for: "onGuildScheduledEventCreate") {
+                try await onGuildScheduledEventCreate(payload)
+            }
         case let .guildScheduledEventUpdate(payload):
-            await onGuildScheduledEventUpdate(payload)
+            await withLogging(for: "onGuildScheduledEventUpdate") {
+                try await onGuildScheduledEventUpdate(payload)
+            }
         case let .guildScheduledEventDelete(payload):
-            await onGuildScheduledEventDelete(payload)
+            await withLogging(for: "onGuildScheduledEventDelete") {
+                try await onGuildScheduledEventDelete(payload)
+            }
         case let .guildScheduledEventUserAdd(payload):
-            await onGuildScheduledEventUserAdd(payload)
+            await withLogging(for: "onGuildScheduledEventUserAdd") {
+                try await onGuildScheduledEventUserAdd(payload)
+            }
         case let .guildScheduledEventUserRemove(payload):
-            await onGuildScheduledEventUserRemove(payload)
+            await withLogging(for: "onGuildScheduledEventUserRemove") {
+                try await onGuildScheduledEventUserRemove(payload)
+            }
         case let .guildAuditLogEntryCreate(payload):
-            await onGuildAuditLogEntryCreate(payload)
+            await withLogging(for: "onGuildAuditLogEntryCreate") {
+                try await onGuildAuditLogEntryCreate(payload)
+            }
         case let .integrationCreate(payload):
-            await onIntegrationCreate(payload)
+            await withLogging(for: "onIntegrationCreate") {
+                try await onIntegrationCreate(payload)
+            }
         case let .integrationUpdate(payload):
-            await onIntegrationUpdate(payload)
+            await withLogging(for: "onIntegrationUpdate") {
+                try await onIntegrationUpdate(payload)
+            }
         case let .integrationDelete(payload):
-            await onIntegrationDelete(payload)
+            await withLogging(for: "onIntegrationDelete") {
+                try await onIntegrationDelete(payload)
+            }
         case let .interactionCreate(payload):
-            await onInteractionCreate(payload)
+            await withLogging(for: "onInteractionCreate") {
+                try await onInteractionCreate(payload)
+            }
         case let .inviteCreate(payload):
-            await onInviteCreate(payload)
+            await withLogging(for: "onInviteCreate") {
+                try await onInviteCreate(payload)
+            }
         case let .inviteDelete(payload):
-            await onInviteDelete(payload)
+            await withLogging(for: "onInviteDelete") {
+                try await onInviteDelete(payload)
+            }
         case let .messageCreate(payload):
-            await onMessageCreate(payload)
+            await withLogging(for: "onMessageCreate") {
+                try await onMessageCreate(payload)
+            }
         case let .messageUpdate(payload):
-            await onMessageUpdate(payload)
+            await withLogging(for: "onMessageUpdate") {
+                try await onMessageUpdate(payload)
+            }
         case let .messageDelete(payload):
-            await onMessageDelete(payload)
+            await withLogging(for: "onMessageDelete") {
+                try await onMessageDelete(payload)
+            }
         case let .messageDeleteBulk(payload):
-            await onMessageDeleteBulk(payload)
+            await withLogging(for: "onMessageDeleteBulk") {
+                try await onMessageDeleteBulk(payload)
+            }
         case let .messageReactionAdd(payload):
-            await onMessageReactionAdd(payload)
+            await withLogging(for: "onMessageReactionAdd") {
+                try await onMessageReactionAdd(payload)
+            }
         case let .messageReactionRemove(payload):
-            await onMessageReactionRemove(payload)
+            await withLogging(for: "onMessageReactionRemove") {
+                try await onMessageReactionRemove(payload)
+            }
         case let .messageReactionRemoveAll(payload):
-            await onMessageReactionRemoveAll(payload)
+            await withLogging(for: "onMessageReactionRemoveAll") {
+                try await onMessageReactionRemoveAll(payload)
+            }
         case let .messageReactionRemoveEmoji(payload):
-            await onMessageReactionRemoveEmoji(payload)
+            await withLogging(for: "onMessageReactionRemoveEmoji") {
+                try await onMessageReactionRemoveEmoji(payload)
+            }
         case let .presenceUpdate(payload):
-            await onPresenceUpdate(payload)
+            await withLogging(for: "onPresenceUpdate") {
+                try await onPresenceUpdate(payload)
+            }
         case let .requestPresenceUpdate(payload):
-            await onRequestPresenceUpdate(payload)
+            await withLogging(for: "onRequestPresenceUpdate") {
+                try await onRequestPresenceUpdate(payload)
+            }
         case let .stageInstanceCreate(payload):
-            await onStageInstanceCreate(payload)
+            await withLogging(for: "onStageInstanceCreate") {
+                try await onStageInstanceCreate(payload)
+            }
         case let .stageInstanceDelete(payload):
-            await onStageInstanceDelete(payload)
+            await withLogging(for: "onStageInstanceDelete") {
+                try await onStageInstanceDelete(payload)
+            }
         case let .stageInstanceUpdate(payload):
-            await onStageInstanceUpdate(payload)
+            await withLogging(for: "onStageInstanceUpdate") {
+                try await onStageInstanceUpdate(payload)
+            }
         case let .typingStart(payload):
-            await onTypingStart(payload)
+            await withLogging(for: "onTypingStart") {
+                try await onTypingStart(payload)
+            }
         case let .userUpdate(payload):
-            await onUserUpdate(payload)
+            await withLogging(for: "onUserUpdate") {
+                try await onUserUpdate(payload)
+            }
         case let .voiceStateUpdate(payload):
-            await onVoiceStateUpdate(payload)
+            await withLogging(for: "onVoiceStateUpdate") {
+                try await onVoiceStateUpdate(payload)
+            }
         case let .requestVoiceStateUpdate(payload):
-            await onRequestVoiceStateUpdate(payload)
+            await withLogging(for: "onRequestVoiceStateUpdate") {
+                try await onRequestVoiceStateUpdate(payload)
+            }
         case let .voiceServerUpdate(payload):
-            await onVoiceServerUpdate(payload)
+            await withLogging(for: "onVoiceServerUpdate") {
+                try await onVoiceServerUpdate(payload)
+            }
         case let .webhooksUpdate(payload):
-            await onWebhooksUpdate(payload)
+            await withLogging(for: "onWebhooksUpdate") {
+                try await onWebhooksUpdate(payload)
+            }
         case let .applicationCommandPermissionsUpdate(payload):
-            await onApplicationCommandPermissionsUpdate(payload)
+            await withLogging(for: "onApplicationCommandPermissionsUpdate") {
+                try await onApplicationCommandPermissionsUpdate(payload)
+            }
         case let .autoModerationRuleCreate(payload):
-            await onAutoModerationRuleCreate(payload)
+            await withLogging(for: "onAutoModerationRuleCreate") {
+                try await onAutoModerationRuleCreate(payload)
+            }
         case let .autoModerationRuleUpdate(payload):
-            await onAutoModerationRuleUpdate(payload)
+            await withLogging(for: "onAutoModerationRuleUpdate") {
+                try await onAutoModerationRuleUpdate(payload)
+            }
         case let .autoModerationRuleDelete(payload):
-            await onAutoModerationRuleDelete(payload)
+            await withLogging(for: "onAutoModerationRuleDelete") {
+                try await onAutoModerationRuleDelete(payload)
+            }
         case let .autoModerationActionExecution(payload):
-            await onAutoModerationActionExecution(payload)
+            await withLogging(for: "onAutoModerationActionExecution") {
+                try await onAutoModerationActionExecution(payload)
+            }
         }
 
-        await onEventHandlerEnd()
+        await withLogging(for: "onEventHandlerEnd") {
+            try await onEventHandlerEnd()
+        }
+    }
+
+    @usableFromInline
+    func withLogging(for function: String, block: () async throws -> Void) async {
+        do {
+            try await block()
+        } catch {
+            logError(function: function, error: error)
+        }
+    }
+
+    @usableFromInline
+    func logError(function: String, error: any Error) {
+        logger.error("GatewayEventHandler produced an error", metadata: [
+            "function": .string(function),
+            "error": .string(String(reflecting: error))
+        ])
     }
 }
