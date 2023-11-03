@@ -2877,7 +2877,7 @@ private actor GatewayTester {
 
             let expectation = Expectation(description: "GatewayTesterConnect")
 
-            let stream = await self.bot!.makeEventsStream()
+            let stream = await self.bot!.events
             Task {
                 for await event in stream {
                     if case .ready = event.data {

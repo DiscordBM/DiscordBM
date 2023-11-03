@@ -49,7 +49,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let connectionInfo = ConnectionInfo()
 
         Task {
-            for await event in await bot.makeEventsStream() {
+            for await event in await bot.events {
                 if case let .ready(ready) = event.data {
                     await connectionInfo.setReady(ready)
                     expectation.fulfill()
@@ -62,7 +62,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         }
 
         Task {
-            for await (error, buffer) in await bot.makeEventsParseFailureStream() {
+            for await (error, buffer) in await bot.eventFailures {
                 /// Parsing failures are not the end of the world.
                 /// They might even be acceptable.
                 /// However since we know this gateway manager won't do much more than
@@ -125,6 +125,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let counter = ShardCounter(shardCount: shardCount)
 
         Task {
+            /// Keeping this `.makeEventsStream()` to make sure the func still works.
             for await event in await bot.makeEventsStream() {
                 if case let .ready(ready) = event.data {
                     let shardIdx = try XCTUnwrap(ready.shard?.first)
@@ -173,7 +174,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let didReceiveAnythingOtherThanHello = ManagedAtomic(false)
 
         Task {
-            for await event in await bot.makeEventsStream() {
+            for await event in await bot.events {
                 if case .hello = event.data {
                     expectation.fulfill()
                 } else {
@@ -225,7 +226,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let expectation = Expectation(description: "Connected")
 
         Task {
-            for await event in await bot.makeEventsStream() {
+            for await event in await bot.events {
                 if case .ready = event.data {
                     expectation.fulfill()
                 }
