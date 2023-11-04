@@ -203,6 +203,11 @@ class DiscordModelsTests: XCTestCase {
             """
             _ = try JSONDecoder().decode(Gateway.Event.self, from: Data(text.utf8))
         }
+
+        do {
+            let text = #"{"t":"GUILD_AUDIT_LOG_ENTRY_CREATE","s":451,"op":0,"d":{"user_id":"235148962103951360","target_id":"930562427983130635","reason":"Normal reaction role","id":"1170341258422669332","changes":[{"new_value":[{"name":"sahne","id":"1010902088533938188"}],"key":"$add"}],"action_type":25,"guild_id":"922186320275722322"}}"#
+            _ = try JSONDecoder().decode(Gateway.Event.self, from: Data(text.utf8))
+        }
     }
 
     func testImageData() throws {

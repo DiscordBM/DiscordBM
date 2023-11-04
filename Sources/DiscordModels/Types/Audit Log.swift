@@ -465,8 +465,8 @@ public struct AuditLog: Sendable, Codable {
                 case .memberBanRemove: self = .memberBanRemove
                 case .memberUpdate: self = .memberUpdate
                 case .memberRoleUpdate:
-                    let container = try optionsNestedContainer()
-                    let integration_type = try container.decodeIfPresent(
+                    let container = try? optionsNestedContainer()
+                    let integration_type = try container?.decodeIfPresent(
                         Integration.Kind.self,
                         forKey: .integration_type
                     )
