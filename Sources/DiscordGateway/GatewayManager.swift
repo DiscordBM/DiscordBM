@@ -36,17 +36,13 @@ public protocol GatewayManager: AnyActor {
 extension GatewayManager {
     public var events: DiscordAsyncSequence<Gateway.Event> {
         get async {
-            await DiscordAsyncSequence<Gateway.Event>(
-                base: self.makeEventsStream()
-            )
+            await .init(base: self.makeEventsStream())
         }
     }
 
     public var eventFailures: DiscordAsyncSequence<(any Error, ByteBuffer)> {
         get async {
-            await DiscordAsyncSequence<(any Error, ByteBuffer)>(
-                base: self.makeEventsParseFailureStream()
-            )
+            await .init(base: self.makeEventsParseFailureStream())
         }
     }
 }
