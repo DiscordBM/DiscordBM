@@ -55,6 +55,27 @@ public actor ShardingGatewayManager: GatewayManager {
     var eventsStreamContinuations = [AsyncStream<Gateway.Event>.Continuation]()
     var eventsParseFailureContinuations = [AsyncStream<(any Error, ByteBuffer)>.Continuation]()
 
+    /// An async sequence of Gateway events.
+    public var events: DiscordAsyncSequence<Gateway.Event> {
+        DiscordAsyncSequence<Gateway.Event>(
+            base: AsyncStream<Gateway.Event> { continuation in
+                for manager in self.managers {
+                    Task { await manager.addEventsContinuation(continuation) }
+                }
+            }
+        )
+    }
+    /// An async sequence of Gateway event parse failures.
+    public var eventFailures: DiscordAsyncSequence<(any Error, ByteBuffer)> {
+        DiscordAsyncSequence<(any Error, ByteBuffer)>(
+            base: AsyncStream<(any Error, ByteBuffer)> { continuation in
+                for manager in self.managers {
+                    Task { await manager.addEventsParseFailureContinuation(continuation) }
+                }
+            }
+        )
+    }
+
     //MARK: Connection data
     public nonisolated let identifyPayload: Gateway.Identify
 
@@ -198,21 +219,15 @@ public actor ShardingGatewayManager: GatewayManager {
     }
 
     /// Makes an stream of Gateway events.
+    @available(*, deprecated, renamed: "eventFailures")
     public func makeEventsStream() async -> AsyncStream<Gateway.Event> {
-        return AsyncStream<Gateway.Event> { continuation in
-            for manager in self.managers {
-                Task { await manager.addEventsContinuation(continuation) }
-            }
-        }
+        self.events.base
     }
 
     /// Makes an stream of Gateway event parse failures.
+    @available(*, deprecated, renamed: "eventFailures")
     public func makeEventsParseFailureStream() async -> AsyncStream<(any Error, ByteBuffer)> {
-        return AsyncStream<(any Error, ByteBuffer)> { continuation in
-            for manager in self.managers {
-                Task { await manager.addEventsParseFailureContinuation(continuation) }
-            }
-        }
+        self.eventFailures.base
     }
 
     /// Disconnects all shards from Discord.

@@ -49,7 +49,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let connectionInfo = ConnectionInfo()
 
         Task {
-            for await event in await bot.makeEventsStream() {
+            for await event in await bot.events {
                 if case let .ready(ready) = event.data {
                     await connectionInfo.setReady(ready)
                     expectation.fulfill()
@@ -62,13 +62,20 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         }
 
         Task {
-            for await (error, buffer) in await bot.makeEventsParseFailureStream() {
-                /// Parsing failures are not the end of the world.
-                /// They might even be acceptable.
-                /// However since we know this gateway manager won't do much more than
-                /// the basic regular stuff like identify/ping-pong, it shouldn't throw
-                /// parsing errors for those.
-                XCTFail("Received parsing failure. Error: \(error), buffer: \(buffer), string-buffer: \(String(buffer: buffer))")
+            /// Trying to keep `.makeEventsParseFailureStream()` to make sure the func still works.
+            /// Parsing failures are not the end of the world.
+            /// They might even be acceptable.
+            /// However since we know this gateway manager won't do much more than
+            /// the basic regular stuff like identify/ping-pong, it shouldn't throw
+            /// parsing errors for those.
+            if Bool.random() {
+                for await (error, buffer) in await bot.eventFailures {
+                    XCTFail("Received parsing failure. Error: \(error), buffer: \(buffer), string-buffer: \(String(buffer: buffer))")
+                }
+            } else {
+                for await (error, buffer) in await bot.makeEventsParseFailureStream() {
+                    XCTFail("Received parsing failure. Error: \(error), buffer: \(buffer), string-buffer: \(String(buffer: buffer))")
+                }
             }
         }
 
@@ -125,7 +132,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let counter = ShardCounter(shardCount: shardCount)
 
         Task {
-            for await event in await bot.makeEventsStream() {
+            func handleEvent(_ event: Gateway.Event) async throws {
                 if case let .ready(ready) = event.data {
                     let shardIdx = try XCTUnwrap(ready.shard?.first)
                     await counter.increase(shardIdx: shardIdx)
@@ -133,6 +140,16 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
                     XCTFail("Received invalid session in a shard")
                 } else {
                     /// Do nothing
+                }
+            }
+            /// Trying to keep `.makeEventsStream()` to make sure the func still works.
+            if Bool.random() {
+                for await event in await bot.events {
+                    try await handleEvent(event)
+                }
+            } else {
+                for await event in await bot.makeEventsStream() {
+                    try await handleEvent(event)
                 }
             }
         }
@@ -173,6 +190,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let didReceiveAnythingOtherThanHello = ManagedAtomic(false)
 
         Task {
+            /// Trying to keep `.makeEventsStream()` to make sure the func still works.
             for await event in await bot.makeEventsStream() {
                 if case .hello = event.data {
                     expectation.fulfill()
@@ -225,7 +243,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let expectation = Expectation(description: "Connected")
 
         Task {
-            for await event in await bot.makeEventsStream() {
+            for await event in await bot.events {
                 if case .ready = event.data {
                     expectation.fulfill()
                 }

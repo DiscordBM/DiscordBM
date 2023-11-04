@@ -110,12 +110,9 @@ struct EntryPoint {
         /// Don't use `Task { }` if you care and want to wait
         Task { await bot.connect() }
 
-        /// Get an `AsyncStream` of `Gateway.Event`s
-        let stream = await bot.makeEventsStream()
-
-        /// Handle each event in the stream
+        /// Handle each event in the `bot.events` async stream
         /// This stream will never end, therefore preventing your executable from exiting
-        for await event in stream {
+        for await event in await bot.events {
             EventHandler(event: event, client: bot.client).handle()
         }
     }
@@ -198,8 +195,7 @@ try await bot.client
     .guardSuccess() /// Throw an error if not successful
 
 /// Use the events-stream later since the for-loop blocks the function
-let eventsStream = await bot.makeEventsStream()
-for await event in eventsStream {
+for await event in await bot.events {
     EventHandler(event: event, client: bot.client).handle()
 }
 ```
