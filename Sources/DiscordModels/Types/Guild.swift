@@ -39,6 +39,34 @@ public struct Guild: Sendable, Codable {
             self.flags = guildMemberAdd.flags
             self.communication_disabled_until = guildMemberAdd.communication_disabled_until
         }
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            self.user = try container.decodeIfPresent(DiscordUser.self, forKey: .user)
+            self.nick = try container.decodeIfPresent(String.self, forKey: .nick)
+            self.avatar = try container.decodeIfPresent(String.self, forKey: .avatar)
+            self.roles = try container.decode([RoleSnowflake].self, forKey: .roles)
+            self.joined_at = try container.decodeIfPresent(
+                DiscordTimestamp.self,
+                forKey: .joined_at
+            ) ?? .init(date: .distantFuture)
+            self.premium_since = try container.decodeIfPresent(
+                DiscordTimestamp.self,
+                forKey: .premium_since
+            )
+            self.deaf = try container.decodeIfPresent(Bool.self, forKey: .deaf)
+            self.mute = try container.decodeIfPresent(Bool.self, forKey: .mute)
+            self.flags = try container.decodeIfPresent(IntBitField<Guild.Member.Flag>.self, forKey: .flags)
+            self.pending = try container.decodeIfPresent(Bool.self, forKey: .pending)
+            self.permissions = try container.decodeIfPresent(
+                StringBitField<Permission>.self,
+                forKey: .permissions
+            )
+            self.communication_disabled_until = try container.decodeIfPresent(
+                DiscordTimestamp.self,
+                forKey: .communication_disabled_until
+            )
+        }
     }
     
     /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level

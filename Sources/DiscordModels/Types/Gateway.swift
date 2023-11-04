@@ -854,6 +854,31 @@ public struct Gateway: Sendable, Codable {
         public var flags: IntBitField<Guild.Member.Flag>?
         public var pending: Bool?
         public var communication_disabled_until: DiscordTimestamp?
+
+        public init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            self.guild_id = try container.decode(GuildSnowflake.self, forKey: .guild_id)
+            self.roles = try container.decode([RoleSnowflake].self, forKey: .roles)
+            self.user = try container.decode(DiscordUser.self, forKey: .user)
+            self.nick = try container.decodeIfPresent(String.self, forKey: .nick)
+            self.avatar = try container.decodeIfPresent(String.self, forKey: .avatar)
+            self.joined_at = try container.decodeIfPresent(
+                DiscordTimestamp.self,
+                forKey: .joined_at
+            ) ?? .init(date: .distantFuture)
+            self.premium_since = try container.decodeIfPresent(
+                DiscordTimestamp.self,
+                forKey: .premium_since
+            )
+            self.deaf = try container.decodeIfPresent(Bool.self, forKey: .deaf)
+            self.mute = try container.decodeIfPresent(Bool.self, forKey: .mute)
+            self.flags = try container.decodeIfPresent(IntBitField<Guild.Member.Flag>.self, forKey: .flags)
+            self.pending = try container.decodeIfPresent(Bool.self, forKey: .pending)
+            self.communication_disabled_until = try container.decodeIfPresent(
+                DiscordTimestamp.self,
+                forKey: .communication_disabled_until
+            )
+        }
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#guild-member-remove-guild-member-remove-event-fields
