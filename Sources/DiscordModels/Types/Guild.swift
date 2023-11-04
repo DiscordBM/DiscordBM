@@ -40,7 +40,7 @@ public struct Guild: Sendable, Codable {
             self.communication_disabled_until = guildMemberAdd.communication_disabled_until
         }
 
-        public init(from decoder: Decoder) throws {
+        public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self.user = try container.decodeIfPresent(DiscordUser.self, forKey: .user)
             self.nick = try container.decodeIfPresent(String.self, forKey: .nick)
