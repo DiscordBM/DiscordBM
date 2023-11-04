@@ -12,7 +12,7 @@ public protocol GatewayManager: AnyActor {
     nonisolated var identifyPayload: Gateway.Identify { get }
     /// An stream of Gateway events.
     var events: DiscordAsyncSequence<Gateway.Event> { get async }
-    /// Makes an stream of Gateway event parse failures.
+    /// An stream of Gateway event parse failures.
     var eventFailures: DiscordAsyncSequence<(any Error, ByteBuffer)> { get async }
     /// Connects to Discord.
     func connect() async
