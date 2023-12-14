@@ -506,7 +506,8 @@ public enum Payloads {
         public var attachments: [Attachment]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var thread_name: String?
-        
+        public var applied_tags: [ForumTagSnowflake]?
+
         enum CodingKeys: CodingKey {
             case content
             case username
@@ -518,9 +519,10 @@ public enum Payloads {
             case attachments
             case flags
             case thread_name
+            case applied_tags
         }
         
-        public init(content: String? = nil, username: String? = nil, avatar_url: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, thread_name: String? = nil) {
+        public init(content: String? = nil, username: String? = nil, avatar_url: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, thread_name: String? = nil, applied_tags: [ForumTagSnowflake]? = nil) {
             self.content = content
             self.username = username
             self.avatar_url = avatar_url
@@ -532,6 +534,7 @@ public enum Payloads {
             self.attachments = attachments
             self.flags = flags
             self.thread_name = thread_name
+            self.applied_tags = applied_tags
         }
         
         public func validate() -> [ValidationFailure] {
