@@ -30,7 +30,7 @@
 * Abstractions for easier testability.
 
 ## Showcase
-Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/DiscordFactory.swift#L1). 
+Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Services/DiscordService/DiscordService.swift#L1). 
 
 ## How To Use
   
@@ -317,7 +317,7 @@ enum DiscordCommand: String, CaseIterable {
         case .echo:
             return "Echos what you say"
         case .link:
-            return "Links your accounts in Penny"
+            return "Links your accounts "
         }
     }
 
