@@ -38,7 +38,24 @@ public actor BotGatewayManager: GatewayManager {
     //MARK: Event streams
     var eventsStreamContinuations = [AsyncStream<Gateway.Event>.Continuation]()
     var eventsParseFailureContinuations = [AsyncStream<(any Error, ByteBuffer)>.Continuation]()
-    
+
+    /// An async sequence of Gateway events.
+    public var events: DiscordAsyncSequence<Gateway.Event> {
+        DiscordAsyncSequence<Gateway.Event>(
+            base: AsyncStream<Gateway.Event> { continuation in
+                self.eventsStreamContinuations.append(continuation)
+            }
+        )
+    }
+    /// An async sequence of Gateway event parse failures.
+    public var eventFailures: DiscordAsyncSequence<(any Error, ByteBuffer)> {
+        DiscordAsyncSequence<(any Error, ByteBuffer)>(
+            base: AsyncStream<(any Error, ByteBuffer)> { continuation in
+                self.eventsParseFailureContinuations.append(continuation)
+            }
+        )
+    }
+
     //MARK: Connection data
     public nonisolated let identifyPayload: Gateway.Identify
     
@@ -310,17 +327,15 @@ public actor BotGatewayManager: GatewayManager {
     }
 
     /// Makes an stream of Gateway events.
+    @available(*, deprecated, renamed: "events")
     public func makeEventsStream() -> AsyncStream<Gateway.Event> {
-        AsyncStream<Gateway.Event> { continuation in
-            self.eventsStreamContinuations.append(continuation)
-        }
+        self.events.base
     }
 
     /// Makes an stream of Gateway event parse failures.
+    @available(*, deprecated, renamed: "eventFailures")
     public func makeEventsParseFailureStream() -> AsyncStream<(any Error, ByteBuffer)> {
-        AsyncStream<(any Error, ByteBuffer)> { continuation in
-            self.eventsParseFailureContinuations.append(continuation)
-        }
+        self.eventFailures.base
     }
     
     /// Disconnects from Discord.

@@ -72,6 +72,7 @@ struct API: Decodable {
                 case channels = "Channels"
                 case commands = "Commands"
                 case emoji = "Emoji"
+                case entitlements = "Entitlements"
                 case gateway = "Gateway"
                 case guilds = "Guilds"
                 case guildTemplates = "Guild Templates"
@@ -83,6 +84,7 @@ struct API: Decodable {
                 case roles = "Roles"
                 case roleConnections = "Role Connections"
                 case scheduledEvents = "Scheduled Events"
+                case skus = "SKUs"
                 case stages = "Stages"
                 case stickers = "Stickers"
                 case threads = "Threads"
@@ -92,22 +94,24 @@ struct API: Decodable {
                 
                 var priority: Int {
                     switch self {
-                    case .autoMod: return 22
-                    case .auditLog: return 21
-                    case .channels: return 20
-                    case .commands: return 19
-                    case .emoji: return 18
-                    case .gateway: return 17
-                    case .guilds: return 16
-                    case .guildTemplates: return 15
-                    case .interactions: return 14
-                    case .invites: return 13
-                    case .members: return 12
-                    case .messages: return 11
-                    case .oAuth: return 10
-                    case .roles: return 9
-                    case .roleConnections: return 8
-                    case .scheduledEvents: return 7
+                    case .autoMod: return 24
+                    case .auditLog: return 23
+                    case .channels: return 22
+                    case .commands: return 21
+                    case .emoji: return 20
+                    case .entitlements: return 19
+                    case .gateway: return 18
+                    case .guilds: return 17
+                    case .guildTemplates: return 16
+                    case .interactions: return 15
+                    case .invites: return 14
+                    case .members: return 13
+                    case .messages: return 12
+                    case .oAuth: return 11
+                    case .roles: return 10
+                    case .roleConnections: return 9
+                    case .scheduledEvents: return 8
+                    case .skus: return 7
                     case .stages: return 6
                     case .stickers: return 5
                     case .threads: return 4
@@ -124,6 +128,7 @@ struct API: Decodable {
                     case .channels: return true
                     case .commands: return true
                     case .emoji: return true
+                    case .entitlements: return true
                     case .gateway: return true
                     case .guilds: return true
                     case .guildTemplates: return true
@@ -135,6 +140,7 @@ struct API: Decodable {
                     case .roles: return true
                     case .roleConnections: return true
                     case .scheduledEvents: return true
+                    case .skus: return true
                     case .stages: return true
                     case .stickers: return true
                     case .threads: return true
@@ -156,6 +162,8 @@ struct API: Decodable {
                         return "https://discord.com/developers/docs/interactions/application-commands"
                     case .emoji:
                         return "https://discord.com/developers/docs/resources/emoji"
+                    case .entitlements:
+                        return "https://discord.com/developers/docs/monetization/entitlements"
                     case .gateway:
                         return "https://discord.com/developers/docs/topics/gateway"
                     case .guilds:
@@ -178,6 +186,8 @@ struct API: Decodable {
                         return "https://discord.com/developers/docs/resources/user"
                     case .scheduledEvents:
                         return "https://discord.com/developers/docs/resources/guild-scheduled-event"
+                    case .skus:
+                        return "https://discord.com/developers/docs/monetization/skus"
                     case .stages:
                         return "https://discord.com/developers/docs/resources/stage-instance"
                     case .stickers:
@@ -216,10 +226,6 @@ struct API: Decodable {
                 var `in`: In
                 var schema: Schema
                 var required: Bool?
-                var description: String?
-                var example: String
-                /// var requestBody
-                /// var responses
             }
             
             var tags: [Tag]
@@ -271,6 +277,10 @@ struct API: Decodable {
                                 type = "AnySnowflake"
                             case "webhookId":
                                 type = "WebhookSnowflake"
+                            case "entitlementId":
+                                type = "EntitlementSnowflake"
+                            case "skuId":
+                                type = "SKUSnowflake"
                             case let name where name.hasSuffix("Id"):
                                 print("Unhandled ID type: '\(paramName)'")
                                 fatalError("Unhandled ID type: '\(paramName)'")

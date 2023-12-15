@@ -93,6 +93,8 @@ public enum Payloads {
             case applicationCommandAutoCompleteResult = 8
             /// A modal.
             case modal = 9
+            /// Indication that user needs to unlock/buy this capability.
+            case premiumRequired = 10
         }
 
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-messages
@@ -136,6 +138,8 @@ public enum Payloads {
                     reason: "Can only contain 'suppressEmbeds' and 'ephemeral'",
                     allowed: [.suppressEmbeds, .ephemeral]
                 )
+                validateElementCountDoesNotExceed(components, max: 5, name: "components")
+                components?.validate()
                 attachments?.validate()
                 embeds?.validate()
             }
@@ -296,6 +300,11 @@ public enum Payloads {
         /// Creates a response of type `Kind.modal`.
         public static func modal(_ modal: Modal) -> Self {
             .init(type: .modal, data: .modal(modal))
+        }
+
+        /// Creates a response of type `Kind.premiumRequired`.
+        public static func premiumRequired(isEphemeral: Bool = false) -> Self {
+            .init(type: .premiumRequired, data: .flags(.init(isEphemeral: isEphemeral)))
         }
     }
 
@@ -497,7 +506,8 @@ public enum Payloads {
         public var attachments: [Attachment]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var thread_name: String?
-        
+        public var applied_tags: [ForumTagSnowflake]?
+
         enum CodingKeys: CodingKey {
             case content
             case username
@@ -509,9 +519,10 @@ public enum Payloads {
             case attachments
             case flags
             case thread_name
+            case applied_tags
         }
         
-        public init(content: String? = nil, username: String? = nil, avatar_url: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, thread_name: String? = nil) {
+        public init(content: String? = nil, username: String? = nil, avatar_url: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, thread_name: String? = nil, applied_tags: [ForumTagSnowflake]? = nil) {
             self.content = content
             self.username = username
             self.avatar_url = avatar_url
@@ -523,6 +534,7 @@ public enum Payloads {
             self.attachments = attachments
             self.flags = flags
             self.thread_name = thread_name
+            self.applied_tags = applied_tags
         }
         
         public func validate() -> [ValidationFailure] {
@@ -696,8 +708,8 @@ public enum Payloads {
         }
     }
     
-    public struct CreateThreadInForumChannel: Sendable, Encodable, ValidatablePayload {
-        
+    public struct CreateThreadInForumChannel: Sendable, MultipartEncodable, ValidatablePayload {
+
         /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel-forum-thread-message-params-object
         public struct ForumMessage: Sendable, MultipartEncodable, ValidatablePayload {
             public var content: String?
@@ -764,7 +776,18 @@ public enum Payloads {
         public var rate_limit_per_user: Int?
         public var message: ForumMessage
         public var applied_tags: [ForumTagSnowflake]?
-        
+        public var files: [RawFile]? {
+            message.files
+        }
+
+        enum CodingKeys: String, CodingKey {
+            case name
+            case auto_archive_duration
+            case rate_limit_per_user
+            case message
+            case applied_tags
+        }
+
         public init(
             name: String,
             auto_archive_duration: DiscordChannel.AutoArchiveDuration? = nil,
@@ -1739,12 +1762,14 @@ public enum Payloads {
         public var topic: String
         public var privacy_level: StageInstance.PrivacyLevel?
         public var send_start_notification: Bool?
+        public var guild_scheduled_event_id: GuildScheduledEventSnowflake?
 
-        public init(channel_id: ChannelSnowflake, topic: String, privacy_level: StageInstance.PrivacyLevel? = nil, send_start_notification: Bool? = nil) {
+        public init(channel_id: ChannelSnowflake, topic: String, privacy_level: StageInstance.PrivacyLevel? = nil, send_start_notification: Bool? = nil, guild_scheduled_event_id: GuildScheduledEventSnowflake? = nil) {
             self.channel_id = channel_id
             self.topic = topic
             self.privacy_level = privacy_level
             self.send_start_notification = send_start_notification
+            self.guild_scheduled_event_id = guild_scheduled_event_id
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1890,5 +1915,74 @@ public enum Payloads {
         }
 
         public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement-json-params
+    public struct CreateTestEntitlement: Sendable, Encodable, ValidatablePayload {
+
+        public enum OwnerKind: Int, Sendable, Codable {
+            case guildSubscription = 1
+            case userSubscription = 2
+        }
+
+        public var sku_id: SKUSnowflake
+        public var owner_id: AnySnowflake
+        public var owner_type: OwnerKind
+
+        public init(sku_id: SKUSnowflake, owner_id: GuildSnowflake) {
+            self.sku_id = sku_id
+            self.owner_id = AnySnowflake(owner_id)
+            self.owner_type = .guildSubscription
+        }
+
+        public init(sku_id: SKUSnowflake, owner_id: UserSnowflake) {
+            self.sku_id = sku_id
+            self.owner_id = AnySnowflake(owner_id)
+            self.owner_type = .userSubscription
+        }
+
+        public func validate() -> [ValidationFailure] { }
+    }
+
+    /// https://discord.com/developers/docs/resources/application#edit-current-application-json-params
+    public struct UpdateOwnApplication: Sendable, Encodable, ValidatablePayload {
+        public var custom_install_url: String?
+        public var description: String?
+        public var role_connections_verification_url: String?
+        public var install_params: DiscordApplication.InstallParams?
+        public var flags: IntBitField<DiscordApplication.Flag>?
+        public var icon: ImageData?
+        public var cover_image: ImageData?
+        public var interactions_endpoint_url: String?
+        public var tags: [String]?
+
+        public init(custom_install_url: String? = nil, description: String? = nil, role_connections_verification_url: String? = nil, install_params: DiscordApplication.InstallParams? = nil, flags: IntBitField<DiscordApplication.Flag>? = nil, icon: ImageData? = nil, cover_image: ImageData? = nil, interactions_endpoint_url: String? = nil, tags: [String]? = nil) {
+            self.custom_install_url = custom_install_url
+            self.description = description
+            self.role_connections_verification_url = role_connections_verification_url
+            self.install_params = install_params
+            self.flags = flags
+            self.icon = icon
+            self.cover_image = cover_image
+            self.interactions_endpoint_url = interactions_endpoint_url
+            self.tags = tags
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateOnlyContains(
+                flags,
+                name: "flags",
+                reason: "Can only contain 'gatewayPresenceLimited', 'gatewayGuildMembersLimited' and 'gatewayMessageContentLimited'",
+                allowed: [
+                    .gatewayPresenceLimited,
+                    .gatewayGuildMembersLimited,
+                    .gatewayMessageContentLimited
+                ]
+            )
+            validateElementCountDoesNotExceed(tags, max: 5, name: "tags")
+            for (idx, tag) in (tags ?? []).enumerated() {
+                validateCharacterCountDoesNotExceed(tag, max: 20, name: "tags[\(idx)]")
+            }
+        }
     }
 }

@@ -40,7 +40,7 @@ public enum GatewayCloseCode: UInt16, Sendable, Codable {
 /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
 @UnstableEnum<Int>
 public enum JSONErrorCode: Sendable, Codable {
-    case generalError // 0
+case generalError // 0
     case unknownAccount // 10001
     case unknownApplication // 10002
     case unknownChannel // 10003
@@ -146,6 +146,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case serviceResourceRateLimited // 40062
     case noTagsAvailableThatCanBeSetByNonModerators // 40066
     case tagRequiredToCreateForumPostInChannel // 40067
+    case anEntitlementHasAlreadyBeenGrantedForThisResource // 40074
     case missingAccess // 50001
     case invalidAccountType // 50002
     case cannotExecuteActionOnDMChannel // 50003
@@ -181,6 +182,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case invalidFileUploaded // 50046
     case cannotSelfRedeemThisGift // 50054
     case invalidGuild // 50055
+    case invalidSKU // 50057
     case invalidRequestOrigin // 50067
     case invalidMessageType // 50068
     case paymentSourceRequiredToRedeemGift // 50070

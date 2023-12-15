@@ -1548,6 +1548,34 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertEqual(selfApplication.id.rawValue, Constants.botId.rawValue)
 
+        let image = ByteBuffer(data: resource(name: "1kb.png"))
+        let imageData = Payloads.ImageData(file: .init(
+            data: image,
+            filename: "test_image.png"
+        ))
+        func fakeURL() -> String {
+            "https://fake.com/\(Int.random(in: .min ... .max))"
+        }
+        let updatedApplication = try await client.updateOwnApplication(
+            payload: .init(
+                custom_install_url: fakeURL(),
+                description: "TEST DESCRIPTION \(Int.random(in: .min ... .max))",
+                role_connections_verification_url: fakeURL(),
+                install_params: nil,
+                flags: [
+                    .gatewayPresenceLimited,
+                    .gatewayGuildMembersLimited,
+                    .gatewayMessageContentLimited,
+                ],
+                icon: imageData,
+                cover_image: imageData,
+                interactions_endpoint_url: nil,
+                tags: (0..<5).map { _ in "\(Int.random(in: .min ... .max))" }
+            )
+        ).decode()
+
+        XCTAssertEqual(updatedApplication.id.rawValue, Constants.botId.rawValue)
+
         let user = try await client.getUser(id: Constants.secondAccountId).decode()
 
         XCTAssertEqual(user.id, Constants.secondAccountId)
@@ -2063,6 +2091,40 @@ class DiscordClientTests: XCTestCase {
     func testOAuth() async throws {
         let app = try await client.getOwnOauth2Application().decode()
         XCTAssertEqual(app.id, Snowflake(Constants.botId))
+    }
+
+    /// Can't test these properly as the test-bot doesn't have real access to these.
+    func testEntitlements() async throws {
+        let all = try await client.listEntitlements().decode()
+        XCTAssertEqual(all.count, 0, "\(all)")
+
+        let createError = try await client.createTestEntitlement(
+            payload: .init(
+                sku_id: .makeFake(),
+                owner_id: Constants.botId
+            )
+        ).asError()
+
+        switch createError {
+        case .jsonError(let jsonError) where jsonError.code == .unknownSKU:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(String(describing: createError))")
+        }
+
+        let deleteError = try await client.deleteTestEntitlement(
+            entitlementId: .makeFake()
+        ).asError()
+
+        switch deleteError {
+        case .jsonError(let jsonError) where jsonError.code == .unknownEntitlement:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(String(describing: deleteError))")
+        }
+
+        let allSKUs = try await client.listSKUs().decode()
+        XCTAssertEqual(allSKUs.count, 0, "\(allSKUs)")
     }
 
     func testAutoModerationRules() async throws {
@@ -2770,7 +2832,7 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
-    private let totalTestCount = 38
+    private let totalTestCount = 39
     var isLastTest: Bool {
         self.testsRan == self.totalTestCount
     }
@@ -2815,7 +2877,7 @@ private actor GatewayTester {
 
             let expectation = Expectation(description: "GatewayTesterConnect")
 
-            let stream = await self.bot!.makeEventsStream()
+            let stream = await self.bot!.events
             Task {
                 for await event in stream {
                     if case .ready = event.data {

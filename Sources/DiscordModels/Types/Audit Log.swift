@@ -201,7 +201,7 @@ public struct AuditLog: Sendable, Codable {
             case memberBanAdd
             case memberBanRemove
             case memberUpdate
-            case memberRoleUpdate(integration_type: Integration.Kind)
+            case memberRoleUpdate(integration_type: Integration.Kind?)
             case memberMove(channel_id: ChannelSnowflake, count: String)
             case memberDisconnect(count: String)
             case botAdd
@@ -403,8 +403,8 @@ public struct AuditLog: Sendable, Codable {
                 case .memberBanRemove: self = .memberBanRemove
                 case .memberUpdate: self = .memberUpdate
                 case .memberRoleUpdate:
-                    let container = try optionsNestedContainer()
-                    let integration_type = try container.decode(
+                    let container = try? optionsNestedContainer()
+                    let integration_type = try container?.decodeIfPresent(
                         Integration.Kind.self,
                         forKey: .integration_type
                     )

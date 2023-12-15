@@ -249,6 +249,7 @@ public struct Interaction: Sendable, Codable {
         public var custom_id: String
         public var component_type: ActionRow.Kind
         public var values: [String]?
+        public var resolved: Interaction.ApplicationCommand.ResolvedData?
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-modal-submit-data-structure
@@ -279,8 +280,11 @@ public struct Interaction: Sendable, Codable {
     public var locale: DiscordLocale?
     public var guild_locale: DiscordLocale?
     public var app_permissions: StringBitField<Permission>?
-    public var entitlement_sku_ids: [String]?
-    
+    public var entitlements: [Entitlement]
+
+    @available(*, deprecated, message: "This property is not documented and will be removed in a future version of DiscordBM, unless it becomes documented. Will always be nil for now")
+    public var entitlement_sku_ids: [String]? = nil
+
     enum CodingKeys: CodingKey {
         case id
         case application_id
@@ -297,7 +301,7 @@ public struct Interaction: Sendable, Codable {
         case locale
         case guild_locale
         case app_permissions
-        case entitlement_sku_ids
+        case entitlements
     }
     
     public init(from decoder: any Decoder) throws {
@@ -343,9 +347,9 @@ public struct Interaction: Sendable, Codable {
             StringBitField<Permission>.self,
             forKey: .app_permissions
         )
-        self.entitlement_sku_ids = try container.decodeIfPresent(
-            [String].self,
-            forKey: .entitlement_sku_ids
+        self.entitlements = try container.decode(
+            [Entitlement].self,
+            forKey: .entitlements
         )
     }
     
@@ -374,7 +378,7 @@ public struct Interaction: Sendable, Codable {
         try container.encodeIfPresent(self.locale, forKey: .locale)
         try container.encodeIfPresent(self.guild_locale, forKey: .guild_locale)
         try container.encodeIfPresent(self.app_permissions, forKey: .app_permissions)
-        try container.encodeIfPresent(self.entitlement_sku_ids, forKey: .entitlement_sku_ids)
+        try container.encode(self.entitlements, forKey: .entitlements)
     }
 }
 

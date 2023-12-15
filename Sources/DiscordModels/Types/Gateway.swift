@@ -65,7 +65,11 @@ public struct Gateway: Sendable, Codable {
             case threadSyncList(ThreadListSync)
             case threadMemberUpdate(ThreadMemberUpdate)
             case threadMembersUpdate(ThreadMembersUpdate)
-            
+
+            case entitlementCreate(Entitlement)
+            case entitlementUpdate(Entitlement)
+            case entitlementDelete(Entitlement)
+
             case guildCreate(GuildCreate)
             case guildUpdate(Guild)
             case guildDelete(UnavailableGuild)
@@ -146,7 +150,7 @@ public struct Gateway: Sendable, Codable {
 
             public var correspondingIntents: [Intent] {
                 switch self {
-                case .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate, .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
+                case .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate, .entitlementCreate, .entitlementUpdate, .entitlementDelete, .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
                     return []
                 case .guildCreate, .guildUpdate, .guildDelete, .guildMembersChunk, .guildRoleCreate, .guildRoleUpdate, .guildRoleDelete, .channelCreate, .channelUpdate, .channelDelete, .threadCreate, .threadUpdate, .threadDelete, .threadSyncList, .threadMemberUpdate, .stageInstanceCreate, .stageInstanceDelete, .stageInstanceUpdate:
                     return [.guilds]
@@ -278,6 +282,12 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .threadMemberUpdate(decodeData())
                 case "THREAD_MEMBERS_UPDATE":
                     self.data = try .threadMembersUpdate(decodeData())
+                case "ENTITLEMENT_CREATE":
+                    self.data = try .entitlementCreate(decodeData())
+                case "ENTITLEMENT_UPDATE":
+                    self.data = try .entitlementUpdate(decodeData())
+                case "ENTITLEMENT_DELETE":
+                    self.data = try .entitlementDelete(decodeData())
                 case "GUILD_CREATE":
                     self.data = try .guildCreate(decodeData())
                 case "GUILD_UPDATE":
@@ -819,6 +829,31 @@ public struct Gateway: Sendable, Codable {
         public var flags: IntBitField<Guild.Member.Flag>?
         public var pending: Bool?
         public var communication_disabled_until: DiscordTimestamp?
+
+        public init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            self.guild_id = try container.decode(GuildSnowflake.self, forKey: .guild_id)
+            self.roles = try container.decode([RoleSnowflake].self, forKey: .roles)
+            self.user = try container.decode(DiscordUser.self, forKey: .user)
+            self.nick = try container.decodeIfPresent(String.self, forKey: .nick)
+            self.avatar = try container.decodeIfPresent(String.self, forKey: .avatar)
+            self.joined_at = try container.decodeIfPresent(
+                DiscordTimestamp.self,
+                forKey: .joined_at
+            ) ?? .init(date: .distantFuture)
+            self.premium_since = try container.decodeIfPresent(
+                DiscordTimestamp.self,
+                forKey: .premium_since
+            )
+            self.deaf = try container.decodeIfPresent(Bool.self, forKey: .deaf)
+            self.mute = try container.decodeIfPresent(Bool.self, forKey: .mute)
+            self.flags = try container.decodeIfPresent(IntBitField<Guild.Member.Flag>.self, forKey: .flags)
+            self.pending = try container.decodeIfPresent(Bool.self, forKey: .pending)
+            self.communication_disabled_until = try container.decodeIfPresent(
+                DiscordTimestamp.self,
+                forKey: .communication_disabled_until
+            )
+        }
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#guild-member-remove-guild-member-remove-event-fields

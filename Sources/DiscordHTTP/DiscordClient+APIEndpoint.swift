@@ -1061,6 +1061,69 @@ public extension DiscordClient {
         ))
     }
 
+    // MARK: Entitlements
+    /// https://discord.com/developers/docs/monetization/entitlements
+
+    /// https://discord.com/developers/docs/monetization/entitlements#list-entitlements
+    @inlinable
+    func listEntitlements(
+        appId: ApplicationSnowflake? = nil,
+        userId: UserSnowflake? = nil,
+        skuIds: [SKUSnowflake]? = nil,
+        before: EntitlementSnowflake? = nil,
+        after: EntitlementSnowflake? = nil,
+        limit: Int? = nil,
+        guildId: GuildSnowflake? = nil,
+        excludeEnded: Bool? = nil
+    ) async throws -> DiscordClientResponse<[Entitlement]> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 100)
+        try checkMutuallyExclusive(queries: [
+            ("before", before?.rawValue),
+            ("after", after?.rawValue),
+        ])
+        let endpoint = APIEndpoint.listEntitlements(applicationId: try requireAppId(appId))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("user_id", userId?.rawValue),
+                    ("sku_ids", skuIds?.map(\.rawValue).joined(separator: ",")),
+                    ("before", before?.rawValue),
+                    ("after", after?.rawValue),
+                    ("limit", limit.map({ "\($0)" })),
+                    ("guild_id", guildId?.rawValue),
+                    ("exclude_ended", excludeEnded.map({ "\($0)" })),
+                ]
+            )
+        )
+    }
+
+    /// https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement
+    @inlinable
+    func createTestEntitlement(
+        appId: ApplicationSnowflake? = nil,
+        payload: Payloads.CreateTestEntitlement
+    ) async throws -> DiscordClientResponse<Entitlement> {
+        let endpoint = APIEndpoint.createTestEntitlement(applicationId: try requireAppId(appId))
+        return try await self.send(
+            request: .init(to: endpoint),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/monetization/entitlements#delete-test-entitlement
+    @inlinable
+    func deleteTestEntitlement(
+        appId: ApplicationSnowflake? = nil,
+        entitlementId: EntitlementSnowflake
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.deleteTestEntitlement(
+            applicationId: try requireAppId(appId),
+            entitlementId: entitlementId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     // MARK: Guilds
     /// https://discord.com/developers/docs/resources/guild
 
@@ -2066,6 +2129,18 @@ public extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
+    // MARK: SKUs
+    /// https://discord.com/developers/docs/monetization/skus
+
+    /// https://discord.com/developers/docs/monetization/skus#list-skus
+    @inlinable
+    func listSKUs(
+        appId: ApplicationSnowflake? = nil
+    ) async throws -> DiscordClientResponse<[SKU]> {
+        let endpoint = APIEndpoint.listSkus(applicationId: try requireAppId(appId))
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     // MARK: Stage Instances
     /// https://discord.com/developers/docs/resources/stage-instance
 
@@ -2224,6 +2299,18 @@ public extension DiscordClient {
     func getOwnApplication() async throws -> DiscordClientResponse<DiscordApplication> {
         let endpoint = APIEndpoint.getOwnApplication
         return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://discord.com/developers/docs/resources/application#edit-current-application
+    @inlinable
+    func updateOwnApplication(
+        payload: Payloads.UpdateOwnApplication
+    ) async throws -> DiscordClientResponse<DiscordApplication> {
+        let endpoint = APIEndpoint.updateOwnApplication
+        return try await self.send(
+            request: .init(to: endpoint),
+            payload: payload
+        )
     }
 
     /// https://discord.com/developers/docs/resources/user#get-user

@@ -30,7 +30,7 @@
 * Abstractions for easier testability.
 
 ## Showcase
-Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/DiscordFactory.swift#L1). 
+Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Services/DiscordService/DiscordService.swift#L1). 
 
 ## How To Use
 
@@ -108,12 +108,9 @@ struct EntryPoint {
         /// Don't use `Task { }` if you care and want to wait
         Task { await bot.connect() }
 
-        /// Get an `AsyncStream` of `Gateway.Event`s
-        let stream = await bot.makeEventsStream()
-
-        /// Handle each event in the stream
+        /// Handle each event in the `bot.events` async stream
         /// This stream will never end, therefore preventing your executable from exiting
-        for await event in stream {
+        for await event in await bot.events {
             EventHandler(event: event, client: bot.client).handle()
         }
     }
@@ -128,22 +125,18 @@ struct EventHandler: GatewayEventHandler {
     /// Each Gateway payload has its own function. 
     /// See `GatewayEventHandler` for the full list.
     /// This function will only be called upon receiving `MESSAGE_CREATE` events.
-    func onMessageCreate(_ payload: Gateway.MessageCreate) async {
+    func onMessageCreate(_ payload: Gateway.MessageCreate) async throws {
         print("NEW MESSAGE!", payload)
 
-        do {
-            /// Use `client` to send requests to Discord
-            let response = try await client.createMessage(
-                channelId: payload.channel_id,
-                payload: .init(content: "Got a message: '\(payload.content)'")
-            )
+        /// Use `client` to send requests to Discord
+        let response = try await client.createMessage(
+            channelId: payload.channel_id,
+            payload: .init(content: "Got a message: '\(payload.content)'")
+        )
             
-            /// Easily decode the response to the correct type
-            /// `message` will be of type `DiscordChannel.Message`.
-            let message = try response.decode()
-        } catch {
-            print("We got an error! \(error)")
-        }
+        /// Easily decode the response to the correct type
+        /// `message` will be of type `DiscordChannel.Message`.
+        let message = try response.decode()
     }
 }
 ```
@@ -200,8 +193,7 @@ try await bot.client
     .guardSuccess() /// Throw an error if not successful
 
 /// Use the events-stream later since the for-loop blocks the function
-let eventsStream = await bot.makeEventsStream()
-for await event in eventsStream {
+for await event in await bot.events {
     EventHandler(event: event, client: bot.client).handle()
 }
 ```
@@ -214,106 +206,98 @@ struct EventHandler: GatewayEventHandler {
     let logger = Logger(label: "EventHandler")
 
     /// Handle Interactions.
-    func onInteractionCreate(_ interaction: Interaction) async {
-        do {
-            /// You only have 3 second to respond, so it's better to send
-            /// the response right away, and edit the response later.
-            /// This will show a loading indicator to users.
-            try await client.createInteractionResponse(
-                id: interaction.id,
-                token: interaction.token,
-                payload: .deferredChannelMessageWithSource()
-            ).guardSuccess()
+    func onInteractionCreate(_ interaction: Interaction) async throws {
+        /// You only have 3 second to respond, so it's better to send
+        /// the response right away, and edit the response later.
+        /// This will show a loading indicator to users.
+        try await client.createInteractionResponse(
+            id: interaction.id,
+            token: interaction.token,
+            payload: .deferredChannelMessageWithSource()
+        ).guardSuccess()
 
-            /// Delete this if you want. Just here so you notice the loading indicator :)
-            try await Task.sleep(for: .seconds(1))
+        /// Delete this if you want. Just here so you notice the loading indicator :)
+        try await Task.sleep(for: .seconds(1))
 
-            /// Handle the interaction data
-            switch interaction.data {
-            case let .applicationCommand(applicationCommand):
-                switch DiscordCommand(rawValue: applicationCommand.name) {
-                case .echo:
-                    if let echo = applicationCommand.option(named: "text")?.value?.asString {
-                        /// Edits the interaction response.
-                        /// This response is intentionally too fancy just so you see what's possible :)
-                        try await client.updateOriginalInteractionResponse(
-                            token: interaction.token,
-                            payload: Payloads.EditWebhookMessage(
-                                content: "Hello, You wanted me to echo something!",
-                                embeds: [Embed(
-                                    title: "This is an embed",
-                                    description: """
+        /// Handle the interaction data
+        switch interaction.data {
+        case let .applicationCommand(applicationCommand):
+            switch DiscordCommand(rawValue: applicationCommand.name) {
+            case .echo:
+                if let echo = applicationCommand.option(named: "text")?.value?.asString {
+                    /// Edits the interaction response.
+                    /// This response is intentionally too fancy just so you see what's possible :)
+                    try await client.updateOriginalInteractionResponse(
+                        token: interaction.token,
+                        payload: Payloads.EditWebhookMessage(
+                            content: "Hello, You wanted me to echo something!",
+                            embeds: [Embed(
+                                title: "This is an embed",
+                                description: """
                                     You sent this, so I'll echo it to you!
 
                                     > \(DiscordUtils.escapingSpecialCharacters(echo))
                                     """,
-                                    timestamp: Date(),
-                                    color: .init(value: .random(in: 0 ..< (1 << 24) )),
-                                    footer: .init(text: "Footer!"),
-                                    author: .init(name: "Authored by DiscordBM!"),
-                                    fields: [
-                                        .init(name: "field name!", value: "field value!")
-                                    ]
-                                )],
-                                components: [[.button(.init(
-                                    label: "Open DiscordBM!",
-                                    url: "https://github.com/DiscordBM/DiscordBM"
-                                ))]]
-                            )
-                        ).guardSuccess()
-                    } else {
-                        try await client.updateOriginalInteractionResponse(
-                            token: interaction.token,
-                            payload: Payloads.EditWebhookMessage(
-                                content: "Hello, You wanted me to echo something!",
-                                embeds: [Embed(
-                                    title: "This is an embed",
-                                    description: """
-                                    You sent this, so I'll echo it to you but there was nothing!
-                                    """,
-                                    timestamp: Date().addingTimeInterval(90),
-                                    color: .green,
-                                    footer: .init(text: "Footer!"),
-                                    author: .init(name: "Authored by DiscordBM!"),
-                                    fields: [
-                                        .init(name: "field name!", value: "field value!")
-                                    ]
-                                )]
-                            )
-                        ).guardSuccess()
-                    }
-                case .link:
-                    /// `DiscordBM` has some "require" functions for easier unwrapping of
-                    /// application commands. These "require" functions will either give you
-                    /// what you want, or throw an error.
-                    /// See the full list below.
-                    let subcommandOption = try (applicationCommand.options?.first).requireValue()
-                    let subcommandName = subcommandOption.name
-                    let subcommand = try LinkSubCommand(rawValue: subcommandName).requireValue()
-
-                    let id = try (subcommandOption.options?.first).requireValue().requireString()
-                    let name = subcommand.rawValue.capitalized
-
+                                timestamp: Date(),
+                                color: .init(value: .random(in: 0 ..< (1 << 24) )),
+                                footer: .init(text: "Footer!"),
+                                author: .init(name: "Authored by DiscordBM!"),
+                                fields: [
+                                    .init(name: "field name!", value: "field value!")
+                                ]
+                            )],
+                            components: [[.button(.init(
+                                label: "Open DiscordBM!",
+                                url: "https://github.com/DiscordBM/DiscordBM"
+                            ))]]
+                        )
+                    ).guardSuccess()
+                } else {
                     try await client.updateOriginalInteractionResponse(
                         token: interaction.token,
                         payload: Payloads.EditWebhookMessage(
-                            content: "Hi, did you wanted me to link your accounts?",
-                            embeds: [.init(
-                                description: "Will link a \(name) account with id '\(id)'",
-                                color: .yellow
+                            content: "Hello, You wanted me to echo something!",
+                            embeds: [Embed(
+                                title: "This is an embed",
+                                description: """
+                                    You sent this, so I'll echo it to you but there was nothing!
+                                    """,
+                                timestamp: Date().addingTimeInterval(90),
+                                color: .green,
+                                footer: .init(text: "Footer!"),
+                                author: .init(name: "Authored by DiscordBM!"),
+                                fields: [
+                                    .init(name: "field name!", value: "field value!")
+                                ]
                             )]
                         )
                     ).guardSuccess()
-                case .none: break
                 }
-            default: break
+            case .link:
+                /// `DiscordBM` has some "require" functions for easier unwrapping of
+                /// application commands. These "require" functions will either give you
+                /// what you want, or throw an error.
+                /// See the full list below.
+                let subcommandOption = try (applicationCommand.options?.first).requireValue()
+                let subcommandName = subcommandOption.name
+                let subcommand = try LinkSubCommand(rawValue: subcommandName).requireValue()
+
+                let id = try (subcommandOption.options?.first).requireValue().requireString()
+                let name = subcommand.rawValue.capitalized
+
+                try await client.updateOriginalInteractionResponse(
+                    token: interaction.token,
+                    payload: Payloads.EditWebhookMessage(
+                        content: "Hi, did you wanted me to link your accounts?",
+                        embeds: [.init(
+                            description: "Will link a \(name) account with id '\(id)'",
+                            color: .yellow
+                        )]
+                    )
+                ).guardSuccess()
+            case .none: break
             }
-        } catch {
-            /// Log the errors. Using a `Logger` is preferred compared to just `print()`.
-            logger.error("Caught an interaction error", metadata: [
-                "error": "\(error)",
-                "interaction": "\(interaction)"
-            ])
+        default: break
         }
     }
 }
@@ -331,7 +315,7 @@ enum DiscordCommand: String, CaseIterable {
         case .echo:
             return "Echos what you say"
         case .link:
-            return "Links your accounts in Penny"
+            return "Links your accounts "
         }
     }
 

@@ -49,7 +49,7 @@ class PermissionChecker: XCTestCase {
         let expectation = Expectation(description: "Connected")
 
         Task {
-            for await event in await bot.makeEventsStream() {
+            for await event in await bot.events {
                 if case .ready = event.data {
                     expectation.fulfill()
                 }

@@ -12,7 +12,7 @@ public protocol MultipartEncodable: Encodable {
     /// and the rest of the payload as a `payload_json` field, which is what Discord asks.
     /// However, very few endpoints don't accept that approach.
     /// Payloads that set this to `true` shouldn't specify `CodingKeys`
-    /// to exclude the `files` from Codable.
+    /// to exclude the `files` from `Codable`.
     static var rawEncodable: Bool { get }
 }
 
