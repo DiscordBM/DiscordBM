@@ -1224,6 +1224,9 @@ public struct Gateway: Sendable, Codable {
             case watching = 3
             case custom = 4
             case competing = 5
+            /// The name will change to something appropriate, when documented by Discord.
+            /// Avoid using it till then, or be aware of the API breakage possibility.
+            case __undocumented6 = 6
         }
         
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-timestamps
