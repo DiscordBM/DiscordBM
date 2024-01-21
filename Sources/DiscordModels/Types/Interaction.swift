@@ -14,6 +14,8 @@ public struct Interaction: Sendable, Codable {
 
         case componentWasNotOfKind(kind: String, component: ActionRow.Component)
 
+        case dataWasNotOfKind(kind: String, data: Interaction.Data)
+
         public var description: String {
             switch self {
             case let .optionNotFoundInCommand(name, command):
@@ -30,6 +32,8 @@ public struct Interaction: Sendable, Codable {
                 return "Interaction.Error.componentNotFoundInActionRows(customId: \(customId), actionRows: \(actionRows))"
             case let .componentWasNotOfKind(kind, component):
                 return "Interaction.Error.componentWasNotOfKind(kind: \(kind), component: \(component))"
+            case let .dataWasNotOfKind(kind, data):
+                return "Interaction.Error.dataWasNotOfKind(kind: \(kind), data: \(data))"
             }
         }
     }
@@ -262,6 +266,33 @@ public struct Interaction: Sendable, Codable {
         case applicationCommand(ApplicationCommand)
         case messageComponent(MessageComponent)
         case modalSubmit(ModalSubmit)
+
+        public func requireApplicationCommand() throws -> ApplicationCommand {
+            switch self {
+            case let .applicationCommand(applicationCommand):
+                return applicationCommand
+            default:
+                throw Error.dataWasNotOfKind(kind: "applicationCommand", data: self)
+            }
+        }
+
+        public func requireMessageComponent() throws -> MessageComponent {
+            switch self {
+            case let .messageComponent(messageComponent):
+                return messageComponent
+            default:
+                throw Error.dataWasNotOfKind(kind: "messageComponent", data: self)
+            }
+        }
+
+        public func requireModalSubmit() throws -> ModalSubmit {
+            switch self {
+            case let .modalSubmit(modalSubmit):
+                return modalSubmit
+            default:
+                throw Error.dataWasNotOfKind(kind: "modalSubmit", data: self)
+            }
+        }
     }
     
     public var id: InteractionSnowflake
