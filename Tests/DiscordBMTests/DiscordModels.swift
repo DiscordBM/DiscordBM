@@ -354,6 +354,29 @@ class DiscordModelsTests: XCTestCase {
         _ = try decoder.decode(Interaction.ApplicationCommand.ResolvedData.self, from: encoded)
     }
 
+    func testInteractionDataUtilities() throws {
+        let applicationCommand: Interaction.Data = .applicationCommand(
+            .init(id: "", name: "", type: .applicationCommand)
+        )
+
+        let messageComponent: Interaction.Data = .messageComponent(
+            .init(custom_id: "", component_type: .actionRow)
+        )
+
+        let modalSubmit: Interaction.Data = .modalSubmit(
+            .init(custom_id: "", components: [[.button(.init(label: "", url: ""))]])
+        )
+
+        XCTAssertNoThrow(try applicationCommand.requireApplicationCommand())
+        XCTAssertThrowsError(try messageComponent.requireApplicationCommand())
+
+        XCTAssertNoThrow(try messageComponent.requireMessageComponent())
+        XCTAssertThrowsError(try modalSubmit.requireMessageComponent())
+
+        XCTAssertNoThrow(try modalSubmit.requireModalSubmit())
+        XCTAssertThrowsError(try applicationCommand.requireModalSubmit())
+    }
+
     func testApplicationCommandUtilities() throws {
         let command = Interaction.ApplicationCommand(
             id: try! .makeFake(),
@@ -526,7 +549,7 @@ class DiscordModelsTests: XCTestCase {
         }
     }
 
-    func testCollectionisNotEmpty() throws {
+    func testCollectionIsNotEmpty() throws {
         let array1: [String]? = nil
         XCTAssertEqual(array1.isNotEmpty, false)
         
