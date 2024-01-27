@@ -6,38 +6,34 @@ import Foundation
 public struct DiscordChannel: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-    public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case guildText = 0
-        case dm = 1
-        case guildVoice = 2
-        case groupDm = 3
-        case guildCategory = 4
-        case guildAnnouncement = 5
-        case announcementThread = 10
-        case publicThread = 11
-        case privateThread = 12
-        case guildStageVoice = 13
-        case guildDirectory = 14
-        case guildForum = 15
-
-        /// DO NOT USE. WILL BE REMOVED SOON.
-        ///
-        /// Here to only prevent decode failures.
-        /// These non-frequent decode failures are hard to fix with Codable, but they will totally
-        /// go away in near future with a DiscordBM update that includes a macro to take care of these.
-        /// There are already mechanisms in place to prevent most of these failures.
-        case __unknown16 = 16
+    @UnstableEnum<Int>
+    public enum Kind: Sendable, Codable {
+        case guildText // 0
+        case dm // 1
+        case guildVoice // 2
+        case groupDm // 3
+        case guildCategory // 4
+        case guildAnnouncement // 5
+        case announcementThread // 10
+        case publicThread // 11
+        case privateThread // 12
+        case guildStageVoice // 13
+        case guildDirectory // 14
+        case guildForum // 15
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/resources/channel#overwrite-object
     public struct Overwrite: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/channel#overwrite-object
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case role = 0
-            case member = 1
+        @UnstableEnum<Int>
+        public enum Kind: Sendable, Codable {
+            case role // 0
+            case member // 1
+            case _undocumented(Int)
         }
-        
+
         public var id: AnySnowflake
         public var type: Kind
         public var allow: StringBitField<Permission>
@@ -45,38 +41,48 @@ public struct DiscordChannel: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/resources/channel#channel-object-sort-order-types
-    public enum SortOrder: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case latestActivity = 0
-        case creationDate = 1
+    @UnstableEnum<Int>
+    public enum SortOrder: Sendable, Codable {
+        case latestActivity // 0
+        case creationDate // 1
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types
-    public enum ForumLayout: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case notSet = 0
-        case listView = 1
-        case galleryView = 2
+    @UnstableEnum<Int>
+    public enum ForumLayout: Sendable, Codable {
+        case notSet // 0
+        case listView // 1
+        case galleryView // 2
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
-    public enum Flag: UInt, Sendable {
-        case pinned = 1
-        case requireTag = 4
+    @UnstableEnum<UInt>
+    public enum Flag: Sendable {
+        case pinned // 1
+        case requireTag // 4
+        case _undocumented(UInt)
     }
-    
+
     /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
-    public enum VideoQualityMode: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case auto = 1
-        case full = 2
+    @UnstableEnum<Int>
+    public enum VideoQualityMode: Sendable, Codable {
+        case auto // 1
+        case full // 2
+        case _undocumented(Int)
     }
-    
+
     /// Not exactly documented, but they do mention these times in a few different places.
     /// Times are in minutes.
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
-    public enum AutoArchiveDuration: Int, Sendable, Codable {
-        case oneHour = 60
-        case oneDay = 1_440
-        case threeDays = 4_320
-        case sevenDays = 10_080
+    @UnstableEnum<Int>
+    public enum AutoArchiveDuration: Sendable, Codable {
+        case oneHour // 60
+        case oneDay // 1_440
+        case threeDays // 4_320
+        case sevenDays // 10_080
+        case _undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/channel#default-reaction-object-default-reaction-structure
@@ -169,64 +175,59 @@ extension DiscordChannel {
         }
         
         /// https://discord.com/developers/docs/resources/channel#message-object-message-types
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case `default` = 0
-            case recipientAdd = 1
-            case recipientRemove = 2
-            case call = 3
-            case channelNameChange = 4
-            case channelIconChange = 5
-            case channelPinnedMessage = 6
-            case guildMemberJoin = 7
-            case userPremiumGuildSubscription = 8
-            case userPremiumGuildSubscriptionTier1 = 9
-            case userPremiumGuildSubscriptionTier2 = 10
-            case userPremiumGuildSubscriptionTier3 = 11
-            case channelFollowAdd = 12
-            case guildDiscoveryDisqualified = 14
-            case guildDiscoveryRequalified = 15
-            case guildDiscoveryGracePeriodInitialWarning = 16
-            case guildDiscoveryGracePeriodFinalWarning = 17
-            case threadCreated = 18
-            case reply = 19
-            case chatInputCommand = 20
-            case threadStarterMessage = 21
-            case guildInviteReminder = 22
-            case contextMenuCommand = 23
-            case autoModerationAction = 24
-            case roleSubscriptionPurchase = 25
-            case interactionPremiumUpsell = 26
-            case stageStart = 27
-            case stageEnd = 28
-            case stageSpeaker = 29
-            case stageTopic = 31
-            case guildApplicationPremiumSubscription = 32
-            
-            public var isDeletable: Bool {
-                switch self {
-                case .`default`, .channelPinnedMessage, .guildMemberJoin, .userPremiumGuildSubscription, .userPremiumGuildSubscriptionTier1, .userPremiumGuildSubscriptionTier2, .userPremiumGuildSubscriptionTier3, .channelFollowAdd, .threadCreated, .reply, .chatInputCommand, .guildInviteReminder, .contextMenuCommand, .autoModerationAction, .roleSubscriptionPurchase, .interactionPremiumUpsell, .stageStart, .stageEnd, .stageSpeaker, .stageTopic:
-                    return true
-                case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
-                    return false
-                }
-            }
+        @UnstableEnum<Int>
+        public enum Kind: Sendable, Codable {
+            case `default` // 0
+            case recipientAdd // 1
+            case recipientRemove // 2
+            case call // 3
+            case channelNameChange // 4
+            case channelIconChange // 5
+            case channelPinnedMessage // 6
+            case guildMemberJoin // 7
+            case userPremiumGuildSubscription // 8
+            case userPremiumGuildSubscriptionTier1 // 9
+            case userPremiumGuildSubscriptionTier2 // 10
+            case userPremiumGuildSubscriptionTier3 // 11
+            case channelFollowAdd // 12
+            case guildDiscoveryDisqualified // 14
+            case guildDiscoveryRequalified // 15
+            case guildDiscoveryGracePeriodInitialWarning // 16
+            case guildDiscoveryGracePeriodFinalWarning // 17
+            case threadCreated // 18
+            case reply // 19
+            case chatInputCommand // 20
+            case threadStarterMessage // 21
+            case guildInviteReminder // 22
+            case contextMenuCommand // 23
+            case autoModerationAction // 24
+            case roleSubscriptionPurchase // 25
+            case interactionPremiumUpsell // 26
+            case stageStart // 27
+            case stageEnd // 28
+            case stageSpeaker // 29
+            case stageTopic // 31
+            case guildApplicationPremiumSubscription // 32
+            case _undocumented(Int)
         }
-        
+
         /// https://discord.com/developers/docs/resources/channel#message-object-message-flags
-        public enum Flag: UInt, Sendable {
-            case crossposted = 0
-            case isCrosspost = 1
-            case suppressEmbeds = 2
-            case sourceMessageDeleted = 3
-            case urgent = 4
-            case hasThread = 5
-            case ephemeral = 6
-            case loading = 7
-            case failedToMentionSomeRolesInThread = 8
-            case suppressNotifications = 12
-            case isVoiceMessage = 13
+        @UnstableEnum<UInt>
+        public enum Flag: Sendable {
+            case crossposted // 0
+            case isCrosspost // 1
+            case suppressEmbeds // 2
+            case sourceMessageDeleted // 3
+            case urgent // 4
+            case hasThread // 5
+            case ephemeral // 6
+            case loading // 7
+            case failedToMentionSomeRolesInThread // 8
+            case suppressNotifications // 12
+            case isVoiceMessage // 13
+            case _undocumented(UInt)
         }
-        
+
         /// https://discord.com/developers/docs/resources/channel#channel-mention-object
         public struct ChannelMention: Sendable, Codable {
             public var id: ChannelSnowflake
@@ -239,8 +240,10 @@ extension DiscordChannel {
         public struct Attachment: Sendable, Codable {
 
             /// https://discord.com/developers/docs/resources/channel#attachment-object-attachment-flags
-            public enum Flag: UInt, Sendable {
-                case isRemix = 2
+            @UnstableEnum<UInt>
+            public enum Flag: Sendable {
+                case isRemix // 2
+                case _undocumented(UInt)
             }
 
             public var id: AttachmentSnowflake
@@ -340,13 +343,15 @@ extension DiscordChannel {
         public struct Activity: Sendable, Codable {
             
             /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-types
-            public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-                case join = 1
-                case spectate = 2
-                case listen = 3
-                case joinRequest = 5
+            @UnstableEnum<Int>
+            public enum Kind: Sendable, Codable {
+                case join // 1
+                case spectate // 2
+                case listen // 3
+                case joinRequest // 5
+                case _undocumented(Int)
             }
-            
+
             public var type: Kind
             /// Not a Snowflake. Example: `spotify:715622804258684938`.
             public var party_id: String?
@@ -477,10 +482,12 @@ public struct ThreadMemberWithMember: Sendable, Codable {
 
 /// Thread-related subset of `DiscordChannel.Kind`
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-public enum ThreadKind: Int, Sendable, Codable {
-    case announcementThread = 10
-    case publicThread = 11
-    case privateThread = 12
+@UnstableEnum<Int>
+public enum ThreadKind: Sendable, Codable {
+    case announcementThread // 10
+    case publicThread // 11
+    case privateThread // 12
+    case _undocumented(Int)
 }
 
 extension DiscordChannel {
@@ -488,12 +495,14 @@ extension DiscordChannel {
     public struct AllowedMentions: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
-        public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
+        @UnstableEnum<String>
+        public enum Kind: Sendable, Codable {
             case roles
             case users
             case everyone
+            case _undocumented(String)
         }
-        
+
         public var parse: [Kind]
         public var roles: [RoleSnowflake]
         public var users: [UserSnowflake]
@@ -505,16 +514,18 @@ extension DiscordChannel {
 public struct Embed: Sendable, Codable, ValidatablePayload {
     
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
-    public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
-        case rich = "rich"
-        case image = "image"
-        case video = "video"
-        case gifv = "gifv"
-        case article = "article"
-        case link = "link"
-        case autoModerationMessage = "auto_moderation_message"
+    @UnstableEnum<String>
+    public enum Kind: Sendable, Codable {
+        case rich // "rich"
+        case image // "image"
+        case video // "video"
+        case gifv // "gifv"
+        case article // "article"
+        case link // "link"
+        case autoModerationMessage // "auto_moderation_message"
+        case _undocumented(String)
     }
-    
+
     public enum DynamicURL: Sendable, Codable, ExpressibleByStringLiteral {
         public typealias StringLiteralType = String
         
@@ -687,4 +698,17 @@ public struct RoleSubscriptionData: Sendable, Codable {
     public var tier_name: String
     public var total_months_subscribed: Int
     public var is_renewal: Bool
+}
+
+// MARK: + DiscordChannel.Message.Kind
+extension DiscordChannel.Message.Kind {
+    public var isDeletable: Bool {
+        switch self {
+        case .`default`, .channelPinnedMessage, .guildMemberJoin, .userPremiumGuildSubscription, .userPremiumGuildSubscriptionTier1, .userPremiumGuildSubscriptionTier2, .userPremiumGuildSubscriptionTier3, .channelFollowAdd, .threadCreated, .reply, .chatInputCommand, .guildInviteReminder, .contextMenuCommand, .autoModerationAction, .roleSubscriptionPurchase, .interactionPremiumUpsell, .stageStart, .stageEnd, .stageSpeaker, .stageTopic:
+            return true
+        case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
+            return false
+        case ._undocumented: return false
+        }
+    }
 }

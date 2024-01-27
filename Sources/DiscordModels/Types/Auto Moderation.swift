@@ -3,26 +3,32 @@
 public struct AutoModerationRule: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-event-types
-    public enum EventKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case messageSend = 1
+    @UnstableEnum<Int>
+    public enum EventKind: Sendable, Codable {
+        case messageSend // 1
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types
-    public enum TriggerKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case keyword = 1
-        case spam = 3
-        case keywordPreset = 4
-        case mentionSpam = 5
+    @UnstableEnum<Int>
+    public enum TriggerKind: Sendable, Codable {
+        case keyword // 1
+        case spam // 3
+        case keywordPreset // 4
+        case mentionSpam // 5
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata
     public struct TriggerMetadata: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-preset-types
-        public enum KeywordPreset: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case profanity = 1
-            case sexualContent = 2
-            case slurs = 3
+        @UnstableEnum<Int>
+        public enum KeywordPreset: Sendable, Codable {
+            case profanity // 1
+            case sexualContent // 2
+            case slurs // 3
+            case _undocumented(Int)
         }
 
         public var keyword_filter: [String]?

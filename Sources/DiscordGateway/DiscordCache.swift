@@ -829,6 +829,8 @@ public actor DiscordCache {
             self.autoModerationExecutions[execution.guild_id, default: []].append(execution)
         case let .applicationCommandPermissionsUpdate(update):
             self.applicationCommandPermissions[update.id] = update
+        case ._undocumented:
+            break
         }
     }
     
@@ -943,7 +945,7 @@ public actor DiscordCache {
     ) -> Set<Gateway.Intent> {
         var intentsSum = Set<Gateway.Intent>()
 
-        let (managerIntents, _) = manager.identifyPayload.intents.representableValues()
+        let managerIntents = manager.identifyPayload.intents.representableValues()
 
         switch intents {
         case .all:

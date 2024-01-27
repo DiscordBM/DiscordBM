@@ -1,8 +1,7 @@
 
-private let bitFieldLogger = DiscordGlobalConfiguration.makeDecodeLogger("DBM.BitField")
-
 public protocol BitField: OptionSet, CustomStringConvertible where RawValue == UInt {
-    associatedtype R: RawRepresentable where R: Hashable, R.RawValue == UInt
+    associatedtype R: RawRepresentable & LosslessRawRepresentable
+    where R: Hashable, R.RawValue == UInt
     var rawValue: UInt { get set }
 }
 
@@ -48,29 +47,24 @@ public extension BitField {
     }
 
     /// Returns the `R` values in this bit field.
-    func representableValues() -> (values: Set<R>, unknown: Set<UInt>) {
+    func representableValues() -> Set<R> {
         var bitValue = self.rawValue
         var values: [R] = []
-        var unknownValues: Set<UInt> = []
-        guard bitValue > 0 else { return ([], []) }
         var counter: UInt = 0
         while bitValue != 0 {
             if (bitValue & 1) == 1 {
-                if let newValue = R(rawValue: counter) {
-                    values.append(newValue)
-                } else {
-                    unknownValues.insert(counter)
-                }
+                /// `R` is ``LosslessRawRepresentable``. Safe to force-unwrap.
+                values.append(R(rawValue: counter)!)
             }
             bitValue = bitValue >> 1
             counter += 1
         }
-        return (Set(values), unknownValues)
+        return Set(values)
     }
 
     /// Creates a `BitField` from a `Sequence`.
     @inlinable
-    init<S: Sequence>(_ elements: S) where S.Element == R {
+    init(_ elements: some Sequence<R>) {
         self.init(
             rawValue: elements
                 .map(\.rawValue)
@@ -86,15 +80,12 @@ public extension BitField {
     }
 }
 
+/// A bit-field that decode/encodes itself as an integer.
 public struct IntBitField<R>: BitField
-where R: RawRepresentable & Hashable, R.RawValue == UInt {
+where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == UInt {
     public var rawValue: UInt
 
-    public init() {
-        self.rawValue = 0
-    }
-
-    public init(rawValue: UInt) {
+    public init(rawValue: UInt = 0) {
         self.rawValue = rawValue
     }
 }
@@ -102,18 +93,6 @@ where R: RawRepresentable & Hashable, R.RawValue == UInt {
 extension IntBitField: Codable {
     public init(from decoder: any Decoder) throws {
         self.rawValue = try UInt(from: decoder)
-
-#if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
-        let (values, unknownValues) = self.representableValues()
-        if !unknownValues.isEmpty {
-            bitFieldLogger.warning("Found bit-field unknown values", metadata: [
-                "unknownValues": .stringConvertible(unknownValues),
-                "values": .stringConvertible(values.map(\.rawValue)),
-                "rawType": .string(Swift._typeName(R.self)),
-                "codingPath": .stringConvertible(decoder.codingPath.map(\.stringValue))
-            ])
-        }
-#endif
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -125,50 +104,34 @@ extension IntBitField: Sendable where R: Sendable { }
 
 /// A bit-field that decode/encodes itself as a string.
 public struct StringBitField<R>: BitField
-where R: RawRepresentable, R: Hashable, R.RawValue == UInt {
-
-    public enum DecodingError: Swift.Error, CustomStringConvertible {
-        /// The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/DiscordBM/DiscordBM/issues.
-        case notRepresentingInt(String)
-
-        public var description: String {
-            switch self {
-            case let .notRepresentingInt(string):
-                return "StringBitField.DecodingError.notRepresentingInt(\(string))"
-            }
-        }
-    }
-
+where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == UInt {
     public var rawValue: UInt
 
-    public init() {
-        self.rawValue = 0
-    }
-
-    public init(rawValue: UInt) {
+    public init(rawValue: UInt = 0) {
         self.rawValue = rawValue
     }
 }
 
 extension StringBitField: Codable {
+
+    public enum DecodingError: Error, CustomStringConvertible {
+        /// The string value could not be converted to an integer. This is a library decoding issue, please report this at https://github.com/DiscordBM/DiscordBM/issues.
+        case notRepresentingUInt(String)
+
+        public var description: String {
+            switch self {
+            case let .notRepresentingUInt(string):
+                return "StringBitField.DecodingError.notRepresentingUInt(\(string))"
+            }
+        }
+    }
+
     public init(from decoder: any Decoder) throws {
         let string = try String(from: decoder)
         guard let int = UInt(string) else {
-            throw DecodingError.notRepresentingInt(string)
+            throw DecodingError.notRepresentingUInt(string)
         }
         self.rawValue = int
-
-#if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
-        let (values, unknownValues) = self.representableValues()
-        if !unknownValues.isEmpty {
-            bitFieldLogger.warning("Found bit-field unknown values", metadata: [
-                "unknownValues": .stringConvertible(unknownValues),
-                "values": .stringConvertible(values.map(\.rawValue)),
-                "rawType": .string(Swift._typeName(R.self)),
-                "codingPath": .stringConvertible(decoder.codingPath.map(\.stringValue))
-            ])
-        }
-#endif
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -182,12 +145,13 @@ extension StringBitField: Sendable where R: Sendable { }
 public extension RangeReplaceableCollection {
     @inlinable
     init<Field>(_ bitField: Field) where Field: BitField, Self.Element == Field.R {
-        self.init(bitField.representableValues().values)
+        self.init(bitField.representableValues())
     }
 
+    // Useful for optional-field conversions
     @inlinable
     init? <Field>(_ bitField: Field?) where Field: BitField, Self.Element == Field.R {
-        if let values = bitField?.representableValues().values {
+        if let values = bitField?.representableValues() {
             self.init(values)
         } else {
             return nil

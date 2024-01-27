@@ -3,25 +3,31 @@
 public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
     
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
-    public enum PrivacyLevel: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case guildOnly = 2
+    @UnstableEnum<Int>
+    public enum PrivacyLevel: Sendable, Codable {
+        case guildOnly // 2
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
-    public enum Status: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case scheduled = 1
-        case active = 2
-        case completed = 3
-        case canceled = 4
+    @UnstableEnum<Int>
+    public enum Status: Sendable, Codable {
+        case scheduled // 1
+        case active // 2
+        case completed // 3
+        case canceled // 4
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
-    public enum EntityKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case stageInstance = 1
-        case voice = 2
-        case external = 3
+    @UnstableEnum<Int>
+    public enum EntityKind: Sendable, Codable {
+        case stageInstance // 1
+        case voice // 2
+        case external // 3
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-metadata
     public struct EntityMetadata: Sendable, Codable, ValidatablePayload {
         public var location: String?

@@ -1,6 +1,39 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 5.9
 
 import PackageDescription
+import CompilerPluginSupport
+
+let featureFlags: [SwiftSetting] = [
+    /// `-enable-upcoming-feature` flags will get removed in the future
+    /// and we'll need to remove them from here too.
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md
+    /// Require `any` for existential types.
+        .enableUpcomingFeature("ExistentialAny"),
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md
+    /// Nicer `#file`.
+        .enableUpcomingFeature("ConciseMagicFile"),
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0286-forward-scan-trailing-closures.md
+    /// This one shouldn't do much to be honest, but shouldn't hurt as well.
+        .enableUpcomingFeature("ForwardTrailingClosures"),
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0354-regex-literals.md
+    /// `BareSlashRegexLiterals` not enabled since we don't use regex anywhere.
+
+    /// https://github.com/apple/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md
+    /// `ImportObjcForwardDeclarations` not enabled because it's objc-related.
+]
+
+let experimentalFeatureFlags: [SwiftSetting] = [
+    /// `DiscordBM` passes the `complete` level.
+    ///
+    /// `minimal` / `targeted` / `complete`
+    .enableExperimentalFeature("StrictConcurrency=complete"),
+]
+
+let swiftSettings = featureFlags + experimentalFeatureFlags
 
 let package = Package(
     name: "DiscordBM",
@@ -46,86 +79,73 @@ let package = Package(
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.15.0"),
         .package(url: "https://github.com/apple/swift-atomics.git", from: "1.1.0"),
         .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.3"),
-        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.26.0"),
         .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.15.0"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
+        .package(url: "https://github.com/apple/swift-syntax", from: "509.0.0")
     ],
     targets: [
         .target(
             name: "DiscordBM",
             dependencies: [
-                "DiscordAuth",
-                "DiscordHTTP",
-                "DiscordCore",
-                "DiscordGateway",
-                "DiscordModels",
-                "DiscordUtilities",
-            ]
+                .target(name: "DiscordAuth"),
+                .target(name: "DiscordHTTP"),
+                .target(name: "DiscordCore"),
+                .target(name: "DiscordGateway"),
+                .target(name: "DiscordModels"),
+                .target(name: "DiscordUtilities"),
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordCore",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordHTTP",
             dependencies: [
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                "DiscordModels",
-            ]
+                .target(name: "DiscordModels"),
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordGateway",
             dependencies: [
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                "DiscordWebSocket",
-                "DiscordHTTP",
-            ]
+                .target(name: "DiscordWebSocket"),
+                .target(name: "DiscordHTTP"),
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordModels",
             dependencies: [
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "MultipartKit", package: "multipart-kit"),
-                "DiscordCore"
-            ]
+                .target(name: "DiscordCore"),
+                .target(name: "UnstableEnumMacro"),
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordUtilities",
             dependencies: [
-                "DiscordModels"
-            ]
+                .target(name: "DiscordModels")
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "DiscordAuth",
             dependencies: [
-                "DiscordModels"
-            ]
-        ),
-        .plugin(
-            name: "GenerateAPIEndpoints",
-            capability: .command(
-                intent: .custom(
-                    verb: "generate-api-endpoints",
-                    description: "Generates API Endpoints"
-                ),
-                permissions: [
-                    .writeToPackageDirectory(reason: "Add Generated Endpoints")
-                ]
-            ),
-            dependencies: ["GenerateAPIEndpointsExec"]
-        ),
-        .executableTarget(
-            name: "GenerateAPIEndpointsExec",
-            dependencies: [
-                .product(name: "NIOHTTP1", package: "swift-nio"),
-                .product(name: "Yams", package: "Yams")
+                .target(name: "DiscordModels")
             ],
-            path: "Plugins/GenerateAPIEndpointsExec",
-            resources: [.copy("Resources/openapi.yml")]
+            swiftSettings: swiftSettings
         ),
         /// Vapor's `WebSocketKit` with modifications to fit `DiscordBM` better.
         .target(
@@ -140,8 +160,9 @@ let package = Package(
                 .product(name: "NIOWebSocket", package: "swift-nio"),
                 .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
                 .product(name: "Atomics", package: "swift-atomics"),
-                "CZlib"
-            ]
+                .target(name: "CZlib"),
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "CZlib",
@@ -150,18 +171,69 @@ let package = Package(
                 .linkedLibrary("z")
             ]
         ),
+        .plugin(
+            name: "GenerateAPIEndpoints",
+            capability: .command(
+                intent: .custom(
+                    verb: "generate-api-endpoints",
+                    description: "Generates API Endpoints"
+                ),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Add Generated Endpoints")
+                ]
+            ),
+            dependencies: [
+                .target(name: "GenerateAPIEndpointsExec")
+            ]
+        ),
+        .executableTarget(
+            name: "GenerateAPIEndpointsExec",
+            dependencies: [
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "Yams", package: "Yams")
+            ],
+            path: "Plugins/GenerateAPIEndpointsExec",
+            resources: [.copy("Resources/openapi.yml")],
+            swiftSettings: swiftSettings
+        ),
+        .macro(
+            name: "UnstableEnumMacro",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+            ],
+            path: "./Macros/UnstableEnumMacro",
+            swiftSettings: swiftSettings
+        ),
         .testTarget(
             name: "DiscordBMTests",
-            dependencies: ["DiscordBM"]
+            dependencies: [
+                .target(name: "DiscordBM")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "MacroTests",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+                .target(name: "UnstableEnumMacro")
+            ],
+            swiftSettings: swiftSettings
         ),
         /// Vapor's `WebSocketKit` tests with modifications to fit `DiscordBM` better.
         .testTarget(
             name: "WebSocketTests",
-            dependencies: ["DiscordWebSocket"]
+            dependencies: [
+                .target(name: "DiscordWebSocket")
+            ],
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["DiscordBM"]
+            dependencies: [
+                .target(name: "DiscordBM")
+            ],
+            swiftSettings: swiftSettings
         ),
     ]
 )

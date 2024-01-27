@@ -3,9 +3,11 @@
 public struct Invite: Sendable, Codable {
 
     /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
-    public enum TargetKind: Int, Sendable, Codable {
-        case stream = 1
-        case embeddedApplication = 2
+    @UnstableEnum<Int>
+    public enum TargetKind: Sendable, Codable {
+        case stream // 1
+        case embeddedApplication // 2
+        case _undocumented(Int)
     }
 
     public var code: String

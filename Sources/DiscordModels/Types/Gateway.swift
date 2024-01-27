@@ -145,7 +145,9 @@ public struct Gateway: Sendable, Codable {
             case autoModerationRuleDelete(AutoModerationRule)
             
             case autoModerationActionExecution(AutoModerationActionExecution)
-            
+
+            case _undocumented
+
             public var correspondingIntents: [Intent] {
                 switch self {
                 case .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate, .entitlementCreate, .entitlementUpdate, .entitlementDelete, .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
@@ -184,6 +186,8 @@ public struct Gateway: Sendable, Codable {
                     return [.autoModerationConfiguration]
                 case .autoModerationActionExecution:
                     return [.autoModerationExecution]
+                case ._undocumented:
+                    return []
                 }
             }
         }
@@ -529,61 +533,32 @@ public struct Gateway: Sendable, Codable {
             self.intents = .init(intents)
         }
     }
-    
+
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
-    public enum Intent: UInt, Sendable, Codable, CaseIterable {
-        case guilds = 0
-        case guildMembers = 1
-        case guildModeration = 2
-        case guildEmojisAndStickers = 3
-        case guildIntegrations = 4
-        case guildWebhooks = 5
-        case guildInvites = 6
-        case guildVoiceStates = 7
-        case guildPresences = 8
-        case guildMessages = 9
-        case guildMessageReactions = 10
-        case guildMessageTyping = 11
-        case directMessages = 12
-        case directMessageReactions = 13
-        case directMessageTyping = 14
-        case messageContent = 15
-        case guildScheduledEvents = 16
-        case autoModerationConfiguration = 20
-        case autoModerationExecution = 21
-
-        /// All intents that require no privileges.
-        /// https://discord.com/developers/docs/topics/gateway#privileged-intents
-        public static var unprivileged: [Intent] {
-            .init(Gateway.Intent.allCases.filter(\.isPrivileged))
-        }
-
-        /// https://discord.com/developers/docs/topics/gateway#privileged-intents
-        public var isPrivileged: Bool {
-            switch self {
-            case .guilds: return false
-            case .guildMembers: return true
-            case .guildModeration: return false
-            case .guildEmojisAndStickers: return false
-            case .guildIntegrations: return false
-            case .guildWebhooks: return false
-            case .guildInvites: return false
-            case .guildVoiceStates: return false
-            case .guildPresences: return true
-            case .guildMessages: return false
-            case .guildMessageReactions: return false
-            case .guildMessageTyping: return false
-            case .directMessages: return false
-            case .directMessageReactions: return false
-            case .directMessageTyping: return false
-            case .messageContent: return true
-            case .guildScheduledEvents: return false
-            case .autoModerationConfiguration: return false
-            case .autoModerationExecution: return false
-            }
-        }
+    @UnstableEnum<UInt>
+    public enum Intent: Sendable, Codable, CaseIterable {
+        case guilds // 0
+        case guildMembers // 1
+        case guildModeration // 2
+        case guildEmojisAndStickers // 3
+        case guildIntegrations // 4
+        case guildWebhooks // 5
+        case guildInvites // 6
+        case guildVoiceStates // 7
+        case guildPresences // 8
+        case guildMessages // 9
+        case guildMessageReactions // 10
+        case guildMessageTyping // 11
+        case directMessages // 12
+        case directMessageReactions // 13
+        case directMessageTyping // 14
+        case messageContent // 15
+        case guildScheduledEvents // 16
+        case autoModerationConfiguration // 20
+        case autoModerationExecution // 21
+        case _undocumented(UInt)
     }
-    
+
     /// https://discord.com/developers/docs/topics/gateway-events#resume-resume-structure
     public struct Resume: Sendable, Codable {
         public var token: Secret
@@ -598,14 +573,16 @@ public struct Gateway: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence-status-types
-    public enum Status: String, Sendable, Codable, ToleratesStringDecodeMarker {
-        case online = "online"
-        case doNotDisturb = "dnd"
-        case afk = "idle"
-        case offline = "offline"
-        case invisible = "invisible"
+    @UnstableEnum<String>
+    public enum Status: Sendable, Codable {
+        case online // "online"
+        case doNotDisturb // "dnd"
+        case afk // "idle"
+        case offline // "offline"
+        case invisible // "invisible"
+        case _undocumented(String)
     }
-    
+
     /// https://discord.com/developers/docs/topics/gateway-events#hello-hello-structure
     public struct Hello: Sendable, Codable {
         public var heartbeat_interval: Int
@@ -973,11 +950,13 @@ public struct Gateway: Sendable, Codable {
     public struct InviteCreate: Sendable, Codable {
         
         /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
-        public enum TargetKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case stream = 1
-            case embeddedApplication = 2
+        @UnstableEnum<Int>
+        public enum TargetKind: Sendable, Codable {
+            case stream // 1
+            case embeddedApplication // 2
+            case _undocumented(Int)
         }
-        
+
         public var channel_id: ChannelSnowflake
         public var code: String
         public var created_at: DiscordTimestamp
@@ -1122,13 +1101,15 @@ public struct Gateway: Sendable, Codable {
         public var channel_id: ChannelSnowflake
         public var guild_id: GuildSnowflake?
     }
-    
-    public enum ReactionKind: Int, Sendable, Codable {
-        case normal = 0
+
+    @UnstableEnum<Int>
+    public enum ReactionKind: Sendable, Codable {
+        case normal // 0
         /// FIXME: Discord calls this 'burst'. Can't change it to not break API
-        case `super` = 1
+        case `super` // 1
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-add-message-reaction-add-event-fields
     public struct MessageReactionAdd: Sendable, Codable {
         public var type: ReactionKind
@@ -1217,18 +1198,17 @@ public struct Gateway: Sendable, Codable {
     public struct Activity: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case game = 0
-            case streaming = 1
-            case listening = 2
-            case watching = 3
-            case custom = 4
-            case competing = 5
-            /// The name will change to something appropriate, when documented by Discord.
-            /// Avoid using it till then, or be aware of the API breakage possibility.
-            case __undocumented6 = 6
+        @UnstableEnum<Int>
+        public enum Kind: Sendable, Codable {
+            case game // 0
+            case streaming // 1
+            case listening // 2
+            case watching // 3
+            case custom // 4
+            case competing // 5
+            case _undocumented(Int)
         }
-        
+
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-timestamps
         public struct Timestamps: Sendable, Codable {
             public var start: Int?
@@ -1291,20 +1271,22 @@ public struct Gateway: Sendable, Codable {
                 self.match = match
             }
         }
-        
+
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-flags
-        public enum Flag: UInt, Sendable {
-            case instance = 0
-            case join = 1
-            case spectate = 2
-            case joinRequest = 3
-            case sync = 4
-            case play = 5
-            case partyPrivacyFriends = 6
-            case partyPrivacyVoiceChannel = 7
-            case embedded = 8
+        @UnstableEnum<UInt>
+        public enum Flag: Sendable {
+            case instance // 0
+            case join // 1
+            case spectate // 2
+            case joinRequest // 3
+            case sync // 4
+            case play // 5
+            case partyPrivacyFriends // 6
+            case partyPrivacyVoiceChannel // 7
+            case embedded // 8
+            case _undocumented(UInt)
         }
-        
+
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-buttons
         public struct Button: Sendable, Codable {
             public var label: String
@@ -1425,5 +1407,41 @@ public struct Gateway: Sendable, Codable {
         public var url: String
         public var shards: Int
         public var session_start_limit: SessionStartLimit
+    }
+}
+
+// MARK: + Gateway.Intent
+extension Gateway.Intent {
+    /// All intents that require no privileges.
+    /// https://discord.com/developers/docs/topics/gateway#privileged-intents
+    public static var unprivileged: [Gateway.Intent] {
+        Gateway.Intent.allCases.filter(\.isPrivileged)
+    }
+
+    /// https://discord.com/developers/docs/topics/gateway#privileged-intents
+    public var isPrivileged: Bool {
+        switch self {
+        case .guilds: return false
+        case .guildMembers: return true
+        case .guildModeration: return false
+        case .guildEmojisAndStickers: return false
+        case .guildIntegrations: return false
+        case .guildWebhooks: return false
+        case .guildInvites: return false
+        case .guildVoiceStates: return false
+        case .guildPresences: return true
+        case .guildMessages: return false
+        case .guildMessageReactions: return false
+        case .guildMessageTyping: return false
+        case .directMessages: return false
+        case .directMessageReactions: return false
+        case .directMessageTyping: return false
+        case .messageContent: return true
+        case .guildScheduledEvents: return false
+        case .autoModerationConfiguration: return false
+        case .autoModerationExecution: return false
+            /// Undocumented cases are considered privileged just to be safe than sorry
+        case ._undocumented: return true
+        }
     }
 }

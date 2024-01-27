@@ -2,7 +2,7 @@ import Foundation
 
 func resource(name: String) -> Data {
     let fileManager = FileManager.default
-    let path = fileManager.currentDirectoryPath + "/Tests/Resources/" + name
+    let path = "\(fileManager.currentDirectoryPath)/Tests/Resources/\(name)"
     if let data = fileManager.contents(atPath: path) {
         return data
     } else {

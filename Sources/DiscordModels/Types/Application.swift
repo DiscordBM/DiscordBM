@@ -3,17 +3,19 @@
 public struct DiscordApplication: Sendable, Codable {
 
     /// https://discord.com/developers/docs/resources/application#application-object-application-flags
-    public enum Flag: UInt, Sendable {
-        case applicationAutoModerationRuleCreateBadge = 6
-        case gatewayPresence = 12
-        case gatewayPresenceLimited = 13
-        case gatewayGuildMembers = 14
-        case gatewayGuildMembersLimited = 15
-        case verificationPendingGuildLimit = 16
-        case embedded = 17
-        case gatewayMessageContent = 18
-        case gatewayMessageContentLimited = 19
-        case applicationCommandBadge = 23
+    @UnstableEnum<UInt>
+    public enum Flag: Sendable {
+        case applicationAutoModerationRuleCreateBadge // 6
+        case gatewayPresence // 12
+        case gatewayPresenceLimited // 13
+        case gatewayGuildMembers // 14
+        case gatewayGuildMembersLimited // 15
+        case verificationPendingGuildLimit // 16
+        case embedded // 17
+        case gatewayMessageContent // 18
+        case gatewayMessageContentLimited // 19
+        case applicationCommandBadge // 23
+        case _undocumented(UInt)
     }
 
     /// https://discord.com/developers/docs/resources/application#install-params-object

@@ -8,7 +8,7 @@ jobs:
     name: Post LOC
     steps:
       - name: Checkout out package
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install tokei
         uses: giantswarm/install-binary-action@v1.1.0
         with:

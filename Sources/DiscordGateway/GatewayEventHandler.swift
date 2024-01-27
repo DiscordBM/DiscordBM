@@ -498,6 +498,8 @@ extension GatewayEventHandler {
             await withLogging(for: "onAutoModerationActionExecution") {
                 try await onAutoModerationActionExecution(payload)
             }
+        case ._undocumented:
+            break
         }
 
         await withLogging(for: "onEventHandlerEnd") {

@@ -17,7 +17,7 @@
     </a>
     </a>
     <a href="https://swift.org">
-        <img src="https://img.shields.io/badge/swift-5.9%20/%205.8%20/%205.7-brightgreen.svg" alt="Latest/Minimum Swift Version">
+        <img src="https://img.shields.io/badge/swift-5.9-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
 </p>
 
@@ -33,8 +33,6 @@
 Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Services/DiscordService/DiscordService.swift#L1). 
 
 ## How To Use
-  
-> Make sure you have **Xcode 14.1 or above**. Lower Xcode 14 versions have known issues that cause problems for libraries.    
 
 ### Initializing a Gateway Manager
 
@@ -45,7 +43,7 @@ Make sure you've added [AsyncHTTPClient](https://github.com/swift-server/async-h
 import DiscordBM
 import AsyncHTTPClient
 
-let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+let httpClient = HTTPClient()
 
 let bot = await BotGatewayManager(
     eventLoopGroup: httpClient.eventLoopGroup,
@@ -717,7 +715,7 @@ Finally, add `import DiscordBM` to your source code.
 ## Versioning
 `DiscordBM` will try to follow Semantic Versioning 2.0.0, with exceptions:    
 * To keep `DiscordBM` up to date with Discord API's frequent changes, `DiscordBM` will **add** any new properties to any types in **minor** versions, even if it's technically a breaking change.   
-* This includes adding new cases to enums. If you want to try to avoid breaking changes, make sure you have a `default` case in your `switch` statements or use `if case let`/`if case`.
+* `DiscordBM` tries to minimize the effect of this requirement. For example most enums have an underscored case named `_undocumented` which asks users to use non-exhaustive switch statements, preventing future code-breakages.  
 
 ## Contribution & Support
 * If you need help with anything, ask in [DiscordBM's Discord server](https://discord.gg/kxfs5n7HVE).

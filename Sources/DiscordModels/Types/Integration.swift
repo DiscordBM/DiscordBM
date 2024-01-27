@@ -3,19 +3,23 @@
 public struct Integration: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/guild#integration-object-integration-structure
-    public enum Kind: String, Sendable, Codable, ToleratesStringDecodeMarker {
+    @UnstableEnum<String>
+    public enum Kind: Sendable, Codable {
         case twitch
         case youtube
         case discord
-        case guildSubscription = "guild_subscription"
+        case guildSubscription // "guild_subscription"
+        case _undocumented(String)
     }
-    
+
     /// https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors
-    public enum ExpireBehavior: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case removeRole = 0
-        case kick = 1
+    @UnstableEnum<Int>
+    public enum ExpireBehavior: Sendable, Codable {
+        case removeRole // 0
+        case kick // 1
+        case _undocumented(Int)
     }
-    
+
     public var id: IntegrationSnowflake
     public var name: String
     public var type: Kind

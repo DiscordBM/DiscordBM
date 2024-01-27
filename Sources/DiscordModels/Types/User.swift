@@ -3,32 +3,36 @@
 public struct DiscordUser: Sendable, Codable {
     
     /// https://discord.com/developers/docs/resources/user#user-object-premium-types
-    public enum PremiumKind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case none = 0
-        case nitroClassic = 1
-        case nitro = 2
-        case nitroBasic = 3
+    @UnstableEnum<Int>
+    public enum PremiumKind: Sendable, Codable {
+        case none // 0
+        case nitroClassic // 1
+        case nitro // 2
+        case nitroBasic // 3
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/resources/user#user-object-user-flags
-    public enum Flag: UInt, Sendable {
-        case staff = 0
-        case partner = 1
-        case hypeSquad = 2
-        case BugHunterLevel1 = 3
-        case hypeSquadOnlineHouse1 = 6
-        case hypeSquadOnlineHouse2 = 7
-        case hypeSquadOnlineHouse3 = 8
-        case premiumEarlySupporter = 9
-        case teamPseudoUser = 10
-        case bugHunterLevel2 = 14
-        case verifiedBot = 16
-        case verifiedDeveloper = 17
-        case certifiedModerator = 18
-        case botHttpInteractions = 19
-        case activeDeveloper = 22
+    @UnstableEnum<UInt>
+    public enum Flag: Sendable {
+        case staff // 0
+        case partner // 1
+        case hypeSquad // 2
+        case BugHunterLevel1 // 3
+        case hypeSquadOnlineHouse1 // 6
+        case hypeSquadOnlineHouse2 // 7
+        case hypeSquadOnlineHouse3 // 8
+        case premiumEarlySupporter // 9
+        case teamPseudoUser // 10
+        case bugHunterLevel2 // 14
+        case verifiedBot // 16
+        case verifiedDeveloper // 17
+        case certifiedModerator // 18
+        case botHttpInteractions // 19
+        case activeDeveloper // 22
+        case _undocumented(UInt)
     }
-    
+
     public var id: UserSnowflake
     public var username: String
     public var discriminator: String
@@ -100,32 +104,36 @@ extension DiscordUser {
     public struct Connection: Sendable, Codable {
 
         /// https://discord.com/developers/docs/resources/user#connection-object-services
-        public enum Service: String, Sendable, Codable {
-            case battleNet = "Battle.net"
-            case ebay = "eBay"
-            case epicGames = "Epic Games"
-            case facebook = "Facebook"
-            case github = "GitHub"
-            case instagram = "Instagram"
-            case leagueOfLegends = "League of Legends"
-            case paypal = "PayPal"
-            case playstation = "PlayStation Network"
-            case reddit = "Reddit"
-            case riotGames = "Riot Games"
-            case spotify = "Spotify"
-            case skype = "Skype"
-            case steam = "Steam"
-            case tikTok = "TikTok"
-            case twitch = "Twitch"
-            case twitter = "Twitter"
-            case xbox = "Xbox"
-            case youtube = "YouTube"
+        @UnstableEnum<String>
+        public enum Service: Sendable, Codable {
+            case battleNet // "Battle.net"
+            case ebay // "eBay"
+            case epicGames // "Epic Games"
+            case facebook // "Facebook"
+            case github // "GitHub"
+            case instagram // "Instagram"
+            case leagueOfLegends // "League of Legends"
+            case paypal // "PayPal"
+            case playstation // "PlayStation Network"
+            case reddit // "Reddit"
+            case riotGames // "Riot Games"
+            case spotify // "Spotify"
+            case skype // "Skype"
+            case steam // "Steam"
+            case tikTok // "TikTok"
+            case twitch // "Twitch"
+            case twitter // "Twitter"
+            case xbox // "Xbox"
+            case youtube // "YouTube"
+            case _undocumented(String)
         }
 
         /// https://discord.com/developers/docs/resources/user#connection-object-visibility-types
-        public enum VisibilityKind: Int, Sendable, Codable {
-            case none = 0
-            case everyone = 1
+        @UnstableEnum<Int>
+        public enum VisibilityKind: Sendable, Codable {
+            case none // 0
+            case everyone // 1
+            case _undocumented(Int)
         }
 
         public var id: String

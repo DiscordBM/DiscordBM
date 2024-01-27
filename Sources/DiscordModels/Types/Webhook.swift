@@ -2,14 +2,15 @@ import Foundation
 
 /// https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-structure
 public struct Webhook: Sendable, Codable {
-    
     /// https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-types
-    public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case incoming = 1
-        case channelFollower = 2
-        case application = 3
+    @UnstableEnum<Int>
+    public enum Kind: Sendable, Codable {
+        case incoming // 1
+        case channelFollower // 2
+        case application // 3
+        case _undocumented(Int)
     }
-    
+
     public var id: WebhookSnowflake
     public var type: Kind
     public var guild_id: GuildSnowflake?

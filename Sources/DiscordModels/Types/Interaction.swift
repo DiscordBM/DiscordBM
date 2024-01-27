@@ -39,14 +39,16 @@ public struct Interaction: Sendable, Codable {
     }
     
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
-    public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-        case ping = 1
-        case applicationCommand = 2
-        case messageComponent = 3
-        case applicationCommandAutocomplete = 4
-        case modalSubmit = 5
+    @UnstableEnum<Int>
+    public enum Kind: Sendable, Codable {
+        case ping // 1
+        case applicationCommand // 2
+        case messageComponent // 3
+        case applicationCommandAutocomplete // 4
+        case modalSubmit // 5
+        case _undocumented(Int)
     }
-    
+
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
     public struct ApplicationCommand: Sendable, Codable {
         
@@ -358,6 +360,7 @@ public struct Interaction: Sendable, Codable {
             )
         case .ping:
             self.data = nil
+        case ._undocumented: self.data = nil
         }
         self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
         self.channel_id = try container.decodeIfPresent(
@@ -446,27 +449,31 @@ extension Interaction {
     public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral, ValidatablePayload {
 
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
-        public enum Kind: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-            case actionRow = 1
-            case button = 2
-            case stringSelect = 3
-            case textInput = 4
-            case userSelect = 5
-            case roleSelect = 6
-            case mentionableSelect = 7
-            case channelSelect = 8
+        @UnstableEnum<Int>
+        public enum Kind: Sendable, Codable {
+            case actionRow // 1
+            case button // 2
+            case stringSelect // 3
+            case textInput // 4
+            case userSelect // 5
+            case roleSelect // 6
+            case mentionableSelect // 7
+            case channelSelect // 8
+            case _undocumented(Int)
         }
-        
+
         /// https://discord.com/developers/docs/interactions/message-components#button-object-button-structure
         public struct Button: Sendable, Codable, ValidatablePayload {
 
             /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
-            public enum Style: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-                case primary = 1
-                case secondary = 2
-                case success = 3
-                case danger = 4
-                case link = 5
+            @UnstableEnum<Int>
+            public enum Style: Sendable, Codable {
+                case primary // 1
+                case secondary // 2
+                case success // 3
+                case danger // 4
+                case link // 5
+                case _undocumented(Int)
             }
 
             /// The same as ``Style``, but has no `link`.
@@ -477,12 +484,17 @@ extension Interaction {
                 case success
                 case danger
 
+                /// This case serves as a way of discouraging exhaustive switch statements
+                case __DO_NOT_USE_THIS_CASE
+
                 public func toStyle() -> Style {
                     switch self {
                     case .primary: return .primary
                     case .secondary: return .secondary
                     case .success: return .success
                     case .danger: return .danger
+                    case .__DO_NOT_USE_THIS_CASE:
+                        fatalError("If the case name wasn't already clear enough: This case MUST NOT be used")
                     }
                 }
 
@@ -493,6 +505,7 @@ extension Interaction {
                     case .success: self = .success
                     case .danger: self = .danger
                     case .link: return nil
+                    case ._undocumented: return nil
                     }
                 }
             }
@@ -733,11 +746,13 @@ extension Interaction {
         public struct TextInput: Sendable, Codable, ValidatablePayload {
 
         /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
-            public enum Style: Int, Sendable, Codable, ToleratesIntDecodeMarker {
-                case short = 1
-                case paragraph = 2
+            @UnstableEnum<Int>
+            public enum Style: Sendable, Codable {
+                case short // 1
+                case paragraph // 2
+                case _undocumented(Int)
             }
-            
+
             public var custom_id: String
             public var style: Style?
             public var label: String?
@@ -776,6 +791,7 @@ extension Interaction {
             case roleSelect(SelectMenu)
             case mentionableSelect(SelectMenu)
             case channelSelect(ChannelSelectMenu)
+            case _undocumented
 
             public var customId: String? {
                 switch self {
@@ -793,6 +809,8 @@ extension Interaction {
                     return value.custom_id
                 case let .channelSelect(value):
                     return value.custom_id
+                case ._undocumented:
+                    return nil
                 }
             }
 
@@ -820,6 +838,8 @@ extension Interaction {
                     self = try .channelSelect(.init(from: decoder))
                 case .textInput:
                     self = try .textInput(.init(from: decoder))
+                case ._undocumented:
+                    self = ._undocumented
                 }
             }
             
@@ -847,6 +867,7 @@ extension Interaction {
                 case let .channelSelect(selectMenu):
                     try container.encode(Kind.channelSelect, forKey: .type)
                     try selectMenu.encode(to: encoder)
+                case ._undocumented: break
                 }
             }
 
@@ -950,6 +971,8 @@ extension Interaction {
                     selectMenu.validate()
                 case .channelSelect(let channelSelectMenu):
                     channelSelectMenu.validate()
+                case ._undocumented:
+                    Optional<ValidationFailure>.none
                 }
             }
         }

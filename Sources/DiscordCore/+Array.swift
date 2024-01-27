@@ -1,9 +1,8 @@
 
 extension Array where Element == (String, String?) {
     public func makeForURLQuery() -> String {
-        self.compactMap { key, value -> (String, String)? in
-            guard let value else { return nil }
-            return (key, value)
+        self.compactMap { key, value in
+            value.map { (key, $0) }
         }.makeForURLQuery()
     }
 }
