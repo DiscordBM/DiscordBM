@@ -13,6 +13,7 @@ jobs:
       with_coverage: true
       with_tsan: true
       with_public_api_check: true
+      with_gh_codeql: false # Temporary, because it's broken
       coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
       test_filter: '^DiscordBMTests'
   websocket-tests:
@@ -21,5 +22,6 @@ jobs:
       with_coverage: true
       with_tsan: false
       with_public_api_check: false
+      with_gh_codeql: false # Temporary, because it's broken
       coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
       test_filter: '^WebSocketTests'
