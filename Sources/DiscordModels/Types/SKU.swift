@@ -1,15 +1,22 @@
 
+/// https://discord.com/developers/docs/monetization/skus#sku-object-sku-structure
 public struct SKU: Sendable, Codable {
 
-    public enum Kind: Int, Sendable, Codable {
-        case subscription = 5
-        case subscriptionGroup = 6
+    /// https://discord.com/developers/docs/monetization/skus#sku-object-sku-types
+    @UnstableEnum<Int>
+    public enum Kind: Sendable, Codable {
+        case subscription // 5
+        case subscriptionGroup // 6
+        case _undocumented(Int)
     }
 
-    public enum Flag: UInt, Sendable {
-        case available = 2
-        case guildSubscription = 7
-        case userSubscription = 8
+    /// https://discord.com/developers/docs/monetization/skus#sku-object-sku-flags
+    @UnstableEnum<UInt>
+    public enum Flag: Sendable {
+        case available // 2
+        case guildSubscription // 7
+        case userSubscription // 8
+        case _undocumented(UInt)
     }
 
     public var id: SKUSnowflake

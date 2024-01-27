@@ -7,6 +7,17 @@ extension [EnumCaseElementSyntax] {
         rawType: RawKind,
         context: some MacroExpansionContext
     ) -> (cases: [EnumCase], hasError: Bool) {
+        guard self.count > 0 else { return ([], false) }
+        var `self` = self
+        let last = self.removeLast()
+        guard last.name.trimmedDescription == "_undocumented" else {
+            let diagnostic = Diagnostic(
+                node: Syntax(last),
+                message: MacroError.lastCaseMustBe_undocumented
+            )
+            context.diagnose(diagnostic)
+            return ([], false)
+        }
         let cases = self.compactMap {
             element -> EnumCase? in
             if let rawValue = element.rawValue {

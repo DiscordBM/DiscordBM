@@ -10,6 +10,7 @@ public struct Team: Sendable, Codable {
         public enum State: Sendable, Codable {
             case invited // 1
             case accepted // 2
+            case _undocumented(Int)
         }
 
         /// https://discord.com/developers/docs/topics/teams#data-models-team-member-role-types
@@ -18,6 +19,7 @@ public struct Team: Sendable, Codable {
             case admin // admin
             case developer // developer
             case readOnly // read_only
+            case _undocumented(String)
         }
 
         public var membership_state: State

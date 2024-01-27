@@ -196,6 +196,7 @@ public enum DiscordLocale: Sendable, Codable {
     case japanese // "ja"
     case chineseTaiwan // "zh-TW"
     case korean // "ko"
+    case _undocumented(String)
 }
 
 //MARK: - DiscordLocaleDict

@@ -26,6 +26,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         try! httpClient.syncShutdown()
     }
 
+    @available(*, deprecated, message: "To avoid deprecation warnings for 'makeEventsParseFailureStream'")
     func testConnect() async throws {
         /// Make sure last tests don't affect this test's gateway connection
         try await Task.sleep(for: .seconds(5))
@@ -107,6 +108,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
     }
 
+    @available(*, deprecated, message: "To avoid deprecation warnings for 'makeEventsStream'")
     func testShardingGatewayManager() async throws {
         /// Make sure last tests don't affect this test's gateway connection
         try await Task.sleep(for: .seconds(5))
@@ -162,6 +164,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         await counter.waitFulfillment()
     }
 
+    @available(*, deprecated, message: "To avoid deprecation warnings for 'makeEventsStream'")
     func testGatewayStopsOnInvalidToken() async throws {
         /// Make sure last tests don't affect this test's gateway connection
         try await Task.sleep(for: .seconds(5))

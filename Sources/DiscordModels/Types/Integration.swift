@@ -9,6 +9,7 @@ public struct Integration: Sendable, Codable {
         case youtube
         case discord
         case guildSubscription // "guild_subscription"
+        case _undocumented(String)
     }
 
     /// https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors
@@ -16,6 +17,7 @@ public struct Integration: Sendable, Codable {
     public enum ExpireBehavior: Sendable, Codable {
         case removeRole // 0
         case kick // 1
+        case _undocumented(Int)
     }
 
     public var id: IntegrationSnowflake

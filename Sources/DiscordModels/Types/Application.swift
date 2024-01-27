@@ -15,6 +15,7 @@ public struct DiscordApplication: Sendable, Codable {
         case gatewayMessageContent // 18
         case gatewayMessageContentLimited // 19
         case applicationCommandBadge // 23
+        case _undocumented(UInt)
     }
 
     /// https://discord.com/developers/docs/resources/application#install-params-object

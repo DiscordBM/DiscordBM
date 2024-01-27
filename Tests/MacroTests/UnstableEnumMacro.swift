@@ -16,6 +16,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a
                 case b // bb
+                case _undocumented(String)
             }
             """,
             expandedSource: """
@@ -23,7 +24,6 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a
                 case b // bb
-
                 case _undocumented(String)
 
                 var rawValue: String {
@@ -61,6 +61,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum {
                 case a
                 case b // bb
+                case _undocumented(String)
             }
             """,
             expandedSource: """
@@ -68,7 +69,6 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum {
                 case a
                 case b // bb
-
                 case _undocumented(String)
 
                 var rawValue: String {
@@ -106,6 +106,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // "oo"
                 case b // "bb"
+                case _undocumented(String)
             }
             """,
             expandedSource: """
@@ -113,7 +114,6 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // "oo"
                 case b // "bb"
-
                 case _undocumented(String)
 
                 var rawValue: String {
@@ -153,6 +153,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 5
+                case _undocumented(Int)
             }
             """,
             expandedSource: """
@@ -160,7 +161,6 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 5
-
                 case _undocumented(Int)
 
                 var rawValue: Int {
@@ -200,6 +200,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable, Codable {
                 case a // 1
                 case b // 5
+                case _undocumented(Int)
             }
             """,
             expandedSource: #"""
@@ -207,7 +208,6 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable, Codable {
                 case a // 1
                 case b // 5
-
                 case _undocumented(Int)
 
                 var rawValue: Int {
@@ -263,6 +263,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable, Decodable, SomethingElse {
                 case a // 1
                 case b // 5
+                case _undocumented(Int)
             }
             """,
             expandedSource: #"""
@@ -270,7 +271,6 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable, Decodable, SomethingElse {
                 case a // 1
                 case b // 5
-
                 case _undocumented(Int)
 
                 var rawValue: Int {
@@ -328,6 +328,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum StringEnum: RawRepresentable, CaseIterable {
                 case a
                 case b
+                case _undocumented(String)
             }
             """,
             expandedSource: #"""
@@ -335,7 +336,6 @@ class UnstableEnumMacroTests: XCTestCase {
             enum StringEnum: RawRepresentable, CaseIterable {
                 case a
                 case b
-
                 case _undocumented(String)
 
                 var rawValue: String {
@@ -382,6 +382,7 @@ class UnstableEnumMacroTests: XCTestCase {
             public enum MyEnum: RawRepresentable {
                 case a
                 case b // bb
+                case _undocumented(String)
             }
             """,
             expandedSource: """
@@ -389,7 +390,6 @@ class UnstableEnumMacroTests: XCTestCase {
             public enum MyEnum: RawRepresentable {
                 case a
                 case b // bb
-
                 case _undocumented(String)
 
                 public var rawValue: String {
@@ -429,6 +429,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b
+                case _undocumented(Int)
             }
             """,
             expandedSource: """
@@ -436,6 +437,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b
+                case _undocumented(Int)
             }
 
             extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
@@ -457,6 +459,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // bb
                 case b // 1
+                case _undocumented(Int)
             }
             """,
             expandedSource: """
@@ -464,6 +467,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // bb
                 case b // 1
+                case _undocumented(Int)
             }
 
             extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
@@ -483,6 +487,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // 2
                 case b // 1
+                case _undocumented(String)
             }
             """,
             expandedSource: """
@@ -490,6 +495,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // 2
                 case b // 1
+                case _undocumented(String)
             }
 
             extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
@@ -511,6 +517,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // a
                 case b // "1
+                case _undocumented(String)
             }
             """,
             expandedSource: """
@@ -518,6 +525,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // a
                 case b // "1
+                case _undocumented(String)
             }
 
             extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
@@ -539,6 +547,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 1
+                case _undocumented(String)
             }
             """,
             expandedSource: """
@@ -546,6 +555,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 1
+                case _undocumented(String)
             }
 
             extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
@@ -567,6 +577,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a = "g"
                 case b = "gg"
+                case _undocumented(String)
             }
             """,
             expandedSource: """
@@ -574,6 +585,7 @@ class UnstableEnumMacroTests: XCTestCase {
             enum MyEnum: RawRepresentable {
                 case a = "g"
                 case b = "gg"
+                case _undocumented(String)
             }
 
             extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
@@ -591,6 +603,36 @@ class UnstableEnumMacroTests: XCTestCase {
                     line: 4,
                     column: 12,
                     fixIts: [.init(message: "useCommentsInstead")]
+                )
+            ],
+            macros: macros
+        )
+    }
+
+    func testRequireManualUndocumentedCase() throws {
+        assertMacroExpansion(
+            """
+            @UnstableEnum<String>
+            enum MyEnum: RawRepresentable {
+                case a // "g"
+                case b // "gg"
+            }
+            """,
+            expandedSource: """
+
+            enum MyEnum: RawRepresentable {
+                case a // "g"
+                case b // "gg"
+            }
+
+            extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+            }
+            """,
+            diagnostics: [
+                .init(
+                    message: "lastCaseMustBe_undocumented",
+                    line: 4,
+                    column: 10
                 )
             ],
             macros: macros
@@ -617,4 +659,5 @@ enum MyEnum: Sendable, Codable {
     case a // 1
     case b // 7
     case c // 9
+    case _undocumented(Int)
 }

@@ -14,6 +14,7 @@ enum MacroError: String, Error {
     case badEnumCaseTrailingTrivia
     case badEnumCaseComment
     case couldNotFindLocationOfNode
+    case lastCaseMustBe_undocumented
 }
 
 extension MacroError: DiagnosticMessage {

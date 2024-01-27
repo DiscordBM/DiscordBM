@@ -556,6 +556,7 @@ public struct Gateway: Sendable, Codable {
         case guildScheduledEvents // 16
         case autoModerationConfiguration // 20
         case autoModerationExecution // 21
+        case _undocumented(UInt)
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#resume-resume-structure
@@ -579,6 +580,7 @@ public struct Gateway: Sendable, Codable {
         case afk // "idle"
         case offline // "offline"
         case invisible // "invisible"
+        case _undocumented(String)
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#hello-hello-structure
@@ -952,6 +954,7 @@ public struct Gateway: Sendable, Codable {
         public enum TargetKind: Sendable, Codable {
             case stream // 1
             case embeddedApplication // 2
+            case _undocumented(Int)
         }
 
         public var channel_id: ChannelSnowflake
@@ -1104,6 +1107,7 @@ public struct Gateway: Sendable, Codable {
         case normal // 0
         /// FIXME: Discord calls this 'burst'. Can't change it to not break API
         case `super` // 1
+        case _undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-add-message-reaction-add-event-fields
@@ -1202,6 +1206,7 @@ public struct Gateway: Sendable, Codable {
             case watching // 3
             case custom // 4
             case competing // 5
+            case _undocumented(Int)
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-timestamps
@@ -1279,6 +1284,7 @@ public struct Gateway: Sendable, Codable {
             case partyPrivacyFriends // 6
             case partyPrivacyVoiceChannel // 7
             case embedded // 8
+            case _undocumented(UInt)
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-buttons
@@ -1335,16 +1341,16 @@ public struct Gateway: Sendable, Codable {
             self.flags = try container.decodeIfPresent(IntBitField<Flag>.self, forKey: .flags)
             self.buttons = try container.decodeIfPresent([Button].self, forKey: .buttons)
 
-            /// Discord sometimes sends a `0` number instead of a valid Snowflake `String`.
+            /// Discord sometimes sends a number instead of a valid Snowflake `String`.
             do {
                 self.application_id = try container.decodeIfPresent(
                     ApplicationSnowflake.self,
                     forKey: .application_id
                 )
             } catch let error as DecodingError {
-                if case .typeMismatch = error,
-                   try container.decode(Int.self, forKey: .application_id) == 0 {
-                    self.application_id = nil
+                if case .typeMismatch = error {
+                    let number = try container.decode(Int.self, forKey: .application_id)
+                    self.application_id = .init("\(number)")
                 } else {
                     throw error
                 }

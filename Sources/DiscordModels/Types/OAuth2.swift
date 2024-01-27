@@ -29,4 +29,5 @@ public enum OAuth2Scope: Sendable, Codable {
     case rpcVoiceWrite // "rpc.voice.write"
     case voice // "voice"
     case webhookIncoming // "webhook.incoming"
+    case _undocumented(String)
 }

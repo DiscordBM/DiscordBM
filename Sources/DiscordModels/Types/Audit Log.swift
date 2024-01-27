@@ -183,6 +183,7 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationUserCommunicationDisabled // 145
             case creatorMonetizationRequestCreated // 150
             case creatorMonetizationTermsAccepted // 151
+            case _undocumented(Int)
         }
         
         /// A mix of the below two types.

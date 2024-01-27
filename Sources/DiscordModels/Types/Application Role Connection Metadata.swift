@@ -13,6 +13,7 @@ public struct ApplicationRoleConnectionMetadata: Sendable, Codable, ValidatableP
         case dateTimeGreaterThanOrEqual // 6
         case booleanEqual // 7
         case booleanNotEqual // 8
+        case _undocumented(Int)
     }
 
     public var type: Kind

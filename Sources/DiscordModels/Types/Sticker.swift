@@ -7,6 +7,7 @@ public struct Sticker: Sendable, Codable {
     public enum Kind: Sendable, Codable {
         case standard // 1
         case guild // 2
+        case _undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-format-types
@@ -16,6 +17,7 @@ public struct Sticker: Sendable, Codable {
         case apng // 2
         case lottie // 3
         case gif // 4
+        case _undocumented(Int)
     }
 
     public var id: StickerSnowflake

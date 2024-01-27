@@ -40,7 +40,7 @@ public enum GatewayCloseCode: UInt16, Sendable, Codable {
 /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
 @UnstableEnum<Int>
 public enum JSONErrorCode: Sendable, Codable {
-case generalError // 0
+    case generalError // 0
     case unknownAccount // 10001
     case unknownApplication // 10002
     case unknownChannel // 10003
@@ -243,6 +243,7 @@ case generalError // 0
     case messageBlockedByHarmfulLinksFilter // 240000
     case cannotEnableOnboardingRequirementsAreNotMet // 350000
     case cannotUpdateOnboardingWhileBelowRequirements // 350001
+    case _undocumented(Int)
 }
 
 /// https://discord.com/developers/docs/topics/opcodes-and-status-codes#json

@@ -7,6 +7,7 @@ public struct StageInstance: Sendable, Codable {
     public enum PrivacyLevel: Sendable, Codable {
         case `public` // 1
         case guildOnly // 2
+        case _undocumented(Int)
     }
 
     public var id: StageInstanceSnowflake

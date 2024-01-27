@@ -7,6 +7,7 @@ public struct Invite: Sendable, Codable {
     public enum TargetKind: Sendable, Codable {
         case stream // 1
         case embeddedApplication // 2
+        case _undocumented(Int)
     }
 
     public var code: String

@@ -45,8 +45,11 @@ public enum Permission: Sendable, Codable {
     case moderateMembers // 40
     case viewCreatorMonetizationAnalytics // 41
     case useSoundboard // 42
+    case createGuildExpressions // 43
+    case createEvents // 44
     case useExternalSounds // 45
     case sendVoiceMessages // 46
+    case _undocumented(UInt)
 }
 
 /// https://discord.com/developers/docs/topics/permissions#role-object
@@ -69,6 +72,7 @@ public struct Role: Sendable, Codable {
     @UnstableEnum<UInt>
     public enum Flag: Sendable {
         case inPrompt // 0
+        case _undocumented(UInt)
     }
 
     public var id: RoleSnowflake

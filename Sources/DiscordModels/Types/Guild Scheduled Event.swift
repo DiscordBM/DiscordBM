@@ -6,6 +6,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
     @UnstableEnum<Int>
     public enum PrivacyLevel: Sendable, Codable {
         case guildOnly // 2
+        case _undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
@@ -15,6 +16,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
         case active // 2
         case completed // 3
         case canceled // 4
+        case _undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
@@ -23,6 +25,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
         case stageInstance // 1
         case voice // 2
         case external // 3
+        case _undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-metadata

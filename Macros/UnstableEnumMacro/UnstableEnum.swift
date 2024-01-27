@@ -84,7 +84,6 @@ public struct UnstableEnum: MemberMacro {
 
 
         var syntaxes: [DeclSyntax] = [
-            makeUnknownEnumCase(rawType: rawType),
             cases.makeRawValueVar(accessLevel: accessLevel, rawType: rawType),
             cases.makeInitializer(accessLevel: accessLevel, rawType: rawType)
         ]
@@ -144,12 +143,6 @@ extension UnstableEnum: ExtensionMacro {
 
         return [ext]
     }
-}
-
-private func makeUnknownEnumCase(rawType: RawKind) -> DeclSyntax {
-    """
-    case _undocumented(\(raw: rawType.rawValue))
-    """
 }
 
 private extension EnumDeclSyntax {
