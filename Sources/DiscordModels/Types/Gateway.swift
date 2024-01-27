@@ -1359,16 +1359,16 @@ public struct Gateway: Sendable, Codable {
             self.flags = try container.decodeIfPresent(IntBitField<Flag>.self, forKey: .flags)
             self.buttons = try container.decodeIfPresent([Button].self, forKey: .buttons)
 
-            /// Discord sometimes sends a `0` number instead of a valid Snowflake `String`.
+            /// Discord sometimes sends a number instead of a valid Snowflake `String`.
             do {
                 self.application_id = try container.decodeIfPresent(
                     ApplicationSnowflake.self,
                     forKey: .application_id
                 )
             } catch let error as DecodingError {
-                if case .typeMismatch = error,
-                   try container.decode(Int.self, forKey: .application_id) == 0 {
-                    self.application_id = nil
+                if case .typeMismatch = error {
+                    let number = try container.decode(Int.self, forKey: .application_id)
+                    self.application_id = .init("\(number)")
                 } else {
                     throw error
                 }
