@@ -11,6 +11,9 @@ public extension DiscordClient {
             .split(separator: "/").last?
             .split(separator: ".").first
             .map { String($0) } ?? "unknown"
-        return try await self.send(request: .init(to: endpoint), fallbackFileName: fallbackName)
+        return try await self.send(
+            request: .init(to: endpoint),
+            fallbackFileName: fallbackName
+        )
     }
 }
