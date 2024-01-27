@@ -11,7 +11,7 @@ jobs:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
-      with_tsan: false
+      with_tsan: true
       with_public_api_check: true
       with_gh_codeql: false # Temporary, because it's broken
       coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
@@ -20,7 +20,7 @@ jobs:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
-      with_tsan: false
+      with_tsan: true
       with_public_api_check: true
       coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
       test_filter: '^MacroTests'
@@ -28,7 +28,7 @@ jobs:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
-      with_tsan: false
+      with_tsan: true
       with_public_api_check: false
       with_gh_codeql: false # Temporary, because it's broken
       coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
