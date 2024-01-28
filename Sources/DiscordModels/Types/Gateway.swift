@@ -146,7 +146,7 @@ public struct Gateway: Sendable, Codable {
             
             case autoModerationActionExecution(AutoModerationActionExecution)
 
-            case _undocumented
+            case __undocumented
 
             public var correspondingIntents: [Intent] {
                 switch self {
@@ -186,7 +186,7 @@ public struct Gateway: Sendable, Codable {
                     return [.autoModerationConfiguration]
                 case .autoModerationActionExecution:
                     return [.autoModerationExecution]
-                case ._undocumented:
+                case .__undocumented:
                     return []
                 }
             }
@@ -556,7 +556,7 @@ public struct Gateway: Sendable, Codable {
         case guildScheduledEvents // 16
         case autoModerationConfiguration // 20
         case autoModerationExecution // 21
-        case _undocumented(UInt)
+        case __undocumented(UInt)
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#resume-resume-structure
@@ -580,7 +580,7 @@ public struct Gateway: Sendable, Codable {
         case afk // "idle"
         case offline // "offline"
         case invisible // "invisible"
-        case _undocumented(String)
+        case __undocumented(String)
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#hello-hello-structure
@@ -954,7 +954,7 @@ public struct Gateway: Sendable, Codable {
         public enum TargetKind: Sendable, Codable {
             case stream // 1
             case embeddedApplication // 2
-            case _undocumented(Int)
+            case __undocumented(Int)
         }
 
         public var channel_id: ChannelSnowflake
@@ -1107,7 +1107,7 @@ public struct Gateway: Sendable, Codable {
         case normal // 0
         /// FIXME: Discord calls this 'burst'. Can't change it to not break API
         case `super` // 1
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-add-message-reaction-add-event-fields
@@ -1206,7 +1206,7 @@ public struct Gateway: Sendable, Codable {
             case watching // 3
             case custom // 4
             case competing // 5
-            case _undocumented(Int)
+            case __undocumented(Int)
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-timestamps
@@ -1284,7 +1284,7 @@ public struct Gateway: Sendable, Codable {
             case partyPrivacyFriends // 6
             case partyPrivacyVoiceChannel // 7
             case embedded // 8
-            case _undocumented(UInt)
+            case __undocumented(UInt)
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-buttons
@@ -1441,7 +1441,7 @@ extension Gateway.Intent {
         case .autoModerationConfiguration: return false
         case .autoModerationExecution: return false
             /// Undocumented cases are considered privileged just to be safe than sorry
-        case ._undocumented: return true
+        case .__undocumented: return true
         }
     }
 }

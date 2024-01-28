@@ -7,7 +7,7 @@ public struct SKU: Sendable, Codable {
     public enum Kind: Sendable, Codable {
         case subscription // 5
         case subscriptionGroup // 6
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/monetization/skus#sku-object-sku-flags
@@ -16,7 +16,7 @@ public struct SKU: Sendable, Codable {
         case available // 2
         case guildSubscription // 7
         case userSubscription // 8
-        case _undocumented(UInt)
+        case __undocumented(UInt)
     }
 
     public var id: SKUSnowflake

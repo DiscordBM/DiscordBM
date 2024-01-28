@@ -9,7 +9,7 @@ public struct DiscordUser: Sendable, Codable {
         case nitroClassic // 1
         case nitro // 2
         case nitroBasic // 3
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/user#user-object-user-flags
@@ -30,7 +30,7 @@ public struct DiscordUser: Sendable, Codable {
         case certifiedModerator // 18
         case botHttpInteractions // 19
         case activeDeveloper // 22
-        case _undocumented(UInt)
+        case __undocumented(UInt)
     }
 
     public var id: UserSnowflake
@@ -125,7 +125,7 @@ extension DiscordUser {
             case twitter // "Twitter"
             case xbox // "Xbox"
             case youtube // "YouTube"
-            case _undocumented(String)
+            case __undocumented(String)
         }
 
         /// https://discord.com/developers/docs/resources/user#connection-object-visibility-types
@@ -133,7 +133,7 @@ extension DiscordUser {
         public enum VisibilityKind: Sendable, Codable {
             case none // 0
             case everyone // 1
-            case _undocumented(Int)
+            case __undocumented(Int)
         }
 
         public var id: String

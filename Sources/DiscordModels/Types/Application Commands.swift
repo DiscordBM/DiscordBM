@@ -9,7 +9,7 @@ public struct ApplicationCommand: Sendable, Codable {
         case chatInput // 1
         case user // 2
         case message // 3
-        case _undocumented(UInt)
+        case __undocumented(UInt)
     }
 
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure
@@ -29,7 +29,7 @@ public struct ApplicationCommand: Sendable, Codable {
             case mentionable // 9
             case number // 10
             case attachment // 11
-            case _undocumented(UInt)
+            case __undocumented(UInt)
         }
 
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-choice-structure
@@ -164,7 +164,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
             case role // 1
             case user // 2
             case channel // 3
-            case _undocumented(Int)
+            case __undocumented(Int)
         }
 
         public var type: Kind

@@ -11,7 +11,7 @@ public struct Guild: Sendable, Codable {
             case completedOnboarding // 1
             case bypassVerification // 2
             case startedOnboarding // 3
-            case _undocumented(UInt)
+            case __undocumented(UInt)
         }
 
         public var user: DiscordUser?
@@ -78,7 +78,7 @@ public struct Guild: Sendable, Codable {
         case medium // 2
         case high // 3
         case veryHigh // 4
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-default-message-notification-level
@@ -86,7 +86,7 @@ public struct Guild: Sendable, Codable {
     public enum DefaultMessageNotificationLevel: Sendable, Codable {
         case allMessages // 0
         case onlyMentions // 1
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-explicit-content-filter-level
@@ -95,7 +95,7 @@ public struct Guild: Sendable, Codable {
         case disabled // 0
         case memberWithoutRoles // 1
         case allMembers // 2
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-features
@@ -128,7 +128,7 @@ public struct Guild: Sendable, Codable {
         case verified // "VERIFIED"
         case vipRegions // "VIP_REGIONS"
         case welcomeScreenEnabled // "WELCOME_SCREEN_ENABLED"
-        case _undocumented(String)
+        case __undocumented(String)
 
         /// These ones are not mentioned in the Discord docs (There are even more of these).
         /// Might not even be valid anymore.
@@ -154,7 +154,7 @@ public struct Guild: Sendable, Codable {
     public enum MFALevel: Sendable, Codable {
         case none // 0
         case elevated // 1
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-system-channel-flags
@@ -166,7 +166,7 @@ public struct Guild: Sendable, Codable {
         case suppressJoinNotificationReplies // 3
         case suppressRoleSubscriptionPurchaseNotifications // 4
         case suppressRoleSubscriptionPurchaseNotificationReplies // 5
-        case _undocumented(UInt)
+        case __undocumented(UInt)
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier
@@ -176,7 +176,7 @@ public struct Guild: Sendable, Codable {
         case tier1 // 1
         case tier2 // 2
         case tier3 // 3
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-structure
@@ -208,7 +208,7 @@ public struct Guild: Sendable, Codable {
         case explicit // 1
         case safe // 2
         case ageRestricted // 3
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#create-guild-json-params
@@ -219,7 +219,7 @@ public struct Guild: Sendable, Codable {
         case fifteenMinutes // 900
         case halfAnHour // 1800
         case anHour // 3600
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     public var id: GuildSnowflake
@@ -374,7 +374,7 @@ extension Guild {
             public enum Kind: Sendable, Codable {
                 case multipleChoice // 0
                 case dropdown // 1
-                case _undocumented(Int)
+                case __undocumented(Int)
             }
 
             public var id: OnboardingPromptSnowflake

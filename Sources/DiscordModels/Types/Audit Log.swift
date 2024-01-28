@@ -183,7 +183,7 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationUserCommunicationDisabled // 145
             case creatorMonetizationRequestCreated // 150
             case creatorMonetizationTermsAccepted // 151
-            case _undocumented(Int)
+            case __undocumented(Int)
         }
         
         /// A mix of the below two types.
@@ -246,7 +246,7 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationUserCommunicationDisabled(AutoModerationInfo)
             case creatorMonetizationRequestCreated
             case creatorMonetizationTermsAccepted
-            case _undocumented
+            case __undocumented
 
             public struct OverwriteInfo: Sendable, Codable {
                 
@@ -515,8 +515,8 @@ public struct AuditLog: Sendable, Codable {
                     self = .autoModerationUserCommunicationDisabled(moderationInfo)
                 case .creatorMonetizationRequestCreated: self = .creatorMonetizationRequestCreated
                 case .creatorMonetizationTermsAccepted: self = .creatorMonetizationTermsAccepted
-                case ._undocumented:
-                    self = ._undocumented
+                case .__undocumented:
+                    self = .__undocumented
                 }
             }
             
@@ -614,7 +614,7 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(moderationInfo, forKey: .options)
                 case .creatorMonetizationRequestCreated: break
                 case .creatorMonetizationTermsAccepted: break
-                case ._undocumented: break
+                case .__undocumented: break
                 }
             }
         }
@@ -651,7 +651,7 @@ public struct AuditLog: Sendable, Codable {
         }
 
         public func encode(to encoder: any Encoder) throws {
-            if case ._undocumented = action { return }
+            if case .__undocumented = action { return }
 
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encodeIfPresent(self.guild_id, forKey: .guild_id)
@@ -736,8 +736,8 @@ extension AuditLog.Entry.ActionKind {
             self = .creatorMonetizationTermsAccepted
         case .creatorMonetizationRequestCreated:
             self = .creatorMonetizationRequestCreated
-        case ._undocumented:
-            self = ._undocumented(-1)
+        case .__undocumented:
+            self = .__undocumented(-1)
         }
     }
 }

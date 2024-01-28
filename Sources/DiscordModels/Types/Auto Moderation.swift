@@ -6,7 +6,7 @@ public struct AutoModerationRule: Sendable, Codable {
     @UnstableEnum<Int>
     public enum EventKind: Sendable, Codable {
         case messageSend // 1
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types
@@ -16,7 +16,7 @@ public struct AutoModerationRule: Sendable, Codable {
         case spam // 3
         case keywordPreset // 4
         case mentionSpam // 5
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata
@@ -28,7 +28,7 @@ public struct AutoModerationRule: Sendable, Codable {
             case profanity // 1
             case sexualContent // 2
             case slurs // 3
-            case _undocumented(Int)
+            case __undocumented(Int)
         }
 
         public var keyword_filter: [String]?

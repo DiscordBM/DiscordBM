@@ -196,7 +196,7 @@ public enum DiscordLocale: Sendable, Codable {
     case japanese // "ja"
     case chineseTaiwan // "zh-TW"
     case korean // "ko"
-    case _undocumented(String)
+    case __undocumented(String)
 }
 
 //MARK: - DiscordLocaleDict
@@ -303,7 +303,7 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
                 case .japanese: self.japanese = value
                 case .chineseTaiwan: self.chineseTaiwan = value
                 case .korean: self.korean = value
-                case ._undocumented: break /// Ignore
+                case .__undocumented: break /// Ignore
                 }
             }
         }

@@ -46,7 +46,7 @@ public struct Interaction: Sendable, Codable {
         case messageComponent // 3
         case applicationCommandAutocomplete // 4
         case modalSubmit // 5
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
@@ -360,7 +360,7 @@ public struct Interaction: Sendable, Codable {
             )
         case .ping:
             self.data = nil
-        case ._undocumented: self.data = nil
+        case .__undocumented: self.data = nil
         }
         self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
         self.channel_id = try container.decodeIfPresent(
@@ -459,7 +459,7 @@ extension Interaction {
             case roleSelect // 6
             case mentionableSelect // 7
             case channelSelect // 8
-            case _undocumented(Int)
+            case __undocumented(Int)
         }
 
         /// https://discord.com/developers/docs/interactions/message-components#button-object-button-structure
@@ -473,7 +473,7 @@ extension Interaction {
                 case success // 3
                 case danger // 4
                 case link // 5
-                case _undocumented(Int)
+                case __undocumented(Int)
             }
 
             /// The same as ``Style``, but has no `link`.
@@ -505,7 +505,7 @@ extension Interaction {
                     case .success: self = .success
                     case .danger: self = .danger
                     case .link: return nil
-                    case ._undocumented: return nil
+                    case .__undocumented: return nil
                     }
                 }
             }
@@ -750,7 +750,7 @@ extension Interaction {
             public enum Style: Sendable, Codable {
                 case short // 1
                 case paragraph // 2
-                case _undocumented(Int)
+                case __undocumented(Int)
             }
 
             public var custom_id: String
@@ -791,7 +791,7 @@ extension Interaction {
             case roleSelect(SelectMenu)
             case mentionableSelect(SelectMenu)
             case channelSelect(ChannelSelectMenu)
-            case _undocumented
+            case __undocumented
 
             public var customId: String? {
                 switch self {
@@ -809,7 +809,7 @@ extension Interaction {
                     return value.custom_id
                 case let .channelSelect(value):
                     return value.custom_id
-                case ._undocumented:
+                case .__undocumented:
                     return nil
                 }
             }
@@ -838,8 +838,8 @@ extension Interaction {
                     self = try .channelSelect(.init(from: decoder))
                 case .textInput:
                     self = try .textInput(.init(from: decoder))
-                case ._undocumented:
-                    self = ._undocumented
+                case .__undocumented:
+                    self = .__undocumented
                 }
             }
             
@@ -867,7 +867,7 @@ extension Interaction {
                 case let .channelSelect(selectMenu):
                     try container.encode(Kind.channelSelect, forKey: .type)
                     try selectMenu.encode(to: encoder)
-                case ._undocumented: break
+                case .__undocumented: break
                 }
             }
 
@@ -971,7 +971,7 @@ extension Interaction {
                     selectMenu.validate()
                 case .channelSelect(let channelSelectMenu):
                     channelSelectMenu.validate()
-                case ._undocumented:
+                case .__undocumented:
                     Optional<ValidationFailure>.none
                 }
             }

@@ -16,7 +16,7 @@ extension [EnumCase] {
             switch rawValue {
         \#(raw: cases.indented())
             default:
-                self = ._undocumented(rawValue)
+                self = .__undocumented(rawValue)
             }
         }
         """#

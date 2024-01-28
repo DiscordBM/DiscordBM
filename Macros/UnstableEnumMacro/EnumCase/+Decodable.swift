@@ -14,7 +14,7 @@ extension [EnumCase] {
             let rawValue = try container.decode(\#(raw: rawType.rawValue).self)
             self.init(rawValue: rawValue)!
             #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
-            if case let ._undocumented(rawValue) = self {
+            if case let .__undocumented(rawValue) = self {
                 DiscordGlobalConfiguration.makeDecodeLogger("\#(raw: enumIdentifier.trimmedDescription)").warning(
                     "Found an undocumented rawValue",
                     metadata: [

@@ -20,7 +20,7 @@ public struct DiscordChannel: Sendable, Codable {
         case guildStageVoice // 13
         case guildDirectory // 14
         case guildForum // 15
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/channel#overwrite-object
@@ -31,7 +31,7 @@ public struct DiscordChannel: Sendable, Codable {
         public enum Kind: Sendable, Codable {
             case role // 0
             case member // 1
-            case _undocumented(Int)
+            case __undocumented(Int)
         }
 
         public var id: AnySnowflake
@@ -45,7 +45,7 @@ public struct DiscordChannel: Sendable, Codable {
     public enum SortOrder: Sendable, Codable {
         case latestActivity // 0
         case creationDate // 1
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types
@@ -54,7 +54,7 @@ public struct DiscordChannel: Sendable, Codable {
         case notSet // 0
         case listView // 1
         case galleryView // 2
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
@@ -62,7 +62,7 @@ public struct DiscordChannel: Sendable, Codable {
     public enum Flag: Sendable {
         case pinned // 1
         case requireTag // 4
-        case _undocumented(UInt)
+        case __undocumented(UInt)
     }
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
@@ -70,7 +70,7 @@ public struct DiscordChannel: Sendable, Codable {
     public enum VideoQualityMode: Sendable, Codable {
         case auto // 1
         case full // 2
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// Not exactly documented, but they do mention these times in a few different places.
@@ -82,7 +82,7 @@ public struct DiscordChannel: Sendable, Codable {
         case oneDay // 1_440
         case threeDays // 4_320
         case sevenDays // 10_080
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/channel#default-reaction-object-default-reaction-structure
@@ -208,7 +208,7 @@ extension DiscordChannel {
             case stageSpeaker // 29
             case stageTopic // 31
             case guildApplicationPremiumSubscription // 32
-            case _undocumented(Int)
+            case __undocumented(Int)
         }
 
         /// https://discord.com/developers/docs/resources/channel#message-object-message-flags
@@ -225,7 +225,7 @@ extension DiscordChannel {
             case failedToMentionSomeRolesInThread // 8
             case suppressNotifications // 12
             case isVoiceMessage // 13
-            case _undocumented(UInt)
+            case __undocumented(UInt)
         }
 
         /// https://discord.com/developers/docs/resources/channel#channel-mention-object
@@ -243,7 +243,7 @@ extension DiscordChannel {
             @UnstableEnum<UInt>
             public enum Flag: Sendable {
                 case isRemix // 2
-                case _undocumented(UInt)
+                case __undocumented(UInt)
             }
 
             public var id: AttachmentSnowflake
@@ -349,7 +349,7 @@ extension DiscordChannel {
                 case spectate // 2
                 case listen // 3
                 case joinRequest // 5
-                case _undocumented(Int)
+                case __undocumented(Int)
             }
 
             public var type: Kind
@@ -487,7 +487,7 @@ public enum ThreadKind: Sendable, Codable {
     case announcementThread // 10
     case publicThread // 11
     case privateThread // 12
-    case _undocumented(Int)
+    case __undocumented(Int)
 }
 
 extension DiscordChannel {
@@ -500,7 +500,7 @@ extension DiscordChannel {
             case roles
             case users
             case everyone
-            case _undocumented(String)
+            case __undocumented(String)
         }
 
         public var parse: [Kind]
@@ -523,7 +523,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         case article // "article"
         case link // "link"
         case autoModerationMessage // "auto_moderation_message"
-        case _undocumented(String)
+        case __undocumented(String)
     }
 
     public enum DynamicURL: Sendable, Codable, ExpressibleByStringLiteral {
@@ -708,7 +708,7 @@ extension DiscordChannel.Message.Kind {
             return true
         case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
             return false
-        case ._undocumented: return false
+        case .__undocumented: return false
         }
     }
 }

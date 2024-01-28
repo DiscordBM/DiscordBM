@@ -10,10 +10,10 @@ extension [EnumCaseElementSyntax] {
         guard self.count > 0 else { return ([], false) }
         var `self` = self
         let last = self.removeLast()
-        guard last.name.trimmedDescription == "_undocumented" else {
+        guard last.name.trimmedDescription == "__undocumented" else {
             let diagnostic = Diagnostic(
                 node: Syntax(last),
-                message: MacroError.lastCaseMustBe_undocumented
+                message: MacroError.lastCaseMustBe__undocumented
             )
             context.diagnose(diagnostic)
             return ([], false)

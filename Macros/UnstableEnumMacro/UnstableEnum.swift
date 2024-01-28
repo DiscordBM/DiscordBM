@@ -17,9 +17,9 @@ import SwiftSyntaxMacros
 /// case value12 // 12
 /// ```
 ///
+/// Requires you to add a new `.__undocumented(RawValue)` case as the last case.
 /// How it manipulates the code:
 /// Adds `RawRepresentable` conformance where `RawValue` is the generic argument of the macro.
-/// Adds a new `._undocumented(RawValue)` case.
 /// which can too easily result in code breakage.
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
 /// If `CaseIterable`, repairs the `static var allCases` requirement.
@@ -56,7 +56,6 @@ public struct UnstableEnum: MemberMacro {
         let (cases, hasError) = elements.makeCases(rawType: rawType, context: context)
 
         if hasError { return [] }
-
 
         /// Some validations
 

@@ -276,7 +276,7 @@ class DiscordModelsTests: XCTestCase {
             let json = #"{"some":1}"#
             let data = Data(json.utf8)
             let value = try JSONDecoder().decode(CodableContainer.self, from: data)
-            XCTAssertEqual(value.some, ._undocumented(1))
+            XCTAssertEqual(value.some, .__undocumented(1))
         }
 
         do {
@@ -602,7 +602,7 @@ private struct CodableContainer: Codable {
     enum UnstableEnumCodableTester: Codable {
         case a // 12
         case h // 100
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     var some: UnstableEnumCodableTester

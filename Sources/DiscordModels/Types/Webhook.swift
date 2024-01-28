@@ -8,7 +8,7 @@ public struct Webhook: Sendable, Codable {
         case incoming // 1
         case channelFollower // 2
         case application // 3
-        case _undocumented(Int)
+        case __undocumented(Int)
     }
 
     public var id: WebhookSnowflake

@@ -15,7 +15,7 @@ extension [EnumCase] {
         \#(raw: accessLevel)var rawValue: \#(raw: rawType.rawValue) {
             switch self {
         \#(raw: cases.indented())
-            case let ._undocumented(rawValue):
+            case let .__undocumented(rawValue):
                 return rawValue
             }
         }
