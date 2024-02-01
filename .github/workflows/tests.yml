@@ -4,7 +4,7 @@ concurrency:
   cancel-in-progress: true
 on:
   pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
-  push: { branches: [ main ] }
+  push: { branches: [main] }
 
 jobs:
   main-tests:
@@ -14,8 +14,8 @@ jobs:
       with_tsan: true
       with_public_api_check: true
       with_nightly_main_swift: false
-      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
-      test_filter: '^DiscordBMTests'
+      coverage_ignores: "/Tests/|/Plugins/|/Sources/CZlib/"
+      test_filter: "^DiscordBMTests"
   macro-tests:
     uses: mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1
     with:
@@ -23,8 +23,8 @@ jobs:
       with_tsan: true
       with_public_api_check: true
       with_nightly_main_swift: false
-      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
-      test_filter: '^MacroTests'
+      coverage_ignores: "/Tests/|/Plugins/|/Sources/CZlib/"
+      test_filter: "^MacroTests"
   websocket-tests:
     uses: mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1
     with:
@@ -32,5 +32,5 @@ jobs:
       with_tsan: false
       with_public_api_check: false
       with_nightly_main_swift: false
-      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
-      test_filter: '^WebSocketTests'
+      coverage_ignores: "/Tests/|/Plugins/|/Sources/CZlib/"
+      test_filter: "^WebSocketTests"
