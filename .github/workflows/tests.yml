@@ -8,7 +8,7 @@ on:
 
 jobs:
   main-tests:
-    uses: mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1
+    uses: "mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1"
     with:
       with_coverage: true
       with_tsan: true
@@ -17,7 +17,7 @@ jobs:
       coverage_ignores: "/Tests/|/Plugins/|/Sources/CZlib/"
       test_filter: "^DiscordBMTests"
   macro-tests:
-    uses: mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1
+    uses: "mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1"
     with:
       with_coverage: true
       with_tsan: true
@@ -26,7 +26,7 @@ jobs:
       coverage_ignores: "/Tests/|/Plugins/|/Sources/CZlib/"
       test_filter: "^MacroTests"
   websocket-tests:
-    uses: mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1
+    uses: "mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1"
     with:
       with_coverage: true
       with_tsan: false
