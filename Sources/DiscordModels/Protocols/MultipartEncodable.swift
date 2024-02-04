@@ -11,7 +11,7 @@ public protocol MultipartEncodable: Encodable {
     /// By default, DiscordBM encodes the `files` as one field,
     /// and the rest of the payload as a `payload_json` field, which is what Discord asks.
     /// However, very few endpoints don't accept that approach.
-    /// Payloads that set this to `true` shouldn't specify `CodingKeys`
+    /// Payloads that set this to `true` mustn't specify `CodingKeys`
     /// to exclude the `files` from `Codable`.
     static var rawEncodable: Bool { get }
 }
@@ -90,11 +90,14 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
     }
     
     public var multipart: MultipartPart? {
-        var part = MultipartPart(headers: [:], body: .init(self.data.readableBytesView))
+        var part = MultipartPart(headers: [:], body: self.data)
         if let type {
             part.headers.add(name: "Content-Type", value: type)
         }
-        part.headers.add(name: "Content-Disposition", value: #"form-data; filename="\#(self.filename)""#)
+        part.headers.add(
+            name: "Content-Disposition",
+            value: #"form-data; filename="\#(self.filename)""#
+        )
         return part
     }
     
@@ -102,10 +105,7 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
         if let header = multipart.headers.first(name: "Content-Disposition") {
             let parts = header.split(separator: ";").compactMap {
                 part -> (key: Substring, value: Substring)? in
-                var part = part
-                if part.first == " " {
-                    part.removeFirst()
-                }
+                let part = part.trimmingPrefix(" ")
                 let split = part.split(separator: "=")
                 guard split.count == 2 else { return nil }
                 return (split[0], split[1])

@@ -31,12 +31,12 @@ public struct LooseEndpoint: Endpoint, Hashable {
     }
 
     public func hash(into hasher: inout Hasher) {
+        /// Only `url` is dynamic, so no need to hash other stuff.
         hasher.combine(url)
-        hasher.combine(httpMethod.rawValue)
     }
 
     public var description: String {
-        #"LooseEndpoint(url: "\#(url)", httpMethod: \#(httpMethod))"#
+        #"LooseEndpoint(url: "\#(url)")"#
     }
 
     public init(url: String) {

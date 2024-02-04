@@ -171,7 +171,7 @@ In [Discord developer portal](https://discord.com/developers/applications):
 
 `DiscordBM` comes with full support for all kinds of "interactions" such as slash commands, modals, autocomplete etc... and gives you full control over how you want to use them using type-safe APIs.    
 > You can see Penny as an example of using all kinds of commands in production.    
-Penny registers the commands [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/CommandsManager.swift) and responds to them [here](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Handlers/InteractionHandler.swift).   
+Penny registers the commands [here](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/CommandsManager.swift) and responds to them [here](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Handlers/InteractionHandler.swift).   
 
 In this example you'll only make 2 simple slash commands, so you can get started:   
 
@@ -397,6 +397,10 @@ enum LinkSubCommand: String, CaseIterable {
   * `requireRoleSelect() throws -> SelectMenu`
   * `requireMentionableSelect() throws -> SelectMenu`
   * `requireChannelSelect() throws -> ChannelSelectMenu`
+* `Interaction.Data` has:
+  * `requireApplicationCommand() throws -> ApplicationCommand`
+  * `requireMessageComponent() throws -> MessageComponent`
+  * `requireModalSubmit() throws -> ModalSubmit`
 * Swift's `Optional` has a `requireValue() throws` function overload (only in `DiscordBM`).                                             
 
 </details>

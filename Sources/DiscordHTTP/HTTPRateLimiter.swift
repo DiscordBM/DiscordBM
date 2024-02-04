@@ -37,7 +37,7 @@ actor HTTPRateLimiter {
             self.reset = reset
         }
         
-        func shouldRequest() -> ShouldRequestResponse {
+        func shouldRequest() -> ShouldRequest {
             if remaining > 0 {
                 return .true
             } else {
@@ -146,7 +146,7 @@ actor HTTPRateLimiter {
     }
 
     @usableFromInline
-    enum ShouldRequestResponse: Sendable {
+    enum ShouldRequest: Sendable {
         case `true`
         case `false`
         /// Need to wait some seconds if you want to make the request
@@ -159,7 +159,7 @@ actor HTTPRateLimiter {
     /// global rate-limit will be less than the max amount and might not allow you
     /// to make too many requests per second, when it should.
     @usableFromInline
-    func shouldRequest(to endpoint: AnyEndpoint) -> ShouldRequestResponse {
+    func shouldRequest(to endpoint: AnyEndpoint) -> ShouldRequest {
         guard minutelyInvalidRequestsLimitAllows() else { return .false }
         if endpoint.countsAgainstGlobalRateLimit {
             guard globalRateLimitAllows() else { return .false }
