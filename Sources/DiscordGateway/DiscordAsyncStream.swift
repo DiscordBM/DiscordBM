@@ -1,6 +1,6 @@
 
 /// DiscordBM's async sequence.
-public struct DiscordAsyncSequence<Element>: AsyncSequence {
+public struct DiscordAsyncSequence<Element: Sendable>: Sendable, AsyncSequence {
 
     /// DiscordBM's async sequence iterator.
     public struct AsyncIterator: AsyncIteratorProtocol {
