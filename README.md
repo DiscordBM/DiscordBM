@@ -17,7 +17,7 @@
     </a>
     </a>
     <a href="https://swift.org">
-        <img src="https://img.shields.io/badge/swift-5.9%20%2F%205.10-brightgreen.svg" alt="Latest/Minimum Swift Version">
+        <img src="https://img.shields.io/badge/swift-5.10%20%2F%205.9-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
 </p>
 
