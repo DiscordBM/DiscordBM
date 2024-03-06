@@ -4,7 +4,7 @@ concurrency:
   cancel-in-progress: true
 on:
   pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
-  push: { branches: [ main ] }
+  push: { branches: [main] }
 
 jobs:
   tests:
@@ -12,7 +12,7 @@ jobs:
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
     runs-on: ubuntu-latest
-    container: swift:5.9-jammy
+    container: swift:5.10-jammy
     steps:
       - name: Check out package
         uses: actions/checkout@v4
@@ -21,6 +21,6 @@ jobs:
       - name: Upload code coverage
         uses: vapor/swift-codecov-action@v0.2
         with:
-          ignore_paths: '/Tests/|/Plugins/|/Sources/CZlib/'
-          cc_env_vars: 'SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH'
+          ignore_paths: "/Tests/|/Plugins/|/Sources/CZlib/"
+          cc_env_vars: "SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH"
           cc_fail_ci_if_error: false
