@@ -205,152 +205,6 @@ public enum DiscordLocale: Sendable, Codable {
 /// because Discord doesn't like how Codable decode/encodes `[DiscordLocale: String]`.
 public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLiteral {
     
-    struct _DiscordLocaleCodableContainer: Codable {
-        var danish: C?
-        var german: C?
-        var englishUK: C?
-        var englishUS: C?
-        var spanish: C?
-        var french: C?
-        var croatian: C?
-        var italian: C?
-        var lithuanian: C?
-        var hungarian: C?
-        var dutch: C?
-        var norwegian: C?
-        var polish: C?
-        var portuguese: C?
-        var romanian: C?
-        var finnish: C?
-        var swedish: C?
-        var vietnamese: C?
-        var turkish: C?
-        var czech: C?
-        var greek: C?
-        var bulgarian: C?
-        var russian: C?
-        var ukrainian: C?
-        var hindi: C?
-        var thai: C?
-        var chineseChina: C?
-        var japanese: C?
-        var chineseTaiwan: C?
-        var korean: C?
-        
-        enum CodingKeys: String, CodingKey {
-            case danish = "da"
-            case german = "de"
-            case englishUK = "en-GB"
-            case englishUS = "en-US"
-            case spanish = "es-ES"
-            case french = "fr"
-            case croatian = "hr"
-            case italian = "it"
-            case lithuanian = "lt"
-            case hungarian = "hu"
-            case dutch = "nl"
-            case norwegian = "no"
-            case polish = "pl"
-            case portuguese = "pt-BR"
-            case romanian = "ro"
-            case finnish = "fi"
-            case swedish = "sv-SE"
-            case vietnamese = "vi"
-            case turkish = "tr"
-            case czech = "cs"
-            case greek = "el"
-            case bulgarian = "bg"
-            case russian = "ru"
-            case ukrainian = "uk"
-            case hindi = "hi"
-            case thai = "th"
-            case chineseChina = "zh-CN"
-            case japanese = "ja"
-            case chineseTaiwan = "zh-TW"
-            case korean = "ko"
-        }
-        
-        init(_ dictionary: [DiscordLocale: C]) {
-            for (key, value) in dictionary {
-                switch key {
-                case .danish: self.danish = value
-                case .german: self.german = value
-                case .englishUK: self.englishUK = value
-                case .englishUS: self.englishUS = value
-                case .spanish: self.spanish = value
-                case .french: self.french = value
-                case .croatian: self.croatian = value
-                case .italian: self.italian = value
-                case .lithuanian: self.lithuanian = value
-                case .hungarian: self.hungarian = value
-                case .dutch: self.dutch = value
-                case .norwegian: self.norwegian = value
-                case .polish: self.polish = value
-                case .portuguese: self.portuguese = value
-                case .romanian: self.romanian = value
-                case .finnish: self.finnish = value
-                case .swedish: self.swedish = value
-                case .vietnamese: self.vietnamese = value
-                case .turkish: self.turkish = value
-                case .czech: self.czech = value
-                case .greek: self.greek = value
-                case .bulgarian: self.bulgarian = value
-                case .russian: self.russian = value
-                case .ukrainian: self.ukrainian = value
-                case .hindi: self.hindi = value
-                case .thai: self.thai = value
-                case .chineseChina: self.chineseChina = value
-                case .japanese: self.japanese = value
-                case .chineseTaiwan: self.chineseTaiwan = value
-                case .korean: self.korean = value
-                case .__undocumented: break /// Ignore
-                }
-            }
-        }
-        
-        func toDictionary() -> [DiscordLocale: C] {
-            let values = [
-                (key: DiscordLocale.danish, value: self.danish),
-                (key: DiscordLocale.german, value: self.german),
-                (key: DiscordLocale.englishUK, value: self.englishUK),
-                (key: DiscordLocale.englishUS, value: self.englishUS),
-                (key: DiscordLocale.spanish, value: self.spanish),
-                (key: DiscordLocale.french, value: self.french),
-                (key: DiscordLocale.croatian, value: self.croatian),
-                (key: DiscordLocale.italian, value: self.italian),
-                (key: DiscordLocale.lithuanian, value: self.lithuanian),
-                (key: DiscordLocale.hungarian, value: self.hungarian),
-                (key: DiscordLocale.dutch, value: self.dutch),
-                (key: DiscordLocale.norwegian, value: self.norwegian),
-                (key: DiscordLocale.polish, value: self.polish),
-                (key: DiscordLocale.portuguese, value: self.portuguese),
-                (key: DiscordLocale.romanian, value: self.romanian),
-                (key: DiscordLocale.finnish, value: self.finnish),
-                (key: DiscordLocale.swedish, value: self.swedish),
-                (key: DiscordLocale.vietnamese, value: self.vietnamese),
-                (key: DiscordLocale.turkish, value: self.turkish),
-                (key: DiscordLocale.czech, value: self.czech),
-                (key: DiscordLocale.greek, value: self.greek),
-                (key: DiscordLocale.bulgarian, value: self.bulgarian),
-                (key: DiscordLocale.russian, value: self.russian),
-                (key: DiscordLocale.ukrainian, value: self.ukrainian),
-                (key: DiscordLocale.hindi, value: self.hindi),
-                (key: DiscordLocale.thai, value: self.thai),
-                (key: DiscordLocale.chineseChina, value: self.chineseChina),
-                (key: DiscordLocale.japanese, value: self.japanese),
-                (key: DiscordLocale.chineseTaiwan, value: self.chineseTaiwan),
-                (key: DiscordLocale.korean, value: self.korean),
-            ].compactMap { key, value -> (key: DiscordLocale, value: C)? in
-                if let value {
-                    return (key, value)
-                } else {
-                    return nil
-                }
-            }
-            return Dictionary(uniqueKeysWithValues: values)
-        }
-    }
-    
     public var values: [DiscordLocale: C]
     
     public init(dictionaryLiteral elements: (DiscordLocale, C)...) {
@@ -367,13 +221,22 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
     }
     
     public init(from decoder: any Decoder) throws {
-        let container = try _DiscordLocaleCodableContainer(from: decoder)
-        self.values = container.toDictionary()
+        let stringKeyedDict = try [String: C].init(from: decoder)
+        self.values = [:]
+        self.values.reserveCapacity(stringKeyedDict.count)
+        for (key, value) in consume stringKeyedDict {
+            /// Force-unwrap because ``DiscordLocale`` is ``LosslessRawRepresentable`.
+            self.values[DiscordLocale(rawValue: key)!] = value
+        }
     }
     
     public func encode(to encoder: any Encoder) throws {
-        let container = _DiscordLocaleCodableContainer(self.values)
-        try container.encode(to: encoder)
+        var stringKeyedDict = [String: C]()
+        stringKeyedDict.reserveCapacity(self.values.count)
+        for (key, value) in self.values {
+            stringKeyedDict[key.rawValue] = value
+        }
+        try stringKeyedDict.encode(to: encoder)
     }
 }
 

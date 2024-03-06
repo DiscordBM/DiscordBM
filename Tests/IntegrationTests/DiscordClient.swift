@@ -2210,6 +2210,7 @@ class DiscordClientTests: XCTestCase {
             )
         ).decodeJSONError()
 
+        /// Can't create 2 mention spam rules
         XCTAssertEqual(
             createdRule2Error.code,
             .invalidFormBodyOrInvalidContentType,
