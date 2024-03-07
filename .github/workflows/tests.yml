@@ -4,33 +4,33 @@ concurrency:
   cancel-in-progress: true
 on:
   pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
-  push: { branches: [ main ] }
+  push: { branches: [main] }
 
 jobs:
   main-tests:
-    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
+    uses: "mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1"
     with:
       with_coverage: true
       with_tsan: true
       with_public_api_check: true
-      with_gh_codeql: false # Temporary, because it's broken
-      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
-      test_filter: '^DiscordBMTests'
+      with_nightly_main_swift: false
+      coverage_ignores: "/Tests/|/Plugins/|/Sources/CZlib/"
+      test_filter: "^DiscordBMTests"
   macro-tests:
-    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
+    uses: "mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1"
     with:
       with_coverage: true
       with_tsan: true
       with_public_api_check: true
-      with_gh_codeql: false # Temporary, because it's broken
-      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
-      test_filter: '^MacroTests'
+      with_nightly_main_swift: false
+      coverage_ignores: "/Tests/|/Plugins/|/Sources/CZlib/"
+      test_filter: "^MacroTests"
   websocket-tests:
-    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
+    uses: "mahdibm/ci/.github/workflows/run-unit-tests.yml@patch-1"
     with:
       with_coverage: true
       with_tsan: false
       with_public_api_check: false
-      with_gh_codeql: false # Temporary, because it's broken
-      coverage_ignores: '/Tests/|/Plugins/|/Sources/CZlib/'
-      test_filter: '^WebSocketTests'
+      with_nightly_main_swift: false
+      coverage_ignores: "/Tests/|/Plugins/|/Sources/CZlib/"
+      test_filter: "^WebSocketTests"
