@@ -7,6 +7,7 @@ import XCTest
 
 class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
+    /// Don't use `HTTPClient.shared` to test not using it.
     let httpClient = HTTPClient()
 
     override func setUp() {
@@ -31,9 +32,8 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         /// Make sure last tests don't affect this test's gateway connection
         try await Task.sleep(for: .seconds(5))
 
+        /// Also tests with default `HTTPClient.shared` and `HTTPClient.shared.eventLoopGroup`.
         let bot = await BotGatewayManager(
-            eventLoopGroup: httpClient.eventLoopGroup,
-            httpClient: httpClient,
             token: Constants.token,
             presence: .init(
                 activities: [.init(name: "Testing!", type: .competing)],

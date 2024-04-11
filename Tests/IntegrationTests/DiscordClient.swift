@@ -8,7 +8,8 @@ import NIOCore
 import XCTest
 
 class DiscordClientTests: XCTestCase {
-    
+
+    /// Don't change this to `HTTPClient.shared` to have a test for not using `HTTPClient.shared`.
     let httpClient = HTTPClient()
     var client: (any DiscordClient)!
 

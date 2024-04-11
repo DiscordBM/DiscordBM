@@ -38,16 +38,10 @@ Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a go
 
 First you need to initialize a `BotGatewayManager` instance, then tell it to connect and start using it.   
 
-Make sure you've added [AsyncHTTPClient](https://github.com/swift-server/async-http-client) to your dependancies.
 ```swift
 import DiscordBM
-import AsyncHTTPClient
-
-let httpClient = HTTPClient()
 
 let bot = await BotGatewayManager(
-    eventLoopGroup: httpClient.eventLoopGroup,
-    httpClient: httpClient,
     token: <#Your Bot Token#>,
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
