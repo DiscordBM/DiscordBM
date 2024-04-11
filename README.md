@@ -63,15 +63,16 @@ See the [GatewayConnection tests](https://github.com/DiscordBM/DiscordBM/blob/ma
 ### Initializing a Gateway Manager With Vapor
 <details>
   <summary> Click to expand </summary>
-  
+
+With Vapor, use Vapor `Application`'s `EventLoopGroup` and `HTTPClient`:
 ```swift
 import DiscordBM
 import Vapor
 
 let app: Application = <#Your Vapor Application#>
 let bot = await BotGatewayManager(
-    eventLoopGroup: app.eventLoopGroup,
-    httpClient: app.http.client.shared,
+    eventLoopGroup: app.eventLoopGroup, /// Use Vapor's `EventLoopGroup`
+    httpClient: app.http.client.shared, /// Use Vapor's `HTTPClient`
     token: <#Your Bot Token#>,
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
