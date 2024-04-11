@@ -1,10 +1,6 @@
 import DiscordModels
 import Foundation
-#if swift(>=5.8)
-@preconcurrency import OrderedCollections
-#else
 import OrderedCollections
-#endif
 
 /// Caches Gateway events.
 @dynamicMemberLookup
