@@ -159,8 +159,8 @@ public actor BotGatewayManager: GatewayManager {
     ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
-        eventLoopGroup: any EventLoopGroup,
-        httpClient: HTTPClient,
+        eventLoopGroup: any EventLoopGroup = HTTPClient.shared.eventLoopGroup,
+        httpClient: HTTPClient = .shared,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int = 1 << 28,
         appId: ApplicationSnowflake? = nil,
@@ -201,8 +201,8 @@ public actor BotGatewayManager: GatewayManager {
     ///   - presence: The initial presence of the bot.
     ///   - intents: The Discord intents you want to receive messages for.
     public init(
-        eventLoopGroup: any EventLoopGroup,
-        httpClient: HTTPClient,
+        eventLoopGroup: any EventLoopGroup = HTTPClient.shared.eventLoopGroup,
+        httpClient: HTTPClient = .shared,
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int = 1 << 28,
         token: String,

@@ -39,7 +39,7 @@ public struct DefaultDiscordClient: DiscordClient {
     ///   This is used as a default when no app-id is passed to a ``DiscordClient`` function.
     ///   - configuration: The configuration affecting this ``DefaultDiscordClient``.
     public init(
-        httpClient: HTTPClient,
+        httpClient: HTTPClient = .shared,
         token: Secret,
         appId: ApplicationSnowflake? = nil,
         configuration: ClientConfiguration = .init()
@@ -58,7 +58,7 @@ public struct DefaultDiscordClient: DiscordClient {
     ///   This is used as a default when no app-id is passed to a ``DiscordClient`` function.
     ///   - configuration: The configuration affecting this ``DefaultDiscordClient``.
     public init(
-        httpClient: HTTPClient,
+        httpClient: HTTPClient = .shared,
         token: String,
         appId: ApplicationSnowflake? = nil,
         configuration: ClientConfiguration = .init()
@@ -77,7 +77,7 @@ public struct DefaultDiscordClient: DiscordClient {
     ///   This is used as a default when no app-id is passed to a ``DiscordClient`` function.
     ///   - configuration: The configuration affecting this ``DefaultDiscordClient``.
     public init(
-        httpClient: HTTPClient,
+        httpClient: HTTPClient = .shared,
         oAuthToken: Secret,
         appId: ApplicationSnowflake? = nil,
         configuration: ClientConfiguration = .init()
@@ -97,7 +97,7 @@ public struct DefaultDiscordClient: DiscordClient {
     ///   This is used as a default when no app-id is passed to a ``DiscordClient`` function.
     ///   - configuration: The configuration affecting this ``DefaultDiscordClient``.
     public init(
-        httpClient: HTTPClient,
+        httpClient: HTTPClient = .shared,
         oAuthToken: String,
         appId: ApplicationSnowflake? = nil,
         configuration: ClientConfiguration = .init()
@@ -119,7 +119,7 @@ public struct DefaultDiscordClient: DiscordClient {
     ///   This is used as a default when no app-id is passed to a ``DiscordClient`` function.
     ///   - configuration: The configuration affecting this ``DefaultDiscordClient``.
     public init(
-        httpClient: HTTPClient,
+        httpClient: HTTPClient = .shared,
         authentication: AuthenticationHeader,
         appId: ApplicationSnowflake? = nil,
         configuration: ClientConfiguration = .init()

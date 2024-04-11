@@ -8,7 +8,8 @@ import NIOCore
 import XCTest
 
 class DiscordClientTests: XCTestCase {
-    
+
+    /// Don't change this to `HTTPClient.shared` to have a test for not using `HTTPClient.shared`.
     let httpClient = HTTPClient()
     var client: (any DiscordClient)!
 
@@ -2868,7 +2869,7 @@ private actor GatewayTester {
     private init() {
         /// Check to make sure `DiscordClientTests.testInvocations.count` == `self.totalTestCount`.
         /// Because `DiscordClientTests.testInvocations.count` is unavailable on linux.
-#if os(macOS)
+#if canImport(Darwin)
         if DiscordClientTests.testInvocations.count != self.totalTestCount {
             XCTFail("Someone forgot to update 'GatewayTester.totalTestCount'. Update it to '\(DiscordClientTests.testInvocations.count)'")
         }

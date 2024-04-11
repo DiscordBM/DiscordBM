@@ -118,8 +118,8 @@ public actor ShardingGatewayManager: GatewayManager {
     ///   - appId: Your Discord application-id. If not provided, it'll be extracted from bot-token.
     ///   - identifyPayload: The identification payload that is sent to Discord.
     public init(
-        eventLoopGroup: any EventLoopGroup,
-        httpClient: HTTPClient,
+        eventLoopGroup: any EventLoopGroup = HTTPClient.shared.eventLoopGroup,
+        httpClient: HTTPClient = .shared,
         configuration: Configuration = .init(),
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int = 1 << 28,
@@ -157,8 +157,8 @@ public actor ShardingGatewayManager: GatewayManager {
     ///   - presence: The initial presence of the bot.
     ///   - intents: The Discord intents you want to receive messages for.
     public init(
-        eventLoopGroup: any EventLoopGroup,
-        httpClient: HTTPClient,
+        eventLoopGroup: any EventLoopGroup = HTTPClient.shared.eventLoopGroup,
+        httpClient: HTTPClient = .shared,
         configuration: Configuration = .init(),
         clientConfiguration: ClientConfiguration = .init(),
         maxFrameSize: Int = 1 << 28,
