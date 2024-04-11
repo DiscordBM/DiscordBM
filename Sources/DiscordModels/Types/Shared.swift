@@ -1,8 +1,4 @@
-#if os(macOS) /// Xcode toolchains don't usually throw preconcurrency warnings.
 import Foundation
-#else
-@preconcurrency import Foundation
-#endif
 
 //MARK: - StringIntDoubleBool
 
@@ -792,9 +788,18 @@ extension DereferenceBox: Sendable where C: Sendable { }
 //MARK: +Calendar
 
 private extension Calendar {
+#if swift(>=5.10)
+    /// It's safe the way DiscordBM uses it.
+    nonisolated(unsafe) static let utc: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .init(identifier: "UTC")!
+        return calendar
+    }()
+#else
     static let utc: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .init(identifier: "UTC")!
         return calendar
     }()
+#endif
 }

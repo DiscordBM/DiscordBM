@@ -2869,7 +2869,7 @@ private actor GatewayTester {
     private init() {
         /// Check to make sure `DiscordClientTests.testInvocations.count` == `self.totalTestCount`.
         /// Because `DiscordClientTests.testInvocations.count` is unavailable on linux.
-#if os(macOS)
+#if canImport(Darwin)
         if DiscordClientTests.testInvocations.count != self.totalTestCount {
             XCTFail("Someone forgot to update 'GatewayTester.totalTestCount'. Update it to '\(DiscordClientTests.testInvocations.count)'")
         }

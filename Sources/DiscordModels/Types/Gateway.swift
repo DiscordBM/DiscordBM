@@ -466,6 +466,8 @@ public struct Gateway: Sendable, Codable {
                 return "watchOS"
 #elseif os(tvOS)
                 return "tvOS"
+#elseif os(visionOS) || os(xrOS)
+                return "visionOS"
 #elseif os(Windows)
                 return "Windows"
 #elseif os(Android)
