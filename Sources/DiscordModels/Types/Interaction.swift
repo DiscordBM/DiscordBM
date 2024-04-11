@@ -269,6 +269,7 @@ public struct Interaction: Sendable, Codable {
         case messageComponent(MessageComponent)
         case modalSubmit(ModalSubmit)
 
+        /// Requires an `ApplicationCommand` value or throws `Interaction.Error`.
         public func requireApplicationCommand() throws -> ApplicationCommand {
             switch self {
             case let .applicationCommand(applicationCommand):
@@ -278,6 +279,7 @@ public struct Interaction: Sendable, Codable {
             }
         }
 
+        /// Requires a `MessageComponent` value or throws `Interaction.Error`.
         public func requireMessageComponent() throws -> MessageComponent {
             switch self {
             case let .messageComponent(messageComponent):
@@ -287,6 +289,7 @@ public struct Interaction: Sendable, Codable {
             }
         }
 
+        /// Requires a `ModalSubmit` value or throws `Interaction.Error`.
         public func requireModalSubmit() throws -> ModalSubmit {
             switch self {
             case let .modalSubmit(modalSubmit):
@@ -360,7 +363,8 @@ public struct Interaction: Sendable, Codable {
             )
         case .ping:
             self.data = nil
-        case .__undocumented: self.data = nil
+        case .__undocumented:
+            self.data = nil
         }
         self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
         self.channel_id = try container.decodeIfPresent(

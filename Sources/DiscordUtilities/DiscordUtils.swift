@@ -129,7 +129,7 @@ public enum TimestampStyle: String {
 }
 
 /// Options for escaping special characters.
-public struct EscapeOption: OptionSet {
+public struct EscapeOption: Sendable, OptionSet {
     public var rawValue: UInt8
 
     public init(rawValue: UInt8) {

@@ -1021,7 +1021,9 @@ public struct Gateway: Sendable, Codable {
         public mutating func update(with partialMessage: DiscordChannel.PartialMessage) {
             self.id = partialMessage.id
             self.channel_id = partialMessage.channel_id
-            self.author = partialMessage.author
+            if let author = partialMessage.author {
+                self.author = author
+            }
             if let content = partialMessage.content {
                 self.content = content
             }

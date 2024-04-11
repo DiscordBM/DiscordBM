@@ -7,16 +7,17 @@ public protocol Endpoint: Sendable, CustomStringConvertible {
     var httpMethod: HTTPMethod { get }
     /// Interaction endpoints don't count against the global rate limit.
     /// Even if the global rate-limit is exceeded, you can still respond to interactions.
+    /// So this is used for interaction endpoints.
     var countsAgainstGlobalRateLimit: Bool { get }
-    /// Some endpoints don't require an authorization header because the endpoint url itself
-    /// contains some kind of authorization token. Like some of the webhook endpoints.
+    /// Some endpoints don't require an authorization header, sometimes because the endpoint url
+    /// itself contains some kind of authorization token. Like some of the webhook endpoints.
     var requiresAuthorizationHeader: Bool { get }
     /// Path parameters.
     var parameters: [String] { get }
     var id: Int { get }
 }
 
-/// Just to switch between the 2 endpoint types.
+/// Just to switch between the 3 endpoint types.
 public enum AnyEndpoint: Endpoint {
     case api(APIEndpoint)
     case cdn(CDNEndpoint)

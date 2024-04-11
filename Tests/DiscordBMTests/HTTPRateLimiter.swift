@@ -146,7 +146,7 @@ class HTTPRateLimiterTests: XCTestCase {
     }
 }
 
-extension HTTPRateLimiter.ShouldRequestResponse: Equatable {
+extension HTTPRateLimiter.ShouldRequest: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         if case .true = lhs, case .true = rhs {
             return true

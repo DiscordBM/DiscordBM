@@ -2129,11 +2129,30 @@ class DiscordClientTests: XCTestCase {
 
     func testAutoModerationRules() async throws {
         /// Cleanup
-        let rules = try await client.listAutoModerationRules(
+        var rules = try await client.listAutoModerationRules(
             guildId: Constants.guildId
         ).decode()
 
-        for rule in rules where rule.creator_id == Constants.botId {
+        let mentionSpamRule: AutoModerationRule
+        /// Removing `.mentionSpam` from the rules variable prevents this error when the code below tries to cleanup rules:
+        /// ```
+        /// {
+        ///   "message": "Mention Spam AutoMod rule cannot be deleted from community servers",
+        ///   "code": 200006
+        /// }
+        /// ```
+        if let idx = rules.firstIndex(where: { $0.trigger_type == .mentionSpam }) {
+            mentionSpamRule = rules.remove(at: idx)
+        } else {
+            XCTFail("""
+            No mention-spam AutoModerationRule found.
+            You might need to disable this check for the first run.
+            """)
+            return
+        }
+
+        for rule in rules {
+            guard rule.creator_id == Constants.botId else { continue }
             try await client.deleteAutoModerationRule(
                 guildId: Constants.guildId,
                 ruleId: rule.id,
@@ -2166,7 +2185,7 @@ class DiscordClientTests: XCTestCase {
             )
         ).decode()
 
-        let createdRule2 = try await client.createAutoModerationRule(
+        let createdRule2Error = try await client.createAutoModerationRule(
             guildId: Constants.guildId,
             reason: "Testing!",
             payload: .init(
@@ -2189,7 +2208,14 @@ class DiscordClientTests: XCTestCase {
                     Constants.Channels.perm1.id
                 ]
             )
-        ).decode()
+        ).decodeJSONError()
+
+        /// Can't create 2 mention spam rules
+        XCTAssertEqual(
+            createdRule2Error.code,
+            .invalidFormBodyOrInvalidContentType,
+            "\(createdRule2Error)"
+        )
 
         let newRules = try await client.listAutoModerationRules(
             guildId: Constants.guildId
@@ -2209,7 +2235,7 @@ class DiscordClientTests: XCTestCase {
         let newName = "Testing 222"
         let updateRule = try await client.updateAutoModerationRule(
             guildId: Constants.guildId,
-            ruleId: createdRule2.id,
+            ruleId: mentionSpamRule.id,
             reason: "Testing!",
             payload: .init(
                 name: newName,
@@ -2233,7 +2259,7 @@ class DiscordClientTests: XCTestCase {
             )
         ).decode()
 
-        XCTAssertEqual(updateRule.id, createdRule2.id)
+        XCTAssertEqual(updateRule.id, mentionSpamRule.id)
         XCTAssertEqual(updateRule.name, newName)
 
         try await client.deleteAutoModerationRule(
@@ -2242,11 +2268,13 @@ class DiscordClientTests: XCTestCase {
             reason: "Testing Cleanup!"
         ).guardSuccess()
 
-        try await client.deleteAutoModerationRule(
-            guildId: Constants.guildId,
-            ruleId: createdRule2.id,
-            reason: "Testing Cleanup!"
-        ).guardSuccess()
+        /// Can't delete the `.mentionSpam` rule:
+        /// ```
+        /// {
+        ///   "message": "Mention Spam AutoMod rule cannot be deleted from community servers",
+        ///   "code": 200006
+        /// }
+        /// ```
     }
 
     func testApplicationRoleConnectionMetadata() async throws {
