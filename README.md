@@ -56,7 +56,7 @@ let bot = await BotGatewayManager(
 ```
 See the [GatewayConnection tests](https://github.com/DiscordBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
 
-> **Warning**   
+> [!Warning]   
 > In a production app you should use **environment variables** to load your Bot Token.   
 > Avoid hard-coding your Bot Token to reduce the chances of leaking it.   
 
@@ -89,7 +89,7 @@ let bot = await BotGatewayManager(
 </details>
 
 ### Using The Gateway Manager
-> **Note**  
+> [!Note] 
 > For your app's entry point, you should use a type with the [`@main` attribute](https://www.hackingwithswift.com/swift/5.3/atmain) like below.    
 ```swift
 @main
@@ -135,10 +135,10 @@ struct EventHandler: GatewayEventHandler {
     }
 }
 ```
-> **Note**   
+> [!Note]  
 > On a successful connection, you will **always** see a `NOTICE` log indicating `connection is established`.   
 
-> **Note**   
+> [!Note]  
 > By default, `DiscordBM` automatically handles HTTP rate-limits and you don't need to worry about them.
 
 ### Mindset
@@ -405,7 +405,7 @@ enum LinkSubCommand: String, CaseIterable {
   <summary> Click to expand </summary>
   
 `DiscordBM` has support for sending files as attachments.   
-> **Note**   
+> [!Note]  
 > It's usually better to send a link of your media to Discord, instead of sending the actual file.   
 ```swift
 /// Raw data of anything like an image
@@ -546,7 +546,7 @@ if let aGuild = await cache.guilds[<#Guild ID#>] {
 `DiscordBM` has some best-effort functions for checking permissions and roles.   
 FYI, in interactions, the [member field](https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure) already contains the resolved permissions (`Interaction.member.permissions`).
 
-> **Warning**   
+> [!Warning]   
 > You need a `DiscordCache` with intents containing `.guilds` & `.guildMembers` and also `requestAllMembers: .enabled`.   
 
 ```swift
@@ -584,7 +584,7 @@ let hasRole = guild.userHasRole(
 Sharding is a way of splitting up your bot's load accross different `GatewayManager`s. It is useful if:
 * You want to implement zero-down-time scaling/updating.
 * You have too many guilds to be handeled by just 1 `GatewayManager`.
-> **Note**   
+> [!Note]  
 > Discord says sharding is required for bots with 2500 and more guilds. For more info, refer to the [Discord docs](https://discord.com/developers/docs/topics/gateway#sharding)
 
 To enable sharding, simply replace your `BotGatewayManager` with `ShardingGatewayManager`:
@@ -605,7 +605,7 @@ let bot = await ShardingGatewayManager(
 )
 ```
 And that's it! You've already enabled sharding. `DiscordBM` will create as many `BotGatewayManager`s as Discord suggests under the hood of `ShardingGatewayManager`, and will automatically handle them. 
-> **Note**   
+> [!Note]  
 > `ShardingGatewayManager` might still only create 1 `BotGatewayManager` if that's what Discord suggests.
 
 `ShardingGatewayManager` takes a few more options than `BotGatewayManager` to customize how you want to perform sharding:
