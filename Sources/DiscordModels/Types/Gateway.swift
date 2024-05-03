@@ -466,12 +466,24 @@ public struct Gateway: Sendable, Codable {
                 return "watchOS"
 #elseif os(tvOS)
                 return "tvOS"
-#elseif os(visionOS) || os(xrOS)
-                return "visionOS"
 #elseif os(Windows)
                 return "Windows"
+#elseif canImport(Musl)
+                return "Musl"
+#elseif os(FreeBSD)
+                return "FreeBSD"
+#elseif os(OpenBSD)
+                return "OpenBSD"
 #elseif os(Android)
                 return "Android"
+#elseif os(PS4)
+                return "PS4"
+#elseif os(Cygwin)
+                return "Cygwin"
+#elseif os(Haiku)
+                return "Haiku"
+#elseif os(WASI)
+                return "WASI"
 #else
                 return "Unknown"
 #endif
