@@ -357,11 +357,21 @@ extension DiscordChannel {
             public var party_id: String?
         }
 
+        /// https://discord.com/developers/docs/resources/channel#message-interaction-metadata-object-message-interaction-metadata-structure
+        @_spi(UserInstallableApps)
+        public struct InteractionMetadata: Sendable, Codable {
+            public var id: InteractionSnowflake
+            public var type: Interaction.Kind
+            public var user: DiscordUser
+            public var authorizing_integration_owners: [DiscordApplication.IntegrationKind: AnySnowflake]
+            public var original_response_message_id: MessageSnowflake?
+            public var interacted_message_id: MessageSnowflake?
+            public var triggering_interaction_metadata: DereferenceBox<InteractionMetadata>?
+        }
+
         public var id: MessageSnowflake
         public var channel_id: ChannelSnowflake
-        public var guild_id: GuildSnowflake?
         public var author: DiscordUser?
-        public var member: Guild.PartialMember?
         public var content: String
         public var timestamp: DiscordTimestamp
         public var edited_timestamp: DiscordTimestamp?
@@ -383,6 +393,8 @@ extension DiscordChannel {
         public var message_reference: MessageReference?
         public var flags: IntBitField<Flag>?
         public var referenced_message: DereferenceBox<Message>?
+        @_spi(UserInstallableApps) @DecodeOrNil
+        public var interaction_metadata: InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
         public var components: [Interaction.ActionRow]?
@@ -391,6 +403,9 @@ extension DiscordChannel {
         public var position: Int?
         public var role_subscription_data: RoleSubscriptionData?
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
+        /// Extra fields, not sure why I've added them to this type:
+        public var guild_id: GuildSnowflake?
+        public var member: Guild.PartialMember?
     }
 }
 
@@ -421,6 +436,8 @@ extension DiscordChannel {
         public var message_reference: DiscordChannel.Message.MessageReference?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var referenced_message: DereferenceBox<PartialMessage>?
+        @_spi(UserInstallableApps) @DecodeOrNil
+        public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
         public var components: [Interaction.ActionRow]?
@@ -428,10 +445,10 @@ extension DiscordChannel {
         public var stickers: [Sticker]?
         public var position: Int?
         public var role_subscription_data: RoleSubscriptionData?
+        public var resolved: Interaction.ApplicationCommand.ResolvedData?
         /// Extra fields:
         public var member: Guild.PartialMember?
         public var guild_id: GuildSnowflake?
-        public var resolved: Interaction.ApplicationCommand.ResolvedData?
     }
 }
 

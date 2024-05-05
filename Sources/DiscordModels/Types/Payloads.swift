@@ -386,7 +386,8 @@ public enum Payloads {
         public var files: [RawFile]?
         public var attachments: [Attachment]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
-        
+        public var enforce_nonce: Bool?
+
         enum CodingKeys: String, CodingKey {
             case content
             case nonce
@@ -398,9 +399,10 @@ public enum Payloads {
             case sticker_ids
             case attachments
             case flags
+            case enforce_nonce
         }
         
-        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil) {
+        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, enforce_nonce: Bool? = nil) {
             self.content = content
             self.nonce = nonce
             self.tts = tts
@@ -412,6 +414,7 @@ public enum Payloads {
             self.files = files
             self.attachments = attachments
             self.flags = flags
+            self.enforce_nonce = enforce_nonce
         }
         
         public func validate() -> [ValidationFailure] {
@@ -552,8 +555,8 @@ public enum Payloads {
             validateOnlyContains(
                 flags,
                 name: "flags",
-                reason: "Can only contain 'suppressEmbeds'",
-                allowed: [.suppressEmbeds]
+                reason: "Can only contain 'suppressEmbeds' or 'suppressNotifications'",
+                allowed: [.suppressEmbeds, .suppressNotifications]
             )
             allowed_mentions?.validate()
             attachments?.validate()
@@ -824,6 +827,10 @@ public enum Payloads {
         public var dm_permission: Bool?
         public var type: ApplicationCommand.Kind?
         public var nsfw: Bool?
+        @_spi(UserInstallableApps) @DecodeOrNil
+        public var integration_types: [DiscordApplication.IntegrationKind]?
+        @_spi(UserInstallableApps) @DecodeOrNil
+        public var contexts: [Interaction.ContextKind]?
         
         public init(name: String, name_localizations: [DiscordLocale: String]? = nil, description: String? = nil, description_localizations: [DiscordLocale: String]? = nil, options: [ApplicationCommand.Option]? = nil, default_member_permissions: [Permission]? = nil, dm_permission: Bool? = nil, type: ApplicationCommand.Kind? = nil, nsfw: Bool? = nil) {
             self.name = name
@@ -873,6 +880,10 @@ public enum Payloads {
         public var default_member_permissions: StringBitField<Permission>?
         public var dm_permission: Bool?
         public var nsfw: Bool?
+        @_spi(UserInstallableApps) @DecodeOrNil
+        public var integration_types: [DiscordApplication.IntegrationKind]?
+        @_spi(UserInstallableApps) @DecodeOrNil
+        public var contexts: [Interaction.ContextKind]?
         
         public init(name: String? = nil, name_localizations: [DiscordLocale: String]? = nil, description: String? = nil, description_localizations: [DiscordLocale: String]? = nil, options: [ApplicationCommand.Option]? = nil, default_member_permissions: [Permission]? = nil, dm_permission: Bool? = nil, nsfw: Bool? = nil) {
             self.name = name
@@ -884,7 +895,21 @@ public enum Payloads {
             self.dm_permission = dm_permission
             self.nsfw = nsfw
         }
-        
+
+        @_spi(UserInstallableApps)
+        public init(name: String? = nil, name_localizations: [DiscordLocale: String]? = nil, description: String? = nil, description_localizations: [DiscordLocale: String]? = nil, options: [ApplicationCommand.Option]? = nil, default_member_permissions: [Permission]? = nil, dm_permission: Bool? = nil, nsfw: Bool? = nil, integration_types: [DiscordApplication.IntegrationKind]? = nil, contexts: [Interaction.ContextKind]? = nil) {
+            self.name = name
+            self.name_localizations = .init(name_localizations)
+            self.description = description
+            self.description_localizations = .init(description_localizations)
+            self.options = options
+            self.default_member_permissions = default_member_permissions.map({ .init($0) })
+            self.dm_permission = dm_permission
+            self.nsfw = nsfw
+            self.integration_types = integration_types
+            self.contexts = contexts
+        }
+
         public func validate() -> [ValidationFailure] {
             validateElementCountDoesNotExceed(options, max: 25, name: "options")
             validateCharacterCountInRange(name, min: 1, max: 32, name: "name")

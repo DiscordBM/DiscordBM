@@ -49,6 +49,16 @@ public struct Interaction: Sendable, Codable {
         case __undocumented(Int)
     }
 
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-context-types
+    @_spi(UserInstallableApps)
+    @UnstableEnum<Int>
+    public enum ContextKind: Sendable, Codable {
+        case guild // 0
+        case botDm // 1
+        case privateChannel // 2
+        case __undocumented(Int)
+    }
+
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
     public struct ApplicationCommand: Sendable, Codable {
         
@@ -72,63 +82,6 @@ public struct Interaction: Sendable, Codable {
             public var channels: [ChannelSnowflake: PartialChannel]?
             public var messages: [MessageSnowflake: DiscordChannel.PartialMessage]?
             public var attachments: [AttachmentSnowflake: DiscordChannel.Message.Attachment]?
-
-            enum CodingKeys: CodingKey {
-                case users
-                case members
-                case roles
-                case channels
-                case messages
-                case attachments
-            }
-
-            public init(from decoder: any Decoder) throws {
-                let container = try decoder.container(keyedBy: CodingKeys.self)
-
-                /// `JSONDecoder` has a special-case decoding for dictionaries of `[String: some Decodable]`.
-                /// We need to trigger that special-case, so we need to first decode the values
-                /// to keys of `String`, then transform that `String` to the actual `Key` type.
-                func decode<K, V>(forKey key: CodingKeys) throws -> [K: V]?
-                where K: SnowflakeProtocol, V: Decodable {
-                    let decoded = try container.decodeIfPresent([String: V].self, forKey: key)
-                    let transformed = decoded?.map { key, value -> (K, V) in
-                        return (K(key), value)
-                    }
-                    return transformed.map { .init(uniqueKeysWithValues: $0) }
-                }
-
-                self.users = try decode(forKey: .users)
-                self.members = try decode(forKey: .members)
-                self.roles = try decode(forKey: .roles)
-                self.channels = try decode(forKey: .channels)
-                self.messages = try decode(forKey: .messages)
-                self.attachments = try decode(forKey: .attachments)
-            }
-
-            public func encode(to encoder: any Encoder) throws {
-                var container = encoder.container(keyedBy: CodingKeys.self)
-
-                /// `JSONEncoder` has a special-case encoding for dictionaries of `[String: some Encodable]`.
-                /// We need to trigger that special-case, so we need to encode the values
-                /// with keys of type `String`.
-                func encode<K, E>(_ dict: [K: E]?, forKey key: CodingKeys) throws
-                where K: SnowflakeProtocol, E: Encodable {
-                    let transformed = dict?.map { key, value -> (String, E) in
-                        return (key.rawValue, value)
-                    }
-                    let stringDict: [String: E]? = transformed.map {
-                        .init(uniqueKeysWithValues: $0)
-                    }
-                    try container.encode(stringDict, forKey: key)
-                }
-
-                try encode(self.users, forKey: .users)
-                try encode(self.members, forKey: .members)
-                try encode(self.roles, forKey: .roles)
-                try encode(self.channels, forKey: .channels)
-                try encode(self.messages, forKey: .messages)
-                try encode(self.attachments, forKey: .attachments)
-            }
         }
         
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
@@ -316,6 +269,10 @@ public struct Interaction: Sendable, Codable {
     public var guild_locale: DiscordLocale?
     public var app_permissions: StringBitField<Permission>?
     public var entitlements: [Entitlement]
+    @_spi(UserInstallableApps) /* No @DecodeOrNil because there is a manual init(from:) */
+    public var authorizing_integration_owners: [DiscordApplication.IntegrationKind: AnySnowflake]?
+    @_spi(UserInstallableApps) /* No @DecodeOrNil because there is a manual init(from:) */
+    public var context: ContextKind?
 
     @available(*, deprecated, message: "This property is not documented and will be removed in a future version of DiscordBM, unless it becomes documented. Will always be nil for now")
     public var entitlement_sku_ids: [String]? = nil
@@ -337,6 +294,8 @@ public struct Interaction: Sendable, Codable {
         case guild_locale
         case app_permissions
         case entitlements
+        case authorizing_integration_owners
+        case context
     }
     
     public init(from decoder: any Decoder) throws {
@@ -386,6 +345,14 @@ public struct Interaction: Sendable, Codable {
         self.entitlements = try container.decode(
             [Entitlement].self,
             forKey: .entitlements
+        )
+        self.authorizing_integration_owners = try? container.decode(
+            [DiscordApplication.IntegrationKind: AnySnowflake].self,
+            forKey: .authorizing_integration_owners
+        )
+        self.context = try? container.decodeIfPresent(
+            ContextKind.self,
+            forKey: .context
         )
     }
     
@@ -438,7 +405,18 @@ extension Array<Interaction.ApplicationCommand.Option> {
 
 /// https://discord.com/developers/docs/interactions/receiving-and-responding#message-interaction-object-message-interaction-structure
 public struct MessageInteraction: Sendable, Codable {
+    /// FIXME: This is an `InteractionSnowflake`.
     public var id: String
+    /// The same as `id`, but with the correct type of `InteractionSnowflake`.
+    /// FIXME: Remove when the type of `id` is corrected.
+    public var interaction_id: InteractionSnowflake {
+        get {
+            InteractionSnowflake(self.id)
+        }
+        set {
+            self.id = newValue.rawValue
+        }
+    }
     public var type: Interaction.Kind
     public var name: String
     public var user: DiscordUser

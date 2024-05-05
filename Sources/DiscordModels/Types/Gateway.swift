@@ -508,6 +508,7 @@ public struct Gateway: Sendable, Codable {
 
             public func encode(to encoder: any Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
+                /// Need to encode `null` if `nil`, considering a Discord bug.
                 if let since {
                     try container.encode(since, forKey: .since)
                 } else {
@@ -522,9 +523,9 @@ public struct Gateway: Sendable, Codable {
         public var token: Secret
         /// Not public to make sure the correct info is sent to Discord.
         var properties = ConnectionProperties()
-        /// DiscordBM supports the better `Transport Compression`, but not `Payload Compression`.
+        /// DiscordBM supports the better "Transport Compression", but not "Payload Compression".
         /// Setting this to `true` will only cause problems.
-        /// Instead, use the `compression` parameter in the `BotGatewayManager` initializer.
+        /// "Transport Compression" is enabled by default with no options to disable it.
         var compress: Bool?
         public var large_threshold: Int?
         public var shard: IntPair?
@@ -1020,6 +1021,8 @@ public struct Gateway: Sendable, Codable {
         public var message_reference: DiscordChannel.Message.MessageReference?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var referenced_message: DereferenceBox<MessageCreate>?
+        @_spi(UserInstallableApps) @DecodeOrNil
+        public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
         public var components: [Interaction.ActionRow]?
@@ -1027,10 +1030,10 @@ public struct Gateway: Sendable, Codable {
         public var stickers: [Sticker]?
         public var position: Int?
         public var role_subscription_data: RoleSubscriptionData?
+        public var resolved: Interaction.ApplicationCommand.ResolvedData?
         /// Extra fields:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
-        public var resolved: Interaction.ApplicationCommand.ResolvedData?
 
         public mutating func update(with partialMessage: DiscordChannel.PartialMessage) {
             self.id = partialMessage.id
