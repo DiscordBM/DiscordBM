@@ -4926,6 +4926,30 @@ paths:
               schema:
                 type: string
                 example: text/plain
+  /applications/{application_id}/entitlements/{entitlement_id}/consume:
+    post:
+      tags:
+        - Entitlements
+      summary: consume entitlement
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: entitlement_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
   /applications/{application_id}/skus:
     get:
       tags:

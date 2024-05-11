@@ -2140,6 +2140,17 @@ class DiscordClientTests: XCTestCase {
             XCTFail("Unexpected error: \(String(describing: createError))")
         }
 
+        let consumeError = try await client.consumeEntitlement(
+            entitlementId: .makeFake()
+        ).asError()
+
+        switch consumeError {
+        case .jsonError(let jsonError) where jsonError.code == .unknownEntitlement:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(String(describing: consumeError))")
+        }
+
         let deleteError = try await client.deleteTestEntitlement(
             entitlementId: .makeFake()
         ).asError()

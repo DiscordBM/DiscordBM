@@ -1103,6 +1103,19 @@ public extension DiscordClient {
         )
     }
 
+    /// https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement
+    @inlinable
+    func consumeEntitlement(
+        appId: ApplicationSnowflake? = nil,
+        entitlementId: EntitlementSnowflake
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.consumeEntitlement(
+            applicationId: try requireAppId(appId),
+            entitlementId: entitlementId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     /// https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement
     @inlinable
     func createTestEntitlement(

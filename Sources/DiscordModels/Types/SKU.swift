@@ -5,6 +5,8 @@ public struct SKU: Sendable, Codable {
     /// https://discord.com/developers/docs/monetization/skus#sku-object-sku-types
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
+        case durable // 2
+        case consumable // 3
         case subscription // 5
         case subscriptionGroup // 6
         case __undocumented(Int)
