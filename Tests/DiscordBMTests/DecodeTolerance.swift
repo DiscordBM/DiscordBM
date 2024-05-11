@@ -122,8 +122,8 @@ class DecodeToleranceTests: XCTestCase {
         let value = try XCTUnwrap(container.value)
 
         XCTAssertEqual(value.count, 2)
-        let first = try XCTUnwrap(value.values.first)
-        XCTAssertGreaterThan(first.oauth2_install_params.permissions.rawValue, 0)
+        let firstOAuthInstallParams = try XCTUnwrap(value.values.first?.oauth2_install_params)
+        XCTAssertGreaterThan(firstOAuthInstallParams.permissions.rawValue, 0)
     }
 }
 

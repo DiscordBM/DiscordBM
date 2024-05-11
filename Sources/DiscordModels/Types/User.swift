@@ -104,9 +104,13 @@ extension DiscordUser {
     public struct Connection: Sendable, Codable {
 
         /// https://discord.com/developers/docs/resources/user#connection-object-services
+        ///
+        /// FIXME: I'm not sure, maybe the values of cases are wrong?
+        /// E.g.: `case epicGames`'s value should be just `epicgames` like in the docs?
         @UnstableEnum<String>
         public enum Service: Sendable, Codable {
             case battleNet // "Battle.net"
+            case bungie // "Bungie.net"
             case ebay // "eBay"
             case epicGames // "Epic Games"
             case facebook // "Facebook"

@@ -1975,6 +1975,8 @@ public enum Payloads {
         public var description: String?
         public var role_connections_verification_url: String?
         public var install_params: DiscordApplication.InstallParams?
+        @_spi(UserInstallableApps)
+        public var integration_types_config: [DiscordApplication.IntegrationKind: DiscordApplication.IntegrationKindConfiguration]?
         public var flags: IntBitField<DiscordApplication.Flag>?
         public var icon: ImageData?
         public var cover_image: ImageData?
@@ -1982,6 +1984,19 @@ public enum Payloads {
         public var tags: [String]?
 
         public init(custom_install_url: String? = nil, description: String? = nil, role_connections_verification_url: String? = nil, install_params: DiscordApplication.InstallParams? = nil, flags: IntBitField<DiscordApplication.Flag>? = nil, icon: ImageData? = nil, cover_image: ImageData? = nil, interactions_endpoint_url: String? = nil, tags: [String]? = nil) {
+            self.custom_install_url = custom_install_url
+            self.description = description
+            self.role_connections_verification_url = role_connections_verification_url
+            self.install_params = install_params
+            self.flags = flags
+            self.icon = icon
+            self.cover_image = cover_image
+            self.interactions_endpoint_url = interactions_endpoint_url
+            self.tags = tags
+        }
+
+        @_spi(UserInstallableApps)
+        public init(custom_install_url: String? = nil, description: String? = nil, role_connections_verification_url: String? = nil, install_params: DiscordApplication.InstallParams? = nil, integration_types_config: [DiscordApplication.IntegrationKind: DiscordApplication.IntegrationKindConfiguration]? = nil, flags: IntBitField<DiscordApplication.Flag>? = nil, icon: ImageData? = nil, cover_image: ImageData? = nil, interactions_endpoint_url: String? = nil, tags: [String]? = nil) {
             self.custom_install_url = custom_install_url
             self.description = description
             self.role_connections_verification_url = role_connections_verification_url

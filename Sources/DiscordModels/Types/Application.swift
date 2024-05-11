@@ -41,7 +41,7 @@ public struct DiscordApplication: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/application#application-object-application-integration-type-configuration-object
     @_spi(UserInstallableApps)
     public struct IntegrationKindConfiguration: Sendable, Codable {
-        public var oauth2_install_params: InstallParams
+        public var oauth2_install_params: InstallParams?
     }
 
     public var id: ApplicationSnowflake
