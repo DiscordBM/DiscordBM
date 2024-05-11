@@ -1435,6 +1435,23 @@ public extension DiscordClient {
         )
     }
 
+    /// https://discord.com/developers/docs/resources/guild#bulk-guild-ban
+    @inlinable
+    func bulkBanUsersFromGuild(
+        guildId: GuildSnowflake,
+        reason: String? = nil,
+        payload: Payloads.CreateBulkGuildBan
+    ) async throws -> DiscordClientResponse<Responses.GuildBulkBan> {
+        let endpoint = APIEndpoint.bulkBanUsersFromGuild(guildId: guildId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
     /// https://discord.com/developers/docs/resources/guild#remove-guild-ban
     @inlinable
     func unbanUserFromGuild(

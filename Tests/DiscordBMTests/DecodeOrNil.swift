@@ -206,8 +206,20 @@ class DecodeOrNilTests: XCTestCase {
                 TestContainer<[IntegrationKind: IntegrationKindConfiguration]>.self,
                 from: Data(text.utf8)
             )
+            let values = try XCTUnwrap(container.value)
 
-            XCTAssertTrue(container.value == nil, String(reflecting: container.value))
+            XCTAssertEqual(values.count, 2)
+
+            XCTAssertTrue(
+                values.map(\.value).contains(where: { $0.oauth2_install_params != nil }),
+                String(reflecting: container.value)
+            )
+
+            /// One of the pairs contained a value with a bad key.
+            XCTAssertTrue(
+                values.map(\.value).contains(where: { $0.oauth2_install_params == nil }),
+                String(reflecting: container.value)
+            )
         }
     }
 

@@ -1538,6 +1538,22 @@ public enum Payloads {
         }
     }
 
+    /// https://discord.com/developers/docs/resources/guild#bulk-guild-ban-json-params
+    public struct CreateBulkGuildBan: Sendable, Encodable, ValidatablePayload {
+        public var user_ids: [UserSnowflake]
+        public var delete_message_seconds: Int?
+
+        public init(user_ids: [UserSnowflake], delete_message_seconds: Int? = nil) {
+            self.user_ids = user_ids
+            self.delete_message_seconds = delete_message_seconds
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateElementCountInRange(user_ids, min: 1, max: 200, name: "user_ids")
+            validateNumberInRangeOrNil(delete_message_seconds, min: 0, max: 604_800, name: "delete_message_seconds")
+        }
+    }
+
     /// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
     /// https://discord.com/developers/docs/resources/guild#modify-guild-role-json-params
     public struct GuildRole: Sendable, Codable, ValidatablePayload {

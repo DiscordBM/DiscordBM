@@ -847,6 +847,33 @@ class DiscordClientTests: XCTestCase {
         ).guardSuccess()
     }
 
+    func testGuildBulkBan() async throws {
+        let userId: UserSnowflake = "950695294906007573"
+        let reason = "Testing Guild Bulk Ban!"
+
+        try await client.bulkBanUsersFromGuild(
+            guildId: Constants.guildId,
+            reason: reason,
+            payload: .init(
+                user_ids: [userId],
+                delete_message_seconds: 60
+            )
+        ).guardSuccess()
+
+        let ban = try await client.getGuildBan(
+            guildId: Constants.guildId,
+            userId: userId
+        ).decode()
+
+        XCTAssertEqual(ban.reason, reason)
+        XCTAssertEqual(ban.user.id, userId)
+
+        try await client.unbanUserFromGuild(
+            guildId: Constants.guildId,
+            userId: userId
+        ).guardSuccess()
+    }
+
     func testGuildRoles() async throws {
         /// Create new role
         let rolePayload = Payloads.GuildRole(
@@ -2861,7 +2888,7 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
-    private let totalTestCount = 39
+    private let totalTestCount = 40
     var isLastTest: Bool {
         self.testsRan == self.totalTestCount
     }
