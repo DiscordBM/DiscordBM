@@ -406,6 +406,79 @@ paths:
               schema:
                 type: string
               example: ""
+  /channels/{channel_id}/polls/{message_id}/answers/{answer_id}:
+    get:
+      tags:
+        - Polls
+      summary: list poll answer voters
+      parameters:
+        - name: channel_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: message_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: answer_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
+  /channels/{channel_id}/polls/{message_id}/expire:
+    post:
+      tags:
+        - Polls
+      summary: end poll
+      parameters:
+        - name: channel_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: message_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
   /channels/{channel_id}/recipients/{user_id}:
     put:
       tags:

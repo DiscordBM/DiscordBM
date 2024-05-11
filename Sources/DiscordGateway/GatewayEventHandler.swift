@@ -110,6 +110,8 @@ public protocol GatewayEventHandler: Sendable {
     func onAutoModerationRuleUpdate(_ payload: AutoModerationRule) async throws
     func onAutoModerationRuleDelete(_ payload: AutoModerationRule) async throws
     func onAutoModerationActionExecution(_ payload: AutoModerationActionExecution) async throws
+    func onMessagePollVoteAdd(_ payload: Gateway.MessagePollVote) async throws
+    func onMessagePollVoteRemove(_ payload: Gateway.MessagePollVote) async throws
 }
 
 public extension GatewayEventHandler {
@@ -201,6 +203,8 @@ public extension GatewayEventHandler {
     func onAutoModerationRuleUpdate(_: AutoModerationRule) async throws { }
     func onAutoModerationRuleDelete(_: AutoModerationRule) async throws { }
     func onAutoModerationActionExecution(_: AutoModerationActionExecution) async throws { }
+    func onMessagePollVoteAdd(_: Gateway.MessagePollVote) async throws { }
+    func onMessagePollVoteRemove(_: Gateway.MessagePollVote) async throws { }
 }
 
 // MARK: - Handle
@@ -497,6 +501,14 @@ extension GatewayEventHandler {
         case let .autoModerationActionExecution(payload):
             await withLogging(for: "onAutoModerationActionExecution") {
                 try await onAutoModerationActionExecution(payload)
+            }
+        case let .messagePollVoteAdd(payload):
+            await withLogging(for: "onMessagePollVoteAdd") {
+                try await onMessagePollVoteAdd(payload)
+            }
+        case let .messagePollVoteRemove(payload):
+            await withLogging(for: "onMessagePollVoteRemove") {
+                try await onMessagePollVoteRemove(payload)
             }
         case .__undocumented:
             break

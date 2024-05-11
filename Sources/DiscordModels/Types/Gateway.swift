@@ -146,6 +146,9 @@ public struct Gateway: Sendable, Codable {
             
             case autoModerationActionExecution(AutoModerationActionExecution)
 
+            case messagePollVoteAdd(MessagePollVote)
+            case messagePollVoteRemove(MessagePollVote)
+
             case __undocumented
 
             public var correspondingIntents: [Intent] {
@@ -186,6 +189,10 @@ public struct Gateway: Sendable, Codable {
                     return [.autoModerationConfiguration]
                 case .autoModerationActionExecution:
                     return [.autoModerationExecution]
+                case .messagePollVoteAdd:
+                    return [.guildMessagePolls, .directMessagePolls]
+                case .messagePollVoteRemove:
+                    return [.guildMessagePolls, .directMessagePolls]
                 case .__undocumented:
                     return []
                 }
@@ -386,6 +393,10 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .autoModerationRuleDelete(decodeData())
                 case "AUTO_MODERATION_ACTION_EXECUTION":
                     self.data = try .autoModerationActionExecution(decodeData())
+                case "MESSAGE_POLL_VOTE_ADD":
+                    self.data = try .messagePollVoteAdd(decodeData())
+                case "MESSAGE_POLL_VOTE_REMOVE":
+                    self.data = try .messagePollVoteRemove(decodeData())
                 default:
                     throw GatewayDecodingError.unhandledDispatchEvent(type: self.type)
                 }
@@ -571,6 +582,8 @@ public struct Gateway: Sendable, Codable {
         case guildScheduledEvents // 16
         case autoModerationConfiguration // 20
         case autoModerationExecution // 21
+        case guildMessagePolls // 24
+        case directMessagePolls // 25
         case __undocumented(UInt)
     }
 
@@ -1031,6 +1044,7 @@ public struct Gateway: Sendable, Codable {
         public var position: Int?
         public var role_subscription_data: RoleSubscriptionData?
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
+        public var poll: Poll?
         /// Extra fields:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
@@ -1095,6 +1109,9 @@ public struct Gateway: Sendable, Codable {
             self.stickers = partialMessage.stickers
             self.position = partialMessage.position
             self.role_subscription_data = partialMessage.role_subscription_data
+            if let poll = partialMessage.poll {
+                self.poll = poll
+            }
             if let member = partialMessage.member {
                 self.member = member
             }
@@ -1384,7 +1401,17 @@ public struct Gateway: Sendable, Codable {
             self.state = state
         }
     }
-    
+
+    /// https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-add-message-poll-vote-add-fields
+    /// https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-remove-message-poll-vote-remove-fields
+    public struct MessagePollVote: Sendable, Codable {
+        public var user_id: UserSnowflake
+        public var channel_id: ChannelSnowflake
+        public var message_id: MessageSnowflake
+        public var guild_id: GuildSnowflake?
+        public var answer_id: Int
+    }
+
     /// https://discord.com/developers/docs/topics/gateway-events#typing-start-typing-start-event-fields
     public struct TypingStart: Sendable, Codable {
         public var channel_id: ChannelSnowflake
@@ -1434,7 +1461,7 @@ extension Gateway.Intent {
     /// All intents that require no privileges.
     /// https://discord.com/developers/docs/topics/gateway#privileged-intents
     public static var unprivileged: [Gateway.Intent] {
-        Gateway.Intent.allCases.filter(\.isPrivileged)
+        Gateway.Intent.allCases.filter { !$0.isPrivileged }
     }
 
     /// https://discord.com/developers/docs/topics/gateway#privileged-intents
@@ -1459,6 +1486,8 @@ extension Gateway.Intent {
         case .guildScheduledEvents: return false
         case .autoModerationConfiguration: return false
         case .autoModerationExecution: return false
+        case .guildMessagePolls: return false
+        case .directMessagePolls: return false
             /// Undocumented cases are considered privileged just to be safe than sorry
         case .__undocumented: return true
         }

@@ -45,7 +45,9 @@ let _url = grouped.flatMap(\.value).map { info in
         fatalError("'\(split.joined())' did not start with a slash '/'")
     }
     let paramsEncoded = params.compactMap { param -> String? in
-        if param.hasSuffix("Id") {
+        if param == "answerId" {
+            return nil
+        } else if param.hasSuffix("Id") {
             return #"let \#(param) = \#(param).rawValue"#
         } else if noEncodeParamSuffixes.contains(where: { param.hasSuffix($0) }) {
             return nil
@@ -91,10 +93,10 @@ let _urlDescription = grouped.flatMap(\.value).map { info in
         fatalError("'\(split.joined())' did not start with a slash '/'")
     }
     let paramsEncoded = params.compactMap { param -> String? in
-        if param.hasSuffix("Id") {
+        if param == "answerId" {
+            return nil
+        } else if param.hasSuffix("Id") {
             return #"let \#(param) = \#(param).rawValue"#
-        } else if param == webhookTokenParam {
-            return #"let \#(param) = \#(param).urlPathEncoded().hash"#
         } else if noEncodeParamSuffixes.contains(where: { param.hasSuffix($0) }) {
             return nil
         } else {
@@ -158,7 +160,9 @@ public var requiresAuthorizationHeader: Bool {
 let _parameters = grouped.flatMap(\.value).map { info -> String in
     let (name, _params) = info.info.makeIterativeCase()
     let params = _params.map { param in
-        if param.hasSuffix("Id") {
+        if param == "answerId" {
+            return #""\(answerId)""#
+        } else if param.hasSuffix("Id") {
             return "\(param).rawValue"
         } else {
             return param
@@ -179,7 +183,9 @@ public var parameters: [String] {
 let _description = grouped.flatMap(\.value).map { info -> String in
     let (name, _params) = info.info.makeIterativeCase()
     let params = _params.map { param in
-        if param.hasSuffix("Id") {
+        if param == "answerId" {
+            return param
+        } else if param.hasSuffix("Id") {
             return "\(param).rawValue"
         } else {
             return param

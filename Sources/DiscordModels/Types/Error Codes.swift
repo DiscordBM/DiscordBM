@@ -244,6 +244,12 @@ public enum JSONErrorCode: Sendable, Codable {
     case cannotEnableOnboardingRequirementsAreNotMet // 350000
     case cannotUpdateOnboardingWhileBelowRequirements // 350001
     case failedToBanUsers // 500000
+    case pollVotingBlocked // 520000
+    case pollExpired // 520001
+    case invalidChannelTypeForPollCreation // 520002
+    case cannotEditPollMessage // 520003
+    case cannotUseEmojiIncludedWithThePoll // 520004
+    case cannotExpireNonPollMessage // 520006
     case __undocumented(Int)
 }
 

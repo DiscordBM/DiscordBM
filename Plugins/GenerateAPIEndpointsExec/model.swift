@@ -67,6 +67,7 @@ struct API: Decodable {
         struct Info: Decodable {
             
             enum Tag: String, Decodable {
+                case polls = "Polls"
                 case autoMod = "AutoMod"
                 case auditLog = "Audit Log"
                 case channels = "Channels"
@@ -91,9 +92,10 @@ struct API: Decodable {
                 case users = "Users"
                 case voice = "Voice"
                 case webhooks = "Webhooks"
-                
+
                 var priority: Int {
                     switch self {
+                    case .polls: return 25
                     case .autoMod: return 24
                     case .auditLog: return 23
                     case .channels: return 22
@@ -123,6 +125,7 @@ struct API: Decodable {
                 
                 var countsAgainstGlobalRateLimit: Bool {
                     switch self {
+                    case .polls: return true
                     case .autoMod: return true
                     case .auditLog: return true
                     case .channels: return true
@@ -152,6 +155,8 @@ struct API: Decodable {
                 
                 var link: String {
                     switch self {
+                    case .polls:
+                        return "https://discord.com/developers/docs/resources/poll"
                     case .autoMod:
                         return "https://discord.com/developers/docs/resources/auto-moderation"
                     case .auditLog:
@@ -281,6 +286,8 @@ struct API: Decodable {
                                 type = "EntitlementSnowflake"
                             case "skuId":
                                 type = "SKUSnowflake"
+                            case "answerId":
+                                type = "Int"
                             case let name where name.hasSuffix("Id"):
                                 print("Unhandled ID type: '\(paramName)'")
                                 fatalError("Unhandled ID type: '\(paramName)'")

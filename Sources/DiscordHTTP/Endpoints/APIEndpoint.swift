@@ -7,9 +7,14 @@
 import DiscordModels
 import NIOHTTP1
 
-/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum APIEndpoint: Endpoint {
 
+    // MARK: Polls
+    /// https://discord.com/developers/docs/resources/poll
+    
+    case listPollAnswerVoters(channelId: ChannelSnowflake, messageId: MessageSnowflake, answerId: Int)
+    case endPoll(channelId: ChannelSnowflake, messageId: MessageSnowflake)
+    
     // MARK: AutoMod
     /// https://discord.com/developers/docs/resources/auto-moderation
     
@@ -295,6 +300,14 @@ public enum APIEndpoint: Endpoint {
     public var url: String {
         let suffix: String
         switch self {
+        case let .listPollAnswerVoters(channelId, messageId, answerId):
+            let channelId = channelId.rawValue
+            let messageId = messageId.rawValue
+            suffix = "channels/\(channelId)/polls/\(messageId)/answers/\(answerId)"
+        case let .endPoll(channelId, messageId):
+            let channelId = channelId.rawValue
+            let messageId = messageId.rawValue
+            suffix = "channels/\(channelId)/polls/\(messageId)/expire"
         case let .getAutoModerationRule(guildId, ruleId):
             let guildId = guildId.rawValue
             let ruleId = ruleId.rawValue
@@ -908,6 +921,14 @@ public enum APIEndpoint: Endpoint {
     public var urlDescription: String {
         let suffix: String
         switch self {
+        case let .listPollAnswerVoters(channelId, messageId, answerId):
+            let channelId = channelId.rawValue
+            let messageId = messageId.rawValue
+            suffix = "channels/\(channelId)/polls/\(messageId)/answers/\(answerId)"
+        case let .endPoll(channelId, messageId):
+            let channelId = channelId.rawValue
+            let messageId = messageId.rawValue
+            suffix = "channels/\(channelId)/polls/\(messageId)/expire"
         case let .getAutoModerationRule(guildId, ruleId):
             let guildId = guildId.rawValue
             let ruleId = ruleId.rawValue
@@ -1480,11 +1501,9 @@ public enum APIEndpoint: Endpoint {
             suffix = "webhooks/\(webhookId)"
         case let .getWebhookByToken(webhookId, webhookToken):
             let webhookId = webhookId.rawValue
-            let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
             let webhookId = webhookId.rawValue
-            let webhookToken = webhookToken.urlPathEncoded().hash
             let messageId = messageId.rawValue
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .listChannelWebhooks(channelId):
@@ -1495,18 +1514,15 @@ public enum APIEndpoint: Endpoint {
             suffix = "channels/\(channelId)/webhooks"
         case let .executeWebhook(webhookId, webhookToken):
             let webhookId = webhookId.rawValue
-            let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .updateWebhook(webhookId):
             let webhookId = webhookId.rawValue
             suffix = "webhooks/\(webhookId)"
         case let .updateWebhookByToken(webhookId, webhookToken):
             let webhookId = webhookId.rawValue
-            let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .updateWebhookMessage(webhookId, webhookToken, messageId):
             let webhookId = webhookId.rawValue
-            let webhookToken = webhookToken.urlPathEncoded().hash
             let messageId = messageId.rawValue
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .deleteWebhook(webhookId):
@@ -1514,11 +1530,9 @@ public enum APIEndpoint: Endpoint {
             suffix = "webhooks/\(webhookId)"
         case let .deleteWebhookByToken(webhookId, webhookToken):
             let webhookId = webhookId.rawValue
-            let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
             let webhookId = webhookId.rawValue
-            let webhookToken = webhookToken.urlPathEncoded().hash
             let messageId = messageId.rawValue
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         }
@@ -1527,6 +1541,8 @@ public enum APIEndpoint: Endpoint {
 
     public var httpMethod: HTTPMethod {
         switch self {
+        case .listPollAnswerVoters: return .GET
+        case .endPoll: return .POST
         case .getAutoModerationRule: return .GET
         case .listAutoModerationRules: return .GET
         case .createAutoModerationRule: return .POST
@@ -1714,6 +1730,8 @@ public enum APIEndpoint: Endpoint {
 
     public var countsAgainstGlobalRateLimit: Bool {
         switch self {
+        case .listPollAnswerVoters: return true
+        case .endPoll: return true
         case .getAutoModerationRule: return true
         case .listAutoModerationRules: return true
         case .createAutoModerationRule: return true
@@ -1901,6 +1919,8 @@ public enum APIEndpoint: Endpoint {
 
     public var requiresAuthorizationHeader: Bool {
         switch self {
+        case .listPollAnswerVoters: return true
+        case .endPoll: return true
         case .getAutoModerationRule: return true
         case .listAutoModerationRules: return true
         case .createAutoModerationRule: return true
@@ -2088,6 +2108,10 @@ public enum APIEndpoint: Endpoint {
 
     public var parameters: [String] {
         switch self {
+        case let .listPollAnswerVoters(channelId, messageId, answerId):
+            return [channelId.rawValue, messageId.rawValue, "\(answerId)"]
+        case let .endPoll(channelId, messageId):
+            return [channelId.rawValue, messageId.rawValue]
         case let .getAutoModerationRule(guildId, ruleId):
             return [guildId.rawValue, ruleId.rawValue]
         case let .listAutoModerationRules(guildId):
@@ -2457,193 +2481,199 @@ public enum APIEndpoint: Endpoint {
 
     public var id: Int {
         switch self {
-        case .getAutoModerationRule: return 1
-        case .listAutoModerationRules: return 2
-        case .createAutoModerationRule: return 3
-        case .updateAutoModerationRule: return 4
-        case .deleteAutoModerationRule: return 5
-        case .listGuildAuditLogEntries: return 6
-        case .getChannel: return 7
-        case .listPinnedMessages: return 8
-        case .addGroupDmUser: return 9
-        case .pinMessage: return 10
-        case .setChannelPermissionOverwrite: return 11
-        case .createDm: return 12
-        case .createGroupDm: return 13
-        case .followAnnouncementChannel: return 14
-        case .triggerTypingIndicator: return 15
-        case .updateChannel: return 16
-        case .deleteChannel: return 17
-        case .deleteChannelPermissionOverwrite: return 18
-        case .deleteGroupDmUser: return 19
-        case .unpinMessage: return 20
-        case .getApplicationCommand: return 21
-        case .getGuildApplicationCommand: return 22
-        case .getGuildApplicationCommandPermissions: return 23
-        case .listApplicationCommands: return 24
-        case .listGuildApplicationCommandPermissions: return 25
-        case .listGuildApplicationCommands: return 26
-        case .bulkSetApplicationCommands: return 27
-        case .bulkSetGuildApplicationCommands: return 28
-        case .setGuildApplicationCommandPermissions: return 29
-        case .createApplicationCommand: return 30
-        case .createGuildApplicationCommand: return 31
-        case .updateApplicationCommand: return 32
-        case .updateGuildApplicationCommand: return 33
-        case .deleteApplicationCommand: return 34
-        case .deleteGuildApplicationCommand: return 35
-        case .getGuildEmoji: return 36
-        case .listGuildEmojis: return 37
-        case .createGuildEmoji: return 38
-        case .updateGuildEmoji: return 39
-        case .deleteGuildEmoji: return 40
-        case .listEntitlements: return 41
-        case .consumeEntitlement: return 42
-        case .createTestEntitlement: return 43
-        case .deleteTestEntitlement: return 44
-        case .getBotGateway: return 45
-        case .getGateway: return 46
-        case .getGuild: return 47
-        case .getGuildBan: return 48
-        case .getGuildOnboarding: return 49
-        case .getGuildPreview: return 50
-        case .getGuildVanityUrl: return 51
-        case .getGuildWelcomeScreen: return 52
-        case .getGuildWidget: return 53
-        case .getGuildWidgetPng: return 54
-        case .getGuildWidgetSettings: return 55
-        case .listGuildBans: return 56
-        case .listGuildChannels: return 57
-        case .listGuildIntegrations: return 58
-        case .listOwnGuilds: return 59
-        case .previewPruneGuild: return 60
-        case .banUserFromGuild: return 61
-        case .updateGuildOnboarding: return 62
-        case .bulkBanUsersFromGuild: return 63
-        case .createGuild: return 64
-        case .createGuildChannel: return 65
-        case .pruneGuild: return 66
-        case .setGuildMfaLevel: return 67
-        case .updateGuild: return 68
-        case .updateGuildChannelPositions: return 69
-        case .updateGuildWelcomeScreen: return 70
-        case .updateGuildWidgetSettings: return 71
-        case .deleteGuild: return 72
-        case .deleteGuildIntegration: return 73
-        case .leaveGuild: return 74
-        case .unbanUserFromGuild: return 75
-        case .getGuildTemplate: return 76
-        case .listGuildTemplates: return 77
-        case .syncGuildTemplate: return 78
-        case .createGuildFromTemplate: return 79
-        case .createGuildTemplate: return 80
-        case .updateGuildTemplate: return 81
-        case .deleteGuildTemplate: return 82
-        case .getFollowupMessage: return 83
-        case .getOriginalInteractionResponse: return 84
-        case .createFollowupMessage: return 85
-        case .createInteractionResponse: return 86
-        case .updateFollowupMessage: return 87
-        case .updateOriginalInteractionResponse: return 88
-        case .deleteFollowupMessage: return 89
-        case .deleteOriginalInteractionResponse: return 90
-        case .listChannelInvites: return 91
-        case .listGuildInvites: return 92
-        case .resolveInvite: return 93
-        case .createChannelInvite: return 94
-        case .revokeInvite: return 95
-        case .getGuildMember: return 96
-        case .getOwnGuildMember: return 97
-        case .listGuildMembers: return 98
-        case .searchGuildMembers: return 99
-        case .addGuildMember: return 100
-        case .updateGuildMember: return 101
-        case .updateOwnGuildMember: return 102
-        case .deleteGuildMember: return 103
-        case .getMessage: return 104
-        case .listMessageReactionsByEmoji: return 105
-        case .listMessages: return 106
-        case .addMessageReaction: return 107
-        case .bulkDeleteMessages: return 108
-        case .createMessage: return 109
-        case .crosspostMessage: return 110
-        case .updateMessage: return 111
-        case .deleteAllMessageReactions: return 112
-        case .deleteAllMessageReactionsByEmoji: return 113
-        case .deleteMessage: return 114
-        case .deleteOwnMessageReaction: return 115
-        case .deleteUserMessageReaction: return 116
-        case .getOwnOauth2Application: return 117
-        case .listGuildRoles: return 118
-        case .addGuildMemberRole: return 119
-        case .createGuildRole: return 120
-        case .updateGuildRole: return 121
-        case .updateGuildRolePositions: return 122
-        case .deleteGuildMemberRole: return 123
-        case .deleteGuildRole: return 124
-        case .getApplicationUserRoleConnection: return 125
-        case .listApplicationRoleConnectionMetadata: return 126
-        case .bulkOverwriteApplicationRoleConnectionMetadata: return 127
-        case .updateApplicationUserRoleConnection: return 128
-        case .getGuildScheduledEvent: return 129
-        case .listGuildScheduledEventUsers: return 130
-        case .listGuildScheduledEvents: return 131
-        case .createGuildScheduledEvent: return 132
-        case .updateGuildScheduledEvent: return 133
-        case .deleteGuildScheduledEvent: return 134
-        case .listSkus: return 135
-        case .getStageInstance: return 136
-        case .createStageInstance: return 137
-        case .updateStageInstance: return 138
-        case .deleteStageInstance: return 139
-        case .getGuildSticker: return 140
-        case .getSticker: return 141
-        case .listGuildStickers: return 142
-        case .listStickerPacks: return 143
-        case .createGuildSticker: return 144
-        case .updateGuildSticker: return 145
-        case .deleteGuildSticker: return 146
-        case .getThreadMember: return 147
-        case .listActiveGuildThreads: return 148
-        case .listOwnPrivateArchivedThreads: return 149
-        case .listPrivateArchivedThreads: return 150
-        case .listPublicArchivedThreads: return 151
-        case .listThreadMembers: return 152
-        case .addThreadMember: return 153
-        case .joinThread: return 154
-        case .createThread: return 155
-        case .createThreadFromMessage: return 156
-        case .createThreadInForumChannel: return 157
-        case .deleteThreadMember: return 158
-        case .leaveThread: return 159
-        case .getOwnApplication: return 160
-        case .getOwnUser: return 161
-        case .getUser: return 162
-        case .listOwnConnections: return 163
-        case .updateOwnApplication: return 164
-        case .updateOwnUser: return 165
-        case .listGuildVoiceRegions: return 166
-        case .listVoiceRegions: return 167
-        case .updateSelfVoiceState: return 168
-        case .updateVoiceState: return 169
-        case .getGuildWebhooks: return 170
-        case .getWebhook: return 171
-        case .getWebhookByToken: return 172
-        case .getWebhookMessage: return 173
-        case .listChannelWebhooks: return 174
-        case .createWebhook: return 175
-        case .executeWebhook: return 176
-        case .updateWebhook: return 177
-        case .updateWebhookByToken: return 178
-        case .updateWebhookMessage: return 179
-        case .deleteWebhook: return 180
-        case .deleteWebhookByToken: return 181
-        case .deleteWebhookMessage: return 182
+        case .listPollAnswerVoters: return 1
+        case .endPoll: return 2
+        case .getAutoModerationRule: return 3
+        case .listAutoModerationRules: return 4
+        case .createAutoModerationRule: return 5
+        case .updateAutoModerationRule: return 6
+        case .deleteAutoModerationRule: return 7
+        case .listGuildAuditLogEntries: return 8
+        case .getChannel: return 9
+        case .listPinnedMessages: return 10
+        case .addGroupDmUser: return 11
+        case .pinMessage: return 12
+        case .setChannelPermissionOverwrite: return 13
+        case .createDm: return 14
+        case .createGroupDm: return 15
+        case .followAnnouncementChannel: return 16
+        case .triggerTypingIndicator: return 17
+        case .updateChannel: return 18
+        case .deleteChannel: return 19
+        case .deleteChannelPermissionOverwrite: return 20
+        case .deleteGroupDmUser: return 21
+        case .unpinMessage: return 22
+        case .getApplicationCommand: return 23
+        case .getGuildApplicationCommand: return 24
+        case .getGuildApplicationCommandPermissions: return 25
+        case .listApplicationCommands: return 26
+        case .listGuildApplicationCommandPermissions: return 27
+        case .listGuildApplicationCommands: return 28
+        case .bulkSetApplicationCommands: return 29
+        case .bulkSetGuildApplicationCommands: return 30
+        case .setGuildApplicationCommandPermissions: return 31
+        case .createApplicationCommand: return 32
+        case .createGuildApplicationCommand: return 33
+        case .updateApplicationCommand: return 34
+        case .updateGuildApplicationCommand: return 35
+        case .deleteApplicationCommand: return 36
+        case .deleteGuildApplicationCommand: return 37
+        case .getGuildEmoji: return 38
+        case .listGuildEmojis: return 39
+        case .createGuildEmoji: return 40
+        case .updateGuildEmoji: return 41
+        case .deleteGuildEmoji: return 42
+        case .listEntitlements: return 43
+        case .consumeEntitlement: return 44
+        case .createTestEntitlement: return 45
+        case .deleteTestEntitlement: return 46
+        case .getBotGateway: return 47
+        case .getGateway: return 48
+        case .getGuild: return 49
+        case .getGuildBan: return 50
+        case .getGuildOnboarding: return 51
+        case .getGuildPreview: return 52
+        case .getGuildVanityUrl: return 53
+        case .getGuildWelcomeScreen: return 54
+        case .getGuildWidget: return 55
+        case .getGuildWidgetPng: return 56
+        case .getGuildWidgetSettings: return 57
+        case .listGuildBans: return 58
+        case .listGuildChannels: return 59
+        case .listGuildIntegrations: return 60
+        case .listOwnGuilds: return 61
+        case .previewPruneGuild: return 62
+        case .banUserFromGuild: return 63
+        case .updateGuildOnboarding: return 64
+        case .bulkBanUsersFromGuild: return 65
+        case .createGuild: return 66
+        case .createGuildChannel: return 67
+        case .pruneGuild: return 68
+        case .setGuildMfaLevel: return 69
+        case .updateGuild: return 70
+        case .updateGuildChannelPositions: return 71
+        case .updateGuildWelcomeScreen: return 72
+        case .updateGuildWidgetSettings: return 73
+        case .deleteGuild: return 74
+        case .deleteGuildIntegration: return 75
+        case .leaveGuild: return 76
+        case .unbanUserFromGuild: return 77
+        case .getGuildTemplate: return 78
+        case .listGuildTemplates: return 79
+        case .syncGuildTemplate: return 80
+        case .createGuildFromTemplate: return 81
+        case .createGuildTemplate: return 82
+        case .updateGuildTemplate: return 83
+        case .deleteGuildTemplate: return 84
+        case .getFollowupMessage: return 85
+        case .getOriginalInteractionResponse: return 86
+        case .createFollowupMessage: return 87
+        case .createInteractionResponse: return 88
+        case .updateFollowupMessage: return 89
+        case .updateOriginalInteractionResponse: return 90
+        case .deleteFollowupMessage: return 91
+        case .deleteOriginalInteractionResponse: return 92
+        case .listChannelInvites: return 93
+        case .listGuildInvites: return 94
+        case .resolveInvite: return 95
+        case .createChannelInvite: return 96
+        case .revokeInvite: return 97
+        case .getGuildMember: return 98
+        case .getOwnGuildMember: return 99
+        case .listGuildMembers: return 100
+        case .searchGuildMembers: return 101
+        case .addGuildMember: return 102
+        case .updateGuildMember: return 103
+        case .updateOwnGuildMember: return 104
+        case .deleteGuildMember: return 105
+        case .getMessage: return 106
+        case .listMessageReactionsByEmoji: return 107
+        case .listMessages: return 108
+        case .addMessageReaction: return 109
+        case .bulkDeleteMessages: return 110
+        case .createMessage: return 111
+        case .crosspostMessage: return 112
+        case .updateMessage: return 113
+        case .deleteAllMessageReactions: return 114
+        case .deleteAllMessageReactionsByEmoji: return 115
+        case .deleteMessage: return 116
+        case .deleteOwnMessageReaction: return 117
+        case .deleteUserMessageReaction: return 118
+        case .getOwnOauth2Application: return 119
+        case .listGuildRoles: return 120
+        case .addGuildMemberRole: return 121
+        case .createGuildRole: return 122
+        case .updateGuildRole: return 123
+        case .updateGuildRolePositions: return 124
+        case .deleteGuildMemberRole: return 125
+        case .deleteGuildRole: return 126
+        case .getApplicationUserRoleConnection: return 127
+        case .listApplicationRoleConnectionMetadata: return 128
+        case .bulkOverwriteApplicationRoleConnectionMetadata: return 129
+        case .updateApplicationUserRoleConnection: return 130
+        case .getGuildScheduledEvent: return 131
+        case .listGuildScheduledEventUsers: return 132
+        case .listGuildScheduledEvents: return 133
+        case .createGuildScheduledEvent: return 134
+        case .updateGuildScheduledEvent: return 135
+        case .deleteGuildScheduledEvent: return 136
+        case .listSkus: return 137
+        case .getStageInstance: return 138
+        case .createStageInstance: return 139
+        case .updateStageInstance: return 140
+        case .deleteStageInstance: return 141
+        case .getGuildSticker: return 142
+        case .getSticker: return 143
+        case .listGuildStickers: return 144
+        case .listStickerPacks: return 145
+        case .createGuildSticker: return 146
+        case .updateGuildSticker: return 147
+        case .deleteGuildSticker: return 148
+        case .getThreadMember: return 149
+        case .listActiveGuildThreads: return 150
+        case .listOwnPrivateArchivedThreads: return 151
+        case .listPrivateArchivedThreads: return 152
+        case .listPublicArchivedThreads: return 153
+        case .listThreadMembers: return 154
+        case .addThreadMember: return 155
+        case .joinThread: return 156
+        case .createThread: return 157
+        case .createThreadFromMessage: return 158
+        case .createThreadInForumChannel: return 159
+        case .deleteThreadMember: return 160
+        case .leaveThread: return 161
+        case .getOwnApplication: return 162
+        case .getOwnUser: return 163
+        case .getUser: return 164
+        case .listOwnConnections: return 165
+        case .updateOwnApplication: return 166
+        case .updateOwnUser: return 167
+        case .listGuildVoiceRegions: return 168
+        case .listVoiceRegions: return 169
+        case .updateSelfVoiceState: return 170
+        case .updateVoiceState: return 171
+        case .getGuildWebhooks: return 172
+        case .getWebhook: return 173
+        case .getWebhookByToken: return 174
+        case .getWebhookMessage: return 175
+        case .listChannelWebhooks: return 176
+        case .createWebhook: return 177
+        case .executeWebhook: return 178
+        case .updateWebhook: return 179
+        case .updateWebhookByToken: return 180
+        case .updateWebhookMessage: return 181
+        case .deleteWebhook: return 182
+        case .deleteWebhookByToken: return 183
+        case .deleteWebhookMessage: return 184
         }
     }
 
     public var description: String {
         switch self {
+        case let .listPollAnswerVoters(channelId, messageId, answerId):
+            return "listPollAnswerVoters(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), answerId: \(answerId))"
+        case let .endPoll(channelId, messageId):
+            return "endPoll(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
         case let .getAutoModerationRule(guildId, ruleId):
             return "getAutoModerationRule(guildId.rawValue: \(guildId.rawValue), ruleId.rawValue: \(ruleId.rawValue))"
         case let .listAutoModerationRules(guildId):
@@ -3014,6 +3044,11 @@ public enum APIEndpoint: Endpoint {
 
 public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
 
+    // MARK: Polls
+    /// https://discord.com/developers/docs/resources/poll
+    
+    case listPollAnswerVoters
+    
     // MARK: AutoMod
     /// https://discord.com/developers/docs/resources/auto-moderation
     
@@ -3186,6 +3221,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
 
     public var description: String {
         switch self {
+        case .listPollAnswerVoters: return "listPollAnswerVoters"
         case .getAutoModerationRule: return "getAutoModerationRule"
         case .listAutoModerationRules: return "listAutoModerationRules"
         case .listGuildAuditLogEntries: return "listGuildAuditLogEntries"
@@ -3265,6 +3301,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
 
     init? (endpoint: APIEndpoint) {
         switch endpoint {
+        case .listPollAnswerVoters: self = .listPollAnswerVoters
         case .getAutoModerationRule: self = .getAutoModerationRule
         case .listAutoModerationRules: self = .listAutoModerationRules
         case .listGuildAuditLogEntries: self = .listGuildAuditLogEntries

@@ -107,6 +107,7 @@ public enum Payloads {
             public var components: [Interaction.ActionRow]?
             public var attachments: [Attachment]?
             public var files: [RawFile]?
+            public var poll: CreatePollRequest?
 
             enum CodingKeys: String, CodingKey {
                 case tts
@@ -116,9 +117,10 @@ public enum Payloads {
                 case flags
                 case components
                 case attachments
+                case poll
             }
 
-            public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: AllowedMentions? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, components: [Interaction.ActionRow]? = nil, attachments: [Attachment]? = nil, files: [RawFile]? = nil) {
+            public init(tts: Bool? = nil, content: String? = nil, embeds: [Embed]? = nil, allowedMentions: AllowedMentions? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, components: [Interaction.ActionRow]? = nil, attachments: [Attachment]? = nil, files: [RawFile]? = nil, poll: CreatePollRequest? = nil) {
                 self.tts = tts
                 self.content = content
                 self.embeds = embeds
@@ -127,6 +129,7 @@ public enum Payloads {
                 self.components = components
                 self.attachments = attachments
                 self.files = files
+                self.poll = poll
             }
 
             public func validate() -> [ValidationFailure] {
@@ -142,6 +145,7 @@ public enum Payloads {
                 components?.validate()
                 attachments?.validate()
                 embeds?.validate()
+                poll?.validate()
             }
         }
 
@@ -387,6 +391,7 @@ public enum Payloads {
         public var attachments: [Attachment]?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var enforce_nonce: Bool?
+        public var poll: CreatePollRequest?
 
         enum CodingKeys: String, CodingKey {
             case content
@@ -400,9 +405,10 @@ public enum Payloads {
             case attachments
             case flags
             case enforce_nonce
+            case poll
         }
         
-        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, enforce_nonce: Bool? = nil) {
+        public init(content: String? = nil, nonce: StringOrInt? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: DiscordChannel.Message.MessageReference? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, enforce_nonce: Bool? = nil, poll: CreatePollRequest? = nil) {
             self.content = content
             self.nonce = nonce
             self.tts = tts
@@ -415,6 +421,7 @@ public enum Payloads {
             self.attachments = attachments
             self.flags = flags
             self.enforce_nonce = enforce_nonce
+            self.poll = poll
         }
         
         public func validate() -> [ValidationFailure] {
@@ -429,7 +436,8 @@ public enum Payloads {
                 sticker_ids?.isEmpty,
                 components?.isEmpty,
                 files?.isEmpty,
-                names: "content", "embeds", "sticker_ids", "components", "files"
+                poll?.answers.isEmpty,
+                names: "content", "embeds", "sticker_ids", "components", "files", "poll"
             )
             validateCombinedCharacterCountDoesNotExceed(
                 embeds?.reduce(into: 0, { $0 += $1.contentLength }),
@@ -444,6 +452,7 @@ public enum Payloads {
             )
             attachments?.validate()
             embeds?.validate()
+            poll?.validate()
         }
     }
     
@@ -510,6 +519,7 @@ public enum Payloads {
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var thread_name: String?
         public var applied_tags: [ForumTagSnowflake]?
+        public var poll: CreatePollRequest?
 
         enum CodingKeys: CodingKey {
             case content
@@ -523,9 +533,10 @@ public enum Payloads {
             case flags
             case thread_name
             case applied_tags
+            case poll
         }
         
-        public init(content: String? = nil, username: String? = nil, avatar_url: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, thread_name: String? = nil, applied_tags: [ForumTagSnowflake]? = nil) {
+        public init(content: String? = nil, username: String? = nil, avatar_url: String? = nil, tts: Bool? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, thread_name: String? = nil, applied_tags: [ForumTagSnowflake]? = nil, poll: CreatePollRequest? = nil) {
             self.content = content
             self.username = username
             self.avatar_url = avatar_url
@@ -538,14 +549,19 @@ public enum Payloads {
             self.flags = flags
             self.thread_name = thread_name
             self.applied_tags = applied_tags
+            self.poll = poll
         }
         
         public func validate() -> [ValidationFailure] {
             validateElementCountDoesNotExceed(embeds, max: 10, name: "embeds")
             validateCharacterCountDoesNotExceed(content, max: 2_000, name: "content")
             validateAtLeastOneIsNotEmpty(
-                content?.isEmpty, components?.isEmpty, files?.isEmpty, embeds?.isEmpty,
-                names: "content", "components", "files", "embeds"
+                content?.isEmpty,
+                components?.isEmpty,
+                files?.isEmpty,
+                embeds?.isEmpty,
+                poll?.answers.isEmpty,
+                names: "content", "components", "files", "embeds", "poll"
             )
             validateCombinedCharacterCountDoesNotExceed(
                 embeds?.reduce(into: 0, { $0 += $1.contentLength }),
@@ -561,6 +577,7 @@ public enum Payloads {
             allowed_mentions?.validate()
             attachments?.validate()
             embeds?.validate()
+            poll?.validate()
         }
     }
     
@@ -723,7 +740,8 @@ public enum Payloads {
             public var files: [RawFile]?
             public var attachments: [Attachment]?
             public var flags: IntBitField<DiscordChannel.Message.Flag>?
-            
+            public var poll: CreatePollRequest?
+
             enum CodingKeys: String, CodingKey {
                 case content
                 case embeds
@@ -732,9 +750,10 @@ public enum Payloads {
                 case sticker_ids
                 case attachments
                 case flags
+                case poll
             }
             
-            public init(content: String? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil) {
+            public init(content: String? = nil, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, components: [Interaction.ActionRow]? = nil, sticker_ids: [String]? = nil, files: [RawFile]? = nil, attachments: [Attachment]? = nil, flags: IntBitField<DiscordChannel.Message.Flag>? = nil, poll: CreatePollRequest? = nil) {
                 self.content = content
                 self.embeds = embeds
                 self.allowed_mentions = allowed_mentions
@@ -743,6 +762,7 @@ public enum Payloads {
                 self.files = files
                 self.attachments = attachments
                 self.flags = flags
+                self.poll = poll
             }
             
             public func validate() -> [ValidationFailure] {
@@ -756,7 +776,8 @@ public enum Payloads {
                     sticker_ids?.isEmpty,
                     components?.isEmpty,
                     files?.isEmpty,
-                    names: "content", "embeds", "sticker_ids", "components", "files"
+                    poll?.answers.isEmpty,
+                    names: "content", "embeds", "sticker_ids", "components", "files", "poll"
                 )
                 validateCombinedCharacterCountDoesNotExceed(
                     embeds?.reduce(into: 0, { $0 += $1.contentLength }),
@@ -771,6 +792,7 @@ public enum Payloads {
                 )
                 attachments?.validate()
                 embeds?.validate()
+                poll?.validate()
             }
         }
         
@@ -2039,6 +2061,30 @@ public enum Payloads {
             for (idx, tag) in (tags ?? []).enumerated() {
                 validateCharacterCountDoesNotExceed(tag, max: 20, name: "tags[\(idx)]")
             }
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/poll#poll-create-request-object
+    public struct CreatePollRequest: Sendable, Codable, ValidatablePayload {
+        public var question: Poll.Media
+        public var answers: [Poll.Answer]
+        /// "Number of hours the poll should be open for, up to 7 days"
+        public var duration: Int
+        public var allow_multiselect: Bool
+        public var layout_type: Poll.LayoutKind?
+
+        public init(question: Poll.Media, answers: [Poll.Answer], duration: Int, allow_multiselect: Bool, layout_type: Poll.LayoutKind? = nil) {
+            self.question = question
+            self.answers = answers
+            self.duration = duration
+            self.allow_multiselect = allow_multiselect
+            self.layout_type = layout_type
+        }
+
+        public func validate() -> [ValidationFailure] {
+            question.validate()
+            validateElementCountDoesNotExceed(answers, max: 10, name: "answers")
+            validateNumberInRangeOrNil(duration, min: 1, max: 144, name: "duration") /// 7 days max
         }
     }
 }

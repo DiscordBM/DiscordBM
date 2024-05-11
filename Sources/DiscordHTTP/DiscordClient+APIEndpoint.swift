@@ -2468,6 +2468,46 @@ public extension DiscordClient {
         )
     }
 
+    // MARK: Polls
+    /// https://discord.com/developers/docs/resources/poll
+
+    /// https://discord.com/developers/docs/resources/poll#get-answer-voters
+    @inlinable
+    func listPollAnswerVotes(
+        channelId: ChannelSnowflake,
+        messageId: MessageSnowflake,
+        answerId: Int,
+        after: UserSnowflake? = nil,
+        limit: Int? = nil
+    ) async throws -> DiscordClientResponse<Responses.ListPollAnswerVoters> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 100)
+        let endpoint = APIEndpoint.listPollAnswerVoters(
+            channelId: channelId,
+            messageId: messageId,
+            answerId: answerId
+        )
+        return try await self.send(request: .init(
+            to: endpoint,
+            queries: [
+                ("after", after?.rawValue),
+                ("limit", limit.map { "\($0)" })
+            ]
+        ))
+    }
+
+    /// https://discord.com/developers/docs/resources/poll#end-poll
+    @inlinable
+    func endPoll(
+        channelId: ChannelSnowflake,
+        messageId: MessageSnowflake
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+        let endpoint = APIEndpoint.endPoll(
+            channelId: channelId,
+            messageId: messageId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice
 

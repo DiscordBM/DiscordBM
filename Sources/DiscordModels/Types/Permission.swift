@@ -49,6 +49,7 @@ public enum Permission: Sendable, Codable {
     case createEvents // 44
     case useExternalSounds // 45
     case sendVoiceMessages // 46
+    case sendPolls // 49
     case __undocumented(UInt)
 }
 

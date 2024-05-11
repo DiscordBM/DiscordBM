@@ -403,7 +403,8 @@ extension DiscordChannel {
         public var position: Int?
         public var role_subscription_data: RoleSubscriptionData?
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
-        /// Extra fields, not sure why I've added them to this type:
+        public var poll: Poll?
+        /// Extra fields, not sure why I've added them to this specific type:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
     }
@@ -446,6 +447,7 @@ extension DiscordChannel {
         public var position: Int?
         public var role_subscription_data: RoleSubscriptionData?
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
+        public var poll: Poll?
         /// Extra fields:
         public var member: Guild.PartialMember?
         public var guild_id: GuildSnowflake?

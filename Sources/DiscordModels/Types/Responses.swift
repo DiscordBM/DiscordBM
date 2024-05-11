@@ -53,4 +53,9 @@ public enum Responses {
             try messageContainer.encode(self.message, forKey: .message)
         }
     }
+
+    /// https://discord.com/developers/docs/resources/poll#get-answer-voters-response-body
+    public struct ListPollAnswerVoters: Sendable, Codable {
+        public var users: [DiscordUser]
+    }
 }
