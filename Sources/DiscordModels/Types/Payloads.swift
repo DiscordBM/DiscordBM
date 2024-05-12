@@ -2083,6 +2083,7 @@ public enum Payloads {
 
         public func validate() -> [ValidationFailure] {
             question.validate()
+            answers.map(\.poll_media).validate()
             validateElementCountDoesNotExceed(answers, max: 10, name: "answers")
             validateNumberInRangeOrNil(duration, min: 1, max: 144, name: "duration") /// 7 days max
         }
