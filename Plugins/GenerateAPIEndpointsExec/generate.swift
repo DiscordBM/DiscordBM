@@ -24,6 +24,14 @@ var urlPrefix: String {
 """
 
 let noEncodeParamSuffixes = ["code", "Token"]
+let doNotUseThisCaseDeclaration = """
+/// This case serves as a way of discouraging exhaustive switch statements
+case __DO_NOT_USE_THIS_CASE
+"""
+let doNotUseThisCaseCrash = """
+case .__DO_NOT_USE_THIS_CASE:
+    fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
+"""
 
 let _url = grouped.flatMap(\.value).map { info in
     let (name, params) = info.info.makeIterativeCase()
@@ -66,8 +74,9 @@ public var url: String {
     let suffix: String
     switch self {
 \(_url.indent())
+\(doNotUseThisCaseCrash.indent())
     }
-    return urlPrefix + suffix
+    return self.urlPrefix + suffix
 }
 """
 
@@ -116,8 +125,9 @@ public var urlDescription: String {
     let suffix: String
     switch self {
 \(_urlDescription.indent())
+\(doNotUseThisCaseCrash.indent())
     }
-    return urlPrefix + suffix
+    return self.urlPrefix + suffix
 }
 """
 
@@ -129,6 +139,7 @@ let methodsString = """
 public var httpMethod: HTTPMethod {
     switch self {
 \(_methods.indent())
+\(doNotUseThisCaseCrash.indent())
     }
 }
 """
@@ -141,6 +152,7 @@ let countsAgainstGlobalRateLimitString = """
 public var countsAgainstGlobalRateLimit: Bool {
     switch self {
 \(_countsAgainstGlobalRateLimit.indent())
+\(doNotUseThisCaseCrash.indent())
     }
 }
 """
@@ -155,6 +167,7 @@ let requiresAuthorizationHeaderString = """
 public var requiresAuthorizationHeader: Bool {
     switch self {
 \(_requiresAuthorizationHeader.indent())
+\(doNotUseThisCaseCrash.indent())
     }
 }
 """
@@ -178,6 +191,7 @@ let parametersString = """
 public var parameters: [String] {
     switch self {
 \(_parameters.indent())
+\(doNotUseThisCaseCrash.indent())
     }
 }
 """
@@ -209,6 +223,7 @@ let descriptionString = """
 public var description: String {
     switch self {
 \(_description.indent())
+\(doNotUseThisCaseCrash.indent())
     }
 }
 """
@@ -221,6 +236,7 @@ let idString = """
 public var id: Int {
     switch self {
 \(_id.indent())
+\(doNotUseThisCaseCrash.indent())
     }
 }
 """
@@ -251,6 +267,7 @@ let cacheableDescriptionString = """
 public var description: String {
     switch self {
 \(_cacheableDescription.indent())
+\(doNotUseThisCaseCrash.indent())
     }
 }
 """
@@ -265,6 +282,7 @@ let cacheableInitString = """
 init? (endpoint: APIEndpoint) {
     switch endpoint {
 \(_cacheableInit.indent())
+\(doNotUseThisCaseCrash.indent())
     default: return nil
     }
 }
@@ -280,10 +298,11 @@ let result = """
 import DiscordModels
 import NIOHTTP1
 
-/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum APIEndpoint: Endpoint {
 
 \(cases.indent())
+
+\(doNotUseThisCaseDeclaration.indent())
 
 \(urlPrefixString.indent())
 
@@ -304,10 +323,11 @@ public enum APIEndpoint: Endpoint {
 \(descriptionString.indent())
 }
 
-/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
 
 \(cacheableCases.indent())
+
+\(doNotUseThisCaseDeclaration.indent())
 
 \(cacheableDescriptionString.indent())
 

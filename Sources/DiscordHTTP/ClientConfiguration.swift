@@ -104,6 +104,8 @@ public struct ClientConfiguration: Sendable {
                 return ttl.components == (0, 0) ? nil : ttl
             case .loose:
                 return self.looseEndpointsTTL
+            case .__DO_NOT_USE_THIS_CASE:
+                fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
             }
         }
     }
@@ -205,15 +207,11 @@ public struct ClientConfiguration: Sendable {
         public var statuses: Set<HTTPResponseStatus> {
             get { self._statuses }
             set {
-#if DEBUG
-                precondition(
+                assert(
                     newValue.allSatisfy({ $0.code >= 400 }),
                     "Status codes less than 400 don't need retrying. This could cause problems"
                 )
-                self._statuses = newValue
-#else
                 self._statuses = newValue.filter({ $0.code >= 400 })
-#endif
             }
         }
 
@@ -236,8 +234,13 @@ public struct ClientConfiguration: Sendable {
         ///   - backoff: The backoff configuration, to wait a some amount of time
         ///   _after_ a failed request.
         public init(
-            statuses: Set<HTTPResponseStatus> = [.tooManyRequests, .internalServerError, .badGateway],
-            maxRetries: Int = 1,
+            statuses: Set<HTTPResponseStatus> = [
+                .tooManyRequests,
+                .internalServerError,
+                .badGateway,
+                .gatewayTimeout
+            ],
+            maxRetries: Int = 3,
             backoff: Backoff? = .default
         ) {
             self.maxRetries = maxRetries

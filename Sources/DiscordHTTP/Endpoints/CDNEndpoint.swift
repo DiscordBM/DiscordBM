@@ -3,7 +3,6 @@ import NIOHTTP1
 
 /// CDN Endpoints.
 /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
-/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum CDNEndpoint: Endpoint {
     case customEmoji(emojiId: EmojiSnowflake)
     case guildIcon(guildId: GuildSnowflake, icon: String)
@@ -42,7 +41,10 @@ public enum CDNEndpoint: Endpoint {
         userId: UserSnowflake,
         banner: String
     )
-    
+
+    /// This case serves as a way of discouraging exhaustive switch statements
+    case __DO_NOT_USE_THIS_CASE
+
     var urlSuffix: String {
         let suffix: String
         switch self {
@@ -88,6 +90,8 @@ public enum CDNEndpoint: Endpoint {
             suffix = "guild-events/\(eventId.rawValue)/\(cover)"
         case let .guildMemberBanner(guildId, userId, banner):
             suffix = "guilds/\(guildId.rawValue)/users/\(userId.rawValue)/banners/\(banner)"
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
         return suffix.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? suffix
     }
@@ -166,6 +170,8 @@ public enum CDNEndpoint: Endpoint {
             return [eventId.rawValue, cover]
         case .guildMemberBanner(let guildId, let userId, let banner):
             return [guildId.rawValue, userId.rawValue, banner]
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -192,6 +198,8 @@ public enum CDNEndpoint: Endpoint {
         case .roleIcon: return 19
         case .guildScheduledEventCover: return 20
         case .guildMemberBanner: return 21
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -239,6 +247,8 @@ public enum CDNEndpoint: Endpoint {
             return "guildScheduledEventCover(eventId: \(eventId), cover: \(cover))"
         case let .guildMemberBanner(guildId, userId, banner):
             return "guildMemberBanner(guildId: \(guildId), userId: \(userId), banner: \(banner))"
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 }
@@ -265,7 +275,10 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
     case roleIcon
     case guildScheduledEventCover
     case guildMemberBanner
-    
+
+    /// This case serves as a way of discouraging exhaustive switch statements
+    case __DO_NOT_USE_THIS_CASE
+
     public var description: String {
         switch self {
         case .customEmoji: return "customEmoji"
@@ -289,6 +302,8 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
         case .roleIcon: return "roleIcon"
         case .guildScheduledEventCover: return "guildScheduledEventCover"
         case .guildMemberBanner: return "guildMemberBanner"
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -315,6 +330,8 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
         case .roleIcon: self = .roleIcon
         case .guildScheduledEventCover: self = .guildScheduledEventCover
         case .guildMemberBanner: self = .guildMemberBanner
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 }

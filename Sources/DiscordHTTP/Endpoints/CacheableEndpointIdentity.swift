@@ -6,6 +6,9 @@ public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertib
     case cdn(CDNEndpointIdentity)
     case loose(LooseEndpoint)
 
+    /// This case serves as a way of discouraging exhaustive switch statements
+    case __DO_NOT_USE_THIS_CASE
+
     @usableFromInline
     init? (endpoint: AnyEndpoint) {
         switch endpoint {
@@ -19,6 +22,8 @@ public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertib
             self = .cdn(CDNEndpointIdentity(endpoint: endpoint))
         case let .loose(endpoint):
             self = .loose(endpoint)
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -30,6 +35,8 @@ public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertib
             return "CacheableEndpointIdentity.cdn(\(endpoint))"
         case .loose(let endpoint):
             return "CacheableEndpointIdentity.loose(\(endpoint))"
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 }

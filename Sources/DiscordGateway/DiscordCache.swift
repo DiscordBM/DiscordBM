@@ -191,7 +191,8 @@ public actor DiscordCache {
             }
         }
         
-        func calculateCheckForLimitEvery() -> Int {
+        /// Checks for the limit interval and MODIFIES `itemsLimit` to `disabled` if appropriate.
+        mutating func calculateCheckForLimitEvery() -> Int {
             switch self {
             case .disabled: return 1 /// Doesn't matter
             case let .constant(limit):
@@ -199,7 +200,8 @@ public actor DiscordCache {
                 return max(10, Int(powed))
             case let .custom(custom):
                 guard let minimum = custom.map(\.value).min() else {
-                    fatalError("It's meaningless for 'ItemsLimit.custom' to be empty. Please use `ItemsLimit.disabled` instead")
+                    assert(false, "It's meaningless for 'ItemsLimit.custom' to be empty. Please use `ItemsLimit.disabled` instead")
+                    self = .disabled
                 }
                 let powed = pow(1/2, Double(minimum))
                 return max(10, Int(powed))
@@ -350,8 +352,10 @@ public actor DiscordCache {
         )
         self.requestMembers = requestAllMembers
         self.messageCachingPolicy = messageCachingPolicy
-        self.itemsLimit = itemsLimit
+        var itemsLimit = itemsLimit
+        /// Checks for the limit interval and MODIFIES `itemsLimit` to `disabled` if appropriate.
         self.checkForLimitEvery = itemsLimit.calculateCheckForLimitEvery()
+        self.itemsLimit = itemsLimit
         self.storage = storage
 
         Task {

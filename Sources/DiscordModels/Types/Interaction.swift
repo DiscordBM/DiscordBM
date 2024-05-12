@@ -476,7 +476,7 @@ extension Interaction {
                     case .success: return .success
                     case .danger: return .danger
                     case .__DO_NOT_USE_THIS_CASE:
-                        fatalError("If the case name wasn't already clear enough: This case MUST NOT be used")
+                        fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
                     }
                 }
 

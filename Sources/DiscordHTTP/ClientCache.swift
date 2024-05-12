@@ -31,6 +31,8 @@ actor ClientCache {
             case .loose(let endpoint):
                 hasher.combine(2)
                 endpoint.hash(into: &hasher)
+            case .__DO_NOT_USE_THIS_CASE:
+                fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
             }
             for param in parameters {
                 hasher.combine(param)
