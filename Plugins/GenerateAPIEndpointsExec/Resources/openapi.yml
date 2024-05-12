@@ -84,17 +84,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: rule_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -105,7 +105,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - AutoMod
@@ -116,17 +116,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: rule_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -137,7 +137,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - AutoMod
@@ -150,17 +150,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: rule_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -171,7 +171,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/auto-moderation/rules:
     get:
       tags:
@@ -183,10 +183,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -197,7 +197,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - AutoMod
@@ -210,10 +210,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -224,7 +224,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/audit-logs:
     get:
       tags:
@@ -261,10 +261,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -275,7 +275,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /users/@me/channels:
     post:
       tags:
@@ -290,7 +290,7 @@ paths:
             type: string
           example: application/json
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -301,7 +301,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post-2:
       tags:
         - Channels
@@ -315,7 +315,7 @@ paths:
             type: string
           example: application/json
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -326,7 +326,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/permissions/{overwrite_id}:
     put:
       tags:
@@ -352,17 +352,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: overwrite_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -373,7 +373,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Channels
@@ -384,17 +384,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: overwrite_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -405,7 +405,80 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
+  /channels/{channel_id}/polls/{message_id}/answers/{answer_id}:
+    get:
+      tags:
+        - Polls
+      summary: list poll answer voters
+      parameters:
+        - name: channel_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: message_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: answer_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
+  /channels/{channel_id}/polls/{message_id}/expire:
+    post:
+      tags:
+        - Polls
+      summary: end poll
+      parameters:
+        - name: channel_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: message_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
   /channels/{channel_id}/recipients/{user_id}:
     put:
       tags:
@@ -419,17 +492,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -440,7 +513,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Channels
@@ -451,17 +524,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -472,7 +545,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/followers:
     post:
       tags:
@@ -496,10 +569,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -510,7 +583,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/typing:
     post:
       tags:
@@ -524,10 +597,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -538,7 +611,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/pins/{message_id}:
     put:
       tags:
@@ -552,17 +625,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -573,7 +646,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Channels
@@ -584,17 +657,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -605,7 +678,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/pins:
     get:
       tags:
@@ -617,10 +690,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -631,7 +704,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/channels:
     get:
       tags:
@@ -643,10 +716,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -657,7 +730,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Guilds
@@ -673,10 +746,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -687,7 +760,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Guilds
@@ -698,7 +771,7 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
   /channels/{channel_id}:
     get:
@@ -711,10 +784,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -725,7 +798,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Channels
@@ -736,10 +809,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -750,7 +823,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Channels
@@ -774,10 +847,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -788,7 +861,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /applications/{application_id}/guilds/{guild_id}/commands/permissions:
     get:
       tags:
@@ -800,17 +873,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -821,7 +894,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions:
     get:
       tags:
@@ -833,24 +906,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: command_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -861,7 +934,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     put:
       tags:
         - Commands
@@ -890,24 +963,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: command_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -918,7 +991,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /applications/{application_id}/guilds/{guild_id}/commands/{command_id}:
     get:
       tags:
@@ -930,24 +1003,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: command_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -958,7 +1031,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Commands
@@ -969,24 +1042,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: command_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -997,7 +1070,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Commands
@@ -1013,24 +1086,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: command_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1041,7 +1114,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /applications/{application_id}/guilds/{guild_id}/commands:
     get:
       tags:
@@ -1058,17 +1131,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1079,7 +1152,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     put:
       tags:
         - Commands
@@ -1344,17 +1417,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1365,7 +1438,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Commands
@@ -1402,17 +1475,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1423,7 +1496,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /applications/{application_id}/commands/{command_id}:
     get:
       tags:
@@ -1435,17 +1508,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: command_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1456,7 +1529,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Commands
@@ -1467,17 +1540,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: command_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1488,7 +1561,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Commands
@@ -1524,17 +1597,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: command_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1545,7 +1618,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /applications/{application_id}/commands:
     get:
       tags:
@@ -1562,10 +1635,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1576,7 +1649,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     put:
       tags:
         - Commands
@@ -1841,10 +1914,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1855,7 +1928,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Commands
@@ -1892,10 +1965,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1906,7 +1979,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/emojis/{emoji_id}:
     get:
       tags:
@@ -1918,17 +1991,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: emoji_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1939,7 +2012,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Emoji
@@ -1950,17 +2023,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: emoji_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -1971,7 +2044,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Emoji
@@ -1996,17 +2069,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: emoji_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2017,7 +2090,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/emojis:
     get:
       tags:
@@ -2029,10 +2102,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2043,7 +2116,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Emoji
@@ -2069,10 +2142,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2083,14 +2156,14 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /gateway/bot:
     get:
       tags:
         - Gateway
       summary: get bot gateway
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2101,14 +2174,14 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /gateway:
     get:
       tags:
         - Gateway
       summary: get gateway
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2119,7 +2192,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /users/@me/guilds:
     get:
       tags:
@@ -2144,7 +2217,7 @@ paths:
             type: string
           example: <integer,null>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2155,7 +2228,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds:
     post:
       tags:
@@ -2192,7 +2265,7 @@ paths:
             type: string
           example: application/json
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2203,7 +2276,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /users/@me/guilds/{guild_id}:
     delete:
       tags:
@@ -2220,10 +2293,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2234,7 +2307,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/welcome-screen:
     get:
       tags:
@@ -2246,10 +2319,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2260,7 +2333,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Guilds
@@ -2273,10 +2346,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2287,7 +2360,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/integrations/{integration_id}:
     delete:
       tags:
@@ -2299,17 +2372,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: integration_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2320,7 +2393,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/integrations:
     get:
       tags:
@@ -2332,10 +2405,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2346,7 +2419,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/widget.json:
     get:
       tags:
@@ -2358,10 +2431,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2372,7 +2445,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/vanity-url:
     get:
       tags:
@@ -2384,10 +2457,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2398,7 +2471,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/widget.png:
     get:
       tags:
@@ -2415,10 +2488,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2429,7 +2502,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/preview:
     get:
       tags:
@@ -2441,10 +2514,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2455,7 +2528,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/widget:
     get:
       tags:
@@ -2467,10 +2540,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2481,7 +2554,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Guilds
@@ -2505,10 +2578,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2519,7 +2592,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/prune:
     get:
       tags:
@@ -2531,10 +2604,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2545,7 +2618,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Guilds
@@ -2558,10 +2631,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2572,7 +2645,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/bans/{user_id}:
     get:
       tags:
@@ -2584,17 +2657,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2605,7 +2678,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     put:
       tags:
         - Guilds
@@ -2618,17 +2691,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2639,7 +2712,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Guilds
@@ -2650,17 +2723,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2671,7 +2744,35 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
+  /guilds/{guild_id}/bulk-ban:
+    post:
+      tags:
+        - Guilds
+      summary: bulk ban users from guild
+      requestBody:
+        content: {}
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
   /guilds/{guild_id}/bans:
     get:
       tags:
@@ -2698,10 +2799,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2712,7 +2813,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/mfa:
     post:
       tags:
@@ -2736,10 +2837,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2750,7 +2851,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}:
     get:
       tags:
@@ -2767,10 +2868,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2781,7 +2882,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Guilds
@@ -2792,10 +2893,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2806,7 +2907,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Guilds
@@ -2819,10 +2920,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2833,7 +2934,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/onboarding:
     get:
       tags:
@@ -2845,7 +2946,7 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
     put:
       tags:
@@ -2857,7 +2958,7 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
   /guilds/templates/{code}:
     get:
@@ -2870,10 +2971,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2884,7 +2985,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Guild Templates
@@ -2908,10 +3009,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2922,7 +3023,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/templates/{code}:
     put:
       tags:
@@ -2936,17 +3037,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: code
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2957,7 +3058,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Guild Templates
@@ -2968,17 +3069,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: code
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -2989,7 +3090,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Guild Templates
@@ -3013,17 +3114,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: code
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3034,7 +3135,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/templates:
     get:
       tags:
@@ -3046,10 +3147,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3060,7 +3161,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Guild Templates
@@ -3084,10 +3185,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3098,7 +3199,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /interactions/{interaction_id}/{interaction_token}/callback:
     post:
       tags:
@@ -3127,17 +3228,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: interaction_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3148,7 +3249,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /webhooks/{application_id}/{interaction_token}/messages/@original:
     get:
       tags:
@@ -3160,14 +3261,14 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: interaction_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
     patch:
       tags:
@@ -3179,14 +3280,14 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: interaction_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
     delete:
       tags:
@@ -3198,14 +3299,14 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: interaction_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
   /webhooks/{application_id}/{interaction_token}:
     post:
@@ -3218,14 +3319,14 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: interaction_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
   /webhooks/{application_id}/{interaction_token}/messages/{message_id}:
     get:
@@ -3238,21 +3339,21 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: interaction_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
     patch:
       tags:
@@ -3264,21 +3365,21 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: interaction_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
     delete:
       tags:
@@ -3290,21 +3391,21 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: interaction_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
   /webhooks/{webhook_id}/{webhook_token}/messages/{message_id}:
     get:
@@ -3322,24 +3423,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: webhook_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3350,7 +3451,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Webhooks
@@ -3366,24 +3467,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: webhook_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3394,7 +3495,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Webhooks
@@ -3412,24 +3513,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: webhook_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3440,7 +3541,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/invites:
     get:
       tags:
@@ -3452,10 +3553,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3466,7 +3567,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Invites
@@ -3479,10 +3580,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3493,7 +3594,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/invites:
     get:
       tags:
@@ -3505,10 +3606,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3519,7 +3620,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /invites/{code}:
     get:
       tags:
@@ -3541,10 +3642,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3555,7 +3656,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Invites
@@ -3566,10 +3667,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3580,7 +3681,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /users/@me/guilds/{guild_id}/member:
     get:
       tags:
@@ -3594,10 +3695,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3608,7 +3709,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/members/search:
     get:
       tags:
@@ -3619,23 +3720,23 @@ paths:
           in: query
           schema:
             type: string
-          description: '(Required) '
+          description: "(Required) "
           example: <integer>
         - name: query
           in: query
           schema:
             type: string
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
         - name: guild_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3646,7 +3747,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/members/@me:
     patch:
       tags:
@@ -3672,10 +3773,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3686,7 +3787,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/members/{user_id}:
     get:
       tags:
@@ -3698,17 +3799,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3719,7 +3820,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     put:
       tags:
         - Members
@@ -3748,17 +3849,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3769,7 +3870,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Members
@@ -3780,17 +3881,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3801,7 +3902,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Members
@@ -3831,17 +3932,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3852,7 +3953,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/members:
     get:
       tags:
@@ -3874,10 +3975,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3888,7 +3989,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/@me:
     put:
       tags:
@@ -3904,24 +4005,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: emoji_name
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3932,7 +4033,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Messages
@@ -3945,24 +4046,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: emoji_name
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -3973,7 +4074,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/messages/bulk-delete:
     post:
       tags:
@@ -3998,10 +4099,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4012,7 +4113,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/{user_id}:
     delete:
       tags:
@@ -4024,31 +4125,31 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: emoji_name
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4059,7 +4160,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}:
     get:
       tags:
@@ -4081,24 +4182,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: emoji_name
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4109,7 +4210,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Messages
@@ -4120,24 +4221,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: emoji_name
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4148,7 +4249,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/messages/{message_id}/reactions:
     delete:
       tags:
@@ -4160,17 +4261,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4181,7 +4282,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/messages/{message_id}/crosspost:
     post:
       tags:
@@ -4195,17 +4296,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4216,7 +4317,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/messages/{message_id}:
     get:
       tags:
@@ -4228,17 +4329,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4249,7 +4350,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Messages
@@ -4260,17 +4361,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4281,7 +4382,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Messages
@@ -4294,17 +4395,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4315,7 +4416,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/messages:
     get:
       tags:
@@ -4347,10 +4448,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4361,7 +4462,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Messages
@@ -4416,10 +4517,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4430,14 +4531,14 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /applications/@me:
     get:
       tags:
         - Users
       summary: get own application
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4448,13 +4549,13 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Users
       summary: update own application
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4468,7 +4569,7 @@ paths:
         - OAuth
       summary: get own oauth2 application
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4479,7 +4580,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/members/{user_id}/roles/{role_id}:
     put:
       tags:
@@ -4493,24 +4594,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: role_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4521,7 +4622,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Roles
@@ -4532,24 +4633,24 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: role_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4560,7 +4661,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/roles/{role_id}:
     delete:
       tags:
@@ -4572,17 +4673,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: role_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4593,7 +4694,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Roles
@@ -4622,17 +4723,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: role_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4643,7 +4744,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/roles:
     get:
       tags:
@@ -4655,10 +4756,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4669,7 +4770,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Roles
@@ -4682,10 +4783,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4696,7 +4797,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Roles
@@ -4707,7 +4808,7 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
   /users/@me/applications/{application_id}/role-connection:
     get:
@@ -4722,10 +4823,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4736,7 +4837,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     put:
       tags:
         - Role Connections
@@ -4766,10 +4867,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4780,7 +4881,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /applications/{application_id}/role-connections/metadata:
     get:
       tags:
@@ -4792,10 +4893,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4806,7 +4907,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     put:
       tags:
         - Role Connections
@@ -4822,10 +4923,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4836,7 +4937,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /applications/{application_id}/entitlements:
     get:
       tags:
@@ -4849,7 +4950,7 @@ paths:
             type: string
           required: true
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4867,7 +4968,7 @@ paths:
             type: string
           required: true
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4891,7 +4992,31 @@ paths:
             type: string
           required: true
       responses:
-        '200':
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+  /applications/{application_id}/entitlements/{entitlement_id}/consume:
+    post:
+      tags:
+        - Entitlements
+      summary: consume entitlement
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: entitlement_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4910,7 +5035,7 @@ paths:
             type: string
           required: true
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4948,17 +5073,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_scheduled_event_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -4969,7 +5094,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}:
     get:
       tags:
@@ -4986,17 +5111,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_scheduled_event_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5007,7 +5132,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Scheduled Events
@@ -5018,17 +5143,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_scheduled_event_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5039,7 +5164,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Scheduled Events
@@ -5052,17 +5177,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: guild_scheduled_event_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5073,7 +5198,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/scheduled-events:
     get:
       tags:
@@ -5090,10 +5215,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5104,7 +5229,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Scheduled Events
@@ -5117,10 +5242,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5131,7 +5256,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /stage-instances:
     post:
       tags:
@@ -5154,7 +5279,7 @@ paths:
             type: string
           example: application/json
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5165,7 +5290,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /stage-instances/{channel_id}:
     get:
       tags:
@@ -5177,10 +5302,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5191,7 +5316,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Stages
@@ -5207,10 +5332,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5221,7 +5346,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Stages
@@ -5245,10 +5370,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5259,14 +5384,14 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /sticker-packs:
     get:
       tags:
         - Stickers
       summary: list sticker packs
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5277,7 +5402,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/stickers/{sticker_id}:
     get:
       tags:
@@ -5289,17 +5414,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: sticker_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5310,7 +5435,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Stickers
@@ -5321,17 +5446,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: sticker_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5342,7 +5467,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Stickers
@@ -5367,17 +5492,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: sticker_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5388,7 +5513,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/stickers:
     get:
       tags:
@@ -5400,10 +5525,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5414,7 +5539,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Stickers
@@ -5427,11 +5552,11 @@ paths:
               properties:
                 name:
                   type: string
-                  description: '(Required) '
+                  description: "(Required) "
                   example: <string>
                 tags:
                   type: string
-                  description: '(Required) '
+                  description: "(Required) "
                   example: <string>
                 description:
                   type: string
@@ -5447,10 +5572,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5461,7 +5586,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /stickers/{sticker_id}:
     get:
       tags:
@@ -5473,10 +5598,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5487,7 +5612,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/users/@me/threads/archived/private:
     get:
       tags:
@@ -5511,10 +5636,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5525,7 +5650,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/threads/archived/private:
     get:
       tags:
@@ -5547,10 +5672,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5561,7 +5686,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/threads/archived/public:
     get:
       tags:
@@ -5583,10 +5708,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5597,7 +5722,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/thread-members/@me:
     put:
       tags:
@@ -5611,10 +5736,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5625,7 +5750,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Threads
@@ -5636,10 +5761,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5650,7 +5775,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/messages/{message_id}/threads:
     post:
       tags:
@@ -5676,17 +5801,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: message_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5697,7 +5822,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/threads/active:
     get:
       tags:
@@ -5709,10 +5834,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5723,7 +5848,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/thread-members/{user_id}:
     get:
       tags:
@@ -5740,17 +5865,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5761,7 +5886,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     put:
       tags:
         - Threads
@@ -5774,17 +5899,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5795,7 +5920,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Threads
@@ -5806,17 +5931,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5827,7 +5952,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/thread-members:
     get:
       tags:
@@ -5854,10 +5979,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5868,7 +5993,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/threads:
     post:
       tags:
@@ -5882,10 +6007,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5896,7 +6021,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post-2:
       tags:
         - Threads
@@ -5909,7 +6034,7 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
   /users/@me/connections:
     get:
@@ -5919,7 +6044,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5930,7 +6055,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /users/@me:
     get:
       tags:
@@ -5939,7 +6064,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5950,7 +6075,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Users
@@ -5960,7 +6085,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5971,7 +6096,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /users/{user_id}:
     get:
       tags:
@@ -5983,10 +6108,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -5997,14 +6122,14 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /voice/regions:
     get:
       tags:
         - Voice
       summary: list voice regions
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6015,7 +6140,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/voice-states/@me:
     patch:
       tags:
@@ -6043,10 +6168,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6057,7 +6182,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/voice-states/{user_id}:
     patch:
       tags:
@@ -6082,17 +6207,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: user_id
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6103,7 +6228,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/regions:
     get:
       tags:
@@ -6115,10 +6240,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6129,7 +6254,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /channels/{channel_id}/webhooks:
     get:
       tags:
@@ -6141,10 +6266,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6155,7 +6280,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Webhooks
@@ -6179,10 +6304,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6193,7 +6318,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /guilds/{guild_id}/webhooks:
     get:
       tags:
@@ -6205,10 +6330,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6219,7 +6344,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /webhooks/{webhook_id}/{webhook_token}:
     get:
       tags:
@@ -6231,17 +6356,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: webhook_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6252,7 +6377,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     post:
       tags:
         - Webhooks
@@ -6275,17 +6400,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: webhook_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6296,7 +6421,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Webhooks
@@ -6307,17 +6432,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: webhook_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6328,7 +6453,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Webhooks
@@ -6352,17 +6477,17 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
         - name: webhook_token
           in: path
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6373,7 +6498,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
   /webhooks/{webhook_id}:
     get:
       tags:
@@ -6385,10 +6510,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6399,7 +6524,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     delete:
       tags:
         - Webhooks
@@ -6410,10 +6535,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6424,7 +6549,7 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""
     patch:
       tags:
         - Webhooks
@@ -6449,10 +6574,10 @@ paths:
           schema:
             type: string
           required: true
-          description: '(Required) '
+          description: "(Required) "
           example: <snowflake>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Content-Type:
@@ -6463,4 +6588,4 @@ paths:
             text/plain:
               schema:
                 type: string
-              example: ''
+              example: ""

@@ -75,6 +75,14 @@ public enum DiscordUtils {
         return "<t:\(unixTimestamp)\(style)>"
     }
 
+    /// When used in a Discord message, shows up as a guild-navigation link.
+    /// See ``TimestampStyle`` for examples.
+    @available(*, unavailable, message: "Not sure what are the 'Navigation Type's")
+    @inlinable
+    public static func guildNavigation(type: Int) {
+        fatalError("unavailable")
+    }
+
     /// Escapes the special characters in the text, for the specified channel type.
     /// - Parameters:
     ///   - text: The text to be escaped.

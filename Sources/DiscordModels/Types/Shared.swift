@@ -765,13 +765,18 @@ public struct Secret:
 //MARK: - DereferenceBox
 
 /// A class so we can use the same type recursively in itself.
+@dynamicMemberLookup
 public final class DereferenceBox<C>: Codable where C: Codable {
     public let value: C
     
     public init(value: C) {
         self.value = value
     }
-    
+
+    public subscript<T>(dynamicMember keyPath: KeyPath<C, T>) -> T {
+        self.value[keyPath: keyPath]
+    }
+
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         self.value = try container.decode(C.self)

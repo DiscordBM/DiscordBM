@@ -1103,6 +1103,19 @@ public extension DiscordClient {
         )
     }
 
+    /// https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement
+    @inlinable
+    func consumeEntitlement(
+        appId: ApplicationSnowflake? = nil,
+        entitlementId: EntitlementSnowflake
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.consumeEntitlement(
+            applicationId: try requireAppId(appId),
+            entitlementId: entitlementId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     /// https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement
     @inlinable
     func createTestEntitlement(
@@ -1426,6 +1439,23 @@ public extension DiscordClient {
         payload: Payloads.CreateGuildBan
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.banUserFromGuild(guildId: guildId, userId: userId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#bulk-guild-ban
+    @inlinable
+    func bulkBanUsersFromGuild(
+        guildId: GuildSnowflake,
+        reason: String? = nil,
+        payload: Payloads.CreateBulkGuildBan
+    ) async throws -> DiscordClientResponse<Responses.GuildBulkBan> {
+        let endpoint = APIEndpoint.bulkBanUsersFromGuild(guildId: guildId)
         return try await self.send(
             request: .init(
                 to: endpoint,
@@ -2436,6 +2466,46 @@ public extension DiscordClient {
             request: .init(to: endpoint),
             payload: payload
         )
+    }
+
+    // MARK: Polls
+    /// https://discord.com/developers/docs/resources/poll
+
+    /// https://discord.com/developers/docs/resources/poll#get-answer-voters
+    @inlinable
+    func listPollAnswerVotes(
+        channelId: ChannelSnowflake,
+        messageId: MessageSnowflake,
+        answerId: Int,
+        after: UserSnowflake? = nil,
+        limit: Int? = nil
+    ) async throws -> DiscordClientResponse<Responses.ListPollAnswerVoters> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 100)
+        let endpoint = APIEndpoint.listPollAnswerVoters(
+            channelId: channelId,
+            messageId: messageId,
+            answerId: answerId
+        )
+        return try await self.send(request: .init(
+            to: endpoint,
+            queries: [
+                ("after", after?.rawValue),
+                ("limit", limit.map { "\($0)" })
+            ]
+        ))
+    }
+
+    /// https://discord.com/developers/docs/resources/poll#end-poll
+    @inlinable
+    func endPoll(
+        channelId: ChannelSnowflake,
+        messageId: MessageSnowflake
+    ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
+        let endpoint = APIEndpoint.endPoll(
+            channelId: channelId,
+            messageId: messageId
+        )
+        return try await self.send(request: .init(to: endpoint))
     }
 
     // MARK: Voice

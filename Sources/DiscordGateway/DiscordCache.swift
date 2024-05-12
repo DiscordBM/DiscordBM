@@ -171,6 +171,7 @@ public actor DiscordCache {
             case autoModerationRules
             case autoModerationExecutions
             case applicationCommandPermissions
+            case messagePollVotes
         }
         
         case disabled
@@ -252,6 +253,8 @@ public actor DiscordCache {
         public var applicationCommandPermissions: OrderedDictionary<AnySnowflake, GuildApplicationCommandPermissions> = [:]
         /// `[EntitlementID: Entitlement]`
         public var entitlements: OrderedDictionary<EntitlementSnowflake, Entitlement> = [:]
+        /// `[ChannelSnowflake: [MessageSnowflake: [MessagePollVote]]`
+        public var messagePollVotes: OrderedDictionary<ChannelSnowflake, [MessageSnowflake: [Gateway.MessagePollVote]]> = [:]
         /// The current bot-application.
         public var application: PartialApplication?
         /// The current bot user.
@@ -825,6 +828,9 @@ public actor DiscordCache {
             self.autoModerationExecutions[execution.guild_id, default: []].append(execution)
         case let .applicationCommandPermissionsUpdate(update):
             self.applicationCommandPermissions[update.id] = update
+        case let .messagePollVoteAdd(vote),
+            let .messagePollVoteRemove(vote):
+            self.messagePollVotes[vote.channel_id, default: [:]][vote.message_id, default: []].append(vote)
         case .__undocumented:
             break
         }
@@ -849,6 +855,8 @@ public actor DiscordCache {
             switch itemsLimit {
             case .disabled: return
             case let .constant(constant):
+                guard constant > 0 else { return }
+
                 if self.auditLogs.count > constant {
                     let extra = self.auditLogs.count - constant
                     self.auditLogs.removeSubrange(0..<extra)
@@ -884,6 +892,10 @@ public actor DiscordCache {
                 if self.applicationCommandPermissions.count > constant {
                     let extra = self.applicationCommandPermissions.count - constant
                     self.applicationCommandPermissions.removeSubrange(0..<extra)
+                }
+                if self.messagePollVotes.count > constant {
+                    let extra = self.messagePollVotes.count - constant
+                    self.messagePollVotes.removeSubrange(0..<extra)
                 }
             case let .custom(custom):
                 if let limit = custom[.auditLogs],
@@ -930,6 +942,11 @@ public actor DiscordCache {
                    self.applicationCommandPermissions.count > limit {
                     let extra = self.applicationCommandPermissions.count - limit
                     self.applicationCommandPermissions.removeSubrange(0..<extra)
+                }
+                if let limit = custom[.messagePollVotes],
+                   self.messagePollVotes.count > limit {
+                    let extra = self.messagePollVotes.count - limit
+                    self.messagePollVotes.removeSubrange(0..<extra)
                 }
             }
         }

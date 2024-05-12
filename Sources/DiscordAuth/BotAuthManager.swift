@@ -27,7 +27,7 @@ public struct BotAuthManager: Sendable {
         if withApplicationCommands {
             scopes.append(.applicationsCommands)
         }
-        let permissions = StringBitField(permissions).rawValue
+        let permissions = IntBitField(permissions).rawValue
         let queries: [(String, String?)] = [
             ("client_id", self.clientId),
             ("permissions", "\(permissions)"),

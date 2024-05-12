@@ -24,6 +24,12 @@ public enum Responses {
         public var pruned: Int
     }
 
+    /// https://discord.com/developers/docs/resources/guild#bulk-guild-ban-bulk-ban-response
+    public struct GuildBulkBan: Sendable, Codable {
+        public var banned_users: [UserSnowflake]
+        public var failed_users: [UserSnowflake]
+    }
+
     /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-or-media-channel
     public struct ChannelWithMessage: Sendable, Codable {
         public var channel: DiscordChannel
@@ -46,5 +52,10 @@ public enum Responses {
             var messageContainer = encoder.container(keyedBy: MessageCodingKeys.self)
             try messageContainer.encode(self.message, forKey: .message)
         }
+    }
+
+    /// https://discord.com/developers/docs/resources/poll#get-answer-voters-response-body
+    public struct ListPollAnswerVoters: Sendable, Codable {
+        public var users: [DiscordUser]
     }
 }

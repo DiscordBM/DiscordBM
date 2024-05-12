@@ -1,4 +1,6 @@
+
 /// The endpoints that can be cached. Basically the GET endpoints.
+/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertible {
     case api(CacheableAPIEndpointIdentity)
     case cdn(CDNEndpointIdentity)

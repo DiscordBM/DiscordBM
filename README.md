@@ -466,7 +466,7 @@ let channelMessage = "Welcome to \(channelMention)!"
 let roleMessage = "Hello \(roleMention)!"
 
 /// Will look like `Use this command: /help` in Discord
-let slashCommandMeessage = "Use this command: \(slashCommandMention)"
+let slashCommandMessage = "Use this command: \(slashCommandMention)"
 ```
 
 And the emoji helpers:

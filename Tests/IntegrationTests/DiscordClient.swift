@@ -75,8 +75,8 @@ class DiscordClientTests: XCTestCase {
         XCTAssertTrue(numbers.allSatisfy({ $0 != 0 }), "payload: \(botInfo)")
     }
     
-    func testMessageSendDelete() async throws {
-        
+    func testMessages() async throws {
+
         /// Cleanup: Get channel messages and delete messages by the bot itself, if any.
         /// Makes this test resilient to failing when it has failed the last time.
         let allOldMessages = try await client.listMessages(
@@ -298,7 +298,52 @@ class DiscordClientTests: XCTestCase {
             payload: .init(messages: [message.id, message2.id])
         ).guardSuccess()
     }
-    
+
+    func testPolls() async throws {
+        let message = try await client.createMessage(
+            channelId: Constants.Channels.spam.id,
+            payload: .init(
+                content: "Here's a Poll!",
+                poll: .init(
+                    question: .init(
+                        text: "How you doin'?"
+                    ),
+                    answers: [
+                        .init(poll_media: .init(
+                            text: "Good"
+                        )),
+                        .init(poll_media: .init(
+                                text: "Not bad",
+                                emojiId: Constants.serverEmojiId
+                        )),
+                        .init(poll_media: .init(
+                            text: "Great",
+                            emojiName: "🤠"
+                        )),
+                    ],
+                    duration: 120,
+                    allow_multiselect: true,
+                    layout_type: .default
+                )
+            )
+        ).decode()
+
+        let answerId = try XCTUnwrap(message.poll?.answers.first?.answer_id)
+
+        let voters = try await self.client.listPollAnswerVotes(
+            channelId: message.channel_id,
+            messageId: message.id,
+            answerId: answerId
+        ).decode()
+
+        XCTAssertEqual(voters.users.count, 0, "\(voters.users)")
+
+        try await self.client.endPoll(
+            channelId: message.channel_id,
+            messageId: message.id
+        ).guardSuccess()
+    }
+
     func testGlobalApplicationCommands() async throws {
         /// Cleanup before start
 
@@ -840,6 +885,33 @@ class DiscordClientTests: XCTestCase {
         ).decode()
 
         XCTAssertTrue(bans.map(\.user.id).contains(ban.user.id), "\(bans) did not contain \(ban)")
+
+        try await client.unbanUserFromGuild(
+            guildId: Constants.guildId,
+            userId: userId
+        ).guardSuccess()
+    }
+
+    func testGuildBulkBan() async throws {
+        let userId: UserSnowflake = "950695294906007573"
+        let reason = "Testing Guild Bulk Ban!"
+
+        try await client.bulkBanUsersFromGuild(
+            guildId: Constants.guildId,
+            reason: reason,
+            payload: .init(
+                user_ids: [userId],
+                delete_message_seconds: 60
+            )
+        ).guardSuccess()
+
+        let ban = try await client.getGuildBan(
+            guildId: Constants.guildId,
+            userId: userId
+        ).decode()
+
+        XCTAssertEqual(ban.reason, reason)
+        XCTAssertEqual(ban.user.id, userId)
 
         try await client.unbanUserFromGuild(
             guildId: Constants.guildId,
@@ -2113,6 +2185,17 @@ class DiscordClientTests: XCTestCase {
             XCTFail("Unexpected error: \(String(describing: createError))")
         }
 
+        let consumeError = try await client.consumeEntitlement(
+            entitlementId: .makeFake()
+        ).asError()
+
+        switch consumeError {
+        case .jsonError(let jsonError) where jsonError.code == .unknownEntitlement:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(String(describing: consumeError))")
+        }
+
         let deleteError = try await client.deleteTestEntitlement(
             entitlementId: .makeFake()
         ).asError()
@@ -2861,7 +2944,7 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
-    private let totalTestCount = 39
+    private let totalTestCount = 41
     var isLastTest: Bool {
         self.testsRan == self.totalTestCount
     }

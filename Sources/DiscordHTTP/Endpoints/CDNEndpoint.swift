@@ -1,8 +1,9 @@
 import DiscordModels
 import NIOHTTP1
 
-/// CDN Endpoints
+/// CDN Endpoints.
 /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum CDNEndpoint: Endpoint {
     case customEmoji(emojiId: EmojiSnowflake)
     case guildIcon(guildId: GuildSnowflake, icon: String)

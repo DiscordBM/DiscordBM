@@ -81,6 +81,16 @@ public struct Snowflake<Tag>: SnowflakeProtocol {
     }
 }
 
+extension Snowflake: CodingKeyRepresentable {
+    public var codingKey: any CodingKey {
+        self.rawValue.codingKey
+    }
+
+    public init?<CodingKeys>(codingKey: CodingKeys) where CodingKeys: CodingKey {
+        self.rawValue = codingKey.stringValue
+    }
+}
+
 /// Type-erased snowflake.
 /// This type is expressible by string literal. This means the following code is valid:
 /// ```
@@ -100,6 +110,16 @@ public struct AnySnowflake: SnowflakeProtocol {
 
     public var description: String {
         #"AnySnowflake("\#(rawValue)")"#
+    }
+}
+
+extension AnySnowflake: CodingKeyRepresentable {
+    public var codingKey: any CodingKey {
+        self.rawValue.codingKey
+    }
+
+    public init?<CodingKeys>(codingKey: CodingKeys) where CodingKeys: CodingKey {
+        self.rawValue = codingKey.stringValue
     }
 }
 
