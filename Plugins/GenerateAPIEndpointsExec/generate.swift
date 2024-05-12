@@ -97,6 +97,8 @@ let _urlDescription = grouped.flatMap(\.value).map { info in
             return nil
         } else if param.hasSuffix("Id") {
             return #"let \#(param) = \#(param).rawValue"#
+        } else if param == webhookTokenParam {
+            return #"let \#(param) = \#(param).urlPathEncoded().hash"#
         } else if noEncodeParamSuffixes.contains(where: { param.hasSuffix($0) }) {
             return nil
         } else {
@@ -278,6 +280,7 @@ let result = """
 import DiscordModels
 import NIOHTTP1
 
+/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum APIEndpoint: Endpoint {
 
 \(cases.indent())
@@ -301,6 +304,7 @@ public enum APIEndpoint: Endpoint {
 \(descriptionString.indent())
 }
 
+/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
 
 \(cacheableCases.indent())

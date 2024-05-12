@@ -7,6 +7,7 @@
 import DiscordModels
 import NIOHTTP1
 
+/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum APIEndpoint: Endpoint {
 
     // MARK: Polls
@@ -1501,9 +1502,11 @@ public enum APIEndpoint: Endpoint {
             suffix = "webhooks/\(webhookId)"
         case let .getWebhookByToken(webhookId, webhookToken):
             let webhookId = webhookId.rawValue
+            let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
             let webhookId = webhookId.rawValue
+            let webhookToken = webhookToken.urlPathEncoded().hash
             let messageId = messageId.rawValue
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .listChannelWebhooks(channelId):
@@ -1514,15 +1517,18 @@ public enum APIEndpoint: Endpoint {
             suffix = "channels/\(channelId)/webhooks"
         case let .executeWebhook(webhookId, webhookToken):
             let webhookId = webhookId.rawValue
+            let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .updateWebhook(webhookId):
             let webhookId = webhookId.rawValue
             suffix = "webhooks/\(webhookId)"
         case let .updateWebhookByToken(webhookId, webhookToken):
             let webhookId = webhookId.rawValue
+            let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .updateWebhookMessage(webhookId, webhookToken, messageId):
             let webhookId = webhookId.rawValue
+            let webhookToken = webhookToken.urlPathEncoded().hash
             let messageId = messageId.rawValue
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         case let .deleteWebhook(webhookId):
@@ -1530,9 +1536,11 @@ public enum APIEndpoint: Endpoint {
             suffix = "webhooks/\(webhookId)"
         case let .deleteWebhookByToken(webhookId, webhookToken):
             let webhookId = webhookId.rawValue
+            let webhookToken = webhookToken.urlPathEncoded().hash
             suffix = "webhooks/\(webhookId)/\(webhookToken)"
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
             let webhookId = webhookId.rawValue
+            let webhookToken = webhookToken.urlPathEncoded().hash
             let messageId = messageId.rawValue
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         }
@@ -3042,6 +3050,7 @@ public enum APIEndpoint: Endpoint {
     }
 }
 
+/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
 
     // MARK: Polls
