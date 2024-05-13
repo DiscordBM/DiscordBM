@@ -202,6 +202,7 @@ public actor DiscordCache {
                 guard let minimum = custom.map(\.value).min() else {
                     assert(false, "It's meaningless for 'ItemsLimit.custom' to be empty. Please use `ItemsLimit.disabled` instead")
                     self = .disabled
+                    return
                 }
                 let powed = pow(1/2, Double(minimum))
                 return max(10, Int(powed))
