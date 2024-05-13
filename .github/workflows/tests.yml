@@ -15,6 +15,8 @@ jobs:
       with_api_check: true
       with_gh_codeql: true
       test_filter: '^DiscordBMTests'
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   macro-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
@@ -23,6 +25,8 @@ jobs:
       with_api_check: true
       with_gh_codeql: true
       test_filter: '^MacroTests'
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   websocket-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
@@ -31,3 +35,5 @@ jobs:
       with_api_check: false
       with_gh_codeql: true
       test_filter: '^WebSocketTests'
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

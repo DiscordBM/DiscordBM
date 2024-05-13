@@ -24,3 +24,5 @@ jobs:
           ignore_paths: "/Tests/|/Plugins/|/Sources/CZlib/"
           cc_env_vars: "SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH"
           cc_fail_ci_if_error: false
+        secrets:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
