@@ -705,11 +705,15 @@ public extension DiscordClient {
     @inlinable
     func followAnnouncementChannel(
         id: ChannelSnowflake,
+        reason: String? = nil,
         payload: Payloads.FollowAnnouncementChannel
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.followAnnouncementChannel(channelId: id)
         return try await self.send(
-            request: .init(to: endpoint),
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
             payload: payload
         )
     }

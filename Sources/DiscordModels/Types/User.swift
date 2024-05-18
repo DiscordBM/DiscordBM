@@ -1,7 +1,7 @@
 
 /// https://discord.com/developers/docs/resources/user#user-object-user-structure
 public struct DiscordUser: Sendable, Codable {
-    
+
     /// https://discord.com/developers/docs/resources/user#user-object-premium-types
     @UnstableEnum<Int>
     public enum PremiumKind: Sendable, Codable {
@@ -33,6 +33,11 @@ public struct DiscordUser: Sendable, Codable {
         case __undocumented(UInt)
     }
 
+    public struct AvatarDecoration: Sendable, Codable {
+        public var asset: String
+        public var sku_id: SKUSnowflake
+    }
+
     public var id: UserSnowflake
     public var username: String
     public var discriminator: String
@@ -49,7 +54,9 @@ public struct DiscordUser: Sendable, Codable {
     public var flags: IntBitField<Flag>?
     public var premium_type: PremiumKind?
     public var public_flags: IntBitField<Flag>?
+    @available(*, deprecated, renamed: "avatar_decoration_data")
     public var avatar_decoration: String?
+    public var avatar_decoration_data: AvatarDecoration?
 }
 
 /// A partial ``DiscordUser`` object.
@@ -71,7 +78,9 @@ public struct PartialUser: Sendable, Codable {
     public var flags: IntBitField<DiscordUser.Flag>?
     public var premium_type: DiscordUser.PremiumKind?
     public var public_flags: IntBitField<DiscordUser.Flag>?
+    @available(*, deprecated, renamed: "avatar_decoration_data")
     public var avatar_decoration: String?
+    public var avatar_decoration_data: DiscordUser.AvatarDecoration?
 }
 
 /// A ``DiscordUser`` with an extra `member` field.
@@ -94,7 +103,9 @@ public struct MentionUser: Sendable, Codable {
     public var flags: IntBitField<DiscordUser.Flag>?
     public var premium_type: DiscordUser.PremiumKind?
     public var public_flags: IntBitField<DiscordUser.Flag>?
+    @available(*, deprecated, renamed: "avatar_decoration_data")
     public var avatar_decoration: String?
+    public var avatar_decoration_data: DiscordUser.AvatarDecoration?
     public var member: Guild.PartialMember?
 }
 
@@ -111,6 +122,7 @@ extension DiscordUser {
         public enum Service: Sendable, Codable {
             case battleNet // "Battle.net"
             case bungie // "Bungie.net"
+            case domain // Domain
             case ebay // "eBay"
             case epicGames // "Epic Games"
             case facebook // "Facebook"

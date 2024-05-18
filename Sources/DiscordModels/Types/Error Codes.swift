@@ -147,6 +147,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case noTagsAvailableThatCanBeSetByNonModerators // 40066
     case tagRequiredToCreateForumPostInChannel // 40067
     case anEntitlementHasAlreadyBeenGrantedForThisResource // 40074
+    case cloudflareIsBlockingYourRequestThisCanOftenBeResolvedBySettingProperUserAgent // 40333
     case missingAccess // 50001
     case invalidAccountType // 50002
     case cannotExecuteActionOnDMChannel // 50003

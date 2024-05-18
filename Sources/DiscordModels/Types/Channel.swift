@@ -727,7 +727,8 @@ extension DiscordChannel.Message.Kind {
             return true
         case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
             return false
-        case .__undocumented: return false
+        case .__undocumented:
+            return false
         }
     }
 }

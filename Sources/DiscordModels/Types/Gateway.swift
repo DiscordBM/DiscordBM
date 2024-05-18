@@ -859,6 +859,7 @@ public struct Gateway: Sendable, Codable {
         public var flags: IntBitField<Guild.Member.Flag>?
         public var pending: Bool?
         public var communication_disabled_until: DiscordTimestamp?
+        public var avatar_decoration_data: DiscordUser.AvatarDecoration?
 
         public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -877,11 +878,18 @@ public struct Gateway: Sendable, Codable {
             )
             self.deaf = try container.decodeIfPresent(Bool.self, forKey: .deaf)
             self.mute = try container.decodeIfPresent(Bool.self, forKey: .mute)
-            self.flags = try container.decodeIfPresent(IntBitField<Guild.Member.Flag>.self, forKey: .flags)
+            self.flags = try container.decodeIfPresent(
+                IntBitField<Guild.Member.Flag>.self,
+                forKey: .flags
+            )
             self.pending = try container.decodeIfPresent(Bool.self, forKey: .pending)
             self.communication_disabled_until = try container.decodeIfPresent(
                 DiscordTimestamp.self,
                 forKey: .communication_disabled_until
+            )
+            self.avatar_decoration_data = try container.decodeIfPresent(
+                DiscordUser.AvatarDecoration.self,
+                forKey: .avatar_decoration_data
             )
         }
     }

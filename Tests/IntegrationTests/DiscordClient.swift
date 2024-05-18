@@ -659,6 +659,7 @@ class DiscordClientTests: XCTestCase {
         /// Follow announcement channel to this channel
         try await client.followAnnouncementChannel(
             id: Constants.Channels.announcements.id,
+            reason: "Because I want to!",
             payload: .init(webhook_channel_id: createChannel.id)
         ).guardSuccess()
 
@@ -2471,6 +2472,13 @@ class DiscordClientTests: XCTestCase {
 //        do {
 //            let file = try await client.getCDNUserAvatarDecoration(
 //                userId: UserSnowflake,
+//                avatarDecoration: String
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
+//        }
+//
+//        do {
+//            let file = try await client.getCDNAvatarDecoration(
 //                avatarDecoration: String
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 100)
