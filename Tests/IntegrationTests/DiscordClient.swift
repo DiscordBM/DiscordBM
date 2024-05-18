@@ -167,16 +167,26 @@ class DiscordClientTests: XCTestCase {
             userId: Snowflake(Constants.botId)
         ).guardSuccess()
         
-        let listMessageReactionsByEmojiResponse = try await client.listMessageReactionsByEmoji(
+        let listMessageReactionsByEmojiResponseNormal = try await client.listMessageReactionsByEmoji(
             channelId: Constants.Channels.general.id,
             messageId: message.id,
-            emoji: .unicodeEmoji(reactions[2])
+            emoji: .unicodeEmoji(reactions[2]),
+            type: .normal
         ).decode()
         
-        XCTAssertEqual(listMessageReactionsByEmojiResponse.count, 1)
+        XCTAssertEqual(listMessageReactionsByEmojiResponseNormal.count, 1)
         
-        let reactionUser = try XCTUnwrap(listMessageReactionsByEmojiResponse.first)
+        let reactionUser = try XCTUnwrap(listMessageReactionsByEmojiResponseNormal.first)
         XCTAssertEqual(reactionUser.id, Constants.botId)
+
+        let listMessageReactionsByEmojiResponseBurst = try await client.listMessageReactionsByEmoji(
+            channelId: Constants.Channels.general.id,
+            messageId: message.id,
+            emoji: .unicodeEmoji(reactions[2]),
+            type: .burst
+        ).decode()
+
+        XCTAssertEqual(listMessageReactionsByEmojiResponseBurst.count, 0)
         
         try await client.deleteAllMessageReactionsByEmoji(
             channelId: Constants.Channels.general.id,

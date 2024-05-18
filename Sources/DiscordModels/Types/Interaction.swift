@@ -257,6 +257,7 @@ public struct Interaction: Sendable, Codable {
     public var application_id: ApplicationSnowflake
     public var type: Kind
     public var data: Data?
+    public var guild: PartialGuild?
     public var guild_id: GuildSnowflake?
     public var channel_id: ChannelSnowflake?
     public var channel: DiscordChannel?
@@ -282,6 +283,7 @@ public struct Interaction: Sendable, Codable {
         case application_id
         case type
         case data
+        case guild
         case guild_id
         case channel_id
         case channel
@@ -325,6 +327,7 @@ public struct Interaction: Sendable, Codable {
         case .__undocumented:
             self.data = nil
         }
+        self.guild = try container.decodeIfPresent(PartialGuild.self, forKey: .guild)
         self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
         self.channel_id = try container.decodeIfPresent(
             ChannelSnowflake.self,
@@ -371,6 +374,7 @@ public struct Interaction: Sendable, Codable {
             try container.encode(modal, forKey: .data)
         case .none: break
         }
+        try container.encodeIfPresent(self.guild, forKey: .guild)
         try container.encodeIfPresent(self.guild_id, forKey: .guild_id)
         try container.encodeIfPresent(self.channel_id, forKey: .channel_id)
         try container.encodeIfPresent(self.member, forKey: .member)

@@ -549,6 +549,7 @@ public extension DiscordClient {
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         emoji: Reaction,
+        type: Gateway.ReactionKind? = nil,
         after: UserSnowflake? = nil,
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<[DiscordUser]> {
@@ -561,6 +562,7 @@ public extension DiscordClient {
         return try await self.send(request: .init(
             to: endpoint,
             queries: [
+                ("type", type.map({ "\($0.rawValue)" })),
                 ("after", after?.rawValue),
                 ("limit", limit.map({ "\($0)" }))
             ]

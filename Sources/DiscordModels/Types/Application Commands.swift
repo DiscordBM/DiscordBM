@@ -129,6 +129,7 @@ public struct ApplicationCommand: Sendable, Codable {
                 reason: "'choices' is only allowed if 'type' is 'string' or 'integer' or 'number'"
             )
             choices?.validate()
+            validateElementCountDoesNotExceed(options, max: 25, name: "options")
             options?.validate()
         }
     }
