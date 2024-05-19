@@ -109,7 +109,6 @@ public struct MentionUser: Sendable, Codable {
     public var member: Guild.PartialMember?
 }
 
-
 extension DiscordUser {
     /// https://discord.com/developers/docs/resources/user#connection-object-connection-structure
     public struct Connection: Sendable, Codable {
