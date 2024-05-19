@@ -30,7 +30,8 @@
 * Abstractions for easier testability.
 
 ## Showcase
-Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Services/DiscordService/DiscordService.swift#L1). 
+Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Services/DiscordService/DiscordService.swift#L1).  
+Unfortunately Penny isn't a good project to study how to use `DiscordBM`, due to its complexity. For now, this README is your best friend.
 
 ## How To Use
 
