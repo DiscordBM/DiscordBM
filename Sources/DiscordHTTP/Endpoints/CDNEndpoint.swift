@@ -14,7 +14,7 @@ public enum CDNEndpoint: Endpoint {
     case userAvatar(userId: UserSnowflake, avatar: String)
     case guildMemberAvatar(guildId: GuildSnowflake, userId: UserSnowflake, avatar: String)
     case userAvatarDecoration(userId: UserSnowflake, avatarDecoration: String)
-    case avatarDecoration(avatarDecoration: String)
+    case avatarDecoration(asset: String)
     case applicationIcon(appId: ApplicationSnowflake, icon: String)
     case applicationCover(appId: ApplicationSnowflake, cover: String)
     case applicationAsset(
@@ -69,8 +69,8 @@ public enum CDNEndpoint: Endpoint {
             suffix = "guilds/\(guildId.rawValue)/users/\(userId.rawValue)/avatars/\(avatar)"
         case let .userAvatarDecoration(userId, avatarDecoration):
             suffix = "avatar-decorations/\(userId.rawValue)/\(avatarDecoration)"
-        case let .avatarDecoration(avatarDecoration):
-            suffix = "avatar-decoration-presets/\(avatarDecoration)"
+        case let .avatarDecoration(asset):
+            suffix = "avatar-decoration-presets/\(asset)"
         case let .applicationIcon(appId, icon):
             suffix = "app-icons/\(appId.rawValue)/\(icon)"
         case let .applicationCover(appId, cover):
@@ -151,8 +151,8 @@ public enum CDNEndpoint: Endpoint {
             return [guildId.rawValue, userId.rawValue, avatar]
         case .userAvatarDecoration(let userId, let avatarDecoration):
             return [userId.rawValue, avatarDecoration]
-        case .avatarDecoration(let avatarDecoration):
-            return [avatarDecoration]
+        case .avatarDecoration(let asset):
+            return [asset]
         case .applicationIcon(let appId, let icon):
             return [appId.rawValue, icon]
         case .applicationCover(let appId, let cover):
@@ -231,8 +231,8 @@ public enum CDNEndpoint: Endpoint {
             return "guildMemberAvatar(guildId: \(guildId), userId: \(userId), avatar: \(avatar))"
         case let .userAvatarDecoration(userId, avatarDecoration):
             return "userAvatarDecoration(userId: \(userId), avatarDecoration: \(avatarDecoration))"
-        case let .avatarDecoration(avatarDecoration):
-            return "avatarDecoration(avatarDecoration: \(avatarDecoration))"
+        case let .avatarDecoration(asset):
+            return "avatarDecoration(asset: \(asset))"
         case let .applicationIcon(appId, icon):
             return "applicationIcon(appId: \(appId), icon: \(icon))"
         case let .applicationCover(appId, cover):

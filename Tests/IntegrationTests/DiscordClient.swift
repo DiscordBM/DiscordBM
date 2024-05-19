@@ -2486,13 +2486,19 @@ class DiscordClientTests: XCTestCase {
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
-//
-//        do {
-//            let file = try await client.getCDNAvatarDecoration(
-//                avatarDecoration: String
-//            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 100)
-//        }
+
+        do {
+            let user = try await client.getUser(id: Constants.personalId).decode()
+
+            XCTAssertEqual(user.id, Constants.personalId)
+
+            let avatarDecoration = try XCTUnwrap(user.avatar_decoration_data)
+
+            let file = try await client.getCDNAvatarDecoration(
+                asset: avatarDecoration.asset
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
+        }
 //
 //        do {
 //            let file = try await client.getCDNApplicationIcon(

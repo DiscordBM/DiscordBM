@@ -124,12 +124,10 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
     func getCDNAvatarDecoration(
-        avatarDecoration: String
+        asset: String
     ) async throws -> DiscordCDNResponse {
-        let endpoint = CDNEndpoint.avatarDecoration(
-            avatarDecoration: avatarDecoration
-        )
-        return try await self.send(request: .init(to: endpoint), fallbackFileName: avatarDecoration)
+        let endpoint = CDNEndpoint.avatarDecoration(asset: asset)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: asset)
     }
 
     /// Untested function.
