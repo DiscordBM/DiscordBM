@@ -2,6 +2,14 @@
 /// https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
 public struct Invite: Sendable, Codable {
 
+    @UnstableEnum<Int>
+    public enum Kind: Sendable, Codable {
+        case guild // 0
+        case groupDm // 1
+        case friend // 2
+        case __undocumented(Int)
+    }
+
     /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
     @UnstableEnum<Int>
     public enum TargetKind: Sendable, Codable {
@@ -10,6 +18,7 @@ public struct Invite: Sendable, Codable {
         case __undocumented(Int)
     }
 
+    public var type: Kind
     public var code: String
     public var guild: PartialGuild?
     public var channel: DiscordChannel?
@@ -26,6 +35,7 @@ public struct Invite: Sendable, Codable {
 /// https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
 /// https://discord.com/developers/docs/resources/invite#invite-metadata-object-invite-metadata-structure
 public struct InviteWithMetadata: Sendable, Codable {
+    public var type: Invite.Kind
     public var code: String
     public var guild: PartialGuild?
     public var channel: DiscordChannel?
@@ -46,6 +56,7 @@ public struct InviteWithMetadata: Sendable, Codable {
 
 /// https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
 public struct PartialInvite: Sendable, Codable {
+    public var type: Invite.Kind?
     public var code: String?
     public var guild: PartialGuild?
     public var channel: DiscordChannel?

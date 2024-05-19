@@ -14,6 +14,7 @@ public enum CDNEndpoint: Endpoint {
     case userAvatar(userId: UserSnowflake, avatar: String)
     case guildMemberAvatar(guildId: GuildSnowflake, userId: UserSnowflake, avatar: String)
     case userAvatarDecoration(userId: UserSnowflake, avatarDecoration: String)
+    case avatarDecoration(asset: String)
     case applicationIcon(appId: ApplicationSnowflake, icon: String)
     case applicationCover(appId: ApplicationSnowflake, cover: String)
     case applicationAsset(
@@ -68,6 +69,8 @@ public enum CDNEndpoint: Endpoint {
             suffix = "guilds/\(guildId.rawValue)/users/\(userId.rawValue)/avatars/\(avatar)"
         case let .userAvatarDecoration(userId, avatarDecoration):
             suffix = "avatar-decorations/\(userId.rawValue)/\(avatarDecoration)"
+        case let .avatarDecoration(asset):
+            suffix = "avatar-decoration-presets/\(asset)"
         case let .applicationIcon(appId, icon):
             suffix = "app-icons/\(appId.rawValue)/\(icon)"
         case let .applicationCover(appId, cover):
@@ -148,6 +151,8 @@ public enum CDNEndpoint: Endpoint {
             return [guildId.rawValue, userId.rawValue, avatar]
         case .userAvatarDecoration(let userId, let avatarDecoration):
             return [userId.rawValue, avatarDecoration]
+        case .avatarDecoration(let asset):
+            return [asset]
         case .applicationIcon(let appId, let icon):
             return [appId.rawValue, icon]
         case .applicationCover(let appId, let cover):
@@ -187,17 +192,18 @@ public enum CDNEndpoint: Endpoint {
         case .userAvatar: return 8
         case .guildMemberAvatar: return 9
         case .userAvatarDecoration: return 10
-        case .applicationIcon: return 11
-        case .applicationCover: return 12
-        case .applicationAsset: return 13
-        case .achievementIcon: return 14
-        case .storePageAsset: return 15
-        case .stickerPackBanner: return 16
-        case .teamIcon: return 17
-        case .sticker: return 18
-        case .roleIcon: return 19
-        case .guildScheduledEventCover: return 20
-        case .guildMemberBanner: return 21
+        case .avatarDecoration: return 11
+        case .applicationIcon: return 12
+        case .applicationCover: return 13
+        case .applicationAsset: return 14
+        case .achievementIcon: return 15
+        case .storePageAsset: return 16
+        case .stickerPackBanner: return 17
+        case .teamIcon: return 18
+        case .sticker: return 19
+        case .roleIcon: return 20
+        case .guildScheduledEventCover: return 21
+        case .guildMemberBanner: return 22
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
@@ -225,6 +231,8 @@ public enum CDNEndpoint: Endpoint {
             return "guildMemberAvatar(guildId: \(guildId), userId: \(userId), avatar: \(avatar))"
         case let .userAvatarDecoration(userId, avatarDecoration):
             return "userAvatarDecoration(userId: \(userId), avatarDecoration: \(avatarDecoration))"
+        case let .avatarDecoration(asset):
+            return "avatarDecoration(asset: \(asset))"
         case let .applicationIcon(appId, icon):
             return "applicationIcon(appId: \(appId), icon: \(icon))"
         case let .applicationCover(appId, cover):
@@ -264,6 +272,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
     case userAvatar
     case guildMemberAvatar
     case userAvatarDecoration
+    case avatarDecoration
     case applicationIcon
     case applicationCover
     case applicationAsset
@@ -291,6 +300,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
         case .userAvatar: return "userAvatar"
         case .guildMemberAvatar: return "guildMemberAvatar"
         case .userAvatarDecoration: return "userAvatarDecoration"
+        case .avatarDecoration: return "avatarDecoration"
         case .applicationIcon: return "applicationIcon"
         case .applicationCover: return "applicationCover"
         case .applicationAsset: return "applicationAsset"
@@ -319,6 +329,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
         case .userAvatar: self = .userAvatar
         case .guildMemberAvatar: self = .guildMemberAvatar
         case .userAvatarDecoration: self = .userAvatarDecoration
+        case .avatarDecoration: self = .avatarDecoration
         case .applicationIcon: self = .applicationIcon
         case .applicationCover: self = .applicationCover
         case .applicationAsset: self = .applicationAsset

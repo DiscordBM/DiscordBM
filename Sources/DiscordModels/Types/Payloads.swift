@@ -880,7 +880,6 @@ public enum Payloads {
                 name: "description+description_localizations",
                 reason: "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput'"
             )
-            validateElementCountDoesNotExceed(options, max: 25, name: "options")
             validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
             validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
             for (_, value) in name_localizations?.values ?? [:] {
@@ -889,6 +888,7 @@ public enum Payloads {
             for (_, value) in description_localizations?.values ?? [:] {
                 validateCharacterCountInRange(value, min: 1, max: 32, name: "description_localizations.name")
             }
+            validateElementCountDoesNotExceed(options, max: 25, name: "options")
             options?.validate()
         }
     }
@@ -933,7 +933,6 @@ public enum Payloads {
         }
 
         public func validate() -> [ValidationFailure] {
-            validateElementCountDoesNotExceed(options, max: 25, name: "options")
             validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
             validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
             for (_, value) in name_localizations?.values ?? [:] {
@@ -942,6 +941,7 @@ public enum Payloads {
             for (_, value) in description_localizations?.values ?? [:] {
                 validateCharacterCountInRange(value, min: 1, max: 32, name: "description_localizations.name")
             }
+            validateElementCountDoesNotExceed(options, max: 25, name: "options")
             options?.validate()
         }
     }
@@ -1904,10 +1904,12 @@ public enum Payloads {
     public struct ModifyCurrentUser: Sendable, Encodable, ValidatablePayload {
         public var username: String?
         public var avatar: ImageData?
+        public var banner: ImageData?
 
-        public init(username: String? = nil, avatar: ImageData? = nil) {
+        public init(username: String? = nil, avatar: ImageData? = nil, banner: ImageData? = nil) {
             self.username = username
             self.avatar = avatar
+            self.banner = banner
         }
 
         public func validate() -> [ValidationFailure] { }

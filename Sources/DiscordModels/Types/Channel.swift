@@ -369,6 +369,11 @@ extension DiscordChannel {
             public var triggering_interaction_metadata: DereferenceBox<InteractionMetadata>?
         }
 
+        public struct Call: Sendable, Codable {
+            public var participants: [UserSnowflake]
+            public var ended_timestamp: DiscordTimestamp?
+        }
+
         public var id: MessageSnowflake
         public var channel_id: ChannelSnowflake
         public var author: DiscordUser?
@@ -404,6 +409,7 @@ extension DiscordChannel {
         public var role_subscription_data: RoleSubscriptionData?
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
         public var poll: Poll?
+        public var call: Call?
         /// Extra fields, not sure why I've added them to this specific type:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
@@ -448,6 +454,7 @@ extension DiscordChannel {
         public var role_subscription_data: RoleSubscriptionData?
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
         public var poll: Poll?
+        public var call: DiscordChannel.Message.Call?
         /// Extra fields:
         public var member: Guild.PartialMember?
         public var guild_id: GuildSnowflake?
@@ -727,7 +734,8 @@ extension DiscordChannel.Message.Kind {
             return true
         case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
             return false
-        case .__undocumented: return false
+        case .__undocumented:
+            return false
         }
     }
 }
