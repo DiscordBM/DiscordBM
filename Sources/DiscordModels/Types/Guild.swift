@@ -40,6 +40,7 @@ public struct Guild: Sendable, Codable {
             self.pending = guildMemberAdd.pending
             self.flags = guildMemberAdd.flags
             self.communication_disabled_until = guildMemberAdd.communication_disabled_until
+            self.avatar_decoration_data = guildMemberAdd.avatar_decoration_data
         }
 
         public init(from decoder: any Decoder) throws {
@@ -58,7 +59,10 @@ public struct Guild: Sendable, Codable {
             )
             self.deaf = try container.decodeIfPresent(Bool.self, forKey: .deaf)
             self.mute = try container.decodeIfPresent(Bool.self, forKey: .mute)
-            self.flags = try container.decodeIfPresent(IntBitField<Guild.Member.Flag>.self, forKey: .flags)
+            self.flags = try container.decodeIfPresent(
+                IntBitField<Guild.Member.Flag>.self,
+                forKey: .flags
+            )
             self.pending = try container.decodeIfPresent(Bool.self, forKey: .pending)
             self.permissions = try container.decodeIfPresent(
                 StringBitField<Permission>.self,
