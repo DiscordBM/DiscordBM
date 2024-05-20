@@ -782,13 +782,6 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertEqual(anotherMember.user?.id, Constants.personalId)
 
-        let avatar = try XCTUnwrap(anotherMember.user?.avatar)
-        let file = try await client.getCDNUserAvatar(
-            userId: Constants.personalId,
-            avatar: avatar
-        ).getFile()
-        XCTAssertGreaterThan(file.data.readableBytes, 100)
-
         /// Can't add anyone since don't have access token.
         let addMemberError = try await client.addGuildMember(
             guildId: Constants.guildId,
@@ -2409,7 +2402,8 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(metadata.count, 2)
     }
     
-    /// Couldn't find test-cases for the commented functions
+    /// Couldn't find test-cases for the commented-out functions
+    @available(*, deprecated, message: "To avoid deprecation warnings")
     func testCDN() async throws {
         do {
             let file = try await client.getCDNCustomEmoji(
@@ -2453,14 +2447,20 @@ class DiscordClientTests: XCTestCase {
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
-        
-//        do {
-//            let file = try await client.getCDNUserBanner(
-//                userId: UserSnowflake,
-//                banner: String
-//            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 100)
-//        }
+
+        let user = try await client.getUser(id: Constants.personalId).decode()
+
+        XCTAssertEqual(user.id, Constants.personalId)
+
+        let banner = try XCTUnwrap(user.banner)
+
+        do {
+            let file = try await client.getCDNUserBanner(
+                userId: user.id,
+                banner: banner
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
+        }
         
         do {
             let file = try await client.getCDNDefaultUserAvatar(
@@ -2478,22 +2478,28 @@ class DiscordClientTests: XCTestCase {
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
-//
-//        do {
-//            let file = try await client.getCDNUserAvatarDecoration(
-//                userId: UserSnowflake,
-//                avatarDecoration: String
-//            ).getFile()
-//            XCTAssertGreaterThan(file.data.readableBytes, 100)
-//        }
+
+        let avatar = try XCTUnwrap(user.avatar)
 
         do {
-            let user = try await client.getUser(id: Constants.personalId).decode()
+            let file = try await client.getCDNUserAvatar(
+                userId: Constants.personalId,
+                avatar: avatar
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
+        }
 
-            XCTAssertEqual(user.id, Constants.personalId)
+        let avatarDecoration = try XCTUnwrap(user.avatar_decoration_data)
 
-            let avatarDecoration = try XCTUnwrap(user.avatar_decoration_data)
+        do {
+            let file = try await client.getCDNUserAvatarDecoration(
+                userId: user.id,
+                avatarDecoration: avatarDecoration.asset
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
+        }
 
+        do {
             let file = try await client.getCDNAvatarDecoration(
                 asset: avatarDecoration.asset
             ).getFile()
@@ -2562,7 +2568,6 @@ class DiscordClientTests: XCTestCase {
 
         /// `getCDNGuildScheduledEventCover()` is tested with guild-scheduled-event tests.
         /// `getCDNStickerPackBanner()` is tested with sticker tests.
-        /// `getCDNUserAvatar()` is tested with guild-members tests.
         /// `getCDNSticker()` is tested with sticker tests.
     }
     
