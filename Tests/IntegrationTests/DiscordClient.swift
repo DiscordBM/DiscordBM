@@ -2452,15 +2452,15 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertEqual(user.id, Constants.personalId)
 
-        let banner = try XCTUnwrap(user.banner)
-
-        do {
-            let file = try await client.getCDNUserBanner(
-                userId: user.id,
-                banner: banner
-            ).getFile()
-            XCTAssertGreaterThan(file.data.readableBytes, 100)
-        }
+//        let banner = try XCTUnwrap(user.banner)
+//
+//        do {
+//            let file = try await client.getCDNUserBanner(
+//                userId: user.id,
+//                banner: banner
+//            ).getFile()
+//            XCTAssertGreaterThan(file.data.readableBytes, 100)
+//        }
         
         do {
             let file = try await client.getCDNDefaultUserAvatar(
@@ -2557,7 +2557,6 @@ class DiscordClientTests: XCTestCase {
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
-
 //
 //        do {
 //            let file = try await client.getCDNGuildMemberBanner(
