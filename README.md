@@ -55,7 +55,7 @@ let bot = await BotGatewayManager(
     intents: [.guildMessages, .messageContent]
 )
 ```
-See the [GatewayConnection tests](https://github.com/DiscordBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
+See the [GatewayConnection tests](https://github.com/DiscordBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/MainService/PennyService.swift) for real-world examples.
 
 > [!Warning]   
 > In a production app you should use [**environment variables**](https://swiftonserver.com/using-environment-variables-in-swift/) to load your Bot Token.   
