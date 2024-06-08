@@ -217,11 +217,11 @@ var featureFlags: [SwiftSetting] {
 
         /// https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md
         /// Nicer `#file`.
-            .enableUpcomingFeature("ConciseMagicFile"),
+        .enableUpcomingFeature("ConciseMagicFile"),
 
         /// https://github.com/apple/swift-evolution/blob/main/proposals/0286-forward-scan-trailing-closures.md
         /// This one shouldn't do much to be honest, but shouldn't hurt as well.
-            .enableUpcomingFeature("ForwardTrailingClosures"),
+        .enableUpcomingFeature("ForwardTrailingClosures"),
 
         /// https://github.com/apple/swift-evolution/blob/main/proposals/0354-regex-literals.md
         /// `BareSlashRegexLiterals` not enabled since we don't use regex anywhere.
