@@ -20,7 +20,7 @@ class DiscordColorTests: XCTestCase {
         XCTAssertEqual(hex, "#A0B9FF")
     }
     
-    func testInsensitiveHex() throws {
+    func testCaseInsensitiveHex() throws {
         try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "#FFFFFF")).value, 16777215)
         try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "FFFFFF")).value, 16777215)
         try XCTAssertEqual(XCTUnwrap(DiscordColor(hex: "#ffffff")).value, 16777215)

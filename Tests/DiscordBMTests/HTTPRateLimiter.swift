@@ -5,7 +5,7 @@ import XCTest
 
 class HTTPRateLimiterTests: XCTestCase {
     
-    var rateLimiter = HTTPRateLimiter(label: "Test_RateLimiter")
+    let rateLimiter = HTTPRateLimiter(label: "Test_RateLimiter")
     let endpoint = AnyEndpoint.api(.getGateway)
     /// Interactions endpoints are unique in the sense that they by-pass the global rate limit.
     let interactionEndpoint = APIEndpoint.createInteractionResponse(
@@ -13,12 +13,7 @@ class HTTPRateLimiterTests: XCTestCase {
         interactionToken: ""
     )
     
-    override func setUp() async throws {
-        self.rateLimiter = HTTPRateLimiter(label: "Test_RateLimiter")
-    }
-    
     func testBucketAllows() async throws {
-        let rateLimiter = HTTPRateLimiter(label: "Test")
         let headers: HTTPHeaders = [
             "x-ratelimit-bucket": "41f9cd5d28af77da04563bcb1d67fdfd",
             "x-ratelimit-limit": "2",
@@ -36,7 +31,6 @@ class HTTPRateLimiterTests: XCTestCase {
     }
     
     func testBucketExhausted() async throws {
-        let rateLimiter = HTTPRateLimiter(label: "Test")
         let headers: HTTPHeaders = [
             "x-ratelimit-bucket": "41f9cd5d28af77da04563bcb1d67fdfd",
             "x-ratelimit-limit": "2",
@@ -57,9 +51,8 @@ class HTTPRateLimiterTests: XCTestCase {
         }
     }
     
-    /// Bucket is exhausted but the we've already past `x-ratelimit-reset`.
+    /// Bucket is exhausted but the we're already past `x-ratelimit-reset`.
     func testBucketExhaustedAndExpired() async throws {
-        let rateLimiter = HTTPRateLimiter(label: "Test")
         let headers: HTTPHeaders = [
             "x-ratelimit-bucket": "41f9cd5d28af77da04563bcb1d67fdfd",
             "x-ratelimit-limit": "2",

@@ -34,13 +34,11 @@ class SerialQueueTests: XCTestCase {
         
         let times = await container.times
         
-        for (idx, time) in times.enumerated() {
+        for (idx, time) in times.enumerated().dropFirst() {
             XCTAssertGreaterThan(time, Double(idx) * 2)
-            if idx != 0 {
-                let passedBetweenTimes = times[idx] - times[idx - 1]
-                /// 1.99 since it might not be accurate to the exact 2 second.
-                XCTAssertGreaterThan(passedBetweenTimes, 1.99)
-            }
+            let passedBetweenTimes = times[idx] - times[idx - 1]
+            /// 1.99 since it might not be accurate to the exact 2 second.
+            XCTAssertGreaterThan(passedBetweenTimes, 1.99)
         }
     }
     
@@ -60,13 +58,11 @@ class SerialQueueTests: XCTestCase {
         
         let times = await container.times
         
-        for (idx, time) in times.enumerated() {
+        for (idx, time) in times.enumerated().dropFirst() {
             XCTAssertGreaterThan(time, Double(idx) * 0.1)
-            if idx != 0 {
-                let passedBetweenTimes = times[idx] - times[idx - 1]
-                /// 0.098 since it might not be accurate to the exact 0.1 second.
-                XCTAssertGreaterThan(passedBetweenTimes, 0.098)
-            }
+            let passedBetweenTimes = times[idx] - times[idx - 1]
+            /// 0.098 since it might not be accurate to the exact 0.1 second.
+            XCTAssertGreaterThan(passedBetweenTimes, 0.098)
         }
     }
 }
