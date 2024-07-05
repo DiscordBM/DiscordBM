@@ -987,6 +987,8 @@ private func == (lhs: Emoji, rhs: Emoji) -> Bool {
 }
 
 //MARK: - WritableKeyPath + Sendable
-#if !compiler(>=6.0)
+#if compiler(>=6.0)
+extension WritableKeyPath: @unchecked @retroactive Sendable where Root: Sendable, Value: Sendable { }
+#else
 extension WritableKeyPath: @unchecked Sendable where Root: Sendable, Value: Sendable { }
 #endif
