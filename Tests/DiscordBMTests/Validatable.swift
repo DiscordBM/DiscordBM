@@ -309,11 +309,19 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
     }
 }
 
+#if compiler(>=6.0)
+extension ValidationFailure: @retroactive Equatable {
+    public static func == (lhs: ValidationFailure, rhs: ValidationFailure) -> Bool {
+        "\(lhs)" == "\(rhs)"
+    }
+}
+#else
 extension ValidationFailure: Equatable {
     public static func == (lhs: ValidationFailure, rhs: ValidationFailure) -> Bool {
         "\(lhs)" == "\(rhs)"
     }
 }
+#endif
 
 private extension Optional where Wrapped == ValidationFailure {
     func `throw`() throws {

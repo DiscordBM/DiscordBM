@@ -418,6 +418,17 @@ class ClientConfigurationTests: XCTestCase {
 }
 
 // MARK: - DiscordHTTPResponse + Equatable
+#if compiler(>=6.0)
+extension DiscordHTTPResponse: @retroactive Equatable {
+    public static func == (lhs: DiscordHTTPResponse, rhs: DiscordHTTPResponse) -> Bool {
+        lhs.host == rhs.host &&
+        lhs.status == rhs.status &&
+        lhs.version == rhs.version &&
+        lhs.headers == rhs.headers &&
+        lhs.body == rhs.body
+    }
+}
+#else
 extension DiscordHTTPResponse: Equatable {
     public static func == (lhs: DiscordHTTPResponse, rhs: DiscordHTTPResponse) -> Bool {
         lhs.host == rhs.host &&
@@ -427,3 +438,4 @@ extension DiscordHTTPResponse: Equatable {
         lhs.body == rhs.body
     }
 }
+#endif
