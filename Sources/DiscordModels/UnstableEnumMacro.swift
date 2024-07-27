@@ -30,7 +30,7 @@
     extension,
     conformances: RawRepresentable, LosslessRawRepresentable, Hashable
 )
-macro UnstableEnum() = #externalMacro(module: "UnstableEnumMacro", type: "UnstableEnum")
+macro UnstableEnum<T>() = #externalMacro(module: "UnstableEnumMacro", type: "UnstableEnum")
 
 /// Just a compile-time protocol to make sure `UnstableEnumMacro` types are safe to
 /// force-unwrap when using ``RawRepresentable.init(rawValue:)``
