@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "args": [],
+            "cwd": "${workspaceFolder:DiscordBM}",
+            "name": "Debug GenerateAPIEndpointsExec",
+            "program": "${workspaceFolder:DiscordBM}/.build/debug/GenerateAPIEndpointsExec",
+            "preLaunchTask": "swift: Build Debug GenerateAPIEndpointsExec"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "args": [],
+            "cwd": "${workspaceFolder:DiscordBM}",
+            "name": "Release GenerateAPIEndpointsExec",
+            "program": "${workspaceFolder:DiscordBM}/.build/release/GenerateAPIEndpointsExec",
+            "preLaunchTask": "swift: Build Release GenerateAPIEndpointsExec"
+        }
+    ]
+}
