@@ -146,21 +146,6 @@ class HTTPRateLimiterTests: XCTestCase {
     }
 }
 
-#if compiler(>=6.0)
-extension HTTPRateLimiter.ShouldRequest: @retroactive Equatable {
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        if case .true = lhs, case .true = rhs {
-            return true
-        } else if case .false = lhs, case .false = rhs {
-            return true
-        } else if case let .after(lhs) = lhs, case let .after(rhs) = rhs {
-            return lhs == rhs
-        } else {
-            return false
-        }
-    }
-}
-#else
 extension HTTPRateLimiter.ShouldRequest: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         if case .true = lhs, case .true = rhs {
@@ -174,4 +159,3 @@ extension HTTPRateLimiter.ShouldRequest: Equatable {
         }
     }
 }
-#endif

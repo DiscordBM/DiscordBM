@@ -793,7 +793,7 @@ extension DereferenceBox: Sendable where C: Sendable { }
 //MARK: +Calendar
 
 private extension Calendar {
-#if swift(>=5.10)
+#if compiler(>=5.10) && compiler(<6.0)
     /// It's safe the way DiscordBM uses it.
     nonisolated(unsafe) static let utc: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
