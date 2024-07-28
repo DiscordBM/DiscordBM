@@ -2917,7 +2917,7 @@ class DiscordClientTests: XCTestCase {
 private actor Counter {
     private var counter = 0
     private var target: Int
-    private var timeout: Double
+    private let timeout: Double
     private var expectation: Expectation?
     
     init(target: Int, timeout: Double = 10) {
