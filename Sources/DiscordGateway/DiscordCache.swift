@@ -321,9 +321,7 @@ public actor DiscordCache {
     }
     
     /// Utility to access `Storage`.
-    public subscript<T: Sendable>(
-        dynamicMember path: (any Sendable & WritableKeyPath<Storage, T>)
-    ) -> T {
+    public subscript<T: Sendable>(dynamicMember path: WritableKeyPath<Storage, T>) -> T {
         get { self.storage[keyPath: path] }
         set { self.storage[keyPath: path] = newValue }
     }
@@ -989,6 +987,8 @@ private func == (lhs: Emoji, rhs: Emoji) -> Bool {
 }
 
 //MARK: - WritableKeyPath + Sendable
-#if compiler(<6.0)
+#if compiler(>=6.0)
+extension WritableKeyPath: @unchecked @retroactive Sendable where Root: Sendable, Value: Sendable { }
+#else
 extension WritableKeyPath: @unchecked Sendable where Root: Sendable, Value: Sendable { }
 #endif
