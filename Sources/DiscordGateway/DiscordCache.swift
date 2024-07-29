@@ -319,7 +319,16 @@ public actor DiscordCache {
     public var storage: Storage {
         didSet { checkItemsLimit() }
     }
-    
+
+#if compiler(<6.0)
+    /// Utility to access `Storage`.
+    public subscript<T: Sendable>(
+        dynamicMember path: WritableKeyPath<Storage, T>
+    ) -> T {
+        get { self.storage[keyPath: path] }
+        set { self.storage[keyPath: path] = newValue }
+    }
+#else
     /// Utility to access `Storage`.
     public subscript<T: Sendable>(
         dynamicMember path: (any Sendable & WritableKeyPath<Storage, T>)
@@ -327,7 +336,8 @@ public actor DiscordCache {
         get { self.storage[keyPath: path] }
         set { self.storage[keyPath: path] = newValue }
     }
-    
+#endif
+
     /// - Parameters:
     ///   - gatewayManager: The gateway manager that this `DiscordCache` instance caches from.
     ///   - intents: What intents to cache their related Gateway events.
