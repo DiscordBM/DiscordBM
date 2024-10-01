@@ -27,6 +27,8 @@ public actor BotGatewayManager: GatewayManager {
     let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
+    /// Alternate send function for audio sessions
+    let alternateSend: ((Int, Data) -> Void)?
     /// Max frame size we accept to receive through the web-socket connection.
     let maxFrameSize: Int
     /// Generator of `BotGatewayManager` ids.
@@ -71,7 +73,7 @@ public actor BotGatewayManager: GatewayManager {
     //MARK: Current connection properties
     
     /// An ID to keep track of connection changes.
-    nonisolated let connectionId = ManagedAtomic(UInt(0))
+    public nonisolated let connectionId = ManagedAtomic(UInt(0))
     
     //MARK: Resume-related current-connection properties
     
@@ -110,13 +112,15 @@ public actor BotGatewayManager: GatewayManager {
         client: any DiscordClient,
         maxFrameSize: Int = 1 << 28,
         shardInfo: ShardInfo,
-        identifyPayloadWithShard identifyPayload: Gateway.Identify
+        identifyPayloadWithShard identifyPayload: Gateway.Identify,
+        alternateSend: ((Int, Data) -> Void)? = nil
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
         self.shardInfo = shardInfo
         self.identifyPayload = identifyPayload
+        self.alternateSend = alternateSend
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
@@ -131,11 +135,13 @@ public actor BotGatewayManager: GatewayManager {
         eventLoopGroup: any EventLoopGroup,
         client: any DiscordClient,
         maxFrameSize: Int = 1 << 28,
-        identifyPayload: Gateway.Identify
+        identifyPayload: Gateway.Identify,
+        alternateSend: ((Int, Data) -> Void)? = nil
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
+        self.alternateSend = alternateSend
 
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
@@ -187,6 +193,7 @@ public actor BotGatewayManager: GatewayManager {
         } else {
             self.identifyPayload = identifyPayload
         }
+        self.alternateSend = nil
     }
     
     /// - Parameters:
@@ -230,6 +237,7 @@ public actor BotGatewayManager: GatewayManager {
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
         self.logger = logger
+        self.alternateSend = nil
     }
 
     /// Connects to Discord.
@@ -477,7 +485,7 @@ extension BotGatewayManager {
         self.send(payload: identify)
     }
     
-    private func processBinaryData(_ buffer: ByteBuffer, forConnectionWithId connectionId: UInt) {
+    public func processBinaryData(_ buffer: ByteBuffer, forConnectionWithId connectionId: UInt) {
         self.logger.debug("Got text from websocket", metadata: [
             "text": .string(String(buffer: buffer))
         ])
@@ -669,6 +677,8 @@ extension BotGatewayManager {
                             ])
                         }
                     }
+                } else if let alternateSend = self.alternateSend {
+                    alternateSend(Int(opcode), data)
                 } else {
                     /// Pings aka `heartbeat`s are fine if they are sent when a ws connection
                     /// is not established. Pings are not disabled after a connection goes down

@@ -4,6 +4,7 @@ import struct Foundation.Data
 import Logging
 
 public enum AuthenticationHeader: Sendable {
+    case userToken(Secret)
     case botToken(Secret)
     case oAuthToken(Secret)
     case none
@@ -11,6 +12,8 @@ public enum AuthenticationHeader: Sendable {
     @inlinable
     var id: String? {
         switch self {
+        case .userToken(let secret):
+            return "\(secret.value.hash)"
         case .botToken(let secret):
             return "b-\(secret.value.hash)"
         case .oAuthToken(let secret):
@@ -24,6 +27,8 @@ public enum AuthenticationHeader: Sendable {
     @inlinable
     func addHeader(headers: inout HTTPHeaders, request: DiscordHTTPRequest) throws {
         switch self {
+        case .userToken(let secret):
+            headers.replaceOrAdd(name: "Authorization", value: secret.value)
         case .botToken(let secret):
             headers.replaceOrAdd(name: "Authorization", value: "Bot \(secret.value)")
         case .oAuthToken(let secret):
@@ -53,7 +58,7 @@ public enum AuthenticationHeader: Sendable {
                 ]
             )
             return nil
-        case .oAuthToken, .none: return nil
+        case .oAuthToken, .userToken, .none: return nil
         }
     }
 }

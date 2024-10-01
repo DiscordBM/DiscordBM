@@ -64,7 +64,7 @@ public struct DefaultDiscordClient: DiscordClient {
         configuration: ClientConfiguration = .init()
     ) async {
         self.client = httpClient
-        self.authentication = .botToken(Secret(token))
+        self.authentication = .userToken(Secret(token))
         self.appId = appId ?? self.authentication.extractAppIdIfAvailable()
         self.configuration = configuration
         self._authCache = await ClientCacheStorage.shared.cache(for: self.authentication)

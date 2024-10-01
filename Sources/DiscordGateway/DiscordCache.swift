@@ -344,10 +344,7 @@ public actor DiscordCache {
         storage: Storage = Storage()
     ) async {
         self.gatewayManager = gatewayManager
-        self.intents = DiscordCache.calculateIntentsIntersection(
-            gatewayManager: gatewayManager,
-            intents: intents
-        )
+        self.intents = Set<Gateway.Intent>()
         self.requestMembers = requestAllMembers
         self.messageCachingPolicy = messageCachingPolicy
         self.itemsLimit = itemsLimit
@@ -426,7 +423,6 @@ public actor DiscordCache {
                     /// https://discord.com/developers/docs/topics/threads#forum-channel-fields
                     if channel.type == .guildForum,
                        let parentId = channel.parent_id,
-                       self.intents.contains(.guilds),
                        let forumIdx = self.guilds[guildId]?.channels
                         .firstIndex(where: { $0.id == parentId }) {
                         self.guilds[guildId]?.channels[forumIdx].last_message_id = .init(channel.id)
@@ -439,8 +435,7 @@ public actor DiscordCache {
                 /// Update `last_message_id` of forums on thread-create.
                 /// https://discord.com/developers/docs/topics/threads#forum-channel-fields
                 if channel.type == .guildForum,
-                   let parentId = channel.parent_id,
-                   self.intents.contains(.guilds) {
+                   let parentId = channel.parent_id {
                     self.channels[Snowflake(parentId)]?.last_message_id = .init(channel.id)
                 }
             }
@@ -652,18 +647,16 @@ public actor DiscordCache {
             ) {
                 self.messages[message.channel_id, default: []].append(message)
             }
-            if self.intents.contains(.guilds) {
-                if let guildId = message.guild_id {
-                    if let channelIdx = self.guilds[guildId]?.channels
-                        .firstIndex(where: { $0.id == message.channel_id }) {
-                        self.guilds[guildId]?.channels[channelIdx].last_message_id = message.id
-                    } else if let threadIdx = self.guilds[guildId]?.threads
-                        .firstIndex(where: { $0.id == message.channel_id }) {
-                        self.guilds[guildId]?.threads[threadIdx].last_message_id = message.id
-                    }
-                } else {
-                    self.channels[message.channel_id]?.last_message_id = message.id
+            if let guildId = message.guild_id {
+                if let channelIdx = self.guilds[guildId]?.channels
+                    .firstIndex(where: { $0.id == message.channel_id }) {
+                    self.guilds[guildId]?.channels[channelIdx].last_message_id = message.id
+                } else if let threadIdx = self.guilds[guildId]?.threads
+                    .firstIndex(where: { $0.id == message.channel_id }) {
+                    self.guilds[guildId]?.threads[threadIdx].last_message_id = message.id
                 }
+            } else {
+                self.channels[message.channel_id]?.last_message_id = message.id
             }
         case let .messageUpdate(message):
             if let idx = self.messages[message.channel_id]?
@@ -838,14 +831,7 @@ public actor DiscordCache {
     
     private func intentsAllowCaching(event: Gateway.Event) -> Bool {
         guard let data = event.data else { return false }
-        let correspondingIntents = data.correspondingIntents
-        if correspondingIntents.isEmpty {
-            return true
-        } else if correspondingIntents.contains(where: { intents.contains($0) }) {
-            return true
-        } else {
-            return false
-        }
+        return true
     }
     
     private func checkItemsLimit() {
@@ -952,23 +938,6 @@ public actor DiscordCache {
         }
     }
 
-    static func calculateIntentsIntersection(
-        gatewayManager manager: any GatewayManager,
-        intents: Intents
-    ) -> Set<Gateway.Intent> {
-        var intentsSum = Set<Gateway.Intent>()
-
-        let managerIntents = manager.identifyPayload.intents.representableValues()
-
-        switch intents {
-        case .all:
-            intentsSum.formUnion(managerIntents)
-        case let .some(intents):
-            intentsSum.formUnion(intents.intersection(managerIntents))
-        }
-
-        return intentsSum
-    }
     
 #if DEBUG
     func _tests_modifyStorage(_ block: @Sendable (inout Storage) -> Void) {

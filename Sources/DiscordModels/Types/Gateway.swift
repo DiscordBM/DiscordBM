@@ -466,41 +466,19 @@ public struct Gateway: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/gateway-events#identify-identify-connection-properties
         public struct ConnectionProperties: Sendable, Codable {
-            public var os: String = {
-#if os(macOS)
-                return "macOS"
-#elseif os(Linux)
-                return "Linux"
-#elseif os(iOS)
-                return "iOS"
-#elseif os(watchOS)
-                return "watchOS"
-#elseif os(tvOS)
-                return "tvOS"
-#elseif os(Windows)
-                return "Windows"
-#elseif canImport(Musl)
-                return "Musl"
-#elseif os(FreeBSD)
-                return "FreeBSD"
-#elseif os(OpenBSD)
-                return "OpenBSD"
-#elseif os(Android)
-                return "Android"
-#elseif os(PS4)
-                return "PS4"
-#elseif os(Cygwin)
-                return "Cygwin"
-#elseif os(Haiku)
-                return "Haiku"
-#elseif os(WASI)
-                return "WASI"
-#else
-                return "Unknown"
-#endif
-            }()
-            public var browser = "DiscordBM"
-            public var device = "DiscordBM"
+            public var os = "Mac OS X"
+            public var browser = "Safari"
+            public var browser_user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15"
+            public var browser_version = "18.1"
+            public var client_build_number = 331573
+            public var device = ""
+            public var os_version = "10.15.7"
+            public var referrer = "https://discord.com/"
+            public var referrer_current = ""
+            public var referring_domain = "discord.com"
+            public var referring_domain_current = ""
+            public var release_channel = "stable"
+            public var system_locale = NSLocale.autoupdatingCurrent.collatorIdentifier ?? "en-US"
         }
         
         /// https://discord.com/developers/docs/topics/gateway-events#update-presence-gateway-presence-update-structure
@@ -533,15 +511,26 @@ public struct Gateway: Sendable, Codable {
         
         public var token: Secret
         /// Not public to make sure the correct info is sent to Discord.
-        var properties = ConnectionProperties()
+        public var properties = ConnectionProperties()
         /// DiscordBM supports the better "Transport Compression", but not "Payload Compression".
         /// Setting this to `true` will only cause problems.
         /// "Transport Compression" is enabled by default with no options to disable it.
-        var compress: Bool?
+        public var compress: Bool?
         public var large_threshold: Int?
         public var shard: IntPair?
         public var presence: Presence?
-        public var intents: IntBitField<Intent>
+        public var intents: IntBitField<Intent>?
+
+        public init(token: String) {
+            self.token = Secret(token)
+            self.presence = Presence(
+                since: 0,
+                activities: [],
+                status: .online,
+                afk: false
+            )
+            self.compress = false
+        }
         
         public init(token: Secret, large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
             self.token = token

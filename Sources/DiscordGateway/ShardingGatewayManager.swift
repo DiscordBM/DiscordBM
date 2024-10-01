@@ -204,7 +204,7 @@ public actor ShardingGatewayManager: GatewayManager {
     /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
     public func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async {
         await self.managers
-            .first(where: { $0.identifyPayload.intents.contains(.guildMembers) })?
+            .first?
             .requestGuildMembersChunk(payload: payload)
     }
 
