@@ -96,12 +96,13 @@ public extension DiscordClient {
     }
 
     /// Untested function.
-    /// If it didn't work, try to append `.png` to the end of `icon`.
+    /// If it didn't work, try to append `.png` to the end of `avatarDecoration`.
     /// If you are using this endpoint successfully, please open an issue and let me know what
     /// info you pass to the function, so I can fix the function and add it to the tests.
     /// (CDN data are _mostly_ public)
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @available(*, deprecated, renamed: "getCDNAvatarDecoration")
     @inlinable
     func getCDNUserAvatarDecoration(
         userId: UserSnowflake,
@@ -112,6 +113,21 @@ public extension DiscordClient {
             avatarDecoration: avatarDecoration
         )
         return try await self.send(request: .init(to: endpoint), fallbackFileName: avatarDecoration)
+    }
+
+    /// Untested function.
+    /// If it didn't work, try to append `.png` to the end of `avatarDecoration`.
+    /// If you are using this endpoint successfully, please open an issue and let me know what
+    /// info you pass to the function, so I can fix the function and add it to the tests.
+    /// (CDN data are _mostly_ public)
+    ///
+    /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
+    @inlinable
+    func getCDNAvatarDecoration(
+        asset: String
+    ) async throws -> DiscordCDNResponse {
+        let endpoint = CDNEndpoint.avatarDecoration(asset: asset)
+        return try await self.send(request: .init(to: endpoint), fallbackFileName: asset)
     }
 
     /// Untested function.

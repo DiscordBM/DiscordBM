@@ -183,6 +183,13 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationUserCommunicationDisabled // 145
             case creatorMonetizationRequestCreated // 150
             case creatorMonetizationTermsAccepted // 151
+            case onboardingPromptCreate // 163
+            case onboardingPromptUpdate // 164
+            case onboardingPromptDelete // 165
+            case onboardingCreate // 166
+            case onboardingUpdate // 167
+            case homeSettingsCreate // 190
+            case homeSettingsUpdate // 191
             case __undocumented(Int)
         }
         
@@ -246,10 +253,17 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationUserCommunicationDisabled(AutoModerationInfo)
             case creatorMonetizationRequestCreated
             case creatorMonetizationTermsAccepted
+            case onboardingPromptCreate
+            case onboardingPromptUpdate
+            case onboardingPromptDelete
+            case onboardingCreate
+            case onboardingUpdate
+            case homeSettingsCreate
+            case homeSettingsUpdate
             case __undocumented
 
             public struct OverwriteInfo: Sendable, Codable {
-                
+
                 public enum Kind: Sendable {
                     case role(name: String)
                     case member(permission: Bool?)
@@ -515,11 +529,18 @@ public struct AuditLog: Sendable, Codable {
                     self = .autoModerationUserCommunicationDisabled(moderationInfo)
                 case .creatorMonetizationRequestCreated: self = .creatorMonetizationRequestCreated
                 case .creatorMonetizationTermsAccepted: self = .creatorMonetizationTermsAccepted
+                case .onboardingPromptCreate: self = .onboardingPromptCreate
+                case .onboardingPromptUpdate: self = .onboardingPromptUpdate
+                case .onboardingPromptDelete: self = .onboardingPromptDelete
+                case .onboardingCreate: self = .onboardingCreate
+                case .onboardingUpdate: self = .onboardingUpdate
+                case .homeSettingsCreate: self = .homeSettingsCreate
+                case .homeSettingsUpdate: self = .homeSettingsUpdate
                 case .__undocumented:
                     self = .__undocumented
                 }
             }
-            
+
             public func encode(to encoder: any Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 let type = ActionKind(action: self)
@@ -614,6 +635,13 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(moderationInfo, forKey: .options)
                 case .creatorMonetizationRequestCreated: break
                 case .creatorMonetizationTermsAccepted: break
+                case .onboardingPromptCreate: break
+                case .onboardingPromptUpdate: break
+                case .onboardingPromptDelete: break
+                case .onboardingCreate: break
+                case .onboardingUpdate: break
+                case .homeSettingsCreate: break
+                case .homeSettingsUpdate: break
                 case .__undocumented: break
                 }
             }
@@ -736,6 +764,20 @@ extension AuditLog.Entry.ActionKind {
             self = .creatorMonetizationTermsAccepted
         case .creatorMonetizationRequestCreated:
             self = .creatorMonetizationRequestCreated
+        case .onboardingPromptCreate:
+            self = .onboardingPromptCreate
+        case .onboardingPromptUpdate:
+            self = .onboardingPromptUpdate
+        case .onboardingPromptDelete:
+            self = .onboardingPromptDelete
+        case .onboardingCreate:
+            self = .onboardingCreate
+        case .onboardingUpdate:
+            self = .onboardingUpdate
+        case .homeSettingsCreate:
+            self = .homeSettingsCreate
+        case .homeSettingsUpdate:
+            self = .homeSettingsUpdate
         case .__undocumented:
             self = .__undocumented(-1)
         }

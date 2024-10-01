@@ -17,7 +17,7 @@
     </a>
     </a>
     <a href="https://swift.org">
-        <img src="https://img.shields.io/badge/swift-5.10%20%2F%205.9-brightgreen.svg" alt="Latest/Minimum Swift Version">
+        <img src="https://img.shields.io/badge/swift-6.0%20%2F%205.10%20%2F%205.9-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
 </p>
 
@@ -30,7 +30,8 @@
 * Abstractions for easier testability.
 
 ## Showcase
-Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Services/DiscordService/DiscordService.swift#L1). 
+Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Services/DiscordService/DiscordService.swift#L1).  
+Unfortunately Penny isn't a good project to study how to use `DiscordBM`, due to its complexity. For now, this README is your best friend.
 
 ## How To Use
 
@@ -54,10 +55,10 @@ let bot = await BotGatewayManager(
     intents: [.guildMessages, .messageContent]
 )
 ```
-See the [GatewayConnection tests](https://github.com/DiscordBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/CODE/Sources/PennyBOT/Bot.swift) for real-world examples.
+See the [GatewayConnection tests](https://github.com/DiscordBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/MainService/PennyService.swift) for real-world examples.
 
 > [!Warning]   
-> In a production app you should use **environment variables** to load your Bot Token.   
+> In a production app you should use [**environment variables**](https://swiftonserver.com/using-environment-variables-in-swift/) to load your Bot Token.   
 > Avoid hard-coding your Bot Token to reduce the chances of leaking it.   
 
 ### Initializing a Gateway Manager With Vapor
@@ -405,8 +406,9 @@ enum LinkSubCommand: String, CaseIterable {
   <summary> Click to expand </summary>
   
 `DiscordBM` has support for sending files as attachments.   
-> [!Note]  
-> It's usually better to send a link of your media to Discord, instead of sending the actual file.   
+
+> It's usually better to send a link to your media to Discord, instead of sending the actual file everytime.   
+
 ```swift
 /// Raw data of anything like an image
 let image: ByteBuffer = <#Your Image Buffer#>
@@ -546,7 +548,6 @@ if let aGuild = await cache.guilds[<#Guild ID#>] {
 `DiscordBM` has some best-effort functions for checking permissions and roles.   
 FYI, in interactions, the [member field](https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure) already contains the resolved permissions (`Interaction.member.permissions`).
 
-> [!Warning]   
 > You need a `DiscordCache` with intents containing `.guilds` & `.guildMembers` and also `requestAllMembers: .enabled`.   
 
 ```swift
@@ -584,7 +585,7 @@ let hasRole = guild.userHasRole(
 Sharding is a way of splitting up your bot's load accross different `GatewayManager`s. It is useful if:
 * You want to implement zero-down-time scaling/updating.
 * You have too many guilds to be handeled by just 1 `GatewayManager`.
-> [!Note]  
+
 > Discord says sharding is required for bots with 2500 and more guilds. For more info, refer to the [Discord docs](https://discord.com/developers/docs/topics/gateway#sharding)
 
 To enable sharding, simply replace your `BotGatewayManager` with `ShardingGatewayManager`:
@@ -605,7 +606,7 @@ let bot = await ShardingGatewayManager(
 )
 ```
 And that's it! You've already enabled sharding. `DiscordBM` will create as many `BotGatewayManager`s as Discord suggests under the hood of `ShardingGatewayManager`, and will automatically handle them. 
-> [!Note]  
+
 > `ShardingGatewayManager` might still only create 1 `BotGatewayManager` if that's what Discord suggests.
 
 `ShardingGatewayManager` takes a few more options than `BotGatewayManager` to customize how you want to perform sharding:

@@ -167,16 +167,26 @@ class DiscordClientTests: XCTestCase {
             userId: Snowflake(Constants.botId)
         ).guardSuccess()
         
-        let listMessageReactionsByEmojiResponse = try await client.listMessageReactionsByEmoji(
+        let listMessageReactionsByEmojiResponseNormal = try await client.listMessageReactionsByEmoji(
             channelId: Constants.Channels.general.id,
             messageId: message.id,
-            emoji: .unicodeEmoji(reactions[2])
+            emoji: .unicodeEmoji(reactions[2]),
+            type: .normal
         ).decode()
         
-        XCTAssertEqual(listMessageReactionsByEmojiResponse.count, 1)
+        XCTAssertEqual(listMessageReactionsByEmojiResponseNormal.count, 1)
         
-        let reactionUser = try XCTUnwrap(listMessageReactionsByEmojiResponse.first)
+        let reactionUser = try XCTUnwrap(listMessageReactionsByEmojiResponseNormal.first)
         XCTAssertEqual(reactionUser.id, Constants.botId)
+
+        let listMessageReactionsByEmojiResponseBurst = try await client.listMessageReactionsByEmoji(
+            channelId: Constants.Channels.general.id,
+            messageId: message.id,
+            emoji: .unicodeEmoji(reactions[2]),
+            type: .burst
+        ).decode()
+
+        XCTAssertEqual(listMessageReactionsByEmojiResponseBurst.count, 0)
         
         try await client.deleteAllMessageReactionsByEmoji(
             channelId: Constants.Channels.general.id,
@@ -659,6 +669,7 @@ class DiscordClientTests: XCTestCase {
         /// Follow announcement channel to this channel
         try await client.followAnnouncementChannel(
             id: Constants.Channels.announcements.id,
+            reason: "Because I want to!",
             payload: .init(webhook_channel_id: createChannel.id)
         ).guardSuccess()
 
@@ -2475,6 +2486,19 @@ class DiscordClientTests: XCTestCase {
 //            ).getFile()
 //            XCTAssertGreaterThan(file.data.readableBytes, 100)
 //        }
+
+        do {
+            let user = try await client.getUser(id: Constants.personalId).decode()
+
+            XCTAssertEqual(user.id, Constants.personalId)
+
+            let avatarDecoration = try XCTUnwrap(user.avatar_decoration_data)
+
+            let file = try await client.getCDNAvatarDecoration(
+                asset: avatarDecoration.asset
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
+        }
 //
 //        do {
 //            let file = try await client.getCDNApplicationIcon(
@@ -2893,7 +2917,7 @@ class DiscordClientTests: XCTestCase {
 private actor Counter {
     private var counter = 0
     private var target: Int
-    private var timeout: Double
+    private let timeout: Double
     private var expectation: Expectation?
     
     init(target: Int, timeout: Double = 10) {

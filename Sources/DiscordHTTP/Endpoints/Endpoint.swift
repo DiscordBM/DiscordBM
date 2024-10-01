@@ -22,7 +22,10 @@ public enum AnyEndpoint: Endpoint {
     case api(APIEndpoint)
     case cdn(CDNEndpoint)
     case loose(LooseEndpoint)
-    
+
+    /// This case serves as a way of discouraging exhaustive switch statements
+    case __DO_NOT_USE_THIS_CASE
+
     public var url: String {
         switch self {
         case let .api(endpoint):
@@ -31,6 +34,8 @@ public enum AnyEndpoint: Endpoint {
             return endpoint.url
         case let .loose(endpoint):
             return endpoint.url
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -42,6 +47,8 @@ public enum AnyEndpoint: Endpoint {
             return endpoint.urlDescription
         case let .loose(endpoint):
             return endpoint.urlDescription
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -53,6 +60,8 @@ public enum AnyEndpoint: Endpoint {
             return endpoint.httpMethod
         case let .loose(endpoint):
             return endpoint.httpMethod
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -64,6 +73,8 @@ public enum AnyEndpoint: Endpoint {
             return endpoint.countsAgainstGlobalRateLimit
         case let .loose(endpoint):
             return endpoint.countsAgainstGlobalRateLimit
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -75,6 +86,8 @@ public enum AnyEndpoint: Endpoint {
             return endpoint.requiresAuthorizationHeader
         case let .loose(endpoint):
             return endpoint.requiresAuthorizationHeader
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -86,6 +99,8 @@ public enum AnyEndpoint: Endpoint {
             return endpoint.parameters
         case let .loose(endpoint):
             return endpoint.parameters
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -97,6 +112,8 @@ public enum AnyEndpoint: Endpoint {
             return -endpoint.id
         case let .loose(endpoint):
             return endpoint.id
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
     
@@ -108,6 +125,8 @@ public enum AnyEndpoint: Endpoint {
             return "AnyEndpoint.cdn(\(endpoint))"
         case let .loose(endpoint):
             return "AnyEndpoint.loose(\(endpoint))"
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 }

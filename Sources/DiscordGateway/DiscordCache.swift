@@ -191,7 +191,8 @@ public actor DiscordCache {
             }
         }
         
-        func calculateCheckForLimitEvery() -> Int {
+        /// Checks for the limit interval and MODIFIES `itemsLimit` to `disabled` if appropriate.
+        mutating func calculateCheckForLimitEvery() -> Int {
             switch self {
             case .disabled: return 1 /// Doesn't matter
             case let .constant(limit):
@@ -199,7 +200,9 @@ public actor DiscordCache {
                 return max(10, Int(powed))
             case let .custom(custom):
                 guard let minimum = custom.map(\.value).min() else {
-                    fatalError("It's meaningless for 'ItemsLimit.custom' to be empty. Please use `ItemsLimit.disabled` instead")
+                    assert(false, "It's meaningless for 'ItemsLimit.custom' to be empty. Please use `ItemsLimit.disabled` instead")
+                    self = .disabled
+                    return 1 /// Doesn't matter
                 }
                 let powed = pow(1/2, Double(minimum))
                 return max(10, Int(powed))
@@ -316,13 +319,25 @@ public actor DiscordCache {
     public var storage: Storage {
         didSet { checkItemsLimit() }
     }
-    
+
+#if compiler(<6.0)
     /// Utility to access `Storage`.
-    public subscript<T: Sendable>(dynamicMember path: WritableKeyPath<Storage, T>) -> T {
+    public subscript<T: Sendable>(
+        dynamicMember path: WritableKeyPath<Storage, T>
+    ) -> T {
         get { self.storage[keyPath: path] }
         set { self.storage[keyPath: path] = newValue }
     }
-    
+#else
+    /// Utility to access `Storage`.
+    public subscript<T: Sendable>(
+        dynamicMember path: (any Sendable & WritableKeyPath<Storage, T>)
+    ) -> T {
+        get { self.storage[keyPath: path] }
+        set { self.storage[keyPath: path] = newValue }
+    }
+#endif
+
     /// - Parameters:
     ///   - gatewayManager: The gateway manager that this `DiscordCache` instance caches from.
     ///   - intents: What intents to cache their related Gateway events.
@@ -347,8 +362,10 @@ public actor DiscordCache {
         self.intents = Set<Gateway.Intent>()
         self.requestMembers = requestAllMembers
         self.messageCachingPolicy = messageCachingPolicy
-        self.itemsLimit = itemsLimit
+        var itemsLimit = itemsLimit
+        /// Checks for the limit interval and MODIFIES `itemsLimit` to `disabled` if appropriate.
         self.checkForLimitEvery = itemsLimit.calculateCheckForLimitEvery()
+        self.itemsLimit = itemsLimit
         self.storage = storage
 
         Task {
@@ -951,4 +968,6 @@ private func == (lhs: Emoji, rhs: Emoji) -> Bool {
 }
 
 //MARK: - WritableKeyPath + Sendable
+#if compiler(<6.0)
 extension WritableKeyPath: @unchecked Sendable where Root: Sendable, Value: Sendable { }
+#endif

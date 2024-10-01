@@ -24,13 +24,15 @@ actor ClientCache {
             switch identity {
             case .api(let endpoint):
                 hasher.combine(0)
-                hasher.combine(endpoint.rawValue)
+                endpoint.hash(into: &hasher)
             case .cdn(let endpoint):
                 hasher.combine(1)
-                hasher.combine(endpoint.rawValue)
+                endpoint.hash(into: &hasher)
             case .loose(let endpoint):
                 hasher.combine(2)
                 endpoint.hash(into: &hasher)
+            case .__DO_NOT_USE_THIS_CASE:
+                fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
             }
             for param in parameters {
                 hasher.combine(param)

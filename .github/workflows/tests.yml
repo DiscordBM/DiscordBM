@@ -12,22 +12,28 @@ jobs:
     with:
       with_coverage: true
       with_tsan: true
-      with_public_api_check: true
-      with_gh_codeql: false # Temporary, because it's broken
+      with_api_check: true
+      with_gh_codeql: false
       test_filter: '^DiscordBMTests'
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   macro-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
       with_tsan: true
-      with_public_api_check: true
-      with_gh_codeql: false # Temporary, because it's broken
+      with_api_check: false
+      with_gh_codeql: false
       test_filter: '^MacroTests'
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   websocket-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
       with_tsan: false
-      with_public_api_check: false
-      with_gh_codeql: false # Temporary, because it's broken
+      with_api_check: false
+      with_gh_codeql: false
       test_filter: '^WebSocketTests'
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

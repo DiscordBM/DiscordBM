@@ -7,7 +7,6 @@
 import DiscordModels
 import NIOHTTP1
 
-/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum APIEndpoint: Endpoint {
 
     // MARK: Polls
@@ -293,6 +292,9 @@ public enum APIEndpoint: Endpoint {
     case deleteWebhook(webhookId: WebhookSnowflake)
     case deleteWebhookByToken(webhookId: WebhookSnowflake, webhookToken: String)
     case deleteWebhookMessage(webhookId: WebhookSnowflake, webhookToken: String, messageId: MessageSnowflake)
+
+    /// This case serves as a way of discouraging exhaustive switch statements
+    case __DO_NOT_USE_THIS_CASE
 
     var urlPrefix: String {
         "https://discord.com/api/v\(DiscordGlobalConfiguration.apiVersion)/"
@@ -915,8 +917,10 @@ public enum APIEndpoint: Endpoint {
             let webhookId = webhookId.rawValue
             let messageId = messageId.rawValue
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
-        return urlPrefix + suffix
+        return self.urlPrefix + suffix
     }
 
     public var urlDescription: String {
@@ -1543,8 +1547,10 @@ public enum APIEndpoint: Endpoint {
             let webhookToken = webhookToken.urlPathEncoded().hash
             let messageId = messageId.rawValue
             suffix = "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
-        return urlPrefix + suffix
+        return self.urlPrefix + suffix
     }
 
     public var httpMethod: HTTPMethod {
@@ -1733,6 +1739,8 @@ public enum APIEndpoint: Endpoint {
         case .deleteWebhook: return .DELETE
         case .deleteWebhookByToken: return .DELETE
         case .deleteWebhookMessage: return .DELETE
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 
@@ -1922,6 +1930,8 @@ public enum APIEndpoint: Endpoint {
         case .deleteWebhook: return true
         case .deleteWebhookByToken: return true
         case .deleteWebhookMessage: return true
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 
@@ -2111,6 +2121,8 @@ public enum APIEndpoint: Endpoint {
         case .deleteWebhook: return true
         case .deleteWebhookByToken: return false
         case .deleteWebhookMessage: return false
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 
@@ -2484,6 +2496,8 @@ public enum APIEndpoint: Endpoint {
             return [webhookId.rawValue, webhookToken]
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
             return [webhookId.rawValue, webhookToken, messageId.rawValue]
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 
@@ -2673,6 +2687,8 @@ public enum APIEndpoint: Endpoint {
         case .deleteWebhook: return 182
         case .deleteWebhookByToken: return 183
         case .deleteWebhookMessage: return 184
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 
@@ -3046,11 +3062,12 @@ public enum APIEndpoint: Endpoint {
             return "deleteWebhookByToken(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken))"
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
             return "deleteWebhookMessage(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken), messageId.rawValue: \(messageId.rawValue))"
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 }
 
-/// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
 
     // MARK: Polls
@@ -3228,6 +3245,9 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case getWebhookMessage
     case listChannelWebhooks
 
+    /// This case serves as a way of discouraging exhaustive switch statements
+    case __DO_NOT_USE_THIS_CASE
+
     public var description: String {
         switch self {
         case .listPollAnswerVoters: return "listPollAnswerVoters"
@@ -3305,6 +3325,8 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .getWebhookByToken: return "getWebhookByToken"
         case .getWebhookMessage: return "getWebhookMessage"
         case .listChannelWebhooks: return "listChannelWebhooks"
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
 
@@ -3385,6 +3407,8 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .getWebhookByToken: self = .getWebhookByToken
         case .getWebhookMessage: self = .getWebhookMessage
         case .listChannelWebhooks: self = .listChannelWebhooks
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         default: return nil
         }
     }

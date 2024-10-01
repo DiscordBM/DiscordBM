@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 
 import PackageDescription
 import CompilerPluginSupport
@@ -50,7 +50,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.26.0"),
         .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.15.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
-        .package(url: "https://github.com/apple/swift-syntax", "509.0.0"..<"511.0.0")
+        .package(url: "https://github.com/apple/swift-syntax", from: "509.0.0")
     ],
     targets: [
         .target(
@@ -214,32 +214,9 @@ var featureFlags: [SwiftSetting] {
         /// https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md
         /// Require `any` for existential types.
         .enableUpcomingFeature("ExistentialAny"),
-
-        /// https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md
-        /// Nicer `#file`.
-        .enableUpcomingFeature("ConciseMagicFile"),
-
-        /// https://github.com/apple/swift-evolution/blob/main/proposals/0286-forward-scan-trailing-closures.md
-        /// This one shouldn't do much to be honest, but shouldn't hurt as well.
-        .enableUpcomingFeature("ForwardTrailingClosures"),
-
-        /// https://github.com/apple/swift-evolution/blob/main/proposals/0354-regex-literals.md
-        /// `BareSlashRegexLiterals` not enabled since we don't use regex anywhere.
-
-        /// https://github.com/apple/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md
-        /// `ImportObjcForwardDeclarations` not enabled because it's objc-related.
-    ]
-}
-
-var experimentalFeatureFlags: [SwiftSetting] {
-    [
-        /// `DiscordBM` passes the `complete` level.
-        ///
-        /// `minimal` / `targeted` / `complete`
-        .enableExperimentalFeature("StrictConcurrency=complete"),
     ]
 }
 
 var swiftSettings: [SwiftSetting] {
-    featureFlags + experimentalFeatureFlags
+    featureFlags
 }

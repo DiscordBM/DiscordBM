@@ -848,6 +848,7 @@ public struct Gateway: Sendable, Codable {
         public var flags: IntBitField<Guild.Member.Flag>?
         public var pending: Bool?
         public var communication_disabled_until: DiscordTimestamp?
+        public var avatar_decoration_data: DiscordUser.AvatarDecoration?
 
         public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -866,11 +867,18 @@ public struct Gateway: Sendable, Codable {
             )
             self.deaf = try container.decodeIfPresent(Bool.self, forKey: .deaf)
             self.mute = try container.decodeIfPresent(Bool.self, forKey: .mute)
-            self.flags = try container.decodeIfPresent(IntBitField<Guild.Member.Flag>.self, forKey: .flags)
+            self.flags = try container.decodeIfPresent(
+                IntBitField<Guild.Member.Flag>.self,
+                forKey: .flags
+            )
             self.pending = try container.decodeIfPresent(Bool.self, forKey: .pending)
             self.communication_disabled_until = try container.decodeIfPresent(
                 DiscordTimestamp.self,
                 forKey: .communication_disabled_until
+            )
+            self.avatar_decoration_data = try container.decodeIfPresent(
+                DiscordUser.AvatarDecoration.self,
+                forKey: .avatar_decoration_data
             )
         }
     }
@@ -965,15 +973,11 @@ public struct Gateway: Sendable, Codable {
     
     /// https://discord.com/developers/docs/topics/gateway-events#invite-create-invite-create-event-fields
     public struct InviteCreate: Sendable, Codable {
-        
-        /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
-        @UnstableEnum<Int>
-        public enum TargetKind: Sendable, Codable {
-            case stream // 1
-            case embeddedApplication // 2
-            case __undocumented(Int)
-        }
 
+        /// FIXME: Type-alias to avoid code breakage
+        public typealias TargetKind = Invite.TargetKind
+
+        public var type: Invite.Kind
         public var channel_id: ChannelSnowflake
         public var code: String
         public var created_at: DiscordTimestamp
@@ -981,7 +985,7 @@ public struct Gateway: Sendable, Codable {
         public var inviter: DiscordUser?
         public var max_age: Int
         public var max_uses: Int
-        public var target_type: TargetKind?
+        public var target_type: Invite.TargetKind?
         public var target_user: DiscordUser?
         public var target_application: PartialApplication?
         public var temporary: Bool
@@ -1034,6 +1038,7 @@ public struct Gateway: Sendable, Codable {
         public var role_subscription_data: RoleSubscriptionData?
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
         public var poll: Poll?
+        public var call: DiscordChannel.Message.Call?
         /// Extra fields:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
@@ -1133,6 +1138,11 @@ public struct Gateway: Sendable, Codable {
         /// FIXME: Discord calls this 'burst'. Can't change it to not break API
         case `super` // 1
         case __undocumented(Int)
+
+        /// The same as ``.super``.
+        public static var burst: Self {
+            .super
+        }
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-add-message-reaction-add-event-fields
@@ -1143,11 +1153,67 @@ public struct Gateway: Sendable, Codable {
         public var message_id: MessageSnowflake
         public var guild_id: GuildSnowflake?
         public var burst: Bool?
+        public var burst_colors: [DiscordColor]?
         public var member: Guild.Member?
         public var emoji: Emoji
         public var message_author_id: UserSnowflake?
+
+        enum CodingKeys: String, CodingKey {
+            case type
+            case user_id
+            case channel_id
+            case message_id
+            case guild_id
+            case burst
+            case burst_colors
+            case member
+            case emoji
+            case message_author_id
+        }
+
+        public init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+
+            self.type = try container.decode(ReactionKind.self, forKey: .type)
+            self.user_id = try container.decode(UserSnowflake.self, forKey: .user_id)
+            self.channel_id = try container.decode(ChannelSnowflake.self, forKey: .channel_id)
+            self.message_id = try container.decode(MessageSnowflake.self, forKey: .message_id)
+            self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
+            self.burst = try container.decodeIfPresent(Bool.self, forKey: .burst)
+            self.burst_colors = try container.decodeIfPresent(
+                [String].self,
+                forKey: .burst_colors
+            )?.compactMap {
+                DiscordColor(hex: $0)
+            }
+            self.member = try container.decode(Guild.Member.self, forKey: .member)
+            self.emoji = try container.decode(Emoji.self, forKey: .emoji)
+            self.message_author_id = try container.decodeIfPresent(
+                UserSnowflake.self,
+                forKey: .message_author_id
+            )
+        }
+
+        public func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            
+            try container.encode(self.type, forKey: .type)
+            try container.encode(self.user_id, forKey: .user_id)
+            try container.encode(self.channel_id, forKey: .channel_id)
+            try container.encode(self.message_id, forKey: .message_id)
+            try container.encodeIfPresent(self.guild_id, forKey: .guild_id)
+            try container.encodeIfPresent(self.burst, forKey: .burst)
+            try container.encodeIfPresent(
+                self.burst_colors?.map { $0.asHex() },
+                forKey: .burst_colors
+            )
+            try container.encodeIfPresent(self.member, forKey: .member)
+            try container.encode(self.emoji, forKey: .emoji)
+            try container.encodeIfPresent(self.message_author_id, forKey: .message_author_id)
+        }
+
     }
-    
+
     /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove
     public struct MessageReactionRemove: Sendable, Codable {
         public var type: ReactionKind
@@ -1155,6 +1221,7 @@ public struct Gateway: Sendable, Codable {
         public var channel_id: ChannelSnowflake
         public var message_id: MessageSnowflake
         public var guild_id: GuildSnowflake?
+        /// FIXME: make non-optional
         public var burst: Bool?
         public var emoji: Emoji
     }

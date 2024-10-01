@@ -68,7 +68,7 @@ public actor BotGatewayManager: GatewayManager {
     
     /// 120 per 60 seconds (1 every 500ms),
     /// per https://discord.com/developers/docs/topics/gateway#rate-limiting
-    var sendQueue = SerialQueue(waitTime: .milliseconds(500))
+    let sendQueue = SerialQueue(waitTime: .milliseconds(500))
     
     //MARK: Current connection properties
     
@@ -623,8 +623,8 @@ extension BotGatewayManager {
             }
         }
     }
-    
-    private func send(
+
+    private nonisolated func send(
         payload: Gateway.Event,
         opcode: UInt8? = nil,
         connectionId: UInt? = nil,

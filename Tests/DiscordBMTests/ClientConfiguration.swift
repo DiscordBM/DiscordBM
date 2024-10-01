@@ -11,8 +11,10 @@ class ClientConfigurationTests: XCTestCase {
         do {
             let policy = RetryPolicy.default
             XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 0))
-            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 1))
-            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 2))
+            XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 1))
+            XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 2))
+            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 3))
+            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 4))
             XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 100000))
         }
         
