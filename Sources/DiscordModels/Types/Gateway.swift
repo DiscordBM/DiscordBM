@@ -39,6 +39,9 @@ public struct Gateway: Sendable, Codable {
         
         /// This enum is just for swiftly organizing Discord gateway event's `data`.
         /// You need to read each case's inner payload's documentation for more info.
+        ///
+        /// `indirect` is used to mitigate this issue: https://github.com/swiftlang/swift/issues/74303
+        indirect
         public enum Payload: Sendable {
             /// https://discord.com/developers/docs/topics/gateway-events#heartbeat
             case heartbeat(lastSequenceNumber: Int?)
