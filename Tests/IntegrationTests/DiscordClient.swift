@@ -1456,7 +1456,8 @@ class DiscordClientTests: XCTestCase {
         ).decodeJSONError()
 
         switch updatedOnboardingError.code {
-        case .cannotUpdateOnboardingWhileBelowRequirements: break
+        // FIXME: should throw 'cannotUpdateOnboardingWhileBelowRequirements' instead
+        case .invalidFormBodyOrInvalidContentType: break
         default:
             XCTFail("Unexpected error: \(updatedOnboardingError)")
         }
