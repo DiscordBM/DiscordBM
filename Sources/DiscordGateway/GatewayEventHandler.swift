@@ -210,7 +210,7 @@ public extension GatewayEventHandler {
 // MARK: - Handle
 extension GatewayEventHandler {
     @inlinable
-    func handleAsync() async {
+    public func handleAsync() async {
         do {
             guard try await self.onEventHandlerStart() else { return }
         } catch {
