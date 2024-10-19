@@ -474,16 +474,17 @@ public struct Gateway: Sendable, Codable {
             public var device: String
 
             public init(
-                os: String? = nil,
+                os: String = Self.defaultOS(),
                 browser: String = "DiscordBM",
                 device: String = "DiscordBM"
             ) {
-                self.os = os ?? ConnectionProperties.defaultOS()
+                self.os = os
                 self.browser = browser
                 self.device = device
             }
 
-            private static func defaultOS() -> String {
+            @usableFromInline
+            static func defaultOS() -> String {
                 #if os(macOS)
                     return "macOS"
                 #elseif os(Linux)
