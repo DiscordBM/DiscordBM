@@ -547,8 +547,7 @@ public struct Gateway: Sendable, Codable {
         }
         
         public var token: Secret
-        /// Not public to make sure the correct info is sent to Discord.
-        var properties = ConnectionProperties()
+        public var properties: ConnectionProperties
         /// DiscordBM supports the better "Transport Compression", but not "Payload Compression".
         /// Setting this to `true` will only cause problems.
         /// "Transport Compression" is enabled by default with no options to disable it.
