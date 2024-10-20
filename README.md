@@ -99,15 +99,20 @@ struct EntryPoint {
         /// Make an instance like above
         let bot: BotGatewayManager = <#GatewayManager You Made In Previous Steps#>
 
-        /// Tell the manager to connect to Discord. Use a `Task { }` because it
-        /// might take a few seconds, or even minutes under bad network connections
-        /// Don't use `Task { }` if you care and want to wait
-        Task { await bot.connect() }
+        /// You can also wrap this task-group in the `run()` function of a `Service`, if you're using `ServiceLifecycle`:
+        /// https://swiftpackageindex.com/swift-server/swift-service-lifecycle/main/documentation/servicelifecycle
+        await withTaskGroup(of: Void.self) { taskGroup in
+            taskGroup.addTask {
+                await bot.connect()
+            }
 
-        /// Handle each event in the `bot.events` async stream
-        /// This stream will never end, therefore preventing your executable from exiting
-        for await event in await bot.events {
-            EventHandler(event: event, client: bot.client).handle()
+            taskGroup.addTask {
+                /// Handle each event in the `bot.events` async stream
+                /// This stream will never end, therefore preventing your executable from exiting
+                for await event in await bot.events {
+                    EventHandler(event: event, client: bot.client).handle()
+                }
+            }
         }
     }
 }
