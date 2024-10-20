@@ -469,41 +469,53 @@ public struct Gateway: Sendable, Codable {
         
         /// https://discord.com/developers/docs/topics/gateway-events#identify-identify-connection-properties
         public struct ConnectionProperties: Sendable, Codable {
-            public var os: String = {
-#if os(macOS)
-                return "macOS"
-#elseif os(Linux)
-                return "Linux"
-#elseif os(iOS)
-                return "iOS"
-#elseif os(watchOS)
-                return "watchOS"
-#elseif os(tvOS)
-                return "tvOS"
-#elseif os(Windows)
-                return "Windows"
-#elseif canImport(Musl)
-                return "Musl"
-#elseif os(FreeBSD)
-                return "FreeBSD"
-#elseif os(OpenBSD)
-                return "OpenBSD"
-#elseif os(Android)
-                return "Android"
-#elseif os(PS4)
-                return "PS4"
-#elseif os(Cygwin)
-                return "Cygwin"
-#elseif os(Haiku)
-                return "Haiku"
-#elseif os(WASI)
-                return "WASI"
-#else
-                return "Unknown"
-#endif
-            }()
-            public var browser = "DiscordBM"
-            public var device = "DiscordBM"
+            public var os: String
+            public var browser: String
+            public var device: String
+
+            public init(
+                os: String = Self.__defaultOS,
+                browser: String = "DiscordBM",
+                device: String = "DiscordBM"
+            ) {
+                self.os = os
+                self.browser = browser
+                self.device = device
+            }
+
+            public static var __defaultOS: String {
+                #if os(macOS)
+                    return "macOS"
+                #elseif os(Linux)
+                    return "Linux"
+                #elseif os(iOS)
+                    return "iOS"
+                #elseif os(watchOS)
+                    return "watchOS"
+                #elseif os(tvOS)
+                    return "tvOS"
+                #elseif os(Windows)
+                    return "Windows"
+                #elseif canImport(Musl)
+                    return "Musl"
+                #elseif os(FreeBSD)
+                    return "FreeBSD"
+                #elseif os(OpenBSD)
+                    return "OpenBSD"
+                #elseif os(Android)
+                    return "Android"
+                #elseif os(PS4)
+                    return "PS4"
+                #elseif os(Cygwin)
+                    return "Cygwin"
+                #elseif os(Haiku)
+                    return "Haiku"
+                #elseif os(WASI)
+                    return "WASI"
+                #else
+                    return "Unknown"
+                #endif
+            }
         }
         
         /// https://discord.com/developers/docs/topics/gateway-events#update-presence-gateway-presence-update-structure
@@ -546,16 +558,18 @@ public struct Gateway: Sendable, Codable {
         public var presence: Presence?
         public var intents: IntBitField<Intent>
         
-        public init(token: Secret, large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
+        public init(token: Secret, properties: ConnectionProperties = ConnectionProperties(), large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
             self.token = token
+            self.properties = properties
             self.large_threshold = large_threshold
             self.shard = shard
             self.presence = presence
             self.intents = .init(intents)
         }
         
-        public init(token: String, large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
+        public init(token: String, properties: ConnectionProperties = ConnectionProperties(), large_threshold: Int? = nil, shard: IntPair? = nil, presence: Presence? = nil, intents: [Intent]) {
             self.token = Secret(token)
+            self.properties = properties
             self.large_threshold = large_threshold
             self.shard = shard
             self.presence = presence
