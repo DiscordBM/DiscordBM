@@ -1,4 +1,5 @@
-import DiscordWebSocket
+import WSClient
+import WSCompression
 import Foundation
 import AsyncHTTPClient
 import Atomics
@@ -23,7 +24,7 @@ public actor BotGatewayManager: GatewayManager {
         }
     }
     
-    var ws: WebSocket?
+    var outboundWriter: WebSocketOutboundWriter?
     let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
@@ -259,42 +260,41 @@ public actor BotGatewayManager: GatewayManager {
             ("encoding", "json"),
             ("compress", "zlib-stream")
         ]
-        let configuration = WebSocketClient.Configuration(
+        let configuration = WebSocketClientConfiguration(
             maxFrameSize: self.maxFrameSize,
-            decompression: .enabled
+            extensions: [
+                WebSocketExtensionFactory.perMessageDeflate(
+                    maxDecompressedFrameSize: self.maxFrameSize
+                )
+            ]
         )
         logger.trace("Will try to connect to Discord through web-socket")
+        let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
         do {
-            let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
-            let setWebSocket: @Sendable (WebSocket) async -> Void = { ws in
-                await self.closeWebSocket(ws: self.ws)
-                await self.setWebSocket(ws: ws)
-            }
-            let onBuffer: @Sendable (ByteBuffer) -> Void = { buffer in
-                Task { await self.processBinaryData(buffer, forConnectionWithId: connectionId) }
-            }
-            let onClose: @Sendable (WebSocket) -> Void = { ws in
-                Task { await self.setupOnClose(ws: ws, forConnectionWithId: connectionId) }
-            }
-            /// Not removing the returned `WebSocket` for tests compatibility.
-            /// The actual setting of `self.ws` to the new `WebSocket` happens in
-            /// the `setWebSocket` parameter. This is to try to avoid a weird bug where
-            /// `WebSocket.connect()` returns the `WebSocket` _before_ the first event is received.
-            _ = try await WebSocket.connect(
-                to: gatewayURL + queries.makeForURLQuery(),
+            let closeFrame = try await WebSocketClient.connect(
+                url: gatewayURL + queries.makeForURLQuery(),
                 configuration: configuration,
-                on: eventLoopGroup,
-                setWebSocket: setWebSocket,
-                onBuffer: onBuffer,
-                onClose: onClose
-            )
-            self.logger.debug("Connected to Discord through web-socket. Will configure")
-            self.state.store(.configured, ordering: .relaxed)
+                eventLoopGroup: self.eventLoopGroup,
+                logger: self.logger
+            ) { inbound, outbound, context in
+                await self.setupOutboundWriter(outbound)
+
+                self.logger.debug("Connected to Discord through web-socket. Will configure")
+                self.state.store(.configured, ordering: .relaxed)
+
+                try await outbound.write(.text("Hello"))
+                for try await message in inbound.messages(maxSize: self.maxFrameSize) {
+                    await self.processBinaryData(message, forConnectionWithId: connectionId)
+                }
+            }
+
+            self.onClose(closeFrame: closeFrame, forConnectionWithId: connectionId)
         } catch {
             logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
                 "error": .string("\(error)")
             ])
             self.state.store(.noConnection, ordering: .relaxed)
+            self.onClose(closeFrame: nil, forConnectionWithId: connectionId)
             await self.connect()
         }
     }
@@ -354,7 +354,7 @@ public actor BotGatewayManager: GatewayManager {
         self.state.store(.stopped, ordering: .relaxed)
         await connectionBackoff.resetTryCount()
         await self.sendQueue.reset()
-        self.closeWebSocket(ws: self.ws)
+        await self.closeWebSocket()
     }
 }
 
@@ -477,16 +477,30 @@ extension BotGatewayManager {
         self.send(payload: identify)
     }
     
-    private func processBinaryData(_ buffer: ByteBuffer, forConnectionWithId connectionId: UInt) {
-        self.logger.debug("Got text from websocket", metadata: [
-            "text": .string(String(buffer: buffer))
-        ])
+    private func processBinaryData(
+        _ message: WebSocketMessage,
+        forConnectionWithId connectionId: UInt
+    ) {
         guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-        let data = Data(buffer: buffer)
+
+        let buffer: ByteBuffer
+        switch message {
+        case .text(let string):
+            self.logger.debug("Got text from websocket", metadata: [
+                "text": .string(string)
+            ])
+            buffer = ByteBuffer(string: string)
+        case .binary(let _buffer):
+            self.logger.debug("Got binary from websocket", metadata: [
+                "text": .string(String(buffer: _buffer))
+            ])
+            buffer = _buffer
+        }
+
         do {
             let event = try DiscordGlobalConfiguration.decoder.decode(
                 Gateway.Event.self,
-                from: data
+                from: Data(buffer: buffer, byteTransferStrategy: .noCopy)
             )
             self.logger.debug("Decoded event", metadata: [
                 "event": .string("\(event)")
@@ -505,11 +519,12 @@ extension BotGatewayManager {
         }
     }
     
-    private func setupOnClose(ws: WebSocket, forConnectionWithId connectionId: UInt) {
+    private func onClose(closeFrame: WebSocketCloseFrame?, forConnectionWithId connectionId: UInt) {
         self.logger.debug("Received connection close notification for a web-socket")
         guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
         Task {
-            let (code, codeDesc) = self.getCloseCodeAndDescription(of: ws)
+            guard let closeFrame else { return }
+            let (code, codeDesc) = self.getCloseCodeAndDescription(of: closeFrame)
             let isDebugLevelCode = [nil, .goingAway, .unexpectedServerError].contains(code)
             self.logger.log(
                 level: isDebugLevelCode ? .debug : .warning,
@@ -521,7 +536,7 @@ extension BotGatewayManager {
                     )
                 ]
             )
-            if self.canTryReconnect(code: ws.closeCode) {
+            if self.canTryReconnect(code: closeFrame.closeCode) {
                 self.state.store(.noConnection, ordering: .relaxed)
                 await self.connect()
             } else {
@@ -536,9 +551,9 @@ extension BotGatewayManager {
     }
     
     private nonisolated func getCloseCodeAndDescription(
-        of ws: WebSocket
-    ) -> (WebSocketErrorCode?, String) {
-        let code = ws.closeCode
+        of closeFrame: WebSocketCloseFrame
+    ) -> (WebSocketErrorCode, String) {
+        let code = closeFrame.closeCode
         let description: String
         switch code {
         case let .unknown(codeNumber):
@@ -548,15 +563,13 @@ extension BotGatewayManager {
             case .none:
                 description = "\(codeNumber)"
             }
-        case let .some(anyOtherCode):
-            description = "\(anyOtherCode)"
-        case .none:
-            description = "nil"
+        default:
+            description = closeFrame.reason ?? "\(code)"
         }
         return (code, description)
     }
     
-    private nonisolated func canTryReconnect(code: WebSocketErrorCode?) -> Bool {
+    private nonisolated func canTryReconnect(code: WebSocketErrorCode) -> Bool {
         switch code {
         case let .unknown(codeNumber):
             guard let discordCode = GatewayCloseCode(rawValue: codeNumber) else { return true }
@@ -644,15 +657,20 @@ extension BotGatewayManager {
                     return
                 }
                 
-                if let ws = await self.ws {
+                if let outboundWriter = await self.outboundWriter {
                     do {
                         self.logger.trace("Will send a payload", metadata: [
                             "payload": .string("\(payload)"),
                             "opcode": .stringConvertible(opcode)
                         ])
-                        try await ws.send(
-                            raw: data,
-                            opcode: .init(encodedWebSocketOpcode: opcode)!
+                        try await outboundWriter.write(
+                            .custom(
+                                .init(
+                                    fin: true,
+                                    opcode: .init(encodedWebSocketOpcode: opcode)!,
+                                    data: ByteBuffer(data: data)
+                                )
+                            )
                         )
                     } catch {
                         if let channelError = error as? ChannelError,
@@ -713,15 +731,17 @@ extension BotGatewayManager {
         }
     }
 
-    func setWebSocket(ws: WebSocket) {
-        self.ws = ws
+    func setupOutboundWriter(_ outboundWriter: WebSocketOutboundWriter) {
+        self.outboundWriter = outboundWriter
     }
-    
-    private nonisolated func closeWebSocket(ws: WebSocket?) {
+
+    private nonisolated func closeWebSocket() async {
         logger.debug("Will possibly close a web-socket")
-        ws?.closeWithFuture().whenFailure { error in
-            self.logger.warning("Couldn't close a web-socket properly", metadata: [
-                "error": .string("\(error)")
+        do {
+            try await self.outboundWriter?.close(.goingAway, reason: nil)
+        } catch {
+            logger.warning("Will ignore WS closure failure", metadata: [
+                "error": .string(String(reflecting: error))
             ])
         }
     }
