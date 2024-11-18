@@ -1,5 +1,4 @@
 import WSClient
-import WSCompression
 import Foundation
 import AsyncHTTPClient
 import Atomics
@@ -260,13 +259,23 @@ public actor BotGatewayManager: GatewayManager {
             ("encoding", "json"),
             ("compress", "zlib-stream")
         ]
+
+        let decompressorWSExtension: ZlibDecompressorWSExtension
+        do {
+            decompressorWSExtension = try ZlibDecompressorWSExtension()
+        } catch {
+            self.logger.critical(
+                "Will not connect because can't create a decompressor. Something is wrong. Please report this failure at https://github.com/DiscordBM/DiscordBM/issues",
+                metadata: ["error": .string(String(reflecting: error))]
+            )
+            return
+        }
+
         let configuration = WebSocketClientConfiguration(
             maxFrameSize: self.maxFrameSize,
-            extensions: [
-                WebSocketExtensionFactory.perMessageDeflate(
-                    maxDecompressedFrameSize: self.maxFrameSize
-                )
-            ]
+            extensions: [.nonNegotiatedExtension {
+                decompressorWSExtension
+            }]
         )
         logger.trace("Will try to connect to Discord through web-socket")
         let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)

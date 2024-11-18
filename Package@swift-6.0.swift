@@ -51,9 +51,11 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.15.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
         .package(url: "https://github.com/apple/swift-syntax.git", "509.0.0"..<"601.0.0"),
+        .package(url: "https://github.com/adam-fowler/compress-nio.git", from: "1.3.0"),
         .package(
             url: "https://github.com/hummingbird-project/swift-websocket.git",
-            .upToNextMinor(from: "0.1.0")
+            branch: "non-negotiable-extensions"
+            //            .upToNextMinor(from: "0.1.0")
         )
     ],
     targets: [
@@ -91,7 +93,7 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 .product(name: "WSClient", package: "swift-websocket"),
-                .product(name: "WSCompression", package: "swift-websocket"),
+                .product(name: "CompressNIO", package: "compress-nio"),
                 .target(name: "DiscordHTTP"),
             ],
             swiftSettings: swiftSettings
