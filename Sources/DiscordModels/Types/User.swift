@@ -19,17 +19,61 @@ public struct DiscordUser: Sendable, Codable {
         case partner // 1
         case hypeSquad // 2
         case BugHunterLevel1 // 3
+        // Undocumented, user has enabled SMS 2FA
+        case mfaSms // 4
+        // Undocumented, user dismissed promotion?
+        case premiumPromoDismissed // 5
         case hypeSquadOnlineHouse1 // 6
         case hypeSquadOnlineHouse2 // 7
         case hypeSquadOnlineHouse3 // 8
         case premiumEarlySupporter // 9
         case teamPseudoUser // 10
+        // Undocumented, unknown
+        case internalApplication // 11
+        // Undocumented, user is a Discord system account
+        case system // 12
+        // Undocumented, user has unread messages from Discord
+        case hasUnreadUrgentMessages // 13
         case bugHunterLevel2 // 14
+        // Undocumented, user account deleted due to underage, unused flag
+        case underageDeleted // 15
         case verifiedBot // 16
         case verifiedDeveloper // 17
         case certifiedModerator // 18
         case botHttpInteractions // 19
+        // Undocumented, user is likely spammer
+        case spammer // 20
+        // Undocumented, user's nitro features are disabled
+        case disablePremium // 21
         case activeDeveloper // 22
+        // Undocumented, unknown
+        case provisionalAccount // 23
+        // Undocumented, user has a high global rate limit
+        case globalRateLimit // 33
+        // Undocumented, user account deleted
+        case deleted // 34
+        // Undocumented, user account disabled by Discord for suspicious activity
+        case disabledSuspicious // 35
+        // Undocumented, user account deleted by account holder
+        case selfDeleted // 36
+        // Undocumented, user account has premium discriminator
+        case premiumDiscriminator // 37
+        // Undocumented, user account has used desktop client
+        case usedDesktopClient // 38
+        // Undocumented, user account has used web client
+        case usedWebClient // 39
+        // Undocumented, user account has used mobile client
+        case usedMobileClient // 40
+        // Undocumented, user account disabled
+        case disabled // 41
+        // Undocumented, user account has verified email
+        case verifiedEmail // 43
+        // Undocumented, user account is quarantined
+        case quarantined // 44
+        // Undocumented, user account is collaborator and has staff privileges
+        case collaborator // 50
+        // Undocumented, user account is collaborator and has no staff privileges
+        case restrictedCollaborator // 51
         case __undocumented(UInt)
     }
 

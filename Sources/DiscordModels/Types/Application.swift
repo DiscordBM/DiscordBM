@@ -5,7 +5,25 @@ public struct DiscordApplication: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/application#application-object-application-flags
     @UnstableEnum<UInt>
     public enum Flag: Sendable {
+        // Undocumented, app has published embedded app
+        case embeddedReleased // 1
+        // Undocumented, app can make Twitch-style emojis
+        case managedEmoji // 2
+        // Undocumented, embedded app can make in-app purchases
+        case embeddedIAP // 3
+        // Undocumented, app can make group DMs
+        case groupDMCreate // 4
+        // Undocumented, app can access local RPC server
+        case rpcPrivateBeta // 5
         case applicationAutoModerationRuleCreateBadge // 6
+        // Undocumented, app can make activity assets
+        case allowAssets // 8
+        // Undocumented, app can enable activity spectating
+        case allowActivityActionSpectate // 9
+        // Undocumented, app can enable activity join requests
+        case allowActivityActionJoinRequest // 10
+        // Undocumented, app has accessed local RPC before
+        case rpcHasConnected // 11
         case gatewayPresence // 12
         case gatewayPresenceLimited // 13
         case gatewayGuildMembers // 14
@@ -14,7 +32,12 @@ public struct DiscordApplication: Sendable, Codable {
         case embedded // 17
         case gatewayMessageContent // 18
         case gatewayMessageContentLimited // 19
+        // Undocumented, indicates first-party embedded app
+        case embeddedFirstParty // 20
         case applicationCommandBadge // 23
+        case active // 24
+        // Undocumented, app can make iframe modals
+        case iframeModals // 26
         case __undocumented(UInt)
     }
 
