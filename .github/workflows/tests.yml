@@ -25,12 +25,3 @@ jobs:
       test_filter: '^MacroTests'
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-  websocket-tests:
-    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
-    with:
-      with_coverage: true
-      with_tsan: false
-      with_api_check: false
-      test_filter: '^WebSocketTests'
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
