@@ -97,7 +97,7 @@ class HTTPRateLimiterTests: XCTestCase {
             headers: [:],
             status: invalidStatuses.randomElement()!
         )
-        /// Now 1000 invalid requests, so should NOT allow requests.
+        /// Now 500 invalid requests, so should NOT allow requests.
         do {
             let shouldRequest = await rateLimiter.shouldRequest(to: endpoint)
             XCTAssertEqual(shouldRequest, .false)
