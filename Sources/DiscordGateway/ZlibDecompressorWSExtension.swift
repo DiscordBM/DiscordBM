@@ -4,18 +4,6 @@ import NIOCore
 import CompressNIO
 
 struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
-
-    enum Error: Swift.Error, CustomStringConvertible {
-        case expectedZSyncFlushBytesInTheEnd(buffer: ByteBuffer)
-
-        var description: String {
-            switch self {
-            case .expectedZSyncFlushBytesInTheEnd(let buffer):
-                "ZlibDecompressorWSExtension.Error.expectedZSyncFlushBytesInTheEnd(buffer: \(buffer))"
-            }
-        }
-    }
-
     let name = "zlib-stream"
     let decompressor: ZlibDecompressor
 
