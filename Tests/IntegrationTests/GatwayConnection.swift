@@ -13,7 +13,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
             var logger = Logger(label: $0)
-            logger.logLevel = .trace
+            logger.logLevel = .debug
             return logger
         }
     }
