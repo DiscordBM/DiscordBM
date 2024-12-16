@@ -13,7 +13,6 @@ jobs:
       with_coverage: true
       with_tsan: true
       with_api_check: true
-      with_gh_codeql: false
       test_filter: '^DiscordBMTests'
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
