@@ -291,7 +291,6 @@ public actor BotGatewayManager: GatewayManager {
                 self.logger.debug("Connected to Discord through web-socket. Will configure")
                 self.state.store(.configured, ordering: .relaxed)
 
-                try await outbound.write(.text("Hello"))
                 for try await message in inbound.messages(maxSize: self.maxFrameSize) {
                     await self.processBinaryData(message, forConnectionWithId: connectionId)
                 }
