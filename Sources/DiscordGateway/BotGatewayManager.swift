@@ -273,9 +273,7 @@ public actor BotGatewayManager: GatewayManager {
 
         let configuration = WebSocketClientConfiguration(
             maxFrameSize: self.maxFrameSize,
-            extensions: [.nonNegotiatedExtension {
-                decompressorWSExtension
-            }]
+            extensions: [.nonNegotiatedExtension { decompressorWSExtension }]
         )
         logger.trace("Will try to connect to Discord through web-socket")
         let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
@@ -296,14 +294,19 @@ public actor BotGatewayManager: GatewayManager {
                 }
             }
 
-            self.onClose(closeFrame: closeFrame, forConnectionWithId: connectionId)
+            logger.error("web-socket connection closed", metadata: [
+                "closeCode": .string(String(reflecting: closeFrame?.closeCode)),
+                "closeReason": .string(String(reflecting: closeFrame?.reason)),
+                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+            ])
+            await self.onClose(closeFrame: closeFrame, forConnectionWithId: connectionId)
         } catch {
             logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
-                "error": .string("\(error)")
+                "error": .string("\(String(reflecting: error))"),
+                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
             ])
             self.state.store(.noConnection, ordering: .relaxed)
-            self.onClose(closeFrame: nil, forConnectionWithId: connectionId)
-            await self.connect()
+            await self.onClose(closeFrame: nil, forConnectionWithId: connectionId)
         }
     }
 
@@ -527,40 +530,49 @@ extension BotGatewayManager {
         }
     }
     
-    private func onClose(closeFrame: WebSocketCloseFrame?, forConnectionWithId connectionId: UInt) {
+    private func onClose(
+        closeFrame: WebSocketCloseFrame?,
+        forConnectionWithId connectionId: UInt
+    ) async {
         self.logger.debug("Received connection close notification for a web-socket")
         guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-        Task {
-            guard let closeFrame else { return }
-            let (code, codeDesc) = self.getCloseCodeAndDescription(of: closeFrame)
-            let isDebugLevelCode = [nil, .goingAway, .unexpectedServerError].contains(code)
-            self.logger.log(
-                level: isDebugLevelCode ? .debug : .warning,
-                "Received connection close notification. Will try to reconnect",
-                metadata: [
-                    "code": .string(codeDesc),
-                    "closedConnectionId": .stringConvertible(
-                        self.connectionId.load(ordering: .relaxed)
-                    )
-                ]
-            )
-            if self.canTryReconnect(code: closeFrame.closeCode) {
-                self.state.store(.noConnection, ordering: .relaxed)
-                await self.connect()
-            } else {
-                self.state.store(.stopped, ordering: .relaxed)
-                self.connectionId.wrappingIncrement(ordering: .relaxed)
-                self.logger.critical("Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/DiscordBM/DiscordBM/issues if you think this is a library issue")
+        let (code, codeDesc) = self.getCloseCodeAndDescription(of: closeFrame)
+        let isDebugLevelCode = [nil, .goingAway, .unexpectedServerError].contains(code)
+        self.logger.log(
+            level: isDebugLevelCode ? .debug : .warning,
+            "Received connection close notification. Will try to reconnect",
+            metadata: [
+                "code": .string(codeDesc),
+                "closedConnectionId": .stringConvertible(
+                    self.connectionId.load(ordering: .relaxed)
+                )
+            ]
+        )
+        if self.canTryReconnect(code: closeFrame?.closeCode) {
+            self.state.store(.noConnection, ordering: .relaxed)
+            self.logger.trace("Will try reconnect since Discord does allow it.", metadata: [
+                "code": .string(codeDesc),
+                "closedConnectionId": .stringConvertible(
+                    self.connectionId.load(ordering: .relaxed)
+                )
+            ])
+            await self.connect()
+        } else {
+            self.state.store(.stopped, ordering: .relaxed)
+            self.connectionId.wrappingIncrement(ordering: .relaxed)
+            self.logger.critical("Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/DiscordBM/DiscordBM/issues if you think this is a library issue")
 
-                /// Don't remove/end the event streams just to stop apps from crashing/restarting
-                /// which could result in bot-token revocations or even temporary ip bans.
-            }
+            /// Don't remove/end the event streams just to stop apps from crashing/restarting
+            /// which could result in bot-token revocations or even temporary ip bans.
         }
     }
     
     private nonisolated func getCloseCodeAndDescription(
-        of closeFrame: WebSocketCloseFrame
-    ) -> (WebSocketErrorCode, String) {
+        of closeFrame: WebSocketCloseFrame?
+    ) -> (WebSocketErrorCode?, String) {
+        guard let closeFrame else {
+            return (nil, "nil")
+        }
         let code = closeFrame.closeCode
         let description: String
         switch code {
@@ -577,7 +589,7 @@ extension BotGatewayManager {
         return (code, description)
     }
     
-    private nonisolated func canTryReconnect(code: WebSocketErrorCode) -> Bool {
+    private nonisolated func canTryReconnect(code: WebSocketErrorCode?) -> Bool {
         switch code {
         case let .unknown(codeNumber):
             guard let discordCode = GatewayCloseCode(rawValue: codeNumber) else { return true }
