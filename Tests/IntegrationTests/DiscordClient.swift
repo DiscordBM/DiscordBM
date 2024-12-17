@@ -2420,17 +2420,17 @@ class DiscordClientTests: XCTestCase {
             XCTAssertEqual(file.extension, "png")
             XCTAssertEqual(file.filename, "1073704788400820324.png")
         }
-        
+
         do {
             let file = try await client.getCDNGuildIcon(
-                guildId: "922186320275722322",
-                icon: "a_6367dd2460a846748ad133206c910da5"
+                guildId: "431917998102675485",
+                icon: "9df817f0a7d3cc0056684005efe9bf51"
             ).getFile(overrideName: "guildIcon")
             XCTAssertGreaterThan(file.data.readableBytes, 100)
-            XCTAssertEqual(file.extension, "gif")
-            XCTAssertEqual(file.filename, "guildIcon.gif")
+            XCTAssertEqual(file.extension, "png")
+            XCTAssertEqual(file.filename, "guildIcon.png")
         }
-        
+
         do {
             let file = try await client.getCDNGuildSplash(
                 guildId: "922186320275722322",
@@ -2438,7 +2438,7 @@ class DiscordClientTests: XCTestCase {
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
-        
+
         do {
             let file = try await client.getCDNGuildDiscoverySplash(
                 guildId: "922186320275722322",
@@ -2446,7 +2446,7 @@ class DiscordClientTests: XCTestCase {
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
-        
+
         do {
             let file = try await client.getCDNGuildBanner(
                 guildId: "922186320275722322",
@@ -2454,7 +2454,7 @@ class DiscordClientTests: XCTestCase {
             ).getFile()
             XCTAssertGreaterThan(file.data.readableBytes, 100)
         }
-        
+
 //        do {
 //            let file = try await client.getCDNUserBanner(
 //                userId: UserSnowflake,
