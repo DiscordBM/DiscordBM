@@ -50,7 +50,7 @@ let package = Package(
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
         .package(url: "https://github.com/apple/swift-syntax.git", "509.0.0"..<"601.0.0"),
         .package(url: "https://github.com/adam-fowler/compress-nio.git", from: "1.3.0"),
-        .package(url: "https://github.com/hummingbird-project/swift-websocket.git", from: "1.1.0"),
+        .package(url: "https://github.com/hummingbird-project/swift-websocket.git", branch: "stop-client-close"),
     ],
     targets: [
         .target(
