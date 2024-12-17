@@ -277,36 +277,41 @@ public actor BotGatewayManager: GatewayManager {
         )
         logger.trace("Will try to connect to Discord through web-socket")
         let connectionId = self.connectionId.wrappingIncrementThenLoad(ordering: .relaxed)
-        do {
-            let closeFrame = try await WebSocketClient.connect(
-                url: gatewayURL + queries.makeForURLQuery(),
-                configuration: configuration,
-                eventLoopGroup: self.eventLoopGroup,
-                logger: self.logger
-            ) { inbound, outbound, context in
-                await self.setupOutboundWriter(outbound)
+        /// FIXME: remove this `Task` in a future major version.
+        /// This is so the `connect()` method does still exit, like it used to.
+        /// But for proper structured concurrency, this method should never exit (optimally).
+        Task {
+            do {
+                let closeFrame = try await WebSocketClient.connect(
+                    url: gatewayURL + queries.makeForURLQuery(),
+                    configuration: configuration,
+                    eventLoopGroup: self.eventLoopGroup,
+                    logger: self.logger
+                ) { inbound, outbound, context in
+                    await self.setupOutboundWriter(outbound)
 
-                self.logger.debug("Connected to Discord through web-socket. Will configure")
-                self.state.store(.configured, ordering: .relaxed)
+                    self.logger.debug("Connected to Discord through web-socket. Will configure")
+                    self.state.store(.configured, ordering: .relaxed)
 
-                for try await message in inbound.messages(maxSize: self.maxFrameSize) {
-                    await self.processBinaryData(message, forConnectionWithId: connectionId)
+                    for try await message in inbound.messages(maxSize: self.maxFrameSize) {
+                        await self.processBinaryData(message, forConnectionWithId: connectionId)
+                    }
                 }
-            }
 
-            logger.error("web-socket connection closed", metadata: [
-                "closeCode": .string(String(reflecting: closeFrame?.closeCode)),
-                "closeReason": .string(String(reflecting: closeFrame?.reason)),
-                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-            ])
-            await self.onClose(closeFrame: closeFrame, forConnectionWithId: connectionId)
-        } catch {
-            logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
-                "error": .string("\(String(reflecting: error))"),
-                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-            ])
-            self.state.store(.noConnection, ordering: .relaxed)
-            await self.onClose(closeFrame: nil, forConnectionWithId: connectionId)
+                logger.error("web-socket connection closed", metadata: [
+                    "closeCode": .string(String(reflecting: closeFrame?.closeCode)),
+                    "closeReason": .string(String(reflecting: closeFrame?.reason)),
+                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                ])
+                await self.onClose(closeFrame: closeFrame, forConnectionWithId: connectionId)
+            } catch {
+                logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
+                    "error": .string("\(String(reflecting: error))"),
+                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                ])
+                self.state.store(.noConnection, ordering: .relaxed)
+                await self.onClose(closeFrame: nil, forConnectionWithId: connectionId)
+            }
         }
     }
 
