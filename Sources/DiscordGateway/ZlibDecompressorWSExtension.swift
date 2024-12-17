@@ -6,6 +6,7 @@ import CompressNIO
 struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
     let name = "zlib-stream"
     let decompressor: ZlibDecompressor
+    let allocator = ByteBufferAllocator()
 
     init() throws {
         self.decompressor = try ZlibDecompressor(algorithm: .zlib, windowSize: 15)
@@ -15,19 +16,41 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
     func processReceivedFrame(_ frame: WebSocketFrame, context: WebSocketExtensionContext) throws -> WebSocketFrame {
         var frame = frame
 
-        var decompressionBuffer = ByteBuffer()
-        decompressionBuffer.reserveCapacity(
-            max(16_000, frame.data.readableBytes * 4)
+        var decompressionBuffer = allocator.buffer(
+            capacity: max(16_000, frame.data.readableBytes * 4)
         )
 
-        try self.decompressor.inflate(
+        try self.decompress(
             from: &frame.data,
-            to: &decompressionBuffer
+            into: &decompressionBuffer,
+            reserveCapacity: false
         )
 
         frame.data = consume decompressionBuffer
 
         return frame
+    }
+
+    func decompress(
+        from frame: inout ByteBuffer,
+        into buffer: inout ByteBuffer,
+        reserveCapacity: Bool
+    ) throws {
+        if reserveCapacity {
+            buffer.reserveCapacity(minimumWritableBytes: buffer.readableBytes)
+        }
+        do {
+            try self.decompressor.inflate(
+                from: &frame,
+                to: &buffer
+            )
+        } catch let error as CompressNIOError where error == .bufferOverflow {
+            try self.decompress(
+                from: &frame,
+                into: &buffer,
+                reserveCapacity: true
+            )
+        }
     }
 
     /// Process frame about to be sent to websocket
