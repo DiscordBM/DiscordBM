@@ -34,7 +34,7 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
             /// NIO will decide the final reserved capacity on its own anyway.
             capacity: max(16_360, frame.readableBytes * 4)
         )
-        var isFirst = false
+        var isFirst = true
         while true {
             if isFirst {
                 isFirst.toggle()
