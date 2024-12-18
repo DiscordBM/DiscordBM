@@ -17,7 +17,10 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
         var frame = frame
 
         var decompressionBuffer = allocator.buffer(
-            capacity: max(16_000, frame.data.readableBytes * 4)
+            /// `16_360 = 2^14 - 24`, `24` is accounting for allocation overheads.
+            /// This doesn't really do anything as of now anything as of now, since
+            /// NIO will decide the final reserved capacity on its own anyway.
+            capacity: max(16_360, frame.data.readableBytes * 4)
         )
 
         try self.decompress(
