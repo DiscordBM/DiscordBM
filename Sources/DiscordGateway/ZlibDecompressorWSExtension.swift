@@ -16,43 +16,40 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
     func processReceivedFrame(_ frame: WebSocketFrame, context: WebSocketExtensionContext) throws -> WebSocketFrame {
         var frame = frame
 
-        var decompressionBuffer = allocator.buffer(
-            /// `16_360 = 2^14 - 24`, `24` is accounting for allocation overheads.
-            /// This doesn't really do anything as of now anything as of now, since
-            /// NIO will decide the final reserved capacity on its own anyway.
-            capacity: max(16_360, frame.data.readableBytes * 4)
-        )
-
-        try self.decompress(
+        frame.data = try self.decompress(
             from: &frame.data,
-            into: &decompressionBuffer,
             reserveCapacity: false
         )
-
-        frame.data = consume decompressionBuffer
 
         return frame
     }
 
     func decompress(
         from frame: inout ByteBuffer,
-        into buffer: inout ByteBuffer,
         reserveCapacity: Bool
-    ) throws {
-        if reserveCapacity {
-            buffer.reserveCapacity(minimumWritableBytes: buffer.readableBytes)
-        }
-        do {
-            try self.decompressor.inflate(
-                from: &frame,
-                to: &buffer
-            )
-        } catch let error as CompressNIOError where error == .bufferOverflow {
-            try self.decompress(
-                from: &frame,
-                into: &buffer,
-                reserveCapacity: true
-            )
+    ) throws -> ByteBuffer {
+        var buffer = allocator.buffer(
+            /// `16_360 = 2^14 - 24`, `24` is accounting for allocation overheads.
+            /// This doesn't really do anything as of now anything as of now, since
+            /// NIO will decide the final reserved capacity on its own anyway.
+            capacity: max(16_360, frame.readableBytes * 4)
+        )
+        var isFirst = false
+        while true {
+            if isFirst {
+                isFirst.toggle()
+            } else {
+                buffer.reserveCapacity(minimumWritableBytes: buffer.readableBytes)
+            }
+            do {
+                try self.decompressor.inflate(
+                    from: &frame,
+                    to: &buffer
+                )
+                return buffer
+            } catch let error as CompressNIOError where error == .bufferOverflow {
+                continue
+            }
         }
     }
 
