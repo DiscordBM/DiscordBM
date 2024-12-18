@@ -39,6 +39,7 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
             if isFirst {
                 isFirst.toggle()
             } else {
+                /// Double the capacity
                 buffer.reserveCapacity(minimumWritableBytes: buffer.readableBytes)
             }
             do {
