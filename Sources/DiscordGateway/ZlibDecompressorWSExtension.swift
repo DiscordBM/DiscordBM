@@ -28,12 +28,10 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
         )
         var isFirst = true
         while true {
-            if isFirst {
-                isFirst.toggle()
-            } else {
+            isFirst ? isFirst.toggle() : buffer.reserveCapacity(
                 /// Double the capacity
-                buffer.reserveCapacity(minimumWritableBytes: buffer.readableBytes)
-            }
+                minimumWritableBytes: buffer.readableBytes
+            )
             do {
                 try self.decompressor.inflate(
                     from: &frame,
