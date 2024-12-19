@@ -13,7 +13,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
             var logger = Logger(label: $0)
-            logger.logLevel = .trace
+            logger.logLevel = .debug
             return logger
         }
     }
@@ -173,17 +173,8 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let logHandler = TestingLogHandler(expectation: criticalLogExpectation)
 
         DiscordGlobalConfiguration.makeLogger = { label in
-            Logger(
-                label: label,
-                factory: { _ in
-                    var stdoutLogHandler = StreamLogHandler.standardOutput(label: "InvalidTokenTest")
-                    stdoutLogHandler.logLevel = .trace
-                    return MultiplexLogHandler([logHandler, stdoutLogHandler])
-                }
-            )
+            Logger(label: label, factory: { _ in logHandler })
         }
-
-        print(Date(), "START")
 
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
@@ -218,7 +209,6 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation, criticalLogExpectation], timeout: 10)
-        print(Date(), "END")
 
         /// We sent an invalid token so Discord shouldn't even respond to us.
         XCTAssertFalse(didReceiveAnythingOtherThanHello.load(ordering: .relaxed))

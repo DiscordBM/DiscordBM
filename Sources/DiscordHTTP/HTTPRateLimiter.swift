@@ -95,7 +95,7 @@ actor HTTPRateLimiter {
         /// Check not locked
         if let lockedUntil = self.noRequestsUntil {
             if lockedUntil > Date() {
-                logger.error("HTTP rate-limiter has been locked for a bit, due to invalid requests", metadata: [
+                logger.error("HTTP rate-limiter has been locked for a few seconds, due to invalid requests", metadata: [
                     "label": .string(label)
                 ])
                 return false
