@@ -37,8 +37,11 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
                     from: &frame,
                     to: &buffer
                 )
+                /// If no errors were thrown then the decompression must have fully succeeded.
                 return buffer
             } catch let error as CompressNIOError where error == .bufferOverflow {
+                /// If we have a `.bufferOverflow`, continue the loop.
+                /// The loop will increase the capacity of the buffer and try again.
                 continue
             }
         }
