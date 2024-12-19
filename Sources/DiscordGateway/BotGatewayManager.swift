@@ -298,19 +298,22 @@ public actor BotGatewayManager: GatewayManager {
                     }
                 }
 
-                logger.error("web-socket connection closed", metadata: [
+                logger.debug("web-socket connection closed", metadata: [
                     "closeCode": .string(String(reflecting: closeFrame?.closeCode)),
                     "closeReason": .string(String(reflecting: closeFrame?.reason)),
                     "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                 ])
-                await self.onClose(closeFrame: closeFrame, forConnectionWithId: connectionId)
+                await self.onClose(
+                    closeReason: .closeFrame(closeFrame),
+                    forConnectionWithId: connectionId
+                )
             } catch {
-                logger.error("web-socket error while connecting to Discord. Will try again", metadata: [
-                    "error": .string("\(String(reflecting: error))"),
+                logger.debug("web-socket error while connecting to Discord. Will try again", metadata: [
+                    "error": .string(String(reflecting: error)),
                     "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                 ])
                 self.state.store(.noConnection, ordering: .relaxed)
-                await self.onClose(closeFrame: nil, forConnectionWithId: connectionId)
+                await self.onClose(closeReason: .error(error), forConnectionWithId: connectionId)
             }
         }
     }
@@ -537,14 +540,19 @@ extension BotGatewayManager {
             }
         }
     }
-    
+
+    private enum CloseReason {
+        case closeFrame(WebSocketCloseFrame?)
+        case error(any Error)
+    }
+
     private func onClose(
-        closeFrame: WebSocketCloseFrame?,
+        closeReason: CloseReason,
         forConnectionWithId connectionId: UInt
     ) async {
         self.logger.debug("Received connection close notification for a web-socket")
         guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
-        let (code, codeDesc) = self.getCloseCodeAndDescription(of: closeFrame)
+        let (code, codeDesc) = self.getCloseCodeAndDescription(of: closeReason)
         let isDebugLevelCode = [nil, .goingAway, .unexpectedServerError].contains(code)
         self.logger.log(
             level: isDebugLevelCode ? .debug : .warning,
@@ -556,7 +564,7 @@ extension BotGatewayManager {
                 )
             ]
         )
-        if self.canTryReconnect(code: closeFrame?.closeCode) {
+        if self.canTryReconnect(code: code) {
             self.state.store(.noConnection, ordering: .relaxed)
             self.logger.trace("Will try reconnect since Discord does allow it.", metadata: [
                 "code": .string(codeDesc),
@@ -576,25 +584,30 @@ extension BotGatewayManager {
     }
     
     private nonisolated func getCloseCodeAndDescription(
-        of closeFrame: WebSocketCloseFrame?
+        of closeReason: CloseReason
     ) -> (WebSocketErrorCode?, String) {
-        guard let closeFrame else {
-            return (nil, "nil")
-        }
-        let code = closeFrame.closeCode
-        let description: String
-        switch code {
-        case let .unknown(codeNumber):
-            switch GatewayCloseCode(rawValue: codeNumber) {
-            case let .some(discordCode):
-                description = "\(discordCode)"
-            case .none:
-                description = "\(codeNumber)"
+        switch closeReason {
+        case .error(let error):
+            return (nil, String(reflecting: error))
+        case .closeFrame(let closeFrame):
+            guard let closeFrame else {
+                return (nil, "nil")
             }
-        default:
-            description = closeFrame.reason ?? "\(code)"
+            let code = closeFrame.closeCode
+            let description: String
+            switch code {
+            case let .unknown(codeNumber):
+                switch GatewayCloseCode(rawValue: codeNumber) {
+                case let .some(discordCode):
+                    description = "\(discordCode)"
+                case .none:
+                    description = "\(codeNumber)"
+                }
+            default:
+                description = closeFrame.reason ?? "\(code)"
+            }
+            return (code, description)
         }
-        return (code, description)
     }
     
     private nonisolated func canTryReconnect(code: WebSocketErrorCode?) -> Bool {
