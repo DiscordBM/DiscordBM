@@ -24,14 +24,10 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
             /// `16_360 = 2^14 - 24`, `24` is accounting for allocation overheads.
             /// This doesn't really do anything as of now, since
             /// NIO will decide the final reserved capacity on its own anyway.
-            capacity: max(16_360, frame.readableBytes * 4)
+            ///
+            capacity: max(16_360, frame.readableBytes * 8)
         )
-        var isFirst = true
         while true {
-            isFirst ? isFirst.toggle() : buffer.reserveCapacity(
-                /// Double the capacity
-                minimumWritableBytes: buffer.readableBytes
-            )
             do {
                 try self.decompressor.inflate(
                     from: &frame,
@@ -40,8 +36,9 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
                 /// If no errors were thrown then the decompression must have fully succeeded.
                 return buffer
             } catch let error as CompressNIOError where error == .bufferOverflow {
-                /// If we have a `.bufferOverflow`, continue the loop.
-                /// The loop will increase the capacity of the buffer and try again.
+                /// If we have a `.bufferOverflow`,
+                /// double the capacity and continue decompression.
+                buffer.reserveCapacity(minimumWritableBytes: buffer.readableBytes)
                 continue
             }
         }
