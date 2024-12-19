@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 5.10
 
 import PackageDescription
 import CompilerPluginSupport
@@ -45,12 +45,12 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.49.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.21.0"),
-        .package(url: "https://github.com/apple/swift-atomics.git", from: "1.1.0"),
         .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.3"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.26.0"),
-        .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.15.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
-        .package(url: "https://github.com/apple/swift-syntax", "509.0.0"..<"511.0.0")
+        .package(url: "https://github.com/apple/swift-syntax.git", "509.0.0"..<"601.0.0"),
+        .package(url: "https://github.com/adam-fowler/compress-nio.git", from: "1.3.0"),
+        .package(url: "https://github.com/hummingbird-project/swift-websocket.git", from: "1.2.0"),
     ],
     targets: [
         .target(
@@ -86,7 +86,8 @@ let package = Package(
             dependencies: [
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                .target(name: "DiscordWebSocket"),
+                .product(name: "WSClient", package: "swift-websocket"),
+                .product(name: "CompressNIO", package: "compress-nio"),
                 .target(name: "DiscordHTTP"),
             ],
             swiftSettings: swiftSettings
@@ -112,23 +113,6 @@ let package = Package(
             name: "DiscordAuth",
             dependencies: [
                 .target(name: "DiscordModels")
-            ],
-            swiftSettings: swiftSettings
-        ),
-        /// Vapor's `WebSocketKit` with modifications to fit `DiscordBM` better.
-        .target(
-            name: "DiscordWebSocket",
-            dependencies: [
-                .product(name: "NIO", package: "swift-nio"),
-                .product(name: "NIOCore", package: "swift-nio"),
-                .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
-                .product(name: "NIOFoundationCompat", package: "swift-nio"),
-                .product(name: "NIOHTTP1", package: "swift-nio"),
-                .product(name: "NIOSSL", package: "swift-nio-ssl"),
-                .product(name: "NIOWebSocket", package: "swift-nio"),
-                .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
-                .product(name: "Atomics", package: "swift-atomics"),
-                .target(name: "CZlib"),
             ],
             swiftSettings: swiftSettings
         ),
@@ -185,14 +169,6 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
                 .target(name: "UnstableEnumMacro")
-            ],
-            swiftSettings: swiftSettings
-        ),
-        /// Vapor's `WebSocketKit` tests with modifications to fit `DiscordBM` better.
-        .testTarget(
-            name: "WebSocketTests",
-            dependencies: [
-                .target(name: "DiscordWebSocket")
             ],
             swiftSettings: swiftSettings
         ),

@@ -1,19 +1,24 @@
-@testable import DiscordWebSocket
+@testable import DiscordGateway
+@testable import WSCore
+import Logging
+import NIOWebSocket
+import NIOCore
 import XCTest
 
 class DecompressionTests: XCTestCase {
-    
+    let logger = Logger(label: "TestDecompression")
+
     func testDeflateDecompression() throws {
-        var decompressor = Decompression.Decompressor()
-        try decompressor.initializeDecoder(encoding: .deflate)
-        defer { decompressor.deinitializeDecoder() }
-        
+        let decompressor = try ZlibDecompressorWSExtension(logger: logger)
+
         for (data, decodedString) in zip(deflatedData, deflatedDataDecodedStrings) {
-            var part = ByteBuffer(data: data)
-            var decodeBuffer = ByteBuffer()
-            try decompressor.decompress(part: &part, buffer: &decodeBuffer)
-            
-            XCTAssertEqual(String(buffer: decodeBuffer).count, decodedString.count)
+            let frame = WebSocketFrame(fin: true, data: ByteBuffer(data: data))
+            let decodedFrame = try decompressor.processReceivedFrame(
+                frame,
+                context: .init(logger: logger)
+            )
+
+            XCTAssertEqual(String(buffer: decodedFrame.data).count, decodedString.count)
         }
     }
 }

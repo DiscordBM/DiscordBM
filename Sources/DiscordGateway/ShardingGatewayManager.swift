@@ -277,15 +277,19 @@ extension ShardingGatewayManager {
     }
 
     private func getGatewayInfo() async -> Gateway.BotConnectionInfo {
-        logger.debug("Will try to get Discord gateway url")
-        if let gatewayBot = try? await client.getBotGateway().decode() {
+        logger.debug("Will try to get Discord gateway info")
+        do {
+            let gatewayBot = try await client.getBotGateway().decode()
             logger.trace("Got Discord gateway url from gateway-bot api call", metadata: [
                 "info": .string("\(gatewayBot)")
             ])
             return gatewayBot
+        } catch {
+            logger.error("Cannot get gateway info to connect to. Will retry in 10 seconds", metadata: [
+                "error": .string(String(reflecting: error))
+            ])
+            try? await Task.sleep(for: .seconds(10))
+            return await self.getGatewayInfo()
         }
-        logger.error("Cannot get gateway url to connect to. Will retry in 10 seconds")
-        try? await Task.sleep(for: .seconds(10))
-        return await self.getGatewayInfo()
     }
 }
