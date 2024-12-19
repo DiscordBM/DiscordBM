@@ -262,7 +262,7 @@ public actor BotGatewayManager: GatewayManager {
 
         let decompressorWSExtension: ZlibDecompressorWSExtension
         do {
-            decompressorWSExtension = try ZlibDecompressorWSExtension()
+            decompressorWSExtension = try ZlibDecompressorWSExtension(logger: self.logger)
         } catch {
             self.logger.critical(
                 "Will not connect because can't create a decompressor. Something is wrong. Please report this failure at https://github.com/DiscordBM/DiscordBM/issues",

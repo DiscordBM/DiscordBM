@@ -6,15 +6,16 @@ import NIOCore
 import XCTest
 
 class DecompressionTests: XCTestCase {
+    let logger = Logger(label: "TestDecompression")
 
     func testDeflateDecompression() throws {
-        let decompressor = try ZlibDecompressorWSExtension()
+        let decompressor = try ZlibDecompressorWSExtension(logger: logger)
 
         for (data, decodedString) in zip(deflatedData, deflatedDataDecodedStrings) {
             let frame = WebSocketFrame(fin: true, data: ByteBuffer(data: data))
             let decodedFrame = try decompressor.processReceivedFrame(
                 frame,
-                context: .init(logger: Logger(label: "TestDecompression"))
+                context: .init(logger: logger)
             )
 
             XCTAssertEqual(String(buffer: decodedFrame.data).count, decodedString.count)
