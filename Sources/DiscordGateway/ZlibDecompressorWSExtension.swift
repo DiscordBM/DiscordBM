@@ -46,8 +46,10 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
         }
     }
 
-    /// Process frame about to be sent to websocket
-    func processFrameToSend(_ frame: WebSocketFrame, context: WebSocketExtensionContext) -> WebSocketFrame {
+    func processFrameToSend(
+        _ frame: WebSocketFrame,
+        context: WebSocketExtensionContext
+    ) -> WebSocketFrame {
         frame
     }
 
