@@ -110,7 +110,8 @@ struct EntryPoint {
                 /// Handle each event in the `bot.events` async stream
                 /// This stream will never end, therefore preventing your executable from exiting
                 for await event in await bot.events {
-                    EventHandler(event: event, client: bot.client).handle()
+                    /// You can move the above `taskGroup.addTask {` to down here, for more concurrency.
+                    await EventHandler(event: event, client: bot.client).handleAsync()
                 }
             }
         }
@@ -195,7 +196,7 @@ try await bot.client
 
 /// Use the events-stream later since the for-loop blocks the function
 for await event in await bot.events {
-    EventHandler(event: event, client: bot.client).handle()
+    await EventHandler(event: event, client: bot.client).handleAsync()
 }
 ```
 In your `EventHandler`:
