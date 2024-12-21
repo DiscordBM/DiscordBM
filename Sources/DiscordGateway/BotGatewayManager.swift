@@ -719,6 +719,10 @@ extension BotGatewayManager {
                             self.logger.error("Received 'ChannelError.ioOnClosedChannel' error while sending payload through web-socket. Will fully disconnect and reconnect again")
                             await self.disconnect()
                             await self.connect()
+                        } else if payload.opcode == .heartbeat,
+                                  let writerError = error as? NIOAsyncWriterError,
+                                  writerError == .alreadyFinished() {
+                            self.logger.warning("Received 'NIOAsyncWriterError.alreadyFinished' error while sending heartbeat through web-socket. Will ignore")
                         } else {
                             self.logger.error("Could not send payload through web-socket", metadata: [
                                 "error": .string("\(error)"),
