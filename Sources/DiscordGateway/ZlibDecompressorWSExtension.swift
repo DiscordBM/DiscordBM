@@ -5,6 +5,7 @@ import CompressNIO
 import Logging
 
 private let zlibAllocator = ByteBufferAllocator()
+private let minimumAllocation = 4070 /// `4096` - `26` allocator margin
 
 /// Will be used for only 1 WS connection so won't need concurrency guards.
 struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
@@ -19,28 +20,33 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
 
     func processReceivedFrame(_ frame: WebSocketFrame, context: WebSocketExtensionContext) throws -> WebSocketFrame {
         var frame = frame
-        let frameReadableBytes = frame.data.readableBytes
-        frame.data = try self.decompress(from: &frame.data)
+        let compressedBytes = frame.data.readableBytes
+        frame.data = try self.decompress(
+            compressedBytes: compressedBytes,
+            from: &frame.data
+        )
         logger.trace("Decompressed a Discord message", metadata: [
-            "compressedBytes": .stringConvertible(frameReadableBytes),
+            "compressedBytes": .stringConvertible(compressedBytes),
             "decompressedBytes": .stringConvertible(frame.data.readableBytes),
-            "compressionRatio": .stringConvertible(Double(frame.data.readableBytes) / Double(frameReadableBytes))
+            "firstAllocation": .stringConvertible(
+                self.nextAllocation(
+                    compressedBytes: compressedBytes,
+                    currentlyAllocated: nil
+                )
+            )
         ])
         return frame
     }
 
-    func decompress(from frame: inout ByteBuffer) throws -> ByteBuffer {
+    func decompress(
+        compressedBytes: Int,
+        from frame: inout ByteBuffer
+    ) throws -> ByteBuffer {
         var buffer = zlibAllocator.buffer(
-            /// `16_360 = 2^14 - 24`, `24` is accounting for allocation overheads.
-            /// This doesn't really do anything as of now, since
-            /// NIO will decide the final reserved capacity on its own anyway.
-            ///
-            /// The `* 16` of `frame.readableBytes * 16` comes based on this link:
-            /// https://discord.com/blog/how-discord-reduced-websocket-traffic-by-40-percent
-            /// which mentions up to `~14` times compression ratio for Discord events with zlib.
-            /// Since Discord events are never way too big, I preferred to overestimate the
-            /// possible ratio, rather than underestimating by using `* 4` or `* 8`.
-            capacity: max(16_360, frame.readableBytes * 16)
+            capacity: self.nextAllocation(
+                compressedBytes: compressedBytes,
+                currentlyAllocated: nil
+            )
         )
         while true {
             do {
@@ -53,7 +59,12 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
             } catch let error as CompressNIOError where error == .bufferOverflow {
                 /// If we have a `.bufferOverflow`,
                 /// double the capacity and continue decompression.
-                buffer.reserveCapacity(minimumWritableBytes: buffer.readableBytes)
+                buffer.reserveCapacity(
+                    minimumWritableBytes: self.nextAllocation(
+                        compressedBytes: compressedBytes,
+                        currentlyAllocated: buffer.readableBytes
+                    )
+                )
                 continue
             }
         }
@@ -67,4 +78,26 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
     }
 
     func shutdown() {}
+
+    private func nextAllocation(
+        compressedBytes: Int,
+        currentlyAllocated: Int?
+    ) -> Int {
+        switch currentlyAllocated {
+        case let .some(currentlyAllocated):
+            if compressedBytes > 10 || currentlyAllocated > 60 {
+                return currentlyAllocated
+            } else {
+                return minimumAllocation - currentlyAllocated
+            }
+        case .none:
+            if compressedBytes > 10 {
+                return max(minimumAllocation, 8 * compressedBytes)
+            } else {
+                /// Frames smaller than 10 bytes usually don't take more than 4.5x space
+                /// after decompression.
+                return compressedBytes * 5
+            }
+        }
+    }
 }
