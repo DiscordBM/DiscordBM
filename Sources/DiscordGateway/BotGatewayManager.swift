@@ -722,7 +722,7 @@ extension BotGatewayManager {
                         } else if payload.opcode == .heartbeat,
                                   let writerError = error as? NIOAsyncWriterError,
                                   writerError == .alreadyFinished() {
-                            self.logger.warning("Received 'NIOAsyncWriterError.alreadyFinished' error while sending heartbeat through web-socket. Will ignore")
+                            self.logger.debug("Received 'NIOAsyncWriterError.alreadyFinished' error while sending heartbeat through web-socket. Will ignore")
                         } else {
                             self.logger.error("Could not send payload through web-socket", metadata: [
                                 "error": .string("\(error)"),

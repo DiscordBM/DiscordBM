@@ -530,8 +530,8 @@ extension GatewayEventHandler {
 
     @usableFromInline
     func logError(function: String, error: any Error) {
-        logger.error("GatewayEventHandler produced an error", metadata: [
-            "function": .string(function),
+        logger.error("\(Self.self) produced an error", metadata: [
+            "event-handler-func": .string(function),
             "error": .string(String(reflecting: error))
         ])
     }
