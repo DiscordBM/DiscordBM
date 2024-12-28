@@ -75,4 +75,25 @@ public struct VoiceStateUpdate: Sendable, Codable {
         self.self_mute = selfMute
         self.self_deaf = selfDeaf
     }
+    
+    private enum CodingKeys: CodingKey {
+        case guild_id
+        case channel_id
+        case self_deaf
+        case self_mute
+    }
+    
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(self.guild_id, forKey: .guild_id)
+        /// Need to encode `null` if `nil`, considering a Discord bug.
+        if let channel_id {
+            try container.encode(self.channel_id, forKey: .channel_id)
+        } else {
+            try container.encodeNil(forKey: .channel_id)
+        }
+        try container.encode(self.self_deaf, forKey: .self_deaf)
+        try container.encode(self.self_mute, forKey: .self_mute)
+    }
 }

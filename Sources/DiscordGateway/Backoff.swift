@@ -2,7 +2,7 @@ import Foundation
 import NIOCore
 
 /// Exponential backoff
-actor Backoff {
+final class Backoff {
     
     let base: Double
     let maxExponentiation: Int
