@@ -574,16 +574,17 @@ public actor DiscordCache {
                 self.guilds[member.guild_id]?.members.remove(at: idx)
             }
         case let .guildMembersChunk(chunk):
-            let userIds = chunk.members.compactMap(\.user?.id)
+            let membersUserIds = chunk.members.compactMap(\.user?.id)
             self.guilds[chunk.guild_id]?.members.removeAll {
                 guard let id = $0.user?.id else { return false }
-                return userIds.contains(id)
+                return membersUserIds.contains(id)
             }
             self.guilds[chunk.guild_id]?.members.append(contentsOf: chunk.members)
             if let presences = chunk.presences {
+                let presencesUserIds = presences.compactMap(\.user?.id)
                 self.guilds[chunk.guild_id]?.presences.removeAll {
                     guard let id = $0.user?.id else { return false }
-                    return userIds.contains(id)
+                    return presencesUserIds.contains(id)
                 }
                 self.guilds[chunk.guild_id]?.presences.append(contentsOf: presences)
             }
