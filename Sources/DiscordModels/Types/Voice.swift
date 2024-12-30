@@ -89,7 +89,7 @@ public struct VoiceStateUpdate: Sendable, Codable {
         try container.encode(self.guild_id, forKey: .guild_id)
         /// Need to encode `null` if `nil`, considering a Discord bug.
         if let channel_id {
-            try container.encode(self.channel_id, forKey: .channel_id)
+            try container.encode(channel_id, forKey: .channel_id)
         } else {
             try container.encodeNil(forKey: .channel_id)
         }

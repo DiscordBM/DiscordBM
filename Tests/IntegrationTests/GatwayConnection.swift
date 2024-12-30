@@ -265,14 +265,15 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation], timeout: 10)
-        
+
         /// Didn't find a way to properly verify these functions.
         /// Here we just make the requests and make sure we aren't getting invalid-session-ed.
         await bot.requestGuildMembersChunk(payload: .init(
             guild_id: Constants.guildId
         ))
-        let activityName = "New Testing! \(Int.random(in: .min ... .max))"
+        let activityName = "Test Activity! \(UInt.random(in: .min ... .max))"
         await bot.updatePresence(payload: .init(
+            since: Date.now,
             activities: [.init(name: activityName, type: .listening)],
             status: .online,
             afk: true
@@ -286,7 +287,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we aren't getting invalid-session-ed.
         /// And also to wait for propagation of the presence update to us through DiscordCache.
-        try await Task.sleep(for: .seconds(60))
+        try await Task.sleep(for: .seconds(30))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
 
         await bot.disconnect()

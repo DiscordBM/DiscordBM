@@ -559,11 +559,11 @@ extension BotGatewayManager {
                 Gateway.Event.self,
                 from: Data(buffer: buffer, byteTransferStrategy: .noCopy)
             )
-            self.logger.debug("Decoded event", metadata: [
-                "event": .string("\(event)")
-            ])
             self.logger.debug("Decoded event with opcode", metadata: [
                 "opcode": .string(event.opcode.description)
+            ])
+            self.logger.debug("Decoded event", metadata: [
+                "event": .string("\(event)")
             ])
             Task { await self.processEvent(event) }
             for continuation in self.eventsStreamContinuations {
@@ -758,12 +758,12 @@ extension BotGatewayManager {
 
                 if let outboundWriter = await self.outboundWriter {
                     do {
+                        self.logger.debug("Will send a payload with opcode", metadata: [
+                            "opcode": .string(message.payload.opcode.description)
+                        ])
                         self.logger.trace("Will send a payload", metadata: [
                             "payload": .string("\(message.payload)"),
                             "opcode": .stringConvertible(opcode)
-                        ])
-                        self.logger.debug("Sending payload with opcode", metadata: [
-                            "opcode": .string(message.payload.opcode.description)
                         ])
                         try await outboundWriter.write(
                             .custom(
