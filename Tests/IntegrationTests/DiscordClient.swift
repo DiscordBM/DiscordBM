@@ -1644,7 +1644,7 @@ class DiscordClientTests: XCTestCase {
         let updatedApplication = try await client.updateOwnApplication(
             payload: .init(
                 custom_install_url: fakeURL(),
-                description: "TEST DESCRIPTION \(Int.random(in: .min ... .max))",
+                description: "TEST DESCRIPTION \(UInt.random(in: .min ... .max))",
                 role_connections_verification_url: fakeURL(),
                 install_params: nil,
                 flags: [

@@ -524,9 +524,18 @@ public struct Gateway: Sendable, Codable {
             public var activities: [Activity]
             public var status: Status
             public var afk: Bool
-            
+
+            // FIXME: remove this init? or make it not be ambiguous compared to the init below,
+            // when the init below is changed to `since: Date? = nil`.
             public init(since: Int? = nil, activities: [Activity], status: Status, afk: Bool) {
                 self.since = since
+                self.activities = activities
+                self.status = status
+                self.afk = afk
+            }
+
+            public init(since: Date, activities: [Activity], status: Status, afk: Bool) {
+                self.since = Int(since.timeIntervalSince1970)
                 self.activities = activities
                 self.status = status
                 self.afk = afk

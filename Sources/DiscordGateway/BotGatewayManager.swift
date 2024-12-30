@@ -5,6 +5,7 @@ import Atomics
 import Logging
 import DiscordModels
 import NIO
+import struct NIOWebSocket.WebSocketOpcode
 import enum NIOWebSocket.WebSocketErrorCode
 
 public actor BotGatewayManager: GatewayManager {
@@ -22,7 +23,26 @@ public actor BotGatewayManager: GatewayManager {
             self.shardCoordinator = shardCoordinator
         }
     }
-    
+
+    private struct Message {
+        let payload: Gateway.Event
+        let opcode: WebSocketOpcode?
+        let connectionId: UInt?
+        var tryCount: Int
+
+        init(
+            payload: Gateway.Event,
+            opcode: WebSocketOpcode? = nil,
+            connectionId: UInt? = nil,
+            tryCount: Int = 0
+        ) {
+            self.payload = payload
+            self.opcode = opcode
+            self.connectionId = connectionId
+            self.tryCount = tryCount
+        }
+    }
+
     var outboundWriter: WebSocketOutboundWriter?
     let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
@@ -67,7 +87,7 @@ public actor BotGatewayManager: GatewayManager {
     /// 120 per 60 seconds (1 every 500ms),
     /// per https://discord.com/developers/docs/topics/gateway#rate-limiting
     let sendQueue = SerialQueue(waitTime: .milliseconds(500))
-    
+
     //MARK: Current connection properties
     
     /// An ID to keep track of connection changes.
@@ -237,7 +257,7 @@ public actor BotGatewayManager: GatewayManager {
     public func connect() async {
         logger.debug("Connect method triggered")
         /// Guard we're attempting to connect too fast
-        if let connectIn = await connectionBackoff.canPerformIn() {
+        if let connectIn = connectionBackoff.canPerformIn() {
             logger.warning("Cannot try to connect immediately due to backoff", metadata: [
                 "wait-time": .stringConvertible(connectIn)
             ])
@@ -320,29 +340,41 @@ public actor BotGatewayManager: GatewayManager {
 
     /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
     public func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) {
-        /// This took a lot of time to figure out, not sure why it needs opcode `1`.
-        self.send(payload: .init(
-            opcode: .requestGuildMembers,
-            data: .requestGuildMembers(payload)
-        ), opcode: 1)
+        self.send(
+            message: .init(
+                payload: .init(
+                    opcode: .requestGuildMembers,
+                    data: .requestGuildMembers(payload)
+                ),
+                opcode: .text
+            )
+        )
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     public func updatePresence(payload: Gateway.Identify.Presence) {
-        /// This took a lot of time to figure out, not sure why it needs opcode `1`.
-        self.send(payload: .init(
-            opcode: .presenceUpdate,
-            data: .requestPresenceUpdate(payload)
-        ), opcode: 1)
+        self.send(
+            message: .init(
+                payload: .init(
+                    opcode: .presenceUpdate,
+                    data: .requestPresenceUpdate(payload)
+                ),
+                opcode: .text
+            )
+        )
     }
     
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
     public func updateVoiceState(payload: VoiceStateUpdate) {
-        /// This took a lot of time to figure out, not sure why it needs opcode `10` (works with `9` too?!).
-        self.send(payload: .init(
-            opcode: .voiceStateUpdate,
-            data: .requestVoiceStateUpdate(payload)
-        ), opcode: 10)
+        self.send(
+            message: .init(
+                payload: .init(
+                    opcode: .voiceStateUpdate,
+                    data: .requestVoiceStateUpdate(payload)
+                ),
+                opcode: .text
+            )
+        )
     }
 
     /// Makes an stream of Gateway events.
@@ -371,7 +403,7 @@ public actor BotGatewayManager: GatewayManager {
         }
         self.connectionId.wrappingIncrement(ordering: .relaxed)
         self.state.store(.stopped, ordering: .relaxed)
-        await connectionBackoff.resetTryCount()
+        connectionBackoff.resetTryCount()
         await self.sendQueue.reset()
         await self.closeWebSocket()
     }
@@ -477,11 +509,14 @@ extension BotGatewayManager {
                 sequence: sequenceNumber
             ))
         )
+        let opcode = Gateway.Opcode.identify
         self.send(
-            payload: resume,
-            opcode: Gateway.Opcode.identify.rawValue
+            message: .init(
+                payload: resume,
+                opcode: .init(encodedWebSocketOpcode: opcode.rawValue)!
+            )
         )
-        
+
         /// Invalidate `sequenceNumber` info for the next connection, incase this one fails.
         /// This will be a notice for the next connection to
         /// not try resuming anymore, if this connection has failed.
@@ -491,12 +526,12 @@ extension BotGatewayManager {
     }
     
     private func sendIdentify() async {
-        await connectionBackoff.willTry()
+        connectionBackoff.willTry()
         let identify = Gateway.Event(
             opcode: .identify,
             data: .identify(identifyPayload)
         )
-        self.send(payload: identify)
+        self.send(message: .init(payload: identify))
     }
     
     private func processBinaryData(
@@ -524,6 +559,9 @@ extension BotGatewayManager {
                 Gateway.Event.self,
                 from: Data(buffer: buffer, byteTransferStrategy: .noCopy)
             )
+            self.logger.debug("Decoded event with opcode", metadata: [
+                "opcode": .string(event.opcode.description)
+            ])
             self.logger.debug("Decoded event", metadata: [
                 "event": .string("\(event)")
             ])
@@ -643,10 +681,14 @@ extension BotGatewayManager {
         logger.trace("Will ping", metadata: [
             "connectionId": .stringConvertible(connectionId)
         ])
-        self.send(payload: .init(
-            opcode: .heartbeat,
-            data: .heartbeat(lastSequenceNumber: self.sequenceNumber)
-        ))
+        self.send(
+            message: .init(
+                payload: .init(
+                    opcode: .heartbeat,
+                    data: .heartbeat(lastSequenceNumber: self.sequenceNumber)
+                )
+            )
+        )
         Task {
             try? await Task.sleep(for: .seconds(10))
             guard self.connectionId.load(ordering: .relaxed) == connectionId else { return }
@@ -670,45 +712,64 @@ extension BotGatewayManager {
         }
     }
 
-    private nonisolated func send(
-        payload: Gateway.Event,
-        opcode: UInt8? = nil,
-        connectionId: UInt? = nil,
-        tryCount: Int = 0
-    ) {
+    private nonisolated func send(message: Message) {
         self.sendQueue.perform { [weak self] in
             guard let self = self else { return }
-            Task {
-                if let connectionId,
-                   self.connectionId.load(ordering: .relaxed) != connectionId {
+            let state = self.state.load(ordering: .relaxed)
+            switch state {
+            case .connected:
+                break
+            case .stopped:
+                logger.warning("Will not send message because bot is stopped", metadata: [
+                    "message": .string("\(message)")
+                ])
+                return
+            case .noConnection, .connecting, .configured:
+                switch message.payload.opcode.isSentForConnectionEstablishment {
+                case true:
+                    break
+                case false:
+                    /// Recursively try to send through the queue.
+                    /// The send queue has slowdown mechanisms so it's fine.
+                    self.send(message: message)
                     return
                 }
-                
-                let opcode = opcode ?? payload.opcode.rawValue
-                
+            }
+            if let connectionId = message.connectionId,
+               self.connectionId.load(ordering: .relaxed) != connectionId {
+                return
+            }
+            Task {
+                let opcode: WebSocketOpcode = message.opcode ?? .init(
+                    encodedWebSocketOpcode: message.payload.opcode.rawValue
+                )!
+
                 let data: Data
                 do {
-                    data = try DiscordGlobalConfiguration.encoder.encode(payload)
+                    data = try DiscordGlobalConfiguration.encoder.encode(message.payload)
                 } catch {
                     self.logger.error("Could not encode payload", metadata: [
-                        "payload": .string("\(payload)"),
+                        "payload": .string("\(message.payload)"),
                         "opcode": .stringConvertible(opcode),
                         "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                     ])
                     return
                 }
-                
+
                 if let outboundWriter = await self.outboundWriter {
                     do {
+                        self.logger.debug("Will send a payload with opcode", metadata: [
+                            "opcode": .string(message.payload.opcode.description)
+                        ])
                         self.logger.trace("Will send a payload", metadata: [
-                            "payload": .string("\(payload)"),
+                            "payload": .string("\(message.payload)"),
                             "opcode": .stringConvertible(opcode)
                         ])
                         try await outboundWriter.write(
                             .custom(
                                 .init(
                                     fin: true,
-                                    opcode: .init(encodedWebSocketOpcode: opcode)!,
+                                    opcode: opcode,
                                     data: ByteBuffer(data: data)
                                 )
                             )
@@ -719,15 +780,16 @@ extension BotGatewayManager {
                             self.logger.error("Received 'ChannelError.ioOnClosedChannel' error while sending payload through web-socket. Will fully disconnect and reconnect again")
                             await self.disconnect()
                             await self.connect()
-                        } else if payload.opcode == .heartbeat,
+                        } else if message.payload.opcode == .heartbeat,
                                   let writerError = error as? NIOAsyncWriterError,
                                   writerError == .alreadyFinished() {
                             self.logger.debug("Received 'NIOAsyncWriterError.alreadyFinished' error while sending heartbeat through web-socket. Will ignore")
                         } else {
                             self.logger.error("Could not send payload through web-socket", metadata: [
-                                "error": .string("\(error)"),
-                                "payload": .string("\(payload)"),
+                                "error": .string(String(reflecting: error)),
+                                "payload": .string("\(message.payload)"),
                                 "opcode": .stringConvertible(opcode),
+                                "state": .stringConvertible(self.state.load(ordering: .relaxed)),
                                 "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                             ])
                         }
@@ -738,10 +800,10 @@ extension BotGatewayManager {
                     /// so long story short, the gateway manager never gets stuck in a bad
                     /// cycle of no-connection.
                     self.logger.log(
-                        level: (payload.opcode == .heartbeat) ? .debug : .warning,
+                        level: (message.payload.opcode == .heartbeat) ? .debug : .warning,
                         "Trying to send through ws when a connection is not established",
                         metadata: [
-                            "payload": .string("\(payload)"),
+                            "payload": .string("\(message.payload)"),
                             "state": .stringConvertible(self.state.load(ordering: .relaxed)),
                             "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
                         ])
@@ -749,10 +811,10 @@ extension BotGatewayManager {
             }
         }
     }
-    
+
     private func onSuccessfulConnection() async {
         self.state.store(.connected, ordering: .relaxed)
-        await connectionBackoff.resetTryCount()
+        connectionBackoff.resetTryCount()
         self.unsuccessfulPingsCount = 0
         await self.sendQueue.reset()
     }
@@ -780,7 +842,7 @@ extension BotGatewayManager {
         self.outboundWriter = outboundWriter
     }
 
-    private nonisolated func closeWebSocket() async {
+    private func closeWebSocket() async {
         logger.debug("Will possibly close a web-socket")
         do {
             try await self.outboundWriter?.close(.goingAway, reason: nil)
@@ -789,6 +851,7 @@ extension BotGatewayManager {
                 "error": .string(String(reflecting: error))
             ])
         }
+        self.outboundWriter = nil
     }
 }
 
@@ -820,6 +883,16 @@ private enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
         case .connecting: return "connecting"
         case .configured: return "configured"
         case .connected: return "connected"
+        }
+    }
+}
+
+// MARK: - +Gateway.Opcode
+extension Gateway.Opcode {
+    var isSentForConnectionEstablishment: Bool {
+        switch self {
+        case .dispatch, .presenceUpdate, .voiceStateUpdate, .reconnect, .requestGuildMembers, .invalidSession, .hello, .heartbeatAccepted, .heartbeat: false
+        case .identify, .resume: true
         }
     }
 }

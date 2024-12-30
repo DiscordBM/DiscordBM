@@ -243,6 +243,12 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
             intents: Gateway.Intent.allCases
         )
 
+        let cache = await DiscordCache(
+            gatewayManager: bot,
+            intents: .all,
+            requestAllMembers: .enabledWithPresences
+        )
+
         let expectation = Expectation(description: "Connected")
 
         Task {
@@ -259,14 +265,16 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation], timeout: 10)
-        
+
         /// Didn't find a way to properly verify these functions.
         /// Here we just make the requests and make sure we aren't getting invalid-session-ed.
         await bot.requestGuildMembersChunk(payload: .init(
             guild_id: Constants.guildId
         ))
+        let activityName = "Test Activity! \(UInt.random(in: .min ... .max))"
         await bot.updatePresence(payload: .init(
-            activities: [.init(name: "New Testing!", type: .listening)],
+            since: Date.now,
+            activities: [.init(name: activityName, type: .listening)],
             status: .online,
             afk: true
         ))
@@ -278,12 +286,19 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we aren't getting invalid-session-ed.
-        try await Task.sleep(for: .seconds(10))
+        /// And also to wait for propagation of the presence update to us through DiscordCache.
+        try await Task.sleep(for: .seconds(30))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
 
         await bot.disconnect()
 
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 2)
+
+        let _guild = await cache.guilds[Constants.guildId]
+        let guild = try XCTUnwrap(_guild)
+        let presence = try XCTUnwrap(guild.presences.first(where: { $0.user?.id == Constants.botId }), "\(guild)")
+        let activity = try XCTUnwrap(presence.activities?.first)
+        XCTAssertEqual(activity.name, activityName)
     }
 }
 
