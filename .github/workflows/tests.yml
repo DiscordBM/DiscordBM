@@ -15,7 +15,7 @@ jobs:
       with_tsan: true
       with_api_check: true
       test_filter: "^DiscordBMTests"
-      extra_flags: "--explicit-target-dependency-import-check error --force-resolved-versions -require-explicit-sendable"
+      extra_flags: "--explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable"
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -26,6 +26,6 @@ jobs:
       with_tsan: true
       with_api_check: false
       test_filter: "^MacroTests"
-      extra_flags: "--explicit-target-dependency-import-check error --force-resolved-versions -require-explicit-sendable"
+      extra_flags: "--explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable"
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
