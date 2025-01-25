@@ -4,8 +4,10 @@ import Foundation
 @_spi(UserInstallableApps)
 @propertyWrapper
 public struct DecodeOrNil<C> where C: Codable {
+    @_spi(UserInstallableApps)
     public var wrappedValue: C?
 
+    @_spi(UserInstallableApps)
     public init(wrappedValue: C? = nil) {
         self.wrappedValue = wrappedValue
     }
