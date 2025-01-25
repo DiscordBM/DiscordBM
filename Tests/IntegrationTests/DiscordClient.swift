@@ -2474,8 +2474,8 @@ class DiscordClientTests: XCTestCase {
 
         do {
             let file = try await client.getCDNGuildIcon(
-                guildId: "431917998102675485",
-                icon: "e1344e0584cfadd002555ec6c1480c07"
+                guildId: "965874258054094878",
+                icon: "08b885eb2b03ee09fc906fa1a38cc1f8"
             ).getFile(overrideName: "guildIcon")
             XCTAssertGreaterThan(file.data.readableBytes, 100)
             XCTAssertEqual(file.extension, "png")
