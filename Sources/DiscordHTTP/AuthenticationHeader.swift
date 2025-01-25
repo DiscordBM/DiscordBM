@@ -1,7 +1,8 @@
 import DiscordModels
-import NIOHTTP1
-import struct Foundation.Data
 import Logging
+import NIOHTTP1
+
+import struct Foundation.Data
 
 public enum AuthenticationHeader: Sendable {
     case botToken(Secret)
@@ -41,14 +42,16 @@ public enum AuthenticationHeader: Sendable {
             if let base64 = token.value.split(separator: ".").first {
                 for base64 in [base64, base64 + "=="] {
                     if let data = Data(base64Encoded: String(base64)),
-                       let decoded = String(data: data, encoding: .utf8) {
+                        let decoded = String(data: data, encoding: .utf8)
+                    {
                         return ApplicationSnowflake(decoded)
                     }
                 }
             }
 
             DiscordGlobalConfiguration.makeLogger("AuthenticationHeader").error(
-                "Cannot extract app-id from the bot token, please report this at https://github.com/DiscordBM/DiscordBM/issues. It can be an empty issue with a title like 'AuthenticationHeader failed to decode app-id'", metadata: [
+                "Cannot extract app-id from the bot token, please report this at https://github.com/DiscordBM/DiscordBM/issues. It can be an empty issue with a title like 'AuthenticationHeader failed to decode app-id'",
+                metadata: [
                     "botTokenSecret": .stringConvertible(token)
                 ]
             )

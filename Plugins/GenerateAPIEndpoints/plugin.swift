@@ -5,11 +5,11 @@ import PackagePlugin
 struct GenerateAPIEndpoints: CommandPlugin {
     func performCommand(context: PluginContext, arguments: [String]) throws {
         let tool = try context.tool(named: "GenerateAPIEndpointsExec")
-#if compiler(>=6.0)
+        #if compiler(>=6.0)
         let toolUrl = tool.url
-#else
+        #else
         let toolUrl = URL(fileURLWithPath: tool.path.string)
-#endif
+        #endif
         let process = Process()
         process.executableURL = toolUrl
         try process.run()

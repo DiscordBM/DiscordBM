@@ -1,17 +1,16 @@
-
 /// https://discord.com/developers/docs/monetization/entitlements#entitlement-object-entitlement-structure
 public struct Entitlement: Sendable, Codable {
 
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
-        case purchase // 1
-        case premiumSubscription // 2
-        case developerGift // 3
-        case testModePurchase // 4
-        case freePurchase // 5
-        case userGift // 6
-        case premiumPurchase // 7
-        case applicationSubscription // 8
+        case purchase  // 1
+        case premiumSubscription  // 2
+        case developerGift  // 3
+        case testModePurchase  // 4
+        case freePurchase  // 5
+        case userGift  // 6
+        case premiumPurchase  // 7
+        case applicationSubscription  // 8
         case __undocumented(Int)
     }
 

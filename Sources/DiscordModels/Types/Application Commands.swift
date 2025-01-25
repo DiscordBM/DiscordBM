@@ -2,33 +2,33 @@ import Foundation
 
 /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
 public struct ApplicationCommand: Sendable, Codable {
-    
+
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
     @UnstableEnum<UInt>
     public enum Kind: Sendable, Codable {
-        case chatInput // 1
-        case user // 2
-        case message // 3
+        case chatInput  // 1
+        case user  // 2
+        case message  // 3
         case __undocumented(UInt)
     }
 
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure
     public struct Option: Sendable, Codable, ValidatablePayload {
-        
+
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
         @UnstableEnum<UInt>
         public enum Kind: Sendable, Codable {
-            case subCommand // 1
-            case subCommandGroup // 2
-            case string // 3
-            case integer // 4
-            case boolean // 5
-            case user // 6
-            case channel // 7
-            case role // 8
-            case mentionable // 9
-            case number // 10
-            case attachment // 11
+            case subCommand  // 1
+            case subCommandGroup  // 2
+            case string  // 3
+            case integer  // 4
+            case boolean  // 5
+            case user  // 6
+            case channel  // 7
+            case role  // 8
+            case mentionable  // 9
+            case number  // 10
+            case attachment  // 11
             case __undocumented(UInt)
         }
 
@@ -39,8 +39,8 @@ public struct ApplicationCommand: Sendable, Codable {
             public var value: StringIntDoubleBool
 
             public var name_localized: String?
-            
-            public init(name: String, name_localizations: [DiscordLocale : String]? = nil, value: StringIntDoubleBool) {
+
+            public init(name: String, name_localizations: [DiscordLocale: String]? = nil, value: StringIntDoubleBool) {
                 self.name = name
                 self.name_localizations = .init(name_localizations)
                 self.value = value
@@ -53,7 +53,9 @@ public struct ApplicationCommand: Sendable, Codable {
                 }
                 for (key, value) in name_localizations?.values ?? [:] {
                     validateCharacterCountInRange(
-                        value, min: 1, max: 100,
+                        value,
+                        min: 1,
+                        max: 100,
                         name: "name_localizations.\(key.rawValue)"
                     )
                 }
@@ -75,7 +77,22 @@ public struct ApplicationCommand: Sendable, Codable {
         public var max_length: Int?
         public var autocomplete: Bool?
 
-        public init(type: Kind, name: String, name_localizations: [DiscordLocale : String]? = nil, description: String, description_localizations: [DiscordLocale : String]? = nil, required: Bool? = nil, choices: [Choice]? = nil, options: [Option]? = nil, channel_types: [DiscordChannel.Kind]? = nil, min_value: IntOrDouble? = nil, max_value: IntOrDouble? = nil, min_length: Int? = nil, max_length: Int? = nil, autocomplete: Bool? = nil) {
+        public init(
+            type: Kind,
+            name: String,
+            name_localizations: [DiscordLocale: String]? = nil,
+            description: String,
+            description_localizations: [DiscordLocale: String]? = nil,
+            required: Bool? = nil,
+            choices: [Choice]? = nil,
+            options: [Option]? = nil,
+            channel_types: [DiscordChannel.Kind]? = nil,
+            min_value: IntOrDouble? = nil,
+            max_value: IntOrDouble? = nil,
+            min_length: Int? = nil,
+            max_length: Int? = nil,
+            autocomplete: Bool? = nil
+        ) {
             self.type = type
             self.name = name
             self.name_localizations = .init(name_localizations)
@@ -91,7 +108,7 @@ public struct ApplicationCommand: Sendable, Codable {
             self.max_length = max_length
             self.autocomplete = autocomplete
         }
-        
+
         public func validate() -> [ValidationFailure] {
             validateNumberInRangeOrNil(min_length, min: 0, max: 6_000, name: "min_length")
             validateNumberInRangeOrNil(max_length, min: 0, max: 6_000, name: "max_length")
@@ -133,7 +150,7 @@ public struct ApplicationCommand: Sendable, Codable {
             options?.validate()
         }
     }
-    
+
     public var id: CommandSnowflake
     public var type: Kind?
     public var application_id: ApplicationSnowflake
@@ -159,29 +176,29 @@ public struct ApplicationCommand: Sendable, Codable {
 
 /// https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-guild-application-command-permissions-structure
 public struct GuildApplicationCommandPermissions: Sendable, Codable {
-    
+
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-application-command-permissions-structure
     public struct Permission: Sendable, Codable {
-        
+
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-application-command-permission-type
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
-            case role // 1
-            case user // 2
-            case channel // 3
+            case role  // 1
+            case user  // 2
+            case channel  // 3
             case __undocumented(Int)
         }
 
         public var type: Kind
         public var permission: Bool
         public var id: AnySnowflake
-        
+
         public init(type: Kind, permission: Bool, id: AnySnowflake) {
             self.type = type
             self.permission = permission
             self.id = id
         }
-        
+
         public enum ConversionError: Error, CustomStringConvertible {
             /// Couldn't convert \(id) to an integer
             case couldNotConvertToInteger(GuildSnowflake)
@@ -189,11 +206,12 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
             public var description: String {
                 switch self {
                 case let .couldNotConvertToInteger(string):
-                    return "GuildApplicationCommandPermissions.Permission.ConversionError.couldNotConvertToInteger(\(string))"
+                    return
+                        "GuildApplicationCommandPermissions.Permission.ConversionError.couldNotConvertToInteger(\(string))"
                 }
             }
         }
-        
+
         public static func allChannels(
             inGuildWithId guildId: GuildSnowflake,
             permission: Bool
@@ -207,7 +225,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
                 id: AnySnowflake("\(guildNumber - 1)")
             )
         }
-        
+
         public static func allMembers(
             inGuildWithId guildId: GuildSnowflake,
             permission: Bool
@@ -215,7 +233,7 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
             self.init(type: .user, permission: permission, id: AnySnowflake(guildId))
         }
     }
-    
+
     public var permissions: [Permission]
     public var id: AnySnowflake
     public var guild_id: GuildSnowflake

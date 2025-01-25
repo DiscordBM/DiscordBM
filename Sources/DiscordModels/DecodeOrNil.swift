@@ -49,4 +49,4 @@ extension DecodeOrNil: CustomDebugStringConvertible {
 }
 
 @_spi(UserInstallableApps)
-extension DecodeOrNil: Sendable where C: Sendable { }
+extension DecodeOrNil: Sendable where C: Sendable {}

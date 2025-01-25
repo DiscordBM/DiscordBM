@@ -182,7 +182,8 @@ public struct ClientConfiguration: Sendable {
                     return time
                 case let .basedOnHeaders(maxAllowed, retryIfGreater, elseBackoff):
                     if let header = headers.resetOrRetryAfterHeaderValue(),
-                       let retryAfter = Double(header) {
+                        let retryAfter = Double(header)
+                    {
                         if retryAfter <= (maxAllowed ?? 0) {
                             return retryAfter
                         } else {
@@ -238,7 +239,7 @@ public struct ClientConfiguration: Sendable {
                 .tooManyRequests,
                 .internalServerError,
                 .badGateway,
-                .gatewayTimeout
+                .gatewayTimeout,
             ],
             maxRetries: Int = 3,
             backoff: Backoff? = .default

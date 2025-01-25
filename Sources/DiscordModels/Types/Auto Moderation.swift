@@ -1,33 +1,32 @@
-
 /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object
 public struct AutoModerationRule: Sendable, Codable {
-    
+
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-event-types
     @UnstableEnum<Int>
     public enum EventKind: Sendable, Codable {
-        case messageSend // 1
+        case messageSend  // 1
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types
     @UnstableEnum<Int>
     public enum TriggerKind: Sendable, Codable {
-        case keyword // 1
-        case spam // 3
-        case keywordPreset // 4
-        case mentionSpam // 5
+        case keyword  // 1
+        case spam  // 3
+        case keywordPreset  // 4
+        case mentionSpam  // 5
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata
     public struct TriggerMetadata: Sendable, Codable {
-        
+
         /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-preset-types
         @UnstableEnum<Int>
         public enum KeywordPreset: Sendable, Codable {
-            case profanity // 1
-            case sexualContent // 2
-            case slurs // 3
+            case profanity  // 1
+            case sexualContent  // 2
+            case slurs  // 3
             case __undocumented(Int)
         }
 
@@ -38,7 +37,14 @@ public struct AutoModerationRule: Sendable, Codable {
         public var mention_total_limit: Int?
         public var mention_raid_protection_enabled: Bool?
 
-        public init(keyword_filter: [String]? = nil, regex_patterns: [String]? = nil, presets: [KeywordPreset]? = nil, allow_list: [String]? = nil, mention_total_limit: Int? = nil, mention_raid_protection_enabled: Bool? = nil) {
+        public init(
+            keyword_filter: [String]? = nil,
+            regex_patterns: [String]? = nil,
+            presets: [KeywordPreset]? = nil,
+            allow_list: [String]? = nil,
+            mention_total_limit: Int? = nil,
+            mention_raid_protection_enabled: Bool? = nil
+        ) {
             self.keyword_filter = keyword_filter
             self.regex_patterns = regex_patterns
             self.presets = presets
@@ -47,30 +53,30 @@ public struct AutoModerationRule: Sendable, Codable {
             self.mention_raid_protection_enabled = mention_raid_protection_enabled
         }
     }
-    
+
     /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object
     public enum Action: Sendable, Codable, ValidatablePayload {
         case blockMessage(customMessage: String?)
         case sendAlertMessage(channelId: ChannelSnowflake)
         case timeout(durationSeconds: Int)
-        
+
         private enum CodingKeys: String, CodingKey {
             case type
             case metadata
         }
-        
+
         private enum BlockMessageCodingKeys: String, CodingKey {
             case custom_message
         }
-        
+
         private enum SendAlertMessageCodingKeys: String, CodingKey {
             case channel_id
         }
-        
+
         private enum TimeoutCodingKeys: String, CodingKey {
             case duration_seconds
         }
-        
+
         public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let type = try container.decode(Int.self, forKey: .type)
@@ -94,13 +100,15 @@ public struct AutoModerationRule: Sendable, Codable {
                 ).decode(Int.self, forKey: .duration_seconds)
                 self = .timeout(durationSeconds: durationSeconds)
             default:
-                throw DecodingError.dataCorrupted(.init(
-                    codingPath: container.codingPath,
-                    debugDescription: "Unexpected AutoModerationRule.Action 'type': \(type)"
-                ))
+                throw DecodingError.dataCorrupted(
+                    .init(
+                        codingPath: container.codingPath,
+                        debugDescription: "Unexpected AutoModerationRule.Action 'type': \(type)"
+                    )
+                )
             }
         }
-        
+
         public func encode(to encoder: any Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             switch self {
@@ -127,7 +135,7 @@ public struct AutoModerationRule: Sendable, Codable {
                 try metadataContainer.encode(durationSeconds, forKey: .duration_seconds)
             }
         }
-        
+
         public func validate() -> [ValidationFailure] {
             switch self {
             case .blockMessage(let customMessage):
@@ -140,7 +148,7 @@ public struct AutoModerationRule: Sendable, Codable {
                 validateNumberInRangeOrNil(
                     durationSeconds,
                     min: 0,
-                    max: 2419200,
+                    max: 2_419_200,
                     name: "durationSeconds"
                 )
             case .sendAlertMessage(_):
@@ -148,7 +156,7 @@ public struct AutoModerationRule: Sendable, Codable {
             }
         }
     }
-    
+
     public var id: RuleSnowflake
     public var guild_id: GuildSnowflake
     public var name: String

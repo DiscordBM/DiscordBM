@@ -3,14 +3,14 @@ import NIOCore
 
 /// Exponential backoff
 final class Backoff {
-    
+
     let base: Double
     let maxExponentiation: Int
     let coefficient: Double
     let minBackoff: TimeInterval
     var tryCount = 0
     var previousTry = Date.distantPast.timeIntervalSince1970
-    
+
     init(
         base: Double,
         maxExponentiation: Int,
@@ -22,7 +22,7 @@ final class Backoff {
         self.coefficient = coefficient
         self.minBackoff = minBackoff
     }
-    
+
     /// Returns `nil` if can perform immediately,
     /// otherwise `Duration` to wait before attempting to perform.
     /// Assumes you will definitely perform the task after calling this.
@@ -56,20 +56,20 @@ final class Backoff {
             }
         }
     }
-    
+
     func resetTryCount() {
         self.tryCount = 0
     }
-    
+
     func willTry() {
         self.previousTry = Date().timeIntervalSince1970
     }
-    
+
     #if DEBUG
     func test_setTryCount(to newValue: Int) {
         self.tryCount = newValue
     }
-    
+
     func test_setPreviousTry(to newValue: TimeInterval) {
         self.previousTry = newValue
     }

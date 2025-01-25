@@ -1,4 +1,3 @@
-
 /// https://discord.com/developers/docs/resources/voice#voice-state-object-voice-state-structure
 public struct VoiceState: Sendable, Codable {
     public var guild_id: GuildSnowflake
@@ -30,7 +29,7 @@ public struct PartialVoiceState: Sendable, Codable {
     public var self_video: Bool
     public var suppress: Bool
     public var request_to_speak_timestamp: DiscordTimestamp?
-    
+
     public init(voiceState: VoiceState) {
         self.channel_id = voiceState.channel_id
         self.user_id = voiceState.user_id
@@ -62,7 +61,7 @@ public struct VoiceStateUpdate: Sendable, Codable {
     public var channel_id: ChannelSnowflake?
     public var self_deaf: Bool
     public var self_mute: Bool
-    
+
     /// For Gateway Voice-State update.
     public init(
         guildId: GuildSnowflake,
@@ -75,14 +74,14 @@ public struct VoiceStateUpdate: Sendable, Codable {
         self.self_mute = selfMute
         self.self_deaf = selfDeaf
     }
-    
+
     private enum CodingKeys: CodingKey {
         case guild_id
         case channel_id
         case self_deaf
         case self_mute
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 

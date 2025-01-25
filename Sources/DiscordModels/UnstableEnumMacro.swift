@@ -28,7 +28,9 @@
 )
 @attached(
     extension,
-    conformances: RawRepresentable, LosslessRawRepresentable, Hashable
+    conformances: RawRepresentable,
+    LosslessRawRepresentable,
+    Hashable
 )
 macro UnstableEnum<T>() = #externalMacro(module: "UnstableEnumMacro", type: "UnstableEnum")
 
@@ -37,4 +39,4 @@ macro UnstableEnum<T>() = #externalMacro(module: "UnstableEnumMacro", type: "Uns
 ///
 /// This is assigned to all types with `UnstableEnumMacro` attribute.
 @_marker
-public protocol LosslessRawRepresentable { }
+public protocol LosslessRawRepresentable {}

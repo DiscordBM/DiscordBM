@@ -1,4 +1,3 @@
-
 public enum OptionalError: Error, CustomStringConvertible {
     case nilValue(file: String, function: String, line: UInt)
 

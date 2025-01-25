@@ -23,13 +23,16 @@ public struct Interaction: Sendable, Codable {
             case let .optionNotFoundInOption(name, parentOption):
                 return "Interaction.Error.optionNotFoundInOption(name: \(name), parentOption: \(parentOption))"
             case let .optionNotFoundInOptions(name, options):
-                return "Interaction.Error.optionNotFoundInOption(name: \(name), options: \(String(describing: options)))"
+                return
+                    "Interaction.Error.optionNotFoundInOption(name: \(name), options: \(String(describing: options)))"
             case let .componentNotFoundInComponents(customId, components):
-                return "Interaction.Error.componentNotFoundInComponents(customId: \(customId), components: \(components))"
+                return
+                    "Interaction.Error.componentNotFoundInComponents(customId: \(customId), components: \(components))"
             case let .componentNotFoundInActionRow(customId, actionRow):
                 return "Interaction.Error.componentNotFoundInActionRow(customId: \(customId), actionRow: \(actionRow))"
             case let .componentNotFoundInActionRows(customId, actionRows):
-                return "Interaction.Error.componentNotFoundInActionRows(customId: \(customId), actionRows: \(actionRows))"
+                return
+                    "Interaction.Error.componentNotFoundInActionRows(customId: \(customId), actionRows: \(actionRows))"
             case let .componentWasNotOfKind(kind, component):
                 return "Interaction.Error.componentWasNotOfKind(kind: \(kind), component: \(component))"
             case let .dataWasNotOfKind(kind, data):
@@ -37,15 +40,15 @@ public struct Interaction: Sendable, Codable {
             }
         }
     }
-    
+
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
-        case ping // 1
-        case applicationCommand // 2
-        case messageComponent // 3
-        case applicationCommandAutocomplete // 4
-        case modalSubmit // 5
+        case ping  // 1
+        case applicationCommand  // 2
+        case messageComponent  // 3
+        case applicationCommandAutocomplete  // 4
+        case modalSubmit  // 5
         case __undocumented(Int)
     }
 
@@ -53,15 +56,15 @@ public struct Interaction: Sendable, Codable {
     @_spi(UserInstallableApps)
     @UnstableEnum<Int>
     public enum ContextKind: Sendable, Codable {
-        case guild // 0
-        case botDm // 1
-        case privateChannel // 2
+        case guild  // 0
+        case botDm  // 1
+        case privateChannel  // 2
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
     public struct ApplicationCommand: Sendable, Codable {
-        
+
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
         public struct ResolvedData: Sendable, Codable {
 
@@ -83,7 +86,7 @@ public struct Interaction: Sendable, Codable {
             public var messages: [MessageSnowflake: DiscordChannel.PartialMessage]?
             public var attachments: [AttachmentSnowflake: DiscordChannel.Message.Attachment]?
         }
-        
+
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
         public struct Option: Sendable, Codable {
             public var name: String
@@ -166,7 +169,7 @@ public struct Interaction: Sendable, Codable {
                 }
             }
         }
-        
+
         public var id: CommandSnowflake
         public var name: String
         public var type: Kind
@@ -201,7 +204,7 @@ public struct Interaction: Sendable, Codable {
             }
         }
     }
-    
+
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-message-component-data-structure
     public struct MessageComponent: Sendable, Codable {
         public var custom_id: String
@@ -209,13 +212,13 @@ public struct Interaction: Sendable, Codable {
         public var values: [String]?
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
     }
-    
+
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-modal-submit-data-structure
     public struct ModalSubmit: Sendable, Codable {
         public var custom_id: String
         public var components: [ActionRow]
     }
-    
+
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data
     public enum Data: Sendable {
         case applicationCommand(ApplicationCommand)
@@ -252,7 +255,7 @@ public struct Interaction: Sendable, Codable {
             }
         }
     }
-    
+
     public var id: InteractionSnowflake
     public var application_id: ApplicationSnowflake
     public var type: Kind
@@ -275,7 +278,12 @@ public struct Interaction: Sendable, Codable {
     @_spi(UserInstallableApps) /* No @DecodeOrNil because there is a manual init(from:) */
     public var context: ContextKind?
 
-    @available(*, deprecated, message: "This property is not documented and will be removed in a future version of DiscordBM, unless it becomes documented. Will always be nil for now")
+    @available(
+        *,
+        deprecated,
+        message:
+            "This property is not documented and will be removed in a future version of DiscordBM, unless it becomes documented. Will always be nil for now"
+    )
     public var entitlement_sku_ids: [String]? = nil
 
     enum CodingKeys: CodingKey {
@@ -299,10 +307,10 @@ public struct Interaction: Sendable, Codable {
         case authorizing_integration_owners
         case context
     }
-    
+
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         self.id = try container.decode(InteractionSnowflake.self, forKey: .id)
         self.application_id = try container.decode(
             ApplicationSnowflake.self,
@@ -310,11 +318,11 @@ public struct Interaction: Sendable, Codable {
         )
         self.type = try container.decode(Interaction.Kind.self, forKey: .type)
         switch self.type {
-        case .applicationCommand, .applicationCommandAutocomplete: 
+        case .applicationCommand, .applicationCommandAutocomplete:
             self.data = .applicationCommand(
                 try container.decode(ApplicationCommand.self, forKey: .data)
             )
-        case .messageComponent: 
+        case .messageComponent:
             self.data = .messageComponent(
                 try container.decode(MessageComponent.self, forKey: .data)
             )
@@ -358,10 +366,10 @@ public struct Interaction: Sendable, Codable {
             forKey: .context
         )
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
         try container.encode(self.id, forKey: .id)
         try container.encode(self.application_id, forKey: .application_id)
         try container.encode(self.type, forKey: .type)
@@ -389,7 +397,7 @@ public struct Interaction: Sendable, Codable {
     }
 }
 
-extension Array<Interaction.ApplicationCommand.Option> {
+extension [Interaction.ApplicationCommand.Option] {
     /// Returns the option with the `name`, or `nil`.
     @inlinable
     public func option(named name: String) -> Interaction.ApplicationCommand.Option? {
@@ -437,14 +445,14 @@ extension Interaction {
         /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
-            case actionRow // 1
-            case button // 2
-            case stringSelect // 3
-            case textInput // 4
-            case userSelect // 5
-            case roleSelect // 6
-            case mentionableSelect // 7
-            case channelSelect // 8
+            case actionRow  // 1
+            case button  // 2
+            case stringSelect  // 3
+            case textInput  // 4
+            case userSelect  // 5
+            case roleSelect  // 6
+            case mentionableSelect  // 7
+            case channelSelect  // 8
             case __undocumented(Int)
         }
 
@@ -454,11 +462,11 @@ extension Interaction {
             /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
             @UnstableEnum<Int>
             public enum Style: Sendable, Codable {
-                case primary // 1
-                case secondary // 2
-                case success // 3
-                case danger // 4
-                case link // 5
+                case primary  // 1
+                case secondary  // 2
+                case success  // 3
+                case danger  // 4
+                case link  // 5
                 case __undocumented(Int)
             }
 
@@ -480,11 +488,13 @@ extension Interaction {
                     case .success: return .success
                     case .danger: return .danger
                     case .__DO_NOT_USE_THIS_CASE:
-                        fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
+                        fatalError(
+                            "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
+                        )
                     }
                 }
 
-                public init? (style: Style) {
+                public init?(style: Style) {
                     switch style {
                     case .primary: self = .primary
                     case .secondary: self = .secondary
@@ -591,19 +601,25 @@ extension Interaction {
                 validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
             }
         }
-        
+
         /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
         public struct StringSelectMenu: Sendable, Codable, ValidatablePayload {
 
-        /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure
+            /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure
             public struct Option: Sendable, Codable, ValidatablePayload {
                 public var label: String
                 public var value: String
                 public var description: String?
                 public var emoji: Emoji?
                 public var `default`: Bool?
-                
-                public init(label: String, value: String, description: String? = nil, emoji: Emoji? = nil, `default`: Bool? = nil) {
+
+                public init(
+                    label: String,
+                    value: String,
+                    description: String? = nil,
+                    emoji: Emoji? = nil,
+                    `default`: Bool? = nil
+                ) {
                     self.label = label
                     self.value = value
                     self.description = description
@@ -617,15 +633,22 @@ extension Interaction {
                     validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
                 }
             }
-            
+
             public var custom_id: String
             public var options: [Option]
             public var placeholder: String?
             public var min_values: Int?
             public var max_values: Int?
             public var disabled: Bool?
-            
-            public init(custom_id: String, options: [Option], placeholder: String? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
+
+            public init(
+                custom_id: String,
+                options: [Option],
+                placeholder: String? = nil,
+                min_values: Int? = nil,
+                max_values: Int? = nil,
+                disabled: Bool? = nil
+            ) {
                 self.custom_id = custom_id
                 self.options = options
                 self.placeholder = placeholder
@@ -683,7 +706,15 @@ extension Interaction {
             public var max_values: Int?
             public var disabled: Bool?
 
-            public init(custom_id: String, channel_types: [DiscordChannel.Kind]? = nil, placeholder: String? = nil, default_values: [DefaultValue]? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
+            public init(
+                custom_id: String,
+                channel_types: [DiscordChannel.Kind]? = nil,
+                placeholder: String? = nil,
+                default_values: [DefaultValue]? = nil,
+                min_values: Int? = nil,
+                max_values: Int? = nil,
+                disabled: Bool? = nil
+            ) {
                 self.custom_id = custom_id
                 self.channel_types = channel_types
                 self.placeholder = placeholder
@@ -710,7 +741,14 @@ extension Interaction {
             public var max_values: Int?
             public var disabled: Bool?
 
-            public init(custom_id: String, placeholder: String? = nil, default_values: [DefaultValue]? = nil, min_values: Int? = nil, max_values: Int? = nil, disabled: Bool? = nil) {
+            public init(
+                custom_id: String,
+                placeholder: String? = nil,
+                default_values: [DefaultValue]? = nil,
+                min_values: Int? = nil,
+                max_values: Int? = nil,
+                disabled: Bool? = nil
+            ) {
                 self.custom_id = custom_id
                 self.placeholder = placeholder
                 self.default_values = default_values
@@ -724,18 +762,23 @@ extension Interaction {
                 validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
                 validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
                 validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
-                validateElementCountInRange(default_values, min: min_values ?? 0, max: max_values ?? .max, name: "default_values")
+                validateElementCountInRange(
+                    default_values,
+                    min: min_values ?? 0,
+                    max: max_values ?? .max,
+                    name: "default_values"
+                )
             }
         }
-        
+
         /// https://discord.com/developers/docs/interactions/message-components#text-inputs
         public struct TextInput: Sendable, Codable, ValidatablePayload {
 
-        /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
+            /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
             @UnstableEnum<Int>
             public enum Style: Sendable, Codable {
-                case short // 1
-                case paragraph // 2
+                case short  // 1
+                case paragraph  // 2
                 case __undocumented(Int)
             }
 
@@ -748,7 +791,16 @@ extension Interaction {
             public var value: String?
             public var placeholder: String?
 
-            public init(custom_id: String, style: Style? = nil, label: String? = nil, min_length: Int? = nil, max_length: Int? = nil, required: Bool? = nil, value: String? = nil, placeholder: String? = nil) {
+            public init(
+                custom_id: String,
+                style: Style? = nil,
+                label: String? = nil,
+                min_length: Int? = nil,
+                max_length: Int? = nil,
+                required: Bool? = nil,
+                value: String? = nil,
+                placeholder: String? = nil
+            ) {
                 self.custom_id = custom_id
                 self.style = style
                 self.label = label
@@ -803,7 +855,7 @@ extension Interaction {
             enum CodingKeys: String, CodingKey {
                 case type
             }
-            
+
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
                 let type = try container.decode(Kind.self, forKey: .type)
@@ -828,7 +880,7 @@ extension Interaction {
                     self = .__undocumented
                 }
             }
-            
+
             public func encode(to encoder: any Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 switch self {
@@ -980,12 +1032,12 @@ extension Interaction {
                 }
             }
         }
-        
+
         enum CodingKeys: String, CodingKey {
             case type
             case components
         }
-        
+
         public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let type = try container.decode(Kind.self, forKey: .type)
@@ -994,13 +1046,13 @@ extension Interaction {
             }
             self.components = try container.decode([Component].self, forKey: .components)
         }
-        
+
         public func encode(to encoder: any Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(Kind.actionRow, forKey: .type)
             try container.encode(self.components, forKey: .components)
         }
-        
+
         public init(components: [Component]) {
             self.components = components
         }
@@ -1031,7 +1083,7 @@ extension Interaction {
     }
 }
 
-extension Array<Interaction.ActionRow> {
+extension [Interaction.ActionRow] {
     /// Returns the component with the `customId`, or `nil`.
     @inlinable
     public func component(customId: String) -> Interaction.ActionRow.Component? {
@@ -1052,7 +1104,7 @@ extension Array<Interaction.ActionRow> {
     }
 }
 
-extension Array<Interaction.ActionRow.Component> {
+extension [Interaction.ActionRow.Component] {
     /// Returns the component with the `customId`, or `nil`.
     @inlinable
     public func component(customId: String) -> Interaction.ActionRow.Component? {

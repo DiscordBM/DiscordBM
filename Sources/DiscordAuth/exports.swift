@@ -1,2 +1,2 @@
-@_exported import DiscordModels
 @_exported import DiscordCore
+@_exported import DiscordModels

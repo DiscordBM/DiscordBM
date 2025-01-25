@@ -1,8 +1,9 @@
-@testable import DiscordGateway
 import XCTest
 
+@testable import DiscordGateway
+
 class BackoffTests: XCTestCase {
-    
+
     func testNoWaitTimeForTheFirstTime() async {
         for _ in 0..<50 {
             let backoff = Backoff(
@@ -17,7 +18,7 @@ class BackoffTests: XCTestCase {
             XCTAssertEqual(tryCount, 1)
         }
     }
-    
+
     func testMinPastTime1() async throws {
         for _ in 0..<50 {
             let minBackoff = Double.random(in: 5...60)
@@ -35,7 +36,7 @@ class BackoffTests: XCTestCase {
             XCTAssertTolerantIsEqual(canPerformDouble, minBackoff)
         }
     }
-    
+
     func testMinPastTime2() async throws {
         for _ in 0..<500 {
             for num in 1...5 {
@@ -60,7 +61,7 @@ class BackoffTests: XCTestCase {
             }
         }
     }
-    
+
     func testMaxExponentiation() async throws {
         /// Less than `minBackoff`
         do {
@@ -77,7 +78,7 @@ class BackoffTests: XCTestCase {
             let canPerformDouble = canPerformIn.asTimeInterval
             XCTAssertTolerantIsEqual(canPerformDouble, 32)
         }
-        
+
         /// Greater than `minBackoff`
         do {
             let backoff = Backoff(
@@ -94,7 +95,7 @@ class BackoffTests: XCTestCase {
             XCTAssertTolerantIsEqual(canPerformDouble, 257)
         }
     }
-    
+
     func testTryCountIncrement() async throws {
         for _ in 0..<50 {
             let minBackoff = Double.random(in: 5...60)
@@ -112,7 +113,7 @@ class BackoffTests: XCTestCase {
             XCTAssertEqual(backoffTryCount, tryCount + 1)
         }
     }
-    
+
     func testPreviousTry() async throws {
         for _ in 0..<500 {
             for num in 1...5 {
@@ -143,7 +144,7 @@ class BackoffTests: XCTestCase {
             }
         }
     }
-    
+
     func XCTAssertTolerantIsEqual(_ lhs: Double, _ rhs: Double) {
         let tolerance = 0.1
         let acceptedRange = (-tolerance...tolerance)
@@ -154,8 +155,8 @@ class BackoffTests: XCTestCase {
     }
 }
 
-private extension Duration {
-    var asTimeInterval: TimeInterval {
+extension Duration {
+    fileprivate var asTimeInterval: TimeInterval {
         let comps = self.components
         let attos = Double(comps.attoseconds) / 1_000_000_000_000_000_000
         return Double(comps.seconds) + attos

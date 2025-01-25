@@ -1,4 +1,3 @@
-
 protocol ValidationResult {
     func get() -> [ValidationFailure]
 }
@@ -9,7 +8,7 @@ extension ValidationFailure: ValidationResult {
     }
 }
 
-extension Array<ValidationFailure>: ValidationResult {
+extension [ValidationFailure]: ValidationResult {
     func get() -> [ValidationFailure] {
         self
     }

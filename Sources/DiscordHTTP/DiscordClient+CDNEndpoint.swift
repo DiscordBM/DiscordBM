@@ -1,9 +1,8 @@
-
 /// MARK: - +CDNEndpoint
-public extension DiscordClient {
+extension DiscordClient {
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNCustomEmoji(emojiId: EmojiSnowflake) async throws -> DiscordCDNResponse {
+    public func getCDNCustomEmoji(emojiId: EmojiSnowflake) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.customEmoji(emojiId: emojiId)
         return try await self.send(
             request: .init(to: endpoint),
@@ -13,7 +12,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNGuildIcon(
+    public func getCDNGuildIcon(
         guildId: GuildSnowflake,
         icon: String
     ) async throws -> DiscordCDNResponse {
@@ -23,7 +22,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNGuildSplash(
+    public func getCDNGuildSplash(
         guildId: GuildSnowflake,
         splash: String
     ) async throws -> DiscordCDNResponse {
@@ -33,7 +32,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNGuildDiscoverySplash(
+    public func getCDNGuildDiscoverySplash(
         guildId: GuildSnowflake,
         splash: String
     ) async throws -> DiscordCDNResponse {
@@ -43,7 +42,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNGuildBanner(guildId: GuildSnowflake, banner: String) async throws -> DiscordCDNResponse {
+    public func getCDNGuildBanner(guildId: GuildSnowflake, banner: String) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.guildBanner(guildId: guildId, banner: banner)
         return try await self.send(request: .init(to: endpoint), fallbackFileName: banner)
     }
@@ -56,14 +55,14 @@ public extension DiscordClient {
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNUserBanner(userId: UserSnowflake, banner: String) async throws -> DiscordCDNResponse {
+    public func getCDNUserBanner(userId: UserSnowflake, banner: String) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.userBanner(userId: userId, banner: banner)
         return try await self.send(request: .init(to: endpoint), fallbackFileName: banner)
     }
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNDefaultUserAvatar(discriminator: Int) async throws -> DiscordCDNResponse {
+    public func getCDNDefaultUserAvatar(discriminator: Int) async throws -> DiscordCDNResponse {
         /// `discriminator % 5` is what Discord says.
         let modulo = "\(discriminator % 5)"
         let endpoint = CDNEndpoint.defaultUserAvatar(discriminator: modulo)
@@ -75,14 +74,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNUserAvatar(userId: UserSnowflake, avatar: String) async throws -> DiscordCDNResponse {
+    public func getCDNUserAvatar(userId: UserSnowflake, avatar: String) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.userAvatar(userId: userId, avatar: avatar)
         return try await self.send(request: .init(to: endpoint), fallbackFileName: avatar)
     }
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNGuildMemberAvatar(
+    public func getCDNGuildMemberAvatar(
         guildId: GuildSnowflake,
         userId: UserSnowflake,
         avatar: String
@@ -104,7 +103,7 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @available(*, deprecated, renamed: "getCDNAvatarDecoration")
     @inlinable
-    func getCDNUserAvatarDecoration(
+    public func getCDNUserAvatarDecoration(
         userId: UserSnowflake,
         avatarDecoration: String
     ) async throws -> DiscordCDNResponse {
@@ -123,7 +122,7 @@ public extension DiscordClient {
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNAvatarDecoration(
+    public func getCDNAvatarDecoration(
         asset: String
     ) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.avatarDecoration(asset: asset)
@@ -138,7 +137,7 @@ public extension DiscordClient {
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNApplicationIcon(appId: ApplicationSnowflake, icon: String) async throws -> DiscordCDNResponse {
+    public func getCDNApplicationIcon(appId: ApplicationSnowflake, icon: String) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.applicationIcon(appId: appId, icon: icon)
         return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
     }
@@ -151,14 +150,14 @@ public extension DiscordClient {
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNApplicationCover(appId: ApplicationSnowflake, cover: String) async throws -> DiscordCDNResponse {
+    public func getCDNApplicationCover(appId: ApplicationSnowflake, cover: String) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.applicationCover(appId: appId, cover: cover)
         return try await self.send(request: .init(to: endpoint), fallbackFileName: cover)
     }
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNApplicationAsset(
+    public func getCDNApplicationAsset(
         appId: ApplicationSnowflake,
         assetId: AssetsSnowflake
     ) async throws -> DiscordCDNResponse {
@@ -177,7 +176,7 @@ public extension DiscordClient {
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNAchievementIcon(
+    public func getCDNAchievementIcon(
         appId: ApplicationSnowflake,
         achievementId: AnySnowflake,
         icon: String
@@ -198,7 +197,7 @@ public extension DiscordClient {
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNStorePageAsset(
+    public func getCDNStorePageAsset(
         appId: ApplicationSnowflake,
         assetId: AssetsSnowflake
     ) async throws -> DiscordCDNResponse {
@@ -211,7 +210,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNStickerPackBanner(
+    public func getCDNStickerPackBanner(
         assetId: AssetsSnowflake
     ) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.stickerPackBanner(assetId: assetId)
@@ -229,14 +228,14 @@ public extension DiscordClient {
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNTeamIcon(teamId: TeamSnowflake, icon: String) async throws -> DiscordCDNResponse {
+    public func getCDNTeamIcon(teamId: TeamSnowflake, icon: String) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.teamIcon(teamId: teamId, icon: icon)
         return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
     }
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNSticker(stickerId: StickerSnowflake) async throws -> DiscordCDNResponse {
+    public func getCDNSticker(stickerId: StickerSnowflake) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.sticker(stickerId: stickerId)
         return try await self.send(
             request: .init(to: endpoint),
@@ -246,14 +245,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNRoleIcon(roleId: RoleSnowflake, icon: String) async throws -> DiscordCDNResponse {
+    public func getCDNRoleIcon(roleId: RoleSnowflake, icon: String) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.roleIcon(roleId: roleId, icon: icon)
         return try await self.send(request: .init(to: endpoint), fallbackFileName: icon)
     }
 
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNGuildScheduledEventCover(
+    public func getCDNGuildScheduledEventCover(
         eventId: GuildScheduledEventSnowflake,
         cover: String
     ) async throws -> DiscordCDNResponse {
@@ -269,7 +268,7 @@ public extension DiscordClient {
     ///
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    func getCDNGuildMemberBanner(
+    public func getCDNGuildMemberBanner(
         guildId: GuildSnowflake,
         userId: UserSnowflake,
         banner: String

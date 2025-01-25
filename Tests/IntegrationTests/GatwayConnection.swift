@@ -1,9 +1,10 @@
-@testable import DiscordGateway
 import AsyncHTTPClient
 import Atomics
-import Logging
 import Foundation
+import Logging
 import XCTest
+
+@testable import DiscordGateway
 
 class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
@@ -71,11 +72,15 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
             /// parsing errors for those.
             if Bool.random() {
                 for await (error, buffer) in await bot.eventFailures {
-                    XCTFail("Received parsing failure. Error: \(error), buffer: \(buffer), string-buffer: \(String(buffer: buffer))")
+                    XCTFail(
+                        "Received parsing failure. Error: \(error), buffer: \(buffer), string-buffer: \(String(buffer: buffer))"
+                    )
                 }
             } else {
                 for await (error, buffer) in await bot.makeEventsParseFailureStream() {
-                    XCTFail("Received parsing failure. Error: \(error), buffer: \(buffer), string-buffer: \(String(buffer: buffer))")
+                    XCTFail(
+                        "Received parsing failure. Error: \(error), buffer: \(buffer), string-buffer: \(String(buffer: buffer))"
+                    )
                 }
             }
         }
@@ -217,7 +222,10 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(messages.count, 1)
         let first = try XCTUnwrap(messages.first)
-        XCTAssertEqual(first, #"Will not reconnect because Discord does not allow it. Something is wrong. Your close code is 'authenticationFailed', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/DiscordBM/DiscordBM/issues if you think this is a library issue"#)
+        XCTAssertEqual(
+            first,
+            #"Will not reconnect because Discord does not allow it. Something is wrong. Your close code is 'authenticationFailed', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/DiscordBM/DiscordBM/issues if you think this is a library issue"#
+        )
 
         /// Wait 1s just incase.
         try await Task.sleep(for: .seconds(1))
@@ -268,21 +276,27 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         /// Didn't find a way to properly verify these functions.
         /// Here we just make the requests and make sure we aren't getting invalid-session-ed.
-        await bot.requestGuildMembersChunk(payload: .init(
-            guild_id: Constants.guildId
-        ))
+        await bot.requestGuildMembersChunk(
+            payload: .init(
+                guild_id: Constants.guildId
+            )
+        )
         let activityName = "Test Activity! \(UInt.random(in: .min ... .max))"
-        await bot.updatePresence(payload: .init(
-            since: Date.now,
-            activities: [.init(name: activityName, type: .listening)],
-            status: .online,
-            afk: true
-        ))
-        await bot.updateVoiceState(payload: .init(
-            guildId: Constants.guildId,
-            selfMute: true,
-            selfDeaf: false
-        ))
+        await bot.updatePresence(
+            payload: .init(
+                since: Date.now,
+                activities: [.init(name: activityName, type: .listening)],
+                status: .online,
+                afk: true
+            )
+        )
+        await bot.updateVoiceState(
+            payload: .init(
+                guildId: Constants.guildId,
+                selfMute: true,
+                selfDeaf: false
+            )
+        )
 
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we aren't getting invalid-session-ed.
@@ -306,12 +320,12 @@ private actor ConnectionInfo {
     var ready: Gateway.Ready? = nil
     var didHello = false
 
-    init() { }
+    init() {}
 
     func setReady(_ ready: Gateway.Ready) {
         self.ready = ready
     }
-    
+
     func setDidHello() {
         self.didHello = true
     }
@@ -365,8 +379,8 @@ private class TestingLogHandler: @unchecked Sendable, LogHandler {
     var metadata: Logger.Metadata = [:]
     var logLevel: Logger.Level = .critical
     subscript(metadataKey _: String) -> Logger.Metadata.Value? {
-        get { return nil }
-        set { }
+        get { nil }
+        set {}
     }
 
     init(expectation: Expectation) {

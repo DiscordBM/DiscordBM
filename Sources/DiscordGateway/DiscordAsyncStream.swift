@@ -1,4 +1,3 @@
-
 /// DiscordBM's async sequence.
 public struct DiscordAsyncSequence<Element: Sendable>: Sendable, AsyncSequence {
 

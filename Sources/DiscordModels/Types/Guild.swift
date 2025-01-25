@@ -1,16 +1,15 @@
-
 /// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
 public struct Guild: Sendable, Codable {
-    
+
     /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
     public struct Member: Sendable, Codable {
         /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags
         @UnstableEnum<UInt>
         public enum Flag: Sendable {
-            case didRejoin // 0
-            case completedOnboarding // 1
-            case bypassVerification // 2
-            case startedOnboarding // 3
+            case didRejoin  // 0
+            case completedOnboarding  // 1
+            case bypassVerification  // 2
+            case startedOnboarding  // 3
             case __undocumented(UInt)
         }
 
@@ -49,10 +48,11 @@ public struct Guild: Sendable, Codable {
             self.nick = try container.decodeIfPresent(String.self, forKey: .nick)
             self.avatar = try container.decodeIfPresent(String.self, forKey: .avatar)
             self.roles = try container.decode([RoleSnowflake].self, forKey: .roles)
-            self.joined_at = try container.decodeIfPresent(
-                DiscordTimestamp.self,
-                forKey: .joined_at
-            ) ?? .init(date: .distantFuture)
+            self.joined_at =
+                try container.decodeIfPresent(
+                    DiscordTimestamp.self,
+                    forKey: .joined_at
+                ) ?? .init(date: .distantFuture)
             self.premium_since = try container.decodeIfPresent(
                 DiscordTimestamp.self,
                 forKey: .premium_since
@@ -78,119 +78,119 @@ public struct Guild: Sendable, Codable {
             )
         }
     }
-    
+
     /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level
     @UnstableEnum<Int>
     public enum VerificationLevel: Sendable, Codable {
-        case none // 0
-        case low // 1
-        case medium // 2
-        case high // 3
-        case veryHigh // 4
+        case none  // 0
+        case low  // 1
+        case medium  // 2
+        case high  // 3
+        case veryHigh  // 4
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-default-message-notification-level
     @UnstableEnum<Int>
     public enum DefaultMessageNotificationLevel: Sendable, Codable {
-        case allMessages // 0
-        case onlyMentions // 1
+        case allMessages  // 0
+        case onlyMentions  // 1
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-explicit-content-filter-level
     @UnstableEnum<Int>
     public enum ExplicitContentFilterLevel: Sendable, Codable {
-        case disabled // 0
-        case memberWithoutRoles // 1
-        case allMembers // 2
+        case disabled  // 0
+        case memberWithoutRoles  // 1
+        case allMembers  // 2
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-features
     @UnstableEnum<String>
     public enum Feature: Sendable, Codable {
-        case animatedBanner // "ANIMATED_BANNER"
-        case animatedIcon // "ANIMATED_ICON"
-        case applicationCommandPermissionsV2 // "APPLICATION_COMMAND_PERMISSIONS_V2"
-        case autoModeration // "AUTO_MODERATION"
-        case banner // "BANNER"
-        case community // "COMMUNITY"
-        case creatorMonetizableProvisional // "CREATOR_MONETIZABLE_PROVISIONAL"
-        case creatorStorePage // "CREATOR_STORE_PAGE"
-        case developerSupportServer // "DEVELOPER_SUPPORT_SERVER"
-        case discoverable // "DISCOVERABLE"
-        case featurable // "FEATURABLE"
-        case invitesDisabled // "INVITES_DISABLED"
-        case inviteSplash // "INVITE_SPLASH"
-        case memberVerificationGateEnabled // "MEMBER_VERIFICATION_GATE_ENABLED"
-        case moreStickers // "MORE_STICKERS"
-        case news // "NEWS"
-        case partnered // "PARTNERED"
-        case previewEnabled // "PREVIEW_ENABLED"
-        case raidAlertsDisabled // "RAID_ALERTS_DISABLED"
-        case roleIcons // "ROLE_ICONS"
-        case roleSubscriptionsAvailableForPurchase // "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE"
-        case roleSubscriptionsEnabled // "ROLE_SUBSCRIPTIONS_ENABLED"
-        case ticketedEventsEnabled // "TICKETED_EVENTS_ENABLED"
-        case vanityURL // "VANITY_URL"
-        case verified // "VERIFIED"
-        case vipRegions // "VIP_REGIONS"
-        case welcomeScreenEnabled // "WELCOME_SCREEN_ENABLED"
+        case animatedBanner  // "ANIMATED_BANNER"
+        case animatedIcon  // "ANIMATED_ICON"
+        case applicationCommandPermissionsV2  // "APPLICATION_COMMAND_PERMISSIONS_V2"
+        case autoModeration  // "AUTO_MODERATION"
+        case banner  // "BANNER"
+        case community  // "COMMUNITY"
+        case creatorMonetizableProvisional  // "CREATOR_MONETIZABLE_PROVISIONAL"
+        case creatorStorePage  // "CREATOR_STORE_PAGE"
+        case developerSupportServer  // "DEVELOPER_SUPPORT_SERVER"
+        case discoverable  // "DISCOVERABLE"
+        case featurable  // "FEATURABLE"
+        case invitesDisabled  // "INVITES_DISABLED"
+        case inviteSplash  // "INVITE_SPLASH"
+        case memberVerificationGateEnabled  // "MEMBER_VERIFICATION_GATE_ENABLED"
+        case moreStickers  // "MORE_STICKERS"
+        case news  // "NEWS"
+        case partnered  // "PARTNERED"
+        case previewEnabled  // "PREVIEW_ENABLED"
+        case raidAlertsDisabled  // "RAID_ALERTS_DISABLED"
+        case roleIcons  // "ROLE_ICONS"
+        case roleSubscriptionsAvailableForPurchase  // "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE"
+        case roleSubscriptionsEnabled  // "ROLE_SUBSCRIPTIONS_ENABLED"
+        case ticketedEventsEnabled  // "TICKETED_EVENTS_ENABLED"
+        case vanityURL  // "VANITY_URL"
+        case verified  // "VERIFIED"
+        case vipRegions  // "VIP_REGIONS"
+        case welcomeScreenEnabled  // "WELCOME_SCREEN_ENABLED"
         case __undocumented(String)
 
         /// These ones are not mentioned in the Discord docs (There are even more of these).
         /// Might not even be valid anymore.
-//        case commerce = "COMMERCE"
-//        case privateThreads = "PRIVATE_THREADS"
-//        case sevenDayThreadArchive = "SEVEN_DAY_THREAD_ARCHIVE"
-//        case threeDayThreadArchive = "THREE_DAY_THREAD_ARCHIVE"
-//        case guildWebPageVanityUrl = "GUILD_WEB_PAGE_VANITY_URL"
-//        case textInVoiceEnabled = "TEXT_IN_VOICE_ENABLED"
-//        case memberProfiles = "MEMBER_PROFILES"
-//        case threadsEnabled = "THREADS_ENABLED"
-//        case exposedToActivitiesWtpExperiment = "EXPOSED_TO_ACTIVITIES_WTP_EXPERIMENT"
-//        case newThreadPermissions = "NEW_THREAD_PERMISSIONS"
-//        case enabledDiscoverableBefore = "ENABLED_DISCOVERABLE_BEFORE"
-//        case communityExpMedium = "COMMUNITY_EXP_MEDIUM"
-//        case communityExpLargeUngated = "COMMUNITY_EXP_LARGE_UNGATED"
-//        case soundboard = "SOUNDBOARD"
-//        case monetizationEnabled = "MONETIZATION_ENABLED"
+        //        case commerce = "COMMERCE"
+        //        case privateThreads = "PRIVATE_THREADS"
+        //        case sevenDayThreadArchive = "SEVEN_DAY_THREAD_ARCHIVE"
+        //        case threeDayThreadArchive = "THREE_DAY_THREAD_ARCHIVE"
+        //        case guildWebPageVanityUrl = "GUILD_WEB_PAGE_VANITY_URL"
+        //        case textInVoiceEnabled = "TEXT_IN_VOICE_ENABLED"
+        //        case memberProfiles = "MEMBER_PROFILES"
+        //        case threadsEnabled = "THREADS_ENABLED"
+        //        case exposedToActivitiesWtpExperiment = "EXPOSED_TO_ACTIVITIES_WTP_EXPERIMENT"
+        //        case newThreadPermissions = "NEW_THREAD_PERMISSIONS"
+        //        case enabledDiscoverableBefore = "ENABLED_DISCOVERABLE_BEFORE"
+        //        case communityExpMedium = "COMMUNITY_EXP_MEDIUM"
+        //        case communityExpLargeUngated = "COMMUNITY_EXP_LARGE_UNGATED"
+        //        case soundboard = "SOUNDBOARD"
+        //        case monetizationEnabled = "MONETIZATION_ENABLED"
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
     @UnstableEnum<Int>
     public enum MFALevel: Sendable, Codable {
-        case none // 0
-        case elevated // 1
+        case none  // 0
+        case elevated  // 1
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-system-channel-flags
     @UnstableEnum<UInt>
     public enum SystemChannelFlag: Sendable {
-        case suppressJoinNotifications // 0
-        case suppressPremiumSubscriptions // 1
-        case suppressGuildReminderNotifications // 2
-        case suppressJoinNotificationReplies // 3
-        case suppressRoleSubscriptionPurchaseNotifications // 4
-        case suppressRoleSubscriptionPurchaseNotificationReplies // 5
+        case suppressJoinNotifications  // 0
+        case suppressPremiumSubscriptions  // 1
+        case suppressGuildReminderNotifications  // 2
+        case suppressJoinNotificationReplies  // 3
+        case suppressRoleSubscriptionPurchaseNotifications  // 4
+        case suppressRoleSubscriptionPurchaseNotificationReplies  // 5
         case __undocumented(UInt)
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier
     @UnstableEnum<Int>
     public enum PremiumTier: Sendable, Codable {
-        case none // 0
-        case tier1 // 1
-        case tier2 // 2
-        case tier3 // 3
+        case none  // 0
+        case tier1  // 1
+        case tier2  // 2
+        case tier3  // 3
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-structure
     public struct WelcomeScreen: Sendable, Codable {
-        
+
         /// https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-channel-structure
         public struct Channel: Sendable, Codable {
             public var channel_id: ChannelSnowflake
@@ -198,36 +198,41 @@ public struct Guild: Sendable, Codable {
             public var emoji_id: EmojiSnowflake?
             public var emoji_name: String?
 
-            public init(channel_id: ChannelSnowflake, description: String, emoji_id: EmojiSnowflake? = nil, emoji_name: String? = nil) {
+            public init(
+                channel_id: ChannelSnowflake,
+                description: String,
+                emoji_id: EmojiSnowflake? = nil,
+                emoji_name: String? = nil
+            ) {
                 self.channel_id = channel_id
                 self.description = description
                 self.emoji_id = emoji_id
                 self.emoji_name = emoji_name
             }
         }
-        
+
         public var description: String?
         public var welcome_channels: [Channel]
     }
-    
+
     /// https://discord.com/developers/docs/resources/guild#guild-object-guild-nsfw-level
     @UnstableEnum<Int>
     public enum NSFWLevel: Sendable, Codable {
-        case `default` // 0
-        case explicit // 1
-        case safe // 2
-        case ageRestricted // 3
+        case `default`  // 0
+        case explicit  // 1
+        case safe  // 2
+        case ageRestricted  // 3
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild#create-guild-json-params
     @UnstableEnum<Int>
     public enum AFKTimeout: Sendable, Codable {
-        case oneMinute // 60
-        case fiveMinutes // 300
-        case fifteenMinutes // 900
-        case halfAnHour // 1800
-        case anHour // 3600
+        case oneMinute  // 60
+        case fiveMinutes  // 300
+        case fifteenMinutes  // 900
+        case halfAnHour  // 1800
+        case anHour  // 3600
         case __undocumented(Int)
     }
 
@@ -369,7 +374,14 @@ extension Guild {
                 public var title: String
                 public var description: String?
 
-                public init(id: OnboardingPromptOptionSnowflake, channel_ids: [ChannelSnowflake], role_ids: [RoleSnowflake], emoji: Emoji, title: String, description: String? = nil) {
+                public init(
+                    id: OnboardingPromptOptionSnowflake,
+                    channel_ids: [ChannelSnowflake],
+                    role_ids: [RoleSnowflake],
+                    emoji: Emoji,
+                    title: String,
+                    description: String? = nil
+                ) {
                     self.id = id
                     self.channel_ids = channel_ids
                     self.role_ids = role_ids
@@ -382,8 +394,8 @@ extension Guild {
             /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-types
             @UnstableEnum<Int>
             public enum Kind: Sendable, Codable {
-                case multipleChoice // 0
-                case dropdown // 1
+                case multipleChoice  // 0
+                case dropdown  // 1
                 case __undocumented(Int)
             }
 
@@ -395,7 +407,15 @@ extension Guild {
             public var required: Bool
             public var in_onboarding: Bool
 
-            public init(id: OnboardingPromptSnowflake, type: Kind, options: [Option], title: String, single_select: Bool, required: Bool, in_onboarding: Bool) {
+            public init(
+                id: OnboardingPromptSnowflake,
+                type: Kind,
+                options: [Option],
+                title: String,
+                single_select: Bool,
+                required: Bool,
+                in_onboarding: Bool
+            ) {
                 self.id = id
                 self.type = type
                 self.options = options
@@ -418,7 +438,7 @@ extension Guild {
         public var enabled: Bool
         public var mode: Mode
     }
-    
+
     /// https://discord.com/developers/docs/resources/guild#guild-preview-object-guild-preview-structure
     public struct Preview: Sendable, Codable {
         public var id: GuildSnowflake

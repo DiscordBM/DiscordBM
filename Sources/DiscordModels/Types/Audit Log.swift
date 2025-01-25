@@ -1,10 +1,9 @@
-
 /// https://discord.com/developers/docs/resources/audit-log#audit-log-object-audit-log-structure
 public struct AuditLog: Sendable, Codable {
-    
+
     /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-entry-structure
     public struct Entry: Sendable, Codable {
-        
+
         public enum Mixed: Sendable, Codable, CustomStringConvertible {
             case string(String)
             case int(Int)
@@ -17,20 +16,20 @@ public struct AuditLog: Sendable, Codable {
             case permission(GuildApplicationCommandPermissions.Permission)
             case actions([AutoModerationRule.Action])
             case other(Other)
-            
+
             public struct NameID: Sendable, Codable {
                 public var name: String
                 public var id: String?
             }
-            
+
             public struct Other: @unchecked Sendable {
                 let container: any SingleValueDecodingContainer
-                
+
                 public func decode<D: Decodable>(as: D.Type = D.self) throws -> D {
                     try container.decode(D.self)
                 }
             }
-            
+
             public var description: String {
                 switch self {
                 case let .string(string): return string
@@ -46,7 +45,7 @@ public struct AuditLog: Sendable, Codable {
                 case let .other(other): return "\(other.container)"
                 }
             }
-            
+
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.singleValueContainer()
                 if let string = try? container.decode(String.self) {
@@ -65,24 +64,29 @@ public struct AuditLog: Sendable, Codable {
                     self = .nameIds(nameIds)
                 } else if let overwrites = try? container.decode([DiscordChannel.Overwrite].self) {
                     self = .permissionOverwrites(overwrites)
-                } else if let permission = try? container
-                    .decode(GuildApplicationCommandPermissions.Permission.self) {
+                } else if let permission =
+                    try? container
+                    .decode(GuildApplicationCommandPermissions.Permission.self)
+                {
                     self = .permission(permission)
                 } else if let actions = try? container.decode([AutoModerationRule.Action].self) {
                     self = .actions(actions)
                 } else {
                     DiscordGlobalConfiguration
                         .makeDecodeLogger("DBM.AuditLog.Entry.Mixed")
-                        .warning("Can't decode a value", metadata: [
-                            "codingPath": .stringConvertible(
-                                container.codingPath.map(\.stringValue)
-                            ),
-                            "container": "\(container)"
-                        ])
+                        .warning(
+                            "Can't decode a value",
+                            metadata: [
+                                "codingPath": .stringConvertible(
+                                    container.codingPath.map(\.stringValue)
+                                ),
+                                "container": "\(container)",
+                            ]
+                        )
                     self = .other(Other(container: container))
                 }
             }
-            
+
             public func encode(to encoder: any Encoder) throws {
                 var container = encoder.singleValueContainer()
                 switch self {
@@ -116,83 +120,83 @@ public struct AuditLog: Sendable, Codable {
                 }
             }
         }
-        
+
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-change-object-audit-log-change-structure
         public struct Change: Sendable, Codable {
             public var new_value: Mixed?
             public var old_value: Mixed?
             public var key: String
         }
-        
+
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
         @UnstableEnum<Int>
         public enum ActionKind: Sendable, Codable {
-            case guildUpdate // 1
-            case channelCreate // 10
-            case channelUpdate // 11
-            case channelDelete // 12
-            case channelOverwriteCreate // 13
-            case channelOverwriteUpdate // 14
-            case channelOverwriteDelete // 15
-            case memberKick // 20
-            case memberPrune // 21
-            case memberBanAdd // 22
-            case memberBanRemove // 23
-            case memberUpdate // 24
-            case memberRoleUpdate // 25
-            case memberMove // 26
-            case memberDisconnect // 27
-            case botAdd // 28
-            case roleCreate // 30
-            case roleUpdate // 31
-            case roleDelete // 32
-            case inviteCreate // 40
-            case inviteUpdate // 41
-            case inviteDelete // 42
-            case webhookCreate // 50
-            case webhookUpdate // 51
-            case webhookDelete // 52
-            case emojiCreate // 60
-            case emojiUpdate // 61
-            case emojiDelete // 62
-            case messageDelete // 72
-            case messageBulkDelete // 73
-            case messagePin // 74
-            case messageUnpin // 75
-            case integrationCreate // 80
-            case integrationUpdate // 81
-            case integrationDelete // 82
-            case stageInstanceCreate // 83
-            case stageInstanceUpdate // 84
-            case stageInstanceDelete // 85
-            case stickerCreate // 90
-            case stickerUpdate // 91
-            case stickerDelete // 92
-            case guildScheduledEventCreate // 100
-            case guildScheduledEventUpdate // 101
-            case guildScheduledEventDelete // 102
-            case threadCreate // 110
-            case threadUpdate // 111
-            case threadDelete // 112
-            case applicationCommandPermissionUpdate // 121
-            case autoModerationRuleCreate // 140
-            case autoModerationRuleUpdate // 141
-            case autoModerationRuleDelete // 142
-            case autoModerationBlockMessage // 143
-            case autoModerationFlagToChannel // 144
-            case autoModerationUserCommunicationDisabled // 145
-            case creatorMonetizationRequestCreated // 150
-            case creatorMonetizationTermsAccepted // 151
-            case onboardingPromptCreate // 163
-            case onboardingPromptUpdate // 164
-            case onboardingPromptDelete // 165
-            case onboardingCreate // 166
-            case onboardingUpdate // 167
-            case homeSettingsCreate // 190
-            case homeSettingsUpdate // 191
+            case guildUpdate  // 1
+            case channelCreate  // 10
+            case channelUpdate  // 11
+            case channelDelete  // 12
+            case channelOverwriteCreate  // 13
+            case channelOverwriteUpdate  // 14
+            case channelOverwriteDelete  // 15
+            case memberKick  // 20
+            case memberPrune  // 21
+            case memberBanAdd  // 22
+            case memberBanRemove  // 23
+            case memberUpdate  // 24
+            case memberRoleUpdate  // 25
+            case memberMove  // 26
+            case memberDisconnect  // 27
+            case botAdd  // 28
+            case roleCreate  // 30
+            case roleUpdate  // 31
+            case roleDelete  // 32
+            case inviteCreate  // 40
+            case inviteUpdate  // 41
+            case inviteDelete  // 42
+            case webhookCreate  // 50
+            case webhookUpdate  // 51
+            case webhookDelete  // 52
+            case emojiCreate  // 60
+            case emojiUpdate  // 61
+            case emojiDelete  // 62
+            case messageDelete  // 72
+            case messageBulkDelete  // 73
+            case messagePin  // 74
+            case messageUnpin  // 75
+            case integrationCreate  // 80
+            case integrationUpdate  // 81
+            case integrationDelete  // 82
+            case stageInstanceCreate  // 83
+            case stageInstanceUpdate  // 84
+            case stageInstanceDelete  // 85
+            case stickerCreate  // 90
+            case stickerUpdate  // 91
+            case stickerDelete  // 92
+            case guildScheduledEventCreate  // 100
+            case guildScheduledEventUpdate  // 101
+            case guildScheduledEventDelete  // 102
+            case threadCreate  // 110
+            case threadUpdate  // 111
+            case threadDelete  // 112
+            case applicationCommandPermissionUpdate  // 121
+            case autoModerationRuleCreate  // 140
+            case autoModerationRuleUpdate  // 141
+            case autoModerationRuleDelete  // 142
+            case autoModerationBlockMessage  // 143
+            case autoModerationFlagToChannel  // 144
+            case autoModerationUserCommunicationDisabled  // 145
+            case creatorMonetizationRequestCreated  // 150
+            case creatorMonetizationTermsAccepted  // 151
+            case onboardingPromptCreate  // 163
+            case onboardingPromptUpdate  // 164
+            case onboardingPromptDelete  // 165
+            case onboardingCreate  // 166
+            case onboardingUpdate  // 167
+            case homeSettingsCreate  // 190
+            case homeSettingsUpdate  // 191
             case __undocumented(Int)
         }
-        
+
         /// A mix of the below two types.
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
         /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
@@ -268,17 +272,17 @@ public struct AuditLog: Sendable, Codable {
                     case role(name: String)
                     case member(permission: Bool?)
                 }
-                
+
                 public var id: String
                 public var type: Kind
-                
+
                 enum CodingKeys: CodingKey {
                     case id
                     case type
                     case permission
                     case role_name
                 }
-                
+
                 public init(from decoder: any Decoder) throws {
                     let container = try decoder.container(keyedBy: CodingKeys.self)
                     self.id = try container.decode(String.self, forKey: .id)
@@ -294,13 +298,16 @@ public struct AuditLog: Sendable, Codable {
                         )
                         self.type = .member(permission: permission)
                     default:
-                        throw DecodingError.keyNotFound(CodingKeys.type, .init(
-                            codingPath: decoder.codingPath,
-                            debugDescription: "Can't decode from value: '\(type)'"
-                        ))
+                        throw DecodingError.keyNotFound(
+                            CodingKeys.type,
+                            .init(
+                                codingPath: decoder.codingPath,
+                                debugDescription: "Can't decode from value: '\(type)'"
+                            )
+                        )
                     }
                 }
-                
+
                 public func encode(to encoder: any Encoder) throws {
                     var container = encoder.container(keyedBy: CodingKeys.self)
                     try container.encode(self.id, forKey: .id)
@@ -313,12 +320,12 @@ public struct AuditLog: Sendable, Codable {
                     }
                 }
             }
-            
+
             public struct AutoModerationInfo: Sendable, Codable {
                 public var auto_moderation_rule_name: String
                 public var auto_moderation_rule_trigger_type: AutoModerationRule.TriggerKind
                 public var channel_id: ChannelSnowflake
-                
+
                 public init(from decoder: any Decoder) throws {
                     let container = try decoder.container(keyedBy: CodingKeys.self)
                     self.auto_moderation_rule_name = try container.decode(
@@ -330,26 +337,30 @@ public struct AuditLog: Sendable, Codable {
                         forKey: .auto_moderation_rule_trigger_type
                     )
                     if let intTrigger = Int(triggerType),
-                       let type = AutoModerationRule.TriggerKind(rawValue: intTrigger) {
+                        let type = AutoModerationRule.TriggerKind(rawValue: intTrigger)
+                    {
                         self.auto_moderation_rule_trigger_type = type
                     } else {
-                        throw DecodingError.keyNotFound(CodingKeys.auto_moderation_rule_trigger_type, .init(
-                            codingPath: decoder.codingPath,
-                            debugDescription: "Can't decode from value: '\(triggerType)'"
-                        ))
+                        throw DecodingError.keyNotFound(
+                            CodingKeys.auto_moderation_rule_trigger_type,
+                            .init(
+                                codingPath: decoder.codingPath,
+                                debugDescription: "Can't decode from value: '\(triggerType)'"
+                            )
+                        )
                     }
                     self.channel_id = try container.decode(
                         ChannelSnowflake.self,
                         forKey: .channel_id
                     )
                 }
-                
+
                 enum CodingKeys: CodingKey {
                     case auto_moderation_rule_name
                     case auto_moderation_rule_trigger_type
                     case channel_id
                 }
-                
+
                 public func encode(to encoder: any Encoder) throws {
                     var container = encoder.container(keyedBy: CodingKeys.self)
                     try container.encode(
@@ -363,7 +374,7 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(self.channel_id, forKey: .channel_id)
                 }
             }
-            
+
             enum CodingKeys: String, CodingKey {
                 case action_type
                 case options
@@ -376,7 +387,7 @@ public struct AuditLog: Sendable, Codable {
                 case application_id
                 case integration_type
             }
-            
+
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
                 let actionType = try container.decode(ActionKind.self, forKey: .action_type)
@@ -400,7 +411,7 @@ public struct AuditLog: Sendable, Codable {
                 case .channelOverwriteDelete:
                     let info = try container.decode(OverwriteInfo.self, forKey: .options)
                     self = .channelOverwriteDelete(info)
-                case .memberKick: 
+                case .memberKick:
                     let container = try optionsNestedContainer()
                     let integration_type = try container.decode(
                         Integration.Kind.self,
@@ -646,7 +657,7 @@ public struct AuditLog: Sendable, Codable {
                 }
             }
         }
-        
+
         public var guild_id: GuildSnowflake?
         public var target_id: AnySnowflake?
         public var changes: [Change]?
@@ -654,7 +665,7 @@ public struct AuditLog: Sendable, Codable {
         public var id: AuditLogEntrySnowflake
         public var action: Action
         public var reason: String?
-        
+
         enum CodingKeys: String, CodingKey {
             case guild_id
             case target_id
@@ -663,7 +674,7 @@ public struct AuditLog: Sendable, Codable {
             case id
             case reason
         }
-        
+
         public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self.guild_id = try container.decodeIfPresent(GuildSnowflake.self, forKey: .guild_id)
@@ -691,7 +702,7 @@ public struct AuditLog: Sendable, Codable {
             try action.encode(to: encoder)
         }
     }
-    
+
     public var application_commands: [ApplicationCommand]
     public var audit_log_entries: [Entry]
     public var auto_moderation_rules: [AutoModerationRule]

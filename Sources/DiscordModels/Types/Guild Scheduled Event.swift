@@ -1,30 +1,29 @@
-
 /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object
 public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
-    
+
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
     @UnstableEnum<Int>
     public enum PrivacyLevel: Sendable, Codable {
-        case guildOnly // 2
+        case guildOnly  // 2
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
     @UnstableEnum<Int>
     public enum Status: Sendable, Codable {
-        case scheduled // 1
-        case active // 2
-        case completed // 3
-        case canceled // 4
+        case scheduled  // 1
+        case active  // 2
+        case completed  // 3
+        case canceled  // 4
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
     @UnstableEnum<Int>
     public enum EntityKind: Sendable, Codable {
-        case stageInstance // 1
-        case voice // 2
-        case external // 3
+        case stageInstance  // 1
+        case voice  // 2
+        case external  // 3
         case __undocumented(Int)
     }
 
@@ -40,7 +39,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
             validateCharacterCountInRange(location, min: 1, max: 100, name: "location")
         }
     }
-    
+
     public var id: GuildScheduledEventSnowflake
     public var guild_id: GuildSnowflake
     public var channel_id: ChannelSnowflake?

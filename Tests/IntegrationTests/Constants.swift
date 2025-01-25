@@ -1,12 +1,14 @@
-import Foundation
 import DiscordModels
+import Foundation
 
 enum Constants {
     static let token: String = {
         if let token = ProcessInfo.processInfo.environment["BOT_TOKEN"] {
             return token
         } else {
-            fatalError("Due to the complexity of making integration tests work, they can only be run by the author of DiscordBM, PRs of the author on Github, or on the main branch commits, at least for now. Please reach out if you are facing any issues because of this")
+            fatalError(
+                "Due to the complexity of making integration tests work, they can only be run by the author of DiscordBM, PRs of the author on Github, or on the main branch commits, at least for now. Please reach out if you are facing any issues because of this"
+            )
         }
     }()
 

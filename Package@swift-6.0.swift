@@ -1,7 +1,7 @@
 // swift-tools-version: 6.0
 
-import PackageDescription
 import CompilerPluginSupport
+import PackageDescription
 
 let package = Package(
     name: "DiscordBM",
@@ -39,7 +39,7 @@ let package = Package(
         .library(
             name: "DiscordAuth",
             targets: ["DiscordAuth"]
-        )
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.49.0"),
@@ -141,7 +141,7 @@ let package = Package(
             name: "GenerateAPIEndpointsExec",
             dependencies: [
                 .product(name: "NIOHTTP1", package: "swift-nio"),
-                .product(name: "Yams", package: "Yams")
+                .product(name: "Yams", package: "Yams"),
             ],
             path: "Plugins/GenerateAPIEndpointsExec",
             resources: [.copy("Resources/openapi.yml")],
@@ -167,7 +167,7 @@ let package = Package(
             name: "MacroTests",
             dependencies: [
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
-                .target(name: "UnstableEnumMacro")
+                .target(name: "UnstableEnumMacro"),
             ],
             swiftSettings: swiftSettings
         ),
@@ -188,7 +188,7 @@ var featureFlags: [SwiftSetting] {
 
         /// https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md
         /// Require `any` for existential types.
-        .enableUpcomingFeature("ExistentialAny"),
+        .enableUpcomingFeature("ExistentialAny")
     ]
 }
 

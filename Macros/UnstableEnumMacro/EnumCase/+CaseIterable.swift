@@ -7,11 +7,11 @@ extension [EnumCase] {
     ) -> DeclSyntax {
         let cases = self.map { ".\($0.key)," }
         return """
-        \(raw: accessLevel)static var allCases: [\(enumIdentifier)] {
-        [
-        \(raw: cases.indented())
-        ]
-        }
-        """
+            \(raw: accessLevel)static var allCases: [\(enumIdentifier)] {
+            [
+            \(raw: cases.indented())
+            ]
+            }
+            """
     }
 }

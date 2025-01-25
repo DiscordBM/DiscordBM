@@ -1,5 +1,6 @@
 import Atomics
 import DiscordModels
+
 import struct NIOCore.ByteBuffer
 
 #if compiler(>=6.0)

@@ -1,28 +1,28 @@
 import Foundation
-import NIOCore
 import Logging
+import NIOCore
 
 actor SerialQueue {
-    
+
     var lastSend: Date
     let waitTime: Duration
-    
+
     init(waitTime: Duration) {
         /// Setting `lastSend` to sometime in the past that is not way too far.
         let waitSeconds = waitTime.asTimeInterval
         self.lastSend = Date().addingTimeInterval(-waitSeconds * 2)
         self.waitTime = waitTime
     }
-    
+
     func reset() {
         let waitSeconds = waitTime.asTimeInterval
         self.lastSend = Date().addingTimeInterval(-waitSeconds * 2)
     }
-    
+
     nonisolated func perform(_ task: @escaping @Sendable () -> Void) {
         Task { await self._perform(task) }
     }
-    
+
     private func _perform(_ task: @escaping @Sendable () -> Void) {
         if let performIn = canPerformIn() {
             queueTask(task, in: performIn)
@@ -31,7 +31,7 @@ actor SerialQueue {
             task()
         }
     }
-    
+
     private func canPerformIn() -> Duration? {
         let now = Date().timeIntervalSince1970
         let past = now - self.lastSend.timeIntervalSince1970
@@ -39,7 +39,7 @@ actor SerialQueue {
         let waitMore = waitTime.nanoseconds - pastNanos
         return waitMore > 0 ? .nanoseconds(waitMore) : nil
     }
-    
+
     private func queueTask(_ task: @escaping @Sendable () -> Void, in wait: Duration) {
         Task {
             do {
@@ -56,14 +56,14 @@ actor SerialQueue {
     }
 }
 
-private extension Duration {
-    var asTimeInterval: TimeInterval {
+extension Duration {
+    fileprivate var asTimeInterval: TimeInterval {
         let comps = self.components
         let attos = Double(comps.attoseconds) / 1_000_000_000_000_000_000
         return Double(comps.seconds) + attos
     }
 
-    var nanoseconds: Int64 {
+    fileprivate var nanoseconds: Int64 {
         let comps = self.components
         let seconds = comps.seconds * 1_000_000_000
         let attos = comps.attoseconds / 1_000_000_000

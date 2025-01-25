@@ -20,7 +20,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
     case int(Int)
     case double(Double)
     case bool(Bool)
-    
+
     public var asString: String {
         switch self {
         case .string(let string): return string
@@ -65,7 +65,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
         default: throw Error.valueIsNotOfType(Bool.self, value: self)
         }
     }
-    
+
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let string = try? container.decode(String.self) {
@@ -79,7 +79,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
             self = .double(double)
         }
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
@@ -101,14 +101,14 @@ public enum StringIntDoubleBool: Sendable, Codable {
 public enum StringOrInt: Sendable, Codable {
     case string(String)
     case int(Int)
-    
+
     public var asString: String {
         switch self {
         case .string(let string): return string
         case .int(let int): return "\(int)"
         }
     }
-    
+
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let string = try? container.decode(String.self) {
@@ -118,7 +118,7 @@ public enum StringOrInt: Sendable, Codable {
             self = .int(int)
         }
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
@@ -135,7 +135,7 @@ public enum StringOrInt: Sendable, Codable {
 public enum IntOrDouble: Sendable, Codable {
     case int(Int)
     case double(Double)
-    
+
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let int = try? container.decode(Int.self) {
@@ -145,7 +145,7 @@ public enum IntOrDouble: Sendable, Codable {
             self = .double(double)
         }
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
@@ -162,36 +162,36 @@ public enum IntOrDouble: Sendable, Codable {
 /// https://discord.com/developers/docs/reference#locales
 @UnstableEnum<String>
 public enum DiscordLocale: Sendable, Codable {
-    case danish // "da"
-    case german // "de"
-    case englishUK // "en-GB"
-    case englishUS // "en-US"
-    case spanish // "es-ES"
-    case french // "fr"
-    case croatian // "hr"
-    case italian // "it"
-    case lithuanian // "lt"
-    case hungarian // "hu"
-    case dutch // "nl"
-    case norwegian // "no"
-    case polish // "pl"
-    case portuguese // "pt-BR"
-    case romanian // "ro"
-    case finnish // "fi"
-    case swedish // "sv-SE"
-    case vietnamese // "vi"
-    case turkish // "tr"
-    case czech // "cs"
-    case greek // "el"
-    case bulgarian // "bg"
-    case russian // "ru"
-    case ukrainian // "uk"
-    case hindi // "hi"
-    case thai // "th"
-    case chineseChina // "zh-CN"
-    case japanese // "ja"
-    case chineseTaiwan // "zh-TW"
-    case korean // "ko"
+    case danish  // "da"
+    case german  // "de"
+    case englishUK  // "en-GB"
+    case englishUS  // "en-US"
+    case spanish  // "es-ES"
+    case french  // "fr"
+    case croatian  // "hr"
+    case italian  // "it"
+    case lithuanian  // "lt"
+    case hungarian  // "hu"
+    case dutch  // "nl"
+    case norwegian  // "no"
+    case polish  // "pl"
+    case portuguese  // "pt-BR"
+    case romanian  // "ro"
+    case finnish  // "fi"
+    case swedish  // "sv-SE"
+    case vietnamese  // "vi"
+    case turkish  // "tr"
+    case czech  // "cs"
+    case greek  // "el"
+    case bulgarian  // "bg"
+    case russian  // "ru"
+    case ukrainian  // "uk"
+    case hindi  // "hi"
+    case thai  // "th"
+    case chineseChina  // "zh-CN"
+    case japanese  // "ja"
+    case chineseTaiwan  // "zh-TW"
+    case korean  // "ko"
     case __undocumented(String)
 }
 
@@ -200,32 +200,32 @@ public enum DiscordLocale: Sendable, Codable {
 /// A container to decode/encode `[DiscordLocale: String]`,
 /// because Discord doesn't like how Codable decode/encodes `[DiscordLocale: String]`.
 public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLiteral {
-    
+
     public var values: [DiscordLocale: C]
-    
+
     public init(dictionaryLiteral elements: (DiscordLocale, C)...) {
         self.values = .init(elements, uniquingKeysWith: { l, _ in l })
     }
-    
+
     public init(_ elements: [DiscordLocale: C]) {
         self.values = elements
     }
-    
-    public init? (_ elements: [DiscordLocale: C]?) {
+
+    public init?(_ elements: [DiscordLocale: C]?) {
         guard let elements else { return nil }
         self.values = elements
     }
-    
+
     public init(from decoder: any Decoder) throws {
         let stringKeyedDict = try [String: C].init(from: decoder)
         self.values = [:]
         self.values.reserveCapacity(stringKeyedDict.count)
         for (key, value) in consume stringKeyedDict {
-            /// Force-unwrap because ``DiscordLocale`` is ``LosslessRawRepresentable`.
+            /// Force-unwrap because ``DiscordLocale`` is ``LosslessRawRepresentable``.
             self.values[DiscordLocale(rawValue: key)!] = value
         }
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var stringKeyedDict = [String: C]()
         stringKeyedDict.reserveCapacity(self.values.count)
@@ -236,7 +236,7 @@ public struct DiscordLocaleDict<C: Codable>: Codable, ExpressibleByDictionaryLit
     }
 }
 
-extension DiscordLocaleDict: Sendable where C: Sendable { }
+extension DiscordLocaleDict: Sendable where C: Sendable {}
 
 //MARK: - DiscordTimestamp
 
@@ -258,32 +258,32 @@ public struct DiscordTimestamp: Codable {
             }
         }
     }
-    
+
     public var date: Date
 
     public init(date: Date) {
         self.date = date
     }
-    
+
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         let string = try container.decode(String.self)
-        
+
         let startIndex = string.startIndex
         func index(_ offset: Int) -> String.Index {
             string.index(startIndex, offsetBy: offset)
         }
-        
+
         let components: DateComponents
-        
+
         if string.count == 32 {
             guard let year = Int(string[startIndex...index(3)]),
-                  let month = Int(string[index(5)...index(6)]),
-                  let day = Int(string[index(8)...index(9)]),
-                  let hour = Int(string[index(11)...index(12)]),
-                  let minute = Int(string[index(14)...index(15)]),
-                  let second = Int(string[index(17)...index(18)]),
-                  let microSecond = Int(string[index(20)...index(25)])
+                let month = Int(string[index(5)...index(6)]),
+                let day = Int(string[index(8)...index(9)]),
+                let hour = Int(string[index(11)...index(12)]),
+                let minute = Int(string[index(14)...index(15)]),
+                let second = Int(string[index(17)...index(18)]),
+                let microSecond = Int(string[index(20)...index(25)])
             else {
                 throw DecodingError.unexpectedFormat(container.codingPath, string)
             }
@@ -299,11 +299,11 @@ public struct DiscordTimestamp: Codable {
             )
         } else if string.count == 25 {
             guard let year = Int(string[startIndex...index(3)]),
-                  let month = Int(string[index(5)...index(6)]),
-                  let day = Int(string[index(8)...index(9)]),
-                  let hour = Int(string[index(11)...index(12)]),
-                  let minute = Int(string[index(14)...index(15)]),
-                  let second = Int(string[index(17)...index(18)])
+                let month = Int(string[index(5)...index(6)]),
+                let day = Int(string[index(8)...index(9)]),
+                let hour = Int(string[index(11)...index(12)]),
+                let minute = Int(string[index(14)...index(15)]),
+                let second = Int(string[index(17)...index(18)])
             else {
                 throw DecodingError.unexpectedFormat(container.codingPath, string)
             }
@@ -324,29 +324,33 @@ public struct DiscordTimestamp: Codable {
         }
         self.date = date
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
-        
+
         let componentSet: Set<Calendar.Component> = [
-            .year, .month, .day, .hour, .minute, .second, .nanosecond
+            .year, .month, .day, .hour, .minute, .second, .nanosecond,
         ]
         let components = Calendar.utc.dateComponents(componentSet, from: date)
         guard let year = components.year,
-              let month = components.month,
-              let day = components.day,
-              let hour = components.hour,
-              let minute = components.minute,
-              let second = components.second,
-              let nanoSecond = components.nanosecond
+            let month = components.month,
+            let day = components.day,
+            let hour = components.hour,
+            let minute = components.minute,
+            let second = components.second,
+            let nanoSecond = components.nanosecond
         else {
-            throw EncodingError.invalidValue(date, .init(
-                codingPath: container.codingPath,
-                debugDescription: "Programming Error. Could not encode Date to Discord Timestamp. Please report: https://github.com/DiscordBM/DiscordBM/issues"
-            ))
+            throw EncodingError.invalidValue(
+                date,
+                .init(
+                    codingPath: container.codingPath,
+                    debugDescription:
+                        "Programming Error. Could not encode Date '\(date.debugDescription)' to Discord Timestamp. Please report: https://github.com/DiscordBM/DiscordBM/issues"
+                )
+            )
         }
         let miliSecond = nanoSecond / 1_000
-        
+
         func fixedDigit(_ int: Int, _ length: Int) -> String {
             let description = "\(int)"
             let zeroCount = length - description.count
@@ -356,7 +360,7 @@ public struct DiscordTimestamp: Codable {
                 return description
             }
         }
-        
+
         let f = (
             year: fixedDigit(year, 4),
             month: fixedDigit(month, 2),
@@ -366,14 +370,14 @@ public struct DiscordTimestamp: Codable {
             second: fixedDigit(second, 2),
             mili: fixedDigit(miliSecond, 6)
         )
-        
+
         let str = "\(f.year)-\(f.month)-\(f.day)T\(f.hour):\(f.minute):\(f.second).\(f.mili)+00:00"
-        
+
         try container.encode(str)
     }
 }
 
-extension DiscordTimestamp: Sendable { }
+extension DiscordTimestamp: Sendable {}
 
 //MARK: - IntPair
 
@@ -395,15 +399,17 @@ public struct IntPair: Sendable, Codable, CustomStringConvertible {
         let container = try decoder.singleValueContainer()
         let array = try container.decode([Int].self)
         guard array.count == 2 else {
-            throw DecodingError.dataCorrupted(.init(
-                codingPath: container.codingPath,
-                debugDescription: "Expected 2 integers in \(array.debugDescription)"
-            ))
+            throw DecodingError.dataCorrupted(
+                .init(
+                    codingPath: container.codingPath,
+                    debugDescription: "Expected 2 integers in \(array.debugDescription)"
+                )
+            )
         }
         self.first = array[0]
         self.second = array[1]
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         try [first, second].encode(to: encoder)
     }
@@ -413,7 +419,7 @@ public struct IntPair: Sendable, Codable, CustomStringConvertible {
 
 /// A dynamic color type that decode/encodes itself as an integer which Discord expects.
 public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLiteral {
-    
+
     public let value: Int
 
     public func asRGB() -> (red: Int, green: Int, blue: Int) {
@@ -422,18 +428,18 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
         let blue = value & 0x0000FF
         return (red, green, blue)
     }
-    
+
     public func asHex() -> String {
         "#" + String(self.value, radix: 16, uppercase: true)
     }
-    
+
     public init(integerLiteral value: Int) {
         self.init(value: value)!
     }
 
-    public init? (value: Int) {
+    public init?(value: Int) {
         guard value >= 0,
-              value < (1 << 24)
+            value < (1 << 24)
         else { return nil }
         self.value = value
     }
@@ -446,15 +452,15 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
         self.init(_unvalidatedValue: red << 16 | green << 8 | blue)
     }
 
-    public init? (red: Int, green: Int, blue: Int) {
+    public init?(red: Int, green: Int, blue: Int) {
         guard (0..<256).contains(red),
-              (0..<256).contains(green),
-              (0..<256).contains(blue)
+            (0..<256).contains(green),
+            (0..<256).contains(blue)
         else { return nil }
         self.value = red << 16 | green << 8 | blue
     }
-    
-    public init? (hex: String) {
+
+    public init?(hex: String) {
         var dropCount = 0
         if hex.hasPrefix("#") {
             dropCount = 1
@@ -464,12 +470,12 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
         }
         self.value = value
     }
-    
+
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         self.value = try container.decode(Int.self)
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.value)
@@ -477,13 +483,13 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
 }
 
 extension DiscordColor {
-    
+
     /// Light mode or dark mode.
     public enum ColorScheme {
         case light
         case dark
     }
-    
+
     /// iOS system red color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func red(scheme: ColorScheme = .light) -> DiscordColor {
@@ -494,7 +500,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 255, green: 69, blue: 58)
         }
     }
-    
+
     /// iOS system orange color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func orange(scheme: ColorScheme = .light) -> DiscordColor {
@@ -505,7 +511,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 255, green: 159, blue: 10)
         }
     }
-    
+
     /// iOS system yellow color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func yellow(scheme: ColorScheme = .light) -> DiscordColor {
@@ -516,7 +522,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 255, green: 214, blue: 10)
         }
     }
-    
+
     /// iOS system green color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func green(scheme: ColorScheme = .light) -> DiscordColor {
@@ -527,7 +533,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 48, green: 209, blue: 88)
         }
     }
-    
+
     /// iOS system mint color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func mint(scheme: ColorScheme = .light) -> DiscordColor {
@@ -538,7 +544,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 99, green: 230, blue: 226)
         }
     }
-    
+
     /// iOS system teal color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func teal(scheme: ColorScheme = .light) -> DiscordColor {
@@ -549,7 +555,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 64, green: 200, blue: 224)
         }
     }
-    
+
     /// iOS system cyan color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func cyan(scheme: ColorScheme = .light) -> DiscordColor {
@@ -560,7 +566,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 100, green: 210, blue: 255)
         }
     }
-    
+
     /// iOS system blue color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func blue(scheme: ColorScheme = .light) -> DiscordColor {
@@ -571,7 +577,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 10, green: 132, blue: 255)
         }
     }
-    
+
     /// iOS system indigo color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func indigo(scheme: ColorScheme = .light) -> DiscordColor {
@@ -582,7 +588,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 94, green: 92, blue: 230)
         }
     }
-    
+
     /// iOS system purple color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func purple(scheme: ColorScheme = .light) -> DiscordColor {
@@ -593,7 +599,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 191, green: 90, blue: 242)
         }
     }
-    
+
     /// iOS system pink color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func pink(scheme: ColorScheme = .light) -> DiscordColor {
@@ -604,7 +610,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 255, green: 55, blue: 95)
         }
     }
-    
+
     /// iOS system brown color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static func brown(scheme: ColorScheme = .light) -> DiscordColor {
@@ -615,7 +621,7 @@ extension DiscordColor {
             return DiscordColor.unvalidatedRGB(red: 172, green: 142, blue: 104)
         }
     }
-    
+
     /// iOS light system red color.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-colors
     public static var red: DiscordColor { .red() }
@@ -729,33 +735,34 @@ public struct Secret:
     Codable,
     ExpressibleByStringLiteral,
     CustomStringConvertible,
-    CustomDebugStringConvertible {
-    
+    CustomDebugStringConvertible
+{
+
     public var value: String
-    
+
     public init(stringLiteral value: String) {
         self.value = value
     }
-    
+
     public init(_ value: String) {
         self.value = value
     }
-    
+
     public var description: String {
         let count = Swift.min((self.value.unicodeScalars.count / 4), 6)
         let prefixed = value.prefix(count)
         return #"Secret("\#(prefixed)****")"#
     }
-    
+
     public var debugDescription: String {
         self.description
     }
-    
+
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         self.value = try container.decode(String.self)
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.value)
@@ -768,7 +775,7 @@ public struct Secret:
 @dynamicMemberLookup
 public final class DereferenceBox<C>: Codable where C: Codable {
     public let value: C
-    
+
     public init(value: C) {
         self.value = value
     }
@@ -781,30 +788,30 @@ public final class DereferenceBox<C>: Codable where C: Codable {
         let container = try decoder.singleValueContainer()
         self.value = try container.decode(C.self)
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.value)
     }
 }
 
-extension DereferenceBox: Sendable where C: Sendable { }
+extension DereferenceBox: Sendable where C: Sendable {}
 
 //MARK: +Calendar
 
-private extension Calendar {
-#if compiler(>=5.10) && compiler(<6.0)
+extension Calendar {
+    #if compiler(>=5.10) && compiler(<6.0)
     /// It's safe the way DiscordBM uses it.
     nonisolated(unsafe) static let utc: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .init(identifier: "UTC")!
         return calendar
     }()
-#else
+    #else
     static let utc: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .init(identifier: "UTC")!
         return calendar
     }()
-#endif
+    #endif
 }

@@ -45,12 +45,13 @@ actor ClientCache {
 
         @usableFromInline
         static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.identity == rhs.identity &&
-            lhs.parameters == rhs.parameters &&
-            lhs.queries.elementsEqual(rhs.queries, by: {
-                $0.0 == $1.0 &&
-                $0.1 == $1.1
-            })
+            lhs.identity == rhs.identity && lhs.parameters == rhs.parameters
+                && lhs.queries.elementsEqual(
+                    rhs.queries,
+                    by: {
+                        $0.0 == $1.0 && $0.1 == $1.1
+                    }
+                )
         }
     }
 
@@ -137,7 +138,7 @@ actor ClientCacheStorage {
     private var storage = [String: ClientCache]()
     private var noAuth = ClientCache()
 
-    private init() { }
+    private init() {}
 
     static let shared = ClientCacheStorage()
 
@@ -156,8 +157,8 @@ actor ClientCacheStorage {
     }
 }
 
-private extension Duration {
-    var asTimeInterval: TimeInterval {
+extension Duration {
+    fileprivate var asTimeInterval: TimeInterval {
         let comps = self.components
         let attos = Double(comps.attoseconds) / 1_000_000_000_000_000_000
         return Double(comps.seconds) + attos

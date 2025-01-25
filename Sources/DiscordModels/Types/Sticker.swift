@@ -1,22 +1,21 @@
-
 /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-structure
 public struct Sticker: Sendable, Codable {
-    
+
     /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
-        case standard // 1
-        case guild // 2
+        case standard  // 1
+        case guild  // 2
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-format-types
     @UnstableEnum<Int>
     public enum FormatKind: Sendable, Codable {
-        case png // 1
-        case apng // 2
-        case lottie // 3
-        case gif // 4
+        case png  // 1
+        case apng  // 2
+        case lottie  // 3
+        case gif  // 4
         case __undocumented(Int)
     }
 

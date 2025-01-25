@@ -6,7 +6,7 @@ public protocol ValidatablePayload: Sendable {
 }
 
 extension ValidatablePayload {
-    
+
     @inlinable
     func validateAtLeastOneIsNotEmpty(
         _ isEmpties: Bool?...,
@@ -17,7 +17,7 @@ extension ValidatablePayload {
         }
         return nil
     }
-    
+
     @inlinable
     func validateCharacterCountDoesNotExceed(
         _ value: String?,
@@ -29,7 +29,7 @@ extension ValidatablePayload {
         }
         return nil
     }
-    
+
     @inlinable
     func validateCharacterCountInRange(_ value: String?, min: Int, max: Int, name: String) -> ValidationFailure? {
         let count = value?.unicodeScalars.count ?? 0
@@ -53,7 +53,7 @@ extension ValidatablePayload {
         }
         return nil
     }
-    
+
     @inlinable
     func validateCombinedCharacterCountDoesNotExceed(
         _ count: Int?,
@@ -65,9 +65,9 @@ extension ValidatablePayload {
         }
         return nil
     }
-    
+
     @inlinable
-    func validateElementCountDoesNotExceed<T>(_ array: Array<T>?, max: Int, name: String) -> ValidationFailure? {
+    func validateElementCountDoesNotExceed<T>(_ array: [T]?, max: Int, name: String) -> ValidationFailure? {
         guard array?.count ?? 0 <= max else {
             return ValidationFailure.tooManyElements(name: name, max: max)
         }
@@ -76,7 +76,7 @@ extension ValidatablePayload {
 
     @inlinable
     func validateElementCountInRange<T>(
-        _ array: Array<T>?,
+        _ array: [T]?,
         min: Int,
         max: Int,
         name: String
@@ -113,7 +113,7 @@ extension ValidatablePayload {
             return nil
         }
     }
-    
+
     @inlinable
     func validateCaseInsensitivelyDoesNotContain(
         _ value: String?,
@@ -122,7 +122,8 @@ extension ValidatablePayload {
         reason: String
     ) -> ValidationFailure? {
         if let value,
-           values.contains(where: { value.localizedCaseInsensitiveContains($0) }) {
+            values.contains(where: { value.localizedCaseInsensitiveContains($0) })
+        {
             return ValidationFailure.containsProhibitedValues(
                 name: name,
                 reason: reason,
@@ -131,7 +132,7 @@ extension ValidatablePayload {
         }
         return nil
     }
-    
+
     @inlinable
     func validateHasPrecondition(
         condition: Bool,
@@ -146,7 +147,7 @@ extension ValidatablePayload {
         }
         return nil
     }
-    
+
     @inlinable
     func validateAssertIsNotEmpty(_ isNotEmpty: Bool, name: String) -> ValidationFailure? {
         if !isNotEmpty {
@@ -154,7 +155,7 @@ extension ValidatablePayload {
         }
         return nil
     }
-    
+
     @inlinable
     func validateNumberInRangeOrNil<N: Numeric & Comparable>(
         _ number: N?,

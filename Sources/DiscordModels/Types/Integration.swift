@@ -1,22 +1,21 @@
-
 /// https://discord.com/developers/docs/resources/guild#integration-object
 public struct Integration: Sendable, Codable {
-    
+
     /// https://discord.com/developers/docs/resources/guild#integration-object-integration-structure
     @UnstableEnum<String>
     public enum Kind: Sendable, Codable {
         case twitch
         case youtube
         case discord
-        case guildSubscription // "guild_subscription"
+        case guildSubscription  // "guild_subscription"
         case __undocumented(String)
     }
 
     /// https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors
     @UnstableEnum<Int>
     public enum ExpireBehavior: Sendable, Codable {
-        case removeRole // 0
-        case kick // 1
+        case removeRole  // 0
+        case kick  // 1
         case __undocumented(Int)
     }
 
@@ -36,7 +35,7 @@ public struct Integration: Sendable, Codable {
     public var revoked: Bool?
     public var application: IntegrationApplication?
     public var scopes: [OAuth2Scope]?
-    
+
     public init(integrationCreate: Gateway.IntegrationCreate) {
         self.id = integrationCreate.id
         self.name = integrationCreate.name

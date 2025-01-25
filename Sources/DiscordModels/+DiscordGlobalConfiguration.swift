@@ -4,7 +4,7 @@ import Logging
 /// `-strict-concurrency=complete`
 private class ConfigurationStorage: @unchecked Sendable {
     var globalRateLimit = 50
-    
+
     static let shared = ConfigurationStorage()
 }
 
@@ -22,12 +22,12 @@ extension DiscordGlobalConfiguration {
     /// This is supposed to be only used by the library author.
     /// Enabling the logger is discouraged as it'll be too spammy.
     static func makeDecodeLogger(_ label: String) -> Logger {
-#if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
-            var logger = DiscordGlobalConfiguration.makeLogger(label)
-            logger[metadataKey: "tag"] = "decode-logger"
-            return logger
-#else
-            return Logger(label: label, factory: SwiftLogNoOpLogHandler.init)
-#endif
+        #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
+        var logger = DiscordGlobalConfiguration.makeLogger(label)
+        logger[metadataKey: "tag"] = "decode-logger"
+        return logger
+        #else
+        return Logger(label: label, factory: SwiftLogNoOpLogHandler.init)
+        #endif
     }
 }

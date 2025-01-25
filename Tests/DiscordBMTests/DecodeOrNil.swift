@@ -9,10 +9,10 @@ class DecodeOrNilTests: XCTestCase {
     func testDecodeSucceeds() throws {
         do {
             let text = """
-            {
-                "value": 1
-            }
-            """
+                {
+                    "value": 1
+                }
+                """
 
             let container = try DiscordGlobalConfiguration.decoder.decode(
                 TestContainer<Interaction.ContextKind>.self,
@@ -26,45 +26,45 @@ class DecodeOrNilTests: XCTestCase {
 
         do {
             let text = """
-            {
-                "value": 999999999999
-            }
-            """
+                {
+                    "value": 999999999999
+                }
+                """
 
             let container = try DiscordGlobalConfiguration.decoder.decode(
                 TestContainer<Interaction.ContextKind>.self,
                 from: Data(text.utf8)
             )
 
-            XCTAssertEqual(container.value, .__undocumented(999999999999))
+            XCTAssertEqual(container.value, .__undocumented(999_999_999_999))
         }
 
     }
 
     func testDictDecodeSucceeds() throws {
         let text = """
-        {
-           "value":{
-              "0":{
-                 "oauth2_install_params":{
-                    "scopes":[
-                       "applications.commands",
-                       "bot"
-                    ],
-                    "permissions":"2048"
-                 }
-              },
-              "1":{
-                 "oauth2_install_params":{
-                    "scopes":[
-                       "applications.commands"
-                    ],
-                    "permissions":"1"
-                 }
-              }
-           }
-        }
-        """
+            {
+               "value":{
+                  "0":{
+                     "oauth2_install_params":{
+                        "scopes":[
+                           "applications.commands",
+                           "bot"
+                        ],
+                        "permissions":"2048"
+                     }
+                  },
+                  "1":{
+                     "oauth2_install_params":{
+                        "scopes":[
+                           "applications.commands"
+                        ],
+                        "permissions":"1"
+                     }
+                  }
+               }
+            }
+            """
 
         let container = try DiscordGlobalConfiguration.decoder.decode(
             TestContainer<[IntegrationKind: IntegrationKindConfiguration]>.self,
@@ -81,10 +81,10 @@ class DecodeOrNilTests: XCTestCase {
     func testDecodeBadValue() throws {
         do {
             let text = """
-            {
-               "valueddd": 0
-            }
-            """
+                {
+                   "valueddd": 0
+                }
+                """
 
             let container = try DiscordGlobalConfiguration.decoder.decode(
                 TestContainer<Interaction.ContextKind>.self,
@@ -96,10 +96,10 @@ class DecodeOrNilTests: XCTestCase {
 
         do {
             let text = """
-            {
-               "value": false
-            }
-            """
+                {
+                   "value": false
+                }
+                """
 
             let container = try DiscordGlobalConfiguration.decoder.decode(
                 TestContainer<Interaction.ContextKind>.self,
@@ -113,28 +113,28 @@ class DecodeOrNilTests: XCTestCase {
     func testDictDecodeBadValue() throws {
         do {
             let text = """
-            {
-               "valueddd":{
-                  "0":{
-                     "oauth2_install_params":{
-                        "scopes":[
-                           "applications.commands",
-                           "bot"
-                        ],
-                        "permissions":"2048"
-                     }
-                  },
-                  "1":{
-                     "oauth2_install_params":{
-                        "scopes":[
-                           "applications.commands"
-                        ],
-                        "permissions":"0"
-                     }
-                  }
-               }
-            }
-            """
+                {
+                   "valueddd":{
+                      "0":{
+                         "oauth2_install_params":{
+                            "scopes":[
+                               "applications.commands",
+                               "bot"
+                            ],
+                            "permissions":"2048"
+                         }
+                      },
+                      "1":{
+                         "oauth2_install_params":{
+                            "scopes":[
+                               "applications.commands"
+                            ],
+                            "permissions":"0"
+                         }
+                      }
+                   }
+                }
+                """
 
             let container = try DiscordGlobalConfiguration.decoder.decode(
                 TestContainer<[IntegrationKind: IntegrationKindConfiguration]>.self,
@@ -146,28 +146,28 @@ class DecodeOrNilTests: XCTestCase {
 
         do {
             let text = """
-            {
-               "value":{
-                  "0":{
-                     "oauth2_install_params":{
-                        "scopes":[
-                           "applications.commands",
-                           "bot"
-                        ],
-                        "permissions":"2048"
-                     }
-                  },
-                  "1rrr":{
-                     "oauth2_install_params":{
-                        "scopes":[
-                           "applications.commands"
-                        ],
-                        "permissions":"0"
-                     }
-                  }
-               }
-            }
-            """
+                {
+                   "value":{
+                      "0":{
+                         "oauth2_install_params":{
+                            "scopes":[
+                               "applications.commands",
+                               "bot"
+                            ],
+                            "permissions":"2048"
+                         }
+                      },
+                      "1rrr":{
+                         "oauth2_install_params":{
+                            "scopes":[
+                               "applications.commands"
+                            ],
+                            "permissions":"0"
+                         }
+                      }
+                   }
+                }
+                """
 
             let container = try DiscordGlobalConfiguration.decoder.decode(
                 TestContainer<[IntegrationKind: IntegrationKindConfiguration]>.self,
@@ -179,28 +179,28 @@ class DecodeOrNilTests: XCTestCase {
 
         do {
             let text = """
-            {
-               "value":{
-                  "0":{
-                     "oauth2_install_params":{
-                        "scopes":[
-                           "applications.commands",
-                           "bot"
-                        ],
-                        "permissions":"2048"
-                     }
-                  },
-                  "1":{
-                     "oauth2_insttttttttttttttall_params":{
-                        "scopes":[
-                           "applications.commands"
-                        ],
-                        "permissions":"0"
-                     }
-                  }
-               }
-            }
-            """
+                {
+                   "value":{
+                      "0":{
+                         "oauth2_install_params":{
+                            "scopes":[
+                               "applications.commands",
+                               "bot"
+                            ],
+                            "permissions":"2048"
+                         }
+                      },
+                      "1":{
+                         "oauth2_insttttttttttttttall_params":{
+                            "scopes":[
+                               "applications.commands"
+                            ],
+                            "permissions":"0"
+                         }
+                      }
+                   }
+                }
+                """
 
             let container = try DiscordGlobalConfiguration.decoder.decode(
                 TestContainer<[IntegrationKind: IntegrationKindConfiguration]>.self,
@@ -225,8 +225,8 @@ class DecodeOrNilTests: XCTestCase {
 
     func testDecodeNothing() throws {
         let text = """
-        {}
-        """
+            {}
+            """
         let container = try DiscordGlobalConfiguration.decoder.decode(
             TestContainer<Interaction.ContextKind>.self,
             from: Data(text.utf8)
@@ -237,8 +237,8 @@ class DecodeOrNilTests: XCTestCase {
 
     func testDictDecodeNothing() throws {
         let text = """
-        {}
-        """
+            {}
+            """
         let container = try DiscordGlobalConfiguration.decoder.decode(
             TestContainer<[IntegrationKind: IntegrationKindConfiguration]>.self,
             from: Data(text.utf8)

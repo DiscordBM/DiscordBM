@@ -7,15 +7,18 @@ on:
   push: { branches: [ main ] }
 
 jobs:
+
   main-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
+      with_linting: true
       with_coverage: true
       with_tsan: true
       with_api_check: true
       test_filter: '^DiscordBMTests'
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
   macro-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:

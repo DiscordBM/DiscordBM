@@ -1,6 +1,6 @@
 import DiscordModels
-import NIOHTTP1
 import Foundation
+import NIOHTTP1
 
 #if compiler(>=5.10)
 /// It's safe the way DiscordBM uses it.
@@ -10,27 +10,29 @@ private let iso8601DateFormatter = ISO8601DateFormatter()
 #endif
 
 /// MARK: - +APIEndpoint
-public extension DiscordClient {
+extension DiscordClient {
 
     // MARK: Application Commands
     /// https://discord.com/developers/docs/interactions/application-commands
 
     /// https://discord.com/developers/docs/interactions/application-commands#get-global-application-commands
     @inlinable
-    func listApplicationCommands(
+    public func listApplicationCommands(
         appId: ApplicationSnowflake? = nil,
         with_localizations: Bool? = nil
     ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
         let endpoint = APIEndpoint.listApplicationCommands(applicationId: try requireAppId(appId))
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("with_localizations", with_localizations.map { "\($0)" })]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("with_localizations", with_localizations.map { "\($0)" })]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
     @inlinable
-    func createApplicationCommand(
+    public func createApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         payload: Payloads.ApplicationCommandCreate
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
@@ -40,7 +42,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#get-global-application-command
     @inlinable
-    func getApplicationCommand(
+    public func getApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         commandId: CommandSnowflake
     ) async throws -> DiscordClientResponse<ApplicationCommand> {
@@ -53,7 +55,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#edit-global-application-command
     @inlinable
-    func updateApplicationCommand(
+    public func updateApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         commandId: CommandSnowflake,
         payload: Payloads.ApplicationCommandEdit
@@ -67,7 +69,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#delete-global-application-command
     @inlinable
-    func deleteApplicationCommand(
+    public func deleteApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         commandId: CommandSnowflake
     ) async throws -> DiscordHTTPResponse {
@@ -80,7 +82,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
     @inlinable
-    func bulkSetApplicationCommands(
+    public func bulkSetApplicationCommands(
         appId: ApplicationSnowflake? = nil,
         payload: [Payloads.ApplicationCommandCreate]
     ) async throws -> DiscordClientResponse<[ApplicationCommand]> {
@@ -92,7 +94,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#get-guild-application-commands
     @inlinable
-    func listGuildApplicationCommands(
+    public func listGuildApplicationCommands(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
         with_localizations: Bool? = nil
@@ -101,15 +103,17 @@ public extension DiscordClient {
             applicationId: try requireAppId(appId),
             guildId: guildId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("with_localizations", with_localizations.map { "\($0)" })]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("with_localizations", with_localizations.map { "\($0)" })]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/interactions/application-commands#create-guild-application-command
     @inlinable
-    func createGuildApplicationCommand(
+    public func createGuildApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
         payload: Payloads.ApplicationCommandCreate
@@ -123,7 +127,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#get-guild-application-command
     @inlinable
-    func getGuildApplicationCommand(
+    public func getGuildApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
         commandId: CommandSnowflake
@@ -138,7 +142,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#edit-guild-application-command
     @inlinable
-    func updateGuildApplicationCommand(
+    public func updateGuildApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
         commandId: CommandSnowflake,
@@ -154,7 +158,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#delete-guild-application-command
     @inlinable
-    func deleteGuildApplicationCommand(
+    public func deleteGuildApplicationCommand(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
         commandId: CommandSnowflake
@@ -169,7 +173,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-guild-application-commands
     @inlinable
-    func bulkSetGuildApplicationCommands(
+    public func bulkSetGuildApplicationCommands(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
         payload: [Payloads.ApplicationCommandCreate]
@@ -183,7 +187,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#get-application-command-permissions
     @inlinable
-    func listGuildApplicationCommandPermissions(
+    public func listGuildApplicationCommandPermissions(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<[GuildApplicationCommandPermissions]> {
@@ -196,7 +200,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/application-commands#edit-application-command-permissions
     @inlinable
-    func getGuildApplicationCommandPermissions(
+    public func getGuildApplicationCommandPermissions(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
         commandId: CommandSnowflake
@@ -213,7 +217,7 @@ public extension DiscordClient {
     /// By default the authentication method is by a bot token, and not an OAuth one.
     /// https://discord.com/developers/docs/interactions/application-commands#batch-edit-application-command-permissions
     @inlinable
-    func setGuildApplicationCommandPermissions(
+    public func setGuildApplicationCommandPermissions(
         appId: ApplicationSnowflake? = nil,
         guildId: GuildSnowflake,
         commandId: CommandSnowflake,
@@ -232,7 +236,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records
     @inlinable
-    func listApplicationRoleConnectionMetadata(
+    public func listApplicationRoleConnectionMetadata(
         appId: ApplicationSnowflake? = nil
     ) async throws -> DiscordClientResponse<[ApplicationRoleConnectionMetadata]> {
         let endpoint = APIEndpoint.listApplicationRoleConnectionMetadata(
@@ -245,7 +249,7 @@ public extension DiscordClient {
     /// this endpoint takes a payload of type `[ApplicationRoleConnectionMetadata]`.
     /// https://discord.com/developers/docs/resources/application-role-connection-metadata#update-application-role-connection-metadata-records
     @inlinable
-    func bulkOverwriteApplicationRoleConnectionMetadata(
+    public func bulkOverwriteApplicationRoleConnectionMetadata(
         appId: ApplicationSnowflake? = nil,
         payload: [ApplicationRoleConnectionMetadata]
     ) async throws -> DiscordClientResponse<[ApplicationRoleConnectionMetadata]> {
@@ -264,7 +268,7 @@ public extension DiscordClient {
     /// NOTE: `limit`, if provided, must be between `1` and `1_000`.
     /// https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
     @inlinable
-    func listGuildAuditLogEntries(
+    public func listGuildAuditLogEntries(
         guildId: GuildSnowflake,
         userId: UserSnowflake? = nil,
         action_type: AuditLog.Entry.ActionKind? = nil,
@@ -274,16 +278,18 @@ public extension DiscordClient {
     ) async throws -> DiscordClientResponse<AuditLog> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = APIEndpoint.listGuildAuditLogEntries(guildId: guildId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("user_id", userId?.rawValue),
-                ("action_type", action_type.map { "\($0.rawValue)" }),
-                ("before", before?.rawValue),
-                ("after", after?.rawValue),
-                ("limit", limit.map { "\($0)" })
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("user_id", userId?.rawValue),
+                    ("action_type", action_type.map { "\($0.rawValue)" }),
+                    ("before", before?.rawValue),
+                    ("after", after?.rawValue),
+                    ("limit", limit.map { "\($0)" }),
+                ]
+            )
+        )
     }
 
     // MARK: Auto Moderation
@@ -291,7 +297,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/auto-moderation#list-auto-moderation-rules-for-guild
     @inlinable
-    func listAutoModerationRules(
+    public func listAutoModerationRules(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<[AutoModerationRule]> {
         let endpoint = APIEndpoint.listAutoModerationRules(guildId: guildId)
@@ -300,7 +306,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/auto-moderation#get-auto-moderation-rule
     @inlinable
-    func getAutoModerationRule(
+    public func getAutoModerationRule(
         guildId: GuildSnowflake,
         ruleId: RuleSnowflake
     ) async throws -> DiscordClientResponse<AutoModerationRule> {
@@ -310,7 +316,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/auto-moderation#create-auto-moderation-rule
     @inlinable
-    func createAutoModerationRule(
+    public func createAutoModerationRule(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateAutoModerationRule
@@ -327,7 +333,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/auto-moderation#modify-auto-moderation-rule
     @inlinable
-    func updateAutoModerationRule(
+    public func updateAutoModerationRule(
         guildId: GuildSnowflake,
         ruleId: RuleSnowflake,
         reason: String? = nil,
@@ -345,16 +351,18 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/auto-moderation#delete-auto-moderation-rule
     @inlinable
-    func deleteAutoModerationRule(
+    public func deleteAutoModerationRule(
         guildId: GuildSnowflake,
         ruleId: RuleSnowflake,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteAutoModerationRule(guildId: guildId, ruleId: ruleId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     // MARK: Channels
@@ -362,7 +370,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#get-channel
     @inlinable
-    func getChannel(
+    public func getChannel(
         id: ChannelSnowflake
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.getChannel(channelId: id)
@@ -374,7 +382,7 @@ public extension DiscordClient {
     /// functions down below for updating other types of channels, and those do have tests.
     /// https://discord.com/developers/docs/resources/channel#modify-channel
     @inlinable
-    func updateGroupDMChannel(
+    public func updateGroupDMChannel(
         id: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.ModifyGroupDMChannel
@@ -391,7 +399,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#modify-channel
     @inlinable
-    func updateGuildChannel(
+    public func updateGuildChannel(
         id: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.ModifyGuildChannel
@@ -408,7 +416,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#modify-channel
     @inlinable
-    func updateThreadChannel(
+    public func updateThreadChannel(
         id: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.ModifyThreadChannel
@@ -425,21 +433,23 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#deleteclose-channel
     @inlinable
-    func deleteChannel(
+    public func deleteChannel(
         id: ChannelSnowflake,
         reason: String? = nil
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.deleteChannel(channelId: id)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// NOTE: `around`, `before` and `after` are mutually exclusive.
     /// https://discord.com/developers/docs/resources/channel#get-channel-messages
     @inlinable
-    func listMessages(
+    public func listMessages(
         channelId: ChannelSnowflake,
         around: MessageSnowflake? = nil,
         before: MessageSnowflake? = nil,
@@ -449,23 +459,25 @@ public extension DiscordClient {
         try checkMutuallyExclusive(queries: [
             ("around", around?.rawValue),
             ("before", before?.rawValue),
-            ("after", after?.rawValue)
+            ("after", after?.rawValue),
         ])
         let endpoint = APIEndpoint.listMessages(channelId: channelId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("around", around?.rawValue),
-                ("before", before?.rawValue),
-                ("after", after?.rawValue),
-                ("limit", limit.map({ "\($0)" }))
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("around", around?.rawValue),
+                    ("before", before?.rawValue),
+                    ("after", after?.rawValue),
+                    ("limit", limit.map({ "\($0)" })),
+                ]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/channel#get-channel-message
     @inlinable
-    func getMessage(
+    public func getMessage(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
@@ -478,7 +490,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#create-message
     @inlinable
-    func createMessage(
+    public func createMessage(
         channelId: ChannelSnowflake,
         payload: Payloads.CreateMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
@@ -488,7 +500,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#crosspost-message
     @inlinable
-    func crosspostMessage(
+    public func crosspostMessage(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
@@ -498,7 +510,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#create-reaction
     @inlinable
-    func addMessageReaction(
+    public func addMessageReaction(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         emoji: Reaction
@@ -513,7 +525,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#delete-own-reaction
     @inlinable
-    func deleteOwnMessageReaction(
+    public func deleteOwnMessageReaction(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         emoji: Reaction
@@ -528,7 +540,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#delete-user-reaction
     @inlinable
-    func deleteUserMessageReaction(
+    public func deleteUserMessageReaction(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         emoji: Reaction,
@@ -545,7 +557,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#get-reactions
     @inlinable
-    func listMessageReactionsByEmoji(
+    public func listMessageReactionsByEmoji(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         emoji: Reaction,
@@ -559,19 +571,21 @@ public extension DiscordClient {
             messageId: messageId,
             emojiName: emoji.urlPathDescription
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("type", type.map({ "\($0.rawValue)" })),
-                ("after", after?.rawValue),
-                ("limit", limit.map({ "\($0)" }))
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("type", type.map({ "\($0.rawValue)" })),
+                    ("after", after?.rawValue),
+                    ("limit", limit.map({ "\($0)" })),
+                ]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/channel#delete-all-reactions
     @inlinable
-    func deleteAllMessageReactions(
+    public func deleteAllMessageReactions(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake
     ) async throws -> DiscordHTTPResponse {
@@ -584,7 +598,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji
     @inlinable
-    func deleteAllMessageReactionsByEmoji(
+    public func deleteAllMessageReactionsByEmoji(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         emoji: Reaction
@@ -599,7 +613,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#edit-message
     @inlinable
-    func updateMessage(
+    public func updateMessage(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         payload: Payloads.EditMessage
@@ -610,21 +624,23 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#delete-message
     @inlinable
-    func deleteMessage(
+    public func deleteMessage(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteMessage(channelId: channelId, messageId: messageId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/channel#bulk-delete-messages
     @inlinable
-    func bulkDeleteMessages(
+    public func bulkDeleteMessages(
         channelId: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.BulkDeleteMessages
@@ -641,7 +657,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#edit-channel-permissions
     @inlinable
-    func setChannelPermissionOverwrite(
+    public func setChannelPermissionOverwrite(
         channelId: ChannelSnowflake,
         overwriteId: AnySnowflake,
         reason: String? = nil,
@@ -662,7 +678,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#get-channel-invites
     @inlinable
-    func listChannelInvites(
+    public func listChannelInvites(
         channelId: ChannelSnowflake
     ) async throws -> DiscordClientResponse<[InviteWithMetadata]> {
         let endpoint = APIEndpoint.listChannelInvites(channelId: channelId)
@@ -671,7 +687,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#create-channel-invite
     @inlinable
-    func createChannelInvite(
+    public func createChannelInvite(
         channelId: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateChannelInvite
@@ -688,7 +704,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#delete-channel-permission
     @inlinable
-    func deleteChannelPermissionOverwrite(
+    public func deleteChannelPermissionOverwrite(
         channelId: ChannelSnowflake,
         overwriteId: AnySnowflake,
         reason: String? = nil
@@ -697,15 +713,17 @@ public extension DiscordClient {
             channelId: channelId,
             overwriteId: overwriteId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/channel#follow-announcement-channel
     @inlinable
-    func followAnnouncementChannel(
+    public func followAnnouncementChannel(
         id: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.FollowAnnouncementChannel
@@ -722,14 +740,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
     @inlinable
-    func triggerTypingIndicator(channelId: ChannelSnowflake) async throws -> DiscordHTTPResponse {
+    public func triggerTypingIndicator(channelId: ChannelSnowflake) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.triggerTypingIndicator(channelId: channelId)
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/channel#get-pinned-messages
     @inlinable
-    func listPinnedMessages(
+    public func listPinnedMessages(
         channelId: ChannelSnowflake
     ) async throws -> DiscordClientResponse<[DiscordChannel.Message]> {
         let endpoint = APIEndpoint.listPinnedMessages(channelId: channelId)
@@ -738,35 +756,39 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#pin-message
     @inlinable
-    func pinMessage(
+    public func pinMessage(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.pinMessage(channelId: channelId, messageId: messageId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/channel#unpin-message
     @inlinable
-    func unpinMessage(
+    public func unpinMessage(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.unpinMessage(channelId: channelId, messageId: messageId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/channel#group-dm-add-recipient
     @inlinable
-    func addGroupDmUser(
+    public func addGroupDmUser(
         channelId: ChannelSnowflake,
         userId: UserSnowflake,
         payload: Payloads.AddGroupDMUser
@@ -780,7 +802,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#group-dm-remove-recipient
     @inlinable
-    func deleteGroupDmUser(
+    public func deleteGroupDmUser(
         channelId: ChannelSnowflake,
         userId: UserSnowflake
     ) async throws -> DiscordHTTPResponse {
@@ -793,7 +815,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#start-thread-from-message
     @inlinable
-    func createThreadFromMessage(
+    public func createThreadFromMessage(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         reason: String? = nil,
@@ -811,7 +833,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#start-thread-without-message
     @inlinable
-    func createThread(
+    public func createThread(
         channelId: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateThreadWithoutMessage
@@ -829,7 +851,7 @@ public extension DiscordClient {
     /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-or-media-channel
     @available(*, deprecated, renamed: "startThreadInForumOrMediaChannel(channelId:reason:payload:)")
     @inlinable
-    func startThreadInForumChannel(
+    public func startThreadInForumChannel(
         channelId: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateThreadInForumChannel
@@ -846,7 +868,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-or-media-channel
     @inlinable
-    func startThreadInForumOrMediaChannel(
+    public func startThreadInForumOrMediaChannel(
         channelId: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateThreadInForumChannel
@@ -863,14 +885,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#join-thread
     @inlinable
-    func joinThread(id: ChannelSnowflake) async throws -> DiscordHTTPResponse {
+    public func joinThread(id: ChannelSnowflake) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.joinThread(channelId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/channel#add-thread-member
     @inlinable
-    func addThreadMember(
+    public func addThreadMember(
         threadId: ChannelSnowflake,
         userId: UserSnowflake
     ) async throws -> DiscordHTTPResponse {
@@ -880,14 +902,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#leave-thread
     @inlinable
-    func leaveThread(id: ChannelSnowflake) async throws -> DiscordHTTPResponse {
+    public func leaveThread(id: ChannelSnowflake) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.leaveThread(channelId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/channel#remove-thread-member
     @inlinable
-    func deleteThreadMember(
+    public func deleteThreadMember(
         threadId: ChannelSnowflake,
         userId: UserSnowflake
     ) async throws -> DiscordHTTPResponse {
@@ -897,7 +919,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#get-thread-member
     @inlinable
-    func getThreadMember(
+    public func getThreadMember(
         threadId: ChannelSnowflake,
         userId: UserSnowflake
     ) async throws -> DiscordClientResponse<ThreadMember> {
@@ -907,20 +929,22 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#get-thread-member
     @inlinable
-    func getThreadMemberWithMember(
+    public func getThreadMemberWithMember(
         threadId: ChannelSnowflake,
         userId: UserSnowflake
     ) async throws -> DiscordClientResponse<ThreadMemberWithMember> {
         let endpoint = APIEndpoint.getThreadMember(channelId: threadId, userId: userId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("with_member", "true")]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("with_member", "true")]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/channel#list-thread-members
     @inlinable
-    func listThreadMembers(
+    public func listThreadMembers(
         threadId: ChannelSnowflake
     ) async throws -> DiscordClientResponse<[ThreadMember]> {
         let endpoint = APIEndpoint.listThreadMembers(channelId: threadId)
@@ -929,25 +953,27 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/channel#list-thread-members
     @inlinable
-    func listThreadMembersWithMember(
+    public func listThreadMembersWithMember(
         threadId: ChannelSnowflake,
         after: UserSnowflake? = nil,
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<[ThreadMemberWithMember]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 100)
         let endpoint = APIEndpoint.listThreadMembers(channelId: threadId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("with_member", "true"),
-                ("after", after?.rawValue),
-                ("limit", limit.map({ "\($0)" })),
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("with_member", "true"),
+                    ("after", after?.rawValue),
+                    ("limit", limit.map({ "\($0)" })),
+                ]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/channel#list-public-archived-threads
-    func listPublicArchivedThreads(
+    public func listPublicArchivedThreads(
         channelId: ChannelSnowflake,
         before: Date? = nil,
         limit: Int? = nil
@@ -955,17 +981,19 @@ public extension DiscordClient {
         /// Not documented, but correct, at least at the time of writing the code.
         try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
         let endpoint = APIEndpoint.listPublicArchivedThreads(channelId: channelId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("before", before.map(iso8601DateFormatter.string(from:))),
-                ("limit", limit.map({ "\($0)" }))
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("before", before.map(iso8601DateFormatter.string(from:))),
+                    ("limit", limit.map({ "\($0)" })),
+                ]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/channel#list-private-archived-threads
-    func listPrivateArchivedThreads(
+    public func listPrivateArchivedThreads(
         channelId: ChannelSnowflake,
         before: Date? = nil,
         limit: Int? = nil
@@ -973,18 +1001,20 @@ public extension DiscordClient {
         /// Not documented, but correct, at least at the time of writing the code.
         try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
         let endpoint = APIEndpoint.listPrivateArchivedThreads(channelId: channelId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("before", before.map(iso8601DateFormatter.string(from:))),
-                ("limit", limit.map({ "\($0)" }))
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("before", before.map(iso8601DateFormatter.string(from:))),
+                    ("limit", limit.map({ "\($0)" })),
+                ]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/channel#list-joined-private-archived-threads
     @inlinable
-    func listOwnPrivateArchivedThreads(
+    public func listOwnPrivateArchivedThreads(
         channelId: ChannelSnowflake,
         before: String? = nil,
         limit: Int? = nil
@@ -992,13 +1022,15 @@ public extension DiscordClient {
         /// Not documented, but correct, at least at the time of writing the code.
         try checkInBounds(name: "limit", value: limit, lowerBound: 2, upperBound: 100)
         let endpoint = APIEndpoint.listOwnPrivateArchivedThreads(channelId: channelId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("before", before),
-                ("limit", limit.map({ "\($0)" }))
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("before", before),
+                    ("limit", limit.map({ "\($0)" })),
+                ]
+            )
+        )
     }
 
     // MARK: Emojis
@@ -1006,7 +1038,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/emoji#list-guild-emojis
     @inlinable
-    func listGuildEmojis(
+    public func listGuildEmojis(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<[Emoji]> {
         let endpoint = APIEndpoint.listGuildEmojis(guildId: guildId)
@@ -1015,7 +1047,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/emoji#get-guild-emoji
     @inlinable
-    func getGuildEmoji(
+    public func getGuildEmoji(
         guildId: GuildSnowflake,
         emojiId: EmojiSnowflake
     ) async throws -> DiscordClientResponse<Emoji> {
@@ -1025,7 +1057,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/emoji#create-guild-emoji
     @inlinable
-    func createGuildEmoji(
+    public func createGuildEmoji(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateGuildEmoji
@@ -1042,7 +1074,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/emoji#create-guild-emoji
     @inlinable
-    func updateGuildEmoji(
+    public func updateGuildEmoji(
         guildId: GuildSnowflake,
         emojiId: EmojiSnowflake,
         reason: String? = nil,
@@ -1060,16 +1092,18 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/emoji#delete-guild-emoji
     @inlinable
-    func deleteGuildEmoji(
+    public func deleteGuildEmoji(
         guildId: GuildSnowflake,
         emojiId: EmojiSnowflake,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteGuildEmoji(guildId: guildId, emojiId: emojiId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     // MARK: Entitlements
@@ -1077,7 +1111,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/monetization/entitlements#list-entitlements
     @inlinable
-    func listEntitlements(
+    public func listEntitlements(
         appId: ApplicationSnowflake? = nil,
         userId: UserSnowflake? = nil,
         skuIds: [SKUSnowflake]? = nil,
@@ -1111,7 +1145,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement
     @inlinable
-    func consumeEntitlement(
+    public func consumeEntitlement(
         appId: ApplicationSnowflake? = nil,
         entitlementId: EntitlementSnowflake
     ) async throws -> DiscordHTTPResponse {
@@ -1124,7 +1158,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement
     @inlinable
-    func createTestEntitlement(
+    public func createTestEntitlement(
         appId: ApplicationSnowflake? = nil,
         payload: Payloads.CreateTestEntitlement
     ) async throws -> DiscordClientResponse<Entitlement> {
@@ -1137,7 +1171,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/monetization/entitlements#delete-test-entitlement
     @inlinable
-    func deleteTestEntitlement(
+    public func deleteTestEntitlement(
         appId: ApplicationSnowflake? = nil,
         entitlementId: EntitlementSnowflake
     ) async throws -> DiscordHTTPResponse {
@@ -1153,7 +1187,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#create-guild
     @inlinable
-    func createGuild(
+    public func createGuild(
         payload: Payloads.CreateGuild
     ) async throws -> DiscordClientResponse<Guild> {
         let endpoint = APIEndpoint.createGuild
@@ -1165,20 +1199,22 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild
     @inlinable
-    func getGuild(
+    public func getGuild(
         id: GuildSnowflake,
         withCounts: Bool? = nil
     ) async throws -> DiscordClientResponse<Guild> {
         let endpoint = APIEndpoint.getGuild(guildId: id)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("with_counts", withCounts.map { "\($0)" })]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("with_counts", withCounts.map { "\($0)" })]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-preview
     @inlinable
-    func getGuildPreview(
+    public func getGuildPreview(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<Guild.Preview> {
         let endpoint = APIEndpoint.getGuildPreview(guildId: guildId)
@@ -1187,7 +1223,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild
     @inlinable
-    func updateGuild(
+    public func updateGuild(
         id: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.ModifyGuild
@@ -1204,14 +1240,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#delete-guild
     @inlinable
-    func deleteGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse {
+    public func deleteGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteGuild(guildId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-channels
     @inlinable
-    func listGuildChannels(
+    public func listGuildChannels(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<[DiscordChannel]> {
         let endpoint = APIEndpoint.listGuildChannels(guildId: guildId)
@@ -1220,7 +1256,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#create-guild-channel
     @inlinable
-    func createGuildChannel(
+    public func createGuildChannel(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateGuildChannel
@@ -1237,7 +1273,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-channel-positions
     @inlinable
-    func updateGuildChannelPositions(
+    public func updateGuildChannelPositions(
         guildId: GuildSnowflake,
         payload: [Payloads.ModifyGuildChannelPositions]
     ) async throws -> DiscordHTTPResponse {
@@ -1250,7 +1286,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#list-active-guild-threads
     @inlinable
-    func listActiveGuildThreads(
+    public func listActiveGuildThreads(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<Responses.ListActiveGuildThreads> {
         let endpoint = APIEndpoint.listActiveGuildThreads(guildId: guildId)
@@ -1259,7 +1295,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-member
     @inlinable
-    func getGuildMember(
+    public func getGuildMember(
         guildId: GuildSnowflake,
         userId: UserSnowflake
     ) async throws -> DiscordClientResponse<Guild.Member> {
@@ -1269,45 +1305,49 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#list-guild-members
     @inlinable
-    func listGuildMembers(
+    public func listGuildMembers(
         guildId: GuildSnowflake,
         limit: Int? = nil,
         after: UserSnowflake? = nil
     ) async throws -> DiscordClientResponse<[Guild.Member]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = APIEndpoint.listGuildMembers(guildId: guildId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("limit", limit?.description),
-                ("after", after.map { $0.rawValue }),
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("limit", limit?.description),
+                    ("after", after.map { $0.rawValue }),
+                ]
+            )
+        )
     }
 
     /// NOTE: `limit`, if provided, must be between `1` and `1_000`.
     /// https://discord.com/developers/docs/resources/guild#search-guild-members
     @inlinable
-    func searchGuildMembers(
+    public func searchGuildMembers(
         guildId: GuildSnowflake,
         query: String,
         limit: Int? = nil
     ) async throws -> DiscordClientResponse<[Guild.Member]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = APIEndpoint.searchGuildMembers(guildId: guildId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("query", query),
-                ("limit", limit?.description)
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("query", query),
+                    ("limit", limit?.description),
+                ]
+            )
+        )
     }
 
     /// NOTE: Sometimes doesn't return a guild member object. Read the docs.
     /// https://discord.com/developers/docs/resources/guild#add-guild-member
     @inlinable
-    func addGuildMember(
+    public func addGuildMember(
         guildId: GuildSnowflake,
         userId: UserSnowflake,
         payload: Payloads.AddGuildMember
@@ -1321,7 +1361,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-member
     @inlinable
-    func updateGuildMember(
+    public func updateGuildMember(
         guildId: GuildSnowflake,
         userId: UserSnowflake,
         reason: String? = nil,
@@ -1339,7 +1379,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#modify-current-member
     @inlinable
-    func updateOwnGuildMember(
+    public func updateOwnGuildMember(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.ModifyCurrentMember
@@ -1356,7 +1396,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#add-guild-member-role
     @inlinable
-    func addGuildMemberRole(
+    public func addGuildMemberRole(
         guildId: GuildSnowflake,
         userId: UserSnowflake,
         roleId: RoleSnowflake,
@@ -1367,15 +1407,17 @@ public extension DiscordClient {
             userId: userId,
             roleId: roleId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild#remove-guild-member-role
     @inlinable
-    func deleteGuildMemberRole(
+    public func deleteGuildMemberRole(
         guildId: GuildSnowflake,
         userId: UserSnowflake,
         roleId: RoleSnowflake,
@@ -1386,29 +1428,33 @@ public extension DiscordClient {
             userId: userId,
             roleId: roleId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild#remove-guild-member
     @inlinable
-    func deleteGuildMember(
+    public func deleteGuildMember(
         guildId: GuildSnowflake,
         userId: UserSnowflake,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteGuildMember(guildId: guildId, userId: userId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-bans
     @inlinable
-    func listGuildBans(
+    public func listGuildBans(
         guildId: GuildSnowflake,
         limit: Int? = nil,
         before: UserSnowflake? = nil,
@@ -1416,19 +1462,21 @@ public extension DiscordClient {
     ) async throws -> DiscordClientResponse<[Guild.Ban]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 1_000)
         let endpoint = APIEndpoint.listGuildBans(guildId: guildId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("limit", limit.map { "\($0)" }),
-                ("before", before?.rawValue),
-                ("after", after?.rawValue)
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("limit", limit.map { "\($0)" }),
+                    ("before", before?.rawValue),
+                    ("after", after?.rawValue),
+                ]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-ban
     @inlinable
-    func getGuildBan(
+    public func getGuildBan(
         guildId: GuildSnowflake,
         userId: UserSnowflake
     ) async throws -> DiscordClientResponse<Guild.Ban> {
@@ -1438,7 +1486,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#create-guild-ban
     @inlinable
-    func banUserFromGuild(
+    public func banUserFromGuild(
         guildId: GuildSnowflake,
         userId: UserSnowflake,
         reason: String? = nil,
@@ -1456,7 +1504,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#bulk-guild-ban
     @inlinable
-    func bulkBanUsersFromGuild(
+    public func bulkBanUsersFromGuild(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateBulkGuildBan
@@ -1473,7 +1521,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#remove-guild-ban
     @inlinable
-    func unbanUserFromGuild(
+    public func unbanUserFromGuild(
         guildId: GuildSnowflake,
         userId: UserSnowflake,
         reason: String? = nil
@@ -1484,14 +1532,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-roles
     @inlinable
-    func listGuildRoles(id: GuildSnowflake) async throws -> DiscordClientResponse<[Role]> {
+    public func listGuildRoles(id: GuildSnowflake) async throws -> DiscordClientResponse<[Role]> {
         let endpoint = APIEndpoint.listGuildRoles(guildId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/guild#create-guild-role
     @inlinable
-    func createGuildRole(
+    public func createGuildRole(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.GuildRole
@@ -1508,7 +1556,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-role-positions
     @inlinable
-    func updateGuildRolePositions(
+    public func updateGuildRolePositions(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: [Payloads.ModifyGuildRolePositions]
@@ -1524,7 +1572,7 @@ public extension DiscordClient {
     }
 
     @inlinable
-    func updateGuildRole(
+    public func updateGuildRole(
         guildId: GuildSnowflake,
         roleId: RoleSnowflake,
         reason: String? = nil,
@@ -1542,7 +1590,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-mfa-level
     @inlinable
-    func setGuildMfaLevel(
+    public func setGuildMfaLevel(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.ModifyGuildMFALevel
@@ -1559,40 +1607,44 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#delete-guild-role
     @inlinable
-    func deleteGuildRole(
+    public func deleteGuildRole(
         guildId: GuildSnowflake,
         roleId: RoleSnowflake,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteGuildRole(guildId: guildId, roleId: roleId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// NOTE: `days`, if provided, must be between `1` and `30`.
     /// https://discord.com/developers/docs/resources/guild#get-guild-prune-count
     @inlinable
-    func previewPruneGuild(
+    public func previewPruneGuild(
         guildId: GuildSnowflake,
         days: Int? = nil,
         includeRoles: [RoleSnowflake]? = nil
     ) async throws -> DiscordClientResponse<Responses.GuildPrune> {
         try checkInBounds(name: "days", value: days, lowerBound: 1, upperBound: 30)
         let endpoint = APIEndpoint.previewPruneGuild(guildId: guildId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("days", days.map { "\($0)" }),
-                ("include_roles", includeRoles.map { $0.map(\.rawValue).joined(separator: ",") }),
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("days", days.map { "\($0)" }),
+                    ("include_roles", includeRoles.map { $0.map(\.rawValue).joined(separator: ",") }),
+                ]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild#begin-guild-prune
     @inlinable
-    func pruneGuild(
+    public func pruneGuild(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.BeginGuildPrune
@@ -1609,7 +1661,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-voice-regions
     @inlinable
-    func listGuildVoiceRegions(
+    public func listGuildVoiceRegions(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<[VoiceRegion]> {
         let endpoint = APIEndpoint.listGuildVoiceRegions(guildId: guildId)
@@ -1618,7 +1670,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-invites
     @inlinable
-    func listGuildInvites(
+    public func listGuildInvites(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<[InviteWithMetadata]> {
         let endpoint = APIEndpoint.listGuildInvites(guildId: guildId)
@@ -1627,7 +1679,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-integrations
     @inlinable
-    func listGuildIntegrations(
+    public func listGuildIntegrations(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<[Integration]> {
         let endpoint = APIEndpoint.listGuildIntegrations(guildId: guildId)
@@ -1636,7 +1688,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#delete-guild-integration
     @inlinable
-    func deleteGuildIntegration(
+    public func deleteGuildIntegration(
         guildId: GuildSnowflake,
         integrationId: IntegrationSnowflake,
         reason: String? = nil
@@ -1645,15 +1697,17 @@ public extension DiscordClient {
             guildId: guildId,
             integrationId: integrationId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-widget-settings
     @inlinable
-    func getGuildWidgetSettings(
+    public func getGuildWidgetSettings(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<Guild.WidgetSettings> {
         let endpoint = APIEndpoint.getGuildWidgetSettings(guildId: guildId)
@@ -1662,7 +1716,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-widget
     @inlinable
-    func updateGuildWidgetSettings(
+    public func updateGuildWidgetSettings(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.ModifyWidgetSettings
@@ -1679,7 +1733,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-widget
     @inlinable
-    func getGuildWidget(
+    public func getGuildWidget(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<Guild.Widget> {
         let endpoint = APIEndpoint.getGuildWidget(guildId: guildId)
@@ -1688,7 +1742,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-vanity-url
     @inlinable
-    func getGuildVanityUrl(
+    public func getGuildVanityUrl(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<PartialInvite> {
         let endpoint = APIEndpoint.getGuildVanityUrl(guildId: guildId)
@@ -1697,7 +1751,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-widget-image
     @inlinable
-    func getGuildWidgetPng(
+    public func getGuildWidgetPng(
         guildId: GuildSnowflake,
         style: Payloads.WidgetStyle? = nil
     ) async throws -> DiscordCDNResponse {
@@ -1713,20 +1767,22 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-welcome-screen
     @inlinable
-    func getGuildWelcomeScreen(
+    public func getGuildWelcomeScreen(
         guildId: GuildSnowflake,
         reason: String? = nil
     ) async throws -> DiscordClientResponse<Guild.WelcomeScreen> {
         let endpoint = APIEndpoint.getGuildWelcomeScreen(guildId: guildId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen
     @inlinable
-    func updateGuildWelcomeScreen(
+    public func updateGuildWelcomeScreen(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.ModifyGuildWelcomeScreen
@@ -1743,7 +1799,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#get-guild-onboarding
     @inlinable
-    func getGuildOnboarding(
+    public func getGuildOnboarding(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<Guild.Onboarding> {
         let endpoint = APIEndpoint.getGuildOnboarding(guildId: guildId)
@@ -1752,7 +1808,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#modify-guild-onboarding
     @inlinable
-    func updateGuildOnboarding(
+    public func updateGuildOnboarding(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.UpdateGuildOnboarding
@@ -1769,7 +1825,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#modify-current-user-voice-state
     @inlinable
-    func updateSelfVoiceState(
+    public func updateSelfVoiceState(
         guildId: GuildSnowflake,
         payload: Payloads.ModifyCurrentUserVoiceState
     ) async throws -> DiscordHTTPResponse {
@@ -1782,7 +1838,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild#modify-user-voice-state
     @inlinable
-    func updateVoiceState(
+    public func updateVoiceState(
         guildId: GuildSnowflake,
         userId: UserSnowflake,
         payload: Payloads.ModifyUserVoiceState
@@ -1799,20 +1855,22 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#list-scheduled-events-for-guild
     @inlinable
-    func listGuildScheduledEvents(
+    public func listGuildScheduledEvents(
         guildId: GuildSnowflake,
         withUserCount: Bool? = nil
     ) async throws -> DiscordClientResponse<[GuildScheduledEvent]> {
         let endpoint = APIEndpoint.listGuildScheduledEvents(guildId: guildId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("with_user_count", withUserCount.map { "\($0)" })]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("with_user_count", withUserCount.map { "\($0)" })]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event
     @inlinable
-    func createGuildScheduledEvent(
+    public func createGuildScheduledEvent(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateGuildScheduledEvent
@@ -1829,7 +1887,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event
     @inlinable
-    func getGuildScheduledEvent(
+    public func getGuildScheduledEvent(
         guildId: GuildSnowflake,
         guildScheduledEventId: GuildScheduledEventSnowflake,
         withUserCount: Bool? = nil
@@ -1838,15 +1896,17 @@ public extension DiscordClient {
             guildId: guildId,
             guildScheduledEventId: guildScheduledEventId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("with_user_count", withUserCount.map { "\($0)" })]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("with_user_count", withUserCount.map { "\($0)" })]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#modify-guild-scheduled-event
     @inlinable
-    func updateGuildScheduledEvent(
+    public func updateGuildScheduledEvent(
         guildId: GuildSnowflake,
         guildScheduledEventId: GuildScheduledEventSnowflake,
         reason: String? = nil,
@@ -1867,7 +1927,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#delete-guild-scheduled-event
     @inlinable
-    func deleteGuildScheduledEvent(
+    public func deleteGuildScheduledEvent(
         guildId: GuildSnowflake,
         guildScheduledEventId: GuildScheduledEventSnowflake
     ) async throws -> DiscordHTTPResponse {
@@ -1880,7 +1940,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users
     @inlinable
-    func listGuildScheduledEventUsers(
+    public func listGuildScheduledEventUsers(
         guildId: GuildSnowflake,
         guildScheduledEventId: GuildScheduledEventSnowflake,
         limit: Int? = nil,
@@ -1893,15 +1953,17 @@ public extension DiscordClient {
             guildId: guildId,
             guildScheduledEventId: guildScheduledEventId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("limit", limit.map { "\($0)" }),
-                ("with_member", withMember.map { "\($0)" }),
-                ("before", before?.rawValue),
-                ("after", after?.rawValue),
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("limit", limit.map { "\($0)" }),
+                    ("with_member", withMember.map { "\($0)" }),
+                    ("before", before?.rawValue),
+                    ("after", after?.rawValue),
+                ]
+            )
+        )
     }
 
     // MARK: Gateway
@@ -1909,14 +1971,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/topics/gateway#get-gateway
     @inlinable
-    func getGateway() async throws -> DiscordClientResponse<Gateway.URL> {
+    public func getGateway() async throws -> DiscordClientResponse<Gateway.URL> {
         let endpoint = APIEndpoint.getGateway
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/topics/gateway#get-gateway-bot
     @inlinable
-    func getBotGateway() async throws -> DiscordClientResponse<Gateway.BotConnectionInfo> {
+    public func getBotGateway() async throws -> DiscordClientResponse<Gateway.BotConnectionInfo> {
         let endpoint = APIEndpoint.getBotGateway
         return try await self.send(request: .init(to: endpoint))
     }
@@ -1926,14 +1988,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-template#get-guild-template
     @inlinable
-    func getGuildTemplate(code: String) async throws -> DiscordClientResponse<GuildTemplate> {
+    public func getGuildTemplate(code: String) async throws -> DiscordClientResponse<GuildTemplate> {
         let endpoint = APIEndpoint.getGuildTemplate(code: code)
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/guild-template#create-guild-from-guild-template
     @inlinable
-    func createGuildFromTemplate(
+    public func createGuildFromTemplate(
         code: String,
         payload: Payloads.CreateGuildFromGuildTemplate
     ) async throws -> DiscordClientResponse<Guild> {
@@ -1946,7 +2008,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-template#get-guild-templates
     @inlinable
-    func listGuildTemplates(
+    public func listGuildTemplates(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<[GuildTemplate]> {
         let endpoint = APIEndpoint.listGuildTemplates(guildId: guildId)
@@ -1955,7 +2017,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-template#create-guild-template
     @inlinable
-    func createGuildTemplate(
+    public func createGuildTemplate(
         guildId: GuildSnowflake,
         payload: Payloads.CreateGuildTemplate
     ) async throws -> DiscordClientResponse<GuildTemplate> {
@@ -1968,7 +2030,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-template#sync-guild-template
     @inlinable
-    func syncGuildTemplate(
+    public func syncGuildTemplate(
         guildId: GuildSnowflake,
         code: String
     ) async throws -> DiscordClientResponse<GuildTemplate> {
@@ -1978,7 +2040,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-template#modify-guild-template
     @inlinable
-    func updateGuildTemplate(
+    public func updateGuildTemplate(
         guildId: GuildSnowflake,
         code: String,
         payload: Payloads.ModifyGuildTemplate
@@ -1992,7 +2054,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/guild-template#delete-guild-template
     @inlinable
-    func deleteGuildTemplate(
+    public func deleteGuildTemplate(
         guildId: GuildSnowflake,
         code: String
     ) async throws -> DiscordHTTPResponse {
@@ -2005,7 +2067,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
     @inlinable
-    func createInteractionResponse(
+    public func createInteractionResponse(
         id: InteractionSnowflake,
         token: String,
         payload: Payloads.InteractionResponse
@@ -2019,7 +2081,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
     @inlinable
-    func getOriginalInteractionResponse(
+    public func getOriginalInteractionResponse(
         appId: ApplicationSnowflake? = nil,
         token: String,
         threadId: ChannelSnowflake? = nil
@@ -2028,15 +2090,17 @@ public extension DiscordClient {
             applicationId: try requireAppId(appId),
             interactionToken: token
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("thread_id", threadId?.rawValue)]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("thread_id", threadId?.rawValue)]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
     @inlinable
-    func updateOriginalInteractionResponse(
+    public func updateOriginalInteractionResponse(
         appId: ApplicationSnowflake? = nil,
         token: String,
         payload: Payloads.EditWebhookMessage
@@ -2050,7 +2114,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
     @inlinable
-    func deleteOriginalInteractionResponse(
+    public func deleteOriginalInteractionResponse(
         appId: ApplicationSnowflake? = nil,
         token: String
     ) async throws -> DiscordHTTPResponse {
@@ -2063,7 +2127,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
     @inlinable
-    func createFollowupMessage(
+    public func createFollowupMessage(
         appId: ApplicationSnowflake? = nil,
         token: String,
         payload: Payloads.ExecuteWebhook
@@ -2077,7 +2141,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
     @inlinable
-    func getFollowupMessage(
+    public func getFollowupMessage(
         appId: ApplicationSnowflake? = nil,
         token: String,
         messageId: MessageSnowflake,
@@ -2088,15 +2152,17 @@ public extension DiscordClient {
             interactionToken: token,
             messageId: messageId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("thread_id", threadId?.rawValue)]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("thread_id", threadId?.rawValue)]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
     @inlinable
-    func updateFollowupMessage(
+    public func updateFollowupMessage(
         appId: ApplicationSnowflake? = nil,
         token: String,
         messageId: MessageSnowflake,
@@ -2112,7 +2178,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#delete-followup-message
     @inlinable
-    func deleteFollowupMessage(
+    public func deleteFollowupMessage(
         appId: ApplicationSnowflake? = nil,
         token: String,
         messageId: MessageSnowflake
@@ -2130,34 +2196,38 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/invite#get-invite
     @inlinable
-    func resolveInvite(
+    public func resolveInvite(
         code: String,
         withCounts: Bool? = nil,
         withExpiration: Bool? = nil,
         guildScheduledEventId: GuildScheduledEventSnowflake? = nil
     ) async throws -> DiscordClientResponse<Invite> {
         let endpoint = APIEndpoint.resolveInvite(code: code)
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("with_counts", withCounts.map { "\($0)" }),
-                ("with_expiration", withExpiration.map { "\($0)" }),
-                ("guild_scheduled_event_id", guildScheduledEventId.map { "\($0.rawValue)" })
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("with_counts", withCounts.map { "\($0)" }),
+                    ("with_expiration", withExpiration.map { "\($0)" }),
+                    ("guild_scheduled_event_id", guildScheduledEventId.map { "\($0.rawValue)" }),
+                ]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/invite#delete-invite
     @inlinable
-    func revokeInvite(
+    public func revokeInvite(
         code: String,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.revokeInvite(code: code)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     // MARK: OAuth
@@ -2165,7 +2235,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/topics/oauth2#get-current-bot-application-information
     @inlinable
-    func getOwnOauth2Application() async throws -> DiscordClientResponse<DiscordApplication> {
+    public func getOwnOauth2Application() async throws -> DiscordClientResponse<DiscordApplication> {
         let endpoint = APIEndpoint.getOwnOauth2Application
         return try await self.send(request: .init(to: endpoint))
     }
@@ -2175,7 +2245,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/monetization/skus#list-skus
     @inlinable
-    func listSKUs(
+    public func listSKUs(
         appId: ApplicationSnowflake? = nil
     ) async throws -> DiscordClientResponse<[SKU]> {
         let endpoint = APIEndpoint.listSkus(applicationId: try requireAppId(appId))
@@ -2187,7 +2257,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/stage-instance#create-stage-instance
     @inlinable
-    func createStageInstance(
+    public func createStageInstance(
         reason: String? = nil,
         payload: Payloads.CreateStageInstance
     ) async throws -> DiscordClientResponse<StageInstance> {
@@ -2203,7 +2273,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/stage-instance#get-stage-instance
     @inlinable
-    func getStageInstance(
+    public func getStageInstance(
         channelId: ChannelSnowflake
     ) async throws -> DiscordClientResponse<StageInstance> {
         let endpoint = APIEndpoint.getStageInstance(channelId: channelId)
@@ -2212,7 +2282,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/stage-instance#modify-stage-instance
     @inlinable
-    func updateStageInstance(
+    public func updateStageInstance(
         channelId: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.ModifyStageInstance
@@ -2229,15 +2299,17 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/stage-instance#delete-stage-instance
     @inlinable
-    func deleteStageInstance(
+    public func deleteStageInstance(
         channelId: ChannelSnowflake,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteStageInstance(channelId: channelId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     // MARK: Stickers
@@ -2245,21 +2317,21 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/sticker#get-sticker
     @inlinable
-    func getSticker(id: StickerSnowflake) async throws -> DiscordClientResponse<Sticker> {
+    public func getSticker(id: StickerSnowflake) async throws -> DiscordClientResponse<Sticker> {
         let endpoint = APIEndpoint.getSticker(stickerId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs
     @inlinable
-    func listStickerPacks() async throws -> DiscordClientResponse<Responses.ListStickerPacks> {
+    public func listStickerPacks() async throws -> DiscordClientResponse<Responses.ListStickerPacks> {
         let endpoint = APIEndpoint.listStickerPacks
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/sticker#list-guild-stickers
     @inlinable
-    func listGuildStickers(
+    public func listGuildStickers(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<[Sticker]> {
         let endpoint = APIEndpoint.listGuildStickers(guildId: guildId)
@@ -2268,7 +2340,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/sticker#get-guild-sticker
     @inlinable
-    func getGuildSticker(
+    public func getGuildSticker(
         guildId: GuildSnowflake,
         stickerId: StickerSnowflake
     ) async throws -> DiscordClientResponse<Sticker> {
@@ -2278,7 +2350,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/sticker#create-guild-sticker
     @inlinable
-    func createGuildSticker(
+    public func createGuildSticker(
         guildId: GuildSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateGuildSticker
@@ -2295,7 +2367,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/sticker#modify-guild-sticker
     @inlinable
-    func updateGuildSticker(
+    public func updateGuildSticker(
         guildId: GuildSnowflake,
         stickerId: StickerSnowflake,
         reason: String? = nil,
@@ -2313,16 +2385,18 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/sticker#delete-guild-sticker
     @inlinable
-    func deleteGuildSticker(
+    public func deleteGuildSticker(
         guildId: GuildSnowflake,
         stickerId: StickerSnowflake,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteGuildSticker(guildId: guildId, stickerId: stickerId)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     // MARK: User
@@ -2330,21 +2404,21 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/user#get-current-user
     @inlinable
-    func getOwnUser() async throws -> DiscordClientResponse<DiscordUser> {
+    public func getOwnUser() async throws -> DiscordClientResponse<DiscordUser> {
         let endpoint = APIEndpoint.getOwnUser
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/topics/oauth2#get-current-application
     @inlinable
-    func getOwnApplication() async throws -> DiscordClientResponse<DiscordApplication> {
+    public func getOwnApplication() async throws -> DiscordClientResponse<DiscordApplication> {
         let endpoint = APIEndpoint.getOwnApplication
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/application#edit-current-application
     @inlinable
-    func updateOwnApplication(
+    public func updateOwnApplication(
         payload: Payloads.UpdateOwnApplication
     ) async throws -> DiscordClientResponse<DiscordApplication> {
         let endpoint = APIEndpoint.updateOwnApplication
@@ -2356,14 +2430,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/user#get-user
     @inlinable
-    func getUser(id: UserSnowflake) async throws -> DiscordClientResponse<DiscordUser> {
+    public func getUser(id: UserSnowflake) async throws -> DiscordClientResponse<DiscordUser> {
         let endpoint = APIEndpoint.getUser(userId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/user#modify-current-user
     @inlinable
-    func updateOwnUser(
+    public func updateOwnUser(
         payload: Payloads.ModifyCurrentUser
     ) async throws -> DiscordClientResponse<DiscordUser> {
         let endpoint = APIEndpoint.updateOwnUser
@@ -2375,7 +2449,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/user#get-current-user-guilds
     @inlinable
-    func listOwnGuilds(
+    public func listOwnGuilds(
         before: GuildSnowflake? = nil,
         after: GuildSnowflake? = nil,
         limit: Int? = nil,
@@ -2383,22 +2457,24 @@ public extension DiscordClient {
     ) async throws -> DiscordClientResponse<[PartialGuild]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 200)
         let endpoint = APIEndpoint.listOwnGuilds
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("before", before?.rawValue),
-                ("after", after?.rawValue),
-                ("limit", limit.map { "\($0)" }),
-                ("with_counts", withCounts.map { "\($0)" }),
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("before", before?.rawValue),
+                    ("after", after?.rawValue),
+                    ("limit", limit.map { "\($0)" }),
+                    ("with_counts", withCounts.map { "\($0)" }),
+                ]
+            )
+        )
     }
 
     /// This endpoint requires a `DiscordClient` with an OAuth token.
     /// By default the authentication method is by a bot token, and not an OAuth one.
     /// https://discord.com/developers/docs/resources/user#get-current-user-guild-member
     @inlinable
-    func getOwnGuildMember(
+    public func getOwnGuildMember(
         guildId: GuildSnowflake
     ) async throws -> DiscordClientResponse<Guild.Member> {
         let endpoint = APIEndpoint.getOwnGuildMember(guildId: guildId)
@@ -2407,7 +2483,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/user#leave-guild
     @inlinable
-    func leaveGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse {
+    public func leaveGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.leaveGuild(guildId: id)
         return try await self.send(request: .init(to: endpoint))
     }
@@ -2415,7 +2491,7 @@ public extension DiscordClient {
     /// You can use this function to create a new **or** retrieve an existing DM channel.
     /// https://discord.com/developers/docs/resources/user#create-dm
     @inlinable
-    func createDm(
+    public func createDm(
         payload: Payloads.CreateDM
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.createDm
@@ -2427,7 +2503,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/user#create-group-dm
     @inlinable
-    func createGroupDm(
+    public func createGroupDm(
         payload: Payloads.CreateGroupDM
     ) async throws -> DiscordClientResponse<DiscordChannel> {
         let endpoint = APIEndpoint.createGroupDm
@@ -2439,7 +2515,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/user#get-user-connections
     @inlinable
-    func listOwnConnections() async throws -> DiscordClientResponse<[DiscordUser.Connection]> {
+    public func listOwnConnections() async throws -> DiscordClientResponse<[DiscordUser.Connection]> {
         let endpoint = APIEndpoint.listOwnConnections
         return try await self.send(request: .init(to: endpoint))
     }
@@ -2448,7 +2524,7 @@ public extension DiscordClient {
     /// By default the authentication method is by a bot token, and not an OAuth one.
     /// https://discord.com/developers/docs/resources/user#get-user-application-role-connection
     @inlinable
-    func getApplicationUserRoleConnection(
+    public func getApplicationUserRoleConnection(
         appId: ApplicationSnowflake? = nil
     ) async throws -> DiscordClientResponse<DiscordUser.Connection> {
         let endpoint = APIEndpoint.getApplicationUserRoleConnection(
@@ -2461,7 +2537,7 @@ public extension DiscordClient {
     /// By default the authentication method is by a bot token, and not an OAuth one.
     /// https://discord.com/developers/docs/resources/user#update-user-application-role-connection
     @inlinable
-    func updateApplicationUserRoleConnection(
+    public func updateApplicationUserRoleConnection(
         appId: ApplicationSnowflake? = nil,
         payload: Payloads.UpdateUserApplicationRoleConnection
     ) async throws -> DiscordClientResponse<DiscordUser.Connection> {
@@ -2479,7 +2555,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/poll#get-answer-voters
     @inlinable
-    func listPollAnswerVotes(
+    public func listPollAnswerVotes(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake,
         answerId: Int,
@@ -2492,18 +2568,20 @@ public extension DiscordClient {
             messageId: messageId,
             answerId: answerId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [
-                ("after", after?.rawValue),
-                ("limit", limit.map { "\($0)" })
-            ]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("after", after?.rawValue),
+                    ("limit", limit.map { "\($0)" }),
+                ]
+            )
+        )
     }
 
     /// https://discord.com/developers/docs/resources/poll#end-poll
     @inlinable
-    func endPoll(
+    public func endPoll(
         channelId: ChannelSnowflake,
         messageId: MessageSnowflake
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
@@ -2519,7 +2597,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/voice#list-voice-regions
     @inlinable
-    func listVoiceRegions() async throws -> DiscordClientResponse<[VoiceRegion]> {
+    public func listVoiceRegions() async throws -> DiscordClientResponse<[VoiceRegion]> {
         let endpoint = APIEndpoint.listVoiceRegions
         return try await self.send(request: .init(to: endpoint))
     }
@@ -2529,7 +2607,7 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/webhook#create-webhook
     @inlinable
-    func createWebhook(
+    public func createWebhook(
         channelId: ChannelSnowflake,
         reason: String? = nil,
         payload: Payloads.CreateWebhook
@@ -2546,14 +2624,14 @@ public extension DiscordClient {
 
     /// https://discord.com/developers/docs/resources/webhook#get-channel-webhooks
     @inlinable
-    func listChannelWebhooks(channelId: ChannelSnowflake) async throws -> DiscordClientResponse<[Webhook]> {
+    public func listChannelWebhooks(channelId: ChannelSnowflake) async throws -> DiscordClientResponse<[Webhook]> {
         let endpoint = APIEndpoint.listChannelWebhooks(channelId: channelId)
         return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
     @inlinable
-    func getGuildWebhooks(guildId: GuildSnowflake) async throws -> DiscordClientResponse<[Webhook]> {
+    public func getGuildWebhooks(guildId: GuildSnowflake) async throws -> DiscordClientResponse<[Webhook]> {
         let endpoint = APIEndpoint.getGuildWebhooks(guildId: guildId)
         return try await self.send(request: .init(to: endpoint))
     }
@@ -2561,7 +2639,7 @@ public extension DiscordClient {
     /// Requires authentication using an authorized bot-token.
     /// https://discord.com/developers/docs/resources/webhook#get-webhook
     @inlinable
-    func getWebhook(id: WebhookSnowflake) async throws -> DiscordClientResponse<Webhook> {
+    public func getWebhook(id: WebhookSnowflake) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = APIEndpoint.getWebhook(webhookId: id)
         return try await self.send(request: .init(to: endpoint))
     }
@@ -2569,7 +2647,7 @@ public extension DiscordClient {
     /// Doesn't require authentication using bot-token.
     /// https://discord.com/developers/docs/resources/webhook#get-webhook-with-token
     @inlinable
-    func getWebhook(address: WebhookAddress) async throws -> DiscordClientResponse<Webhook> {
+    public func getWebhook(address: WebhookAddress) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = APIEndpoint.getWebhookByToken(
             webhookId: address.id,
             webhookToken: address.token
@@ -2580,7 +2658,7 @@ public extension DiscordClient {
     /// Requires authentication using an authorized bot-token.
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook
     @inlinable
-    func updateWebhook(
+    public func updateWebhook(
         id: WebhookSnowflake,
         reason: String? = nil,
         payload: Payloads.ModifyGuildWebhook
@@ -2598,7 +2676,7 @@ public extension DiscordClient {
     /// Doesn't require authentication using bot-token.
     /// https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
     @inlinable
-    func updateWebhook(
+    public func updateWebhook(
         address: WebhookAddress,
         reason: String? = nil,
         payload: Payloads.ModifyWebhook
@@ -2619,21 +2697,23 @@ public extension DiscordClient {
     /// Requires authentication using an authorized bot-token.
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook
     @inlinable
-    func deleteWebhook(
+    public func deleteWebhook(
         id: WebhookSnowflake,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteWebhook(webhookId: id)
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// Doesn't require authentication using bot-token.
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook-with-token
     @inlinable
-    func deleteWebhook(
+    public func deleteWebhook(
         address: WebhookAddress,
         reason: String? = nil
     ) async throws -> DiscordHTTPResponse {
@@ -2641,17 +2721,19 @@ public extension DiscordClient {
             webhookId: address.id,
             webhookToken: address.token
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#execute-webhook
     @inlinable
-    func executeWebhook(
+    public func executeWebhook(
         address: WebhookAddress,
         threadId: ChannelSnowflake? = nil,
         payload: Payloads.ExecuteWebhook
@@ -2673,7 +2755,7 @@ public extension DiscordClient {
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#execute-webhook
     @inlinable
-    func executeWebhookWithResponse(
+    public func executeWebhookWithResponse(
         address: WebhookAddress,
         threadId: ChannelSnowflake? = nil,
         payload: Payloads.ExecuteWebhook
@@ -2687,7 +2769,7 @@ public extension DiscordClient {
                 to: endpoint,
                 queries: [
                     ("wait", "true"),
-                    ("thread_id", threadId?.rawValue)
+                    ("thread_id", threadId?.rawValue),
                 ]
             ),
             payload: payload
@@ -2698,7 +2780,7 @@ public extension DiscordClient {
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#get-webhook-message
     @inlinable
-    func getWebhookMessage(
+    public func getWebhookMessage(
         address: WebhookAddress,
         messageId: MessageSnowflake,
         threadId: ChannelSnowflake? = nil
@@ -2708,17 +2790,19 @@ public extension DiscordClient {
             webhookToken: address.token,
             messageId: messageId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("thread_id", threadId?.rawValue)]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("thread_id", threadId?.rawValue)]
+            )
+        )
     }
 
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message
     @inlinable
-    func updateWebhookMessage(
+    public func updateWebhookMessage(
         address: WebhookAddress,
         messageId: MessageSnowflake,
         threadId: ChannelSnowflake? = nil,
@@ -2742,7 +2826,7 @@ public extension DiscordClient {
     ///   - threadId: Required if the message is in a thread.
     /// https://discord.com/developers/docs/resources/webhook#delete-webhook-message
     @inlinable
-    func deleteWebhookMessage(
+    public func deleteWebhookMessage(
         address: WebhookAddress,
         messageId: MessageSnowflake,
         threadId: ChannelSnowflake? = nil
@@ -2752,10 +2836,12 @@ public extension DiscordClient {
             webhookToken: address.token,
             messageId: messageId
         )
-        return try await self.send(request: .init(
-            to: endpoint,
-            queries: [("thread_id", threadId?.rawValue)]
-        ))
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("thread_id", threadId?.rawValue)]
+            )
+        )
     }
 }
 
@@ -2780,7 +2866,7 @@ extension DiscordClient {
     @available(*, deprecated, message: "App id must be optional otherwise there is no point")
     @usableFromInline
     func requireAppId(_ appId: ApplicationSnowflake) throws -> ApplicationSnowflake {
-        return appId
+        appId
     }
 
     @usableFromInline

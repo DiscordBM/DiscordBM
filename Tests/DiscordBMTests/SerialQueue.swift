@@ -1,27 +1,28 @@
-@testable import DiscordGateway
 import Atomics
 import XCTest
 
+@testable import DiscordGateway
+
 class SerialQueueTests: XCTestCase {
-    
+
     func testFirstTrySucceedsImmediately() async {
         let queue = SerialQueue(waitTime: .milliseconds(250))
         let number = ManagedAtomic(0)
-        
+
         Task {
             queue.perform {
                 number.wrappingIncrement(ordering: .relaxed)
             }
         }
-        
+
         try! await Task.sleep(for: .milliseconds(20))
         XCTAssertEqual(number.load(ordering: .relaxed), 1)
     }
-    
+
     func testSecondTryNeedsToWait() async {
         let queue = SerialQueue(waitTime: .seconds(2))
         let container = Container()
-        
+
         Task {
             for _ in 0..<2 {
                 queue.perform {
@@ -29,11 +30,11 @@ class SerialQueueTests: XCTestCase {
                 }
             }
         }
-        
+
         try! await Task.sleep(for: .milliseconds(2_250))
-        
+
         let times = await container.times
-        
+
         for (idx, time) in times.enumerated() {
             XCTAssertGreaterThan(time, Double(idx) * 2)
             if idx != 0 {
@@ -43,11 +44,11 @@ class SerialQueueTests: XCTestCase {
             }
         }
     }
-    
+
     func testALotOfTriesNeedToWaitInQueue() async {
         let queue = SerialQueue(waitTime: .milliseconds(100))
         let container = Container()
-        
+
         Task {
             for _ in 0..<5 {
                 queue.perform {
@@ -55,11 +56,11 @@ class SerialQueueTests: XCTestCase {
                 }
             }
         }
-        
+
         try! await Task.sleep(for: .milliseconds(1_600))
-        
+
         let times = await container.times
-        
+
         for (idx, time) in times.enumerated() {
             XCTAssertGreaterThan(time, Double(idx) * 0.1)
             if idx != 0 {
@@ -74,7 +75,7 @@ class SerialQueueTests: XCTestCase {
 private actor Container {
     var times = [Double]()
     let startTime = Date().timeIntervalSince1970
-    
+
     func add() {
         let passed = Date().timeIntervalSince1970 - startTime
         self.times.append(passed)

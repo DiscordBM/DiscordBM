@@ -38,7 +38,7 @@ public enum AnyEndpoint: Endpoint {
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     public var urlDescription: String {
         switch self {
         case let .api(endpoint):
@@ -51,7 +51,7 @@ public enum AnyEndpoint: Endpoint {
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     public var httpMethod: HTTPMethod {
         switch self {
         case let .api(endpoint):
@@ -64,7 +64,7 @@ public enum AnyEndpoint: Endpoint {
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     public var countsAgainstGlobalRateLimit: Bool {
         switch self {
         case let .api(endpoint):
@@ -77,7 +77,7 @@ public enum AnyEndpoint: Endpoint {
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     public var requiresAuthorizationHeader: Bool {
         switch self {
         case let .api(endpoint):
@@ -90,7 +90,7 @@ public enum AnyEndpoint: Endpoint {
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     public var parameters: [String] {
         switch self {
         case let .api(endpoint):
@@ -103,7 +103,7 @@ public enum AnyEndpoint: Endpoint {
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     public var id: Int {
         switch self {
         case let .api(endpoint):
@@ -116,7 +116,7 @@ public enum AnyEndpoint: Endpoint {
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     public var description: String {
         switch self {
         case let .api(endpoint):

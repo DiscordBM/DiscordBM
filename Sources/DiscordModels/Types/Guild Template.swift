@@ -1,4 +1,3 @@
-
 /// https://discord.com/developers/docs/resources/guild-template#guild-template-object-guild-template-structure
 public struct GuildTemplate: Codable, Sendable {
 

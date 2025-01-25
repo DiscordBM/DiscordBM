@@ -1,5 +1,5 @@
-import Foundation
 import DiscordModels
+import Foundation
 
 /// Utilities for writing Discord messages.
 /// https://discord.com/developers/docs/reference#message-formatting-formats
@@ -9,19 +9,19 @@ public enum DiscordUtils {
     public static func mention(id: UserSnowflake) -> String {
         "<@\(id.rawValue)>"
     }
-    
+
     /// When used in a Discord message, shows up as mentioning a channel.
     @inlinable
     public static func mention(id: ChannelSnowflake) -> String {
         "<#\(id.rawValue)>"
     }
-    
+
     /// When used in a Discord message, shows up as mentioning a role, if mentionable.
     @inlinable
     public static func mention(id: RoleSnowflake) -> String {
         "<@&\(id.rawValue)>"
     }
-    
+
     /// When used in a Discord message, shows up as mentioning a slash command.
     @inlinable
     public static func slashCommand(
@@ -34,39 +34,39 @@ public enum DiscordUtils {
         let subcommand = subcommand.map { " \($0)" } ?? ""
         return "</\(name)\(subcommandGroup)\(subcommand):\(id.rawValue)>"
     }
-    
+
     /// When used in a Discord message, shows up as an emoji.
     @inlinable
     public static func standardUnicodeEmoji(emoji: String) -> String {
         emoji
     }
-    
+
     /// When used in a Discord message, shows up as a custom guild emoji.
     @inlinable
     public static func customEmoji(name: String, id: EmojiSnowflake) -> String {
         "<:\(name):\(id.rawValue)>"
     }
-    
+
     /// When used in a Discord message, shows up as a custom animated guild emoji.
     @inlinable
     public static func customAnimatedEmoji(name: String, id: EmojiSnowflake) -> String {
         "<a:\(name):\(id.rawValue)>"
     }
-    
+
     /// When used in a Discord message, shows up as a **localized** time.
     /// See ``TimestampStyle`` for examples.
     @inlinable
     public static func timestamp(date: Date, style: TimestampStyle? = nil) -> String {
         timestamp(unixTimestamp: Int(date.timeIntervalSince1970), style: style)
     }
-    
+
     /// When used in a Discord message, shows up as a **localized** time.
     /// See ``TimestampStyle`` for examples.
     @inlinable
     public static func timestamp(unixTimestamp: Double, style: TimestampStyle? = nil) -> String {
         timestamp(unixTimestamp: Int(unixTimestamp), style: style)
     }
-    
+
     /// When used in a Discord message, shows up as a **localized** time.
     /// See ``TimestampStyle`` for examples.
     @inlinable
@@ -94,19 +94,21 @@ public enum DiscordUtils {
         _ text: String,
         options: EscapeOption? = nil
     ) -> String {
-        var text = text
+        var text =
+            text
             .replacingOccurrences(of: #"\"#, with: #"\\"#)
-            .replacingOccurrences(of: #"|"#, with: #"\|"#) /// Makes invisible
-            .replacingOccurrences(of: #">"#, with: #"\>"#) /// Quotes
-            .replacingOccurrences(of: #"@"#, with: #"\@"#) /// `@everyone`. Not 100% effective
-            .replacingOccurrences(of: #"<"#, with: #"\<"#) /// `<::>` ids like custom emojis
-            .replacingOccurrences(of: #"["#, with: #"\["#) /// Markdown link syntax (`[]()`)
-            .replacingOccurrences(of: ###"#"###, with: ###"\#"###) /// For titles, e.g. `### Title`
-            .replacingOccurrences(of: #"`"#, with: #"\`"#) /// Code blocks
-            .replacingOccurrences(of: #"~"#, with: #"\~"#) /// Crosses words
-            .replacingOccurrences(of: #"_"#, with: #"\_"#) /// Italic
-            .replacingOccurrences(of: #"*"#, with: #"\*"#) /// Bold
-            .replacingOccurrences(of: #":"#, with: #"\:"#) /// Emojis, e.g. `:thumbsup:`
+            .replacingOccurrences(of: #"|"#, with: #"\|"#)/// Makes invisible
+            .replacingOccurrences(of: #">"#, with: #"\>"#)/// Quotes
+            .replacingOccurrences(of: #"@"#, with: #"\@"#)/// `@everyone`. Not 100% effective
+            .replacingOccurrences(of: #"<"#, with: #"\<"#)/// `<::>` ids like custom emojis
+            .replacingOccurrences(of: #"["#, with: #"\["#)/// Markdown link syntax (`[]()`)
+            .replacingOccurrences(of: ###"#"###, with: ###"\#"###)/// For titles, e.g. `### Title`
+            .replacingOccurrences(of: #"`"#, with: #"\`"#)/// Code blocks
+            .replacingOccurrences(of: #"~"#, with: #"\~"#)/// Crosses words
+            .replacingOccurrences(of: #"_"#, with: #"\_"#)/// Italic
+            .replacingOccurrences(of: #"*"#, with: #"\*"#)/// Bold
+            .replacingOccurrences(of: #":"#, with: #"\:"#)
+        /// Emojis, e.g. `:thumbsup:`
         if options?.contains(.keepLinks) == true {
             text = text.replacingOccurrences(of: #"\://"#, with: "://")
         }

@@ -1,6 +1,5 @@
-
 extension Gateway.GuildCreate {
-    
+
     /// Whether or not a member has a permission in a guild and channel.
     /// Member must be of the same guild.
     /// This a best-effort function based on what Discord has documented.
@@ -19,8 +18,9 @@ extension Gateway.GuildCreate {
                 permissions: perms
             )
         } else if let thread = self.threads.first(where: { $0.id == channelId }),
-                  let parentId = thread.parent_id,
-                  let channel = self.channels.first(where: { $0.id == parentId }) {
+            let parentId = thread.parent_id,
+            let channel = self.channels.first(where: { $0.id == parentId })
+        {
             if thread.type == .privateThread {
                 /// For private threads you must be a thread member or a guild admin.
                 /// If you are an admin, then you automatically have all perms.
@@ -50,12 +50,13 @@ extension Gateway.GuildCreate {
                     userId: userId,
                     channel: channel,
                     permissions: perms
-                ) && _memberHasPermissions(
-                    member: member,
-                    userId: userId,
-                    channel: thread,
-                    permissions: perms
                 )
+                    && _memberHasPermissions(
+                        member: member,
+                        userId: userId,
+                        channel: thread,
+                        permissions: perms
+                    )
             }
         } else {
             /// No proper channel or thread found.
@@ -75,8 +76,7 @@ extension Gateway.GuildCreate {
 
         /// `administrator` perm is like the guild owner.
         if self.roles.contains(where: { role in
-            role.permissions.contains(.administrator) &&
-            self.memberHasRole(member: member, roleId: role.id)
+            role.permissions.contains(.administrator) && self.memberHasRole(member: member, roleId: role.id)
         }) {
             return true
         }
@@ -104,11 +104,12 @@ extension Gateway.GuildCreate {
             .mentionEveryone,
             .sendTtsMessages,
             .attachFiles,
-            .embedLinks
+            .embedLinks,
         ]
         /// If perms already contains `sendMessage`, then we've already checked for it.
         if !perms.contains(.sendMessages),
-           perms.contains(where: { requireSendMessages.contains($0) }) {
+            perms.contains(where: { requireSendMessages.contains($0) })
+        {
             if !hasPerm(.sendMessages) { return false }
         }
 
@@ -121,13 +122,14 @@ extension Gateway.GuildCreate {
         /// For voice and stage channels, `connect` permission is necessary.
         /// If perms already contains `connect`, then we've already checked for it.
         if [.guildVoice, .guildStageVoice].contains(channel.type),
-           !perms.contains(.connect) {
+            !perms.contains(.connect)
+        {
             if !hasPerm(.connect) { return false }
         }
 
         return true
     }
-    
+
     /// Use `memberHasPermissions(userId:channelId:permissions:)` instead.
     /// This only checks if the user actually has the permission itself.
     /// Doesn't guarantee the member has the abilities related to the permission _in practice_.
@@ -142,7 +144,7 @@ extension Gateway.GuildCreate {
         var roleOverwriteDenies = false
         var everyoneIsAllowed = false
         var everyoneIsDenied = false
-        
+
         for overwrite in (channel.permission_overwrites ?? []) {
             switch overwrite.type {
             case .member where overwrite.id == userId:
@@ -160,7 +162,8 @@ extension Gateway.GuildCreate {
                 if overwrite.deny.contains(perm) {
                     roleOverwriteDenies = true
                 }
-            case .role where overwrite.id == self.id: /// `@everyone` overwrites
+            case .role where overwrite.id == self.id:
+                /// `@everyone` overwrites
                 if overwrite.allow.contains(perm) {
                     everyoneIsAllowed = true
                 }
@@ -170,27 +173,28 @@ extension Gateway.GuildCreate {
             default: break
             }
         }
-        
+
         /// Checking these based on the Discord-said priority.
         if memberOverwriteDenies { return false }
         if roleOverwriteAllows { return true }
         if roleOverwriteDenies { return false }
         if everyoneIsAllowed { return true }
         if everyoneIsDenied { return false }
-        
+
         /// Member has any roles that allow.
         for role in roles where member.roles.contains(role.id) {
             if role.permissions.contains(perm) {
                 return true
             }
         }
-        
+
         /// `@everyone` role allows.
         if let everyoneRole = self.roles.first(where: { $0.id == self.id }),
-           everyoneRole.permissions.contains(perm) {
+            everyoneRole.permissions.contains(perm)
+        {
             return true
         }
-        
+
         return false
     }
 
@@ -206,8 +210,7 @@ extension Gateway.GuildCreate {
 
         /// `administrator` perm is like the guild owner.
         if self.roles.contains(where: { role in
-            role.permissions.contains(.administrator) &&
-            self.memberHasRole(member: member, roleId: role.id)
+            role.permissions.contains(.administrator) && self.memberHasRole(member: member, roleId: role.id)
         }) {
             return true
         }
@@ -224,7 +227,8 @@ extension Gateway.GuildCreate {
 
         /// `@everyone` role allows.
         if let everyoneRole = self.roles.first(where: { $0.id == self.id }),
-           everyoneRole.permissions.contains(perm) {
+            everyoneRole.permissions.contains(perm)
+        {
             return true
         }
 
@@ -270,12 +274,12 @@ extension Gateway.GuildCreate {
             permission: perm
         )
     }
-    
+
     /// Get member with the specified user id.
     public func member(withUserId userId: UserSnowflake) -> Guild.Member? {
         self.members.first(where: { $0.user?.id == userId })
     }
-    
+
     /// Check to see if a member has a role.
     /// The member object must belong to the guild.
     public func memberHasRole(member: Guild.Member, roleId: RoleSnowflake) -> Bool {
@@ -288,7 +292,7 @@ extension Gateway.GuildCreate {
             return false
         }
     }
-    
+
     /// Check to see if a user has the roles.
     /// Returns false if user is not present in the members list of the guild.
     public func userHasRole(userId: UserSnowflake, roleId: RoleSnowflake) -> Bool {

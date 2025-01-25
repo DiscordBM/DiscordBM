@@ -62,7 +62,8 @@ public enum CDNEndpoint: Endpoint {
         case let .userBanner(userId, banner):
             suffix = "banners/\(userId.rawValue)/\(banner)"
         case let .defaultUserAvatar(discriminator):
-            suffix = "embed/avatars/\(discriminator).png" /// Needs `.png`
+            suffix = "embed/avatars/\(discriminator).png"
+        /// Needs `.png`
         case let .userAvatar(userId, avatar):
             suffix = "avatars/\(userId.rawValue)/\(avatar)"
         case let .guildMemberAvatar(guildId, userId, avatar):
@@ -86,7 +87,8 @@ public enum CDNEndpoint: Endpoint {
         case let .teamIcon(teamId, icon):
             suffix = "team-icons/\(teamId.rawValue)/\(icon)"
         case let .sticker(stickerId):
-            suffix = "stickers/\(stickerId.rawValue).png" /// Needs `.png`
+            suffix = "stickers/\(stickerId.rawValue).png"
+        /// Needs `.png`
         case let .roleIcon(roleId, icon):
             suffix = "role-icons/\(roleId.rawValue)/\(icon)"
         case let .guildScheduledEventCover(eventId, cover):
@@ -98,36 +100,36 @@ public enum CDNEndpoint: Endpoint {
         }
         return suffix.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? suffix
     }
-    
+
     private var urlSuffixDescription: String {
         urlSuffix
     }
-    
+
     public var url: String {
         "https://cdn.discordapp.com/" + urlSuffix
     }
-    
+
     /// Doesn't expose secret url path parameters.
     public var urlDescription: String {
         url
     }
-    
+
     public var httpMethod: HTTPMethod {
         .GET
     }
-    
+
     /// Interaction endpoints don't count against the global rate limit.
     /// Even if the global rate-limit is exceeded, you can still respond to interactions.
     public var countsAgainstGlobalRateLimit: Bool {
         true
     }
-    
+
     /// Some endpoints like don't require an authorization header because the endpoint itself
     /// contains some kind of authorization token. Like half of the webhook endpoints.
     public var requiresAuthorizationHeader: Bool {
         false
     }
-    
+
     /// URL-path parameters.
     public var parameters: [String] {
         switch self {
@@ -179,7 +181,7 @@ public enum CDNEndpoint: Endpoint {
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     public var id: Int {
         switch self {
         case .customEmoji: return 1
@@ -208,7 +210,7 @@ public enum CDNEndpoint: Endpoint {
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     public var description: String {
         switch self {
         case let .customEmoji(emojiId):
@@ -316,7 +318,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     init(endpoint: CDNEndpoint) {
         switch endpoint {
         case .customEmoji: self = .customEmoji

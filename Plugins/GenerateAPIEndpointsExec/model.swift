@@ -1,50 +1,50 @@
-import Yams
-import NIOHTTP1
 import Foundation
+import NIOHTTP1
+import Yams
 
 struct API: Decodable {
-    
+
     struct Info: Decodable {
         var title: String
         var description: String
         var version: String
     }
-    
+
     struct Server: Decodable {
         var url: String
     }
-    
+
     struct Components: Decodable {
-        
+
         struct Schemes: Decodable {
-            
+
             struct Scheme: Decodable {
                 var type: String
                 var scheme: String
             }
-            
+
             var bearerAuth: Scheme
             var apikeyAuth: Scheme
         }
-        
+
         var securitySchemes: Schemes
     }
-    
+
     struct Security: Decodable {
         var apikeyAuth: [String]
     }
-    
+
     struct Tag: Decodable {
         var name: String
         var description: String
     }
-    
+
     struct Path {
-        
+
         fileprivate struct InfoDecodeModel: Decodable {
-            
+
             var values: [(method: HTTPMethod, info: Info)]
-            
+
             init(from decoder: any Decoder) throws {
                 let container = try decoder.singleValueContainer()
                 let infos = try container.decode([String: Info].self)
@@ -63,9 +63,9 @@ struct API: Decodable {
                 }
             }
         }
-        
+
         struct Info: Decodable {
-            
+
             enum Tag: String, Decodable {
                 case polls = "Polls"
                 case autoMod = "AutoMod"
@@ -122,7 +122,7 @@ struct API: Decodable {
                     case .webhooks: return 1
                     }
                 }
-                
+
                 var countsAgainstGlobalRateLimit: Bool {
                     switch self {
                     case .polls: return true
@@ -152,7 +152,7 @@ struct API: Decodable {
                     case .webhooks: return true
                     }
                 }
-                
+
                 var link: String {
                     switch self {
                     case .polls:
@@ -208,35 +208,35 @@ struct API: Decodable {
                     }
                 }
             }
-            
+
             struct Parameter: Decodable {
-                
+
                 enum In: String, Decodable {
                     case path
                     case query
                     case header
                 }
-                
+
                 struct Schema: Decodable {
-                    
+
                     enum Kind: String, Decodable {
                         case string
                     }
-                    
+
                     var type: Kind
                     var example: String?
                 }
-                
+
                 var name: String
                 var `in`: In
                 var schema: Schema
                 var required: Bool?
             }
-            
+
             var tags: [Tag]
             var summary: String
             var parameters: [Parameter]?
-            
+
             func makeCase() -> String {
                 let summary = self.summary.toCamelCase()
                 if summary.isEmpty {
@@ -300,7 +300,7 @@ struct API: Decodable {
                     return "case \(summary)(\(paths))"
                 }
             }
-            
+
             func makeIterativeCase() -> (name: String, params: [String]) {
                 let summary = self.summary.toCamelCase()
                 if summary.isEmpty {
@@ -317,7 +317,7 @@ struct API: Decodable {
                     return ("case let .\(summary)(\(pathsJoined)):", paths)
                 }
             }
-            
+
             func makeRawCaseName() -> String {
                 let summary = self.summary.toCamelCase()
                 if summary.isEmpty {
@@ -325,7 +325,7 @@ struct API: Decodable {
                 }
                 return "case .\(summary):"
             }
-            
+
             func makeRawCaseNameWithParams() -> (name: String, params: [String]) {
                 let summary = self.summary.toCamelCase()
                 if summary.isEmpty {
@@ -339,12 +339,12 @@ struct API: Decodable {
                 return ("case .\(summary):", paths)
             }
         }
-        
+
         var path: String
         var method: HTTPMethod
         var info: Info
     }
-    
+
     var version: String
     var info: Info
     var servers: [Server]
@@ -352,7 +352,7 @@ struct API: Decodable {
     var security: [Security]
     var tags: [Tag]
     var paths: [Path]
-    
+
     enum CodingKeys: String, CodingKey {
         case version = "openapi"
         case info
@@ -362,7 +362,7 @@ struct API: Decodable {
         case tags
         case paths
     }
-    
+
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.version = try container.decode(String.self, forKey: .version)
@@ -382,14 +382,16 @@ struct API: Decodable {
             $0.method.priority < $1.method.priority
         }
     }
-    
+
     static func decode() -> Self {
         let decoder = YAMLDecoder()
         let fm = FileManager.default
         let current = fm.currentDirectoryPath
         let path = current + "/Plugins/GenerateAPIEndpointsExec/Resources/openapi.yml"
         guard let data = fm.contents(atPath: path) else {
-            fatalError("Make sure you've set the custom working directory for the current scheme: https://docs.vapor.codes/getting-started/xcode/#custom-working-directory. If Xcode doesn't let you set a custom working directory with the instructions in the link, on the 'info' tab, set 'Executable' to 'Ask on Launch', then it should let you set your custom working directory. You can set 'Executable' back to 'None' afterwards.")
+            fatalError(
+                "Make sure you've set the custom working directory for the current scheme: https://docs.vapor.codes/getting-started/xcode/#custom-working-directory. If Xcode doesn't let you set a custom working directory with the instructions in the link, on the 'info' tab, set 'Executable' to 'Ask on Launch', then it should let you set your custom working directory. You can set 'Executable' back to 'None' afterwards."
+            )
         }
         let decoded = try! decoder.decode(API.self, from: data)
         return decoded

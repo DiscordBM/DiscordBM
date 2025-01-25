@@ -8,7 +8,7 @@ private class ConfigurationStorage: @unchecked Sendable {
     var decoder: any DiscordDecoder = JSONDecoder()
     var encoder: any DiscordEncoder = JSONEncoder()
     var makeLogger: @Sendable (String) -> Logger = { Logger(label: $0) }
-    
+
     static let shared = ConfigurationStorage()
 }
 
@@ -39,11 +39,11 @@ public protocol DiscordDecoder {
     func decode<D: Decodable>(_ type: D.Type, from: Data) throws -> D
 }
 
-extension JSONDecoder: DiscordDecoder { }
+extension JSONDecoder: DiscordDecoder {}
 
 //MARK: - DiscordEncoder
 public protocol DiscordEncoder {
     func encode<E: Encodable>(_ value: E) throws -> Data
 }
 
-extension JSONEncoder: DiscordEncoder { }
+extension JSONEncoder: DiscordEncoder {}
