@@ -274,6 +274,9 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         await waitFulfillment(of: [expectation], timeout: 10)
 
+        /// To make sure everything is ready and the bot is fully connected
+        try await Task.sleep(for: .seconds(5))
+
         /// Didn't find a way to properly verify these functions.
         /// Here we just make the requests and make sure we aren't getting invalid-session-ed.
         await bot.requestGuildMembersChunk(
@@ -301,7 +304,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we aren't getting invalid-session-ed.
         /// And also to wait for propagation of the presence update to us through DiscordCache.
-        try await Task.sleep(for: .seconds(60))
+        try await Task.sleep(for: .seconds(30))
         XCTAssertEqual(bot.connectionId.load(ordering: .relaxed), 1)
 
         await bot.disconnect()
