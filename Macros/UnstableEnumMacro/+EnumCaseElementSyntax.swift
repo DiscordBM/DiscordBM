@@ -58,9 +58,9 @@ extension [EnumCaseElementSyntax] {
                     value: element.name.text
                 )
             } else {
-                if element.trailingTrivia.pieces.count == 2,
-                    element.trailingTrivia.pieces[0] == .spaces(1),
-                    case let .lineComment(comment) = element.trailingTrivia.pieces[1]
+                let nonSpacePieces = element.trailingTrivia.pieces.filter { !$0.isSpaceOrTab }
+                if nonSpacePieces.count == 1,
+                    case let .lineComment(comment) = nonSpacePieces[0]
                 {
                     if comment.hasPrefix("// ") {
                         var value = String(comment.dropFirst(3))
