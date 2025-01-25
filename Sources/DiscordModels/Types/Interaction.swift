@@ -273,9 +273,9 @@ public struct Interaction: Sendable, Codable {
     public var guild_locale: DiscordLocale?
     public var app_permissions: StringBitField<Permission>?
     public var entitlements: [Entitlement]
-    @_spi(UserInstallableApps) /* No @DecodeOrNil because there is a manual init(from:) */
+    @_spi(UserInstallableApps) /// No @DecodeOrNil because there is a manual init(from:)
     public var authorizing_integration_owners: [DiscordApplication.IntegrationKind: AnySnowflake]?
-    @_spi(UserInstallableApps) /* No @DecodeOrNil because there is a manual init(from:) */
+    @_spi(UserInstallableApps) /// No @DecodeOrNil because there is a manual init(from:)
     public var context: ContextKind?
 
     @available(
