@@ -183,9 +183,6 @@ let package = Package(
 
 var featureFlags: [SwiftSetting] {
     [
-        /// `-enable-upcoming-feature` flags will get removed in the future
-        /// and we'll need to remove them from here too.
-
         /// https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md
         /// Require `any` for existential types.
         .enableUpcomingFeature("ExistentialAny"),

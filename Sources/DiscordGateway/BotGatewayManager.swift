@@ -609,15 +609,10 @@ extension BotGatewayManager {
                 from: Data(buffer: buffer, byteTransferStrategy: .noCopy)
             )
             self.logger.debug(
-                "Decoded event with opcode",
-                metadata: [
-                    "opcode": .string(event.opcode.description)
-                ]
-            )
-            self.logger.debug(
                 "Decoded event",
                 metadata: [
-                    "event": .string("\(event)")
+                    "event": .string("\(event)"),
+                    "opcode": .string(event.opcode.description),
                 ]
             )
             Task { await self.processEvent(event) }
