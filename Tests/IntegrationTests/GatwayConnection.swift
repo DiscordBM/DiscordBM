@@ -287,7 +287,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let activityName = "Test Activity! \(UInt.random(in: .min ... .max))"
         await bot.updatePresence(
             payload: .init(
-                since: Date.now.addingTimeInterval(-60),
+                since: Date.now.addingTimeInterval(15),
                 activities: [.init(name: activityName, type: .listening)],
                 status: .online,
                 afk: true
