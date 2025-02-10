@@ -298,11 +298,13 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         /// `DiscordCache` itself will do `requestGuildMembersChunk`s,
         /// but we also do it to make sure we get the new presence.
-        await bot.requestGuildMembersChunk(payload: .init(
-            guild_id: Constants.guildId,
-            presences: true,
-            user_ids: [Constants.botId.rawValue]
-        ))
+        await bot.requestGuildMembersChunk(
+            payload: .init(
+                guild_id: Constants.guildId,
+                presences: true,
+                user_ids: [Constants.botId.rawValue]
+            )
+        )
 
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we aren't getting invalid-session-ed.

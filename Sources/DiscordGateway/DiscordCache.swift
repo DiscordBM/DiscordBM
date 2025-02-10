@@ -1,6 +1,6 @@
 import DiscordModels
-import Logging
 import Foundation
+import Logging
 import OrderedCollections
 
 /// Caches Gateway events.
@@ -393,9 +393,12 @@ public actor DiscordCache {
     private func handleEvent(_ event: Gateway.Event) {
         guard intentsAllowCaching(event: event) else { return }
 
-        logger.trace("Will handle an event in DiscordCache", metadata: [
-            "event": .string("\(event)")
-        ])
+        logger.trace(
+            "Will handle an event in DiscordCache",
+            metadata: [
+                "event": .string("\(event)")
+            ]
+        )
 
         switch event.data {
         case .none, .heartbeat, .identify, .hello, .resume, .resumed, .invalidSession, .requestGuildMembers,
