@@ -1,4 +1,5 @@
 import DiscordModels
+import Logging
 import Foundation
 import OrderedCollections
 
@@ -306,6 +307,7 @@ public actor DiscordCache {
 
     /// The gateway manager that this `DiscordCache` instance caches from.
     let gatewayManager: any GatewayManager
+    let logger: Logger
     /// What intents to cache their related Gateway events.
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
@@ -360,6 +362,7 @@ public actor DiscordCache {
     ///   - storage: The storage of cached stuff. You usually don't need to provide this parameter.
     public init(
         gatewayManager: any GatewayManager,
+        logger: Logger = Logger(label: "no-op", factory: SwiftLogNoOpLogHandler.init),
         intents: Intents,
         requestAllMembers: RequestMembers,
         messageCachingPolicy: MessageCachingPolicy = .normal,
@@ -367,6 +370,7 @@ public actor DiscordCache {
         storage: Storage = Storage()
     ) async {
         self.gatewayManager = gatewayManager
+        self.logger = logger
         self.intents = DiscordCache.calculateIntentsIntersection(
             gatewayManager: gatewayManager,
             intents: intents
@@ -388,6 +392,11 @@ public actor DiscordCache {
 
     private func handleEvent(_ event: Gateway.Event) {
         guard intentsAllowCaching(event: event) else { return }
+
+        logger.trace("Will handle an event in DiscordCache", metadata: [
+            "event": .string("\(event)")
+        ])
+
         switch event.data {
         case .none, .heartbeat, .identify, .hello, .resume, .resumed, .invalidSession, .requestGuildMembers,
             .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate:
@@ -603,14 +612,14 @@ public actor DiscordCache {
                 self.guilds[member.guild_id]?.members.remove(at: idx)
             }
         case let .guildMembersChunk(chunk):
-            let membersUserIds = chunk.members.compactMap(\.user?.id)
+            let membersUserIds = Set(chunk.members.compactMap(\.user?.id))
             self.guilds[chunk.guild_id]?.members.removeAll {
                 guard let id = $0.user?.id else { return false }
                 return membersUserIds.contains(id)
             }
             self.guilds[chunk.guild_id]?.members.append(contentsOf: chunk.members)
             if let presences = chunk.presences {
-                let presencesUserIds = presences.compactMap(\.user?.id)
+                let presencesUserIds = Set(presences.compactMap(\.user?.id))
                 self.guilds[chunk.guild_id]?.presences.removeAll {
                     guard let id = $0.user?.id else { return false }
                     return presencesUserIds.contains(id)
@@ -852,6 +861,7 @@ public actor DiscordCache {
                 }
             }
         case let .presenceUpdate(presence):
+            print("Willllll update presence: \(presence)")
             if let idx = self.guilds[presence.guild_id]?.presences
                 .firstIndex(where: { $0.user?.id == presence.user.id })
             {

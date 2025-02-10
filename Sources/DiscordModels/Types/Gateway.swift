@@ -969,6 +969,7 @@ public struct Gateway: Sendable, Codable {
         public var query: String = ""
         public var limit: Int = 0
         public var presences: Bool?
+        /// FIXME: change to `UserSnowflake`.
         public var user_ids: [String]?
         public var nonce: String?
 
@@ -977,6 +978,7 @@ public struct Gateway: Sendable, Codable {
             query: String = "",
             limit: Int = 0,
             presences: Bool? = nil,
+            /// FIXME: change to `UserSnowflake`.
             user_ids: [String]? = nil,
             nonce: String? = nil
         ) {

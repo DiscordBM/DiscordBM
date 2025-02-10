@@ -276,11 +276,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         /// Didn't find a way to properly verify these functions.
         /// Here we just make the requests and make sure we aren't getting invalid-session-ed.
-        await bot.requestGuildMembersChunk(
-            payload: .init(
-                guild_id: Constants.guildId
-            )
-        )
+
         let activityName = "Test Activity! \(UInt.random(in: .min ... .max))"
         await bot.updatePresence(
             payload: .init(
@@ -297,6 +293,16 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
                 selfDeaf: false
             )
         )
+
+        try await Task.sleep(for: .seconds(5))
+
+        /// `DiscordCache` itself will do `requestGuildMembersChunk`s,
+        /// but we also do it to make sure we get the new presence.
+        await bot.requestGuildMembersChunk(payload: .init(
+            guild_id: Constants.guildId,
+            presences: true,
+            user_ids: [Constants.botId.rawValue]
+        ))
 
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we aren't getting invalid-session-ed.
