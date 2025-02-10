@@ -559,11 +559,8 @@ public struct Gateway: Sendable, Codable {
             public func encode(to encoder: any Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 /// Need to encode `null` if `nil`, considering a Discord bug.
-                if let since {
-                    try container.encode(since, forKey: .since)
-                } else {
-                    try container.encodeNil(forKey: .since)
-                }
+                /// So don't use `encodeIfPresent`.
+                try container.encode(self.since, forKey: .since)
                 try container.encode(self.activities, forKey: .activities)
                 try container.encode(self.status, forKey: .status)
                 try container.encode(self.afk, forKey: .afk)

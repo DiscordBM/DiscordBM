@@ -14,7 +14,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
             var logger = Logger(label: $0)
-            logger.logLevel = .debug
+            logger.logLevel = .trace
             return logger
         }
     }
@@ -244,7 +244,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
             httpClient: httpClient,
             token: Constants.token,
             presence: .init(
-                activities: [.init(name: "Testing!", type: .competing)],
+                activities: [.init(name: "Test Activity!", type: .competing)],
                 status: .invisible,
                 afk: false
             ),
@@ -274,9 +274,6 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         await waitFulfillment(of: [expectation], timeout: 10)
 
-        /// To make sure everything is ready and the bot is fully connected
-        try await Task.sleep(for: .seconds(5))
-
         /// Didn't find a way to properly verify these functions.
         /// Here we just make the requests and make sure we aren't getting invalid-session-ed.
         await bot.requestGuildMembersChunk(
@@ -287,7 +284,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         let activityName = "Test Activity! \(UInt.random(in: .min ... .max))"
         await bot.updatePresence(
             payload: .init(
-                since: Date.now.addingTimeInterval(15),
+                since: .now,
                 activities: [.init(name: activityName, type: .listening)],
                 status: .online,
                 afk: true
