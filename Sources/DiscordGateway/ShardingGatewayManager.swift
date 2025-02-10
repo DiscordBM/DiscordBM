@@ -1,8 +1,8 @@
+import AsyncHTTPClient
+import Atomics
 import DiscordHTTP
 import DiscordModels
 import Logging
-import AsyncHTTPClient
-import Atomics
 import NIO
 
 public actor ShardingGatewayManager: GatewayManager {
@@ -45,7 +45,7 @@ public actor ShardingGatewayManager: GatewayManager {
     public nonisolated let client: any DiscordClient
     /// Max frame size we accept to receive through the web-socket connection.
     let maxFrameSize: Int
-    
+
     static let idGenerator = ManagedAtomic(UInt(0))
     public nonisolated let id: UInt = idGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
 
@@ -280,14 +280,20 @@ extension ShardingGatewayManager {
         logger.debug("Will try to get Discord gateway info")
         do {
             let gatewayBot = try await client.getBotGateway().decode()
-            logger.trace("Got Discord gateway url from gateway-bot api call", metadata: [
-                "info": .string("\(gatewayBot)")
-            ])
+            logger.trace(
+                "Got Discord gateway url from gateway-bot api call",
+                metadata: [
+                    "info": .string("\(gatewayBot)")
+                ]
+            )
             return gatewayBot
         } catch {
-            logger.error("Cannot get gateway info to connect to. Will retry in 10 seconds", metadata: [
-                "error": .string(String(reflecting: error))
-            ])
+            logger.error(
+                "Cannot get gateway info to connect to. Will retry in 10 seconds",
+                metadata: [
+                    "error": .string(String(reflecting: error))
+                ]
+            )
             try? await Task.sleep(for: .seconds(10))
             return await self.getGatewayInfo()
         }

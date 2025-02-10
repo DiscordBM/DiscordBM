@@ -1,20 +1,19 @@
-
 /// https://discord.com/developers/docs/resources/application#application-object-application-structure
 public struct DiscordApplication: Sendable, Codable {
 
     /// https://discord.com/developers/docs/resources/application#application-object-application-flags
     @UnstableEnum<UInt>
     public enum Flag: Sendable {
-        case applicationAutoModerationRuleCreateBadge // 6
-        case gatewayPresence // 12
-        case gatewayPresenceLimited // 13
-        case gatewayGuildMembers // 14
-        case gatewayGuildMembersLimited // 15
-        case verificationPendingGuildLimit // 16
-        case embedded // 17
-        case gatewayMessageContent // 18
-        case gatewayMessageContentLimited // 19
-        case applicationCommandBadge // 23
+        case applicationAutoModerationRuleCreateBadge  // 6
+        case gatewayPresence  // 12
+        case gatewayPresenceLimited  // 13
+        case gatewayGuildMembers  // 14
+        case gatewayGuildMembersLimited  // 15
+        case verificationPendingGuildLimit  // 16
+        case embedded  // 17
+        case gatewayMessageContent  // 18
+        case gatewayMessageContentLimited  // 19
+        case applicationCommandBadge  // 23
         case __undocumented(UInt)
     }
 
@@ -33,8 +32,8 @@ public struct DiscordApplication: Sendable, Codable {
     @_spi(UserInstallableApps)
     @UnstableEnum<Int>
     public enum IntegrationKind: Sendable, Codable, CodingKeyRepresentable {
-        case guildInstall // 0
-        case userInstall // 1
+        case guildInstall  // 0
+        case userInstall  // 1
         case __undocumented(Int)
     }
 
@@ -112,6 +111,7 @@ public struct PartialApplication: Sendable, Codable {
     @_spi(UserInstallableApps) @DecodeOrNil
     public var integration_types: [DiscordApplication.IntegrationKind]?
     @_spi(UserInstallableApps) @DecodeOrNil
-    public var integration_types_config: [DiscordApplication.IntegrationKind: DiscordApplication.IntegrationKindConfiguration]?
+    public var integration_types_config:
+        [DiscordApplication.IntegrationKind: DiscordApplication.IntegrationKindConfiguration]?
     public var custom_install_url: String?
 }

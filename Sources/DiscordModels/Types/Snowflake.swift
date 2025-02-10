@@ -5,7 +5,8 @@ public protocol SnowflakeProtocol:
     Codable,
     Hashable,
     CustomStringConvertible,
-    ExpressibleByStringLiteral {
+    ExpressibleByStringLiteral
+{
 
     var rawValue: String { get }
     init(_ rawValue: String)
@@ -19,16 +20,17 @@ extension SnowflakeProtocol {
 
     public init(from decoder: any Decoder) throws {
         try self.init(.init(from: decoder))
-#if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
+        #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
         if self.parse() == nil {
             DiscordGlobalConfiguration.makeDecodeLogger("SnowflakeProtocol").warning(
-                "Could not parse a snowflake", metadata: [
+                "Could not parse a snowflake",
+                metadata: [
                     "codingPath": "\(decoder.codingPath.map(\.stringValue))",
-                    "decoded": "\(self.rawValue)"
+                    "decoded": "\(self.rawValue)",
                 ]
             )
         }
-#endif
+        #endif
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -240,7 +242,7 @@ public struct SnowflakeInfo: Sendable {
     }
 
     @inlinable
-    internal init? (from snowflake: String) {
+    internal init?(from snowflake: String) {
         guard let value = UInt64(snowflake) else { return nil }
         self.timestamp = (value >> 22) + SnowflakeInfo.discordEpochConstant
         self.workerId = UInt8((value >> 17) & 0x1F)
@@ -249,12 +251,12 @@ public struct SnowflakeInfo: Sendable {
     }
 
     @inlinable
-    internal init? (from snowflake: any SnowflakeProtocol) {
+    internal init?(from snowflake: any SnowflakeProtocol) {
         self.init(from: snowflake.rawValue)
     }
 
     @inlinable
-    internal func toSnowflake<S: SnowflakeProtocol>(as type: S.Type) -> S {
+    internal func toSnowflake<S: SnowflakeProtocol>(as type: S.Type = S.self) -> S {
         let timestamp = (self.timestamp - SnowflakeInfo.discordEpochConstant) << 22
         let workerId = UInt64(self.workerId) << 17
         let processId = UInt64(self.processId) << 12

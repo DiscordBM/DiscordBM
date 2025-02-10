@@ -10,7 +10,7 @@ class SnowflakeTests: XCTestCase {
 
         let snowflakeInfo = try XCTUnwrap(messageSnowflake.parse())
 
-        XCTAssertEqual(snowflakeInfo.timestamp, 1665669843297)
+        XCTAssertEqual(snowflakeInfo.timestamp, 1_665_669_843_297)
         XCTAssertEqual(snowflakeInfo.workerId, 2)
         XCTAssertEqual(snowflakeInfo.processId, 1)
         XCTAssertEqual(snowflakeInfo.sequenceNumber, 101)
@@ -73,26 +73,30 @@ class SnowflakeTests: XCTestCase {
     }
 
     func testEdgeCases() throws {
-        XCTAssertThrowsError(try SnowflakeInfo(
-            timestamp: .max,
-            workerId: 0,
-            processId: 0,
-            sequenceNumber: 0
-        )) { error in
+        XCTAssertThrowsError(
+            try SnowflakeInfo(
+                timestamp: .max,
+                workerId: 0,
+                processId: 0,
+                sequenceNumber: 0
+            )
+        ) { error in
             let error = error as! SnowflakeInfo.Error
             switch error {
-            case .fieldTooBig("timestamp", value: "18446744073709551615", max: 4398046511104): break
+            case .fieldTooBig("timestamp", value: "18446744073709551615", max: 4_398_046_511_104): break
             default:
                 XCTFail("Unexpected SnowflakeInfo.Error: \(error)")
             }
         }
 
-        XCTAssertThrowsError(try SnowflakeInfo(
-            timestamp: 0,
-            workerId: .max,
-            processId: 0,
-            sequenceNumber: 0
-        )) { error in
+        XCTAssertThrowsError(
+            try SnowflakeInfo(
+                timestamp: 0,
+                workerId: .max,
+                processId: 0,
+                sequenceNumber: 0
+            )
+        ) { error in
             let error = error as! SnowflakeInfo.Error
             switch error {
             case .fieldTooBig("workerId", value: "255", max: 32): break
@@ -101,12 +105,14 @@ class SnowflakeTests: XCTestCase {
             }
         }
 
-        XCTAssertThrowsError(try SnowflakeInfo(
-            timestamp: 0,
-            workerId: 0,
-            processId: .max,
-            sequenceNumber: 0
-        )) { error in
+        XCTAssertThrowsError(
+            try SnowflakeInfo(
+                timestamp: 0,
+                workerId: 0,
+                processId: .max,
+                sequenceNumber: 0
+            )
+        ) { error in
             let error = error as! SnowflakeInfo.Error
             switch error {
             case .fieldTooBig("processId", value: "255", max: 32): break
@@ -115,12 +121,14 @@ class SnowflakeTests: XCTestCase {
             }
         }
 
-        XCTAssertThrowsError(try SnowflakeInfo(
-            timestamp: 0,
-            workerId: 0,
-            processId: 0,
-            sequenceNumber: .max
-        )) { error in
+        XCTAssertThrowsError(
+            try SnowflakeInfo(
+                timestamp: 0,
+                workerId: 0,
+                processId: 0,
+                sequenceNumber: .max
+            )
+        ) { error in
             let error = error as! SnowflakeInfo.Error
             switch error {
             case .fieldTooBig("sequenceNumber", value: "65535", max: 4096): break
@@ -133,7 +141,7 @@ class SnowflakeTests: XCTestCase {
 
         _ = try SnowflakeInfo(timestamp: 0, workerId: .min, processId: 0, sequenceNumber: 0)
 
-        _ = try SnowflakeInfo( timestamp: 0, workerId: 0, processId: .min, sequenceNumber: 0)
+        _ = try SnowflakeInfo(timestamp: 0, workerId: 0, processId: .min, sequenceNumber: 0)
 
         _ = try SnowflakeInfo(timestamp: 0, workerId: 0, processId: 0, sequenceNumber: .min)
     }

@@ -13,16 +13,16 @@ class DecodeToleranceTests: XCTestCase {
     func testNoThrowEnums() throws {
         do {
             let text = """
-            {
-                "value": [
-                    1,
-                    2,
-                    3,
-                    500
-                ]
-            }
-            """
-            
+                {
+                    "value": [
+                        1,
+                        2,
+                        3,
+                        500
+                    ]
+                }
+                """
+
             /// The values include `500` which is not in `DiscordChannel.Kind`.
             /// Decoding the `500` normally fails, but based on our `UnstableEnum` macro,
             /// this should never fail.
@@ -32,20 +32,20 @@ class DecodeToleranceTests: XCTestCase {
             ).value
             XCTAssertEqual(decoded.count, 4)
         }
-        
+
         do {
             let text = """
-            {
-                "value": [
-                    "online",
-                    "dnd",
-                    "bothOfflineAndOnlineWhichIsInvalid",
-                    "idle",
-                    "offline"
-                ]
-            }
-            """
-            
+                {
+                    "value": [
+                        "online",
+                        "dnd",
+                        "bothOfflineAndOnlineWhichIsInvalid",
+                        "idle",
+                        "offline"
+                    ]
+                }
+                """
+
             /// Refer to the comment above for some explanations.
             let decoded = try JSONDecoder().decode(
                 TestContainer<[Gateway.Status]>.self,
@@ -53,22 +53,22 @@ class DecodeToleranceTests: XCTestCase {
             ).value
             XCTAssertEqual(decoded.count, 5)
         }
-        
+
         do {
             let text = """
-            {
-                "scopes": [
-                    "something.completely.new",
-                    "activities.read",
-                    "activities.write",
-                    "applications.builds.read",
-                    "applications.builds.upload",
-                    "applications.commands"
-                ],
-                "permissions": "15"
-            }
-            """
-            
+                {
+                    "scopes": [
+                        "something.completely.new",
+                        "activities.read",
+                        "activities.write",
+                        "applications.builds.read",
+                        "applications.builds.upload",
+                        "applications.commands"
+                    ],
+                    "permissions": "15"
+                }
+                """
+
             /// Refer to the comment above for some explanations.
             let decoded = try JSONDecoder().decode(
                 DiscordApplication.InstallParams.self,
@@ -84,35 +84,36 @@ class DecodeToleranceTests: XCTestCase {
         }
 
         do {
-            let text = #"[{"id":"1036881950696288277","name":"DiscordBM Test Server","icon":null,"owner":false,"permissions":"140737488355327","features":["NEWS","COMMUNITY","GUILD_ONBOARDING_HAS_PROMPTS","GUILD_ONBOARDING_EVER_ENABLED","GUILD_SERVER_GUIDE","GUILD_ONBOARDING"]}]"#
+            let text =
+                #"[{"id":"1036881950696288277","name":"DiscordBM Test Server","icon":null,"owner":false,"permissions":"140737488355327","features":["NEWS","COMMUNITY","GUILD_ONBOARDING_HAS_PROMPTS","GUILD_ONBOARDING_EVER_ENABLED","GUILD_SERVER_GUIDE","GUILD_ONBOARDING"]}]"#
             _ = try JSONDecoder().decode([PartialGuild].self, from: Data(text.utf8))
         }
     }
 
     func testCodingKeyRepresentableDictKey() throws {
         let text = """
-        {
-           "value":{
-              "0":{
-                 "oauth2_install_params":{
-                    "scopes":[
-                       "applications.commands",
-                       "bot"
-                    ],
-                    "permissions":"2048"
-                 }
-              },
-              "1":{
-                 "oauth2_install_params":{
-                    "scopes":[
-                       "applications.commands"
-                    ],
-                    "permissions":"4"
-                 }
-              }
-           }
-        }
-        """
+            {
+               "value":{
+                  "0":{
+                     "oauth2_install_params":{
+                        "scopes":[
+                           "applications.commands",
+                           "bot"
+                        ],
+                        "permissions":"2048"
+                     }
+                  },
+                  "1":{
+                     "oauth2_install_params":{
+                        "scopes":[
+                           "applications.commands"
+                        ],
+                        "permissions":"4"
+                     }
+                  }
+               }
+            }
+            """
 
         let container = try JSONDecoder().decode(
             TestContainer<[IntegrationKind: IntegrationKindConfiguration]>.self,

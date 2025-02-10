@@ -1,12 +1,11 @@
-
 /// https://discord.com/developers/docs/resources/stage-instance#stage-instance-object
 public struct StageInstance: Sendable, Codable {
-    
+
     /// https://discord.com/developers/docs/resources/stage-instance#stage-instance-object-privacy-level
     @UnstableEnum<Int>
     public enum PrivacyLevel: Sendable, Codable {
-        case `public` // 1
-        case guildOnly // 2
+        case `public`  // 1
+        case guildOnly  // 2
         case __undocumented(Int)
     }
 

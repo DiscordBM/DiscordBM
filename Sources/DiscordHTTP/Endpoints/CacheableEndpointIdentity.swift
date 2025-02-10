@@ -1,4 +1,3 @@
-
 /// The endpoints that can be cached. Basically the GET endpoints.
 /// UNSTABLE ENUM, DO NOT USE EXHAUSTIVE SWITCH STATEMENTS.
 public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertible {
@@ -10,7 +9,7 @@ public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertib
     case __DO_NOT_USE_THIS_CASE
 
     @usableFromInline
-    init? (endpoint: AnyEndpoint) {
+    init?(endpoint: AnyEndpoint) {
         switch endpoint {
         case let .api(endpoint):
             if let endpoint = CacheableAPIEndpointIdentity(endpoint: endpoint) {
@@ -26,7 +25,7 @@ public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertib
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
     }
-    
+
     public var description: String {
         switch self {
         case .api(let endpoint):

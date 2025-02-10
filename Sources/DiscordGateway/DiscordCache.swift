@@ -1,25 +1,26 @@
 import DiscordModels
 import Foundation
+import Logging
 import OrderedCollections
 
 /// Caches Gateway events.
 @dynamicMemberLookup
 public actor DiscordCache {
-    
+
     public enum SnowflakeChoice<Tag>: Sendable, ExpressibleByArrayLiteral {
         case all
         case none
         case some(Set<Snowflake<Tag>>)
-        
+
         public init(arrayLiteral elements: Snowflake<Tag>...) {
             self = .some(Set(elements))
         }
-        
+
         public init<S>(_ elements: S) where S: Sequence, S.Element == String {
             let guildIds = elements.map(Snowflake<Tag>.init)
             self = .some(Set(guildIds))
         }
-        
+
         public func contains(_ value: Snowflake<Tag>) -> Bool {
             switch self {
             case .all: return true
@@ -28,31 +29,31 @@ public actor DiscordCache {
             }
         }
     }
-    
+
     public enum Intents: Sendable, ExpressibleByArrayLiteral {
         case all
         case some(Set<Gateway.Intent>)
-        
+
         public init(arrayLiteral elements: Gateway.Intent...) {
             self = .some(Set(elements))
         }
-        
+
         public init<S>(_ elements: S) where S: Sequence, S.Element == Gateway.Intent {
             self = .some(.init(elements))
         }
     }
-    
+
     public enum RequestMembers: Sendable {
         case disabled
         /// Only requests members.
         case enabled(guilds: SnowflakeChoice<Guild> = .all)
         /// Requests all members as well as their presences.
         case enabledWithPresences(guilds: SnowflakeChoice<Guild> = .all)
-        
+
         public static var enabled: RequestMembers { .enabled() }
-        
+
         public static var enabledWithPresences: RequestMembers { .enabledWithPresences() }
-        
+
         public func isEnabled(for guildId: GuildSnowflake) -> Bool {
             switch self {
             case .disabled: return false
@@ -60,7 +61,7 @@ public actor DiscordCache {
                 return guilds.contains(guildId)
             }
         }
-        
+
         public func wantsPresences(for guildId: GuildSnowflake) -> Bool {
             switch self {
             case .disabled, .enabled: return false
@@ -69,11 +70,11 @@ public actor DiscordCache {
             }
         }
     }
-    
+
     public enum MessageCachingPolicy: Sendable {
-        
+
         /// `Channels` is for channels that don't belong to a guild.
-        
+
         /// Caches messages, replaces edited messages with the new message,
         /// removes deleted messages from storage.
         case normal(
@@ -99,17 +100,17 @@ public actor DiscordCache {
             guilds: SnowflakeChoice<Guild> = .all,
             channels: SnowflakeChoice<DiscordChannel> = .all
         )
-        
+
         public static var normal: MessageCachingPolicy { .normal() }
-        
+
         public static var saveDeleted: MessageCachingPolicy { .saveDeleted() }
-        
+
         public static var saveEditHistory: MessageCachingPolicy { .saveEditHistory() }
-        
+
         public static var saveEditHistoryAndDeleted: MessageCachingPolicy {
             .saveEditHistoryAndDeleted()
         }
-        
+
         func shouldSave(
             guildId: GuildSnowflake?,
             channelId: ChannelSnowflake
@@ -123,7 +124,7 @@ public actor DiscordCache {
                 return guildContains || channels.contains(channelId)
             }
         }
-        
+
         func shouldSaveDeleted(
             guildId: GuildSnowflake?,
             channelId: ChannelSnowflake
@@ -136,7 +137,7 @@ public actor DiscordCache {
             case .normal, .saveEditHistory: return false
             }
         }
-        
+
         func shouldSaveHistory(
             guildId: GuildSnowflake?,
             channelId: ChannelSnowflake
@@ -145,19 +146,19 @@ public actor DiscordCache {
             case let .saveEditHistory(guilds, channels),
                 let .saveEditHistoryAndDeleted(guilds, channels):
                 let guildContains = guildId.map { guilds.contains($0) } ?? false
-                return  guildContains || channels.contains(channelId)
+                return guildContains || channels.contains(channelId)
             case .normal, .saveDeleted: return false
             }
         }
     }
-    
+
     /// Keeps the storage from using too much memory. Removes the oldest items.
     ///
     /// Note: The limit policy is applied with a small tolerance, so you can't count on
     /// the limits being applied right-away. Realistically this should not matter anyway,
     /// as the point of this is to just preserve memory.
     public enum ItemsLimit: @unchecked Sendable {
-        
+
         /// `guilds`, `channels` and `botUser` are intentionally excluded.
         /// For `guilds` and `channels`, Discord only sends a limited amount that are related
         /// to your Gateway/shard. And `botUser` isn't a collection.
@@ -173,13 +174,13 @@ public actor DiscordCache {
             case applicationCommandPermissions
             case messagePollVotes
         }
-        
+
         case disabled
         case constant(Int)
         case custom([Path: Int])
-        
+
         public static let `default` = ItemsLimit.constant(100_000)
-        
+
         func limit(for path: Path) -> Int? {
             switch self {
             case .disabled:
@@ -190,43 +191,47 @@ public actor DiscordCache {
                 return custom[path]
             }
         }
-        
+
         /// Checks for the limit interval and MODIFIES `itemsLimit` to `disabled` if appropriate.
         mutating func calculateCheckForLimitEvery() -> Int {
             switch self {
-            case .disabled: return 1 /// Doesn't matter
+            case .disabled: return 1
+            /// Doesn't matter
             case let .constant(limit):
-                let powed = pow(1/2, Double(limit))
+                let powed = pow(1 / 2, Double(limit))
                 return max(10, Int(powed))
             case let .custom(custom):
                 guard let minimum = custom.map(\.value).min() else {
-                    assert(false, "It's meaningless for 'ItemsLimit.custom' to be empty. Please use `ItemsLimit.disabled` instead")
+                    assert(
+                        false,
+                        "It's meaningless for 'ItemsLimit.custom' to be empty. Please use `ItemsLimit.disabled` instead"
+                    )
                     self = .disabled
-                    return 1 /// Doesn't matter
+                    return 1/// Doesn't matter
                 }
-                let powed = pow(1/2, Double(minimum))
+                let powed = pow(1 / 2, Double(minimum))
                 return max(10, Int(powed))
             }
         }
     }
-    
+
     /// The assumption is users might want to encode/decode contents of this storage using Codable.
     /// So this storage should be codable-backward-compatible.
     public struct Storage: @unchecked Sendable, Codable {
-        
+
         public struct InviteID: Sendable, Codable, Hashable {
             public var guildId: GuildSnowflake?
             public var channelId: ChannelSnowflake
-            
+
             public init(guildId: GuildSnowflake? = nil, channelId: ChannelSnowflake) {
                 self.guildId = guildId
                 self.channelId = channelId
             }
         }
-        
+
         /// Using `OrderedDictionary` for those which can be affected by the `ItemsLimit`
         /// so we can remove the oldest items.
-        
+
         /// `[GuildID: Guild]`
         public var guilds: [GuildSnowflake: Gateway.GuildCreate] = [:]
         /// `[ChannelID: Channel]`
@@ -244,20 +249,24 @@ public actor DiscordCache {
         /// `[ChannelID: [MessageID: [EditedMessage]]]`
         /// It's `[EditedMessage]` because it will keep all edited versions of a message.
         /// This does not keep the most recent message, which is available in `messages`.
-        public var editedMessages: OrderedDictionary<ChannelSnowflake, [MessageSnowflake: [Gateway.MessageCreate]]> = [:]
+        public var editedMessages: OrderedDictionary<ChannelSnowflake, [MessageSnowflake: [Gateway.MessageCreate]]> =
+            [:]
         /// `[ChannelID: [MessageID: [DeletedMessage]]]`
         /// It's `[DeletedMessage]` because it might have the edited versions of the message too.
-        public var deletedMessages: OrderedDictionary<ChannelSnowflake, [MessageSnowflake: [Gateway.MessageCreate]]> = [:]
+        public var deletedMessages: OrderedDictionary<ChannelSnowflake, [MessageSnowflake: [Gateway.MessageCreate]]> =
+            [:]
         /// `[GuildID: [Rule]]`
         public var autoModerationRules: OrderedDictionary<GuildSnowflake, [AutoModerationRule]> = [:]
         /// `[GuildID: [ActionExecution]]`
         public var autoModerationExecutions: OrderedDictionary<GuildSnowflake, [AutoModerationActionExecution]> = [:]
         /// `[CommandID (or ApplicationID): Permissions]`
-        public var applicationCommandPermissions: OrderedDictionary<AnySnowflake, GuildApplicationCommandPermissions> = [:]
+        public var applicationCommandPermissions: OrderedDictionary<AnySnowflake, GuildApplicationCommandPermissions> =
+            [:]
         /// `[EntitlementID: Entitlement]`
         public var entitlements: OrderedDictionary<EntitlementSnowflake, Entitlement> = [:]
         /// `[ChannelSnowflake: [MessageSnowflake: [MessagePollVote]]`
-        public var messagePollVotes: OrderedDictionary<ChannelSnowflake, [MessageSnowflake: [Gateway.MessagePollVote]]> = [:]
+        public var messagePollVotes:
+            OrderedDictionary<ChannelSnowflake, [MessageSnowflake: [Gateway.MessagePollVote]]> = [:]
         /// The current bot-application.
         public var application: PartialApplication?
         /// The current bot user.
@@ -295,9 +304,10 @@ public actor DiscordCache {
             self.botUser = botUser
         }
     }
-    
+
     /// The gateway manager that this `DiscordCache` instance caches from.
     let gatewayManager: any GatewayManager
+    let logger: Logger
     /// What intents to cache their related Gateway events.
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
@@ -320,7 +330,7 @@ public actor DiscordCache {
         didSet { checkItemsLimit() }
     }
 
-#if compiler(<6.0)
+    #if compiler(<6.0)
     /// Utility to access `Storage`.
     public subscript<T: Sendable>(
         dynamicMember path: WritableKeyPath<Storage, T>
@@ -328,7 +338,7 @@ public actor DiscordCache {
         get { self.storage[keyPath: path] }
         set { self.storage[keyPath: path] = newValue }
     }
-#else
+    #else
     /// Utility to access `Storage`.
     public subscript<T: Sendable>(
         dynamicMember path: (any Sendable & WritableKeyPath<Storage, T>)
@@ -336,7 +346,7 @@ public actor DiscordCache {
         get { self.storage[keyPath: path] }
         set { self.storage[keyPath: path] = newValue }
     }
-#endif
+    #endif
 
     /// - Parameters:
     ///   - gatewayManager: The gateway manager that this `DiscordCache` instance caches from.
@@ -352,6 +362,7 @@ public actor DiscordCache {
     ///   - storage: The storage of cached stuff. You usually don't need to provide this parameter.
     public init(
         gatewayManager: any GatewayManager,
+        logger: Logger = Logger(label: "no-op", factory: SwiftLogNoOpLogHandler.init),
         intents: Intents,
         requestAllMembers: RequestMembers,
         messageCachingPolicy: MessageCachingPolicy = .normal,
@@ -359,6 +370,7 @@ public actor DiscordCache {
         storage: Storage = Storage()
     ) async {
         self.gatewayManager = gatewayManager
+        self.logger = logger
         self.intents = DiscordCache.calculateIntentsIntersection(
             gatewayManager: gatewayManager,
             intents: intents
@@ -377,11 +389,20 @@ public actor DiscordCache {
             }
         }
     }
-    
+
     private func handleEvent(_ event: Gateway.Event) {
         guard intentsAllowCaching(event: event) else { return }
+
+        logger.trace(
+            "Will handle an event in DiscordCache",
+            metadata: [
+                "event": .string("\(event)")
+            ]
+        )
+
         switch event.data {
-        case .none, .heartbeat, .identify, .hello, .resume, .resumed, .invalidSession, .requestGuildMembers, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate:
+        case .none, .heartbeat, .identify, .hello, .resume, .resumed, .invalidSession, .requestGuildMembers,
+            .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate:
             break
         case let .ready(ready):
             self.application = ready.application
@@ -390,14 +411,16 @@ public actor DiscordCache {
             self.guilds[guildCreate.id] = guildCreate
             if requestMembers.isEnabled(for: guildCreate.id) {
                 Task {
-                    await gatewayManager.requestGuildMembersChunk(payload: .init(
-                        guild_id: guildCreate.id,
-                        query: "",
-                        limit: 0,
-                        presences: requestMembers.wantsPresences(for: guildCreate.id),
-                        user_ids: nil,
-                        nonce: nil
-                    ))
+                    await gatewayManager.requestGuildMembersChunk(
+                        payload: .init(
+                            guild_id: guildCreate.id,
+                            query: "",
+                            limit: 0,
+                            presences: requestMembers.wantsPresences(for: guildCreate.id),
+                            user_ids: nil,
+                            nonce: nil
+                        )
+                    )
                 }
             }
         case let .guildUpdate(guild):
@@ -407,7 +430,8 @@ public actor DiscordCache {
         case let .channelCreate(channel), let .channelUpdate(channel):
             if let guildId = channel.guild_id {
                 if let index = self.guilds[guildId]?.channels
-                    .firstIndex(where: { $0.id == channel.id }) {
+                    .firstIndex(where: { $0.id == channel.id })
+                {
                     self.guilds[guildId]?.channels.remove(at: index)
                 }
                 self.guilds[guildId]?.channels.append(channel)
@@ -417,7 +441,8 @@ public actor DiscordCache {
         case let .channelDelete(channel):
             if let guildId = channel.guild_id {
                 if let index = self.guilds[guildId]?.channels
-                    .firstIndex(where: { $0.id == channel.id }) {
+                    .firstIndex(where: { $0.id == channel.id })
+                {
                     self.guilds[guildId]?.channels.remove(at: index)
                 }
             } else {
@@ -426,7 +451,8 @@ public actor DiscordCache {
         case let .channelPinsUpdate(pinsUpdate):
             if let guildId = pinsUpdate.guild_id {
                 if let index = self.guilds[guildId]?.channels
-                    .firstIndex(where: { $0.id == pinsUpdate.channel_id }) {
+                    .firstIndex(where: { $0.id == pinsUpdate.channel_id })
+                {
                     self.guilds[guildId]!.channels[index]
                         .last_pin_timestamp = pinsUpdate.last_pin_timestamp
                 }
@@ -437,15 +463,17 @@ public actor DiscordCache {
         case let .threadCreate(channel):
             if let guildId = channel.guild_id {
                 if let existingIndex = self.guilds[guildId]?.threads
-                    .firstIndex(where: { $0.id == channel.id }) {
+                    .firstIndex(where: { $0.id == channel.id })
+                {
                     self.guilds[guildId]?.threads[existingIndex] = channel
                     /// Update `last_message_id` of forums on thread-create.
                     /// https://discord.com/developers/docs/topics/threads#forum-channel-fields
                     if channel.type == .guildForum,
-                       let parentId = channel.parent_id,
-                       self.intents.contains(.guilds),
-                       let forumIdx = self.guilds[guildId]?.channels
-                        .firstIndex(where: { $0.id == parentId }) {
+                        let parentId = channel.parent_id,
+                        self.intents.contains(.guilds),
+                        let forumIdx = self.guilds[guildId]?.channels
+                            .firstIndex(where: { $0.id == parentId })
+                    {
                         self.guilds[guildId]?.channels[forumIdx].last_message_id = .init(channel.id)
                     }
                 } else {
@@ -456,15 +484,17 @@ public actor DiscordCache {
                 /// Update `last_message_id` of forums on thread-create.
                 /// https://discord.com/developers/docs/topics/threads#forum-channel-fields
                 if channel.type == .guildForum,
-                   let parentId = channel.parent_id,
-                   self.intents.contains(.guilds) {
+                    let parentId = channel.parent_id,
+                    self.intents.contains(.guilds)
+                {
                     self.channels[Snowflake(parentId)]?.last_message_id = .init(channel.id)
                 }
             }
         case let .threadUpdate(channel):
             if let guildId = channel.guild_id {
                 if let existingIndex = self.guilds[guildId]?.threads
-                    .firstIndex(where: { $0.id == channel.id }) {
+                    .firstIndex(where: { $0.id == channel.id })
+                {
                     self.guilds[guildId]?.threads[existingIndex] = channel
                 }
             } else {
@@ -473,7 +503,8 @@ public actor DiscordCache {
         case let .threadDelete(threadDelete):
             if let guildId = threadDelete.guild_id {
                 if let existingIndex = self.guilds[guildId]?.threads
-                    .firstIndex(where: { $0.id == threadDelete.id }) {
+                    .firstIndex(where: { $0.id == threadDelete.id })
+                {
                     self.guilds[guildId]?.threads.remove(at: existingIndex)
                 }
             } else {
@@ -482,13 +513,14 @@ public actor DiscordCache {
         case let .threadSyncList(syncList):
             var guild: Gateway.GuildCreate? {
                 get { self.guilds[syncList.guild_id] }
-                set { self.guilds[syncList.guild_id] = newValue}
+                set { self.guilds[syncList.guild_id] = newValue }
             }
             /// Remove unavailable threads
             let allParents = Set(syncList.threads.compactMap(\.parent_id))
-            let parentsOfRemovedThreads = syncList.channel_ids?.filter { channelId in
-                !allParents.contains(where: { $0 == channelId })
-            } ?? []
+            let parentsOfRemovedThreads =
+                syncList.channel_ids?.filter { channelId in
+                    !allParents.contains(where: { $0 == channelId })
+                } ?? []
             guild?.threads.removeAll {
                 guard let parentId = $0.parent_id else { return false }
                 return parentsOfRemovedThreads.contains(where: { $0 == parentId })
@@ -503,14 +535,16 @@ public actor DiscordCache {
             }
         case let .threadMemberUpdate(threadMember):
             if let idx = self.guilds[threadMember.guild_id]?.threads
-                .firstIndex(where: { $0.id == threadMember.id }) {
+                .firstIndex(where: { $0.id == threadMember.id })
+            {
                 self.guilds[threadMember.guild_id]?.threads[idx].member = .init(
                     threadMemberUpdate: threadMember
                 )
             }
         case let .threadMembersUpdate(update):
             if let idx = self.guilds[update.guild_id]?.threads
-                .firstIndex(where: { $0.id == update.id }) {
+                .firstIndex(where: { $0.id == update.id })
+            {
                 self.guilds[update.guild_id]!.threads[idx].member_count = update.member_count
                 if self.guilds[update.guild_id]!.threads[idx].threadMembers == nil {
                     if let added = update.added_members {
@@ -536,14 +570,17 @@ public actor DiscordCache {
             self.entitlements.removeValue(forKey: entitlement.id)
         case let .guildBanAdd(ban):
             if let idx = self.guilds[ban.guild_id]?.members
-                .firstIndex(where: { $0.user?.id == ban.user.id }) {
+                .firstIndex(where: { $0.user?.id == ban.user.id })
+            {
                 self.guilds[ban.guild_id]?.members.remove(at: idx)
             }
-        case .guildBanRemove: break /// Nothing to do?
+        case .guildBanRemove: break
+        /// Nothing to do?
         case let .guildEmojisUpdate(update):
             for emoji in update.emojis {
                 if let idx = self.guilds[update.guild_id]?.emojis
-                    .firstIndex(where: { $0.id == emoji.id }) {
+                    .firstIndex(where: { $0.id == emoji.id })
+                {
                     self.guilds[update.guild_id]?.emojis[idx] = emoji
                 } else {
                     self.guilds[update.guild_id]?.emojis.append(emoji)
@@ -555,33 +592,37 @@ public actor DiscordCache {
             }
             for sticker in update.stickers {
                 if let idx = self.guilds[update.guild_id]?.stickers?
-                    .firstIndex(where: { $0.id == sticker.id }) {
+                    .firstIndex(where: { $0.id == sticker.id })
+                {
                     self.guilds[update.guild_id]?.stickers?[idx] = sticker
                 } else {
                     self.guilds[update.guild_id]?.stickers?.append(sticker)
                 }
             }
-        case .guildIntegrationsUpdate: break /// Nothing to do?
+        case .guildIntegrationsUpdate: break
+        /// Nothing to do?
         case let .guildMemberAdd(member), let .guildMemberUpdate(member):
             if let idx = self.guilds[member.guild_id]?.members
-                .firstIndex(where: { $0.user?.id == member.user.id }) {
+                .firstIndex(where: { $0.user?.id == member.user.id })
+            {
                 self.guilds[member.guild_id]?.members.remove(at: idx)
             }
             self.guilds[member.guild_id]?.members.append(.init(guildMemberAdd: member))
         case let .guildMemberRemove(member):
             if let idx = self.guilds[member.guild_id]?.members
-                .firstIndex(where: { $0.user?.id == member.user.id }) {
+                .firstIndex(where: { $0.user?.id == member.user.id })
+            {
                 self.guilds[member.guild_id]?.members.remove(at: idx)
             }
         case let .guildMembersChunk(chunk):
-            let membersUserIds = chunk.members.compactMap(\.user?.id)
+            let membersUserIds = Set(chunk.members.compactMap(\.user?.id))
             self.guilds[chunk.guild_id]?.members.removeAll {
                 guard let id = $0.user?.id else { return false }
                 return membersUserIds.contains(id)
             }
             self.guilds[chunk.guild_id]?.members.append(contentsOf: chunk.members)
             if let presences = chunk.presences {
-                let presencesUserIds = presences.compactMap(\.user?.id)
+                let presencesUserIds = Set(presences.compactMap(\.user?.id))
                 self.guilds[chunk.guild_id]?.presences.removeAll {
                     guard let id = $0.user?.id else { return false }
                     return presencesUserIds.contains(id)
@@ -590,29 +631,34 @@ public actor DiscordCache {
             }
         case let .guildRoleCreate(role), let .guildRoleUpdate(role):
             if let idx = self.guilds[role.guild_id]?.roles
-                .firstIndex(where: { $0.id == role.role.id }) {
+                .firstIndex(where: { $0.id == role.role.id })
+            {
                 self.guilds[role.guild_id]?.roles.remove(at: idx)
             }
             self.guilds[role.guild_id]?.roles.append(role.role)
         case let .guildRoleDelete(role):
             if let idx = self.guilds[role.guild_id]?.roles
-                .firstIndex(where: { $0.id == role.role_id }) {
+                .firstIndex(where: { $0.id == role.role_id })
+            {
                 self.guilds[role.guild_id]?.roles.remove(at: idx)
             }
         case let .guildScheduledEventCreate(event), let .guildScheduledEventUpdate(event):
             if let idx = self.guilds[event.guild_id]?.guild_scheduled_events
-                .firstIndex(where: { $0.id == event.id }) {
+                .firstIndex(where: { $0.id == event.id })
+            {
                 self.guilds[event.guild_id]?.guild_scheduled_events.remove(at: idx)
             }
             self.guilds[event.guild_id]?.guild_scheduled_events.append(event)
         case let .guildScheduledEventDelete(event):
             if let idx = self.guilds[event.guild_id]?.guild_scheduled_events
-                .firstIndex(where: { $0.id == event.id }) {
+                .firstIndex(where: { $0.id == event.id })
+            {
                 self.guilds[event.guild_id]?.guild_scheduled_events.remove(at: idx)
             }
         case let .guildScheduledEventUserAdd(user):
-            guard let idx = self.guilds[user.guild_id]?.guild_scheduled_events
-                .firstIndex(where: { $0.id == user.guild_scheduled_event_id })
+            guard
+                let idx = self.guilds[user.guild_id]?.guild_scheduled_events
+                    .firstIndex(where: { $0.id == user.guild_scheduled_event_id })
             else { break }
             if self.guilds[user.guild_id]?.guild_scheduled_events[idx].user_ids == nil {
                 self.guilds[user.guild_id]?.guild_scheduled_events[idx]
@@ -627,11 +673,13 @@ public actor DiscordCache {
                 self.guilds[user.guild_id]!.guild_scheduled_events[idx].user_count! += 1
             }
         case let .guildScheduledEventUserRemove(user):
-            guard let idx = self.guilds[user.guild_id]?.guild_scheduled_events
-                .firstIndex(where: { $0.id == user.guild_scheduled_event_id })
+            guard
+                let idx = self.guilds[user.guild_id]?.guild_scheduled_events
+                    .firstIndex(where: { $0.id == user.guild_scheduled_event_id })
             else { break }
             if let ind = self.guilds[user.guild_id]?.guild_scheduled_events[idx]
-                .user_ids?.firstIndex(where: { $0 == user.user_id }) {
+                .user_ids?.firstIndex(where: { $0 == user.user_id })
+            {
                 self.guilds[user.guild_id]?.guild_scheduled_events[idx]
                     .user_ids?.remove(at: ind)
             }
@@ -646,7 +694,8 @@ public actor DiscordCache {
             self.auditLogs[guildId ?? targetId ?? AnySnowflake(""), default: []].append(log)
         case let .integrationCreate(integration), let .integrationUpdate(integration):
             if let idx = self.integrations[integration.guild_id]?
-                .firstIndex(where: { $0.id == integration.id }) {
+                .firstIndex(where: { $0.id == integration.id })
+            {
                 self.integrations[integration.guild_id]?.remove(at: idx)
             }
             self.integrations[integration.guild_id, default: []].append(
@@ -654,7 +703,8 @@ public actor DiscordCache {
             )
         case let .integrationDelete(integration):
             if let idx = self.integrations[integration.guild_id]?
-                .firstIndex(where: { $0.id == integration.id }) {
+                .firstIndex(where: { $0.id == integration.id })
+            {
                 self.integrations[integration.guild_id]?.remove(at: idx)
             }
         case let .inviteCreate(invite):
@@ -673,10 +723,12 @@ public actor DiscordCache {
             if self.intents.contains(.guilds) {
                 if let guildId = message.guild_id {
                     if let channelIdx = self.guilds[guildId]?.channels
-                        .firstIndex(where: { $0.id == message.channel_id }) {
+                        .firstIndex(where: { $0.id == message.channel_id })
+                    {
                         self.guilds[guildId]?.channels[channelIdx].last_message_id = message.id
                     } else if let threadIdx = self.guilds[guildId]?.threads
-                        .firstIndex(where: { $0.id == message.channel_id }) {
+                        .firstIndex(where: { $0.id == message.channel_id })
+                    {
                         self.guilds[guildId]?.threads[threadIdx].last_message_id = message.id
                     }
                 } else {
@@ -685,7 +737,8 @@ public actor DiscordCache {
             }
         case let .messageUpdate(message):
             if let idx = self.messages[message.channel_id]?
-                .firstIndex(where: { $0.id == message.id }) {
+                .firstIndex(where: { $0.id == message.id })
+            {
                 self.messages[message.channel_id]![idx].update(with: message)
                 if messageCachingPolicy.shouldSaveHistory(
                     guildId: message.guild_id,
@@ -698,13 +751,15 @@ public actor DiscordCache {
             }
         case let .messageDelete(message):
             if let idx = self.messages[message.channel_id]?
-                .firstIndex(where: { $0.id == message.id }) {
+                .firstIndex(where: { $0.id == message.id })
+            {
                 let deleted = self.messages[message.channel_id]?.remove(at: idx)
                 if messageCachingPolicy.shouldSaveDeleted(
                     guildId: message.guild_id,
                     channelId: message.channel_id
                 ),
-                   let deleted {
+                    let deleted
+                {
                     if messageCachingPolicy.shouldSaveHistory(
                         guildId: message.guild_id,
                         channelId: message.channel_id
@@ -747,11 +802,13 @@ public actor DiscordCache {
             }
         case let .messageReactionAdd(reaction):
             if let idx = self.messages[reaction.channel_id]?
-                .firstIndex(where: { $0.id == reaction.message_id }) {
+                .firstIndex(where: { $0.id == reaction.message_id })
+            {
                 let me = reaction.user_id == self.botUser?.id
                 let isBurst = reaction.type == .super
                 if let index = self.messages[reaction.channel_id]![idx].reactions?
-                    .firstIndex(where: { $0.emoji == reaction.emoji }) {
+                    .firstIndex(where: { $0.emoji == reaction.emoji })
+                {
                     self.messages[reaction.channel_id]![idx].reactions![index].count += 1
                     if isBurst {
                         self.messages[reaction.channel_id]![idx].reactions![index].count_details.burst += 1
@@ -760,25 +817,29 @@ public actor DiscordCache {
                     }
                 } else {
                     self.messages[reaction.channel_id]![idx].reactions =
-                    self.messages[reaction.channel_id]![idx].reactions ?? []
-                    self.messages[reaction.channel_id]![idx].reactions!.append(.init(
-                        count: 1,
-                        count_details: .init(
-                            burst: isBurst ? 1 : 0,
-                            normal: isBurst ? 0 : 1
-                        ),
-                        me: me,
-                        me_burst: reaction.type == .super && me,
-                        emoji: reaction.emoji,
-                        burst_colors: []
-                    ))
+                        self.messages[reaction.channel_id]![idx].reactions ?? []
+                    self.messages[reaction.channel_id]![idx].reactions!.append(
+                        .init(
+                            count: 1,
+                            count_details: .init(
+                                burst: isBurst ? 1 : 0,
+                                normal: isBurst ? 0 : 1
+                            ),
+                            me: me,
+                            me_burst: reaction.type == .super && me,
+                            emoji: reaction.emoji,
+                            burst_colors: []
+                        )
+                    )
                 }
             }
         case let .messageReactionRemove(reaction):
             if let idx = self.messages[reaction.channel_id]?
-                .firstIndex(where: { $0.id == reaction.message_id }) {
+                .firstIndex(where: { $0.id == reaction.message_id })
+            {
                 if let index = self.messages[reaction.channel_id]?[idx].reactions?
-                    .firstIndex(where: { $0.emoji == reaction.emoji }) {
+                    .firstIndex(where: { $0.emoji == reaction.emoji })
+                {
                     if self.messages[reaction.channel_id]![idx].reactions![index].count == 1 {
                         self.messages[reaction.channel_id]?[idx].reactions?.remove(at: index)
                     } else {
@@ -788,58 +849,71 @@ public actor DiscordCache {
             }
         case let .messageReactionRemoveAll(reaction):
             if let idx = self.messages[reaction.channel_id]?
-                .firstIndex(where: { $0.id == reaction.message_id }) {
+                .firstIndex(where: { $0.id == reaction.message_id })
+            {
                 self.messages[reaction.channel_id]?[idx].reactions = []
             }
         case let .messageReactionRemoveEmoji(reaction):
             if let idx = self.messages[reaction.channel_id]?
-                .firstIndex(where: { $0.id == reaction.message_id }) {
+                .firstIndex(where: { $0.id == reaction.message_id })
+            {
                 if let index = self.messages[reaction.channel_id]?[idx].reactions?
-                    .firstIndex(where: { $0.emoji == reaction.emoji }) {
+                    .firstIndex(where: { $0.emoji == reaction.emoji })
+                {
                     self.messages[reaction.channel_id]?[idx].reactions?.remove(at: index)
                 }
             }
         case let .presenceUpdate(presence):
+            print("Willllll update presence: \(presence)")
             if let idx = self.guilds[presence.guild_id]?.presences
-                .firstIndex(where: { $0.user?.id == presence.user.id }) {
+                .firstIndex(where: { $0.user?.id == presence.user.id })
+            {
                 self.guilds[presence.guild_id]?.presences[idx].update(with: presence)
             } else {
                 self.guilds[presence.guild_id]?.presences.append(.init(presenceUpdate: presence))
             }
         case let .stageInstanceCreate(stage), let .stageInstanceUpdate(stage):
             if let idx = self.guilds[stage.guild_id]?.stage_instances
-                .firstIndex(where: { $0.id == stage.id }) {
+                .firstIndex(where: { $0.id == stage.id })
+            {
                 self.guilds[stage.guild_id]?.stage_instances[idx] = stage
             } else {
                 self.guilds[stage.guild_id]?.stage_instances.append(stage)
             }
         case let .stageInstanceDelete(stage):
             if let idx = self.guilds[stage.guild_id]?.stage_instances
-                .firstIndex(where: { $0.id == stage.id }) {
+                .firstIndex(where: { $0.id == stage.id })
+            {
                 self.guilds[stage.guild_id]?.stage_instances.remove(at: idx)
             }
-        case .typingStart: break /// Nothing to do?
+        case .typingStart: break
+        /// Nothing to do?
         case let .userUpdate(user):
             self.botUser = user
         case let .voiceStateUpdate(state):
             if let idx = self.guilds[state.guild_id]?.voice_states
-                .firstIndex(where: { $0.session_id == state.session_id }) {
+                .firstIndex(where: { $0.session_id == state.session_id })
+            {
                 self.guilds[state.guild_id]?.voice_states[idx] = .init(voiceState: state)
             } else {
                 self.guilds[state.guild_id]?.voice_states.append(.init(voiceState: state))
             }
-        case .voiceServerUpdate: break /// Nothing to do?
-        case .webhooksUpdate: break /// Nothing to do?
+        case .voiceServerUpdate: break
+        /// Nothing to do?
+        case .webhooksUpdate: break
+        /// Nothing to do?
         case let .autoModerationRuleCreate(autoMod), let .autoModerationRuleUpdate(autoMod):
             if let idx = self.autoModerationRules[autoMod.guild_id]?
-                .firstIndex(where: { $0.id == autoMod.id }) {
+                .firstIndex(where: { $0.id == autoMod.id })
+            {
                 self.autoModerationRules[autoMod.guild_id]![idx] = autoMod
             } else {
                 self.autoModerationRules[autoMod.guild_id, default: []].append(autoMod)
             }
         case let .autoModerationRuleDelete(autoMod):
             if let idx = self.autoModerationRules[autoMod.guild_id]?
-                .firstIndex(where: { $0.id == autoMod.id }) {
+                .firstIndex(where: { $0.id == autoMod.id })
+            {
                 self.autoModerationRules[autoMod.guild_id]?.remove(at: idx)
             }
         case let .autoModerationActionExecution(execution):
@@ -853,7 +927,7 @@ public actor DiscordCache {
             break
         }
     }
-    
+
     private func intentsAllowCaching(event: Gateway.Event) -> Bool {
         guard let data = event.data else { return false }
         let correspondingIntents = data.correspondingIntents
@@ -865,7 +939,7 @@ public actor DiscordCache {
             return false
         }
     }
-    
+
     private func checkItemsLimit() {
         if case .disabled = itemsLimit { return }
         itemsLimitCounter &+= 1
@@ -917,52 +991,62 @@ public actor DiscordCache {
                 }
             case let .custom(custom):
                 if let limit = custom[.auditLogs],
-                   self.auditLogs.count > limit {
+                    self.auditLogs.count > limit
+                {
                     let extra = self.auditLogs.count - limit
                     self.auditLogs.removeSubrange(0..<extra)
                 }
                 if let limit = custom[.integrations],
-                   self.integrations.count > limit {
+                    self.integrations.count > limit
+                {
                     let extra = self.integrations.count - limit
                     self.integrations.removeSubrange(0..<extra)
                 }
                 if let limit = custom[.invites],
-                   self.invites.count > limit {
+                    self.invites.count > limit
+                {
                     let extra = self.invites.count - limit
                     self.invites.removeSubrange(0..<extra)
                 }
                 if let limit = custom[.messages],
-                   self.messages.count > limit {
+                    self.messages.count > limit
+                {
                     let extra = self.messages.count - limit
                     self.messages.removeSubrange(0..<extra)
                 }
                 if let limit = custom[.editedMessages],
-                   self.editedMessages.count > limit {
+                    self.editedMessages.count > limit
+                {
                     let extra = self.editedMessages.count - limit
                     self.editedMessages.removeSubrange(0..<extra)
                 }
                 if let limit = custom[.deletedMessages],
-                   self.deletedMessages.count > limit {
+                    self.deletedMessages.count > limit
+                {
                     let extra = self.deletedMessages.count - limit
                     self.deletedMessages.removeSubrange(0..<extra)
                 }
                 if let limit = custom[.autoModerationRules],
-                   self.autoModerationRules.count > limit {
+                    self.autoModerationRules.count > limit
+                {
                     let extra = self.autoModerationRules.count - limit
                     self.autoModerationRules.removeSubrange(0..<extra)
                 }
                 if let limit = custom[.autoModerationExecutions],
-                   self.autoModerationExecutions.count > limit {
+                    self.autoModerationExecutions.count > limit
+                {
                     let extra = self.autoModerationExecutions.count - limit
                     self.autoModerationExecutions.removeSubrange(0..<extra)
                 }
                 if let limit = custom[.applicationCommandPermissions],
-                   self.applicationCommandPermissions.count > limit {
+                    self.applicationCommandPermissions.count > limit
+                {
                     let extra = self.applicationCommandPermissions.count - limit
                     self.applicationCommandPermissions.removeSubrange(0..<extra)
                 }
                 if let limit = custom[.messagePollVotes],
-                   self.messagePollVotes.count > limit {
+                    self.messagePollVotes.count > limit
+                {
                     let extra = self.messagePollVotes.count - limit
                     self.messagePollVotes.removeSubrange(0..<extra)
                 }
@@ -987,12 +1071,12 @@ public actor DiscordCache {
 
         return intentsSum
     }
-    
-#if DEBUG
+
+    #if DEBUG
     func _tests_modifyStorage(_ block: @Sendable (inout Storage) -> Void) {
         block(&self.storage)
     }
-#endif
+    #endif
 }
 
 private func == (lhs: Emoji, rhs: Emoji) -> Bool {
@@ -1001,5 +1085,5 @@ private func == (lhs: Emoji, rhs: Emoji) -> Bool {
 
 //MARK: - WritableKeyPath + Sendable
 #if compiler(<6.0)
-extension WritableKeyPath: @unchecked Sendable where Root: Sendable, Value: Sendable { }
+extension WritableKeyPath: @unchecked Sendable where Root: Sendable, Value: Sendable {}
 #endif

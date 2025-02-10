@@ -13,8 +13,18 @@ public struct Emoji: Sendable, Codable {
     public var animated: Bool?
     public var available: Bool?
     public var version: Int?
-    
-    public init(id: EmojiSnowflake? = nil, name: String? = nil, roles: [RoleSnowflake]? = nil, user: DiscordUser? = nil, require_colons: Bool? = nil, managed: Bool? = nil, animated: Bool? = nil, available: Bool? = nil, version: Int? = nil) {
+
+    public init(
+        id: EmojiSnowflake? = nil,
+        name: String? = nil,
+        roles: [RoleSnowflake]? = nil,
+        user: DiscordUser? = nil,
+        require_colons: Bool? = nil,
+        managed: Bool? = nil,
+        animated: Bool? = nil,
+        available: Bool? = nil,
+        version: Int? = nil
+    ) {
         self.id = id
         self.name = name
         self.roles = roles
@@ -29,33 +39,33 @@ public struct Emoji: Sendable, Codable {
 
 /// A reaction emoji.
 public struct Reaction: Sendable, Codable, Hashable {
-    
+
     private enum Base: Sendable, Codable, Hashable {
         case unicodeEmoji(String)
         case guildEmoji(name: String?, id: EmojiSnowflake)
     }
-    
+
     private let base: Base
-    
+
     public var urlPathDescription: String {
         switch self.base {
         case let .unicodeEmoji(emoji): return emoji
         case let .guildEmoji(name, id): return "\(name ?? ""):\(id.rawValue)"
         }
     }
-    
+
     private init(base: Base) {
         self.base = base
     }
-    
+
     public init(from decoder: any Decoder) throws {
         self.base = try .init(from: decoder)
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         try self.base.encode(to: encoder)
     }
-    
+
     public enum Error: Swift.Error, CustomStringConvertible {
         /// Expected only 1 emoji in the input '\(input)' but recognized '\(count)' emojis.
         case moreThan1Emoji(String, count: Int)
@@ -75,7 +85,7 @@ public struct Reaction: Sendable, Codable, Hashable {
             }
         }
     }
-    
+
     /// Unicode emoji. The function verifies that your input is an emoji or not.
     public static func unicodeEmoji(_ emoji: String) throws -> Reaction {
         guard emoji.count == 1 else {
@@ -86,12 +96,12 @@ public struct Reaction: Sendable, Codable, Hashable {
         }
         return Reaction(base: .unicodeEmoji(emoji))
     }
-    
+
     /// Custom discord guild emoji.
     public static func guildEmoji(name: String?, id: EmojiSnowflake) -> Reaction {
         Reaction(base: .guildEmoji(name: name, id: id))
     }
-    
+
     public init(emoji: Emoji) throws {
         if let id = emoji.id {
             self = .guildEmoji(name: emoji.name, id: id)
@@ -101,7 +111,7 @@ public struct Reaction: Sendable, Codable, Hashable {
             throw Error.cantConvertEmoji(emoji)
         }
     }
-    
+
     /// Is the same as the partial emoji?
     public func `is`(_ emoji: Emoji) -> Bool {
         switch self.base {

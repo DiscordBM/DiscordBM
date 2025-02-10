@@ -1,9 +1,10 @@
 @preconcurrency import AsyncHTTPClient
 import DiscordModels
-import NIOHTTP1
-import struct NIOCore.ByteBuffer
-import NIOFoundationCompat
 import Foundation
+import NIOFoundationCompat
+import NIOHTTP1
+
+import struct NIOCore.ByteBuffer
 
 public struct DiscordHTTPRequest: Sendable {
     /// The endpoint to send the request to.
@@ -12,7 +13,7 @@ public struct DiscordHTTPRequest: Sendable {
     public let queries: [(String, String?)]
     /// The extra headers of the request.
     public let headers: HTTPHeaders
-    
+
     public init(
         to endpoint: APIEndpoint,
         queries: [(String, String?)] = [],
@@ -22,7 +23,7 @@ public struct DiscordHTTPRequest: Sendable {
         self.queries = queries
         self.headers = headers
     }
-    
+
     public init(
         to endpoint: CDNEndpoint,
         queries: [(String, String?)] = [],
@@ -43,11 +44,11 @@ public struct DiscordHTTPRequest: Sendable {
 /// Represents a raw Discord HTTP response.
 public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     let _response: HTTPClient.Response
-    
+
     internal init(_response: HTTPClient.Response) {
         self._response = _response
     }
-    
+
     public init(
         host: String,
         status: HTTPResponseStatus,
@@ -63,7 +64,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
             body: body
         )
     }
-    
+
     /// Remote host of the request.
     public var host: String {
         _response.host
@@ -84,17 +85,17 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
     public var body: ByteBuffer? {
         _response.body
     }
-    
+
     public var description: String {
         "DiscordHTTPResponse("
-        + "host: \(host), "
-        + "status: \(status), "
-        + "version: \(version), "
-        + "headers: \(headers), "
-        + "body: \(body.map({ String(buffer: $0) }) ?? "nil")"
-        + ")"
+            + "host: \(host), "
+            + "status: \(status), "
+            + "version: \(version), "
+            + "headers: \(headers), "
+            + "body: \(body.map({ String(buffer: $0) }) ?? "nil")"
+            + ")"
     }
-    
+
     /// Throws an error if the response does not indicate success.
     @inlinable
     public func guardSuccess() throws {
@@ -102,7 +103,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
             throw DiscordHTTPError.badStatusCode(self)
         }
     }
-    
+
     /// Makes sure the response is a success response, or tries to find a `JSONError`
     /// so you have a chance to process the error and try to recover.
     ///
@@ -145,7 +146,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
         try self.guardSuccess()
         return try self._decode()
     }
-    
+
     /// Doesn't check for success of the response
     @usableFromInline
     func _decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
@@ -169,7 +170,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
 public struct DiscordClientResponse<C>: Sendable, CustomStringConvertible where C: Codable {
     /// The raw http response.
     public let httpResponse: DiscordHTTPResponse
-    
+
     public init(httpResponse: DiscordHTTPResponse) {
         self.httpResponse = httpResponse
     }
@@ -177,13 +178,13 @@ public struct DiscordClientResponse<C>: Sendable, CustomStringConvertible where 
     public var description: String {
         "DiscordClientResponse<\(Swift._typeName(C.self, qualified: true))>(httpResponse: \(self.httpResponse))"
     }
-    
+
     /// Throws an error if the response does not indicate success.
     @inlinable
     public func guardSuccess() throws {
         try self.httpResponse.guardSuccess()
     }
-    
+
     /// Makes sure the response is a success response, or tries to find a `JSONError`
     /// so you have a chance to process the error and try to recover.
     ///
@@ -207,7 +208,7 @@ public struct DiscordClientResponse<C>: Sendable, CustomStringConvertible where 
     public func decodeJSONError() throws -> JSONError {
         try self.httpResponse.decodeJSONError()
     }
-    
+
     /// Decodes the response.
     @inlinable
     public func decode() throws -> C {
@@ -221,7 +222,7 @@ public struct DiscordCDNResponse: Sendable, CustomStringConvertible {
     public let httpResponse: DiscordHTTPResponse
     /// The fallback name for the file that will be decoded.
     public let fallbackFileName: String
-    
+
     public init(httpResponse: DiscordHTTPResponse, fallbackFileName: String) {
         self.httpResponse = httpResponse
         self.fallbackFileName = fallbackFileName
@@ -235,7 +236,7 @@ public struct DiscordCDNResponse: Sendable, CustomStringConvertible {
     public func guardSuccess() throws {
         try self.httpResponse.guardSuccess()
     }
-    
+
     @inlinable
     public func getFile(overrideName: String? = nil) throws -> RawFile {
         try self.guardSuccess()
@@ -311,7 +312,8 @@ public enum DiscordHTTPError: Error, CustomStringConvertible {
         case let .queryParametersMutuallyExclusive(queries):
             return "DiscordHTTPError.queryParametersMutuallyExclusive(queries: \(queries))"
         case let .queryParameterOutOfBounds(name, value, lowerBound, upperBound):
-            return "DiscordHTTPError.queryParameterOutOfBounds(name: \(name), value: \(value ?? "nil"), lowerBound: \(lowerBound), upperBound: \(upperBound))"
+            return
+                "DiscordHTTPError.queryParameterOutOfBounds(name: \(name), value: \(value ?? "nil"), lowerBound: \(lowerBound), upperBound: \(upperBound))"
         }
     }
 }

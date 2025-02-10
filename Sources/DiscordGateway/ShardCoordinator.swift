@@ -1,4 +1,5 @@
 import DiscordModels
+
 import struct Foundation.Date
 
 actor ShardCoordinator {
@@ -6,8 +7,8 @@ actor ShardCoordinator {
     /// Each `maxConcurrency` amount of connections need to wait **5** seconds.
     /// https://discord.com/developers/docs/topics/gateway#session-start-limit-object-session-start-limit-structure
     let waitTime = 5.0
-    
-    init() { }
+
+    init() {}
 
     /// Wait until the other required shards have connected.
     func waitForOtherShards(shard: IntPair, maxConcurrency: Int) async {

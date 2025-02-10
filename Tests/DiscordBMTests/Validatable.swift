@@ -1,11 +1,12 @@
-@testable import DiscordModels
 import XCTest
 
+@testable import DiscordModels
+
 class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePayload {
-    
+
     /// `ValidatablePayload` requirement
-    func validate() -> [ValidationFailure] { }
-    
+    func validate() -> [ValidationFailure] {}
+
     func testValidateAssertIsNotEmpty() throws {
         try validateAssertIsNotEmpty(true, name: "a").throw()
         XCTAssertThrowsError(
@@ -15,7 +16,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             XCTAssertErrorsEqual(error, ValidationFailure.cantBeEmpty(name: "a"))
         }
     }
-    
+
     func testValidateAtLeastOneIsNotEmpty() throws {
         try validateAtLeastOneIsNotEmpty(false, names: "a").throw()
         try validateAtLeastOneIsNotEmpty(nil, names: "a").throw()
@@ -31,13 +32,13 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             XCTAssertErrorsEqual(error, .atLeastOneFieldIsRequired(names: ["a"]))
         }
     }
-    
+
     func testValidateCharacterCountDoesNotExceed() throws {
         /// Some characters are 2 unicode bytes.
         /// It's important to always use `char.unicodeScalars.count` instead of `char.count`.
         XCTAssertEqual("🇯🇵".count, 1)
         XCTAssertEqual("🇯🇵".unicodeScalars.count, 2)
-        
+
         try validateCharacterCountDoesNotExceed(nil, max: 0, name: "a").throw()
         try validateCharacterCountDoesNotExceed(nil, max: 12, name: "a").throw()
         try validateCharacterCountDoesNotExceed("", max: 0, name: "a").throw()
@@ -56,7 +57,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             XCTAssertErrorsEqual(error, .tooManyCharacters(name: "a", max: 10))
         }
     }
-    
+
     func testValidateCharacterCountInRange() throws {
         try validateCharacterCountInRange(nil, min: 0, max: 0, name: "a").throw()
         try validateCharacterCountInRange(nil, min: 0, max: 12, name: "a").throw()
@@ -109,7 +110,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             XCTAssertErrorsEqual(error, .elementCountOutOfRange(name: "a", min: 20, max: 40))
         }
     }
-    
+
     func testValidateCombinedCharacterCountDoesNotExceed() throws {
         try validateCombinedCharacterCountDoesNotExceed(nil, max: 0, names: "a").throw()
         try validateCombinedCharacterCountDoesNotExceed(nil, max: 1, names: "a").throw()
@@ -124,10 +125,10 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             XCTAssertErrorsEqual(error, .tooManyCharacters(name: "a+b", max: 5_000))
         }
     }
-    
+
     func testValidateElementCountDoesNotExceed() throws {
-        try validateElementCountDoesNotExceed(Optional<Array<Never>>.none, max: 0, name: "a").throw()
-        try validateElementCountDoesNotExceed(Optional<Array<String>>.none, max: 1, name: "a").throw()
+        try validateElementCountDoesNotExceed(Optional<[Never]>.none, max: 0, name: "a").throw()
+        try validateElementCountDoesNotExceed(Optional<[String]>.none, max: 1, name: "a").throw()
         try validateElementCountDoesNotExceed([String](), max: 0, name: "a").throw()
         try validateElementCountDoesNotExceed([String](), max: 1, name: "a").throw()
         try validateElementCountDoesNotExceed([1, 2, 3, 4], max: 4, name: "a").throw()
@@ -138,7 +139,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             XCTAssertErrorsEqual(error, .tooManyElements(name: "t", max: 4))
         }
     }
-    
+
     func testValidateOnlyContains() throws {
         typealias Field = StringBitField<Permission>?
         try validateOnlyContains(
@@ -169,14 +170,17 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             ).throw()
         ) { error in
             let error = error as! ValidationError
-            XCTAssertErrorsEqual(error, .containsProhibitedValues(
-                name: "r",
-                reason: "k",
-                valuesRepresentation: "\(throwingField!)"
-            ))
+            XCTAssertErrorsEqual(
+                error,
+                .containsProhibitedValues(
+                    name: "r",
+                    reason: "k",
+                    valuesRepresentation: "\(throwingField!)"
+                )
+            )
         }
     }
-    
+
     func testValidateCaseInsensitivelyDoesNotContain() throws {
         try validateCaseInsensitivelyDoesNotContain(
             nil,
@@ -199,14 +203,17 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             ).throw()
         ) { error in
             let error = error as! ValidationError
-            XCTAssertErrorsEqual(error, .containsProhibitedValues(
-                name: "aabb",
-                reason: "rrr",
-                valuesRepresentation: "\(["discord", "clyde"])"
-            ))
+            XCTAssertErrorsEqual(
+                error,
+                .containsProhibitedValues(
+                    name: "aabb",
+                    reason: "rrr",
+                    valuesRepresentation: "\(["discord", "clyde"])"
+                )
+            )
         }
     }
-    
+
     func testValidateHasPrecondition() throws {
         try validateHasPrecondition(
             condition: true,
@@ -238,7 +245,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             XCTAssertErrorsEqual(error, .hasPrecondition(name: "qq", reason: "pji"))
         }
     }
-    
+
     func testValidateNumberInRangeOrNil() throws {
         try validateNumberInRangeOrNil(1, min: 0, max: 21_600, name: "adoand").throw()
         try validateNumberInRangeOrNil(0, min: 0, max: 21_600, name: "").throw()
@@ -261,7 +268,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             )
         }
         XCTAssertThrowsError(
-            try validateNumberInRangeOrNil(-1391293, min: 10, max: 21, name: "rqerqrew").throw()
+            try validateNumberInRangeOrNil(-1_391_293, min: 10, max: 21, name: "rqerqrew").throw()
         ) { error in
             let error = error as! ValidationError
             XCTAssertErrorsEqual(
@@ -270,7 +277,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             )
         }
         XCTAssertThrowsError(
-            try validateNumberInRangeOrNil(934129139, min: 10, max: 21, name: "oewo").throw()
+            try validateNumberInRangeOrNil(934_129_139, min: 10, max: 21, name: "oewo").throw()
         ) { error in
             let error = error as! ValidationError
             XCTAssertErrorsEqual(
@@ -279,7 +286,7 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
             )
         }
     }
-    
+
     func testValidationsThrowsMultiple() throws {
         let embed = Embed(
             title: String(repeating: "a", count: 257),
@@ -289,13 +296,16 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
         XCTAssertThrowsError(try embed.validate().throw(model: embed)) { error in
             let error = error as! ValidationError
             XCTAssertEqual("\(error.model)", "\(embed)")
-            XCTAssertEqual(error.failures, [
-                .tooManyElements(name: "fields", max: 25),
-                .tooManyCharacters(name: "title", max: 256)
-            ])
+            XCTAssertEqual(
+                error.failures,
+                [
+                    .tooManyElements(name: "fields", max: 25),
+                    .tooManyCharacters(name: "title", max: 256),
+                ]
+            )
         }
     }
-    
+
     func XCTAssertErrorsEqual(
         _ expression1: ValidationError,
         _ expression2: ValidationFailure,
@@ -315,8 +325,8 @@ extension ValidationFailure: Equatable {
     }
 }
 
-private extension Optional where Wrapped == ValidationFailure {
-    func `throw`() throws {
+extension Optional where Wrapped == ValidationFailure {
+    fileprivate func `throw`() throws {
         if let wrapped = self {
             /// `model` is not important for the tests.
             throw ValidationError(model: "", failures: [wrapped])

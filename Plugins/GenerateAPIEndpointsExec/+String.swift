@@ -1,4 +1,3 @@
-
 extension StringProtocol {
     func toCamelCase() -> String {
         var capitalized = self.capitalized
@@ -10,7 +9,7 @@ extension StringProtocol {
         }
         return capitalized
     }
-    
+
     /// Indents 4 spaces.
     func indent() -> String {
         self.components(separatedBy: .newlines).map {

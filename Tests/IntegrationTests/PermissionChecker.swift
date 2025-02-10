@@ -1,5 +1,5 @@
-import DiscordBM
 import AsyncHTTPClient
+import DiscordBM
 import Logging
 import XCTest
 
@@ -12,7 +12,7 @@ class PermissionChecker: XCTestCase {
             Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
         }
     }
-    
+
     override func tearDown() async throws {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
     }
@@ -34,13 +34,13 @@ class PermissionChecker: XCTestCase {
             ),
             intents: Gateway.Intent.allCases
         )
-        
+
         let cache = await DiscordCache(
             gatewayManager: bot,
             intents: .all,
             requestAllMembers: .enabled
         )
-        
+
         let expectation = Expectation(description: "Connected")
 
         Task {
@@ -53,7 +53,7 @@ class PermissionChecker: XCTestCase {
 
         /// To make sure these 2 `Task`s are triggered in order
         try await Task.sleep(for: .milliseconds(200))
-        
+
         Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation], timeout: 10)
@@ -76,121 +76,157 @@ class PermissionChecker: XCTestCase {
 
         /// For cache to get populated
         try await Task.sleep(for: .seconds(5))
-        
+
         let _guild = await cache.guilds[Constants.guildId]
         let guild = try XCTUnwrap(_guild)
-        
+
         /// The bot is `administrator` in the server.
-        XCTAssertTrue(guild.userHasGuildPermission(
-            userId: Snowflake(Constants.botId),
-            permission: .administrator
-        ))
+        XCTAssertTrue(
+            guild.userHasGuildPermission(
+                userId: Snowflake(Constants.botId),
+                permission: .administrator
+            )
+        )
         /// The bot does not have `manageEvents` perm, but is `administrator`,
         /// so in practice has the perm.
-        XCTAssertTrue(guild.userHasGuildPermission(
-            userId: Snowflake(Constants.botId),
-            permission: .manageEvents
-        ))
+        XCTAssertTrue(
+            guild.userHasGuildPermission(
+                userId: Snowflake(Constants.botId),
+                permission: .manageEvents
+            )
+        )
         /// The account does not have the perm at all.
-        XCTAssertFalse(guild.userHasGuildPermission(
-            userId: Constants.secondAccountId,
-            permission: .manageRoles
-        ))
+        XCTAssertFalse(
+            guild.userHasGuildPermission(
+                userId: Constants.secondAccountId,
+                permission: .manageRoles
+            )
+        )
         /// The account has the perm but doesn't have `viewChannel`,
         /// so in practice doesn't have the perm.
-        XCTAssertFalse(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: Constants.Channels.perm1.id,
-            permissions: [.manageChannels]
-        ))
+        XCTAssertFalse(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: Constants.Channels.perm1.id,
+                permissions: [.manageChannels]
+            )
+        )
         /// The account has the perm.
-        XCTAssertTrue(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: Constants.Channels.perm2.id,
-            permissions: [.viewChannel]
-        ))
+        XCTAssertTrue(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: Constants.Channels.perm2.id,
+                permissions: [.viewChannel]
+            )
+        )
         /// The account doesn't have the perm.
-        XCTAssertFalse(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: Constants.Channels.perm2.id,
-            permissions: [.sendMessages]
-        ))
+        XCTAssertFalse(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: Constants.Channels.perm2.id,
+                permissions: [.sendMessages]
+            )
+        )
         /// The account doesn't has the perm but doesn't have the `sendMessages` perm,
         ///  which blocks this specific perm in practice.
-        XCTAssertFalse(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: Constants.Channels.perm2.id,
-            permissions: [.embedLinks]
-        ))
+        XCTAssertFalse(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: Constants.Channels.perm2.id,
+                permissions: [.embedLinks]
+            )
+        )
         /// The account has all the permissions.
-        XCTAssertTrue(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: Constants.Channels.perm3.id,
-            permissions: [.viewChannel, .manageChannels, .createInstantInvite, .useExternalStickers]
-        ))
+        XCTAssertTrue(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: Constants.Channels.perm3.id,
+                permissions: [.viewChannel, .manageChannels, .createInstantInvite, .useExternalStickers]
+            )
+        )
         /// The account has all the permissions but one.
-        XCTAssertFalse(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: Constants.Channels.perm3.id,
-            permissions: [.viewChannel, .manageChannels, .sendTtsMessages, .useExternalStickers]
-        ))
+        XCTAssertFalse(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: Constants.Channels.perm3.id,
+                permissions: [.viewChannel, .manageChannels, .sendTtsMessages, .useExternalStickers]
+            )
+        )
         /// The account has the permission thanks to a member-perm-overwrite.
-        XCTAssertTrue(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: Constants.Channels.perm3.id,
-            permissions: [.useExternalEmojis]
-        ))
+        XCTAssertTrue(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: Constants.Channels.perm3.id,
+                permissions: [.useExternalEmojis]
+            )
+        )
         /// The account has the perm in the guild, doesn't have it based on role-overwrite
         /// in the channel, but still has it based on member-overwrite in the channel.
-        XCTAssertTrue(guild.userHasGuildPermission(
-            userId: Constants.secondAccountId,
-            permission: .manageWebhooks
-        ))
-        XCTAssertTrue(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: Constants.Channels.perm3.id,
-            permissions: [.manageWebhooks]
-        ))
+        XCTAssertTrue(
+            guild.userHasGuildPermission(
+                userId: Constants.secondAccountId,
+                permission: .manageWebhooks
+            )
+        )
+        XCTAssertTrue(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: Constants.Channels.perm3.id,
+                permissions: [.manageWebhooks]
+            )
+        )
         /// The account has the perm in the guild, and has it based on role-overwrite
         /// in the channel, but doesn't have it based on member-overwrite in the channel.
-        XCTAssertTrue(guild.userHasGuildPermission(
-            userId: Constants.secondAccountId,
-            permission: .manageThreads
-        ))
-        XCTAssertFalse(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: Constants.Channels.perm3.id,
-            permissions: [.manageThreads]
-        ))
+        XCTAssertTrue(
+            guild.userHasGuildPermission(
+                userId: Constants.secondAccountId,
+                permission: .manageThreads
+            )
+        )
+        XCTAssertFalse(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: Constants.Channels.perm3.id,
+                permissions: [.manageThreads]
+            )
+        )
 
         /// The account doesn't have access to the channel, so
         /// doesn't have access to the thread either.
-        XCTAssertFalse(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: publicThread.id,
-            permissions: [.viewChannel]
-        ))
+        XCTAssertFalse(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: publicThread.id,
+                permissions: [.viewChannel]
+            )
+        )
 
         /// The account has access to the channel, but the thread is private.
-        XCTAssertFalse(guild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: privateThread.id,
-            permissions: [.viewChannel]
-        ))
+        XCTAssertFalse(
+            guild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: privateThread.id,
+                permissions: [.viewChannel]
+            )
+        )
 
         /// Is not in the private thread but is guild owner, so has access.
-        XCTAssertTrue(guild.userHasPermissions(
-            userId: Constants.personalId,
-            channelId: privateThread.id,
-            permissions: [.viewChannel]
-        ))
+        XCTAssertTrue(
+            guild.userHasPermissions(
+                userId: Constants.personalId,
+                channelId: privateThread.id,
+                permissions: [.viewChannel]
+            )
+        )
 
         /// Is thread creator, so has access.
-        XCTAssertTrue(guild.userHasPermissions(
-            userId: Constants.botId,
-            channelId: privateThread.id,
-            permissions: [.viewChannel]
-        ))
+        XCTAssertTrue(
+            guild.userHasPermissions(
+                userId: Constants.botId,
+                channelId: privateThread.id,
+                permissions: [.viewChannel]
+            )
+        )
 
         /// Mention the second account so it is added to the members list.
         try await bot.client.createMessage(
@@ -207,19 +243,23 @@ class PermissionChecker: XCTestCase {
         let updatedGuild = try XCTUnwrap(_updatedGuild)
 
         /// The account has access to the channel, and is joined to the thread.
-        XCTAssertTrue(updatedGuild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: privateThread.id,
-            permissions: [.viewChannel, .sendMessages, .readMessageHistory]
-        ))
+        XCTAssertTrue(
+            updatedGuild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: privateThread.id,
+                permissions: [.viewChannel, .sendMessages, .readMessageHistory]
+            )
+        )
 
         /// The account has access to the channel, and is joined to the thread,
         /// but doesn't have the perm.
-        XCTAssertFalse(updatedGuild.userHasPermissions(
-            userId: Constants.secondAccountId,
-            channelId: privateThread.id,
-            permissions: [.manageGuild]
-        ))
+        XCTAssertFalse(
+            updatedGuild.userHasPermissions(
+                userId: Constants.secondAccountId,
+                channelId: privateThread.id,
+                permissions: [.manageGuild]
+            )
+        )
 
         try await bot.client.deleteChannel(id: publicThread.id).guardSuccess()
         try await bot.client.deleteChannel(id: privateThread.id).guardSuccess()

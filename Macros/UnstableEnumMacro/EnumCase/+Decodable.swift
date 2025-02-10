@@ -8,7 +8,7 @@ extension [EnumCase] {
         location: AbstractSourceLocation,
         rawType: RawKind
     ) -> DeclSyntax {
-        return #"""
+        #"""
         \#(raw: accessLevel)init(from decoder: any Decoder) throws {
             let container = try decoder.singleValueContainer()
             let rawValue = try container.decode(\#(raw: rawType.rawValue).self)

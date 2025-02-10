@@ -1,11 +1,12 @@
-import WSClient
-import NIOWebSocket
-import NIOCore
 import CompressNIO
 import Logging
+import NIOCore
+import NIOWebSocket
+import WSClient
 
 private let zlibAllocator = ByteBufferAllocator()
-private let minimumAllocation = 4070 /// `4096` - `26` allocator margin
+private let minimumAllocation = 4070
+/// `4096` - `26` allocator margin
 
 /// Will be used for only 1 WS connection so won't need concurrency guards.
 struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
@@ -25,16 +26,19 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
             compressedBytes: compressedBytes,
             from: &frame.data
         )
-        logger.trace("Decompressed a Discord message", metadata: [
-            "compressedBytes": .stringConvertible(compressedBytes),
-            "decompressedBytes": .stringConvertible(frame.data.readableBytes),
-            "firstAllocation": .stringConvertible(
-                self.nextAllocation(
-                    compressedBytes: compressedBytes,
-                    currentlyAllocated: nil
-                )
-            )
-        ])
+        logger.trace(
+            "Decompressed a Discord message",
+            metadata: [
+                "compressedBytes": .stringConvertible(compressedBytes),
+                "decompressedBytes": .stringConvertible(frame.data.readableBytes),
+                "firstAllocation": .stringConvertible(
+                    self.nextAllocation(
+                        compressedBytes: compressedBytes,
+                        currentlyAllocated: nil
+                    )
+                ),
+            ]
+        )
         return frame
     }
 
@@ -57,8 +61,7 @@ struct ZlibDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
                 /// If no errors were thrown then the decompression must have fully succeeded.
                 return buffer
             } catch let error as CompressNIOError where error == .bufferOverflow {
-                /// If we have a `.bufferOverflow`,
-                /// double the capacity and continue decompression.
+                /// If we have a `.bufferOverflow`, increase the capacity and continue the loop.
                 buffer.reserveCapacity(
                     minimumWritableBytes: self.nextAllocation(
                         compressedBytes: compressedBytes,

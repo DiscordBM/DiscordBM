@@ -1,6 +1,6 @@
+import Foundation
 import MultipartKit
 import NIOCore
-import Foundation
 
 /// Note: you need to use a custom `CodingKeys` on conforming types to exclude
 /// this `files` field from Codable decode/encodes.
@@ -26,10 +26,10 @@ extension MultipartEncodable {
 public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
     /// Name of the file, including extension.
     public var filename: String
-    
+
     /// The file's data.
     public var data: ByteBuffer
-    
+
     /// The file extension, if it has one.
     public var `extension`: String? {
         let parts = self.filename.split(separator: ".")
@@ -39,21 +39,22 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
             return nil
         }
     }
-    
+
     public var type: String? {
         if let ext = self.extension,
-           let (type, subType) = fileExtensionMediaTypeMapping[ext] {
+            let (type, subType) = fileExtensionMediaTypeMapping[ext]
+        {
             return "\(type)/\(subType)"
         } else {
             return nil
         }
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case data
         case filename
     }
-    
+
     /// `Encodable` conformance.
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -61,7 +62,7 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
         try container.encode(data, forKey: .data)
         try container.encode(self.filename, forKey: .filename)
     }
-    
+
     /// Creates a new `File`.
     ///
     ///     let file = File(data: "hello", filename: "foo.txt")
@@ -73,22 +74,24 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
         self.data = data
         self.filename = filename
     }
-    
+
     /// - Parameters:
     ///   - data: The file's contents.
     ///   - nameNoExtension: The file's name without the extension.
     ///   - contentType: The content type header containing the file's extension.
     public init(data: ByteBuffer, nameNoExtension: String, contentType: String) {
         self.data = data
-        let format = fileExtensionMediaTypeMapping.first(where: {
-            "\($0.value.0)/\($0.value.1)" == contentType
-        }) ?? fileExtensionMediaTypeMapping.first(where: {
-            $0.key == contentType
-        })
+        let format =
+            fileExtensionMediaTypeMapping.first(where: {
+                "\($0.value.0)/\($0.value.1)" == contentType
+            })
+            ?? fileExtensionMediaTypeMapping.first(where: {
+                $0.key == contentType
+            })
         let `extension` = format.map({ ".\($0.key)" }) ?? ""
         self.filename = nameNoExtension + `extension`
     }
-    
+
     public var multipart: MultipartPart? {
         var part = MultipartPart(headers: [:], body: self.data)
         if let type {
@@ -100,8 +103,8 @@ public struct RawFile: Sendable, Encodable, MultipartPartConvertible {
         )
         return part
     }
-    
-    public init? (multipart: MultipartPart) {
+
+    public init?(multipart: MultipartPart) {
         if let header = multipart.headers.first(name: "Content-Disposition") {
             let parts = header.split(separator: ";").compactMap {
                 part -> (key: Substring, value: Substring)? in

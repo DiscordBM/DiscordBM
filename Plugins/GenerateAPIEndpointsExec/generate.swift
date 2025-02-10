@@ -12,26 +12,26 @@ let cases = grouped.map { tag, infos in
     """
     // MARK: \(tag.rawValue)
     /// \(tag.link)
-    
+
     \(infos.joined(separator: "\n"))
     """
 }.joined(separator: "\n\n")
 
 let urlPrefixString = """
-var urlPrefix: String {
-    "https://discord.com/api/v\\(DiscordGlobalConfiguration.apiVersion)/"
-}
-"""
+    var urlPrefix: String {
+        "https://discord.com/api/v\\(DiscordGlobalConfiguration.apiVersion)/"
+    }
+    """
 
 let noEncodeParamSuffixes = ["code", "Token"]
 let doNotUseThisCaseDeclaration = """
-/// This case serves as a way of discouraging exhaustive switch statements
-case __DO_NOT_USE_THIS_CASE
-"""
+    /// This case serves as a way of discouraging exhaustive switch statements
+    case __DO_NOT_USE_THIS_CASE
+    """
 let doNotUseThisCaseCrash = """
-case .__DO_NOT_USE_THIS_CASE:
-    fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
-"""
+    case .__DO_NOT_USE_THIS_CASE:
+        fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
+    """
 
 let _url = grouped.flatMap(\.value).map { info in
     let (name, params) = info.info.makeIterativeCase()
@@ -70,15 +70,15 @@ let _url = grouped.flatMap(\.value).map { info in
 }.joined(separator: "\n")
 
 let urlString = """
-public var url: String {
-    let suffix: String
-    switch self {
-\(_url.indent())
-\(doNotUseThisCaseCrash.indent())
+    public var url: String {
+        let suffix: String
+        switch self {
+    \(_url.indent())
+    \(doNotUseThisCaseCrash.indent())
+        }
+        return self.urlPrefix + suffix
     }
-    return self.urlPrefix + suffix
-}
-"""
+    """
 
 let webhookTokenParam = "webhookToken"
 
@@ -121,41 +121,41 @@ let _urlDescription = grouped.flatMap(\.value).map { info in
 }.joined(separator: "\n")
 
 let urlDescriptionString = """
-public var urlDescription: String {
-    let suffix: String
-    switch self {
-\(_urlDescription.indent())
-\(doNotUseThisCaseCrash.indent())
+    public var urlDescription: String {
+        let suffix: String
+        switch self {
+    \(_urlDescription.indent())
+    \(doNotUseThisCaseCrash.indent())
+        }
+        return self.urlPrefix + suffix
     }
-    return self.urlPrefix + suffix
-}
-"""
+    """
 
 let _methods = grouped.flatMap(\.value).map {
     $0.info.makeRawCaseName() + " return .\($0.method.rawValue)"
 }.joined(separator: "\n")
 
 let methodsString = """
-public var httpMethod: HTTPMethod {
-    switch self {
-\(_methods.indent())
-\(doNotUseThisCaseCrash.indent())
+    public var httpMethod: HTTPMethod {
+        switch self {
+    \(_methods.indent())
+    \(doNotUseThisCaseCrash.indent())
+        }
     }
-}
-"""
+    """
 
 let _countsAgainstGlobalRateLimit = grouped.flatMap(\.value).map {
     $0.info.makeRawCaseName() + " return \($0.info.tags.contains(where: \.countsAgainstGlobalRateLimit))"
 }.joined(separator: "\n")
 
 let countsAgainstGlobalRateLimitString = """
-public var countsAgainstGlobalRateLimit: Bool {
-    switch self {
-\(_countsAgainstGlobalRateLimit.indent())
-\(doNotUseThisCaseCrash.indent())
+    public var countsAgainstGlobalRateLimit: Bool {
+        switch self {
+    \(_countsAgainstGlobalRateLimit.indent())
+    \(doNotUseThisCaseCrash.indent())
+        }
     }
-}
-"""
+    """
 
 let _requiresAuthorizationHeader = grouped.flatMap(\.value).map { info -> String in
     let (name, params) = info.info.makeRawCaseNameWithParams()
@@ -164,13 +164,13 @@ let _requiresAuthorizationHeader = grouped.flatMap(\.value).map { info -> String
 }.joined(separator: "\n")
 
 let requiresAuthorizationHeaderString = """
-public var requiresAuthorizationHeader: Bool {
-    switch self {
-\(_requiresAuthorizationHeader.indent())
-\(doNotUseThisCaseCrash.indent())
+    public var requiresAuthorizationHeader: Bool {
+        switch self {
+    \(_requiresAuthorizationHeader.indent())
+    \(doNotUseThisCaseCrash.indent())
+        }
     }
-}
-"""
+    """
 
 let _parameters = grouped.flatMap(\.value).map { info -> String in
     let (name, _params) = info.info.makeIterativeCase()
@@ -188,13 +188,13 @@ let _parameters = grouped.flatMap(\.value).map { info -> String in
 }.joined(separator: "\n")
 
 let parametersString = """
-public var parameters: [String] {
-    switch self {
-\(_parameters.indent())
-\(doNotUseThisCaseCrash.indent())
+    public var parameters: [String] {
+        switch self {
+    \(_parameters.indent())
+    \(doNotUseThisCaseCrash.indent())
+        }
     }
-}
-"""
+    """
 
 let _description = grouped.flatMap(\.value).map { info -> String in
     let (name, _params) = info.info.makeIterativeCase()
@@ -220,26 +220,26 @@ let _description = grouped.flatMap(\.value).map { info -> String in
 }.joined(separator: "\n")
 
 let descriptionString = """
-public var description: String {
-    switch self {
-\(_description.indent())
-\(doNotUseThisCaseCrash.indent())
+    public var description: String {
+        switch self {
+    \(_description.indent())
+    \(doNotUseThisCaseCrash.indent())
+        }
     }
-}
-"""
+    """
 
 let _id = grouped.flatMap(\.value).enumerated().map { idx, info in
     info.info.makeRawCaseName() + " return \(idx + 1)"
 }.joined(separator: "\n")
 
 let idString = """
-public var id: Int {
-    switch self {
-\(_id.indent())
-\(doNotUseThisCaseCrash.indent())
+    public var id: Int {
+        switch self {
+    \(_id.indent())
+    \(doNotUseThisCaseCrash.indent())
+        }
     }
-}
-"""
+    """
 
 let cacheableCases = grouped.compactMap { tag, infos -> (API.Path.Info.Tag, [String])? in
     let filtered = infos.filter { $0.method == .GET }
@@ -252,7 +252,7 @@ let cacheableCases = grouped.compactMap { tag, infos -> (API.Path.Info.Tag, [Str
     """
     // MARK: \(tag.rawValue)
     /// \(tag.link)
-    
+
     \(infos.joined(separator: "\n"))
     """
 }.joined(separator: "\n\n")
@@ -264,13 +264,13 @@ let _cacheableDescription = grouped.flatMap(\.value).filter {
 }.joined(separator: "\n")
 
 let cacheableDescriptionString = """
-public var description: String {
-    switch self {
-\(_cacheableDescription.indent())
-\(doNotUseThisCaseCrash.indent())
+    public var description: String {
+        switch self {
+    \(_cacheableDescription.indent())
+    \(doNotUseThisCaseCrash.indent())
+        }
     }
-}
-"""
+    """
 
 let _cacheableInit = grouped.flatMap(\.value).filter {
     $0.method == .GET
@@ -279,58 +279,58 @@ let _cacheableInit = grouped.flatMap(\.value).filter {
 }.joined(separator: "\n")
 
 let cacheableInitString = """
-init? (endpoint: APIEndpoint) {
-    switch endpoint {
-\(_cacheableInit.indent())
-\(doNotUseThisCaseCrash.indent())
-    default: return nil
+    init? (endpoint: APIEndpoint) {
+        switch endpoint {
+    \(_cacheableInit.indent())
+    \(doNotUseThisCaseCrash.indent())
+        default: return nil
+        }
     }
-}
-"""
+    """
 
 let result = """
-// DO NOT EDIT. Auto-generated using the GenerateAPIEndpoints command plugin.
+    // DO NOT EDIT. Auto-generated using the GenerateAPIEndpoints command plugin.
 
-/// If you want to add an endpoint that somehow doesn't exist, you'll need to
-/// properly edit `/Plugins/GenerateAPIEndpointsExec/Resources/openapi.yml`, then trigger
-/// the `GenerateAPIEndpoints` plugin (right click on `DiscordBM` in the file navigator)
+    /// If you want to add an endpoint that somehow doesn't exist, you'll need to
+    /// properly edit `/Plugins/GenerateAPIEndpointsExec/Resources/openapi.yml`, then trigger
+    /// the `GenerateAPIEndpoints` plugin (right click on `DiscordBM` in the file navigator)
 
-import DiscordModels
-import NIOHTTP1
+    import DiscordModels
+    import NIOHTTP1
 
-public enum APIEndpoint: Endpoint {
+    public enum APIEndpoint: Endpoint {
 
-\(cases.indent())
+    \(cases.indent())
 
-\(doNotUseThisCaseDeclaration.indent())
+    \(doNotUseThisCaseDeclaration.indent())
 
-\(urlPrefixString.indent())
+    \(urlPrefixString.indent())
 
-\(urlString.indent())
+    \(urlString.indent())
 
-\(urlDescriptionString.indent())
+    \(urlDescriptionString.indent())
 
-\(methodsString.indent())
+    \(methodsString.indent())
 
-\(countsAgainstGlobalRateLimitString.indent())
+    \(countsAgainstGlobalRateLimitString.indent())
 
-\(requiresAuthorizationHeaderString.indent())
+    \(requiresAuthorizationHeaderString.indent())
 
-\(parametersString.indent())
+    \(parametersString.indent())
 
-\(idString.indent())
+    \(idString.indent())
 
-\(descriptionString.indent())
-}
+    \(descriptionString.indent())
+    }
 
-public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
+    public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
 
-\(cacheableCases.indent())
+    \(cacheableCases.indent())
 
-\(doNotUseThisCaseDeclaration.indent())
+    \(doNotUseThisCaseDeclaration.indent())
 
-\(cacheableDescriptionString.indent())
+    \(cacheableDescriptionString.indent())
 
-\(cacheableInitString.indent())
-}
-"""
+    \(cacheableInitString.indent())
+    }
+    """

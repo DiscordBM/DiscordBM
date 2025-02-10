@@ -62,7 +62,8 @@ actor Expectation {
         let task = Task {
             try await Task.sleep(for: .nanoseconds(Int(timeout * 1_000_000_000)))
             let indices = storage.getIndices()
-            let left = expectations
+            let left =
+                expectations
                 .enumerated()
                 .filter { !indices.contains($0.offset) }
                 .map(\.element.description)
@@ -83,7 +84,8 @@ actor Expectation {
             for (idx, expectation) in expectations.enumerated() {
                 expectation.onFulfillment {
                     let indices = storage.appendingIndex(idx)
-                    let left = expectations
+                    let left =
+                        expectations
                         .enumerated()
                         .filter { !indices.contains($0.offset) }
                     if left.isEmpty {
@@ -125,7 +127,7 @@ private class FulfillmentStorage: @unchecked Sendable {
     private var continuation: CheckedContinuation<(), Never>? = nil
     private let queue = DispatchQueue(label: "FulfillmentStorageQueue")
 
-    init() { }
+    init() {}
 
     func getIndices() -> [Int] {
         queue.sync {

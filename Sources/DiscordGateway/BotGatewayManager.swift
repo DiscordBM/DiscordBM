@@ -1,17 +1,18 @@
-import WSClient
-import Foundation
 import AsyncHTTPClient
 import Atomics
-import Logging
 import DiscordModels
+import Foundation
+import Logging
 import NIO
-import struct NIOWebSocket.WebSocketOpcode
+import WSClient
+
 import enum NIOWebSocket.WebSocketErrorCode
+import struct NIOWebSocket.WebSocketOpcode
 
 public actor BotGatewayManager: GatewayManager {
 
     /// The info related to the shard status of this gateway-manager.
-    struct ShardInfo: Sendable {
+    struct ShardInfo {
         var shardConnectedOnceBefore = false
         let shard: IntPair
         let maxConcurrency: Int
@@ -54,7 +55,7 @@ public actor BotGatewayManager: GatewayManager {
     /// This gateway manager's identifier.
     public nonisolated let id = idGenerator.wrappingIncrementThenLoad(ordering: .relaxed)
     let logger: Logger
-    
+
     //MARK: Event streams
     var eventsStreamContinuations = [AsyncStream<Gateway.Event>.Continuation]()
     var eventsParseFailureContinuations = [AsyncStream<(any Error, ByteBuffer)>.Continuation]()
@@ -78,35 +79,35 @@ public actor BotGatewayManager: GatewayManager {
 
     //MARK: Connection data
     public nonisolated let identifyPayload: Gateway.Identify
-    
+
     //MARK: Connection state
     private nonisolated let state = ManagedAtomic(GatewayState.noConnection)
-    
+
     //MARK: Send queue
-    
+
     /// 120 per 60 seconds (1 every 500ms),
     /// per https://discord.com/developers/docs/topics/gateway#rate-limiting
     let sendQueue = SerialQueue(waitTime: .milliseconds(500))
 
     //MARK: Current connection properties
-    
+
     /// An ID to keep track of connection changes.
     nonisolated let connectionId = ManagedAtomic(UInt(0))
-    
+
     //MARK: Resume-related current-connection properties
-    
+
     /// The sequence number for the payloads sent to us.
     var sequenceNumber: Int? = nil
     /// The ID of the current Discord-related session.
     var sessionId: String? = nil
     /// Gateway URL for resuming the connection, so we don't need to make an api call.
     var resumeGatewayURL: String? = nil
-    
+
     //MARK: Shard-ing
     var shardInfo: ShardInfo? = nil
-    
+
     //MARK: Backoff
-    
+
     /// Discord cares about the identify payload for rate-limiting and if you send
     /// more than 1000 identifies in a day, Discord will revoke your bot token
     /// (unless your bot is big enough that has a bigger identify-limit than 1000 per day).
@@ -120,7 +121,7 @@ public actor BotGatewayManager: GatewayManager {
         coefficient: 1,
         minBackoff: 15
     )
-    
+
     //MARK: Ping-pong tracking properties
     var unsuccessfulPingsCount = 0
     var lastPongDate = Date()
@@ -165,12 +166,14 @@ public actor BotGatewayManager: GatewayManager {
             var identifyPayload = identifyPayload
             identifyPayload.shard = nil
             self.identifyPayload = identifyPayload
-            logger.warning("You can't manually configure a 'BotGatewayManager' for shard-ing. Use 'ShardingGatewayManager' instead.")
+            logger.warning(
+                "You can't manually configure a 'BotGatewayManager' for shard-ing. Use 'ShardingGatewayManager' instead."
+            )
         } else {
             self.identifyPayload = identifyPayload
         }
     }
-    
+
     /// - Parameters:
     ///   - eventLoopGroup: An `EventLoopGroup`.
     ///   - httpClient: A `HTTPClient`.
@@ -203,12 +206,14 @@ public actor BotGatewayManager: GatewayManager {
             var identifyPayload = identifyPayload
             identifyPayload.shard = nil
             self.identifyPayload = identifyPayload
-            logger.warning("You can't manually configure a 'BotGatewayManager' for shard-ing. Use 'ShardingGatewayManager' instead.")
+            logger.warning(
+                "You can't manually configure a 'BotGatewayManager' for shard-ing. Use 'ShardingGatewayManager' instead."
+            )
         } else {
             self.identifyPayload = identifyPayload
         }
     }
-    
+
     /// - Parameters:
     ///   - eventLoopGroup: An `EventLoopGroup`.
     ///   - httpClient: A `HTTPClient`.
@@ -258,17 +263,23 @@ public actor BotGatewayManager: GatewayManager {
         logger.debug("Connect method triggered")
         /// Guard we're attempting to connect too fast
         if let connectIn = connectionBackoff.canPerformIn() {
-            logger.warning("Cannot try to connect immediately due to backoff", metadata: [
-                "wait-time": .stringConvertible(connectIn)
-            ])
+            logger.warning(
+                "Cannot try to connect immediately due to backoff",
+                metadata: [
+                    "wait-time": .stringConvertible(connectIn)
+                ]
+            )
             try? await Task.sleep(for: connectIn)
         }
         /// Guard if other connections are in process
         let state = self.state.load(ordering: .relaxed)
         guard [.noConnection, .configured, .stopped].contains(state) else {
-            logger.error("Gateway state doesn't allow a new connection", metadata: [
-                "state": .stringConvertible(state)
-            ])
+            logger.error(
+                "Gateway state doesn't allow a new connection",
+                metadata: [
+                    "state": .stringConvertible(state)
+                ]
+            )
             return
         }
         self.state.store(.connecting, ordering: .relaxed)
@@ -277,7 +288,7 @@ public actor BotGatewayManager: GatewayManager {
         let queries: [(String, String)] = [
             ("v", "\(DiscordGlobalConfiguration.apiVersion)"),
             ("encoding", "json"),
-            ("compress", "zlib-stream")
+            ("compress", "zlib-stream"),
         ]
 
         let decompressorWSExtension: ZlibDecompressorWSExtension
@@ -318,20 +329,26 @@ public actor BotGatewayManager: GatewayManager {
                     }
                 }
 
-                logger.debug("web-socket connection closed", metadata: [
-                    "closeCode": .string(String(reflecting: closeFrame?.closeCode)),
-                    "closeReason": .string(String(reflecting: closeFrame?.reason)),
-                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-                ])
+                logger.debug(
+                    "web-socket connection closed",
+                    metadata: [
+                        "closeCode": .string(String(reflecting: closeFrame?.closeCode)),
+                        "closeReason": .string(String(reflecting: closeFrame?.reason)),
+                        "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed)),
+                    ]
+                )
                 await self.onClose(
                     closeReason: .closeFrame(closeFrame),
                     forConnectionWithId: connectionId
                 )
             } catch {
-                logger.debug("web-socket error while connecting to Discord. Will try again", metadata: [
-                    "error": .string(String(reflecting: error)),
-                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-                ])
+                logger.debug(
+                    "web-socket error while connecting to Discord. Will try again",
+                    metadata: [
+                        "error": .string(String(reflecting: error)),
+                        "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed)),
+                    ]
+                )
                 self.state.store(.noConnection, ordering: .relaxed)
                 await self.onClose(closeReason: .error(error), forConnectionWithId: connectionId)
             }
@@ -350,7 +367,7 @@ public actor BotGatewayManager: GatewayManager {
             )
         )
     }
-    
+
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     public func updatePresence(payload: Gateway.Identify.Presence) {
         self.send(
@@ -363,7 +380,7 @@ public actor BotGatewayManager: GatewayManager {
             )
         )
     }
-    
+
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
     public func updateVoiceState(payload: VoiceStateUpdate) {
         self.send(
@@ -388,17 +405,23 @@ public actor BotGatewayManager: GatewayManager {
     public func makeEventsParseFailureStream() -> AsyncStream<(any Error, ByteBuffer)> {
         self.eventFailures.base
     }
-    
+
     /// Disconnects from Discord.
     /// Doesn't end the event streams.
     public func disconnect() async {
-        logger.debug("Will disconnect", metadata: [
-            "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-        ])
-        if self.state.load(ordering: .relaxed) == .stopped {
-            logger.debug("Already disconnected", metadata: [
+        logger.debug(
+            "Will disconnect",
+            metadata: [
                 "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-            ])
+            ]
+        )
+        if self.state.load(ordering: .relaxed) == .stopped {
+            logger.debug(
+                "Already disconnected",
+                metadata: [
+                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                ]
+            )
             return
         }
         self.connectionId.wrappingIncrement(ordering: .relaxed)
@@ -414,7 +437,7 @@ extension BotGatewayManager {
         if let sequenceNumber = event.sequenceNumber {
             self.sequenceNumber = sequenceNumber
         }
-        
+
         switch event.opcode {
         case .heartbeat:
             self.sendPing(forConnectionWithId: self.connectionId.load(ordering: .relaxed))
@@ -425,12 +448,15 @@ extension BotGatewayManager {
         default:
             break
         }
-        
+
         switch event.data {
         case let .invalidSession(canResume):
-            logger.warning("Got invalid session. Will try to reconnect or resume", metadata: [
-                "canResume": .stringConvertible(canResume)
-            ])
+            logger.warning(
+                "Got invalid session. Will try to reconnect or resume",
+                metadata: [
+                    "canResume": .stringConvertible(canResume)
+                ]
+            )
             if !canResume {
                 self.sequenceNumber = nil
                 self.resumeGatewayURL = nil
@@ -450,26 +476,34 @@ extension BotGatewayManager {
             logger.trace("Will resume or identify")
             await self.sendResumeOrIdentify()
         case let .ready(payload):
-            logger.notice("Received ready notice. The connection is fully established", metadata: [
-                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-            ])
+            logger.notice(
+                "Received ready notice. The connection is fully established",
+                metadata: [
+                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                ]
+            )
             await self.onSuccessfulConnection()
             self.sessionId = payload.session_id
             self.resumeGatewayURL = payload.resume_gateway_url
         case .resumed:
-            logger.debug("Received resume notice. The connection is fully established", metadata: [
-                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-            ])
+            logger.debug(
+                "Received resume notice. The connection is fully established",
+                metadata: [
+                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                ]
+            )
             await self.onSuccessfulConnection()
         default:
             break
         }
     }
-    
+
     private func getGatewayURL() async -> String {
         logger.debug("Will try to get Discord gateway url")
-        if self.sequenceNumber != nil, /// If can resume at all
-           let gatewayURL = self.resumeGatewayURL {
+        if self.sequenceNumber != nil,
+            /// If can resume at all
+            let gatewayURL = self.resumeGatewayURL
+        {
             logger.trace("Got Discord gateway url from 'resumeGatewayURL'")
             return gatewayURL
         } else {
@@ -478,36 +512,45 @@ extension BotGatewayManager {
                 logger.trace("Got Discord gateway url from gateway api call")
                 return gatewayURL
             } catch {
-                logger.error("Cannot get gateway url to connect to. Will retry in 10 seconds", metadata: [
-                    "error": .string(String(reflecting: error))
-                ])
+                logger.error(
+                    "Cannot get gateway url to connect to. Will retry in 10 seconds",
+                    metadata: [
+                        "error": .string(String(reflecting: error))
+                    ]
+                )
                 try? await Task.sleep(for: .seconds(10))
                 return await self.getGatewayURL()
             }
         }
     }
-    
+
     private func sendResumeOrIdentify() async {
         if let sessionId = self.sessionId,
-           let lastSequenceNumber = self.sequenceNumber {
+            let lastSequenceNumber = self.sequenceNumber
+        {
             self.sendResume(sessionId: sessionId, sequenceNumber: lastSequenceNumber)
         } else {
-            logger.debug("Can't resume last Discord connection. Will identify", metadata: [
-                "sessionId": .stringConvertible(self.sessionId ?? "nil"),
-                "lastSequenceNumber": .stringConvertible(self.sequenceNumber ?? -1)
-            ])
+            logger.debug(
+                "Can't resume last Discord connection. Will identify",
+                metadata: [
+                    "sessionId": .stringConvertible(self.sessionId ?? "nil"),
+                    "lastSequenceNumber": .stringConvertible(self.sequenceNumber ?? -1),
+                ]
+            )
             await self.sendIdentify()
         }
     }
-    
+
     private func sendResume(sessionId: String, sequenceNumber: Int) {
         let resume = Gateway.Event(
             opcode: .resume,
-            data: .resume(.init(
-                token: identifyPayload.token,
-                session_id: sessionId,
-                sequence: sequenceNumber
-            ))
+            data: .resume(
+                .init(
+                    token: identifyPayload.token,
+                    session_id: sessionId,
+                    sequence: sequenceNumber
+                )
+            )
         )
         let opcode = Gateway.Opcode.identify
         self.send(
@@ -521,10 +564,10 @@ extension BotGatewayManager {
         /// This will be a notice for the next connection to
         /// not try resuming anymore, if this connection has failed.
         self.sequenceNumber = nil
-        
+
         logger.debug("Sent resume request to Discord")
     }
-    
+
     private func sendIdentify() async {
         connectionBackoff.willTry()
         let identify = Gateway.Event(
@@ -533,7 +576,7 @@ extension BotGatewayManager {
         )
         self.send(message: .init(payload: identify))
     }
-    
+
     private func processBinaryData(
         _ message: WebSocketMessage,
         forConnectionWithId connectionId: UInt
@@ -543,14 +586,20 @@ extension BotGatewayManager {
         let buffer: ByteBuffer
         switch message {
         case .text(let string):
-            self.logger.debug("Got text from websocket", metadata: [
-                "text": .string(string)
-            ])
+            self.logger.debug(
+                "Got text from websocket",
+                metadata: [
+                    "text": .string(string)
+                ]
+            )
             buffer = ByteBuffer(string: string)
         case .binary(let _buffer):
-            self.logger.debug("Got binary from websocket", metadata: [
-                "text": .string(String(buffer: _buffer))
-            ])
+            self.logger.debug(
+                "Got binary from websocket",
+                metadata: [
+                    "text": .string(String(buffer: _buffer))
+                ]
+            )
             buffer = _buffer
         }
 
@@ -559,20 +608,24 @@ extension BotGatewayManager {
                 Gateway.Event.self,
                 from: Data(buffer: buffer, byteTransferStrategy: .noCopy)
             )
-            self.logger.debug("Decoded event with opcode", metadata: [
-                "opcode": .string(event.opcode.description)
-            ])
-            self.logger.debug("Decoded event", metadata: [
-                "event": .string("\(event)")
-            ])
+            self.logger.debug(
+                "Decoded event",
+                metadata: [
+                    "event": .string("\(event)"),
+                    "opcode": .string(event.opcode.description),
+                ]
+            )
             Task { await self.processEvent(event) }
             for continuation in self.eventsStreamContinuations {
                 continuation.yield(event)
             }
         } catch {
-            self.logger.debug("Failed to decode event", metadata: [
-                "error": .string("\(error)")
-            ])
+            self.logger.debug(
+                "Failed to decode event",
+                metadata: [
+                    "error": .string("\(error)")
+                ]
+            )
             for continuation in self.eventsParseFailureContinuations {
                 continuation.yield((error, buffer))
             }
@@ -599,28 +652,33 @@ extension BotGatewayManager {
                 "code": .string(codeDesc),
                 "closedConnectionId": .stringConvertible(
                     self.connectionId.load(ordering: .relaxed)
-                )
+                ),
             ]
         )
         if self.canTryReconnect(code: code) {
             self.state.store(.noConnection, ordering: .relaxed)
-            self.logger.trace("Will try reconnect since Discord does allow it.", metadata: [
-                "code": .string(codeDesc),
-                "closedConnectionId": .stringConvertible(
-                    self.connectionId.load(ordering: .relaxed)
-                )
-            ])
+            self.logger.trace(
+                "Will try reconnect since Discord does allow it.",
+                metadata: [
+                    "code": .string(codeDesc),
+                    "closedConnectionId": .stringConvertible(
+                        self.connectionId.load(ordering: .relaxed)
+                    ),
+                ]
+            )
             await self.connect()
         } else {
             self.state.store(.stopped, ordering: .relaxed)
             self.connectionId.wrappingIncrement(ordering: .relaxed)
-            self.logger.critical("Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/DiscordBM/DiscordBM/issues if you think this is a library issue")
+            self.logger.critical(
+                "Will not reconnect because Discord does not allow it. Something is wrong. Your close code is '\(codeDesc)', check Discord docs at https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes and see what it means. Report at https://github.com/DiscordBM/DiscordBM/issues if you think this is a library issue"
+            )
 
             /// Don't remove/end the event streams just to stop apps from crashing/restarting
             /// which could result in bot-token revocations or even temporary ip bans.
         }
     }
-    
+
     private nonisolated func getCloseCodeAndDescription(
         of closeReason: CloseReason
     ) -> (WebSocketErrorCode?, String) {
@@ -647,7 +705,7 @@ extension BotGatewayManager {
             return (code, description)
         }
     }
-    
+
     private nonisolated func canTryReconnect(code: WebSocketErrorCode?) -> Bool {
         switch code {
         case let .unknown(codeNumber):
@@ -656,7 +714,7 @@ extension BotGatewayManager {
         default: return true
         }
     }
-    
+
     private func setupPingTask(
         forConnectionWithId connectionId: UInt,
         every duration: Duration
@@ -664,23 +722,32 @@ extension BotGatewayManager {
         Task {
             try? await Task.sleep(for: duration)
             guard self.connectionId.load(ordering: .relaxed) == connectionId else {
-                self.logger.trace("Canceled a ping task", metadata: [
-                    "connectionId": .stringConvertible(connectionId)
-                ])
-                return /// cancel
+                self.logger.trace(
+                    "Canceled a ping task",
+                    metadata: [
+                        "connectionId": .stringConvertible(connectionId)
+                    ]
+                )
+                return/// cancel
             }
-            self.logger.debug("Will send automatic ping", metadata: [
-                "connectionId": .stringConvertible(connectionId)
-            ])
+            self.logger.debug(
+                "Will send automatic ping",
+                metadata: [
+                    "connectionId": .stringConvertible(connectionId)
+                ]
+            )
             self.sendPing(forConnectionWithId: connectionId)
             self.setupPingTask(forConnectionWithId: connectionId, every: duration)
         }
     }
-    
+
     private func sendPing(forConnectionWithId connectionId: UInt) {
-        logger.trace("Will ping", metadata: [
-            "connectionId": .stringConvertible(connectionId)
-        ])
+        logger.trace(
+            "Will ping",
+            metadata: [
+                "connectionId": .stringConvertible(connectionId)
+            ]
+        )
         self.send(
             message: .init(
                 payload: .init(
@@ -703,9 +770,12 @@ extension BotGatewayManager {
                 self.unsuccessfulPingsCount += 1
             }
             if unsuccessfulPingsCount > 2 {
-                logger.debug("Too many unsuccessful pings. Will try to reconnect", metadata: [
-                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-                ])
+                logger.debug(
+                    "Too many unsuccessful pings. Will try to reconnect",
+                    metadata: [
+                        "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
+                    ]
+                )
                 self.state.store(.noConnection, ordering: .relaxed)
                 await self.connect()
             }
@@ -720,9 +790,12 @@ extension BotGatewayManager {
             case .connected:
                 break
             case .stopped:
-                logger.warning("Will not send message because bot is stopped", metadata: [
-                    "message": .string("\(message)")
-                ])
+                logger.warning(
+                    "Will not send message because bot is stopped",
+                    metadata: [
+                        "message": .string("\(message)")
+                    ]
+                )
                 return
             case .noConnection, .connecting, .configured:
                 switch message.payload.opcode.isSentForConnectionEstablishment {
@@ -736,35 +809,46 @@ extension BotGatewayManager {
                 }
             }
             if let connectionId = message.connectionId,
-               self.connectionId.load(ordering: .relaxed) != connectionId {
+                self.connectionId.load(ordering: .relaxed) != connectionId
+            {
                 return
             }
             Task {
-                let opcode: WebSocketOpcode = message.opcode ?? .init(
-                    encodedWebSocketOpcode: message.payload.opcode.rawValue
-                )!
+                let opcode: WebSocketOpcode =
+                    message.opcode ?? .init(
+                        encodedWebSocketOpcode: message.payload.opcode.rawValue
+                    )!
 
                 let data: Data
                 do {
                     data = try DiscordGlobalConfiguration.encoder.encode(message.payload)
                 } catch {
-                    self.logger.error("Could not encode payload", metadata: [
-                        "payload": .string("\(message.payload)"),
-                        "opcode": .stringConvertible(opcode),
-                        "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-                    ])
+                    self.logger.error(
+                        "Could not encode payload",
+                        metadata: [
+                            "payload": .string("\(message.payload)"),
+                            "opcode": .stringConvertible(opcode),
+                            "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed)),
+                        ]
+                    )
                     return
                 }
 
                 if let outboundWriter = await self.outboundWriter {
                     do {
-                        self.logger.debug("Will send a payload with opcode", metadata: [
-                            "opcode": .string(message.payload.opcode.description)
-                        ])
-                        self.logger.trace("Will send a payload", metadata: [
-                            "payload": .string("\(message.payload)"),
-                            "opcode": .stringConvertible(opcode)
-                        ])
+                        self.logger.debug(
+                            "Will send a payload with opcode",
+                            metadata: [
+                                "opcode": .string(message.payload.opcode.description)
+                            ]
+                        )
+                        self.logger.trace(
+                            "Will send a payload",
+                            metadata: [
+                                "payload": .string("\(message.payload)"),
+                                "opcode": .stringConvertible(opcode),
+                            ]
+                        )
                         try await outboundWriter.write(
                             .custom(
                                 .init(
@@ -776,22 +860,31 @@ extension BotGatewayManager {
                         )
                     } catch {
                         if let channelError = error as? ChannelError,
-                           case .ioOnClosedChannel = channelError {
-                            self.logger.error("Received 'ChannelError.ioOnClosedChannel' error while sending payload through web-socket. Will fully disconnect and reconnect again")
+                            case .ioOnClosedChannel = channelError
+                        {
+                            self.logger.error(
+                                "Received 'ChannelError.ioOnClosedChannel' error while sending payload through web-socket. Will fully disconnect and reconnect again"
+                            )
                             await self.disconnect()
                             await self.connect()
                         } else if message.payload.opcode == .heartbeat,
-                                  let writerError = error as? NIOAsyncWriterError,
-                                  writerError == .alreadyFinished() {
-                            self.logger.debug("Received 'NIOAsyncWriterError.alreadyFinished' error while sending heartbeat through web-socket. Will ignore")
+                            let writerError = error as? NIOAsyncWriterError,
+                            writerError == .alreadyFinished()
+                        {
+                            self.logger.debug(
+                                "Received 'NIOAsyncWriterError.alreadyFinished' error while sending heartbeat through web-socket. Will ignore"
+                            )
                         } else {
-                            self.logger.error("Could not send payload through web-socket", metadata: [
-                                "error": .string(String(reflecting: error)),
-                                "payload": .string("\(message.payload)"),
-                                "opcode": .stringConvertible(opcode),
-                                "state": .stringConvertible(self.state.load(ordering: .relaxed)),
-                                "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-                            ])
+                            self.logger.error(
+                                "Could not send payload through web-socket",
+                                metadata: [
+                                    "error": .string(String(reflecting: error)),
+                                    "payload": .string("\(message.payload)"),
+                                    "opcode": .stringConvertible(opcode),
+                                    "state": .stringConvertible(self.state.load(ordering: .relaxed)),
+                                    "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed)),
+                                ]
+                            )
                         }
                     }
                 } else {
@@ -805,8 +898,9 @@ extension BotGatewayManager {
                         metadata: [
                             "payload": .string("\(message.payload)"),
                             "state": .stringConvertible(self.state.load(ordering: .relaxed)),
-                            "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed))
-                        ])
+                            "connectionId": .stringConvertible(self.connectionId.load(ordering: .relaxed)),
+                        ]
+                    )
                 }
             }
         }
@@ -826,13 +920,14 @@ extension BotGatewayManager {
     /// Maybe soon with some `DistributedActor`s magic.
     private func waitInShardQueueIfNeeded() async {
         if let shardInfo,
-           /// If shard already connected once before, then skip the wait.
-           !shardInfo.shardConnectedOnceBefore {
+            /// If shard already connected once before, then skip the wait.
+            !shardInfo.shardConnectedOnceBefore
+        {
             logger.trace("Will wait for other shards")
             /// `shardManager` must exist. Initializer must enforce this.
             await shardInfo.shardCoordinator.waitForOtherShards(
                 shard: shardInfo.shard,
-                maxConcurrency: max(shardInfo.maxConcurrency, 1) /// Avoid an unlikely division-by-zero
+                maxConcurrency: max(shardInfo.maxConcurrency, 1)/// Avoid an unlikely division-by-zero
             )
             logger.trace("Done waiting for other shards")
         }
@@ -847,9 +942,12 @@ extension BotGatewayManager {
         do {
             try await self.outboundWriter?.close(.goingAway, reason: nil)
         } catch {
-            logger.warning("Will ignore WS closure failure", metadata: [
-                "error": .string(String(reflecting: error))
-            ])
+            logger.warning(
+                "Will ignore WS closure failure",
+                metadata: [
+                    "error": .string(String(reflecting: error))
+                ]
+            )
         }
         self.outboundWriter = nil
     }
@@ -891,7 +989,9 @@ private enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
 extension Gateway.Opcode {
     var isSentForConnectionEstablishment: Bool {
         switch self {
-        case .dispatch, .presenceUpdate, .voiceStateUpdate, .reconnect, .requestGuildMembers, .invalidSession, .hello, .heartbeatAccepted, .heartbeat: false
+        case .dispatch, .presenceUpdate, .voiceStateUpdate, .reconnect, .requestGuildMembers, .invalidSession, .hello,
+            .heartbeatAccepted, .heartbeat:
+            false
         case .identify, .resume: true
         }
     }

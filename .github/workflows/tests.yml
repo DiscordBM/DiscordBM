@@ -4,24 +4,28 @@ concurrency:
   cancel-in-progress: true
 on:
   pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
-  push: { branches: [ main ] }
+  push: { branches: [main] }
 
 jobs:
   main-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
+      with_linting: true
       with_coverage: true
       with_tsan: true
       with_api_check: true
-      test_filter: '^DiscordBMTests'
+      test_filter: "^DiscordBMTests"
+      extra_flags: "--explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable"
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
   macro-tests:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
       with_tsan: true
       with_api_check: false
-      test_filter: '^MacroTests'
+      test_filter: "^MacroTests"
+      extra_flags: "--explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable"
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

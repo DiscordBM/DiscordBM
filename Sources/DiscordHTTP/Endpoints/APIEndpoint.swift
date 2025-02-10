@@ -11,27 +11,27 @@ public enum APIEndpoint: Endpoint {
 
     // MARK: Polls
     /// https://discord.com/developers/docs/resources/poll
-    
+
     case listPollAnswerVoters(channelId: ChannelSnowflake, messageId: MessageSnowflake, answerId: Int)
     case endPoll(channelId: ChannelSnowflake, messageId: MessageSnowflake)
-    
+
     // MARK: AutoMod
     /// https://discord.com/developers/docs/resources/auto-moderation
-    
+
     case getAutoModerationRule(guildId: GuildSnowflake, ruleId: RuleSnowflake)
     case listAutoModerationRules(guildId: GuildSnowflake)
     case createAutoModerationRule(guildId: GuildSnowflake)
     case updateAutoModerationRule(guildId: GuildSnowflake, ruleId: RuleSnowflake)
     case deleteAutoModerationRule(guildId: GuildSnowflake, ruleId: RuleSnowflake)
-    
+
     // MARK: Audit Log
     /// https://discord.com/developers/docs/resources/audit-log
-    
+
     case listGuildAuditLogEntries(guildId: GuildSnowflake)
-    
+
     // MARK: Channels
     /// https://discord.com/developers/docs/resources/channel
-    
+
     case getChannel(channelId: ChannelSnowflake)
     case listPinnedMessages(channelId: ChannelSnowflake)
     case addGroupDmUser(channelId: ChannelSnowflake, userId: UserSnowflake)
@@ -46,52 +46,72 @@ public enum APIEndpoint: Endpoint {
     case deleteChannelPermissionOverwrite(channelId: ChannelSnowflake, overwriteId: AnySnowflake)
     case deleteGroupDmUser(channelId: ChannelSnowflake, userId: UserSnowflake)
     case unpinMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
-    
+
     // MARK: Commands
     /// https://discord.com/developers/docs/interactions/application-commands
-    
+
     case getApplicationCommand(applicationId: ApplicationSnowflake, commandId: CommandSnowflake)
-    case getGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: CommandSnowflake)
-    case getGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: CommandSnowflake)
+    case getGuildApplicationCommand(
+        applicationId: ApplicationSnowflake,
+        guildId: GuildSnowflake,
+        commandId: CommandSnowflake
+    )
+    case getGuildApplicationCommandPermissions(
+        applicationId: ApplicationSnowflake,
+        guildId: GuildSnowflake,
+        commandId: CommandSnowflake
+    )
     case listApplicationCommands(applicationId: ApplicationSnowflake)
     case listGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
     case listGuildApplicationCommands(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
     case bulkSetApplicationCommands(applicationId: ApplicationSnowflake)
     case bulkSetGuildApplicationCommands(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
-    case setGuildApplicationCommandPermissions(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: CommandSnowflake)
+    case setGuildApplicationCommandPermissions(
+        applicationId: ApplicationSnowflake,
+        guildId: GuildSnowflake,
+        commandId: CommandSnowflake
+    )
     case createApplicationCommand(applicationId: ApplicationSnowflake)
     case createGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake)
     case updateApplicationCommand(applicationId: ApplicationSnowflake, commandId: CommandSnowflake)
-    case updateGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: CommandSnowflake)
+    case updateGuildApplicationCommand(
+        applicationId: ApplicationSnowflake,
+        guildId: GuildSnowflake,
+        commandId: CommandSnowflake
+    )
     case deleteApplicationCommand(applicationId: ApplicationSnowflake, commandId: CommandSnowflake)
-    case deleteGuildApplicationCommand(applicationId: ApplicationSnowflake, guildId: GuildSnowflake, commandId: CommandSnowflake)
-    
+    case deleteGuildApplicationCommand(
+        applicationId: ApplicationSnowflake,
+        guildId: GuildSnowflake,
+        commandId: CommandSnowflake
+    )
+
     // MARK: Emoji
     /// https://discord.com/developers/docs/resources/emoji
-    
+
     case getGuildEmoji(guildId: GuildSnowflake, emojiId: EmojiSnowflake)
     case listGuildEmojis(guildId: GuildSnowflake)
     case createGuildEmoji(guildId: GuildSnowflake)
     case updateGuildEmoji(guildId: GuildSnowflake, emojiId: EmojiSnowflake)
     case deleteGuildEmoji(guildId: GuildSnowflake, emojiId: EmojiSnowflake)
-    
+
     // MARK: Entitlements
     /// https://discord.com/developers/docs/monetization/entitlements
-    
+
     case listEntitlements(applicationId: ApplicationSnowflake)
     case consumeEntitlement(applicationId: ApplicationSnowflake, entitlementId: EntitlementSnowflake)
     case createTestEntitlement(applicationId: ApplicationSnowflake)
     case deleteTestEntitlement(applicationId: ApplicationSnowflake, entitlementId: EntitlementSnowflake)
-    
+
     // MARK: Gateway
     /// https://discord.com/developers/docs/topics/gateway
-    
+
     case getBotGateway
     case getGateway
-    
+
     // MARK: Guilds
     /// https://discord.com/developers/docs/resources/guild
-    
+
     case getGuild(guildId: GuildSnowflake)
     case getGuildBan(guildId: GuildSnowflake, userId: UserSnowflake)
     case getGuildOnboarding(guildId: GuildSnowflake)
@@ -121,10 +141,10 @@ public enum APIEndpoint: Endpoint {
     case deleteGuildIntegration(guildId: GuildSnowflake, integrationId: IntegrationSnowflake)
     case leaveGuild(guildId: GuildSnowflake)
     case unbanUserFromGuild(guildId: GuildSnowflake, userId: UserSnowflake)
-    
+
     // MARK: Guild Templates
     /// https://discord.com/developers/docs/resources/guild-template
-    
+
     case getGuildTemplate(code: String)
     case listGuildTemplates(guildId: GuildSnowflake)
     case syncGuildTemplate(guildId: GuildSnowflake, code: String)
@@ -132,31 +152,39 @@ public enum APIEndpoint: Endpoint {
     case createGuildTemplate(guildId: GuildSnowflake)
     case updateGuildTemplate(guildId: GuildSnowflake, code: String)
     case deleteGuildTemplate(guildId: GuildSnowflake, code: String)
-    
+
     // MARK: Interactions
     /// https://discord.com/developers/docs/interactions/receiving-and-responding
-    
+
     case getFollowupMessage(applicationId: ApplicationSnowflake, interactionToken: String, messageId: MessageSnowflake)
     case getOriginalInteractionResponse(applicationId: ApplicationSnowflake, interactionToken: String)
     case createFollowupMessage(applicationId: ApplicationSnowflake, interactionToken: String)
     case createInteractionResponse(interactionId: InteractionSnowflake, interactionToken: String)
-    case updateFollowupMessage(applicationId: ApplicationSnowflake, interactionToken: String, messageId: MessageSnowflake)
+    case updateFollowupMessage(
+        applicationId: ApplicationSnowflake,
+        interactionToken: String,
+        messageId: MessageSnowflake
+    )
     case updateOriginalInteractionResponse(applicationId: ApplicationSnowflake, interactionToken: String)
-    case deleteFollowupMessage(applicationId: ApplicationSnowflake, interactionToken: String, messageId: MessageSnowflake)
+    case deleteFollowupMessage(
+        applicationId: ApplicationSnowflake,
+        interactionToken: String,
+        messageId: MessageSnowflake
+    )
     case deleteOriginalInteractionResponse(applicationId: ApplicationSnowflake, interactionToken: String)
-    
+
     // MARK: Invites
     /// https://discord.com/developers/docs/resources/invite
-    
+
     case listChannelInvites(channelId: ChannelSnowflake)
     case listGuildInvites(guildId: GuildSnowflake)
     case resolveInvite(code: String)
     case createChannelInvite(channelId: ChannelSnowflake)
     case revokeInvite(code: String)
-    
+
     // MARK: Members
     /// https://discord.com/developers/docs/resources/guild
-    
+
     case getGuildMember(guildId: GuildSnowflake, userId: UserSnowflake)
     case getOwnGuildMember(guildId: GuildSnowflake)
     case listGuildMembers(guildId: GuildSnowflake)
@@ -165,10 +193,10 @@ public enum APIEndpoint: Endpoint {
     case updateGuildMember(guildId: GuildSnowflake, userId: UserSnowflake)
     case updateOwnGuildMember(guildId: GuildSnowflake)
     case deleteGuildMember(guildId: GuildSnowflake, userId: UserSnowflake)
-    
+
     // MARK: Messages
     /// https://discord.com/developers/docs/resources/channel
-    
+
     case getMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
     case listMessageReactionsByEmoji(channelId: ChannelSnowflake, messageId: MessageSnowflake, emojiName: String)
     case listMessages(channelId: ChannelSnowflake)
@@ -181,16 +209,21 @@ public enum APIEndpoint: Endpoint {
     case deleteAllMessageReactionsByEmoji(channelId: ChannelSnowflake, messageId: MessageSnowflake, emojiName: String)
     case deleteMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
     case deleteOwnMessageReaction(channelId: ChannelSnowflake, messageId: MessageSnowflake, emojiName: String)
-    case deleteUserMessageReaction(channelId: ChannelSnowflake, messageId: MessageSnowflake, emojiName: String, userId: UserSnowflake)
-    
+    case deleteUserMessageReaction(
+        channelId: ChannelSnowflake,
+        messageId: MessageSnowflake,
+        emojiName: String,
+        userId: UserSnowflake
+    )
+
     // MARK: OAuth
     /// https://discord.com/developers/docs/topics/oauth2
-    
+
     case getOwnOauth2Application
-    
+
     // MARK: Roles
     /// https://discord.com/developers/docs/resources/guild
-    
+
     case listGuildRoles(guildId: GuildSnowflake)
     case addGuildMemberRole(guildId: GuildSnowflake, userId: UserSnowflake, roleId: RoleSnowflake)
     case createGuildRole(guildId: GuildSnowflake)
@@ -198,41 +231,41 @@ public enum APIEndpoint: Endpoint {
     case updateGuildRolePositions(guildId: GuildSnowflake)
     case deleteGuildMemberRole(guildId: GuildSnowflake, userId: UserSnowflake, roleId: RoleSnowflake)
     case deleteGuildRole(guildId: GuildSnowflake, roleId: RoleSnowflake)
-    
+
     // MARK: Role Connections
     /// https://discord.com/developers/docs/resources/user
-    
+
     case getApplicationUserRoleConnection(applicationId: ApplicationSnowflake)
     case listApplicationRoleConnectionMetadata(applicationId: ApplicationSnowflake)
     case bulkOverwriteApplicationRoleConnectionMetadata(applicationId: ApplicationSnowflake)
     case updateApplicationUserRoleConnection(applicationId: ApplicationSnowflake)
-    
+
     // MARK: Scheduled Events
     /// https://discord.com/developers/docs/resources/guild-scheduled-event
-    
+
     case getGuildScheduledEvent(guildId: GuildSnowflake, guildScheduledEventId: GuildScheduledEventSnowflake)
     case listGuildScheduledEventUsers(guildId: GuildSnowflake, guildScheduledEventId: GuildScheduledEventSnowflake)
     case listGuildScheduledEvents(guildId: GuildSnowflake)
     case createGuildScheduledEvent(guildId: GuildSnowflake)
     case updateGuildScheduledEvent(guildId: GuildSnowflake, guildScheduledEventId: GuildScheduledEventSnowflake)
     case deleteGuildScheduledEvent(guildId: GuildSnowflake, guildScheduledEventId: GuildScheduledEventSnowflake)
-    
+
     // MARK: SKUs
     /// https://discord.com/developers/docs/monetization/skus
-    
+
     case listSkus(applicationId: ApplicationSnowflake)
-    
+
     // MARK: Stages
     /// https://discord.com/developers/docs/resources/stage-instance
-    
+
     case getStageInstance(channelId: ChannelSnowflake)
     case createStageInstance
     case updateStageInstance(channelId: ChannelSnowflake)
     case deleteStageInstance(channelId: ChannelSnowflake)
-    
+
     // MARK: Stickers
     /// https://discord.com/developers/docs/resources/sticker
-    
+
     case getGuildSticker(guildId: GuildSnowflake, stickerId: StickerSnowflake)
     case getSticker(stickerId: StickerSnowflake)
     case listGuildStickers(guildId: GuildSnowflake)
@@ -240,10 +273,10 @@ public enum APIEndpoint: Endpoint {
     case createGuildSticker(guildId: GuildSnowflake)
     case updateGuildSticker(guildId: GuildSnowflake, stickerId: StickerSnowflake)
     case deleteGuildSticker(guildId: GuildSnowflake, stickerId: StickerSnowflake)
-    
+
     // MARK: Threads
     /// https://discord.com/developers/docs/resources/channel
-    
+
     case getThreadMember(channelId: ChannelSnowflake, userId: UserSnowflake)
     case listActiveGuildThreads(guildId: GuildSnowflake)
     case listOwnPrivateArchivedThreads(channelId: ChannelSnowflake)
@@ -257,28 +290,28 @@ public enum APIEndpoint: Endpoint {
     case createThreadInForumChannel(channelId: ChannelSnowflake)
     case deleteThreadMember(channelId: ChannelSnowflake, userId: UserSnowflake)
     case leaveThread(channelId: ChannelSnowflake)
-    
+
     // MARK: Users
     /// https://discord.com/developers/docs/resources/user
-    
+
     case getOwnApplication
     case getOwnUser
     case getUser(userId: UserSnowflake)
     case listOwnConnections
     case updateOwnApplication
     case updateOwnUser
-    
+
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice#list-voice-regions
-    
+
     case listGuildVoiceRegions(guildId: GuildSnowflake)
     case listVoiceRegions
     case updateSelfVoiceState(guildId: GuildSnowflake)
     case updateVoiceState(guildId: GuildSnowflake, userId: UserSnowflake)
-    
+
     // MARK: Webhooks
     /// https://discord.com/developers/docs/resources/webhook
-    
+
     case getGuildWebhooks(guildId: GuildSnowflake)
     case getWebhook(webhookId: WebhookSnowflake)
     case getWebhookByToken(webhookId: WebhookSnowflake, webhookToken: String)
@@ -2695,7 +2728,8 @@ public enum APIEndpoint: Endpoint {
     public var description: String {
         switch self {
         case let .listPollAnswerVoters(channelId, messageId, answerId):
-            return "listPollAnswerVoters(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), answerId: \(answerId))"
+            return
+                "listPollAnswerVoters(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), answerId: \(answerId))"
         case let .endPoll(channelId, messageId):
             return "endPoll(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
         case let .getAutoModerationRule(guildId, ruleId):
@@ -2705,9 +2739,11 @@ public enum APIEndpoint: Endpoint {
         case let .createAutoModerationRule(guildId):
             return "createAutoModerationRule(guildId.rawValue: \(guildId.rawValue))"
         case let .updateAutoModerationRule(guildId, ruleId):
-            return "updateAutoModerationRule(guildId.rawValue: \(guildId.rawValue), ruleId.rawValue: \(ruleId.rawValue))"
+            return
+                "updateAutoModerationRule(guildId.rawValue: \(guildId.rawValue), ruleId.rawValue: \(ruleId.rawValue))"
         case let .deleteAutoModerationRule(guildId, ruleId):
-            return "deleteAutoModerationRule(guildId.rawValue: \(guildId.rawValue), ruleId.rawValue: \(ruleId.rawValue))"
+            return
+                "deleteAutoModerationRule(guildId.rawValue: \(guildId.rawValue), ruleId.rawValue: \(ruleId.rawValue))"
         case let .listGuildAuditLogEntries(guildId):
             return "listGuildAuditLogEntries(guildId.rawValue: \(guildId.rawValue))"
         case let .getChannel(channelId):
@@ -2719,7 +2755,8 @@ public enum APIEndpoint: Endpoint {
         case let .pinMessage(channelId, messageId):
             return "pinMessage(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
         case let .setChannelPermissionOverwrite(channelId, overwriteId):
-            return "setChannelPermissionOverwrite(channelId.rawValue: \(channelId.rawValue), overwriteId.rawValue: \(overwriteId.rawValue))"
+            return
+                "setChannelPermissionOverwrite(channelId.rawValue: \(channelId.rawValue), overwriteId.rawValue: \(overwriteId.rawValue))"
         case .createDm:
             return "createDm"
         case .createGroupDm:
@@ -2733,41 +2770,54 @@ public enum APIEndpoint: Endpoint {
         case let .deleteChannel(channelId):
             return "deleteChannel(channelId.rawValue: \(channelId.rawValue))"
         case let .deleteChannelPermissionOverwrite(channelId, overwriteId):
-            return "deleteChannelPermissionOverwrite(channelId.rawValue: \(channelId.rawValue), overwriteId.rawValue: \(overwriteId.rawValue))"
+            return
+                "deleteChannelPermissionOverwrite(channelId.rawValue: \(channelId.rawValue), overwriteId.rawValue: \(overwriteId.rawValue))"
         case let .deleteGroupDmUser(channelId, userId):
             return "deleteGroupDmUser(channelId.rawValue: \(channelId.rawValue), userId.rawValue: \(userId.rawValue))"
         case let .unpinMessage(channelId, messageId):
             return "unpinMessage(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
         case let .getApplicationCommand(applicationId, commandId):
-            return "getApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), commandId.rawValue: \(commandId.rawValue))"
+            return
+                "getApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), commandId.rawValue: \(commandId.rawValue))"
         case let .getGuildApplicationCommand(applicationId, guildId, commandId):
-            return "getGuildApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue), commandId.rawValue: \(commandId.rawValue))"
+            return
+                "getGuildApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue), commandId.rawValue: \(commandId.rawValue))"
         case let .getGuildApplicationCommandPermissions(applicationId, guildId, commandId):
-            return "getGuildApplicationCommandPermissions(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue), commandId.rawValue: \(commandId.rawValue))"
+            return
+                "getGuildApplicationCommandPermissions(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue), commandId.rawValue: \(commandId.rawValue))"
         case let .listApplicationCommands(applicationId):
             return "listApplicationCommands(applicationId.rawValue: \(applicationId.rawValue))"
         case let .listGuildApplicationCommandPermissions(applicationId, guildId):
-            return "listGuildApplicationCommandPermissions(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue))"
+            return
+                "listGuildApplicationCommandPermissions(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue))"
         case let .listGuildApplicationCommands(applicationId, guildId):
-            return "listGuildApplicationCommands(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue))"
+            return
+                "listGuildApplicationCommands(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue))"
         case let .bulkSetApplicationCommands(applicationId):
             return "bulkSetApplicationCommands(applicationId.rawValue: \(applicationId.rawValue))"
         case let .bulkSetGuildApplicationCommands(applicationId, guildId):
-            return "bulkSetGuildApplicationCommands(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue))"
+            return
+                "bulkSetGuildApplicationCommands(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue))"
         case let .setGuildApplicationCommandPermissions(applicationId, guildId, commandId):
-            return "setGuildApplicationCommandPermissions(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue), commandId.rawValue: \(commandId.rawValue))"
+            return
+                "setGuildApplicationCommandPermissions(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue), commandId.rawValue: \(commandId.rawValue))"
         case let .createApplicationCommand(applicationId):
             return "createApplicationCommand(applicationId.rawValue: \(applicationId.rawValue))"
         case let .createGuildApplicationCommand(applicationId, guildId):
-            return "createGuildApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue))"
+            return
+                "createGuildApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue))"
         case let .updateApplicationCommand(applicationId, commandId):
-            return "updateApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), commandId.rawValue: \(commandId.rawValue))"
+            return
+                "updateApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), commandId.rawValue: \(commandId.rawValue))"
         case let .updateGuildApplicationCommand(applicationId, guildId, commandId):
-            return "updateGuildApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue), commandId.rawValue: \(commandId.rawValue))"
+            return
+                "updateGuildApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue), commandId.rawValue: \(commandId.rawValue))"
         case let .deleteApplicationCommand(applicationId, commandId):
-            return "deleteApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), commandId.rawValue: \(commandId.rawValue))"
+            return
+                "deleteApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), commandId.rawValue: \(commandId.rawValue))"
         case let .deleteGuildApplicationCommand(applicationId, guildId, commandId):
-            return "deleteGuildApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue), commandId.rawValue: \(commandId.rawValue))"
+            return
+                "deleteGuildApplicationCommand(applicationId.rawValue: \(applicationId.rawValue), guildId.rawValue: \(guildId.rawValue), commandId.rawValue: \(commandId.rawValue))"
         case let .getGuildEmoji(guildId, emojiId):
             return "getGuildEmoji(guildId.rawValue: \(guildId.rawValue), emojiId.rawValue: \(emojiId.rawValue))"
         case let .listGuildEmojis(guildId):
@@ -2781,11 +2831,13 @@ public enum APIEndpoint: Endpoint {
         case let .listEntitlements(applicationId):
             return "listEntitlements(applicationId.rawValue: \(applicationId.rawValue))"
         case let .consumeEntitlement(applicationId, entitlementId):
-            return "consumeEntitlement(applicationId.rawValue: \(applicationId.rawValue), entitlementId.rawValue: \(entitlementId.rawValue))"
+            return
+                "consumeEntitlement(applicationId.rawValue: \(applicationId.rawValue), entitlementId.rawValue: \(entitlementId.rawValue))"
         case let .createTestEntitlement(applicationId):
             return "createTestEntitlement(applicationId.rawValue: \(applicationId.rawValue))"
         case let .deleteTestEntitlement(applicationId, entitlementId):
-            return "deleteTestEntitlement(applicationId.rawValue: \(applicationId.rawValue), entitlementId.rawValue: \(entitlementId.rawValue))"
+            return
+                "deleteTestEntitlement(applicationId.rawValue: \(applicationId.rawValue), entitlementId.rawValue: \(entitlementId.rawValue))"
         case .getBotGateway:
             return "getBotGateway"
         case .getGateway:
@@ -2843,7 +2895,8 @@ public enum APIEndpoint: Endpoint {
         case let .deleteGuild(guildId):
             return "deleteGuild(guildId.rawValue: \(guildId.rawValue))"
         case let .deleteGuildIntegration(guildId, integrationId):
-            return "deleteGuildIntegration(guildId.rawValue: \(guildId.rawValue), integrationId.rawValue: \(integrationId.rawValue))"
+            return
+                "deleteGuildIntegration(guildId.rawValue: \(guildId.rawValue), integrationId.rawValue: \(integrationId.rawValue))"
         case let .leaveGuild(guildId):
             return "leaveGuild(guildId.rawValue: \(guildId.rawValue))"
         case let .unbanUserFromGuild(guildId, userId):
@@ -2863,21 +2916,29 @@ public enum APIEndpoint: Endpoint {
         case let .deleteGuildTemplate(guildId, code):
             return "deleteGuildTemplate(guildId.rawValue: \(guildId.rawValue), code: \(code))"
         case let .getFollowupMessage(applicationId, interactionToken, messageId):
-            return "getFollowupMessage(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken), messageId.rawValue: \(messageId.rawValue))"
+            return
+                "getFollowupMessage(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken), messageId.rawValue: \(messageId.rawValue))"
         case let .getOriginalInteractionResponse(applicationId, interactionToken):
-            return "getOriginalInteractionResponse(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken))"
+            return
+                "getOriginalInteractionResponse(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken))"
         case let .createFollowupMessage(applicationId, interactionToken):
-            return "createFollowupMessage(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken))"
+            return
+                "createFollowupMessage(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken))"
         case let .createInteractionResponse(interactionId, interactionToken):
-            return "createInteractionResponse(interactionId.rawValue: \(interactionId.rawValue), interactionToken: \(interactionToken))"
+            return
+                "createInteractionResponse(interactionId.rawValue: \(interactionId.rawValue), interactionToken: \(interactionToken))"
         case let .updateFollowupMessage(applicationId, interactionToken, messageId):
-            return "updateFollowupMessage(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken), messageId.rawValue: \(messageId.rawValue))"
+            return
+                "updateFollowupMessage(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken), messageId.rawValue: \(messageId.rawValue))"
         case let .updateOriginalInteractionResponse(applicationId, interactionToken):
-            return "updateOriginalInteractionResponse(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken))"
+            return
+                "updateOriginalInteractionResponse(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken))"
         case let .deleteFollowupMessage(applicationId, interactionToken, messageId):
-            return "deleteFollowupMessage(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken), messageId.rawValue: \(messageId.rawValue))"
+            return
+                "deleteFollowupMessage(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken), messageId.rawValue: \(messageId.rawValue))"
         case let .deleteOriginalInteractionResponse(applicationId, interactionToken):
-            return "deleteOriginalInteractionResponse(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken))"
+            return
+                "deleteOriginalInteractionResponse(applicationId.rawValue: \(applicationId.rawValue), interactionToken: \(interactionToken))"
         case let .listChannelInvites(channelId):
             return "listChannelInvites(channelId.rawValue: \(channelId.rawValue))"
         case let .listGuildInvites(guildId):
@@ -2907,35 +2968,43 @@ public enum APIEndpoint: Endpoint {
         case let .getMessage(channelId, messageId):
             return "getMessage(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
         case let .listMessageReactionsByEmoji(channelId, messageId, emojiName):
-            return "listMessageReactionsByEmoji(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName))"
+            return
+                "listMessageReactionsByEmoji(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName))"
         case let .listMessages(channelId):
             return "listMessages(channelId.rawValue: \(channelId.rawValue))"
         case let .addMessageReaction(channelId, messageId, emojiName):
-            return "addMessageReaction(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName))"
+            return
+                "addMessageReaction(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName))"
         case let .bulkDeleteMessages(channelId):
             return "bulkDeleteMessages(channelId.rawValue: \(channelId.rawValue))"
         case let .createMessage(channelId):
             return "createMessage(channelId.rawValue: \(channelId.rawValue))"
         case let .crosspostMessage(channelId, messageId):
-            return "crosspostMessage(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
+            return
+                "crosspostMessage(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
         case let .updateMessage(channelId, messageId):
             return "updateMessage(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
         case let .deleteAllMessageReactions(channelId, messageId):
-            return "deleteAllMessageReactions(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
+            return
+                "deleteAllMessageReactions(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
         case let .deleteAllMessageReactionsByEmoji(channelId, messageId, emojiName):
-            return "deleteAllMessageReactionsByEmoji(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName))"
+            return
+                "deleteAllMessageReactionsByEmoji(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName))"
         case let .deleteMessage(channelId, messageId):
             return "deleteMessage(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
         case let .deleteOwnMessageReaction(channelId, messageId, emojiName):
-            return "deleteOwnMessageReaction(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName))"
+            return
+                "deleteOwnMessageReaction(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName))"
         case let .deleteUserMessageReaction(channelId, messageId, emojiName, userId):
-            return "deleteUserMessageReaction(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName), userId.rawValue: \(userId.rawValue))"
+            return
+                "deleteUserMessageReaction(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName), userId.rawValue: \(userId.rawValue))"
         case .getOwnOauth2Application:
             return "getOwnOauth2Application"
         case let .listGuildRoles(guildId):
             return "listGuildRoles(guildId.rawValue: \(guildId.rawValue))"
         case let .addGuildMemberRole(guildId, userId, roleId):
-            return "addGuildMemberRole(guildId.rawValue: \(guildId.rawValue), userId.rawValue: \(userId.rawValue), roleId.rawValue: \(roleId.rawValue))"
+            return
+                "addGuildMemberRole(guildId.rawValue: \(guildId.rawValue), userId.rawValue: \(userId.rawValue), roleId.rawValue: \(roleId.rawValue))"
         case let .createGuildRole(guildId):
             return "createGuildRole(guildId.rawValue: \(guildId.rawValue))"
         case let .updateGuildRole(guildId, roleId):
@@ -2943,7 +3012,8 @@ public enum APIEndpoint: Endpoint {
         case let .updateGuildRolePositions(guildId):
             return "updateGuildRolePositions(guildId.rawValue: \(guildId.rawValue))"
         case let .deleteGuildMemberRole(guildId, userId, roleId):
-            return "deleteGuildMemberRole(guildId.rawValue: \(guildId.rawValue), userId.rawValue: \(userId.rawValue), roleId.rawValue: \(roleId.rawValue))"
+            return
+                "deleteGuildMemberRole(guildId.rawValue: \(guildId.rawValue), userId.rawValue: \(userId.rawValue), roleId.rawValue: \(roleId.rawValue))"
         case let .deleteGuildRole(guildId, roleId):
             return "deleteGuildRole(guildId.rawValue: \(guildId.rawValue), roleId.rawValue: \(roleId.rawValue))"
         case let .getApplicationUserRoleConnection(applicationId):
@@ -2955,17 +3025,21 @@ public enum APIEndpoint: Endpoint {
         case let .updateApplicationUserRoleConnection(applicationId):
             return "updateApplicationUserRoleConnection(applicationId.rawValue: \(applicationId.rawValue))"
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
-            return "getGuildScheduledEvent(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"
+            return
+                "getGuildScheduledEvent(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"
         case let .listGuildScheduledEventUsers(guildId, guildScheduledEventId):
-            return "listGuildScheduledEventUsers(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"
+            return
+                "listGuildScheduledEventUsers(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"
         case let .listGuildScheduledEvents(guildId):
             return "listGuildScheduledEvents(guildId.rawValue: \(guildId.rawValue))"
         case let .createGuildScheduledEvent(guildId):
             return "createGuildScheduledEvent(guildId.rawValue: \(guildId.rawValue))"
         case let .updateGuildScheduledEvent(guildId, guildScheduledEventId):
-            return "updateGuildScheduledEvent(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"
+            return
+                "updateGuildScheduledEvent(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"
         case let .deleteGuildScheduledEvent(guildId, guildScheduledEventId):
-            return "deleteGuildScheduledEvent(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"
+            return
+                "deleteGuildScheduledEvent(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"
         case let .listSkus(applicationId):
             return "listSkus(applicationId.rawValue: \(applicationId.rawValue))"
         case let .getStageInstance(channelId):
@@ -2987,9 +3061,11 @@ public enum APIEndpoint: Endpoint {
         case let .createGuildSticker(guildId):
             return "createGuildSticker(guildId.rawValue: \(guildId.rawValue))"
         case let .updateGuildSticker(guildId, stickerId):
-            return "updateGuildSticker(guildId.rawValue: \(guildId.rawValue), stickerId.rawValue: \(stickerId.rawValue))"
+            return
+                "updateGuildSticker(guildId.rawValue: \(guildId.rawValue), stickerId.rawValue: \(stickerId.rawValue))"
         case let .deleteGuildSticker(guildId, stickerId):
-            return "deleteGuildSticker(guildId.rawValue: \(guildId.rawValue), stickerId.rawValue: \(stickerId.rawValue))"
+            return
+                "deleteGuildSticker(guildId.rawValue: \(guildId.rawValue), stickerId.rawValue: \(stickerId.rawValue))"
         case let .getThreadMember(channelId, userId):
             return "getThreadMember(channelId.rawValue: \(channelId.rawValue), userId.rawValue: \(userId.rawValue))"
         case let .listActiveGuildThreads(guildId):
@@ -3009,7 +3085,8 @@ public enum APIEndpoint: Endpoint {
         case let .createThread(channelId):
             return "createThread(channelId.rawValue: \(channelId.rawValue))"
         case let .createThreadFromMessage(channelId, messageId):
-            return "createThreadFromMessage(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
+            return
+                "createThreadFromMessage(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue))"
         case let .createThreadInForumChannel(channelId):
             return "createThreadInForumChannel(channelId.rawValue: \(channelId.rawValue))"
         case let .deleteThreadMember(channelId, userId):
@@ -3043,7 +3120,8 @@ public enum APIEndpoint: Endpoint {
         case let .getWebhookByToken(webhookId, webhookToken):
             return "getWebhookByToken(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken))"
         case let .getWebhookMessage(webhookId, webhookToken, messageId):
-            return "getWebhookMessage(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken), messageId.rawValue: \(messageId.rawValue))"
+            return
+                "getWebhookMessage(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken), messageId.rawValue: \(messageId.rawValue))"
         case let .listChannelWebhooks(channelId):
             return "listChannelWebhooks(channelId.rawValue: \(channelId.rawValue))"
         case let .createWebhook(channelId):
@@ -3055,13 +3133,15 @@ public enum APIEndpoint: Endpoint {
         case let .updateWebhookByToken(webhookId, webhookToken):
             return "updateWebhookByToken(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken))"
         case let .updateWebhookMessage(webhookId, webhookToken, messageId):
-            return "updateWebhookMessage(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken), messageId.rawValue: \(messageId.rawValue))"
+            return
+                "updateWebhookMessage(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken), messageId.rawValue: \(messageId.rawValue))"
         case let .deleteWebhook(webhookId):
             return "deleteWebhook(webhookId.rawValue: \(webhookId.rawValue))"
         case let .deleteWebhookByToken(webhookId, webhookToken):
             return "deleteWebhookByToken(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken))"
         case let .deleteWebhookMessage(webhookId, webhookToken, messageId):
-            return "deleteWebhookMessage(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken), messageId.rawValue: \(messageId.rawValue))"
+            return
+                "deleteWebhookMessage(webhookId.rawValue: \(webhookId.rawValue), webhookToken: \(webhookToken), messageId.rawValue: \(messageId.rawValue))"
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
@@ -3072,56 +3152,56 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
 
     // MARK: Polls
     /// https://discord.com/developers/docs/resources/poll
-    
+
     case listPollAnswerVoters
-    
+
     // MARK: AutoMod
     /// https://discord.com/developers/docs/resources/auto-moderation
-    
+
     case getAutoModerationRule
     case listAutoModerationRules
-    
+
     // MARK: Audit Log
     /// https://discord.com/developers/docs/resources/audit-log
-    
+
     case listGuildAuditLogEntries
-    
+
     // MARK: Channels
     /// https://discord.com/developers/docs/resources/channel
-    
+
     case getChannel
     case listPinnedMessages
-    
+
     // MARK: Commands
     /// https://discord.com/developers/docs/interactions/application-commands
-    
+
     case getApplicationCommand
     case getGuildApplicationCommand
     case getGuildApplicationCommandPermissions
     case listApplicationCommands
     case listGuildApplicationCommandPermissions
     case listGuildApplicationCommands
-    
+
     // MARK: Emoji
     /// https://discord.com/developers/docs/resources/emoji
-    
+
     case getGuildEmoji
     case listGuildEmojis
-    
+
     // MARK: Entitlements
     /// https://discord.com/developers/docs/monetization/entitlements
-    
+
     case listEntitlements
-    
+
     // MARK: Gateway
     /// https://discord.com/developers/docs/topics/gateway
-    
+
     case getBotGateway
     case getGateway
-    
+
     // MARK: Guilds
     /// https://discord.com/developers/docs/resources/guild
-    
+
     case getGuild
     case getGuildBan
     case getGuildOnboarding
@@ -3136,109 +3216,109 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case listGuildIntegrations
     case listOwnGuilds
     case previewPruneGuild
-    
+
     // MARK: Guild Templates
     /// https://discord.com/developers/docs/resources/guild-template
-    
+
     case getGuildTemplate
     case listGuildTemplates
-    
+
     // MARK: Interactions
     /// https://discord.com/developers/docs/interactions/receiving-and-responding
-    
+
     case getFollowupMessage
     case getOriginalInteractionResponse
-    
+
     // MARK: Invites
     /// https://discord.com/developers/docs/resources/invite
-    
+
     case listChannelInvites
     case listGuildInvites
     case resolveInvite
-    
+
     // MARK: Members
     /// https://discord.com/developers/docs/resources/guild
-    
+
     case getGuildMember
     case getOwnGuildMember
     case listGuildMembers
     case searchGuildMembers
-    
+
     // MARK: Messages
     /// https://discord.com/developers/docs/resources/channel
-    
+
     case getMessage
     case listMessageReactionsByEmoji
     case listMessages
-    
+
     // MARK: OAuth
     /// https://discord.com/developers/docs/topics/oauth2
-    
+
     case getOwnOauth2Application
-    
+
     // MARK: Roles
     /// https://discord.com/developers/docs/resources/guild
-    
+
     case listGuildRoles
-    
+
     // MARK: Role Connections
     /// https://discord.com/developers/docs/resources/user
-    
+
     case getApplicationUserRoleConnection
     case listApplicationRoleConnectionMetadata
-    
+
     // MARK: Scheduled Events
     /// https://discord.com/developers/docs/resources/guild-scheduled-event
-    
+
     case getGuildScheduledEvent
     case listGuildScheduledEventUsers
     case listGuildScheduledEvents
-    
+
     // MARK: SKUs
     /// https://discord.com/developers/docs/monetization/skus
-    
+
     case listSkus
-    
+
     // MARK: Stages
     /// https://discord.com/developers/docs/resources/stage-instance
-    
+
     case getStageInstance
-    
+
     // MARK: Stickers
     /// https://discord.com/developers/docs/resources/sticker
-    
+
     case getGuildSticker
     case getSticker
     case listGuildStickers
     case listStickerPacks
-    
+
     // MARK: Threads
     /// https://discord.com/developers/docs/resources/channel
-    
+
     case getThreadMember
     case listActiveGuildThreads
     case listOwnPrivateArchivedThreads
     case listPrivateArchivedThreads
     case listPublicArchivedThreads
     case listThreadMembers
-    
+
     // MARK: Users
     /// https://discord.com/developers/docs/resources/user
-    
+
     case getOwnApplication
     case getOwnUser
     case getUser
     case listOwnConnections
-    
+
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice#list-voice-regions
-    
+
     case listGuildVoiceRegions
     case listVoiceRegions
-    
+
     // MARK: Webhooks
     /// https://discord.com/developers/docs/resources/webhook
-    
+
     case getGuildWebhooks
     case getWebhook
     case getWebhookByToken
@@ -3330,7 +3410,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         }
     }
 
-    init? (endpoint: APIEndpoint) {
+    init?(endpoint: APIEndpoint) {
         switch endpoint {
         case .listPollAnswerVoters: self = .listPollAnswerVoters
         case .getAutoModerationRule: self = .getAutoModerationRule

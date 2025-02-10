@@ -1,7 +1,7 @@
 import DiscordModels
+import Foundation
 import MultipartKit
 import NIOCore
-import Foundation
 
 private let allocator = ByteBufferAllocator()
 
@@ -60,7 +60,7 @@ struct MultipartEncodingContainer: Encodable {
             )
         }
 
-        init? (multipart: MultipartPart) {
+        init?(multipart: MultipartPart) {
             self.buffer = multipart.body
         }
 

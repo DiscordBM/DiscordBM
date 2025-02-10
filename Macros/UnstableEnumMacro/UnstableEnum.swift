@@ -1,5 +1,5 @@
-import SwiftSyntax
 import SwiftDiagnostics
+import SwiftSyntax
 import SwiftSyntaxMacros
 
 /// A macro to stabilize enums that might get more cases, to some extent.
@@ -37,10 +37,10 @@ public struct UnstableEnum: MemberMacro {
         let accessLevel = enumDecl.accessLevelModifier.map { "\($0) " } ?? ""
 
         guard let name = node.attributeName.as(IdentifierTypeSyntax.self),
-              let generic = name.genericArgumentClause,
-              generic.arguments.count == 1,
-              let genericTypeSyntax = generic.arguments.first?.argument,
-              let genericType = genericTypeSyntax.as(IdentifierTypeSyntax.self)
+            let generic = name.genericArgumentClause,
+            generic.arguments.count == 1,
+            let genericTypeSyntax = generic.arguments.first?.argument,
+            let genericType = genericTypeSyntax.as(IdentifierTypeSyntax.self)
         else {
             throw MacroError.macroDoesNotHaveRequiredGenericArgument
         }
@@ -81,10 +81,9 @@ public struct UnstableEnum: MemberMacro {
             }
         }
 
-
         var syntaxes: [DeclSyntax] = [
             cases.makeRawValueVar(accessLevel: accessLevel, rawType: rawType),
-            cases.makeInitializer(accessLevel: accessLevel, rawType: rawType)
+            cases.makeInitializer(accessLevel: accessLevel, rawType: rawType),
         ]
 
         let conformsToCaseIterable = enumDecl.inheritanceClause?.inheritedTypes.contains {
@@ -136,20 +135,19 @@ extension UnstableEnum: ExtensionMacro {
         }
 
         let syntax: DeclSyntax = """
-        extension \(enumDecl.name): RawRepresentable, LosslessRawRepresentable, Hashable { }
-        """
+            extension \(enumDecl.name): RawRepresentable, LosslessRawRepresentable, Hashable { }
+            """
         let ext = ExtensionDeclSyntax(syntax)!
 
         return [ext]
     }
 }
 
-private extension EnumDeclSyntax {
-    var accessLevelModifier: String? {
+extension EnumDeclSyntax {
+    fileprivate var accessLevelModifier: String? {
         let accessLevelModifiers: [Keyword] = [.open, .public, .package, .internal, .private, .fileprivate]
         for modifier in self.modifiers {
-            guard let modifier = modifier.as(DeclModifierSyntax.self),
-                  case let .keyword(keyword) = modifier.name.tokenKind else {
+            guard case let .keyword(keyword) = modifier.name.tokenKind else {
                 continue
             }
             if accessLevelModifiers.contains(keyword) {

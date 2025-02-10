@@ -24,18 +24,18 @@ public protocol DiscordClient: Sendable {
 }
 
 //MARK: - Default functions for DiscordClient
-public extension DiscordClient {
+extension DiscordClient {
 
     /// Send a request to Discord with no body.
     @inlinable
-    func send<C: Codable>(request: DiscordHTTPRequest) async throws -> DiscordClientResponse<C> {
+    public func send<C: Codable>(request: DiscordHTTPRequest) async throws -> DiscordClientResponse<C> {
         let response = try await self.send(request: request)
         return DiscordClientResponse(httpResponse: response)
     }
 
     /// Send a request to Discord with no body and a file response.
     @inlinable
-    func send(
+    public func send(
         request: DiscordHTTPRequest,
         fallbackFileName: String
     ) async throws -> DiscordCDNResponse {
@@ -45,7 +45,7 @@ public extension DiscordClient {
 
     /// Send a request to payload with a JSON body.
     @inlinable
-    func send<E: Sendable & Encodable & ValidatablePayload, C: Codable>(
+    public func send<E: Sendable & Encodable & ValidatablePayload, C: Codable>(
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordClientResponse<C> {
@@ -55,7 +55,7 @@ public extension DiscordClient {
 
     /// Send a request to Discord with a Multipart body.
     @inlinable
-    func sendMultipart<E: Sendable & MultipartEncodable & ValidatablePayload, C: Codable>(
+    public func sendMultipart<E: Sendable & MultipartEncodable & ValidatablePayload, C: Codable>(
         request: DiscordHTTPRequest,
         payload: E
     ) async throws -> DiscordClientResponse<C> {

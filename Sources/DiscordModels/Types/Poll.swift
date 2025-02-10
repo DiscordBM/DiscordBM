@@ -1,5 +1,3 @@
-
-
 /// https://discord.com/developers/docs/resources/poll#poll-object-poll-object-structure
 public struct Poll: Sendable, Codable {
 
@@ -46,7 +44,7 @@ public struct Poll: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/poll#layout-type
     @UnstableEnum<Int>
     public enum LayoutKind: Sendable, Codable {
-        case `default` // 1
+        case `default`  // 1
         case __undocumented(Int)
     }
 

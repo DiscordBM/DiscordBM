@@ -4,33 +4,33 @@ import Foundation
 /// The same as what the Discord API docs call "partial channel".
 /// Also the same as a "thread object".
 public struct DiscordChannel: Sendable, Codable {
-    
+
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
-        case guildText // 0
-        case dm // 1
-        case guildVoice // 2
-        case groupDm // 3
-        case guildCategory // 4
-        case guildAnnouncement // 5
-        case announcementThread // 10
-        case publicThread // 11
-        case privateThread // 12
-        case guildStageVoice // 13
-        case guildDirectory // 14
-        case guildForum // 15
+        case guildText  // 0
+        case dm  // 1
+        case guildVoice  // 2
+        case groupDm  // 3
+        case guildCategory  // 4
+        case guildAnnouncement  // 5
+        case announcementThread  // 10
+        case publicThread  // 11
+        case privateThread  // 12
+        case guildStageVoice  // 13
+        case guildDirectory  // 14
+        case guildForum  // 15
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/channel#overwrite-object
     public struct Overwrite: Sendable, Codable {
-        
+
         /// https://discord.com/developers/docs/resources/channel#overwrite-object
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
-            case role // 0
-            case member // 1
+            case role  // 0
+            case member  // 1
             case __undocumented(Int)
         }
 
@@ -39,37 +39,37 @@ public struct DiscordChannel: Sendable, Codable {
         public var allow: StringBitField<Permission>
         public var deny: StringBitField<Permission>
     }
-    
+
     /// https://discord.com/developers/docs/resources/channel#channel-object-sort-order-types
     @UnstableEnum<Int>
     public enum SortOrder: Sendable, Codable {
-        case latestActivity // 0
-        case creationDate // 1
+        case latestActivity  // 0
+        case creationDate  // 1
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types
     @UnstableEnum<Int>
     public enum ForumLayout: Sendable, Codable {
-        case notSet // 0
-        case listView // 1
-        case galleryView // 2
+        case notSet  // 0
+        case listView  // 1
+        case galleryView  // 2
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
     @UnstableEnum<UInt>
     public enum Flag: Sendable {
-        case pinned // 1
-        case requireTag // 4
+        case pinned  // 1
+        case requireTag  // 4
         case __undocumented(UInt)
     }
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
     @UnstableEnum<Int>
     public enum VideoQualityMode: Sendable, Codable {
-        case auto // 1
-        case full // 2
+        case auto  // 1
+        case full  // 2
         case __undocumented(Int)
     }
 
@@ -78,10 +78,10 @@ public struct DiscordChannel: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
     @UnstableEnum<Int>
     public enum AutoArchiveDuration: Sendable, Codable {
-        case oneHour // 60
-        case oneDay // 1_440
-        case threeDays // 4_320
-        case sevenDays // 10_080
+        case oneHour  // 60
+        case oneDay  // 1_440
+        case threeDays  // 4_320
+        case sevenDays  // 10_080
         case __undocumented(Int)
     }
 
@@ -109,7 +109,7 @@ public struct DiscordChannel: Sendable, Codable {
         public var emoji_id: EmojiSnowflake?
         public var emoji_name: String?
     }
-    
+
     public var id: ChannelSnowflake
     /// Type is optional because there are some endpoints that return
     /// partial channel objects, and very few of them exclude the `type`.
@@ -158,73 +158,78 @@ public struct DiscordChannel: Sendable, Codable {
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#message-object
     public struct Message: Sendable, Codable {
-        
+
         /// https://discord.com/developers/docs/resources/channel#message-reference-object-message-reference-structure
         public struct MessageReference: Sendable, Codable {
             public var message_id: MessageSnowflake?
             public var channel_id: ChannelSnowflake?
             public var guild_id: GuildSnowflake?
             public var fail_if_not_exists: Bool?
-            
-            public init(message_id: MessageSnowflake? = nil, channel_id: ChannelSnowflake? = nil, guild_id: GuildSnowflake? = nil, fail_if_not_exists: Bool? = nil) {
+
+            public init(
+                message_id: MessageSnowflake? = nil,
+                channel_id: ChannelSnowflake? = nil,
+                guild_id: GuildSnowflake? = nil,
+                fail_if_not_exists: Bool? = nil
+            ) {
                 self.message_id = message_id
                 self.channel_id = channel_id
                 self.guild_id = guild_id
                 self.fail_if_not_exists = fail_if_not_exists
             }
         }
-        
+
         /// https://discord.com/developers/docs/resources/channel#message-object-message-types
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
-            case `default` // 0
-            case recipientAdd // 1
-            case recipientRemove // 2
-            case call // 3
-            case channelNameChange // 4
-            case channelIconChange // 5
-            case channelPinnedMessage // 6
-            case guildMemberJoin // 7
-            case userPremiumGuildSubscription // 8
-            case userPremiumGuildSubscriptionTier1 // 9
-            case userPremiumGuildSubscriptionTier2 // 10
-            case userPremiumGuildSubscriptionTier3 // 11
-            case channelFollowAdd // 12
-            case guildDiscoveryDisqualified // 14
-            case guildDiscoveryRequalified // 15
-            case guildDiscoveryGracePeriodInitialWarning // 16
-            case guildDiscoveryGracePeriodFinalWarning // 17
-            case threadCreated // 18
-            case reply // 19
-            case chatInputCommand // 20
-            case threadStarterMessage // 21
-            case guildInviteReminder // 22
-            case contextMenuCommand // 23
-            case autoModerationAction // 24
-            case roleSubscriptionPurchase // 25
-            case interactionPremiumUpsell // 26
-            case stageStart // 27
-            case stageEnd // 28
-            case stageSpeaker // 29
-            case stageTopic // 31
-            case guildApplicationPremiumSubscription // 32
+            case `default`  // 0
+            case recipientAdd  // 1
+            case recipientRemove  // 2
+            case call  // 3
+            case channelNameChange  // 4
+            case channelIconChange  // 5
+            case channelPinnedMessage  // 6
+            case guildMemberJoin  // 7
+            case userPremiumGuildSubscription  // 8
+            case userPremiumGuildSubscriptionTier1  // 9
+            case userPremiumGuildSubscriptionTier2  // 10
+            case userPremiumGuildSubscriptionTier3  // 11
+            case channelFollowAdd  // 12
+            case guildDiscoveryDisqualified  // 14
+            case guildDiscoveryRequalified  // 15
+            case guildDiscoveryGracePeriodInitialWarning  // 16
+            case guildDiscoveryGracePeriodFinalWarning  // 17
+            case threadCreated  // 18
+            case reply  // 19
+            case chatInputCommand  // 20
+            case threadStarterMessage  // 21
+            case guildInviteReminder  // 22
+            case contextMenuCommand  // 23
+            case autoModerationAction  // 24
+            case roleSubscriptionPurchase  // 25
+            case interactionPremiumUpsell  // 26
+            case stageStart  // 27
+            case stageEnd  // 28
+            case stageSpeaker  // 29
+            case stageTopic  // 31
+            case guildApplicationPremiumSubscription  // 32
             case __undocumented(Int)
         }
 
         /// https://discord.com/developers/docs/resources/channel#message-object-message-flags
         @UnstableEnum<UInt>
         public enum Flag: Sendable {
-            case crossposted // 0
-            case isCrosspost // 1
-            case suppressEmbeds // 2
-            case sourceMessageDeleted // 3
-            case urgent // 4
-            case hasThread // 5
-            case ephemeral // 6
-            case loading // 7
-            case failedToMentionSomeRolesInThread // 8
-            case suppressNotifications // 12
-            case isVoiceMessage // 13
+            case crossposted  // 0
+            case isCrosspost  // 1
+            case suppressEmbeds  // 2
+            case sourceMessageDeleted  // 3
+            case urgent  // 4
+            case hasThread  // 5
+            case ephemeral  // 6
+            case loading  // 7
+            case failedToMentionSomeRolesInThread  // 8
+            case suppressNotifications  // 12
+            case isVoiceMessage  // 13
             case __undocumented(UInt)
         }
 
@@ -235,14 +240,14 @@ extension DiscordChannel {
             public var type: DiscordChannel.Kind
             public var name: String
         }
-        
+
         /// https://discord.com/developers/docs/resources/channel#attachment-object
         public struct Attachment: Sendable, Codable {
 
             /// https://discord.com/developers/docs/resources/channel#attachment-object-attachment-flags
             @UnstableEnum<UInt>
             public enum Flag: Sendable {
-                case isRemix // 2
+                case isRemix  // 2
                 case __undocumented(UInt)
             }
 
@@ -260,7 +265,7 @@ extension DiscordChannel {
             public var waveform: String?
             public var flags: IntBitField<Flag>?
         }
-        
+
         /// https://discord.com/developers/docs/resources/channel#reaction-object
         public struct Reaction: Sendable, Codable {
 
@@ -301,7 +306,14 @@ extension DiscordChannel {
                 self.burst_colors = []
             }
 
-            public init(count: Int, count_details: CountDetails, me: Bool, me_burst: Bool, emoji: Emoji, burst_colors: [DiscordColor]) {
+            public init(
+                count: Int,
+                count_details: CountDetails,
+                me: Bool,
+                me_burst: Bool,
+                emoji: Emoji,
+                burst_colors: [DiscordColor]
+            ) {
                 self.count = count
                 self.count_details = count_details
                 self.me = me
@@ -338,17 +350,17 @@ extension DiscordChannel {
                 )
             }
         }
-        
+
         /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-structure
         public struct Activity: Sendable, Codable {
-            
+
             /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-types
             @UnstableEnum<Int>
             public enum Kind: Sendable, Codable {
-                case join // 1
-                case spectate // 2
-                case listen // 3
-                case joinRequest // 5
+                case join  // 1
+                case spectate  // 2
+                case listen  // 3
+                case joinRequest  // 5
                 case __undocumented(Int)
             }
 
@@ -419,7 +431,7 @@ extension DiscordChannel {
 extension DiscordChannel {
     /// Partial ``DiscordChannel.Message`` object.
     public struct PartialMessage: Sendable, Codable {
-        public var id:  MessageSnowflake
+        public var id: MessageSnowflake
         public var channel_id: ChannelSnowflake
         public var author: DiscordUser?
         public var content: String?
@@ -482,7 +494,7 @@ public struct ThreadMember: Sendable, Codable {
     /// I think currently it's set to `1` or `0` depending on if you have notifications
     /// enabled for the thread?
     public var flags: Int
-    
+
     public init(threadMemberUpdate: Gateway.ThreadMemberUpdate) {
         self.id = threadMemberUpdate.id
         self.user_id = threadMemberUpdate.user_id
@@ -510,16 +522,16 @@ public struct ThreadMemberWithMember: Sendable, Codable {
 /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
 @UnstableEnum<Int>
 public enum ThreadKind: Sendable, Codable {
-    case announcementThread // 10
-    case publicThread // 11
-    case privateThread // 12
+    case announcementThread  // 10
+    case publicThread  // 11
+    case privateThread  // 12
     case __undocumented(Int)
 }
 
 extension DiscordChannel {
     /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
     public struct AllowedMentions: Sendable, Codable {
-        
+
         /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
         @UnstableEnum<String>
         public enum Kind: Sendable, Codable {
@@ -538,26 +550,26 @@ extension DiscordChannel {
 
 /// https://discord.com/developers/docs/resources/channel#embed-object
 public struct Embed: Sendable, Codable, ValidatablePayload {
-    
+
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
     @UnstableEnum<String>
     public enum Kind: Sendable, Codable {
-        case rich // "rich"
-        case image // "image"
-        case video // "video"
-        case gifv // "gifv"
-        case article // "article"
-        case link // "link"
-        case autoModerationMessage // "auto_moderation_message"
+        case rich  // "rich"
+        case image  // "image"
+        case video  // "video"
+        case gifv  // "gifv"
+        case article  // "article"
+        case link  // "link"
+        case autoModerationMessage  // "auto_moderation_message"
         case __undocumented(String)
     }
 
     public enum DynamicURL: Sendable, Codable, ExpressibleByStringLiteral {
         public typealias StringLiteralType = String
-        
+
         case exact(String)
         case attachment(name: String)
-        
+
         public var asString: String {
             switch self {
             case let .exact(exact):
@@ -566,7 +578,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
                 return "attachment://\(name)"
             }
         }
-        
+
         public init(stringLiteral string: String) {
             if string.hasPrefix("attachment://") {
                 self = .attachment(name: String(string.dropFirst(13)))
@@ -574,7 +586,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
                 self = .exact(string)
             }
         }
-        
+
         public init(from string: String) {
             if string.hasPrefix("attachment://") {
                 self = .attachment(name: String(string.dropFirst(13)))
@@ -582,39 +594,39 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
                 self = .exact(string)
             }
         }
-        
+
         public init(from decoder: any Decoder) throws {
             let container = try decoder.singleValueContainer()
             let string = try container.decode(String.self)
             self = .init(from: string)
         }
-        
+
         public func encode(to encoder: any Encoder) throws {
             var container = encoder.singleValueContainer()
             try container.encode(self.asString)
         }
     }
-    
+
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-footer-structure
     public struct Footer: Sendable, Codable {
         public var text: String
         public var icon_url: DynamicURL?
         public var proxy_icon_url: String?
-        
+
         public init(text: String, icon_url: DynamicURL? = nil, proxy_icon_url: String? = nil) {
             self.text = text
             self.icon_url = icon_url
             self.proxy_icon_url = proxy_icon_url
         }
     }
-    
+
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-image-structure
     public struct Media: Sendable, Codable {
         public var url: DynamicURL
         public var proxy_url: String?
         public var height: Int?
         public var width: Int?
-        
+
         public init(url: DynamicURL, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil) {
             self.url = url
             self.proxy_url = proxy_url
@@ -622,25 +634,25 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
             self.width = width
         }
     }
-    
+
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-provider-structure
     public struct Provider: Sendable, Codable {
         public var name: String?
         public var url: String?
-        
+
         public init(name: String? = nil, url: String? = nil) {
             self.name = name
             self.url = url
         }
     }
-    
+
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-author-structure
     public struct Author: Sendable, Codable {
         public var name: String
         public var url: String?
         public var icon_url: DynamicURL?
         public var proxy_icon_url: String?
-        
+
         public init(name: String, url: String? = nil, icon_url: DynamicURL? = nil, proxy_icon_url: String? = nil) {
             self.name = name
             self.url = url
@@ -648,20 +660,20 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
             self.proxy_icon_url = proxy_icon_url
         }
     }
-    
+
     /// https://discord.com/developers/docs/resources/channel#embed-object-embed-field-structure
     public struct Field: Sendable, Codable {
         public var name: String
         public var value: String
         public var inline: Bool?
-        
+
         public init(name: String, value: String, inline: Bool? = nil) {
             self.name = name
             self.value = value
             self.inline = inline
         }
     }
-    
+
     public var title: String?
     public var type: Kind?
     public var description: String?
@@ -678,17 +690,29 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
 
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
     public var contentLength: Int {
-        let fields = fields?.reduce(into: 0) {
-            $0 += $1.name.unicodeScalars.count + $1.value.unicodeScalars.count
-        } ?? 0
-        return (title?.unicodeScalars.count ?? 0) +
-        (description?.unicodeScalars.count ?? 0) +
-        fields +
-        (footer?.text.unicodeScalars.count ?? 0) +
-        (author?.name.unicodeScalars.count ?? 0)
+        let fields =
+            fields?.reduce(into: 0) {
+                $0 += $1.name.unicodeScalars.count + $1.value.unicodeScalars.count
+            } ?? 0
+        return (title?.unicodeScalars.count ?? 0) + (description?.unicodeScalars.count ?? 0) + fields
+            + (footer?.text.unicodeScalars.count ?? 0) + (author?.name.unicodeScalars.count ?? 0)
     }
-    
-    public init(title: String? = nil, type: Embed.Kind? = nil, description: String? = nil, url: String? = nil, timestamp: Date? = nil, color: DiscordColor? = nil, footer: Embed.Footer? = nil, image: Embed.Media? = nil, thumbnail: Embed.Media? = nil, video: Embed.Media? = nil, provider: Embed.Provider? = nil, author: Embed.Author? = nil, fields: [Embed.Field]? = nil) {
+
+    public init(
+        title: String? = nil,
+        type: Embed.Kind? = nil,
+        description: String? = nil,
+        url: String? = nil,
+        timestamp: Date? = nil,
+        color: DiscordColor? = nil,
+        footer: Embed.Footer? = nil,
+        image: Embed.Media? = nil,
+        thumbnail: Embed.Media? = nil,
+        video: Embed.Media? = nil,
+        provider: Embed.Provider? = nil,
+        author: Embed.Author? = nil,
+        fields: [Embed.Field]? = nil
+    ) {
         self.title = title
         self.type = type
         self.description = description
@@ -703,7 +727,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         self.author = author
         self.fields = fields
     }
-    
+
     public func validate() -> [ValidationFailure] {
         validateElementCountDoesNotExceed(fields, max: 25, name: "fields")
         validateCharacterCountDoesNotExceed(title, max: 256, name: "title")
@@ -730,9 +754,15 @@ public struct RoleSubscriptionData: Sendable, Codable {
 extension DiscordChannel.Message.Kind {
     public var isDeletable: Bool {
         switch self {
-        case .`default`, .channelPinnedMessage, .guildMemberJoin, .userPremiumGuildSubscription, .userPremiumGuildSubscriptionTier1, .userPremiumGuildSubscriptionTier2, .userPremiumGuildSubscriptionTier3, .channelFollowAdd, .threadCreated, .reply, .chatInputCommand, .guildInviteReminder, .contextMenuCommand, .autoModerationAction, .roleSubscriptionPurchase, .interactionPremiumUpsell, .stageStart, .stageEnd, .stageSpeaker, .stageTopic:
+        case .`default`, .channelPinnedMessage, .guildMemberJoin, .userPremiumGuildSubscription,
+            .userPremiumGuildSubscriptionTier1, .userPremiumGuildSubscriptionTier2, .userPremiumGuildSubscriptionTier3,
+            .channelFollowAdd, .threadCreated, .reply, .chatInputCommand, .guildInviteReminder, .contextMenuCommand,
+            .autoModerationAction, .roleSubscriptionPurchase, .interactionPremiumUpsell, .stageStart, .stageEnd,
+            .stageSpeaker, .stageTopic:
             return true
-        case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange, .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning, .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
+        case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange,
+            .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning,
+            .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
             return false
         case .__undocumented:
             return false

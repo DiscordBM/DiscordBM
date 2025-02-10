@@ -12,13 +12,13 @@ extension [EnumCase] {
             """
         }
         return #"""
-        \#(raw: accessLevel)init?(rawValue: \#(raw: rawType.rawValue)) {
-            switch rawValue {
-        \#(raw: cases.indented())
-            default:
-                self = .__undocumented(rawValue)
+            \#(raw: accessLevel)init?(rawValue: \#(raw: rawType.rawValue)) {
+                switch rawValue {
+            \#(raw: cases.indented())
+                default:
+                    self = .__undocumented(rawValue)
+                }
             }
-        }
-        """#
+            """#
     }
 }

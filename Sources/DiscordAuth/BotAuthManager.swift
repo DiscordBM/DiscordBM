@@ -8,20 +8,20 @@ private let baseURLs = (
 
 /// For now, only to be able to make bot auth urls dynamically, on demand.
 public struct BotAuthManager: Sendable {
-    
+
     let clientId: String
-    
+
     public init(clientId: String) {
         self.clientId = clientId
     }
-    
+
     /// The bot will immediately join servers which authorize your bot via this URL.
     /// https://discord.com/developers/docs/topics/oauth2#bot-authorization-flow
     @available(
         *,
-         deprecated,
-         renamed: "makeBotAuthorizationURL(permissions:guildId:disableGuildSelect:)",
-         message: "'.applicationsCommands' OAuth scope is automatically included by Discord for bots"
+        deprecated,
+        renamed: "makeBotAuthorizationURL(permissions:guildId:disableGuildSelect:)",
+        message: "'.applicationsCommands' OAuth scope is automatically included by Discord for bots"
     )
     public func makeBotAuthorizationURL(
         withApplicationCommands: Bool = true,
@@ -39,7 +39,7 @@ public struct BotAuthManager: Sendable {
             ("permissions", "\(permissions)"),
             ("scope", scopes.map(\.rawValue).joined(separator: " ")),
             ("guild_id", guildId?.rawValue),
-            ("disable_guild_select", disableGuildSelect?.description)
+            ("disable_guild_select", disableGuildSelect?.description),
         ]
         return baseURLs.authorization + queries.makeForURLQuery()
     }
@@ -58,7 +58,7 @@ public struct BotAuthManager: Sendable {
             ("permissions", "\(permissions)"),
             ("scope", scopes.map(\.rawValue).joined(separator: " ")),
             ("guild_id", guildId?.rawValue),
-            ("disable_guild_select", disableGuildSelect?.description)
+            ("disable_guild_select", disableGuildSelect?.description),
         ]
         return baseURLs.authorization + queries.makeForURLQuery()
     }

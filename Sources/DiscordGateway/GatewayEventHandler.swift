@@ -114,14 +114,14 @@ public protocol GatewayEventHandler: Sendable {
     func onMessagePollVoteRemove(_ payload: Gateway.MessagePollVote) async throws
 }
 
-public extension GatewayEventHandler {
+extension GatewayEventHandler {
 
-    var logger: Logger {
+    public var logger: Logger {
         Logger(label: "GatewayEventHandler")
     }
 
     @inlinable
-    func handle() {
+    public func handle() {
         Task {
             await self.handleAsync()
         }
@@ -130,81 +130,81 @@ public extension GatewayEventHandler {
     // MARK: - Default Do-Nothings
 
     @inlinable
-    func onEventHandlerStart() async throws -> Bool { true }
-    func onEventHandlerEnd() async throws { }
+    public func onEventHandlerStart() async throws -> Bool { true }
+    public func onEventHandlerEnd() async throws {}
 
-    func onHeartbeat(lastSequenceNumber _: Int?) async throws { }
-    func onHello(_: Gateway.Hello) async throws { }
-    func onReady(_: Gateway.Ready) async throws { }
-    func onResumed() async throws { }
-    func onInvalidSession(canResume _: Bool) async throws { }
-    func onChannelCreate(_: DiscordChannel) async throws { }
-    func onChannelUpdate(_: DiscordChannel) async throws { }
-    func onChannelDelete(_: DiscordChannel) async throws { }
-    func onChannelPinsUpdate(_: Gateway.ChannelPinsUpdate) async throws { }
-    func onThreadCreate(_: DiscordChannel) async throws { }
-    func onThreadUpdate(_: DiscordChannel) async throws { }
-    func onThreadDelete(_: Gateway.ThreadDelete) async throws { }
-    func onThreadSyncList(_: Gateway.ThreadListSync) async throws { }
-    func onThreadMemberUpdate(_: Gateway.ThreadMemberUpdate) async throws { }
-    func onEntitlementCreate(_: Entitlement) async throws { }
-    func onEntitlementUpdate(_: Entitlement) async throws { }
-    func onEntitlementDelete(_: Entitlement) async throws { }
-    func onThreadMembersUpdate(_: Gateway.ThreadMembersUpdate) async throws { }
-    func onGuildCreate(_: Gateway.GuildCreate) async throws { }
-    func onGuildUpdate(_: Guild) async throws { }
-    func onGuildDelete(_: UnavailableGuild) async throws { }
-    func onGuildBanAdd(_: Gateway.GuildBan) async throws { }
-    func onGuildBanRemove(_: Gateway.GuildBan) async throws { }
-    func onGuildEmojisUpdate(_: Gateway.GuildEmojisUpdate) async throws { }
-    func onGuildStickersUpdate(_: Gateway.GuildStickersUpdate) async throws { }
-    func onGuildIntegrationsUpdate(_: Gateway.GuildIntegrationsUpdate) async throws { }
-    func onGuildMemberAdd(_: Gateway.GuildMemberAdd) async throws { }
-    func onGuildMemberRemove(_: Gateway.GuildMemberRemove) async throws { }
-    func onGuildMemberUpdate(_: Gateway.GuildMemberAdd) async throws { }
-    func onGuildMembersChunk(_: Gateway.GuildMembersChunk) async throws { }
-    func onRequestGuildMembers(_: Gateway.RequestGuildMembers) async throws { }
-    func onGuildRoleCreate(_: Gateway.GuildRole) async throws { }
-    func onGuildRoleUpdate(_: Gateway.GuildRole) async throws { }
-    func onGuildRoleDelete(_: Gateway.GuildRoleDelete) async throws { }
-    func onGuildScheduledEventCreate(_: GuildScheduledEvent) async throws { }
-    func onGuildScheduledEventUpdate(_: GuildScheduledEvent) async throws { }
-    func onGuildScheduledEventDelete(_: GuildScheduledEvent) async throws { }
-    func onGuildScheduledEventUserAdd(_: Gateway.GuildScheduledEventUser) async throws { }
-    func onGuildScheduledEventUserRemove(_: Gateway.GuildScheduledEventUser) async throws { }
-    func onGuildAuditLogEntryCreate(_: AuditLog.Entry) async throws { }
-    func onIntegrationCreate(_: Gateway.IntegrationCreate) async throws { }
-    func onIntegrationUpdate(_: Gateway.IntegrationCreate) async throws { }
-    func onIntegrationDelete(_: Gateway.IntegrationDelete) async throws { }
-    func onInteractionCreate(_: Interaction) async throws { }
-    func onInviteCreate(_: Gateway.InviteCreate) async throws { }
-    func onInviteDelete(_: Gateway.InviteDelete) async throws { }
-    func onMessageCreate(_: Gateway.MessageCreate) async throws { }
-    func onMessageUpdate(_: DiscordChannel.PartialMessage) async throws { }
-    func onMessageDelete(_: Gateway.MessageDelete) async throws { }
-    func onMessageDeleteBulk(_: Gateway.MessageDeleteBulk) async throws { }
-    func onMessageReactionAdd(_: Gateway.MessageReactionAdd) async throws { }
-    func onMessageReactionRemove(_: Gateway.MessageReactionRemove) async throws { }
-    func onMessageReactionRemoveAll(_: Gateway.MessageReactionRemoveAll) async throws { }
-    func onMessageReactionRemoveEmoji(_: Gateway.MessageReactionRemoveEmoji) async throws { }
-    func onPresenceUpdate(_: Gateway.PresenceUpdate) async throws { }
-    func onRequestPresenceUpdate(_: Gateway.Identify.Presence) async throws { }
-    func onStageInstanceCreate(_: StageInstance) async throws { }
-    func onStageInstanceDelete(_: StageInstance) async throws { }
-    func onStageInstanceUpdate(_: StageInstance) async throws { }
-    func onTypingStart(_: Gateway.TypingStart) async throws { }
-    func onUserUpdate(_: DiscordUser) async throws { }
-    func onVoiceStateUpdate(_: VoiceState) async throws { }
-    func onRequestVoiceStateUpdate(_: VoiceStateUpdate) async throws { }
-    func onVoiceServerUpdate(_: Gateway.VoiceServerUpdate) async throws { }
-    func onWebhooksUpdate(_: Gateway.WebhooksUpdate) async throws { }
-    func onApplicationCommandPermissionsUpdate(_: GuildApplicationCommandPermissions) async throws { }
-    func onAutoModerationRuleCreate(_: AutoModerationRule) async throws { }
-    func onAutoModerationRuleUpdate(_: AutoModerationRule) async throws { }
-    func onAutoModerationRuleDelete(_: AutoModerationRule) async throws { }
-    func onAutoModerationActionExecution(_: AutoModerationActionExecution) async throws { }
-    func onMessagePollVoteAdd(_: Gateway.MessagePollVote) async throws { }
-    func onMessagePollVoteRemove(_: Gateway.MessagePollVote) async throws { }
+    public func onHeartbeat(lastSequenceNumber _: Int?) async throws {}
+    public func onHello(_: Gateway.Hello) async throws {}
+    public func onReady(_: Gateway.Ready) async throws {}
+    public func onResumed() async throws {}
+    public func onInvalidSession(canResume _: Bool) async throws {}
+    public func onChannelCreate(_: DiscordChannel) async throws {}
+    public func onChannelUpdate(_: DiscordChannel) async throws {}
+    public func onChannelDelete(_: DiscordChannel) async throws {}
+    public func onChannelPinsUpdate(_: Gateway.ChannelPinsUpdate) async throws {}
+    public func onThreadCreate(_: DiscordChannel) async throws {}
+    public func onThreadUpdate(_: DiscordChannel) async throws {}
+    public func onThreadDelete(_: Gateway.ThreadDelete) async throws {}
+    public func onThreadSyncList(_: Gateway.ThreadListSync) async throws {}
+    public func onThreadMemberUpdate(_: Gateway.ThreadMemberUpdate) async throws {}
+    public func onEntitlementCreate(_: Entitlement) async throws {}
+    public func onEntitlementUpdate(_: Entitlement) async throws {}
+    public func onEntitlementDelete(_: Entitlement) async throws {}
+    public func onThreadMembersUpdate(_: Gateway.ThreadMembersUpdate) async throws {}
+    public func onGuildCreate(_: Gateway.GuildCreate) async throws {}
+    public func onGuildUpdate(_: Guild) async throws {}
+    public func onGuildDelete(_: UnavailableGuild) async throws {}
+    public func onGuildBanAdd(_: Gateway.GuildBan) async throws {}
+    public func onGuildBanRemove(_: Gateway.GuildBan) async throws {}
+    public func onGuildEmojisUpdate(_: Gateway.GuildEmojisUpdate) async throws {}
+    public func onGuildStickersUpdate(_: Gateway.GuildStickersUpdate) async throws {}
+    public func onGuildIntegrationsUpdate(_: Gateway.GuildIntegrationsUpdate) async throws {}
+    public func onGuildMemberAdd(_: Gateway.GuildMemberAdd) async throws {}
+    public func onGuildMemberRemove(_: Gateway.GuildMemberRemove) async throws {}
+    public func onGuildMemberUpdate(_: Gateway.GuildMemberAdd) async throws {}
+    public func onGuildMembersChunk(_: Gateway.GuildMembersChunk) async throws {}
+    public func onRequestGuildMembers(_: Gateway.RequestGuildMembers) async throws {}
+    public func onGuildRoleCreate(_: Gateway.GuildRole) async throws {}
+    public func onGuildRoleUpdate(_: Gateway.GuildRole) async throws {}
+    public func onGuildRoleDelete(_: Gateway.GuildRoleDelete) async throws {}
+    public func onGuildScheduledEventCreate(_: GuildScheduledEvent) async throws {}
+    public func onGuildScheduledEventUpdate(_: GuildScheduledEvent) async throws {}
+    public func onGuildScheduledEventDelete(_: GuildScheduledEvent) async throws {}
+    public func onGuildScheduledEventUserAdd(_: Gateway.GuildScheduledEventUser) async throws {}
+    public func onGuildScheduledEventUserRemove(_: Gateway.GuildScheduledEventUser) async throws {}
+    public func onGuildAuditLogEntryCreate(_: AuditLog.Entry) async throws {}
+    public func onIntegrationCreate(_: Gateway.IntegrationCreate) async throws {}
+    public func onIntegrationUpdate(_: Gateway.IntegrationCreate) async throws {}
+    public func onIntegrationDelete(_: Gateway.IntegrationDelete) async throws {}
+    public func onInteractionCreate(_: Interaction) async throws {}
+    public func onInviteCreate(_: Gateway.InviteCreate) async throws {}
+    public func onInviteDelete(_: Gateway.InviteDelete) async throws {}
+    public func onMessageCreate(_: Gateway.MessageCreate) async throws {}
+    public func onMessageUpdate(_: DiscordChannel.PartialMessage) async throws {}
+    public func onMessageDelete(_: Gateway.MessageDelete) async throws {}
+    public func onMessageDeleteBulk(_: Gateway.MessageDeleteBulk) async throws {}
+    public func onMessageReactionAdd(_: Gateway.MessageReactionAdd) async throws {}
+    public func onMessageReactionRemove(_: Gateway.MessageReactionRemove) async throws {}
+    public func onMessageReactionRemoveAll(_: Gateway.MessageReactionRemoveAll) async throws {}
+    public func onMessageReactionRemoveEmoji(_: Gateway.MessageReactionRemoveEmoji) async throws {}
+    public func onPresenceUpdate(_: Gateway.PresenceUpdate) async throws {}
+    public func onRequestPresenceUpdate(_: Gateway.Identify.Presence) async throws {}
+    public func onStageInstanceCreate(_: StageInstance) async throws {}
+    public func onStageInstanceDelete(_: StageInstance) async throws {}
+    public func onStageInstanceUpdate(_: StageInstance) async throws {}
+    public func onTypingStart(_: Gateway.TypingStart) async throws {}
+    public func onUserUpdate(_: DiscordUser) async throws {}
+    public func onVoiceStateUpdate(_: VoiceState) async throws {}
+    public func onRequestVoiceStateUpdate(_: VoiceStateUpdate) async throws {}
+    public func onVoiceServerUpdate(_: Gateway.VoiceServerUpdate) async throws {}
+    public func onWebhooksUpdate(_: Gateway.WebhooksUpdate) async throws {}
+    public func onApplicationCommandPermissionsUpdate(_: GuildApplicationCommandPermissions) async throws {}
+    public func onAutoModerationRuleCreate(_: AutoModerationRule) async throws {}
+    public func onAutoModerationRuleUpdate(_: AutoModerationRule) async throws {}
+    public func onAutoModerationRuleDelete(_: AutoModerationRule) async throws {}
+    public func onAutoModerationActionExecution(_: AutoModerationActionExecution) async throws {}
+    public func onMessagePollVoteAdd(_: Gateway.MessagePollVote) async throws {}
+    public func onMessagePollVoteRemove(_: Gateway.MessagePollVote) async throws {}
 }
 
 // MARK: - Handle
@@ -530,9 +530,12 @@ extension GatewayEventHandler {
 
     @usableFromInline
     func logError(function: String, error: any Error) {
-        logger.error("\(Self.self) produced an error", metadata: [
-            "event-handler-func": .string(function),
-            "error": .string(String(reflecting: error))
-        ])
+        logger.error(
+            "\(Self.self) produced an error",
+            metadata: [
+                "event-handler-func": .string(function),
+                "error": .string(String(reflecting: error)),
+            ]
+        )
     }
 }

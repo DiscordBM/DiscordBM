@@ -1,20 +1,19 @@
-
 /// https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
 public struct Invite: Sendable, Codable {
 
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
-        case guild // 0
-        case groupDm // 1
-        case friend // 2
+        case guild  // 0
+        case groupDm  // 1
+        case friend  // 2
         case __undocumented(Int)
     }
 
     /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
     @UnstableEnum<Int>
     public enum TargetKind: Sendable, Codable {
-        case stream // 1
-        case embeddedApplication // 2
+        case stream  // 1
+        case embeddedApplication  // 2
         case __undocumented(Int)
     }
 

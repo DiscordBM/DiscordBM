@@ -9,6 +9,7 @@ jobs:
     steps:
       - name: Checkout out package
         uses: actions/checkout@v4
+
       - name: Install tokei
         uses: giantswarm/install-binary-action@v1.1.0
         with:
@@ -17,11 +18,14 @@ jobs:
           download_url: "https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-x86_64-unknown-linux-gnu.tar.gz"
           tarball_binary_path: "tokei"
           smoke_test: "${binary} --version"
+
       - name: Calculate LOC
         id: loc
         run: echo "count=$(tokei -t swift -o json | jq .Swift.code)" >> $GITHUB_OUTPUT
+
       - name: Print the output
         run: echo "Line count is ${{ steps.loc.outputs.count }}"
+
       - name: "Post"
         uses: indiesdev/curl@v1.1
         with:

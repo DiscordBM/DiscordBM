@@ -1,4 +1,3 @@
-
 public enum ValidationFailure: Sendable, CustomStringConvertible {
     /// At least one of these fields is required to be present.
     case atLeastOneFieldIsRequired(names: [String])
@@ -32,7 +31,8 @@ public enum ValidationFailure: Sendable, CustomStringConvertible {
         case let .elementCountOutOfRange(name, min, max):
             return "ValidationFailure.elementCountOutOfRange(name: \(name), min: \(min), max: \(max))"
         case let .containsProhibitedValues(name, reason, valuesRepresentation):
-            return "ValidationFailure.containsProhibitedValues(name: \(name), reason: \(reason), valuesRepresentation: \(valuesRepresentation))"
+            return
+                "ValidationFailure.containsProhibitedValues(name: \(name), reason: \(reason), valuesRepresentation: \(valuesRepresentation))"
         case let .hasPrecondition(name, reason):
             return "ValidationFailure.hasPrecondition(name: \(name), reason: \(reason))"
         case let .cantBeEmpty(name):
@@ -43,7 +43,7 @@ public enum ValidationFailure: Sendable, CustomStringConvertible {
     }
 }
 
-extension Array<ValidationFailure> {
+extension [ValidationFailure] {
     /// Throws a `ValidationError` if any `ValidationFailure`s are available.
     /// - Parameter model: The data to be reported for debugging in case of throw.
     public func `throw`(model: any Sendable) throws {
