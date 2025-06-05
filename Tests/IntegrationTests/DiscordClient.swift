@@ -1434,7 +1434,7 @@ class DiscordClientTests: XCTestCase {
         let auditLogs = try await client.listGuildAuditLogEntries(
             guildId: Constants.guildId
         ).decode()
-        XCTAssertEqual(auditLogs.audit_log_entries.count, 50)
+        XCTAssertEqual(auditLogs.audit_log_entries.count, 50, "\(auditLogs.audit_log_entries)")
 
         _ = try await client.listGuildVoiceRegions(guildId: Constants.guildId).decode()
 

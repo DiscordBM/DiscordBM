@@ -23,4 +23,4 @@ jobs:
         uses: vapor/swift-codecov-action@v0.3
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
-          cc_env_vars: "SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH"
+          env_vars: "SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH"
