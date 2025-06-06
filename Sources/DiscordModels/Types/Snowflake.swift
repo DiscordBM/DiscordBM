@@ -244,6 +244,11 @@ public struct SnowflakeInfo: Sendable {
     @inlinable
     internal init?(from snowflake: String) {
         guard let value = UInt64(snowflake) else { return nil }
+        self.init(from: value)
+    }
+
+    @inlinable
+    public init?(from value: UInt64) {
         self.timestamp = (value >> 22) + SnowflakeInfo.discordEpochConstant
         self.workerId = UInt8((value >> 17) & 0x1F)
         self.processId = UInt8((value >> 12) & 0x1F)
