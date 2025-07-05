@@ -134,8 +134,11 @@ extension UnstableEnum: ExtensionMacro {
             throw MacroError.isNotEnum
         }
 
+        let parentNames = try findParentTypeNames(from: context.lexicalContext)
+        let enumName = enumDecl.name.trimmedDescription
+        let qualifiedName = parentNames.isEmpty ? enumName : parentNames + "." + enumName
         let syntax: DeclSyntax = """
-            extension \(enumDecl.name): RawRepresentable, LosslessRawRepresentable, Hashable { }
+            extension \(raw: qualifiedName): RawRepresentable, LosslessRawRepresentable, Hashable { }
             """
         let ext = ExtensionDeclSyntax(syntax)!
 

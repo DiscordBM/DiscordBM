@@ -94,7 +94,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension MyEnum : RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """,
             macros: macros
@@ -418,6 +418,58 @@ class UnstableEnumMacroTests: XCTestCase {
                 extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """,
+            macros: macros
+        )
+    }
+
+    func testNestedEnum() throws {
+        assertMacroExpansion(
+            """
+            extension N1.N2 {
+                public enum N3 {
+                    package struct N4 {
+                        @UnstableEnum<String>
+                        public enum MyEnum {
+                            case a // "g"
+                            case __undocumented
+                        }
+                    }
+                }
+            }
+            """,
+            expandedSource: #"""
+                extension N1.N2 {
+                    public enum N3 {
+                        package struct N4 {
+                            public enum MyEnum {
+                                case a // "g"
+                                case __undocumented
+
+                                public var rawValue: String {
+                                    switch self {
+                                    case .a:
+                                        return "g"
+                                    case let .__undocumented(rawValue):
+                                        return rawValue
+                                    }
+                                }
+
+                                public init?(rawValue: String) {
+                                    switch rawValue {
+                                    case "g":
+                                        self = .a
+                                    default:
+                                        self = .__undocumented(rawValue)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                extension N1.N2.N3.N4.MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                }
+                """#,
             macros: macros
         )
     }
