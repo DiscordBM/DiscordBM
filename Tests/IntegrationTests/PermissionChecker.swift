@@ -22,7 +22,7 @@ class PermissionChecker: XCTestCase {
     /// Checks to see if the permission checker functions work properly.
     func testCheckPermissions() async throws {
         /// Make sure last tests don't affect this test's gateway connection
-        try await Task.sleep(for: .seconds(5))
+        try await Task.sleep(for: .seconds(15))
 
         let bot = await BotGatewayManager(
             eventLoopGroup: httpClient.eventLoopGroup,
