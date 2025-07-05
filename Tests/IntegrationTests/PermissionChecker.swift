@@ -9,7 +9,9 @@ class PermissionChecker: XCTestCase {
 
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
-            Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
+            var logger = Logger(label: $0)
+            logger.logLevel = .trace
+            return logger
         }
     }
 
@@ -65,9 +67,6 @@ class PermissionChecker: XCTestCase {
                 type: .publicThread
             )
         ).decode()
-
-        /// To dodge "deadline exceeded" HTTP errors
-        try await Task.sleep(for: .seconds(1))
 
         let privateThread = try await bot.client.createThread(
             channelId: Constants.Channels.spam.id,
@@ -230,9 +229,6 @@ class PermissionChecker: XCTestCase {
                 permissions: [.viewChannel]
             )
         )
-
-        /// To dodge "deadline exceeded" HTTP errors
-        try await Task.sleep(for: .seconds(1))
 
         /// Mention the second account so it is added to the members list.
         try await bot.client.createMessage(
