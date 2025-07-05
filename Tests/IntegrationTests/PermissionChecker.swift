@@ -66,6 +66,9 @@ class PermissionChecker: XCTestCase {
             )
         ).decode()
 
+        /// To dodge "deadline exceeded" HTTP errors
+        try await Task.sleep(for: .seconds(1))
+
         let privateThread = try await bot.client.createThread(
             channelId: Constants.Channels.spam.id,
             payload: .init(
@@ -227,6 +230,9 @@ class PermissionChecker: XCTestCase {
                 permissions: [.viewChannel]
             )
         )
+
+        /// To dodge "deadline exceeded" HTTP errors
+        try await Task.sleep(for: .seconds(1))
 
         /// Mention the second account so it is added to the members list.
         try await bot.client.createMessage(
