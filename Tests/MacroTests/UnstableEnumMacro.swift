@@ -444,7 +444,7 @@ class UnstableEnumMacroTests: XCTestCase {
                             public enum MyEnum {
                                 case a // "g"
                                 case __undocumented
-                
+
                                 public var rawValue: String {
                                     switch self {
                                     case .a:
@@ -453,7 +453,7 @@ class UnstableEnumMacroTests: XCTestCase {
                                         return rawValue
                                     }
                                 }
-                
+
                                 public init?(rawValue: String) {
                                     switch rawValue {
                                     case "g":
