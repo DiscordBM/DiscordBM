@@ -15,6 +15,7 @@ enum MacroError: String, Error {
     case badEnumCaseComment
     case couldNotFindLocationOfNode
     case lastCaseMustBe__undocumented
+    case unexpectedSyntaxInLexicalContext
 }
 
 extension MacroError: DiagnosticMessage {
