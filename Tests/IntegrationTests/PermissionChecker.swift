@@ -5,16 +5,23 @@ import XCTest
 
 class PermissionChecker: XCTestCase {
 
-    let httpClient = HTTPClient.shared
+    let httpClient = HTTPClient()
 
     override func setUp() {
         DiscordGlobalConfiguration.makeLogger = {
-            Logger(label: $0, factory: SwiftLogNoOpLogHandler.init)
+            var logger = Logger(label: $0)
+            logger.logLevel = .trace
+            return logger
         }
     }
 
     override func tearDown() async throws {
         DiscordGlobalConfiguration.makeLogger = { Logger(label: $0) }
+    }
+
+    /// Can't use the async `shutdown()` in `tearDown()`. Will get `Fatal error: leaking promise created at (file: "NIOPosix/HappyEyeballs.swift", line: 300)`
+    deinit {
+        try! httpClient.syncShutdown()
     }
 
     /// Checks to see if the permission checker functions work properly.
