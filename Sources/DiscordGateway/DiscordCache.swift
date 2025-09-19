@@ -390,6 +390,8 @@ public actor DiscordCache {
         }
     }
 
+    // https://github.com/swiftlang/swift/issues/83476
+    @_optimize(none)
     private func handleEvent(_ event: Gateway.Event) {
         guard intentsAllowCaching(event: event) else { return }
 
