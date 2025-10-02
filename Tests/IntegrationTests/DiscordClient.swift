@@ -559,6 +559,8 @@ class DiscordClientTests: XCTestCase {
     }
 
     func testGuildWithCreatedGuild() async throws {
+        throw XCTSkip("Discord has recently disabled bots ability to create a guild")
+
         let guildName = "Test Guild"
 
         /// Cleanup
@@ -1400,20 +1402,22 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertEqual(synced.code, created.code)
 
-        let image = ByteBuffer(data: resource(name: "1kb.png"))
-        let guildName = "Guild From Template Test!"
-        let guild = try await client.createGuildFromTemplate(
-            code: created.code,
-            payload: .init(
-                name: guildName,
-                icon: .init(file: .init(data: image, filename: "1kb.png"))
-            )
-        ).decode()
+        /// Discord has recently disabled bots ability to create a guild
 
-        XCTAssertEqual(guild.name, guildName)
-        XCTAssertFalse(guild.roles.isEmpty)
-
-        try await client.deleteGuild(id: guild.id).guardSuccess()
+        //        let image = ByteBuffer(data: resource(name: "1kb.png"))
+        //        let guildName = "Guild From Template Test!"
+        //        let guild = try await client.createGuildFromTemplate(
+        //            code: created.code,
+        //            payload: .init(
+        //                name: guildName,
+        //                icon: .init(file: .init(data: image, filename: "1kb.png"))
+        //            )
+        //        ).decode()
+        //
+        //        XCTAssertEqual(guild.name, guildName)
+        //        XCTAssertFalse(guild.roles.isEmpty)
+        //
+        //        try await client.deleteGuild(id: guild.id).guardSuccess()
 
         try await client.deleteGuildTemplate(
             guildId: Constants.guildId,
