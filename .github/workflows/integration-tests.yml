@@ -17,8 +17,15 @@ jobs:
     steps:
       - name: Check out package
         uses: actions/checkout@v4
+
       - name: Run tests
-        run: swift test --filter IntegrationTests --sanitize=thread --enable-code-coverage
+        run: |
+          swift test \
+            --filter IntegrationTests \
+            --sanitize=thread \
+            --enable-code-coverage \
+            --disable-experimental-prebuilts
+
       - name: Upload code coverage
         uses: vapor/swift-codecov-action@v0.3
         with:
