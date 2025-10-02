@@ -5,7 +5,7 @@
         <img src="https://img.shields.io/badge/sswg-sandbox-lightgrey.svg" alt="SSWG Incubation Status: Sandbox">
     </a>
     <a href="https://discord.gg/kxfs5n7HVE">
-        <img src="https://dcbadge.vercel.app/api/server/kxfs5n7HVE?style=flat" alt="DiscordBM Server">
+        <img src="https://design.vapor.codes/images/discordchat.svg" alt="DiscordBM Discord Server">
     </a>
     <a href="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml">
         <img src="https://github.com/DiscordBM/DiscordBM/actions/workflows/tests.yml/badge.svg" alt="Tests Badge">
