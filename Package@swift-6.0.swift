@@ -150,6 +150,7 @@ let package = Package(
         .macro(
             name: "UnstableEnumMacro",
             dependencies: [
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ],
@@ -166,6 +167,7 @@ let package = Package(
         .testTarget(
             name: "MacroTests",
             dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
                 .target(name: "UnstableEnumMacro"),
             ],
