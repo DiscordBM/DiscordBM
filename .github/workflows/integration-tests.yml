@@ -18,6 +18,11 @@ jobs:
       - name: Check out package
         uses: actions/checkout@v4
 
+      - name: Install curl for codecov
+        run: |
+          apt-get update
+          apt-get install -y curl
+
       - name: Run tests
         run: |
           swift test \
