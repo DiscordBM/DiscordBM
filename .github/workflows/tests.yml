@@ -8,7 +8,7 @@ on:
 
 jobs:
   main-tests:
-    uses: vapor/ci/.github/workflows/run-unit-tests.yml@mmbm-strip-swift-syntax-prebuilts-in-6.0
+    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_linting: true
       with_coverage: true
@@ -20,7 +20,7 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   macro-tests:
-    uses: vapor/ci/.github/workflows/run-unit-tests.yml@mmbm-strip-swift-syntax-prebuilts-in-6.0
+    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_coverage: true
       with_tsan: true
