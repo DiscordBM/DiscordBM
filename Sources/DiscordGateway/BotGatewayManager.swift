@@ -814,10 +814,8 @@ extension BotGatewayManager {
                 return
             }
             Task {
-                let opcode: WebSocketOpcode =
-                    message.opcode ?? .init(
-                        encodedWebSocketOpcode: message.payload.opcode.rawValue
-                    )!
+                // If the message has no specified opcode, default to sending .text
+                let opcode: WebSocketOpcode = message.opcode ?? .text
 
                 let data: Data
                 do {
