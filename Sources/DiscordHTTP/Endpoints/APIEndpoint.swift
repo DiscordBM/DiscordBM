@@ -304,6 +304,7 @@ public enum APIEndpoint: Endpoint {
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice#list-voice-regions
 
+    case getVoiceState(guildId: GuildSnowflake, userId: UserSnowflake)
     case listGuildVoiceRegions(guildId: GuildSnowflake)
     case listVoiceRegions
     case updateSelfVoiceState(guildId: GuildSnowflake)
@@ -896,6 +897,10 @@ public enum APIEndpoint: Endpoint {
             suffix = "applications/@me"
         case .updateOwnUser:
             suffix = "users/@me"
+        case let .getVoiceState(guildId, userId):
+            let guildId = guildId.rawValue
+            let userId = userId.rawValue
+            suffix = "guilds/\(guildId)/voice-states/\(userId)"
         case let .listGuildVoiceRegions(guildId):
             let guildId = guildId.rawValue
             suffix = "guilds/\(guildId)/regions"
@@ -1519,6 +1524,10 @@ public enum APIEndpoint: Endpoint {
             suffix = "applications/@me"
         case .updateOwnUser:
             suffix = "users/@me"
+        case let .getVoiceState(guildId, userId):
+            let guildId = guildId.rawValue
+            let userId = userId.rawValue
+            suffix = "guilds/\(guildId)/voice-states/\(userId)"
         case let .listGuildVoiceRegions(guildId):
             let guildId = guildId.rawValue
             suffix = "guilds/\(guildId)/regions"
@@ -1755,6 +1764,7 @@ public enum APIEndpoint: Endpoint {
         case .listOwnConnections: return .GET
         case .updateOwnApplication: return .PATCH
         case .updateOwnUser: return .PATCH
+        case .getVoiceState: return .GET
         case .listGuildVoiceRegions: return .GET
         case .listVoiceRegions: return .GET
         case .updateSelfVoiceState: return .PATCH
@@ -1946,6 +1956,7 @@ public enum APIEndpoint: Endpoint {
         case .listOwnConnections: return true
         case .updateOwnApplication: return true
         case .updateOwnUser: return true
+        case .getVoiceState: return true
         case .listGuildVoiceRegions: return true
         case .listVoiceRegions: return true
         case .updateSelfVoiceState: return true
@@ -2137,6 +2148,7 @@ public enum APIEndpoint: Endpoint {
         case .listOwnConnections: return true
         case .updateOwnApplication: return true
         case .updateOwnUser: return true
+        case .getVoiceState: return true
         case .listGuildVoiceRegions: return true
         case .listVoiceRegions: return true
         case .updateSelfVoiceState: return true
@@ -2495,6 +2507,8 @@ public enum APIEndpoint: Endpoint {
             return []
         case .updateOwnUser:
             return []
+        case let .getVoiceState(guildId, userId):
+            return [guildId.rawValue, userId.rawValue]
         case let .listGuildVoiceRegions(guildId):
             return [guildId.rawValue]
         case .listVoiceRegions:
@@ -2703,23 +2717,24 @@ public enum APIEndpoint: Endpoint {
         case .listOwnConnections: return 165
         case .updateOwnApplication: return 166
         case .updateOwnUser: return 167
-        case .listGuildVoiceRegions: return 168
-        case .listVoiceRegions: return 169
-        case .updateSelfVoiceState: return 170
-        case .updateVoiceState: return 171
-        case .getGuildWebhooks: return 172
-        case .getWebhook: return 173
-        case .getWebhookByToken: return 174
-        case .getWebhookMessage: return 175
-        case .listChannelWebhooks: return 176
-        case .createWebhook: return 177
-        case .executeWebhook: return 178
-        case .updateWebhook: return 179
-        case .updateWebhookByToken: return 180
-        case .updateWebhookMessage: return 181
-        case .deleteWebhook: return 182
-        case .deleteWebhookByToken: return 183
-        case .deleteWebhookMessage: return 184
+        case .getVoiceState: return 168
+        case .listGuildVoiceRegions: return 169
+        case .listVoiceRegions: return 170
+        case .updateSelfVoiceState: return 171
+        case .updateVoiceState: return 172
+        case .getGuildWebhooks: return 173
+        case .getWebhook: return 174
+        case .getWebhookByToken: return 175
+        case .getWebhookMessage: return 176
+        case .listChannelWebhooks: return 177
+        case .createWebhook: return 178
+        case .executeWebhook: return 179
+        case .updateWebhook: return 180
+        case .updateWebhookByToken: return 181
+        case .updateWebhookMessage: return 182
+        case .deleteWebhook: return 183
+        case .deleteWebhookByToken: return 184
+        case .deleteWebhookMessage: return 185
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
@@ -3105,6 +3120,8 @@ public enum APIEndpoint: Endpoint {
             return "updateOwnApplication"
         case .updateOwnUser:
             return "updateOwnUser"
+        case let .getVoiceState(guildId, userId):
+            return "getVoiceState(guildId.rawValue: \(guildId.rawValue), userId.rawValue: \(userId.rawValue))"
         case let .listGuildVoiceRegions(guildId):
             return "listGuildVoiceRegions(guildId.rawValue: \(guildId.rawValue))"
         case .listVoiceRegions:
@@ -3313,6 +3330,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     // MARK: Voice
     /// https://discord.com/developers/docs/resources/voice#list-voice-regions
 
+    case getVoiceState
     case listGuildVoiceRegions
     case listVoiceRegions
 
@@ -3398,6 +3416,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .getOwnUser: return "getOwnUser"
         case .getUser: return "getUser"
         case .listOwnConnections: return "listOwnConnections"
+        case .getVoiceState: return "getVoiceState"
         case .listGuildVoiceRegions: return "listGuildVoiceRegions"
         case .listVoiceRegions: return "listVoiceRegions"
         case .getGuildWebhooks: return "getGuildWebhooks"
@@ -3480,6 +3499,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
         case .getOwnUser: self = .getOwnUser
         case .getUser: self = .getUser
         case .listOwnConnections: self = .listOwnConnections
+        case .getVoiceState: self = .getVoiceState
         case .listGuildVoiceRegions: self = .listGuildVoiceRegions
         case .listVoiceRegions: self = .listVoiceRegions
         case .getGuildWebhooks: self = .getGuildWebhooks
