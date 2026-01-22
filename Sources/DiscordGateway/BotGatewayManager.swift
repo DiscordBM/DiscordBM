@@ -48,6 +48,8 @@ public actor BotGatewayManager: GatewayManager {
     let eventLoopGroup: any EventLoopGroup
     /// A client to send requests to Discord.
     public nonisolated let client: any DiscordClient
+    /// The proxy settings to use for the web-socket connection.
+    let websocketProxy: WebSocketProxySettings?
     /// Max frame size we accept to receive through the web-socket connection.
     let maxFrameSize: Int
     /// Generator of `BotGatewayManager` ids.
@@ -129,6 +131,7 @@ public actor BotGatewayManager: GatewayManager {
     internal init(
         eventLoopGroup: any EventLoopGroup,
         client: any DiscordClient,
+        websocketProxy: WebSocketProxySettings? = nil,
         maxFrameSize: Int = 1 << 28,
         shardInfo: ShardInfo,
         identifyPayloadWithShard identifyPayload: Gateway.Identify
@@ -136,6 +139,7 @@ public actor BotGatewayManager: GatewayManager {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
+        self.websocketProxy = websocketProxy
         self.shardInfo = shardInfo
         self.identifyPayload = identifyPayload
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
@@ -151,12 +155,14 @@ public actor BotGatewayManager: GatewayManager {
     public init(
         eventLoopGroup: any EventLoopGroup,
         client: any DiscordClient,
+        websocketProxy: WebSocketProxySettings? = nil,
         maxFrameSize: Int = 1 << 28,
         identifyPayload: Gateway.Identify
     ) {
         self.eventLoopGroup = eventLoopGroup
         self.client = client
         self.maxFrameSize = maxFrameSize
+        self.websocketProxy = websocketProxy
 
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
@@ -185,6 +191,7 @@ public actor BotGatewayManager: GatewayManager {
         eventLoopGroup: any EventLoopGroup = HTTPClient.shared.eventLoopGroup,
         httpClient: HTTPClient = .shared,
         clientConfiguration: ClientConfiguration = .init(),
+        websocketProxy: WebSocketProxySettings? = nil,
         maxFrameSize: Int = 1 << 28,
         appId: ApplicationSnowflake? = nil,
         identifyPayload: Gateway.Identify
@@ -197,6 +204,7 @@ public actor BotGatewayManager: GatewayManager {
             configuration: clientConfiguration
         )
         self.maxFrameSize = maxFrameSize
+        self.websocketProxy = websocketProxy
 
         var logger = DiscordGlobalConfiguration.makeLogger("GatewayManager")
         logger[metadataKey: "gateway-id"] = .string("\(self.id)")
@@ -229,6 +237,7 @@ public actor BotGatewayManager: GatewayManager {
         eventLoopGroup: any EventLoopGroup = HTTPClient.shared.eventLoopGroup,
         httpClient: HTTPClient = .shared,
         clientConfiguration: ClientConfiguration = .init(),
+        websocketProxy: WebSocketProxySettings? = nil,
         maxFrameSize: Int = 1 << 28,
         token: String,
         appId: ApplicationSnowflake? = nil,
@@ -244,6 +253,7 @@ public actor BotGatewayManager: GatewayManager {
             appId: appId,
             configuration: clientConfiguration
         )
+        self.websocketProxy = websocketProxy
         self.maxFrameSize = maxFrameSize
         self.identifyPayload = .init(
             token: token,
@@ -313,12 +323,9 @@ public actor BotGatewayManager: GatewayManager {
         /// But for proper structured concurrency, this method should never exit (optimally).
         Task {
             do {
-                let closeFrame = try await WebSocketClient.connect(
-                    url: gatewayURL + queries.makeForURLQuery(),
-                    configuration: configuration,
-                    eventLoopGroup: self.eventLoopGroup,
-                    logger: self.logger
-                ) { inbound, outbound, context in
+                typealias HandlerType = WebSocketDataHandler<WebSocketClient.Context>
+                let handler: HandlerType = { inbound, outbound, context in
+
                     await self.setupOutboundWriter(outbound)
 
                     self.logger.debug("Connected to Discord through web-socket. Will configure")
@@ -327,6 +334,25 @@ public actor BotGatewayManager: GatewayManager {
                     for try await message in inbound.messages(maxSize: self.maxFrameSize) {
                         await self.processBinaryData(message, forConnectionWithId: connectionId)
                     }
+                }
+                let closeFrame: WebSocketCloseFrame?
+                if let proxySettings = self.websocketProxy {
+                    closeFrame = try await WebSocketClient.connect(
+                        url: gatewayURL + queries.makeForURLQuery(),
+                        configuration: configuration,
+                        proxySettings: proxySettings,
+                        eventLoopGroup: self.eventLoopGroup,
+                        logger: self.logger,
+                        handler: handler
+                    )
+                } else {
+                    closeFrame = try await WebSocketClient.connect(
+                        url: gatewayURL + queries.makeForURLQuery(),
+                        configuration: configuration,
+                        eventLoopGroup: self.eventLoopGroup,
+                        logger: self.logger,
+                        handler: handler
+                    )
                 }
 
                 logger.debug(
