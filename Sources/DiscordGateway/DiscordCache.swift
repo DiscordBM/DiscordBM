@@ -866,7 +866,6 @@ public actor DiscordCache {
                 }
             }
         case let .presenceUpdate(presence):
-            print("Willllll update presence: \(presence)")
             if let idx = self.guilds[presence.guild_id]?.presences
                 .firstIndex(where: { $0.user?.id == presence.user.id })
             {
