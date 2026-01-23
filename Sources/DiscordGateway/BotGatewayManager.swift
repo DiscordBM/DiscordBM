@@ -298,12 +298,12 @@ public actor BotGatewayManager: GatewayManager {
         let queries: [(String, String)] = [
             ("v", "\(DiscordGlobalConfiguration.apiVersion)"),
             ("encoding", "json"),
-            ("compress", "zlib-stream"),
+            ("compress", "zstd-stream"),
         ]
 
-        let decompressorWSExtension: ZlibDecompressorWSExtension
+        let decompressorWSExtension: ZstdDecompressorWSExtension
         do {
-            decompressorWSExtension = try ZlibDecompressorWSExtension(logger: self.logger)
+            decompressorWSExtension = try ZstdDecompressorWSExtension(logger: self.logger)
         } catch {
             self.logger.critical(
                 "Will not connect because can't create a decompressor. Something is wrong. Please report this failure at https://github.com/DiscordBM/DiscordBM/issues",
@@ -325,7 +325,6 @@ public actor BotGatewayManager: GatewayManager {
             do {
                 typealias HandlerType = WebSocketDataHandler<WebSocketClient.Context>
                 let handler: HandlerType = { inbound, outbound, context in
-
                     await self.setupOutboundWriter(outbound)
 
                     self.logger.debug("Connected to Discord through web-socket. Will configure")

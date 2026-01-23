@@ -48,7 +48,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.3"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
         .package(url: "https://github.com/apple/swift-syntax.git", "509.0.0"..<"604.0.0"),
-        .package(url: "https://github.com/adam-fowler/compress-nio.git", from: "1.3.0"),
+        .package(url: "https://github.com/facebook/zstd.git", from: "1.5.7"),
         .package(url: "https://github.com/hummingbird-project/swift-websocket.git", from: "1.4.0"),
     ],
     targets: [
@@ -86,7 +86,7 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 .product(name: "WSClient", package: "swift-websocket"),
-                .product(name: "CompressNIO", package: "compress-nio"),
+                .product(name: "libzstd", package: "zstd"),
                 .target(name: "DiscordHTTP"),
             ],
             swiftSettings: swiftSettings
@@ -114,13 +114,6 @@ let package = Package(
                 .target(name: "DiscordModels")
             ],
             swiftSettings: swiftSettings
-        ),
-        .target(
-            name: "CZlib",
-            dependencies: [],
-            linkerSettings: [
-                .linkedLibrary("z")
-            ]
         ),
         .plugin(
             name: "GenerateAPIEndpoints",
