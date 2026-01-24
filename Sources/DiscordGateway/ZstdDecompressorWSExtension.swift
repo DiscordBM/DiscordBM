@@ -14,9 +14,7 @@ struct ZstdDecompressorWSExtension: WebSocketExtension, @unchecked Sendable {
     let logger: Logger
 
     init(logger: Logger) throws {
-        self.decompressor = try ZstdStreamingDecompressor(
-            outBufferSize: 128  // * 1024
-        )
+        self.decompressor = try ZstdStreamingDecompressor()
         self.logger = logger
     }
 
@@ -128,7 +126,7 @@ enum DecompressionError: Error {
 final class ZstdStreamingDecompressor {
     private let dctx: OpaquePointer
 
-    init(outBufferSize: Int) throws {
+    init() throws {
         guard let dctx = ZSTD_createDCtx() else {
             throw DecompressionError.initializationFailed
         }
