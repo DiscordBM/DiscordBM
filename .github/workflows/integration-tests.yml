@@ -16,16 +16,42 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out package
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Install curl for codecov
+      - name: Install curl for codecov, zstd for the cache action
         run: |
           apt-get update
-          apt-get install -y curl
+          apt-get install -y curl zstd
+
+      - name: Restore .build
+        if: ${{ runner.debug != '1' }}
+        id: "restore-cache"
+        uses: actions/cache/restore@v4
+        with:
+          path: .build
+          key: "${{ github.event.repository.name }}-integration-tests-${{ matrix.config.mode }}-build-${{ matrix.swift-image.name }}-${{ runner.os }}-${{ hashFiles('./Package.resolved') }}"
+          restore-keys: "${{ github.event.repository.name }}-integration-tests-${{ matrix.config.mode }}-build-${{ matrix.swift-image.name }}-${{ runner.os }}-"
+
+      - name: Build ${{ github.event.repository.name }}
+        run: |
+          swift build \
+            --build-tests \
+            --enable-code-coverage \
+            --disable-experimental-prebuilts \
+            --explicit-target-dependency-import-check error \
+            -c ${{ matrix.config.mode }}
+
+      - name: Cache .build
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .build
+          key: "${{ github.event.repository.name }}-integration-tests-${{ matrix.config.mode }}-build-${{ matrix.swift-image.name }}-${{ runner.os }}-${{ hashFiles('./Package.resolved') }}"
 
       - name: Run tests
         run: |
           swift test \
+            --skip-build \
             --filter IntegrationTests \
             --sanitize=thread \
             --enable-code-coverage \
