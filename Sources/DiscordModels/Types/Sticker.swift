@@ -24,6 +24,14 @@ public struct Sticker: Sendable, Codable {
     public var name: String
     public var description: String?
     public var tags: String
+    @available(
+        *,
+        deprecated,
+        message: """
+            Deprecated by Discord with the following explanation:
+            Previously the sticker asset hash, now an empty string
+            """
+    )
     public var asset: String?
     public var type: Kind
     public var format_type: FormatKind

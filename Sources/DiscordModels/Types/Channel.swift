@@ -213,6 +213,12 @@ extension DiscordChannel {
             case stageSpeaker  // 29
             case stageTopic  // 31
             case guildApplicationPremiumSubscription  // 32
+            case guildIncidentAlertModeEnabled  // 36
+            case guildIncidentAlertModeDisabled  // 37
+            case guildIncidentReportRaid  // 38
+            case guildIncidentReportFalseAlarm  // 39
+            case purchaseNotification  // 44
+            case pollResult  // 46
             case __undocumented(Int)
         }
 
@@ -253,6 +259,7 @@ extension DiscordChannel {
 
             public var id: AttachmentSnowflake
             public var filename: String
+            public var title: String?
             public var description: String?
             public var content_type: String?
             public var size: Int
@@ -429,6 +436,9 @@ extension DiscordChannel {
 }
 
 extension DiscordChannel {
+    /// FIXME: It's no longer true that all these fields should be nullable:
+    /// https://github.com/discord/discord-api-docs/commit/8ab98d5eac8d90b860da5e84e69e973a1bf7011e
+
     /// Partial ``DiscordChannel.Message`` object.
     public struct PartialMessage: Sendable, Codable {
         public var id: MessageSnowflake
@@ -551,7 +561,7 @@ extension DiscordChannel {
 /// https://discord.com/developers/docs/resources/channel#embed-object
 public struct Embed: Sendable, Codable, ValidatablePayload {
 
-    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
+    /// https://discord.com/developers/docs/resources/message#embed-object-embed-types
     @UnstableEnum<String>
     public enum Kind: Sendable, Codable {
         case rich  // "rich"
@@ -560,6 +570,8 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         case gifv  // "gifv"
         case article  // "article"
         case link  // "link"
+        case pollResult  // "poll_result"
+        @available(*, deprecated, message: "Not available in Discord Docs so will be removed in a future major version")
         case autoModerationMessage  // "auto_moderation_message"
         case __undocumented(String)
     }
@@ -752,17 +764,22 @@ public struct RoleSubscriptionData: Sendable, Codable {
 
 // MARK: + DiscordChannel.Message.Kind
 extension DiscordChannel.Message.Kind {
+    /// Whether or not is can be possible to delete this kind of message.
+    /// This is derived from the official documentation of ``DiscordChannel.Message.Kind``.
     public var isDeletable: Bool {
         switch self {
         case .`default`, .channelPinnedMessage, .guildMemberJoin, .userPremiumGuildSubscription,
             .userPremiumGuildSubscriptionTier1, .userPremiumGuildSubscriptionTier2, .userPremiumGuildSubscriptionTier3,
             .channelFollowAdd, .threadCreated, .reply, .chatInputCommand, .guildInviteReminder, .contextMenuCommand,
             .autoModerationAction, .roleSubscriptionPurchase, .interactionPremiumUpsell, .stageStart, .stageEnd,
-            .stageSpeaker, .stageTopic:
+            .stageSpeaker, .stageTopic, .guildIncidentAlertModeEnabled, .guildIncidentAlertModeDisabled,
+            .guildIncidentReportRaid, .guildIncidentReportFalseAlarm, .guildDiscoveryDisqualified,
+            .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning,
+            .guildDiscoveryGracePeriodFinalWarning,
+            .purchaseNotification, .pollResult:
             return true
         case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange,
-            .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning,
-            .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
+            .threadStarterMessage, .guildApplicationPremiumSubscription:
             return false
         case .__undocumented:
             return false

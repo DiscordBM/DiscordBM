@@ -1119,7 +1119,8 @@ extension DiscordClient {
         after: EntitlementSnowflake? = nil,
         limit: Int? = nil,
         guildId: GuildSnowflake? = nil,
-        excludeEnded: Bool? = nil
+        excludeEnded: Bool? = nil,
+        excludeDeleted: Bool? = nil
     ) async throws -> DiscordClientResponse<[Entitlement]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 100)
         try checkMutuallyExclusive(queries: [
@@ -1138,6 +1139,7 @@ extension DiscordClient {
                     ("limit", limit.map({ "\($0)" })),
                     ("guild_id", guildId?.rawValue),
                     ("exclude_ended", excludeEnded.map({ "\($0)" })),
+                    ("exclude_deleted", excludeDeleted.map({ "\($0)" })),
                 ]
             )
         )

@@ -5,6 +5,7 @@ public struct AutoModerationRule: Sendable, Codable {
     @UnstableEnum<Int>
     public enum EventKind: Sendable, Codable {
         case messageSend  // 1
+        case memberUpdate  // 2
         case __undocumented(Int)
     }
 
@@ -15,6 +16,7 @@ public struct AutoModerationRule: Sendable, Codable {
         case spam  // 3
         case keywordPreset  // 4
         case mentionSpam  // 5
+        case memberProfile  // 6
         case __undocumented(Int)
     }
 
@@ -59,6 +61,7 @@ public struct AutoModerationRule: Sendable, Codable {
         case blockMessage(customMessage: String?)
         case sendAlertMessage(channelId: ChannelSnowflake)
         case timeout(durationSeconds: Int)
+        case blockMemberInteraction
 
         private enum CodingKeys: String, CodingKey {
             case type
@@ -99,6 +102,8 @@ public struct AutoModerationRule: Sendable, Codable {
                     forKey: .metadata
                 ).decode(Int.self, forKey: .duration_seconds)
                 self = .timeout(durationSeconds: durationSeconds)
+            case 4:
+                self = .blockMemberInteraction
             default:
                 throw DecodingError.dataCorrupted(
                     .init(
@@ -133,6 +138,8 @@ public struct AutoModerationRule: Sendable, Codable {
                     forKey: .metadata
                 )
                 try metadataContainer.encode(durationSeconds, forKey: .duration_seconds)
+            case .blockMemberInteraction:
+                try container.encode(4, forKey: .type)
             }
         }
 
@@ -152,6 +159,8 @@ public struct AutoModerationRule: Sendable, Codable {
                     name: "durationSeconds"
                 )
             case .sendAlertMessage(_):
+                [ValidationFailure]()
+            case .blockMemberInteraction:
                 [ValidationFailure]()
             }
         }

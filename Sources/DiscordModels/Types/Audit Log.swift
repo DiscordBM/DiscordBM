@@ -179,6 +179,9 @@ public struct AuditLog: Sendable, Codable {
             case threadUpdate  // 111
             case threadDelete  // 112
             case applicationCommandPermissionUpdate  // 121
+            //            case soundboardSoundCreate  // 130
+            //            case soundboardSoundUpdate  // 131
+            //            case soundboardSoundDelete  // 132
             case autoModerationRuleCreate  // 140
             case autoModerationRuleUpdate  // 141
             case autoModerationRuleDelete  // 142
@@ -249,6 +252,9 @@ public struct AuditLog: Sendable, Codable {
             case threadUpdate
             case threadDelete
             case applicationCommandPermissionUpdate(application_id: ApplicationSnowflake)
+            //            case soundboardSoundCreate(SoundboardSound)
+            //            case soundboardSoundUpdate(SoundboardSound)
+            //            case soundboardSoundDelete(SoundboardSound)
             case autoModerationRuleCreate
             case autoModerationRuleUpdate
             case autoModerationRuleDelete

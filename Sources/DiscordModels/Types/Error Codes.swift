@@ -71,6 +71,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case unknownGuildTemplate  // 10057
     case unknownDiscoverableServerCategory  // 10059
     case unknownSticker  // 10060
+    case unknownStickerPack  // 10061
     case unknownInteraction  // 10062
     case unknownApplicationCommand  // 10063
     case unknownVoiceState  // 10065
@@ -134,6 +135,8 @@ public enum JSONErrorCode: Sendable, Codable {
     case featureTemporarilyDisabledOnServerSide  // 40006
     case userIsBannedFromGuild  // 40007
     case connectionRevoked  // 40012
+    case onlyConsumableSKUsCanBeConsumed  // 40018
+    case youCanOnlyDeleteSandboxEntitlements  // 40019
     case userNotConnectedToVoice  // 40032
     case messageAlreadyCrossposted  // 40033
     case applicationCommandWithNameAlreadyExists  // 40041
@@ -145,6 +148,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case noTagsAvailableThatCanBeSetByNonModerators  // 40066
     case tagRequiredToCreateForumPostInChannel  // 40067
     case anEntitlementHasAlreadyBeenGrantedForThisResource  // 40074
+    case thisInteractionHasHitTheMaximumNumberOfFollowUpMessage  // 40094
     case cloudflareIsBlockingYourRequestThisCanOftenBeResolvedBySettingProperUserAgent  // 40333
     case missingAccess  // 50001
     case invalidAccountType  // 50002

@@ -903,6 +903,7 @@ public struct Gateway: Sendable, Codable {
         public var user: DiscordUser
         public var nick: String?
         public var avatar: String?
+        public var banner: String?
         public var joined_at: DiscordTimestamp
         public var premium_since: DiscordTimestamp?
         public var deaf: Bool?
@@ -919,6 +920,7 @@ public struct Gateway: Sendable, Codable {
             self.user = try container.decode(DiscordUser.self, forKey: .user)
             self.nick = try container.decodeIfPresent(String.self, forKey: .nick)
             self.avatar = try container.decodeIfPresent(String.self, forKey: .avatar)
+            self.banner = try container.decodeIfPresent(String.self, forKey: .banner)
             self.joined_at =
                 try container.decodeIfPresent(
                     DiscordTimestamp.self,
@@ -1365,6 +1367,7 @@ public struct Gateway: Sendable, Codable {
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
+            /// FIXME: "game" has been renamed to "playing"
             case game  // 0
             case streaming  // 1
             case listening  // 2
@@ -1372,6 +1375,10 @@ public struct Gateway: Sendable, Codable {
             case custom  // 4
             case competing  // 5
             case __undocumented(Int)
+
+            /// "game" has been renamed to "playing":
+            /// https://github.com/discord/discord-api-docs/commit/3cad69757ad24ecb5affc3024f008d186022ec91
+            public static var playing: Self { .game }
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-timestamps

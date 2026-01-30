@@ -119,8 +119,11 @@ extension DiscordUser {
         /// E.g.: `case epicGames`'s value should be just `epicgames` like in the docs?
         @UnstableEnum<String>
         public enum Service: Sendable, Codable {
+            case amazonMusic  // "Amazon Music"
             case battleNet  // "Battle.net"
             case bungie  // "Bungie.net"
+            case bluesky  // "Bluesky"
+            case crunchyroll  // "Crunchyroll"
             case domain  // Domain
             case ebay  // "eBay"
             case epicGames  // "Epic Games"
@@ -128,10 +131,12 @@ extension DiscordUser {
             case github  // "GitHub"
             case instagram  // "Instagram"
             case leagueOfLegends  // "League of Legends"
+            case mastodon  // "Mastodon"
             case paypal  // "PayPal"
             case playstation  // "PlayStation Network"
             case reddit  // "Reddit"
             case riotGames  // "Riot Games"
+            case roblox  // "Roblox"
             case spotify  // "Spotify"
             case skype  // "Skype"
             case steam  // "Steam"

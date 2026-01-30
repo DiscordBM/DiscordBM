@@ -12,6 +12,7 @@ public enum Payloads {
         /// When sending, `id` is the index of this attachment in the `files` you provide.
         public var id: String
         public var filename: String?
+        public var title: String?
         public var description: String?
         public var content_type: String?
         public var size: Int?
@@ -25,6 +26,7 @@ public enum Payloads {
         public init(
             index: Int,
             filename: String? = nil,
+            title: String? = nil,
             description: String? = nil,
             content_type: String? = nil,
             size: Int? = nil,
@@ -36,6 +38,7 @@ public enum Payloads {
         ) {
             self.id = "\(index)"
             self.filename = filename
+            self.title = title
             self.description = description
             self.content_type = content_type
             self.size = size
@@ -708,6 +711,7 @@ public enum Payloads {
         public var components: [Interaction.ActionRow]?
         public var files: [RawFile]?
         public var attachments: [Attachment]?
+        public var poll: CreatePollRequest?
 
         enum CodingKeys: String, CodingKey {
             case content
@@ -715,6 +719,7 @@ public enum Payloads {
             case allowed_mentions
             case components
             case attachments
+            case poll
         }
 
         public init(
@@ -723,7 +728,8 @@ public enum Payloads {
             allowed_mentions: AllowedMentions? = nil,
             components: [Interaction.ActionRow]? = nil,
             files: [RawFile]? = nil,
-            attachments: [Attachment]? = nil
+            attachments: [Attachment]? = nil,
+            poll: CreatePollRequest? = nil
         ) {
             self.content = content
             self.embeds = embeds
@@ -731,6 +737,7 @@ public enum Payloads {
             self.components = components
             self.files = files
             self.attachments = attachments
+            self.poll = poll
         }
 
         public func validate() -> [ValidationFailure] {
@@ -941,6 +948,7 @@ public enum Payloads {
         public var dm_permission: Bool?
         public var type: ApplicationCommand.Kind?
         public var nsfw: Bool?
+        /// FIXME: check `integration_types` should exist or not
         @_spi(UserInstallableApps) @DecodeOrNil
         public var integration_types: [DiscordApplication.IntegrationKind]?
         @_spi(UserInstallableApps) @DecodeOrNil
@@ -1004,6 +1012,7 @@ public enum Payloads {
         public var default_member_permissions: StringBitField<Permission>?
         public var dm_permission: Bool?
         public var nsfw: Bool?
+        /// FIXME: check `integration_types` should exist or not
         @_spi(UserInstallableApps) @DecodeOrNil
         public var integration_types: [DiscordApplication.IntegrationKind]?
         @_spi(UserInstallableApps) @DecodeOrNil
@@ -2405,9 +2414,9 @@ public enum Payloads {
     public struct CreatePollRequest: Sendable, Codable, ValidatablePayload {
         public var question: Poll.Media
         public var answers: [Poll.Answer]
-        /// "Number of hours the poll should be open for, up to 7 days"
-        public var duration: Int
-        public var allow_multiselect: Bool
+        /// "Number of hours the poll should be open for, up to 32 days"
+        public var duration: Int?
+        public var allow_multiselect: Bool?
         public var layout_type: Poll.LayoutKind?
 
         public init(
@@ -2424,11 +2433,25 @@ public enum Payloads {
             self.layout_type = layout_type
         }
 
+        public init(
+            question: Poll.Media,
+            answers: [Poll.Answer],
+            duration: Int? = nil,
+            allow_multiselect: Bool? = nil,
+            layout_type: Poll.LayoutKind? = nil
+        ) {
+            self.question = question
+            self.answers = answers
+            self.duration = duration
+            self.allow_multiselect = allow_multiselect
+            self.layout_type = layout_type
+        }
+
         public func validate() -> [ValidationFailure] {
             question.validate()
             answers.map(\.poll_media).validate()
             validateElementCountDoesNotExceed(answers, max: 10, name: "answers")
-            validateNumberInRangeOrNil(duration, min: 1, max: 144, name: "duration")/// 7 days max
+            validateNumberInRangeOrNil(duration, min: 1, max: 768, name: "duration")/// 32 days max
         }
     }
 }

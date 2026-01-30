@@ -10,12 +10,18 @@ public struct Guild: Sendable, Codable {
             case completedOnboarding  // 1
             case bypassVerification  // 2
             case startedOnboarding  // 3
+            case isGuest  // 4
+            case startedHomeActions  // 5
+            case completedHomeActions  // 6
+            case automodQuarantinedUsername  // 7
+            case dmSettingsUpsellAcknowledged  // 9
             case __undocumented(UInt)
         }
 
         public var user: DiscordUser?
         public var nick: String?
         public var avatar: String?
+        public var banner: String?
         public var roles: [RoleSnowflake]
         public var joined_at: DiscordTimestamp
         public var premium_since: DiscordTimestamp?
@@ -32,6 +38,7 @@ public struct Guild: Sendable, Codable {
             self.user = guildMemberAdd.user
             self.nick = guildMemberAdd.nick
             self.avatar = guildMemberAdd.avatar
+            self.banner = guildMemberAdd.banner
             self.joined_at = guildMemberAdd.joined_at
             self.premium_since = guildMemberAdd.premium_since
             self.deaf = guildMemberAdd.deaf
@@ -347,6 +354,7 @@ extension Guild {
         public var user: DiscordUser?
         public var nick: String?
         public var avatar: String?
+        public var banner: String?
         public var roles: [RoleSnowflake]?
         public var joined_at: DiscordTimestamp?
         public var premium_since: DiscordTimestamp?
@@ -497,4 +505,19 @@ public struct IntegrationApplication: Sendable, Codable {
     public var icon: String?
     public var description: String
     public var bot: DiscordUser?
+}
+
+extension Guild.Member.Flag {
+    public var isEditable: Bool {
+        switch self {
+        case .didRejoin, .completedOnboarding, .startedOnboarding, .isGuest, .startedHomeActions,
+            .completedHomeActions, .automodQuarantinedUsername, .dmSettingsUpsellAcknowledged:
+            return false
+        case .bypassVerification:
+            return true
+        case .__undocumented:
+            /// Likely `false`, but really: not sure
+            return false
+        }
+    }
 }
