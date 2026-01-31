@@ -1100,6 +1100,7 @@ public struct Gateway: Sendable, Codable {
         public var application_id: ApplicationSnowflake?
         public var message_reference: DiscordChannel.Message.MessageReference?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
+        public var message_snapshots: [DiscordChannel.Message.MessageSnapshot]?
         public var referenced_message: DereferenceBox<MessageCreate>?
         @_spi(UserInstallableApps) @DecodeOrNil
         public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?

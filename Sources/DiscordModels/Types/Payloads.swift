@@ -108,6 +108,14 @@ public enum Payloads {
             /// A modal.
             case modal = 9
             /// Indication that user needs to unlock/buy this capability.
+            @available(
+                *,
+                deprecated,
+                message: """
+                    Deprecated by Discord; See the official docs for more info:
+                    https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
+                    """
+            )
             case premiumRequired = 10
         }
 
@@ -2009,6 +2017,7 @@ public enum Payloads {
         public var description: String?
         public var entity_type: GuildScheduledEvent.EntityKind
         public var image: ImageData?
+        public var recurrence_rule: GuildScheduledEvent.RecurrenceRule?
 
         public init(
             channel_id: ChannelSnowflake? = nil,
@@ -2019,7 +2028,8 @@ public enum Payloads {
             scheduled_end_time: DiscordTimestamp? = nil,
             description: String? = nil,
             entity_type: GuildScheduledEvent.EntityKind,
-            image: ImageData? = nil
+            image: ImageData? = nil,
+            recurrence_rule: GuildScheduledEvent.RecurrenceRule? = nil
         ) {
             self.channel_id = channel_id
             self.entity_metadata = entity_metadata
@@ -2030,6 +2040,7 @@ public enum Payloads {
             self.description = description
             self.entity_type = entity_type
             self.image = image
+            self.recurrence_rule = recurrence_rule
         }
 
         public func validate() -> [ValidationFailure] {}
@@ -2047,6 +2058,7 @@ public enum Payloads {
         public var entity_type: GuildScheduledEvent.EntityKind?
         public var status: GuildScheduledEvent.Status?
         public var image: ImageData?
+        public var recurrence_rule: GuildScheduledEvent.RecurrenceRule?
 
         public init(
             channel_id: ChannelSnowflake? = nil,
@@ -2058,7 +2070,8 @@ public enum Payloads {
             description: String? = nil,
             entity_type: GuildScheduledEvent.EntityKind? = nil,
             status: GuildScheduledEvent.Status? = nil,
-            image: ImageData? = nil
+            image: ImageData? = nil,
+            recurrence_rule: GuildScheduledEvent.RecurrenceRule? = nil
         ) {
             self.channel_id = channel_id
             self.entity_metadata = entity_metadata
@@ -2070,6 +2083,7 @@ public enum Payloads {
             self.entity_type = entity_type
             self.status = status
             self.image = image
+            self.recurrence_rule = recurrence_rule
         }
 
         public func validate() -> [ValidationFailure] {}

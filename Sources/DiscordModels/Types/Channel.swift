@@ -156,22 +156,34 @@ public struct DiscordChannel: Sendable, Codable {
 }
 
 extension DiscordChannel {
-    /// https://discord.com/developers/docs/resources/channel#message-object
+    /// https://discord.com/developers/docs/resources/message#message-object
     public struct Message: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/channel#message-reference-object-message-reference-structure
+        /// https://discord.com/developers/docs/resources/message#message-reference-object-message-reference-structure
         public struct MessageReference: Sendable, Codable {
+
+            /// https://discord.com/developers/docs/resources/message#message-reference-types
+            @UnstableEnum<Int>
+            public enum Kind: Sendable, Codable {
+                case `default`  // 0
+                case forward  // 1
+                case __undocumented(Int)
+            }
+
+            public var type: Kind?
             public var message_id: MessageSnowflake?
             public var channel_id: ChannelSnowflake?
             public var guild_id: GuildSnowflake?
             public var fail_if_not_exists: Bool?
 
             public init(
+                type: Kind? = nil,
                 message_id: MessageSnowflake? = nil,
                 channel_id: ChannelSnowflake? = nil,
                 guild_id: GuildSnowflake? = nil,
                 fail_if_not_exists: Bool? = nil
             ) {
+                self.type = type
                 self.message_id = message_id
                 self.channel_id = channel_id
                 self.guild_id = guild_id
@@ -179,7 +191,7 @@ extension DiscordChannel {
             }
         }
 
-        /// https://discord.com/developers/docs/resources/channel#message-object-message-types
+        /// https://discord.com/developers/docs/resources/message#message-object-message-types
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case `default`  // 0
@@ -222,7 +234,7 @@ extension DiscordChannel {
             case __undocumented(Int)
         }
 
-        /// https://discord.com/developers/docs/resources/channel#message-object-message-flags
+        /// https://discord.com/developers/docs/resources/message#message-object-message-flags
         @UnstableEnum<UInt>
         public enum Flag: Sendable {
             case crossposted  // 0
@@ -239,7 +251,7 @@ extension DiscordChannel {
             case __undocumented(UInt)
         }
 
-        /// https://discord.com/developers/docs/resources/channel#channel-mention-object
+        /// https://discord.com/developers/docs/resources/message#channel-mention-object
         public struct ChannelMention: Sendable, Codable {
             public var id: ChannelSnowflake
             public var guild_id: GuildSnowflake
@@ -247,10 +259,10 @@ extension DiscordChannel {
             public var name: String
         }
 
-        /// https://discord.com/developers/docs/resources/channel#attachment-object
+        /// https://discord.com/developers/docs/resources/message#attachment-object
         public struct Attachment: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/channel#attachment-object-attachment-flags
+            /// https://discord.com/developers/docs/resources/message#attachment-object-attachment-flags
             @UnstableEnum<UInt>
             public enum Flag: Sendable {
                 case isRemix  // 2
@@ -273,10 +285,10 @@ extension DiscordChannel {
             public var flags: IntBitField<Flag>?
         }
 
-        /// https://discord.com/developers/docs/resources/channel#reaction-object
+        /// https://discord.com/developers/docs/resources/message#reaction-object
         public struct Reaction: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/channel#reaction-object-reaction-count-details-structure
+            /// https://discord.com/developers/docs/resources/message#reaction-object-reaction-count-details-structure
             public struct CountDetails: Sendable, Codable {
                 public var burst: Int
                 public var normal: Int
@@ -358,10 +370,10 @@ extension DiscordChannel {
             }
         }
 
-        /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-structure
+        /// https://discord.com/developers/docs/resources/message#message-object-message-activity-structure
         public struct Activity: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-types
+            /// https://discord.com/developers/docs/resources/message#message-object-message-activity-types
             @UnstableEnum<Int>
             public enum Kind: Sendable, Codable {
                 case join  // 1
@@ -376,7 +388,7 @@ extension DiscordChannel {
             public var party_id: String?
         }
 
-        /// https://discord.com/developers/docs/resources/channel#message-interaction-metadata-object-message-interaction-metadata-structure
+        /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-message-interaction-metadata-structure
         @_spi(UserInstallableApps)
         public struct InteractionMetadata: Sendable, Codable {
             public var id: InteractionSnowflake
@@ -388,9 +400,15 @@ extension DiscordChannel {
             public var triggering_interaction_metadata: DereferenceBox<InteractionMetadata>?
         }
 
+        /// https://discord.com/developers/docs/resources/message#message-call-object-message-call-object-structure
         public struct Call: Sendable, Codable {
             public var participants: [UserSnowflake]
             public var ended_timestamp: DiscordTimestamp?
+        }
+
+        /// https://discord.com/developers/docs/resources/message#message-snapshot-structure
+        public struct MessageSnapshot: Sendable, Codable {
+            public var message: PartialMessage
         }
 
         public var id: MessageSnowflake
@@ -416,6 +434,7 @@ extension DiscordChannel {
         public var application_id: ApplicationSnowflake?
         public var message_reference: MessageReference?
         public var flags: IntBitField<Flag>?
+        public var message_snapshots: [MessageSnapshot]?
         public var referenced_message: DereferenceBox<Message>?
         @_spi(UserInstallableApps) @DecodeOrNil
         public var interaction_metadata: InteractionMetadata?
@@ -464,6 +483,7 @@ extension DiscordChannel {
         public var application_id: ApplicationSnowflake?
         public var message_reference: DiscordChannel.Message.MessageReference?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
+        public var message_snapshots: [DiscordChannel.Message.MessageSnapshot]?
         public var referenced_message: DereferenceBox<PartialMessage>?
         @_spi(UserInstallableApps) @DecodeOrNil
         public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?

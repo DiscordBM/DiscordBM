@@ -468,6 +468,7 @@ extension Interaction {
                 case success  // 3
                 case danger  // 4
                 case link  // 5
+                case premium  // 6
                 case __undocumented(Int)
             }
 
@@ -478,6 +479,7 @@ extension Interaction {
                 case secondary
                 case success
                 case danger
+                case premium
 
                 /// This case serves as a way of discouraging exhaustive switch statements
                 case __DO_NOT_USE_THIS_CASE
@@ -488,6 +490,7 @@ extension Interaction {
                     case .secondary: return .secondary
                     case .success: return .success
                     case .danger: return .danger
+                    case .premium: return .premium
                     case .__DO_NOT_USE_THIS_CASE:
                         fatalError(
                             "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
@@ -501,6 +504,7 @@ extension Interaction {
                     case .secondary: self = .secondary
                     case .success: self = .success
                     case .danger: self = .danger
+                    case .premium: self = .premium
                     case .link: return nil
                     case .__undocumented: return nil
                     }
@@ -511,6 +515,7 @@ extension Interaction {
             public var label: String?
             public var emoji: Emoji?
             public var custom_id: String?
+            public var sku_id: SKUSnowflake?
             public var url: String?
             public var disabled: Bool?
 
@@ -519,12 +524,14 @@ extension Interaction {
                 style: NonLinkStyle,
                 label: String,
                 custom_id: String,
+                sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
                 self.style = style.toStyle()
                 self.label = label
                 self.emoji = nil
                 self.custom_id = custom_id
+                self.sku_id = sku_id
                 self.disabled = disabled
             }
 
@@ -533,12 +540,14 @@ extension Interaction {
                 style: NonLinkStyle,
                 emoji: Emoji,
                 custom_id: String,
+                sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
                 self.style = style.toStyle()
                 self.label = nil
                 self.emoji = emoji
                 self.custom_id = custom_id
+                self.sku_id = sku_id
                 self.disabled = disabled
             }
 
@@ -548,12 +557,14 @@ extension Interaction {
                 label: String,
                 emoji: Emoji,
                 custom_id: String,
+                sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
                 self.style = style.toStyle()
                 self.label = label
                 self.emoji = emoji
                 self.custom_id = custom_id
+                self.sku_id = sku_id
                 self.disabled = disabled
             }
 
@@ -561,12 +572,14 @@ extension Interaction {
             public init(
                 label: String,
                 url: String,
+                sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
                 self.style = .link
                 self.label = label
                 self.emoji = nil
                 self.url = url
+                self.sku_id = sku_id
                 self.disabled = disabled
             }
 
@@ -574,12 +587,14 @@ extension Interaction {
             public init(
                 emoji: Emoji,
                 url: String,
+                sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
                 self.style = .link
                 self.label = nil
                 self.emoji = emoji
                 self.url = url
+                self.sku_id = sku_id
                 self.disabled = disabled
             }
 
@@ -588,12 +603,14 @@ extension Interaction {
                 label: String,
                 emoji: Emoji,
                 url: String,
+                sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
                 self.style = .link
                 self.label = label
                 self.emoji = emoji
                 self.url = url
+                self.sku_id = sku_id
                 self.disabled = disabled
             }
 
