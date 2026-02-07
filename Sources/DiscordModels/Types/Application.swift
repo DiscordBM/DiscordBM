@@ -29,7 +29,6 @@ public struct DiscordApplication: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/resources/application#application-object-application-integration-types
-    @_spi(UserInstallableApps)
     @UnstableEnum<Int>
     public enum IntegrationKind: Sendable, Codable, CodingKeyRepresentable {
         case guildInstall  // 0
@@ -38,7 +37,6 @@ public struct DiscordApplication: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/resources/application#application-object-application-integration-type-configuration-object
-    @_spi(UserInstallableApps)
     public struct IntegrationKindConfiguration: Sendable, Codable {
         public var oauth2_install_params: InstallParams?
 
@@ -74,7 +72,6 @@ public struct DiscordApplication: Sendable, Codable {
     public var role_connections_verification_url: String?
     public var tags: [String]?
     public var install_params: InstallParams?
-    @_spi(UserInstallableApps) @DecodeOrNil
     public var integration_types_config: [IntegrationKind: IntegrationKindConfiguration]?
     public var custom_install_url: String?
 }
@@ -108,7 +105,6 @@ public struct PartialApplication: Sendable, Codable {
     public var role_connections_verification_url: String?
     public var tags: [String]?
     public var install_params: DiscordApplication.InstallParams?
-    @_spi(UserInstallableApps) @DecodeOrNil
     public var integration_types_config:
         [DiscordApplication.IntegrationKind: DiscordApplication.IntegrationKindConfiguration]?
     public var custom_install_url: String?

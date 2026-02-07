@@ -53,7 +53,6 @@ public struct Interaction: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-context-types
-    @_spi(UserInstallableApps)
     @UnstableEnum<Int>
     public enum ContextKind: Sendable, Codable {
         case guild  // 0
@@ -274,9 +273,7 @@ public struct Interaction: Sendable, Codable {
     public var guild_locale: DiscordLocale?
     public var app_permissions: StringBitField<Permission>?
     public var entitlements: [Entitlement]
-    @_spi(UserInstallableApps) /// No @DecodeOrNil because there is a manual init(from:)
     public var authorizing_integration_owners: [DiscordApplication.IntegrationKind: AnySnowflake]?
-    @_spi(UserInstallableApps) /// No @DecodeOrNil because there is a manual init(from:)
     public var context: ContextKind?
 
     @available(

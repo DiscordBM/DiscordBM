@@ -167,9 +167,7 @@ public struct ApplicationCommand: Sendable, Codable {
     public var default_member_permissions: StringBitField<Permission>?
     public var dm_permission: Bool?
     public var nsfw: Bool?
-    @_spi(UserInstallableApps) @DecodeOrNil
     public var integration_types: [DiscordApplication.IntegrationKind]?
-    @_spi(UserInstallableApps) @DecodeOrNil
     public var contexts: [Interaction.ContextKind]?
     public var version: String?
 }

@@ -956,10 +956,7 @@ public enum Payloads {
         public var dm_permission: Bool?
         public var type: ApplicationCommand.Kind?
         public var nsfw: Bool?
-        /// FIXME: check `integration_types` should exist or not
-        @_spi(UserInstallableApps) @DecodeOrNil
         public var integration_types: [DiscordApplication.IntegrationKind]?
-        @_spi(UserInstallableApps) @DecodeOrNil
         public var contexts: [Interaction.ContextKind]?
 
         public init(
@@ -971,7 +968,9 @@ public enum Payloads {
             default_member_permissions: [Permission]? = nil,
             dm_permission: Bool? = nil,
             type: ApplicationCommand.Kind? = nil,
-            nsfw: Bool? = nil
+            nsfw: Bool? = nil,
+            integration_types: [DiscordApplication.IntegrationKind]? = nil,
+            contexts: [Interaction.ContextKind]? = nil
         ) {
             self.name = name
             self.name_localizations = .init(name_localizations)
@@ -982,6 +981,8 @@ public enum Payloads {
             self.dm_permission = dm_permission
             self.type = type
             self.nsfw = nsfw
+            self.integration_types = integration_types
+            self.contexts = contexts
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1020,33 +1021,9 @@ public enum Payloads {
         public var default_member_permissions: StringBitField<Permission>?
         public var dm_permission: Bool?
         public var nsfw: Bool?
-        /// FIXME: check `integration_types` should exist or not
-        @_spi(UserInstallableApps) @DecodeOrNil
         public var integration_types: [DiscordApplication.IntegrationKind]?
-        @_spi(UserInstallableApps) @DecodeOrNil
         public var contexts: [Interaction.ContextKind]?
 
-        public init(
-            name: String? = nil,
-            name_localizations: [DiscordLocale: String]? = nil,
-            description: String? = nil,
-            description_localizations: [DiscordLocale: String]? = nil,
-            options: [ApplicationCommand.Option]? = nil,
-            default_member_permissions: [Permission]? = nil,
-            dm_permission: Bool? = nil,
-            nsfw: Bool? = nil
-        ) {
-            self.name = name
-            self.name_localizations = .init(name_localizations)
-            self.description = description
-            self.description_localizations = .init(description_localizations)
-            self.options = options
-            self.default_member_permissions = default_member_permissions.map({ .init($0) })
-            self.dm_permission = dm_permission
-            self.nsfw = nsfw
-        }
-
-        @_spi(UserInstallableApps)
         public init(
             name: String? = nil,
             name_localizations: [DiscordLocale: String]? = nil,
@@ -2442,7 +2419,6 @@ public enum Payloads {
         public var description: String?
         public var role_connections_verification_url: String?
         public var install_params: DiscordApplication.InstallParams?
-        @_spi(UserInstallableApps)
         public var integration_types_config:
             [DiscordApplication.IntegrationKind: DiscordApplication.IntegrationKindConfiguration]?
         public var flags: IntBitField<DiscordApplication.Flag>?
@@ -2451,29 +2427,6 @@ public enum Payloads {
         public var interactions_endpoint_url: String?
         public var tags: [String]?
 
-        public init(
-            custom_install_url: String? = nil,
-            description: String? = nil,
-            role_connections_verification_url: String? = nil,
-            install_params: DiscordApplication.InstallParams? = nil,
-            flags: IntBitField<DiscordApplication.Flag>? = nil,
-            icon: ImageData? = nil,
-            cover_image: ImageData? = nil,
-            interactions_endpoint_url: String? = nil,
-            tags: [String]? = nil
-        ) {
-            self.custom_install_url = custom_install_url
-            self.description = description
-            self.role_connections_verification_url = role_connections_verification_url
-            self.install_params = install_params
-            self.flags = flags
-            self.icon = icon
-            self.cover_image = cover_image
-            self.interactions_endpoint_url = interactions_endpoint_url
-            self.tags = tags
-        }
-
-        @_spi(UserInstallableApps)
         public init(
             custom_install_url: String? = nil,
             description: String? = nil,

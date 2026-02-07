@@ -389,24 +389,14 @@ extension DiscordChannel {
         }
 
         /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-application-command-interaction-metadata-structure
-        @_spi(UserInstallableApps)
         public struct InteractionMetadata: Sendable, Codable {
             public var id: InteractionSnowflake
             public var type: Interaction.Kind
             public var user: DiscordUser
             public var authorizing_integration_owners: [DiscordApplication.IntegrationKind: AnySnowflake]
             public var original_response_message_id: MessageSnowflake?
-
-            /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-application-command-interaction-metadata-structure
             public var target_user: DiscordUser?
             public var target_message_id: MessageSnowflake?
-
-            /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-message-component-interaction-metadata-structure
-            public var interacted_message_id: MessageSnowflake?
-
-            /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-message-component-interaction-metadata-structure
-            /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-modal-submit-interaction-metadata-structure
-            public var triggering_interaction_metadata: DereferenceBox<InteractionMetadata>?
         }
 
         /// https://discord.com/developers/docs/resources/message#message-call-object-message-call-object-structure
@@ -445,8 +435,6 @@ extension DiscordChannel {
         public var flags: IntBitField<Flag>?
         public var message_snapshots: [MessageSnapshot]?
         public var referenced_message: DereferenceBox<Message>?
-        @_spi(UserInstallableApps) @DecodeOrNil
-        public var interaction_metadata: InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
         public var components: [Interaction.ActionRow]?
@@ -494,7 +482,6 @@ extension DiscordChannel {
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var message_snapshots: [DiscordChannel.Message.MessageSnapshot]?
         public var referenced_message: DereferenceBox<PartialMessage>?
-        @_spi(UserInstallableApps) @DecodeOrNil
         public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
