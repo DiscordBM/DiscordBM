@@ -156,22 +156,34 @@ public struct DiscordChannel: Sendable, Codable {
 }
 
 extension DiscordChannel {
-    /// https://discord.com/developers/docs/resources/channel#message-object
+    /// https://discord.com/developers/docs/resources/message#message-object
     public struct Message: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/channel#message-reference-object-message-reference-structure
+        /// https://discord.com/developers/docs/resources/message#message-reference-object-message-reference-structure
         public struct MessageReference: Sendable, Codable {
+
+            /// https://discord.com/developers/docs/resources/message#message-reference-types
+            @UnstableEnum<Int>
+            public enum Kind: Sendable, Codable {
+                case `default`  // 0
+                case forward  // 1
+                case __undocumented(Int)
+            }
+
+            public var type: Kind?
             public var message_id: MessageSnowflake?
             public var channel_id: ChannelSnowflake?
             public var guild_id: GuildSnowflake?
             public var fail_if_not_exists: Bool?
 
             public init(
+                type: Kind? = nil,
                 message_id: MessageSnowflake? = nil,
                 channel_id: ChannelSnowflake? = nil,
                 guild_id: GuildSnowflake? = nil,
                 fail_if_not_exists: Bool? = nil
             ) {
+                self.type = type
                 self.message_id = message_id
                 self.channel_id = channel_id
                 self.guild_id = guild_id
@@ -179,7 +191,7 @@ extension DiscordChannel {
             }
         }
 
-        /// https://discord.com/developers/docs/resources/channel#message-object-message-types
+        /// https://discord.com/developers/docs/resources/message#message-object-message-types
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case `default`  // 0
@@ -213,10 +225,16 @@ extension DiscordChannel {
             case stageSpeaker  // 29
             case stageTopic  // 31
             case guildApplicationPremiumSubscription  // 32
+            case guildIncidentAlertModeEnabled  // 36
+            case guildIncidentAlertModeDisabled  // 37
+            case guildIncidentReportRaid  // 38
+            case guildIncidentReportFalseAlarm  // 39
+            case purchaseNotification  // 44
+            case pollResult  // 46
             case __undocumented(Int)
         }
 
-        /// https://discord.com/developers/docs/resources/channel#message-object-message-flags
+        /// https://discord.com/developers/docs/resources/message#message-object-message-flags
         @UnstableEnum<UInt>
         public enum Flag: Sendable {
             case crossposted  // 0
@@ -233,7 +251,7 @@ extension DiscordChannel {
             case __undocumented(UInt)
         }
 
-        /// https://discord.com/developers/docs/resources/channel#channel-mention-object
+        /// https://discord.com/developers/docs/resources/message#channel-mention-object
         public struct ChannelMention: Sendable, Codable {
             public var id: ChannelSnowflake
             public var guild_id: GuildSnowflake
@@ -241,10 +259,10 @@ extension DiscordChannel {
             public var name: String
         }
 
-        /// https://discord.com/developers/docs/resources/channel#attachment-object
+        /// https://discord.com/developers/docs/resources/message#attachment-object
         public struct Attachment: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/channel#attachment-object-attachment-flags
+            /// https://discord.com/developers/docs/resources/message#attachment-object-attachment-flags
             @UnstableEnum<UInt>
             public enum Flag: Sendable {
                 case isRemix  // 2
@@ -253,6 +271,7 @@ extension DiscordChannel {
 
             public var id: AttachmentSnowflake
             public var filename: String
+            public var title: String?
             public var description: String?
             public var content_type: String?
             public var size: Int
@@ -266,10 +285,10 @@ extension DiscordChannel {
             public var flags: IntBitField<Flag>?
         }
 
-        /// https://discord.com/developers/docs/resources/channel#reaction-object
+        /// https://discord.com/developers/docs/resources/message#reaction-object
         public struct Reaction: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/channel#reaction-object-reaction-count-details-structure
+            /// https://discord.com/developers/docs/resources/message#reaction-object-reaction-count-details-structure
             public struct CountDetails: Sendable, Codable {
                 public var burst: Int
                 public var normal: Int
@@ -351,10 +370,10 @@ extension DiscordChannel {
             }
         }
 
-        /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-structure
+        /// https://discord.com/developers/docs/resources/message#message-object-message-activity-structure
         public struct Activity: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/channel#message-object-message-activity-types
+            /// https://discord.com/developers/docs/resources/message#message-object-message-activity-types
             @UnstableEnum<Int>
             public enum Kind: Sendable, Codable {
                 case join  // 1
@@ -369,21 +388,26 @@ extension DiscordChannel {
             public var party_id: String?
         }
 
-        /// https://discord.com/developers/docs/resources/channel#message-interaction-metadata-object-message-interaction-metadata-structure
-        @_spi(UserInstallableApps)
+        /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-application-command-interaction-metadata-structure
         public struct InteractionMetadata: Sendable, Codable {
             public var id: InteractionSnowflake
             public var type: Interaction.Kind
             public var user: DiscordUser
             public var authorizing_integration_owners: [DiscordApplication.IntegrationKind: AnySnowflake]
             public var original_response_message_id: MessageSnowflake?
-            public var interacted_message_id: MessageSnowflake?
-            public var triggering_interaction_metadata: DereferenceBox<InteractionMetadata>?
+            public var target_user: DiscordUser?
+            public var target_message_id: MessageSnowflake?
         }
 
+        /// https://discord.com/developers/docs/resources/message#message-call-object-message-call-object-structure
         public struct Call: Sendable, Codable {
             public var participants: [UserSnowflake]
             public var ended_timestamp: DiscordTimestamp?
+        }
+
+        /// https://discord.com/developers/docs/resources/message#message-snapshot-structure
+        public struct MessageSnapshot: Sendable, Codable {
+            public var message: PartialMessage
         }
 
         public var id: MessageSnowflake
@@ -409,9 +433,8 @@ extension DiscordChannel {
         public var application_id: ApplicationSnowflake?
         public var message_reference: MessageReference?
         public var flags: IntBitField<Flag>?
+        public var message_snapshots: [MessageSnapshot]?
         public var referenced_message: DereferenceBox<Message>?
-        @_spi(UserInstallableApps) @DecodeOrNil
-        public var interaction_metadata: InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
         public var components: [Interaction.ActionRow]?
@@ -429,6 +452,9 @@ extension DiscordChannel {
 }
 
 extension DiscordChannel {
+    /// FIXME: It's no longer true that all these fields should be nullable:
+    /// https://github.com/discord/discord-api-docs/commit/8ab98d5eac8d90b860da5e84e69e973a1bf7011e
+
     /// Partial ``DiscordChannel.Message`` object.
     public struct PartialMessage: Sendable, Codable {
         public var id: MessageSnowflake
@@ -454,8 +480,8 @@ extension DiscordChannel {
         public var application_id: ApplicationSnowflake?
         public var message_reference: DiscordChannel.Message.MessageReference?
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
+        public var message_snapshots: [DiscordChannel.Message.MessageSnapshot]?
         public var referenced_message: DereferenceBox<PartialMessage>?
-        @_spi(UserInstallableApps) @DecodeOrNil
         public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
@@ -551,7 +577,7 @@ extension DiscordChannel {
 /// https://discord.com/developers/docs/resources/channel#embed-object
 public struct Embed: Sendable, Codable, ValidatablePayload {
 
-    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-types
+    /// https://discord.com/developers/docs/resources/message#embed-object-embed-types
     @UnstableEnum<String>
     public enum Kind: Sendable, Codable {
         case rich  // "rich"
@@ -560,6 +586,8 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         case gifv  // "gifv"
         case article  // "article"
         case link  // "link"
+        case pollResult  // "poll_result"
+        @available(*, deprecated, message: "Not available in Discord Docs so will be removed in a future major version")
         case autoModerationMessage  // "auto_moderation_message"
         case __undocumented(String)
     }
@@ -752,17 +780,22 @@ public struct RoleSubscriptionData: Sendable, Codable {
 
 // MARK: + DiscordChannel.Message.Kind
 extension DiscordChannel.Message.Kind {
+    /// Whether or not is can be possible to delete this kind of message.
+    /// This is derived from the official documentation of ``DiscordChannel.Message.Kind``.
     public var isDeletable: Bool {
         switch self {
         case .`default`, .channelPinnedMessage, .guildMemberJoin, .userPremiumGuildSubscription,
             .userPremiumGuildSubscriptionTier1, .userPremiumGuildSubscriptionTier2, .userPremiumGuildSubscriptionTier3,
             .channelFollowAdd, .threadCreated, .reply, .chatInputCommand, .guildInviteReminder, .contextMenuCommand,
             .autoModerationAction, .roleSubscriptionPurchase, .interactionPremiumUpsell, .stageStart, .stageEnd,
-            .stageSpeaker, .stageTopic:
+            .stageSpeaker, .stageTopic, .guildIncidentAlertModeEnabled, .guildIncidentAlertModeDisabled,
+            .guildIncidentReportRaid, .guildIncidentReportFalseAlarm, .guildDiscoveryDisqualified,
+            .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning,
+            .guildDiscoveryGracePeriodFinalWarning,
+            .purchaseNotification, .pollResult:
             return true
         case .recipientAdd, .recipientRemove, .call, .channelNameChange, .channelIconChange,
-            .guildDiscoveryDisqualified, .guildDiscoveryRequalified, .guildDiscoveryGracePeriodInitialWarning,
-            .guildDiscoveryGracePeriodFinalWarning, .threadStarterMessage, .guildApplicationPremiumSubscription:
+            .threadStarterMessage, .guildApplicationPremiumSubscription:
             return false
         case .__undocumented:
             return false

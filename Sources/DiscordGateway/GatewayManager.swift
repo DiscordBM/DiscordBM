@@ -22,6 +22,8 @@ public protocol GatewayManager: AnyObject, Sendable {
     func connect() async
     /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
+    /// https://discord.com/developers/docs/topics/gateway-events#request-soundboard-sounds
+    func requestSoundboardSounds(payload: Gateway.RequestSoundboardSounds) async
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     func updatePresence(payload: Gateway.Identify.Presence) async
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
@@ -52,6 +54,8 @@ public protocol GatewayManager: AnyActor {
     func connect() async
     /// https://discord.com/developers/docs/topics/gateway-events#request-guild-members
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
+    /// https://discord.com/developers/docs/topics/gateway-events#request-soundboard-sounds
+    func requestSoundboardSounds(payload: Gateway.RequestSoundboardSounds) async
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     func updatePresence(payload: Gateway.Identify.Presence) async
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state

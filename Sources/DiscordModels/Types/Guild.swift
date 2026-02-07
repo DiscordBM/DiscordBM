@@ -10,12 +10,18 @@ public struct Guild: Sendable, Codable {
             case completedOnboarding  // 1
             case bypassVerification  // 2
             case startedOnboarding  // 3
+            case isGuest  // 4
+            case startedHomeActions  // 5
+            case completedHomeActions  // 6
+            case automodQuarantinedUsername  // 7
+            case dmSettingsUpsellAcknowledged  // 9
             case __undocumented(UInt)
         }
 
         public var user: DiscordUser?
         public var nick: String?
         public var avatar: String?
+        public var banner: String?
         public var roles: [RoleSnowflake]
         public var joined_at: DiscordTimestamp
         public var premium_since: DiscordTimestamp?
@@ -32,6 +38,7 @@ public struct Guild: Sendable, Codable {
             self.user = guildMemberAdd.user
             self.nick = guildMemberAdd.nick
             self.avatar = guildMemberAdd.avatar
+            self.banner = guildMemberAdd.banner
             self.joined_at = guildMemberAdd.joined_at
             self.premium_since = guildMemberAdd.premium_since
             self.deaf = guildMemberAdd.deaf
@@ -124,6 +131,7 @@ public struct Guild: Sendable, Codable {
         case invitesDisabled  // "INVITES_DISABLED"
         case inviteSplash  // "INVITE_SPLASH"
         case memberVerificationGateEnabled  // "MEMBER_VERIFICATION_GATE_ENABLED"
+        case moreSoundboard  // "MORE_SOUNDBOARD"
         case moreStickers  // "MORE_STICKERS"
         case news  // "NEWS"
         case partnered  // "PARTNERED"
@@ -132,6 +140,7 @@ public struct Guild: Sendable, Codable {
         case roleIcons  // "ROLE_ICONS"
         case roleSubscriptionsAvailableForPurchase  // "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE"
         case roleSubscriptionsEnabled  // "ROLE_SUBSCRIPTIONS_ENABLED"
+        case soundboard  // "SOUNDBOARD"
         case ticketedEventsEnabled  // "TICKETED_EVENTS_ENABLED"
         case vanityURL  // "VANITY_URL"
         case verified  // "VERIFIED"
@@ -154,7 +163,6 @@ public struct Guild: Sendable, Codable {
         //        case enabledDiscoverableBefore = "ENABLED_DISCOVERABLE_BEFORE"
         //        case communityExpMedium = "COMMUNITY_EXP_MEDIUM"
         //        case communityExpLargeUngated = "COMMUNITY_EXP_LARGE_UNGATED"
-        //        case soundboard = "SOUNDBOARD"
         //        case monetizationEnabled = "MONETIZATION_ENABLED"
     }
 
@@ -347,6 +355,7 @@ extension Guild {
         public var user: DiscordUser?
         public var nick: String?
         public var avatar: String?
+        public var banner: String?
         public var roles: [RoleSnowflake]?
         public var joined_at: DiscordTimestamp?
         public var premium_since: DiscordTimestamp?
@@ -497,4 +506,19 @@ public struct IntegrationApplication: Sendable, Codable {
     public var icon: String?
     public var description: String
     public var bot: DiscordUser?
+}
+
+extension Guild.Member.Flag {
+    public var isEditable: Bool {
+        switch self {
+        case .didRejoin, .completedOnboarding, .startedOnboarding, .isGuest, .startedHomeActions,
+            .completedHomeActions, .automodQuarantinedUsername, .dmSettingsUpsellAcknowledged:
+            return false
+        case .bypassVerification:
+            return true
+        case .__undocumented:
+            /// Likely `false`, but really: not sure
+            return false
+        }
+    }
 }

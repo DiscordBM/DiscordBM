@@ -1106,6 +1106,71 @@ extension DiscordClient {
         )
     }
 
+    /// https://discord.com/developers/docs/resources/emoji#list-application-emojis
+    @inlinable
+    public func listApplicationEmojis(
+        appId: ApplicationSnowflake? = nil
+    ) async throws -> DiscordClientResponse<Responses.ListApplicationEmojis> {
+        let endpoint = APIEndpoint.listApplicationEmojis(applicationId: try requireAppId(appId))
+        return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://discord.com/developers/docs/resources/emoji#get-application-emoji
+    @inlinable
+    public func getApplicationEmoji(
+        emojiId: EmojiSnowflake,
+        appId: ApplicationSnowflake? = nil
+    ) async throws -> DiscordClientResponse<Emoji> {
+        let endpoint = APIEndpoint.getApplicationEmoji(
+            applicationId: try requireAppId(appId),
+            emojiId: emojiId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://discord.com/developers/docs/resources/emoji#create-application-emoji
+    @inlinable
+    public func createApplicationEmoji(
+        payload: Payloads.CreateApplicationEmoji,
+        appId: ApplicationSnowflake? = nil
+    ) async throws -> DiscordClientResponse<Emoji> {
+        let endpoint = APIEndpoint.createApplicationEmoji(applicationId: try requireAppId(appId))
+        return try await self.send(
+            request: .init(to: endpoint),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/emoji#modify-application-emoji
+    @inlinable
+    public func updateApplicationEmoji(
+        emojiId: EmojiSnowflake,
+        payload: Payloads.ModifyApplicationEmoji,
+        appId: ApplicationSnowflake? = nil
+    ) async throws -> DiscordClientResponse<Emoji> {
+        let endpoint = APIEndpoint.updateApplicationEmoji(
+            applicationId: try requireAppId(appId),
+            emojiId: emojiId
+        )
+        return try await self.send(
+            request: .init(to: endpoint),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/emoji#delete-application-emoji
+    @inlinable
+    public func deleteApplicationEmoji(
+        emojiId: EmojiSnowflake,
+        appId: ApplicationSnowflake? = nil
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.deleteApplicationEmoji(
+            applicationId: try requireAppId(appId),
+            emojiId: emojiId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     // MARK: Entitlements
     /// https://discord.com/developers/docs/monetization/entitlements
 
@@ -1119,7 +1184,8 @@ extension DiscordClient {
         after: EntitlementSnowflake? = nil,
         limit: Int? = nil,
         guildId: GuildSnowflake? = nil,
-        excludeEnded: Bool? = nil
+        excludeEnded: Bool? = nil,
+        excludeDeleted: Bool? = nil
     ) async throws -> DiscordClientResponse<[Entitlement]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 100)
         try checkMutuallyExclusive(queries: [
@@ -1138,9 +1204,23 @@ extension DiscordClient {
                     ("limit", limit.map({ "\($0)" })),
                     ("guild_id", guildId?.rawValue),
                     ("exclude_ended", excludeEnded.map({ "\($0)" })),
+                    ("exclude_deleted", excludeDeleted.map({ "\($0)" })),
                 ]
             )
         )
+    }
+
+    /// https://discord.com/developers/docs/resources/entitlement#get-entitlement
+    @inlinable
+    public func getEntitlement(
+        entitlementId: EntitlementSnowflake,
+        appId: ApplicationSnowflake? = nil
+    ) async throws -> DiscordClientResponse<Entitlement> {
+        let endpoint = APIEndpoint.getEntitlement(
+            applicationId: try requireAppId(appId),
+            entitlementId: entitlementId
+        )
+        return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement
@@ -1537,6 +1617,16 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
+    /// https://discord.com/developers/docs/resources/guild#get-guild-role
+    @inlinable
+    public func getGuildRole(
+        guildId: GuildSnowflake,
+        roleId: RoleSnowflake
+    ) async throws -> DiscordClientResponse<Role> {
+        let endpoint = APIEndpoint.getGuildRole(guildId: guildId, roleId: roleId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     /// https://discord.com/developers/docs/resources/guild#create-guild-role
     @inlinable
     public func createGuildRole(
@@ -1846,6 +1936,15 @@ extension DiscordClient {
         return try await self.send(
             request: .init(to: endpoint)
         )
+    }
+
+    /// https://discord.com/developers/docs/resources/voice#get-current-user-voice-state
+    @inlinable
+    public func getOwnVoiceState(
+        guildId: GuildSnowflake
+    ) async throws -> DiscordClientResponse<VoiceState> {
+        let endpoint = APIEndpoint.getOwnVoiceState(guildId: guildId)
+        return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://discord.com/developers/docs/resources/guild#modify-user-voice-state
@@ -2264,6 +2363,47 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
+    /// https://discord.com/developers/docs/resources/subscription#list-sku-subscriptions
+    @inlinable
+    public func listSkuSubscriptions(
+        skuId: SKUSnowflake,
+        before: SubscriptionSnowflake? = nil,
+        after: SubscriptionSnowflake? = nil,
+        limit: Int? = nil,
+        userId: UserSnowflake? = nil
+    ) async throws -> DiscordClientResponse<[Subscription]> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 100)
+        try checkMutuallyExclusive(queries: [
+            ("before", before?.rawValue),
+            ("after", after?.rawValue),
+        ])
+        let endpoint = APIEndpoint.listSkuSubscriptions(skuId: skuId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("before", before?.rawValue),
+                    ("after", after?.rawValue),
+                    ("limit", limit.map({ "\($0)" })),
+                    ("user_id", userId?.rawValue),
+                ]
+            )
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/subscription#get-sku-subscription
+    @inlinable
+    public func getSkuSubscription(
+        skuId: SKUSnowflake,
+        subscriptionId: SubscriptionSnowflake
+    ) async throws -> DiscordClientResponse<Subscription> {
+        let endpoint = APIEndpoint.getSkuSubscription(
+            skuId: skuId,
+            subscriptionId: subscriptionId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     // MARK: Stage Instances
     /// https://discord.com/developers/docs/resources/stage-instance
 
@@ -2338,6 +2478,15 @@ extension DiscordClient {
     @inlinable
     public func listStickerPacks() async throws -> DiscordClientResponse<Responses.ListStickerPacks> {
         let endpoint = APIEndpoint.listStickerPacks
+        return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://discord.com/developers/docs/resources/sticker#get-sticker-pack
+    @inlinable
+    public func getStickerPack(
+        id: StickerPackSnowflake
+    ) async throws -> DiscordClientResponse<StickerPack> {
+        let endpoint = APIEndpoint.getStickerPack(stickerPackId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
@@ -2602,6 +2751,108 @@ extension DiscordClient {
             messageId: messageId
         )
         return try await self.send(request: .init(to: endpoint))
+    }
+
+    // MARK: Soundboard
+    /// https://discord.com/developers/docs/resources/soundboard
+
+    /// https://discord.com/developers/docs/resources/soundboard#send-soundboard-sound
+    @inlinable
+    public func sendSoundboardSound(
+        channelId: ChannelSnowflake,
+        payload: Payloads.SendSoundboardSound
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.sendSoundboardSound(channelId: channelId)
+        return try await self.send(
+            request: .init(to: endpoint),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/soundboard#list-default-soundboard-sounds
+    @inlinable
+    public func listDefaultSoundboardSounds() async throws -> DiscordClientResponse<[SoundboardSound]> {
+        let endpoint = APIEndpoint.listDefaultSoundboardSounds
+        return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://discord.com/developers/docs/resources/soundboard#list-guild-soundboard-sounds
+    @inlinable
+    public func listGuildSoundboardSounds(
+        guildId: GuildSnowflake
+    ) async throws -> DiscordClientResponse<Responses.ListGuildSoundboardSounds> {
+        let endpoint = APIEndpoint.listGuildSoundboardSounds(guildId: guildId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://discord.com/developers/docs/resources/soundboard#get-guild-soundboard-sound
+    @inlinable
+    public func getGuildSoundboardSound(
+        guildId: GuildSnowflake,
+        soundId: SoundboardSoundSnowflake
+    ) async throws -> DiscordClientResponse<SoundboardSound> {
+        let endpoint = APIEndpoint.getGuildSoundboardSound(
+            guildId: guildId,
+            soundId: soundId
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://discord.com/developers/docs/resources/soundboard#create-guild-soundboard-sound
+    @inlinable
+    public func createGuildSoundboardSound(
+        guildId: GuildSnowflake,
+        reason: String? = nil,
+        payload: Payloads.CreateGuildSoundboardSound
+    ) async throws -> DiscordClientResponse<SoundboardSound> {
+        let endpoint = APIEndpoint.createGuildSoundboardSound(guildId: guildId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/soundboard#modify-guild-soundboard-sound
+    @inlinable
+    public func updateGuildSoundboardSound(
+        guildId: GuildSnowflake,
+        soundId: SoundboardSoundSnowflake,
+        reason: String? = nil,
+        payload: Payloads.ModifyGuildSoundboardSound
+    ) async throws -> DiscordClientResponse<SoundboardSound> {
+        let endpoint = APIEndpoint.updateGuildSoundboardSound(
+            guildId: guildId,
+            soundId: soundId
+        )
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
+    /// https://discord.com/developers/docs/resources/soundboard#delete-guild-soundboard-sound
+    @inlinable
+    public func deleteGuildSoundboardSound(
+        guildId: GuildSnowflake,
+        soundId: SoundboardSoundSnowflake,
+        reason: String? = nil
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.deleteGuildSoundboardSound(
+            guildId: guildId,
+            soundId: soundId
+        )
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            )
+        )
     }
 
     // MARK: Voice

@@ -276,6 +276,8 @@ struct API: Decodable {
                                 type = "RuleSnowflake"
                             case "stickerId":
                                 type = "StickerSnowflake"
+                            case "stickerPackId":
+                                type = "StickerPackSnowflake"
                             case "guildScheduledEventId":
                                 type = "GuildScheduledEventSnowflake"
                             case "overwriteId":
@@ -286,6 +288,10 @@ struct API: Decodable {
                                 type = "EntitlementSnowflake"
                             case "skuId":
                                 type = "SKUSnowflake"
+                            case "subscriptionId":
+                                type = "SubscriptionSnowflake"
+                            case "soundId":
+                                type = "SoundboardSoundSnowflake"
                             case "answerId":
                                 type = "Int"
                             case let name where name.hasSuffix("Id"):

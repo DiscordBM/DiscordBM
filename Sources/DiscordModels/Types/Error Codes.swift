@@ -56,6 +56,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case unknownWebhook  // 10015
     case unknownWebhookService  // 10016
     case unknownSession  // 10020
+    case unknownAsset  // 10021
     case unknownBan  // 10026
     case unknownSKU  // 10027
     case unknownStoreListing  // 10028
@@ -71,6 +72,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case unknownGuildTemplate  // 10057
     case unknownDiscoverableServerCategory  // 10059
     case unknownSticker  // 10060
+    case unknownStickerPack  // 10061
     case unknownInteraction  // 10062
     case unknownApplicationCommand  // 10063
     case unknownVoiceState  // 10065
@@ -81,6 +83,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case unknownGuildScheduledEvent  // 10070
     case unknownGuildScheduledEventUser  // 10071
     case unknownTag  // 10087
+    case unknownSound  // 10097
     case botsCannotUseEndpoint  // 20001
     case onlyBotsCanUseEndpoint  // 20002
     case explicitContentCannotBeSentToRecipients  // 20009
@@ -118,6 +121,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case maxNumberOfStickersReached  // 30039
     case maxNumberOfPruneRequestsReached  // 30040
     case maxNumberOfGuildWidgetSettingsUpdatesReached  // 30042
+    case maxNumberOfSoundboardSoundsReached  // 30045
     case maxNumberOfEditsToMessagesOlderThan1HourReached  // 30046
     case maxNumberOfPinnedThreadsInForumChannelReached  // 30047
     case maxNumberOfTagsInForumChannelReached  // 30048
@@ -134,6 +138,8 @@ public enum JSONErrorCode: Sendable, Codable {
     case featureTemporarilyDisabledOnServerSide  // 40006
     case userIsBannedFromGuild  // 40007
     case connectionRevoked  // 40012
+    case onlyConsumableSKUsCanBeConsumed  // 40018
+    case youCanOnlyDeleteSandboxEntitlements  // 40019
     case userNotConnectedToVoice  // 40032
     case messageAlreadyCrossposted  // 40033
     case applicationCommandWithNameAlreadyExists  // 40041
@@ -145,6 +151,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case noTagsAvailableThatCanBeSetByNonModerators  // 40066
     case tagRequiredToCreateForumPostInChannel  // 40067
     case anEntitlementHasAlreadyBeenGrantedForThisResource  // 40074
+    case thisInteractionHasHitTheMaximumNumberOfFollowUpMessage  // 40094
     case cloudflareIsBlockingYourRequestThisCanOftenBeResolvedBySettingProperUserAgent  // 40333
     case missingAccess  // 50001
     case invalidAccountType  // 50002
@@ -198,12 +205,16 @@ public enum JSONErrorCode: Sendable, Codable {
     case serverNeedsMonetizationEnabledToPerformAction  // 50097
     case serverNeedsMoreBoostsToPerformThisAction  // 50101
     case requestBodyContainsInvalidJSON  // 50109
+    case providedFileIsInvalid  // 50110
+    case providedFileTypeIsInvalid  // 50123
+    case providedFileDurationExceedsMaximumOf5_2Seconds  // 50124
     case ownerCannotBePendingMember  // 50131
     case ownershipCannotBeTransferredToBotUser  // 50132
     case failedToResizeAssetBelowTheMaxSize  // 50138
     case cannotMixSubscriptionAndNonSubscriptionRolesForEmoji  // 50144
     case cannotConvertBetweenPremiumEmojiAndNormalEmoji  // 50145
     case uploadedFileNotFound  // 50146
+    case specifiedEmojiIsInvalid  // 50151
     case voiceMessagesDoNotSupportAdditionalContent  // 50159
     case voiceMessagesMustHaveASingleAudioAttachment  // 50160
     case voiceMessagesMustHaveSupportingMetadata  // 50161
@@ -211,6 +222,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case cannotDeleteGuildSubscriptionIntegration  // 50163
     case cannotSendVoiceMessagesInThisChannel  // 50173
     case theUserAccountMustFirstBeVerified  // 50178
+    case providedFileDoesNotHaveAValidDuration  // 50192
     case missingPermissionToSendSticker  // 50600
     case twoFactorRequiredForOperation  // 60003
     case noUsersWithDiscordTagExist  // 80004

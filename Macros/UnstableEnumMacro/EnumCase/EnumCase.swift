@@ -4,7 +4,7 @@ struct EnumCase {
 
     func maybeQuotedValue(rawType: RawKind) -> String {
         switch rawType {
-        case .Int, .UInt:
+        case .Int, .UInt, .UInt8:
             return value
         case .String:
             return #""\#(value)""#

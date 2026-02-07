@@ -1,6 +1,6 @@
 /// Must not import `DiscordModels` as `@testable` to make sure
 /// these tests are run using `public` declarations.
-@_spi(UserInstallableApps) import DiscordModels
+import DiscordModels
 import XCTest
 
 class DecodeToleranceTests: XCTestCase {

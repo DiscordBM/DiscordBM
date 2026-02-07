@@ -393,6 +393,19 @@ public actor BotGatewayManager: GatewayManager {
         )
     }
 
+    /// https://discord.com/developers/docs/topics/gateway-events#request-soundboard-sounds
+    public func requestSoundboardSounds(payload: Gateway.RequestSoundboardSounds) {
+        self.send(
+            message: .init(
+                payload: .init(
+                    opcode: .requestSoundboardSounds,
+                    data: .requestSoundboardSounds(payload)
+                ),
+                opcode: .text
+            )
+        )
+    }
+
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     public func updatePresence(payload: Gateway.Identify.Presence) {
         self.send(
@@ -1012,8 +1025,8 @@ private enum GatewayState: Int, Sendable, AtomicValue, CustomStringConvertible {
 extension Gateway.Opcode {
     var isSentForConnectionEstablishment: Bool {
         switch self {
-        case .dispatch, .presenceUpdate, .voiceStateUpdate, .reconnect, .requestGuildMembers, .invalidSession, .hello,
-            .heartbeatAccepted, .heartbeat:
+        case .dispatch, .presenceUpdate, .voiceStateUpdate, .reconnect, .requestGuildMembers,
+            .requestSoundboardSounds, .invalidSession, .hello, .heartbeatAccepted, .heartbeat, .__undocumented:
             false
         case .identify, .resume: true
         }

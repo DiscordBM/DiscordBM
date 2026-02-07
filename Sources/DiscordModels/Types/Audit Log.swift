@@ -179,6 +179,9 @@ public struct AuditLog: Sendable, Codable {
             case threadUpdate  // 111
             case threadDelete  // 112
             case applicationCommandPermissionUpdate  // 121
+            case soundboardSoundCreate  // 130
+            case soundboardSoundUpdate  // 131
+            case soundboardSoundDelete  // 132
             case autoModerationRuleCreate  // 140
             case autoModerationRuleUpdate  // 141
             case autoModerationRuleDelete  // 142
@@ -249,6 +252,9 @@ public struct AuditLog: Sendable, Codable {
             case threadUpdate
             case threadDelete
             case applicationCommandPermissionUpdate(application_id: ApplicationSnowflake)
+            case soundboardSoundCreate(SoundboardSound)
+            case soundboardSoundUpdate(SoundboardSound)
+            case soundboardSoundDelete(SoundboardSound)
             case autoModerationRuleCreate
             case autoModerationRuleUpdate
             case autoModerationRuleDelete
@@ -526,6 +532,15 @@ public struct AuditLog: Sendable, Codable {
                         forKey: .application_id
                     )
                     self = .applicationCommandPermissionUpdate(application_id: application_id)
+                case .soundboardSoundCreate:
+                    let sound = try container.decode(SoundboardSound.self, forKey: .options)
+                    self = .soundboardSoundCreate(sound)
+                case .soundboardSoundUpdate:
+                    let sound = try container.decode(SoundboardSound.self, forKey: .options)
+                    self = .soundboardSoundUpdate(sound)
+                case .soundboardSoundDelete:
+                    let sound = try container.decode(SoundboardSound.self, forKey: .options)
+                    self = .soundboardSoundDelete(sound)
                 case .autoModerationRuleCreate: self = .autoModerationRuleCreate
                 case .autoModerationRuleUpdate: self = .autoModerationRuleUpdate
                 case .autoModerationRuleDelete: self = .autoModerationRuleDelete
@@ -635,6 +650,12 @@ public struct AuditLog: Sendable, Codable {
                 case let .applicationCommandPermissionUpdate(application_id):
                     var container = try optionsNestedContainer()
                     try container.encode(application_id, forKey: .application_id)
+                case let .soundboardSoundCreate(sound):
+                    try container.encode(sound, forKey: .options)
+                case let .soundboardSoundUpdate(sound):
+                    try container.encode(sound, forKey: .options)
+                case let .soundboardSoundDelete(sound):
+                    try container.encode(sound, forKey: .options)
                 case .autoModerationRuleCreate: break
                 case .autoModerationRuleUpdate: break
                 case .autoModerationRuleDelete: break
@@ -765,6 +786,9 @@ extension AuditLog.Entry.ActionKind {
         case .threadUpdate: self = .threadUpdate
         case .threadDelete: self = .threadDelete
         case .applicationCommandPermissionUpdate: self = .applicationCommandPermissionUpdate
+        case .soundboardSoundCreate: self = .soundboardSoundCreate
+        case .soundboardSoundUpdate: self = .soundboardSoundUpdate
+        case .soundboardSoundDelete: self = .soundboardSoundDelete
         case .autoModerationRuleCreate: self = .autoModerationRuleCreate
         case .autoModerationRuleUpdate: self = .autoModerationRuleUpdate
         case .autoModerationRuleDelete: self = .autoModerationRuleDelete
