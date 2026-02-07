@@ -72,6 +72,7 @@ private actor FakeGatewayManager: GatewayManager {
     nonisolated let identifyPayload: Gateway.Identify = .init(token: "", intents: [])
     func connect() async {}
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async {}
+    func requestSoundboardSounds(payload: Gateway.RequestSoundboardSounds) async {}
     func updatePresence(payload: Gateway.Identify.Presence) async {}
     func updateVoiceState(payload: VoiceStateUpdate) async {}
     func makeEventsStream() async -> AsyncStream<Gateway.Event> {

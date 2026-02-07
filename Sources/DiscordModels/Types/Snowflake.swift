@@ -341,3 +341,9 @@ public typealias EntitlementSnowflake = Snowflake<Entitlement>
 
 /// Convenience type-alias for `Snowflake<SKU>`
 public typealias SKUSnowflake = Snowflake<SKU>
+
+/// Convenience type-alias for `Snowflake<Subscription>`
+public typealias SubscriptionSnowflake = Snowflake<Subscription>
+
+/// Convenience type-alias for `Snowflake<SoundboardSound>`
+public typealias SoundboardSoundSnowflake = Snowflake<SoundboardSound>

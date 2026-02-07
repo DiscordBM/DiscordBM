@@ -306,6 +306,12 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
             )
         )
 
+        await bot.requestSoundboardSounds(
+            payload: .init(
+                guild_ids: [Constants.guildId]
+            )
+        )
+
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we aren't getting invalid-session-ed.
         /// And also to wait for propagation of the presence update to us through DiscordCache.

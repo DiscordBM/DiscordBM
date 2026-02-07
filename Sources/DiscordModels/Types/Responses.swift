@@ -1,5 +1,10 @@
 public enum Responses {
 
+    /// https://discord.com/developers/docs/resources/emoji#list-application-emojis
+    public struct ListApplicationEmojis: Sendable, Codable {
+        public var items: [Emoji]
+    }
+
     /// https://discord.com/developers/docs/resources/channel#list-public-archived-threads-response-body
     public struct ListArchivedThreads: Sendable, Codable {
         public var threads: [DiscordChannel]
@@ -56,5 +61,10 @@ public enum Responses {
     /// https://discord.com/developers/docs/resources/poll#get-answer-voters-response-body
     public struct ListPollAnswerVoters: Sendable, Codable {
         public var users: [DiscordUser]
+    }
+
+    /// https://discord.com/developers/docs/resources/soundboard#list-guild-soundboard-sounds
+    public struct ListGuildSoundboardSounds: Sendable, Codable {
+        public var items: [SoundboardSound]
     }
 }

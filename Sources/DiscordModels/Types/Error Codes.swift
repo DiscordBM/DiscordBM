@@ -56,6 +56,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case unknownWebhook  // 10015
     case unknownWebhookService  // 10016
     case unknownSession  // 10020
+    case unknownAsset  // 10021
     case unknownBan  // 10026
     case unknownSKU  // 10027
     case unknownStoreListing  // 10028
@@ -82,6 +83,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case unknownGuildScheduledEvent  // 10070
     case unknownGuildScheduledEventUser  // 10071
     case unknownTag  // 10087
+    case unknownSound  // 10097
     case botsCannotUseEndpoint  // 20001
     case onlyBotsCanUseEndpoint  // 20002
     case explicitContentCannotBeSentToRecipients  // 20009
@@ -119,6 +121,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case maxNumberOfStickersReached  // 30039
     case maxNumberOfPruneRequestsReached  // 30040
     case maxNumberOfGuildWidgetSettingsUpdatesReached  // 30042
+    case maxNumberOfSoundboardSoundsReached  // 30045
     case maxNumberOfEditsToMessagesOlderThan1HourReached  // 30046
     case maxNumberOfPinnedThreadsInForumChannelReached  // 30047
     case maxNumberOfTagsInForumChannelReached  // 30048
@@ -202,12 +205,16 @@ public enum JSONErrorCode: Sendable, Codable {
     case serverNeedsMonetizationEnabledToPerformAction  // 50097
     case serverNeedsMoreBoostsToPerformThisAction  // 50101
     case requestBodyContainsInvalidJSON  // 50109
+    case providedFileIsInvalid  // 50110
+    case providedFileTypeIsInvalid  // 50123
+    case providedFileDurationExceedsMaximumOf5_2Seconds  // 50124
     case ownerCannotBePendingMember  // 50131
     case ownershipCannotBeTransferredToBotUser  // 50132
     case failedToResizeAssetBelowTheMaxSize  // 50138
     case cannotMixSubscriptionAndNonSubscriptionRolesForEmoji  // 50144
     case cannotConvertBetweenPremiumEmojiAndNormalEmoji  // 50145
     case uploadedFileNotFound  // 50146
+    case specifiedEmojiIsInvalid  // 50151
     case voiceMessagesDoNotSupportAdditionalContent  // 50159
     case voiceMessagesMustHaveASingleAudioAttachment  // 50160
     case voiceMessagesMustHaveSupportingMetadata  // 50161
@@ -215,6 +222,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case cannotDeleteGuildSubscriptionIntegration  // 50163
     case cannotSendVoiceMessagesInThisChannel  // 50173
     case theUserAccountMustFirstBeVerified  // 50178
+    case providedFileDoesNotHaveAValidDuration  // 50192
     case missingPermissionToSendSticker  // 50600
     case twoFactorRequiredForOperation  // 60003
     case noUsersWithDiscordTagExist  // 80004

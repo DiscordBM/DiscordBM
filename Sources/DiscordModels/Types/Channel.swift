@@ -388,7 +388,7 @@ extension DiscordChannel {
             public var party_id: String?
         }
 
-        /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-message-interaction-metadata-structure
+        /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-application-command-interaction-metadata-structure
         @_spi(UserInstallableApps)
         public struct InteractionMetadata: Sendable, Codable {
             public var id: InteractionSnowflake
@@ -396,7 +396,16 @@ extension DiscordChannel {
             public var user: DiscordUser
             public var authorizing_integration_owners: [DiscordApplication.IntegrationKind: AnySnowflake]
             public var original_response_message_id: MessageSnowflake?
+
+            /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-application-command-interaction-metadata-structure
+            public var target_user: DiscordUser?
+            public var target_message_id: MessageSnowflake?
+
+            /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-message-component-interaction-metadata-structure
             public var interacted_message_id: MessageSnowflake?
+
+            /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-message-component-interaction-metadata-structure
+            /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-modal-submit-interaction-metadata-structure
             public var triggering_interaction_metadata: DereferenceBox<InteractionMetadata>?
         }
 

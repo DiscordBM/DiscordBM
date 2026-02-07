@@ -2157,6 +2157,128 @@ paths:
               schema:
                 type: string
               example: ""
+  /applications/{application_id}/emojis:
+    get:
+      tags:
+        - Emoji
+      summary: list application emojis
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+    post:
+      tags:
+        - Emoji
+      summary: create application emoji
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: <string>
+                image: <string>
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+  /applications/{application_id}/emojis/{emoji_id}:
+    get:
+      tags:
+        - Emoji
+      summary: get application emoji
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: emoji_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+    patch:
+      tags:
+        - Emoji
+      summary: update application emoji
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: <string>
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: emoji_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+    delete:
+      tags:
+        - Emoji
+      summary: delete application emoji
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: emoji_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
   /gateway/bot:
     get:
       tags:
@@ -4663,6 +4785,38 @@ paths:
                 type: string
               example: ""
   /guilds/{guild_id}/roles/{role_id}:
+    get:
+      tags:
+        - Roles
+      summary: get guild role
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: role_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
     delete:
       tags:
         - Roles
@@ -4976,6 +5130,29 @@ paths:
                 type: string
                 example: text/plain
   /applications/{application_id}/entitlements/{entitlement_id}:
+    get:
+      tags:
+        - Entitlements
+      summary: get entitlement
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: entitlement_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
     delete:
       tags:
         - Entitlements
@@ -5030,6 +5207,49 @@ paths:
       summary: list SKUs
       parameters:
         - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+  /skus/{sku_id}/subscriptions:
+    get:
+      tags:
+        - SKUs
+      summary: list sku subscriptions
+      parameters:
+        - name: sku_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+  /skus/{sku_id}/subscriptions/{subscription_id}:
+    get:
+      tags:
+        - SKUs
+      summary: get sku subscription
+      parameters:
+        - name: sku_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: subscription_id
           in: path
           schema:
             type: string
@@ -5403,6 +5623,25 @@ paths:
               schema:
                 type: string
               example: ""
+  /sticker-packs/{sticker_pack_id}:
+    get:
+      tags:
+        - Stickers
+      summary: get sticker pack
+      parameters:
+        - name: sticker_pack_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
   /guilds/{guild_id}/stickers/{sticker_id}:
     get:
       tags:
@@ -6123,6 +6362,174 @@ paths:
               schema:
                 type: string
               example: ""
+  /channels/{channel_id}/send-soundboard-sound:
+    post:
+      tags:
+        - Channels
+      summary: send soundboard sound
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                sound_id: <string-snowflake>
+                source_guild_id: <string,null-snowflake>
+      parameters:
+        - name: channel_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+  /soundboard-default-sounds:
+    get:
+      tags:
+        - Guilds
+      summary: list default soundboard sounds
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+  /guilds/{guild_id}/soundboard-sounds:
+    get:
+      tags:
+        - Guilds
+      summary: list guild soundboard sounds
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+    post:
+      tags:
+        - Guilds
+      summary: create guild soundboard sound
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: <string>
+                sound: <string>
+                volume: <number,null>
+                emoji_id: <string,null-snowflake>
+                emoji_name: <string,null>
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+  /guilds/{guild_id}/soundboard-sounds/{sound_id}:
+    get:
+      tags:
+        - Guilds
+      summary: get guild soundboard sound
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: sound_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+    patch:
+      tags:
+        - Guilds
+      summary: update guild soundboard sound
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: <string,null>
+                volume: <number,null>
+                emoji_id: <string,null-snowflake>
+                emoji_name: <string,null>
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: sound_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+    delete:
+      tags:
+        - Guilds
+      summary: delete guild soundboard sound
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: sound_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
   /voice/regions:
     get:
       tags:
@@ -6142,6 +6549,24 @@ paths:
                 type: string
               example: ""
   /guilds/{guild_id}/voice-states/@me:
+    get:
+      tags:
+        - Voice
+      summary: get own voice state
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
     patch:
       tags:
         - Voice

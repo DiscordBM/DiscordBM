@@ -983,6 +983,12 @@ class DiscordClientTests: XCTestCase {
         XCTAssertEqual(role.unicode_emoji, rolePayload.unicode_emoji)
         XCTAssertEqual(role.mentionable, rolePayload.mentionable)
 
+        let gotRole = try await client.getGuildRole(
+            guildId: Constants.guildId,
+            roleId: role.id
+        ).decode()
+        XCTAssertEqual(gotRole.id, role.id)
+
         /// Get guild roles
         let guildRoles = try await client.listGuildRoles(id: Constants.guildId).decode()
         let rolesWithName = guildRoles.filter({ $0.name == role.name })
@@ -1095,6 +1101,49 @@ class DiscordClientTests: XCTestCase {
             guildId: Constants.guildId,
             emojiId: emojiId,
             reason: "Deleting Emoji Test!"
+        ).guardSuccess()
+    }
+
+    func testApplicationEmojis() async throws {
+        /// Cleanup in case a previous run failed.
+        let oldEmojis = try await client.listApplicationEmojis().decode().items
+            .filter({ $0.name?.hasPrefix("test_app_emoji_") == true })
+        for emoji in oldEmojis {
+            guard let id = emoji.id else { continue }
+            try await client.deleteApplicationEmoji(
+                emojiId: id
+            ).guardSuccess()
+        }
+
+        let image = ByteBuffer(data: resource(name: "1kb.png"))
+        let name = "test_app_emoji_\(Int.random(in: 1000...9999))"
+        let created = try await client.createApplicationEmoji(
+            payload: .init(
+                name: name,
+                image: .init(file: .init(data: image, filename: "app_emoji.png"))
+            )
+        ).decode()
+
+        let emojiId = try XCTUnwrap(created.id)
+        XCTAssertEqual(created.name, name)
+
+        let all = try await client.listApplicationEmojis().decode()
+        XCTAssertTrue(all.items.contains(where: { $0.id == emojiId }), "\(all)")
+
+        let got = try await client.getApplicationEmoji(emojiId: emojiId).decode()
+        XCTAssertEqual(got.id, emojiId)
+        XCTAssertEqual(got.name, name)
+
+        let newName = "\(name)_updated"
+        let updated = try await client.updateApplicationEmoji(
+            emojiId: emojiId,
+            payload: .init(name: newName)
+        ).decode()
+        XCTAssertEqual(updated.id, emojiId)
+        XCTAssertEqual(updated.name, newName)
+
+        try await client.deleteApplicationEmoji(
+            emojiId: emojiId
         ).guardSuccess()
     }
 
@@ -1617,6 +1666,9 @@ class DiscordClientTests: XCTestCase {
             )
         )
 
+        let gotPack = try await client.getStickerPack(id: firstPack.id).decode()
+        XCTAssertEqual(gotPack.id, firstPack.id)
+
         let packBanner =
             try await client
             .getCDNStickerPackBanner(assetId: firstPack.banner_asset_id!)
@@ -1654,6 +1706,17 @@ class DiscordClientTests: XCTestCase {
             XCTFail("Unexpected error: \(String(describing: selfVoiceStateError))")
         }
 
+        /// This endpoint is expected to fail for bots not currently connected to voice.
+        let ownVoiceStateResult = try await client.getOwnVoiceState(guildId: Constants.guildId).asError()
+        switch ownVoiceStateResult {
+        case .none:
+            break
+        case .jsonError(let jsonError) where jsonError.code == .unknownVoiceState:
+            break
+        case .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(String(describing: ownVoiceStateResult))")
+        }
+
         /// Can't set this because we can't join a voice/stage channel first.
         let voiceStateError = try await client.updateVoiceState(
             guildId: Constants.guildId,
@@ -1669,6 +1732,46 @@ class DiscordClientTests: XCTestCase {
             break
         case .none, .badStatusCode, .jsonError:
             XCTFail("Unexpected error: \(String(describing: voiceStateError))")
+        }
+    }
+
+    func testSoundboard() async throws {
+        let defaultSounds = try await client.listDefaultSoundboardSounds().decode()
+        XCTAssertGreaterThan(defaultSounds.count, 0)
+
+        let guildSounds = try await client.listGuildSoundboardSounds(
+            guildId: Constants.guildId
+        ).decode().items
+
+        if let firstGuildSound = guildSounds.first {
+            let gotSound = try await client.getGuildSoundboardSound(
+                guildId: Constants.guildId,
+                soundId: firstGuildSound.sound_id
+            ).decode()
+            XCTAssertEqual(gotSound.sound_id, firstGuildSound.sound_id)
+        } else {
+            let getError = try await client.getGuildSoundboardSound(
+                guildId: Constants.guildId,
+                soundId: .makeFake()
+            ).asError()
+            switch getError {
+            case .jsonError(let jsonError) where jsonError.code == .unknownSound:
+                break
+            case .none, .badStatusCode, .jsonError:
+                XCTFail("Unexpected error: \(String(describing: getError))")
+            }
+        }
+
+        let sendError = try await client.sendSoundboardSound(
+            channelId: Constants.Channels.voice.id,
+            payload: .init(sound_id: .makeFake())
+        ).asError()
+        switch sendError {
+        /// "User must be in voice channel to send voice channel effect"
+        case .jsonError(let jsonError) where jsonError.code?.rawValue == 50168:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(String(describing: sendError))")
         }
     }
 
@@ -2260,6 +2363,17 @@ class DiscordClientTests: XCTestCase {
             XCTFail("Unexpected error: \(String(describing: consumeError))")
         }
 
+        let getError = try await client.getEntitlement(
+            entitlementId: .makeFake()
+        ).asError()
+
+        switch getError {
+        case .jsonError(let jsonError) where jsonError.code == .unknownEntitlement:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(String(describing: getError))")
+        }
+
         let deleteError = try await client.deleteTestEntitlement(
             entitlementId: .makeFake()
         ).asError()
@@ -2273,6 +2387,30 @@ class DiscordClientTests: XCTestCase {
 
         let allSKUs = try await client.listSKUs().decode()
         XCTAssertEqual(allSKUs.count, 0, "\(allSKUs)")
+
+        let listSubscriptionsError = try await client.listSkuSubscriptions(
+            skuId: .makeFake(),
+            userId: Constants.botId
+        ).asError()
+
+        switch listSubscriptionsError {
+        case .jsonError(let jsonError) where jsonError.code == .unknownSKU:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(String(describing: listSubscriptionsError))")
+        }
+
+        let getSubscriptionError = try await client.getSkuSubscription(
+            skuId: .makeFake(),
+            subscriptionId: .makeFake()
+        ).asError()
+
+        switch getSubscriptionError {
+        case .jsonError(let jsonError) where jsonError.code == .unknownUser:
+            break
+        case .none, .badStatusCode, .jsonError:
+            XCTFail("Unexpected error: \(String(describing: getSubscriptionError))")
+        }
     }
 
     func testAutoModerationRules() async throws {
@@ -3030,7 +3168,7 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
-    private let totalTestCount = 41
+    private let totalTestCount = 43
     var isLastTest: Bool {
         self.testsRan == self.totalTestCount
     }

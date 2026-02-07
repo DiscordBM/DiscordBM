@@ -131,6 +131,7 @@ public struct Guild: Sendable, Codable {
         case invitesDisabled  // "INVITES_DISABLED"
         case inviteSplash  // "INVITE_SPLASH"
         case memberVerificationGateEnabled  // "MEMBER_VERIFICATION_GATE_ENABLED"
+        case moreSoundboard  // "MORE_SOUNDBOARD"
         case moreStickers  // "MORE_STICKERS"
         case news  // "NEWS"
         case partnered  // "PARTNERED"
@@ -139,6 +140,7 @@ public struct Guild: Sendable, Codable {
         case roleIcons  // "ROLE_ICONS"
         case roleSubscriptionsAvailableForPurchase  // "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE"
         case roleSubscriptionsEnabled  // "ROLE_SUBSCRIPTIONS_ENABLED"
+        case soundboard  // "SOUNDBOARD"
         case ticketedEventsEnabled  // "TICKETED_EVENTS_ENABLED"
         case vanityURL  // "VANITY_URL"
         case verified  // "VERIFIED"
@@ -161,7 +163,6 @@ public struct Guild: Sendable, Codable {
         //        case enabledDiscoverableBefore = "ENABLED_DISCOVERABLE_BEFORE"
         //        case communityExpMedium = "COMMUNITY_EXP_MEDIUM"
         //        case communityExpLargeUngated = "COMMUNITY_EXP_LARGE_UNGATED"
-        //        case soundboard = "SOUNDBOARD"
         //        case monetizationEnabled = "MONETIZATION_ENABLED"
     }
 

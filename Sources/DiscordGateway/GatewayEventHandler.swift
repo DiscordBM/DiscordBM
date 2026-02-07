@@ -71,6 +71,7 @@ public protocol GatewayEventHandler: Sendable {
     func onGuildMemberUpdate(_ payload: Gateway.GuildMemberAdd) async throws
     func onGuildMembersChunk(_ payload: Gateway.GuildMembersChunk) async throws
     func onRequestGuildMembers(_ payload: Gateway.RequestGuildMembers) async throws
+    func onRequestSoundboardSounds(_ payload: Gateway.RequestSoundboardSounds) async throws
     func onGuildRoleCreate(_ payload: Gateway.GuildRole) async throws
     func onGuildRoleUpdate(_ payload: Gateway.GuildRole) async throws
     func onGuildRoleDelete(_ payload: Gateway.GuildRoleDelete) async throws
@@ -79,11 +80,19 @@ public protocol GatewayEventHandler: Sendable {
     func onGuildScheduledEventDelete(_ payload: GuildScheduledEvent) async throws
     func onGuildScheduledEventUserAdd(_ payload: Gateway.GuildScheduledEventUser) async throws
     func onGuildScheduledEventUserRemove(_ payload: Gateway.GuildScheduledEventUser) async throws
+    func onGuildSoundboardSoundCreate(_ payload: SoundboardSound) async throws
+    func onGuildSoundboardSoundUpdate(_ payload: SoundboardSound) async throws
+    func onGuildSoundboardSoundDelete(_ payload: Gateway.GuildSoundboardSoundDelete) async throws
+    func onGuildSoundboardSoundsUpdate(_ payload: Gateway.SoundboardSounds) async throws
+    func onSoundboardSounds(_ payload: Gateway.SoundboardSounds) async throws
     func onGuildAuditLogEntryCreate(_ payload: AuditLog.Entry) async throws
     func onIntegrationCreate(_ payload: Gateway.IntegrationCreate) async throws
     func onIntegrationUpdate(_ payload: Gateway.IntegrationCreate) async throws
     func onIntegrationDelete(_ payload: Gateway.IntegrationDelete) async throws
     func onInteractionCreate(_ payload: Interaction) async throws
+    func onSubscriptionCreate(_ payload: Subscription) async throws
+    func onSubscriptionUpdate(_ payload: Subscription) async throws
+    func onSubscriptionDelete(_ payload: Subscription) async throws
     func onInviteCreate(_ payload: Gateway.InviteCreate) async throws
     func onInviteDelete(_ payload: Gateway.InviteDelete) async throws
     func onMessageCreate(_ payload: Gateway.MessageCreate) async throws
@@ -102,6 +111,7 @@ public protocol GatewayEventHandler: Sendable {
     func onTypingStart(_ payload: Gateway.TypingStart) async throws
     func onUserUpdate(_ payload: DiscordUser) async throws
     func onVoiceStateUpdate(_ payload: VoiceState) async throws
+    func onVoiceChannelEffectSend(_ payload: Gateway.VoiceChannelEffectSend) async throws
     func onRequestVoiceStateUpdate(_ payload: VoiceStateUpdate) async throws
     func onVoiceServerUpdate(_ payload: Gateway.VoiceServerUpdate) async throws
     func onWebhooksUpdate(_ payload: Gateway.WebhooksUpdate) async throws
@@ -164,6 +174,7 @@ extension GatewayEventHandler {
     public func onGuildMemberUpdate(_: Gateway.GuildMemberAdd) async throws {}
     public func onGuildMembersChunk(_: Gateway.GuildMembersChunk) async throws {}
     public func onRequestGuildMembers(_: Gateway.RequestGuildMembers) async throws {}
+    public func onRequestSoundboardSounds(_: Gateway.RequestSoundboardSounds) async throws {}
     public func onGuildRoleCreate(_: Gateway.GuildRole) async throws {}
     public func onGuildRoleUpdate(_: Gateway.GuildRole) async throws {}
     public func onGuildRoleDelete(_: Gateway.GuildRoleDelete) async throws {}
@@ -172,11 +183,19 @@ extension GatewayEventHandler {
     public func onGuildScheduledEventDelete(_: GuildScheduledEvent) async throws {}
     public func onGuildScheduledEventUserAdd(_: Gateway.GuildScheduledEventUser) async throws {}
     public func onGuildScheduledEventUserRemove(_: Gateway.GuildScheduledEventUser) async throws {}
+    public func onGuildSoundboardSoundCreate(_: SoundboardSound) async throws {}
+    public func onGuildSoundboardSoundUpdate(_: SoundboardSound) async throws {}
+    public func onGuildSoundboardSoundDelete(_: Gateway.GuildSoundboardSoundDelete) async throws {}
+    public func onGuildSoundboardSoundsUpdate(_: Gateway.SoundboardSounds) async throws {}
+    public func onSoundboardSounds(_: Gateway.SoundboardSounds) async throws {}
     public func onGuildAuditLogEntryCreate(_: AuditLog.Entry) async throws {}
     public func onIntegrationCreate(_: Gateway.IntegrationCreate) async throws {}
     public func onIntegrationUpdate(_: Gateway.IntegrationCreate) async throws {}
     public func onIntegrationDelete(_: Gateway.IntegrationDelete) async throws {}
     public func onInteractionCreate(_: Interaction) async throws {}
+    public func onSubscriptionCreate(_: Subscription) async throws {}
+    public func onSubscriptionUpdate(_: Subscription) async throws {}
+    public func onSubscriptionDelete(_: Subscription) async throws {}
     public func onInviteCreate(_: Gateway.InviteCreate) async throws {}
     public func onInviteDelete(_: Gateway.InviteDelete) async throws {}
     public func onMessageCreate(_: Gateway.MessageCreate) async throws {}
@@ -195,6 +214,7 @@ extension GatewayEventHandler {
     public func onTypingStart(_: Gateway.TypingStart) async throws {}
     public func onUserUpdate(_: DiscordUser) async throws {}
     public func onVoiceStateUpdate(_: VoiceState) async throws {}
+    public func onVoiceChannelEffectSend(_: Gateway.VoiceChannelEffectSend) async throws {}
     public func onRequestVoiceStateUpdate(_: VoiceStateUpdate) async throws {}
     public func onVoiceServerUpdate(_: Gateway.VoiceServerUpdate) async throws {}
     public func onWebhooksUpdate(_: Gateway.WebhooksUpdate) async throws {}
@@ -346,6 +366,10 @@ extension GatewayEventHandler {
             await withLogging(for: "onRequestGuildMembers") {
                 try await onRequestGuildMembers(payload)
             }
+        case let .requestSoundboardSounds(payload):
+            await withLogging(for: "onRequestSoundboardSounds") {
+                try await onRequestSoundboardSounds(payload)
+            }
         case let .guildRoleCreate(payload):
             await withLogging(for: "onGuildRoleCreate") {
                 try await onGuildRoleCreate(payload)
@@ -378,6 +402,26 @@ extension GatewayEventHandler {
             await withLogging(for: "onGuildScheduledEventUserRemove") {
                 try await onGuildScheduledEventUserRemove(payload)
             }
+        case let .guildSoundboardSoundCreate(payload):
+            await withLogging(for: "onGuildSoundboardSoundCreate") {
+                try await onGuildSoundboardSoundCreate(payload)
+            }
+        case let .guildSoundboardSoundUpdate(payload):
+            await withLogging(for: "onGuildSoundboardSoundUpdate") {
+                try await onGuildSoundboardSoundUpdate(payload)
+            }
+        case let .guildSoundboardSoundDelete(payload):
+            await withLogging(for: "onGuildSoundboardSoundDelete") {
+                try await onGuildSoundboardSoundDelete(payload)
+            }
+        case let .guildSoundboardSoundsUpdate(payload):
+            await withLogging(for: "onGuildSoundboardSoundsUpdate") {
+                try await onGuildSoundboardSoundsUpdate(payload)
+            }
+        case let .soundboardSounds(payload):
+            await withLogging(for: "onSoundboardSounds") {
+                try await onSoundboardSounds(payload)
+            }
         case let .guildAuditLogEntryCreate(payload):
             await withLogging(for: "onGuildAuditLogEntryCreate") {
                 try await onGuildAuditLogEntryCreate(payload)
@@ -397,6 +441,18 @@ extension GatewayEventHandler {
         case let .interactionCreate(payload):
             await withLogging(for: "onInteractionCreate") {
                 try await onInteractionCreate(payload)
+            }
+        case let .subscriptionCreate(payload):
+            await withLogging(for: "onSubscriptionCreate") {
+                try await onSubscriptionCreate(payload)
+            }
+        case let .subscriptionUpdate(payload):
+            await withLogging(for: "onSubscriptionUpdate") {
+                try await onSubscriptionUpdate(payload)
+            }
+        case let .subscriptionDelete(payload):
+            await withLogging(for: "onSubscriptionDelete") {
+                try await onSubscriptionDelete(payload)
             }
         case let .inviteCreate(payload):
             await withLogging(for: "onInviteCreate") {
@@ -469,6 +525,10 @@ extension GatewayEventHandler {
         case let .voiceStateUpdate(payload):
             await withLogging(for: "onVoiceStateUpdate") {
                 try await onVoiceStateUpdate(payload)
+            }
+        case let .voiceChannelEffectSend(payload):
+            await withLogging(for: "onVoiceChannelEffectSend") {
+                try await onVoiceChannelEffectSend(payload)
             }
         case let .requestVoiceStateUpdate(payload):
             await withLogging(for: "onRequestVoiceStateUpdate") {

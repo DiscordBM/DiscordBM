@@ -208,6 +208,13 @@ public actor ShardingGatewayManager: GatewayManager {
             .requestGuildMembersChunk(payload: payload)
     }
 
+    /// https://discord.com/developers/docs/topics/gateway-events#request-soundboard-sounds
+    public func requestSoundboardSounds(payload: Gateway.RequestSoundboardSounds) async {
+        await self.managers
+            .first(where: { $0.identifyPayload.intents.contains(.guilds) })?
+            .requestSoundboardSounds(payload: payload)
+    }
+
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     public func updatePresence(payload: Gateway.Identify.Presence) async {
         await self.managers.first?.updatePresence(payload: payload)

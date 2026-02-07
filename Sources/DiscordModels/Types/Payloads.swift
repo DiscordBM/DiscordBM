@@ -357,7 +357,7 @@ public enum Payloads {
                 throw DecodingError.dataCorrupted(
                     .init(
                         codingPath: decoder.codingPath,
-                        debugDescription: "'\(string)' can't be base64 decoded into a file"
+                        debugDescription: "\(string.debugDescription) can't be base64 decoded into a file"
                     )
                 )
             }
@@ -1711,6 +1711,19 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
+    /// https://discord.com/developers/docs/resources/emoji#create-application-emoji-json-params
+    public struct CreateApplicationEmoji: Sendable, Encodable, ValidatablePayload {
+        public var name: String
+        public var image: ImageData
+
+        public init(name: String, image: ImageData) {
+            self.name = name
+            self.image = image
+        }
+
+        public func validate() -> [ValidationFailure] {}
+    }
+
     /// https://discord.com/developers/docs/resources/emoji#create-guild-emoji-json-params
     public struct ModifyGuildEmoji: Sendable, Encodable, ValidatablePayload {
         public var name: String
@@ -1719,6 +1732,17 @@ public enum Payloads {
         public init(name: String, roles: [RoleSnowflake]) {
             self.name = name
             self.roles = roles
+        }
+
+        public func validate() -> [ValidationFailure] {}
+    }
+
+    /// https://discord.com/developers/docs/resources/emoji#modify-application-emoji-json-params
+    public struct ModifyApplicationEmoji: Sendable, Encodable, ValidatablePayload {
+        public var name: String
+
+        public init(name: String) {
+            self.name = name
         }
 
         public func validate() -> [ValidationFailure] {}
@@ -2004,6 +2028,75 @@ public enum Payloads {
         }
 
         public func validate() -> [ValidationFailure] {}
+    }
+
+    /// https://discord.com/developers/docs/resources/soundboard#send-soundboard-sound-json-params
+    public struct SendSoundboardSound: Sendable, Encodable, ValidatablePayload {
+        public var sound_id: SoundboardSoundSnowflake
+        public var source_guild_id: GuildSnowflake?
+
+        public init(
+            sound_id: SoundboardSoundSnowflake,
+            source_guild_id: GuildSnowflake? = nil
+        ) {
+            self.sound_id = sound_id
+            self.source_guild_id = source_guild_id
+        }
+
+        public func validate() -> [ValidationFailure] {}
+    }
+
+    /// https://discord.com/developers/docs/resources/soundboard#create-guild-soundboard-sound-json-params
+    public struct CreateGuildSoundboardSound: Sendable, Encodable, ValidatablePayload {
+        public var name: String
+        public var sound: ImageData
+        public var volume: Double?
+        public var emoji_id: EmojiSnowflake?
+        public var emoji_name: String?
+
+        public init(
+            name: String,
+            sound: ImageData,
+            volume: Double? = nil,
+            emoji_id: EmojiSnowflake? = nil,
+            emoji_name: String? = nil
+        ) {
+            self.name = name
+            self.sound = sound
+            self.volume = volume
+            self.emoji_id = emoji_id
+            self.emoji_name = emoji_name
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRange(name, min: 2, max: 32, name: "name")
+            validateNumberInRangeOrNil(volume, min: 0, max: 1, name: "volume")
+        }
+    }
+
+    /// https://discord.com/developers/docs/resources/soundboard#modify-guild-soundboard-sound-json-params
+    public struct ModifyGuildSoundboardSound: Sendable, Encodable, ValidatablePayload {
+        public var name: String?
+        public var volume: Double?
+        public var emoji_id: EmojiSnowflake?
+        public var emoji_name: String?
+
+        public init(
+            name: String? = nil,
+            volume: Double? = nil,
+            emoji_id: EmojiSnowflake? = nil,
+            emoji_name: String? = nil
+        ) {
+            self.name = name
+            self.volume = volume
+            self.emoji_id = emoji_id
+            self.emoji_name = emoji_name
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountInRangeOrNil(name, min: 2, max: 32, name: "name")
+            validateNumberInRangeOrNil(volume, min: 0, max: 1, name: "volume")
+        }
     }
 
     /// https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event-json-params
