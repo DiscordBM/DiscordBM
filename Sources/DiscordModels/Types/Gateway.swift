@@ -18,24 +18,6 @@ public struct Gateway: Sendable, Codable {
         case heartbeatAccepted  // 11
         case requestSoundboardSounds  // 31
         case __undocumented(UInt8)
-
-        public var description: String {
-            switch self {
-            case .dispatch: return "dispatch"
-            case .heartbeat: return "heartbeat"
-            case .identify: return "identify"
-            case .presenceUpdate: return "presenceUpdate"
-            case .voiceStateUpdate: return "voiceStateUpdate"
-            case .resume: return "resume"
-            case .reconnect: return "reconnect"
-            case .requestGuildMembers: return "requestGuildMembers"
-            case .invalidSession: return "invalidSession"
-            case .hello: return "hello"
-            case .heartbeatAccepted: return "heartbeatAccepted"
-            case .requestSoundboardSounds: return "requestSoundboardSounds"
-            case .__undocumented(let value): return "__undocumented(\(value))"
-            }
-        }
     }
 
     /// The top-level gateway event.

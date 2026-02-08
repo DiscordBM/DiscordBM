@@ -131,6 +131,7 @@ public struct UnstableEnum: MemberMacro {
         }
 
         var syntaxes: [DeclSyntax] = [
+            cases.makeDescriptionVar(accessLevel: accessLevel, rawType: rawType),
             cases.makeRawValueVar(accessLevel: accessLevel, rawType: rawType),
             cases.makeInitializer(accessLevel: accessLevel, rawType: rawType),
         ]
@@ -187,7 +188,7 @@ extension UnstableEnum: ExtensionMacro {
         let enumName = enumDecl.name.trimmedDescription
         let qualifiedName = parentNames.isEmpty ? enumName : parentNames + "." + enumName
         let syntax: DeclSyntax = """
-            extension \(raw: qualifiedName): RawRepresentable, LosslessRawRepresentable, Hashable { }
+            extension \(raw: qualifiedName): CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable { }
             """
         let ext = ExtensionDeclSyntax(syntax)!
 

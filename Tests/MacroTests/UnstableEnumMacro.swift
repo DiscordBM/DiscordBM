@@ -19,12 +19,23 @@ class UnstableEnumMacroTests: XCTestCase {
                 case __undocumented(String)
             }
             """,
-            expandedSource: """
+            expandedSource: #"""
 
                 enum MyEnum: RawRepresentable {
                     case a
                     case b // bb
                     case __undocumented(String)
+
+                    var description: String {
+                        switch self {
+                        case .a:
+                            return "a"
+                        case .b:
+                            return "bb"
+                        case let .__undocumented(rawValue):
+                            return "\(rawValue)[__undocumented]"
+                        }
+                    }
 
                     var rawValue: String {
                         switch self {
@@ -49,9 +60,9 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
-                """,
+                """#,
             macros: macros
         )
 
@@ -64,12 +75,23 @@ class UnstableEnumMacroTests: XCTestCase {
                 case __undocumented(String)
             }
             """,
-            expandedSource: """
+            expandedSource: #"""
 
                 enum MyEnum {
                     case a
                     case b // bb
                     case __undocumented(String)
+
+                    var description: String {
+                        switch self {
+                        case .a:
+                            return "a"
+                        case .b:
+                            return "bb"
+                        case let .__undocumented(rawValue):
+                            return "\(rawValue)[__undocumented]"
+                        }
+                    }
 
                     var rawValue: String {
                         switch self {
@@ -94,9 +116,9 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
-                """,
+                """#,
             macros: macros
         )
 
@@ -109,12 +131,23 @@ class UnstableEnumMacroTests: XCTestCase {
                 case __undocumented(String)
             }
             """,
-            expandedSource: """
+            expandedSource: #"""
 
                 enum MyEnum: RawRepresentable {
                     case a // "oo"
                     case b // "bb"
                     case __undocumented(String)
+
+                    var description: String {
+                        switch self {
+                        case .a:
+                            return "oo"
+                        case .b:
+                            return "bb"
+                        case let .__undocumented(rawValue):
+                            return "\(rawValue)[__undocumented]"
+                        }
+                    }
 
                     var rawValue: String {
                         switch self {
@@ -139,9 +172,9 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
-                """,
+                """#,
             macros: macros
         )
     }
@@ -156,12 +189,23 @@ class UnstableEnumMacroTests: XCTestCase {
                 case __undocumented(Int)
             }
             """,
-            expandedSource: """
+            expandedSource: #"""
 
                 enum MyEnum: RawRepresentable {
                     case a // 1
                     case b // 5
                     case __undocumented(Int)
+
+                    var description: String {
+                        switch self {
+                        case .a:
+                            return "1[a]"
+                        case .b:
+                            return "5[b]"
+                        case let .__undocumented(rawValue):
+                            return "\(rawValue)[__undocumented]"
+                        }
+                    }
 
                     var rawValue: Int {
                         switch self {
@@ -186,9 +230,9 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
-                """,
+                """#,
             macros: macros
         )
     }
@@ -207,7 +251,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 }
             }
             """,
-            expandedSource: """
+            expandedSource: #"""
 
                 enum MyEnum: RawRepresentable {
                     case a // 1
@@ -216,6 +260,17 @@ class UnstableEnumMacroTests: XCTestCase {
                     
                     var extraVar: Int { 
                         0 
+                    }
+
+                    var description: String {
+                        switch self {
+                        case .a:
+                            return "1[a]"
+                        case .b:
+                            return "5[b]"
+                        case let .__undocumented(rawValue):
+                            return "\(rawValue)[__undocumented]"
+                        }
                     }
 
                     var rawValue: Int {
@@ -241,9 +296,9 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
-                """,
+                """#,
             macros: macros
         )
     }
@@ -262,7 +317,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 #endif
             }
             """,
-            expandedSource: """
+            expandedSource: #"""
 
                 enum MyEnum: RawRepresentable {
                     case a // 1
@@ -272,6 +327,17 @@ class UnstableEnumMacroTests: XCTestCase {
                     #else
                     case __undocumented(UInt)
                     #endif
+
+                    var description: String {
+                        switch self {
+                        case .a:
+                            return "1[a]"
+                        case .b:
+                            return "5[b]"
+                        case let .__undocumented(rawValue):
+                            return "\(rawValue)[__undocumented]"
+                        }
+                    }
 
                     var rawValue: UInt64 {
                         switch self {
@@ -296,9 +362,9 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
-                """,
+                """#,
             macros: macros
         )
     }
@@ -320,6 +386,17 @@ class UnstableEnumMacroTests: XCTestCase {
                     case b // 5
                     case __undocumented(Int)
 
+                    var description: String {
+                        switch self {
+                        case .a:
+                            return "1[a]"
+                        case .b:
+                            return "5[b]"
+                        case let .__undocumented(rawValue):
+                            return "\(rawValue)[__undocumented]"
+                        }
+                    }
+
                     var rawValue: Int {
                         switch self {
                         case .a:
@@ -361,7 +438,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """#,
             macros: macros
@@ -383,6 +460,17 @@ class UnstableEnumMacroTests: XCTestCase {
                     case b // 5
                     case __undocumented(Int)
 
+                    var description: String {
+                        switch self {
+                        case .a:
+                            return "1[a]"
+                        case .b:
+                            return "5[b]"
+                        case let .__undocumented(rawValue):
+                            return "\(rawValue)[__undocumented]"
+                        }
+                    }
+
                     var rawValue: Int {
                         switch self {
                         case .a:
@@ -424,7 +512,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """#,
             macros: macros
@@ -447,6 +535,17 @@ class UnstableEnumMacroTests: XCTestCase {
                     case a
                     case b
                     case __undocumented(String)
+
+                    var description: String {
+                        switch self {
+                        case .a:
+                            return "a"
+                        case .b:
+                            return "b"
+                        case let .__undocumented(rawValue):
+                            return "\(rawValue)[__undocumented]"
+                        }
+                    }
 
                     var rawValue: String {
                         switch self {
@@ -478,7 +577,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension StringEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension StringEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """#,
             macros: macros
@@ -495,12 +594,23 @@ class UnstableEnumMacroTests: XCTestCase {
                 case __undocumented(String)
             }
             """,
-            expandedSource: """
+            expandedSource: #"""
 
                 public enum MyEnum: RawRepresentable {
                     case a
                     case b // bb
                     case __undocumented(String)
+
+                    public var description: String {
+                        switch self {
+                        case .a:
+                            return "a"
+                        case .b:
+                            return "bb"
+                        case let .__undocumented(rawValue):
+                            return "\(rawValue)[__undocumented]"
+                        }
+                    }
 
                     public var rawValue: String {
                         switch self {
@@ -525,9 +635,9 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
-                """,
+                """#,
             macros: macros
         )
     }
@@ -555,6 +665,15 @@ class UnstableEnumMacroTests: XCTestCase {
                                 case a // "g"
                                 case __undocumented
 
+                                public var description: String {
+                                    switch self {
+                                    case .a:
+                                        return "g"
+                                    case let .__undocumented(rawValue):
+                                        return "\(rawValue)[__undocumented]"
+                                    }
+                                }
+
                                 public var rawValue: String {
                                     switch self {
                                     case .a:
@@ -577,7 +696,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     }
                 }
 
-                extension N1.N2.N3.N4.MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension N1.N2.N3.N4.MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """#,
             macros: macros
@@ -602,7 +721,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case __undocumented(Int)
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """,
             diagnostics: [
@@ -634,7 +753,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case __undocumented(Int)
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """,
             diagnostics: [
@@ -664,7 +783,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case __undocumented(String)
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """,
             diagnostics: [
@@ -696,7 +815,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case __undocumented(String)
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """,
             diagnostics: [
@@ -728,7 +847,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case __undocumented(String)
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """,
             diagnostics: [
@@ -760,7 +879,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case __undocumented(String)
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """,
             diagnostics: [
@@ -797,7 +916,7 @@ class UnstableEnumMacroTests: XCTestCase {
                     case b // "gg"
                 }
 
-                extension MyEnum: RawRepresentable, LosslessRawRepresentable, Hashable {
+                extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
                 }
                 """,
             diagnostics: [

@@ -23,12 +23,14 @@
     member,
     names: named(init),
     named(rawValue),
+    named(description),
     named(__undocumented),
     named(allCases)
 )
 @attached(
     extension,
     conformances: RawRepresentable,
+    CustomStringConvertible,
     LosslessRawRepresentable,
     Hashable
 )
