@@ -301,6 +301,7 @@ public struct Guild: Sendable, Codable {
     public var welcome_screen: [WelcomeScreen]?
     public var nsfw_level: NSFWLevel
     public var stickers: [Sticker]?
+    public var incidents_data: IncidentsData?
     public var premium_progress_bar_enabled: Bool
     public var `lazy`: Bool?
     public var hub_type: String?
@@ -354,6 +355,7 @@ public struct PartialGuild: Sendable, Codable {
     public var welcome_screen: [Guild.WelcomeScreen]?
     public var nsfw_level: Guild.NSFWLevel?
     public var stickers: [Sticker]?
+    public var incidents_data: Guild.IncidentsData?
     public var premium_progress_bar_enabled: Bool?
     public var `lazy`: Bool?
     public var hub_type: String?
@@ -462,6 +464,14 @@ extension Guild {
         public var default_channel_ids: [ChannelSnowflake]
         public var enabled: Bool
         public var mode: Mode
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#incidents-data-object
+    public struct IncidentsData: Sendable, Codable {
+        public var invites_disabled_until: DiscordTimestamp?
+        public var dms_disabled_until: DiscordTimestamp?
+        public var dm_spam_detected_at: DiscordTimestamp?
+        public var raid_detected_at: DiscordTimestamp?
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-preview-object-guild-preview-structure

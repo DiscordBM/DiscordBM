@@ -260,6 +260,7 @@ extension DiscordChannel {
             case failedToMentionSomeRolesInThread  // 8
             case suppressNotifications  // 12
             case isVoiceMessage  // 13
+            case hasSnapshot  // 14
             #if Non64BitSystemsCompatibility
             case __undocumented(UInt64)
             #else
@@ -591,10 +592,10 @@ extension DiscordChannel {
             case __undocumented(String)
         }
 
-        public var parse: [Kind]
-        public var roles: [RoleSnowflake]
-        public var users: [UserSnowflake]
-        public var replied_user: Bool
+        public var parse: [Kind]?
+        public var roles: [RoleSnowflake]?
+        public var users: [UserSnowflake]?
+        public var replied_user: Bool?
     }
 }
 

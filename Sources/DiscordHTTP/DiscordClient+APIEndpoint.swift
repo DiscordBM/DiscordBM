@@ -1314,6 +1314,19 @@ extension DiscordClient {
         )
     }
 
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-incident-actions
+    @inlinable
+    public func updateGuildIncidentActions(
+        guildId: GuildSnowflake,
+        payload: Payloads.ModifyGuildIncidentActions
+    ) async throws -> DiscordClientResponse<Guild.IncidentsData> {
+        let endpoint = APIEndpoint.updateGuildIncidentActions(guildId: guildId)
+        return try await self.send(
+            request: .init(to: endpoint),
+            payload: payload
+        )
+    }
+
     /// https://discord.com/developers/docs/resources/guild#delete-guild
     @inlinable
     public func deleteGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse {
@@ -2990,11 +3003,13 @@ extension DiscordClient {
 
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
+    ///   - withComponents: Allows sending non-interactive components for non-application-owned webhooks.
     /// https://discord.com/developers/docs/resources/webhook#execute-webhook
     @inlinable
     public func executeWebhook(
         address: WebhookAddress,
         threadId: ChannelSnowflake? = nil,
+        withComponents: Bool? = nil,
         payload: Payloads.ExecuteWebhook
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.executeWebhook(
@@ -3004,7 +3019,10 @@ extension DiscordClient {
         return try await self.sendMultipart(
             request: .init(
                 to: endpoint,
-                queries: [("thread_id", threadId?.rawValue)]
+                queries: [
+                    ("thread_id", threadId?.rawValue),
+                    ("with_components", withComponents.map { "\($0)" }),
+                ]
             ),
             payload: payload
         )
@@ -3012,11 +3030,13 @@ extension DiscordClient {
 
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
+    ///   - withComponents: Allows sending non-interactive components for non-application-owned webhooks.
     /// https://discord.com/developers/docs/resources/webhook#execute-webhook
     @inlinable
     public func executeWebhookWithResponse(
         address: WebhookAddress,
         threadId: ChannelSnowflake? = nil,
+        withComponents: Bool? = nil,
         payload: Payloads.ExecuteWebhook
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = APIEndpoint.executeWebhook(
@@ -3029,6 +3049,7 @@ extension DiscordClient {
                 queries: [
                     ("wait", "true"),
                     ("thread_id", threadId?.rawValue),
+                    ("with_components", withComponents.map { "\($0)" }),
                 ]
             ),
             payload: payload
@@ -3059,12 +3080,14 @@ extension DiscordClient {
 
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
+    ///   - withComponents: Allows sending non-interactive components for non-application-owned webhooks.
     /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message
     @inlinable
     public func updateWebhookMessage(
         address: WebhookAddress,
         messageId: MessageSnowflake,
         threadId: ChannelSnowflake? = nil,
+        withComponents: Bool? = nil,
         payload: Payloads.EditWebhookMessage
     ) async throws -> DiscordClientResponse<DiscordChannel.Message> {
         let endpoint = APIEndpoint.updateWebhookMessage(
@@ -3075,7 +3098,10 @@ extension DiscordClient {
         return try await self.sendMultipart(
             request: .init(
                 to: endpoint,
-                queries: [("thread_id", threadId?.rawValue)]
+                queries: [
+                    ("thread_id", threadId?.rawValue),
+                    ("with_components", withComponents.map { "\($0)" }),
+                ]
             ),
             payload: payload
         )
