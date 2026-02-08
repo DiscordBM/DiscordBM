@@ -818,6 +818,7 @@ public struct Gateway: Sendable, Codable {
         public var welcome_screen: [Guild.WelcomeScreen]?
         public var nsfw_level: Guild.NSFWLevel
         public var stickers: [Sticker]?
+        public var incidents_data: Guild.IncidentsData?
         public var premium_progress_bar_enabled: Bool
         public var `lazy`: Bool?
         public var hub_type: String?

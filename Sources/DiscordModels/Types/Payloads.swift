@@ -170,8 +170,8 @@ public enum Payloads {
                 validateOnlyContains(
                     flags,
                     name: "flags",
-                    reason: "Can only contain 'suppressEmbeds' and 'ephemeral'",
-                    allowed: [.suppressEmbeds, .ephemeral]
+                    reason: "Can only contain 'suppressEmbeds', 'ephemeral', and 'suppressNotifications'",
+                    allowed: [.suppressEmbeds, .ephemeral, .suppressNotifications]
                 )
                 validateElementCountDoesNotExceed(components, max: 5, name: "components")
                 components?.validate()
@@ -1458,6 +1458,22 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {
             validateCharacterCountInRange(name, min: 2, max: 100, name: "name")
         }
+    }
+
+    /// https://discord.com/developers/docs/resources/guild#modify-guild-incident-actions
+    public struct ModifyGuildIncidentActions: Sendable, Encodable, ValidatablePayload {
+        public var invites_disabled_until: DiscordTimestamp?
+        public var dms_disabled_until: DiscordTimestamp?
+
+        public init(
+            invites_disabled_until: DiscordTimestamp? = nil,
+            dms_disabled_until: DiscordTimestamp? = nil
+        ) {
+            self.invites_disabled_until = invites_disabled_until
+            self.dms_disabled_until = dms_disabled_until
+        }
+
+        public func validate() -> [ValidationFailure] {}
     }
 
     /// https://discord.com/developers/docs/resources/auto-moderation#create-auto-moderation-rule-json-params

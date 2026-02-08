@@ -1551,6 +1551,25 @@ class DiscordClientTests: XCTestCase {
         default:
             XCTFail("Unexpected error: \(updatedOnboardingError)")
         }
+
+        let invites_disabled_until: Date? = Bool.random() ? .now.addingTimeInterval(.random(in: 10...1000)) : nil
+        let dms_disabled_until: Date? = Bool.random() ? .now.addingTimeInterval(.random(in: 10...1000)) : nil
+        let updatedIncidentActions = try await client.updateGuildIncidentActions(
+            guildId: Constants.guildId,
+            payload: .init(
+                invites_disabled_until: invites_disabled_until.map(DiscordTimestamp.init(date:)),
+                dms_disabled_until: dms_disabled_until.map(DiscordTimestamp.init(date:))
+            )
+        ).decode()
+
+        XCTAssertTolerantIsEqual(
+            updatedIncidentActions.invites_disabled_until?.date.timeIntervalSince1970,
+            invites_disabled_until?.timeIntervalSince1970
+        )
+        XCTAssertTolerantIsEqual(
+            updatedIncidentActions.dms_disabled_until?.date.timeIntervalSince1970,
+            dms_disabled_until?.timeIntervalSince1970
+        )
     }
 
     func testStageInstance() async throws {
@@ -2258,6 +2277,7 @@ class DiscordClientTests: XCTestCase {
         let date = Date()
         let message = try await client.executeWebhookWithResponse(
             address: .deconstructed(id: webhook1.id, token: webhook1Token),
+            withComponents: false,
             payload: .init(
                 content: text,
                 embeds: [.init(title: "Hey", timestamp: date)]
@@ -2276,6 +2296,7 @@ class DiscordClientTests: XCTestCase {
         let threadMessage = try await client.executeWebhookWithResponse(
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             threadId: threadId,
+            withComponents: true,
             payload: .init(content: text2)
         ).decode()
 
@@ -2296,6 +2317,7 @@ class DiscordClientTests: XCTestCase {
             address: .deconstructed(id: webhook2.id, token: webhook2Token),
             messageId: threadMessage.id,
             threadId: threadId,
+            withComponents: true,
             payload: .init(content: newText)
         ).decode()
 
@@ -3110,6 +3132,21 @@ class DiscordClientTests: XCTestCase {
             let cloudFlareUniqueId = try XCTUnwrap(response.httpResponse.headers.first(name: "cf-ray"))
 
             XCTAssertNotEqual(cloudFlareUniqueId, cloudFlareUniqueRequestIdHeaders.first)
+        }
+    }
+
+    func XCTAssertTolerantIsEqual(_ lhs: Double?, _ rhs: Double?) {
+        switch (lhs, rhs) {
+        case (.none, .none): break
+        case (.none, .some), (.some, .none):
+            XCTFail("\(String(describing: lhs)) is not equal to \(String(describing: rhs)).")
+        case (.some(let lhs), .some(let rhs)):
+            let tolerance = 1.0
+            let acceptedRange = (-tolerance...tolerance)
+            guard acceptedRange.contains(lhs - rhs) else {
+                XCTFail("\(lhs) is not equal to \(rhs).")
+                return
+            }
         }
     }
 }
