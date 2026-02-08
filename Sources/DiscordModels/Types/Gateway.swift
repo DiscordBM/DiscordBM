@@ -648,7 +648,11 @@ public struct Gateway: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
+    #if Non64BitSystemsCompatibility
+    @UnstableEnum<UInt64>
+    #else
     @UnstableEnum<UInt>
+    #endif
     public enum Intent: Sendable, Codable, CaseIterable {
         case guilds  // 0
         case guildMembers  // 1
@@ -671,7 +675,11 @@ public struct Gateway: Sendable, Codable {
         case autoModerationExecution  // 21
         case guildMessagePolls  // 24
         case directMessagePolls  // 25
+        #if Non64BitSystemsCompatibility
+        case __undocumented(UInt64)
+        #else
         case __undocumented(UInt)
+        #endif
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#resume-resume-structure
@@ -1508,7 +1516,11 @@ public struct Gateway: Sendable, Codable {
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-flags
+        #if Non64BitSystemsCompatibility
+        @UnstableEnum<UInt64>
+        #else
         @UnstableEnum<UInt>
+        #endif
         public enum Flag: Sendable {
             case instance  // 0
             case join  // 1
@@ -1519,7 +1531,11 @@ public struct Gateway: Sendable, Codable {
             case partyPrivacyFriends  // 6
             case partyPrivacyVoiceChannel  // 7
             case embedded  // 8
+            #if Non64BitSystemsCompatibility
+            case __undocumented(UInt64)
+            #else
             case __undocumented(UInt)
+            #endif
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-buttons

@@ -2,7 +2,11 @@
 public struct DiscordApplication: Sendable, Codable {
 
     /// https://discord.com/developers/docs/resources/application#application-object-application-flags
+    #if Non64BitSystemsCompatibility
+    @UnstableEnum<UInt64>
+    #else
     @UnstableEnum<UInt>
+    #endif
     public enum Flag: Sendable {
         case applicationAutoModerationRuleCreateBadge  // 6
         case gatewayPresence  // 12
@@ -14,7 +18,11 @@ public struct DiscordApplication: Sendable, Codable {
         case gatewayMessageContent  // 18
         case gatewayMessageContentLimited  // 19
         case applicationCommandBadge  // 23
+        #if Non64BitSystemsCompatibility
+        case __undocumented(UInt64)
+        #else
         case __undocumented(UInt)
+        #endif
     }
 
     /// https://discord.com/developers/docs/resources/application#install-params-object
