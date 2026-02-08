@@ -800,18 +800,9 @@ extension DereferenceBox: Sendable where C: Sendable {}
 //MARK: +Calendar
 
 extension Calendar {
-    #if compiler(>=5.10) && compiler(<6.0)
-    /// It's safe the way DiscordBM uses it.
-    nonisolated(unsafe) static let utc: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = .init(identifier: "UTC")!
-        return calendar
-    }()
-    #else
     static let utc: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .init(identifier: "UTC")!
         return calendar
     }()
-    #endif
 }

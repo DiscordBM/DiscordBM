@@ -58,11 +58,19 @@ public struct DiscordChannel: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
+    #if Non64BitSystemsCompatibility
+    @UnstableEnum<UInt64>
+    #else
     @UnstableEnum<UInt>
+    #endif
     public enum Flag: Sendable {
         case pinned  // 1
         case requireTag  // 4
+        #if Non64BitSystemsCompatibility
+        case __undocumented(UInt64)
+        #else
         case __undocumented(UInt)
+        #endif
     }
 
     /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
@@ -235,7 +243,11 @@ extension DiscordChannel {
         }
 
         /// https://discord.com/developers/docs/resources/message#message-object-message-flags
+        #if Non64BitSystemsCompatibility
+        @UnstableEnum<UInt64>
+        #else
         @UnstableEnum<UInt>
+        #endif
         public enum Flag: Sendable {
             case crossposted  // 0
             case isCrosspost  // 1
@@ -248,7 +260,11 @@ extension DiscordChannel {
             case failedToMentionSomeRolesInThread  // 8
             case suppressNotifications  // 12
             case isVoiceMessage  // 13
+            #if Non64BitSystemsCompatibility
+            case __undocumented(UInt64)
+            #else
             case __undocumented(UInt)
+            #endif
         }
 
         /// https://discord.com/developers/docs/resources/message#channel-mention-object
@@ -263,10 +279,18 @@ extension DiscordChannel {
         public struct Attachment: Sendable, Codable {
 
             /// https://discord.com/developers/docs/resources/message#attachment-object-attachment-flags
+            #if Non64BitSystemsCompatibility
+            @UnstableEnum<UInt64>
+            #else
             @UnstableEnum<UInt>
+            #endif
             public enum Flag: Sendable {
                 case isRemix  // 2
+                #if Non64BitSystemsCompatibility
+                case __undocumented(UInt64)
+                #else
                 case __undocumented(UInt)
+                #endif
             }
 
             public var id: AttachmentSnowflake

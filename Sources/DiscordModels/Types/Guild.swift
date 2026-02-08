@@ -4,7 +4,11 @@ public struct Guild: Sendable, Codable {
     /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
     public struct Member: Sendable, Codable {
         /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags
+        #if Non64BitSystemsCompatibility
+        @UnstableEnum<UInt64>
+        #else
         @UnstableEnum<UInt>
+        #endif
         public enum Flag: Sendable {
             case didRejoin  // 0
             case completedOnboarding  // 1
@@ -15,7 +19,11 @@ public struct Guild: Sendable, Codable {
             case completedHomeActions  // 6
             case automodQuarantinedUsername  // 7
             case dmSettingsUpsellAcknowledged  // 9
+            #if Non64BitSystemsCompatibility
+            case __undocumented(UInt64)
+            #else
             case __undocumented(UInt)
+            #endif
         }
 
         public var user: DiscordUser?
@@ -175,7 +183,11 @@ public struct Guild: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-system-channel-flags
+    #if Non64BitSystemsCompatibility
+    @UnstableEnum<UInt64>
+    #else
     @UnstableEnum<UInt>
+    #endif
     public enum SystemChannelFlag: Sendable {
         case suppressJoinNotifications  // 0
         case suppressPremiumSubscriptions  // 1
@@ -183,7 +195,11 @@ public struct Guild: Sendable, Codable {
         case suppressJoinNotificationReplies  // 3
         case suppressRoleSubscriptionPurchaseNotifications  // 4
         case suppressRoleSubscriptionPurchaseNotificationReplies  // 5
+        #if Non64BitSystemsCompatibility
+        case __undocumented(UInt64)
+        #else
         case __undocumented(UInt)
+        #endif
     }
 
     /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier

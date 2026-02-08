@@ -12,12 +12,20 @@ public struct SKU: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/monetization/skus#sku-object-sku-flags
+    #if Non64BitSystemsCompatibility
+    @UnstableEnum<UInt64>
+    #else
     @UnstableEnum<UInt>
+    #endif
     public enum Flag: Sendable {
         case available  // 2
         case guildSubscription  // 7
         case userSubscription  // 8
+        #if Non64BitSystemsCompatibility
+        case __undocumented(UInt64)
+        #else
         case __undocumented(UInt)
+        #endif
     }
 
     public var id: SKUSnowflake

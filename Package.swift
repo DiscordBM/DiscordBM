@@ -1,4 +1,4 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.1
 
 import CompilerPluginSupport
 import PackageDescription
@@ -40,6 +40,9 @@ let package = Package(
             name: "DiscordAuth",
             targets: ["DiscordAuth"]
         ),
+    ],
+    traits: [
+        "Non64BitSystemsCompatibility"
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.49.0"),
@@ -143,6 +146,7 @@ let package = Package(
         .macro(
             name: "UnstableEnumMacro",
             dependencies: [
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ],
@@ -159,6 +163,7 @@ let package = Package(
         .testTarget(
             name: "MacroTests",
             dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
                 .target(name: "UnstableEnumMacro"),
             ],
@@ -178,33 +183,10 @@ var featureFlags: [SwiftSetting] {
     [
         /// https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md
         /// Require `any` for existential types.
-        .enableUpcomingFeature("ExistentialAny"),
-
-        /// https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md
-        /// Nicer `#file`.
-        .enableUpcomingFeature("ConciseMagicFile"),
-
-        /// https://github.com/apple/swift-evolution/blob/main/proposals/0286-forward-scan-trailing-closures.md
-        /// This one shouldn't do much to be honest, but shouldn't hurt as well.
-        .enableUpcomingFeature("ForwardTrailingClosures"),
-
-        /// https://github.com/apple/swift-evolution/blob/main/proposals/0354-regex-literals.md
-        /// `BareSlashRegexLiterals` not enabled since we don't use regex anywhere.
-
-        /// https://github.com/apple/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md
-        /// `ImportObjcForwardDeclarations` not enabled because it's objc-related.
-    ]
-}
-
-var experimentalFeatureFlags: [SwiftSetting] {
-    [
-        /// `DiscordBM` passes the `complete` level.
-        ///
-        /// `minimal` / `targeted` / `complete`
-        .enableExperimentalFeature("StrictConcurrency=complete")
+        .enableUpcomingFeature("ExistentialAny")
     ]
 }
 
 var swiftSettings: [SwiftSetting] {
-    featureFlags + experimentalFeatureFlags
+    featureFlags
 }

@@ -17,7 +17,7 @@
     </a>
     </a>
     <a href="https://swift.org">
-        <img src="https://img.shields.io/badge/swift-6.2%20%2F%206.1%20%2F%206.0%20%2F%205.10-brightgreen.svg" alt="Latest/Minimum Swift Version">
+        <img src="https://img.shields.io/badge/swift-6.2%20%2F%206.1-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
 </p>
 
@@ -30,14 +30,14 @@
 * Abstractions for easier testability.
 
 ## Showcase
-Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Services/DiscordService/DiscordService.swift#L1).  
+Vapor community's [Penny bot](https://github.com/vapor/penny-bot) serves as a good example of [utilizing this library](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Services/DiscordService/DiscordService.swift#L1).
 Unfortunately Penny isn't a good project to study how to use `DiscordBM`, due to its complexity. For now, this README is your best friend.
 
 ## How To Use
 
 ### Initializing a Gateway Manager
 
-First you need to initialize a `BotGatewayManager` instance, then tell it to connect and start using it.   
+First you need to initialize a `BotGatewayManager` instance, then tell it to connect and start using it.
 
 ```swift
 import DiscordBM
@@ -46,7 +46,7 @@ let bot = await BotGatewayManager(
     token: <#Your Bot Token#>,
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
-        activities: [.init(name: "Fortnite", type: .game)], 
+        activities: [.init(name: "Fortnite", type: .game)],
         status: .online,
         afk: false
     ),
@@ -57,9 +57,9 @@ let bot = await BotGatewayManager(
 ```
 See the [GatewayConnection tests](https://github.com/DiscordBM/DiscordBM/blob/main/Tests/IntegrationTests/GatwayConnection.swift) or [Vapor community's Penny bot](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/MainService/PennyService.swift) for real-world examples.
 
-> [!Warning]   
-> In a production app you should use [**environment variables**](https://swiftonserver.com/using-environment-variables-in-swift/) to load your Bot Token.   
-> Avoid hard-coding your Bot Token to reduce the chances of leaking it.   
+> [!Warning]
+> In a production app you should use [**environment variables**](https://swiftonserver.com/using-environment-variables-in-swift/) to load your Bot Token.
+> Avoid hard-coding your Bot Token to reduce the chances of leaking it.
 
 ### Initializing a Gateway Manager With Vapor
 <details>
@@ -90,8 +90,8 @@ let bot = await BotGatewayManager(
 </details>
 
 ### Using The Gateway Manager
-> [!Note] 
-> For your app's entry point, you should use a type with the [`@main` attribute](https://www.hackingwithswift.com/swift/5.3/atmain) like below.    
+> [!Note]
+> For your app's entry point, you should use a type with the [`@main` attribute](https://www.hackingwithswift.com/swift/5.3/atmain) like below.
 ```swift
 @main
 struct EntryPoint {
@@ -118,13 +118,13 @@ struct EntryPoint {
     }
 }
 
-/// To keep things cleaner, use a type conforming to 
+/// To keep things cleaner, use a type conforming to
 /// `GatewayEventHandler` to handle your Gateway events.
 struct EventHandler: GatewayEventHandler {
     let event: Gateway.Event
     let client: any DiscordClient
 
-    /// Each Gateway payload has its own function. 
+    /// Each Gateway payload has its own function.
     /// See `GatewayEventHandler` for the full list.
     /// This function will only be called upon receiving `MESSAGE_CREATE` events.
     func onMessageCreate(_ payload: Gateway.MessageCreate) async throws {
@@ -135,32 +135,32 @@ struct EventHandler: GatewayEventHandler {
             channelId: payload.channel_id,
             payload: .init(content: "Got a message: '\(payload.content)'")
         )
-            
+
         /// Easily decode the response to the correct type
         /// `message` will be of type `DiscordChannel.Message`.
         let message = try response.decode()
     }
 }
 ```
-> [!Note]  
-> On a successful connection, you will **always** see a `NOTICE` log indicating `connection is established`.   
+> [!Note]
+> On a successful connection, you will **always** see a `NOTICE` log indicating `connection is established`.
 
-> [!Note]  
+> [!Note]
 > By default, `DiscordBM` automatically handles HTTP rate-limits and you don't need to worry about them.
 
 ### Mindset
-The way you can make sense of the library is to think of it as a direct implementation of the Discord API.   
-In most cases, the library doesn't try to abstract away Discord's stuff.   
+The way you can make sense of the library is to think of it as a direct implementation of the Discord API.
+In most cases, the library doesn't try to abstract away Discord's stuff.
 
-* If something is related to the Gateway, you should find it near `GatewayManager`. 
+* If something is related to the Gateway, you should find it near `GatewayManager`.
 * If there is a HTTP request you want to make, you'll need to use `DiscordClient`.
-* You should read Discord documentation's related notes when you want to use something of this library.   
+* You should read Discord documentation's related notes when you want to use something of this library.
   Everything in the library has its related Discord documentation section linked near it.
 
 ### Finding Your Bot Token
 <details>
   <summary> Click to expand </summary>
-  
+
 In [Discord developer portal](https://discord.com/developers/applications):
 ![Finding Bot Token](https://user-images.githubusercontent.com/54685446/200565393-ea31c2ad-fd3a-44a1-9789-89460ab5d1a9.png)
 
@@ -171,11 +171,11 @@ In [Discord developer portal](https://discord.com/developers/applications):
 <details>
   <summary> Click to expand </summary>
 
-`DiscordBM` comes with full support for all kinds of "interactions" such as slash commands, modals, autocomplete etc... and gives you full control over how you want to use them using type-safe APIs.    
-> You can see Penny as an example of using all kinds of commands in production.    
-Penny registers the commands [here](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/CommandsManager.swift) and responds to them [here](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Handlers/InteractionHandler.swift).   
+`DiscordBM` comes with full support for all kinds of "interactions" such as slash commands, modals, autocomplete etc... and gives you full control over how you want to use them using type-safe APIs.
+> You can see Penny as an example of using all kinds of commands in production.
+Penny registers the commands [here](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/CommandsManager.swift) and responds to them [here](https://github.com/vapor/penny-bot/blob/main/Sources/Penny/Handlers/InteractionHandler.swift).
 
-In this example you'll only make 2 simple slash commands, so you can get started:   
+In this example you'll only make 2 simple slash commands, so you can get started:
 
 In your `EntryPoint.main()`:
 ```swift
@@ -304,7 +304,7 @@ struct EventHandler: GatewayEventHandler {
     }
 }
 ```
-In a new file like `DiscordCommand.swift`, to keep things organized: 
+In a new file like `DiscordCommand.swift`, to keep things organized:
 ```swift
 // MARK: - Define a nice clean enum for your commands
 enum DiscordCommand: String, CaseIterable {
@@ -343,7 +343,7 @@ enum DiscordCommand: String, CaseIterable {
     }
 }
 
-// MARK: - You can use enums for subcommands too 
+// MARK: - You can use enums for subcommands too
 enum LinkSubCommand: String, CaseIterable {
     case discord
     case github
@@ -403,17 +403,17 @@ enum LinkSubCommand: String, CaseIterable {
   * `requireApplicationCommand() throws -> ApplicationCommand`
   * `requireMessageComponent() throws -> MessageComponent`
   * `requireModalSubmit() throws -> ModalSubmit`
-* Swift's `Optional` has a `requireValue() throws` function overload (only in `DiscordBM`).                                             
+* Swift's `Optional` has a `requireValue() throws` function overload (only in `DiscordBM`).
 
 </details>
 
 ### Sending Attachments
 <details>
   <summary> Click to expand </summary>
-  
-`DiscordBM` has support for sending files as attachments.   
 
-> It's usually better to send a link to your media to Discord, instead of sending the actual file everytime.   
+`DiscordBM` has support for sending files as attachments.
+
+> It's usually better to send a link to your media to Discord, instead of sending the actual file everytime.
 
 ```swift
 /// Raw data of anything like an image
@@ -438,8 +438,8 @@ try await bot.client.createMessage(
         embeds: [.init(
             title: "An embed with an attachment!",
             image: .init(url: .attachment(name: "penguin.png"))
-            ///                          ~~~~~~~^ 
-            /// `penguin.png` is the name of the attachment in the `files` array.   
+            ///                          ~~~~~~~^
+            /// `penguin.png` is the name of the attachment in the `files` array.
         )],
         files: [.init(data: image, filename: "penguin.png")]
     )
@@ -453,7 +453,7 @@ Take a look at `testMultipartPayload()` in [/Tests/DiscordClientTests](https://g
 <details>
   <summary> Click to expand </summary>
 
-`DiscordBM` contains some utility functions for working with Discord's text-message format.   
+`DiscordBM` contains some utility functions for working with Discord's text-message format.
 
 The mention helpers:
 ```swift
@@ -505,7 +505,7 @@ let timestampMessage = "Time when message was sent: \(timestamp)"
 let anotherTimestampMessage = "I'm a time traveler. I will be born: \(anotherTimestamp)"
 ```
 
-And a function to escape special characters from user input.    
+And a function to escape special characters from user input.
 For example if you type `**BOLD TEXT**` in Discord, it'll look like **BOLD TEXT**, but using this function, it'll instead look like the original `**BOLD TEXT**` input.
 ```swift
 let escaped = DiscordUtils.escapingSpecialCharacters("**BOLD TEXT**")
@@ -522,9 +522,9 @@ let escapedMessage = "Does this look bold to you?! \(escaped)"
 `DiscordBM` has the ability to cache Gateway events in-memory, and keep the data in sync with Discord:
 ```swift
 let cache = await DiscordCache(
-    /// The `GatewayManager`/`bot` to cache the events from. 
+    /// The `GatewayManager`/`bot` to cache the events from.
     gatewayManager: <#GatewayManager You Made In Previous Steps#>,
-    /// What intents to cache their related Gateway events. 
+    /// What intents to cache their related Gateway events.
     /// This does not affect what events you receive from Discord.
     /// The intents you enter here must have been enabled in your `GatewayManager`.
     /// With `.all`, `DiscordCache` will cache all events.
@@ -551,10 +551,10 @@ if let aGuild = await cache.guilds[<#Guild ID#>] {
 <details>
   <summary> Click to expand </summary>
 
-`DiscordBM` has some best-effort functions for checking permissions and roles.   
+`DiscordBM` has some best-effort functions for checking permissions and roles.
 FYI, in interactions, the [member field](https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure) already contains the resolved permissions (`Interaction.member.permissions`).
 
-> You need a `DiscordCache` with intents containing `.guilds` & `.guildMembers` and also `requestAllMembers: .enabled`.   
+> You need a `DiscordCache` with intents containing `.guilds` & `.guildMembers` and also `requestAllMembers: .enabled`.
 
 ```swift
 let cache: DiscordCache = <#DiscordCache You Made In Previous Steps#>
@@ -565,7 +565,7 @@ guard let guild = await cache.guilds[<#Guild ID#>] else { return }
 /// Check if the user has `.viewChannel` & `.readMessageHistory` permissions in a channel.
 let hasPermission = guild.userHasPermissions(
     userId: <#User ID#>,
-    channelId: <#Channel ID#>, 
+    channelId: <#Channel ID#>,
     permissions: [.viewChannel, .readMessageHistory]
 )
 
@@ -602,7 +602,7 @@ let bot = await ShardingGatewayManager(
     token: <#Your Bot Token#>,
     presence: .init( /// Set up bot's initial presence
         /// Will show up as "Playing Fortnite"
-        activities: [.init(name: "Fortnite", type: .game)], 
+        activities: [.init(name: "Fortnite", type: .game)],
         status: .online,
         afk: false
     ),
@@ -611,7 +611,7 @@ let bot = await ShardingGatewayManager(
     intents: [.guildMessages, .messageContent]
 )
 ```
-And that's it! You've already enabled sharding. `DiscordBM` will create as many `BotGatewayManager`s as Discord suggests under the hood of `ShardingGatewayManager`, and will automatically handle them. 
+And that's it! You've already enabled sharding. `DiscordBM` will create as many `BotGatewayManager`s as Discord suggests under the hood of `ShardingGatewayManager`, and will automatically handle them.
 
 > `ShardingGatewayManager` might still only create 1 `BotGatewayManager` if that's what Discord suggests.
 
@@ -660,8 +660,8 @@ Read more about it at https://github.com/DiscordBM/DiscordReactToRole.
 <details>
   <summary> Click to expand </summary>
 
-`DiscordBM` comes with tools to make testing your app easier.   
-* You can type-erase your `BotGatewayManager`s using the `GatewayManager` protocol so you can override your gateway manager with a mocked implementation in tests.   
+`DiscordBM` comes with tools to make testing your app easier.
+* You can type-erase your `BotGatewayManager`s using the `GatewayManager` protocol so you can override your gateway manager with a mocked implementation in tests.
 * You can also do the same for `DefaultDiscordClient` and type-erase it using the `DiscordClient` protocol so you can provide a mocked implementation when testing.
 
 </details>
@@ -672,14 +672,14 @@ Read more about it at https://github.com/DiscordBM/DiscordReactToRole.
 <details>
   <summary> Click to expand </summary>
 
-These are some general implementation detail notes about the `DefaultDiscordClient`.   
+These are some general implementation detail notes about the `DefaultDiscordClient`.
 Generally, the `DefaultDiscordClient` will try to be as smart as possible with minimal compromise.
 
 > I'll refer to `DefaultDiscordClient` as "DDC" to be more concise.
 
 #### Rate Limits
-`DiscordBM` comes with a `HTTPRateLimiter` type that keeps track of the `x-ratelimit` headers.    
-This, in conjunction with `ClientConfiguration`'s `RetryPolicy`, helps `DiscordBM` to recover from what that can otherwise be a `429 Too Many Requests` error from Discord.   
+`DiscordBM` comes with a `HTTPRateLimiter` type that keeps track of the `x-ratelimit` headers.
+This, in conjunction with `ClientConfiguration`'s `RetryPolicy`, helps `DiscordBM` to recover from what that can otherwise be a `429 Too Many Requests` error from Discord.
 The behavior specified below is enabled by default.
 
 * Before each request, DDC will ask the rate-limiter if the headers allow a request.
@@ -693,15 +693,15 @@ The behavior specified below is enabled by default.
 * In any other cases other than specified above, the DDC will fail with a "rate-limited" error.
 
 #### Concurrent Requests
-`ClientConfiguration`s `CachingBehavior` has the ability to avoid multiple concurrent requests with the same "cacheable identity".   
-* You can enable caching using DDC's `configuration.cachingBehavior` through the initializers by passing `cachingBehavior: .minimal`, `.enabled` or the `.custom` static functions.  
-* As an example, if you have caching enabled for a cacheable endpoint, and you make 10 concurrent requests to the endpoint with the same parameters, the DDC will only perform 1 of those requests, and let the other 9 requests use the cached value. 
+`ClientConfiguration`s `CachingBehavior` has the ability to avoid multiple concurrent requests with the same "cacheable identity".
+* You can enable caching using DDC's `configuration.cachingBehavior` through the initializers by passing `cachingBehavior: .minimal`, `.enabled` or the `.custom` static functions.
+* As an example, if you have caching enabled for a cacheable endpoint, and you make 10 concurrent requests to the endpoint with the same parameters, the DDC will only perform 1 of those requests, and let the other 9 requests use the cached value.
 
 </details>
 
 ## How To Add DiscordBM To Your Project
 
-To use the `DiscordBM` library in a SwiftPM project, 
+To use the `DiscordBM` library in a SwiftPM project,
 add the following line to the dependencies in your `Package.swift` file:
 
 ```swift
@@ -719,12 +719,12 @@ Include `DiscordBM` as a dependency for your targets:
 Finally, add `import DiscordBM` to your source code.
 
 ## Versioning
-`DiscordBM` will try to follow Semantic Versioning 2.0.0, with exceptions:    
-* To keep `DiscordBM` up to date with Discord API's frequent changes, `DiscordBM` will **add** any new properties to any types in **minor** versions, even if it's technically a breaking change.   
-* `DiscordBM` tries to minimize the effect of this requirement. For example most enums have an underscored case named `__undocumented` which asks users to use non-exhaustive switch statements, preventing future code-breakages.  
+`DiscordBM` will try to follow Semantic Versioning 2.0.0, with exceptions:
+* To keep `DiscordBM` up to date with Discord API's frequent changes, `DiscordBM` will **add** any new properties to any types in **minor** versions, even if it's technically a breaking change.
+* `DiscordBM` tries to minimize the effect of this requirement. For example most enums have an underscored case named `__undocumented` which asks users to use non-exhaustive switch statements, preventing future code-breakages.
 
 ## Contribution & Support
 * If you need help with anything, ask in [DiscordBM's Discord server](https://discord.gg/kxfs5n7HVE).
-* Any contribution is more than welcome. You can find me in the server to discuss your ideas.    
-* If there is missing/upcoming feature, you can make an issue/PR for it with a link to the related Discord docs page or the related issue/PR in [Discord docs repository](https://github.com/discord/discord-api-docs).   
+* Any contribution is more than welcome. You can find me in the server to discuss your ideas.
+* If there is missing/upcoming feature, you can make an issue/PR for it with a link to the related Discord docs page or the related issue/PR in [Discord docs repository](https://github.com/discord/discord-api-docs).
 * Passing the `linux-integration` tests is not required for PRs because of token/access problems.

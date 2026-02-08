@@ -2,12 +2,8 @@ import DiscordModels
 import Foundation
 import NIOHTTP1
 
-#if compiler(>=5.10)
 /// It's safe the way DiscordBM uses it.
 nonisolated(unsafe) private let iso8601DateFormatter = ISO8601DateFormatter()
-#else
-private let iso8601DateFormatter = ISO8601DateFormatter()
-#endif
 
 /// MARK: - +APIEndpoint
 extension DiscordClient {
