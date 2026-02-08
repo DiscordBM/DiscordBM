@@ -84,4 +84,6 @@ extension GatewayManager {
             await .init(base: self.makeEventsParseFailureStream())
         }
     }
+
+    public func requestSoundboardSounds(payload: Gateway.RequestSoundboardSounds) async {}
 }

@@ -3,6 +3,7 @@ import Foundation
 /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
 public struct ApplicationCommand: Sendable, Codable {
 
+    /// FIXME: If Codable, then should not use `UInt` and should instead use `Int`?
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
     #if Non64BitSystemsCompatibility
     @UnstableEnum<UInt64>
@@ -23,6 +24,7 @@ public struct ApplicationCommand: Sendable, Codable {
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure
     public struct Option: Sendable, Codable, ValidatablePayload {
 
+        /// FIXME: If Codable, then should not use `UInt` and should instead use `Int`?
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
         #if Non64BitSystemsCompatibility
         @UnstableEnum<UInt64>
