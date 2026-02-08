@@ -13,6 +13,10 @@ public protocol SnowflakeProtocol:
 }
 
 extension SnowflakeProtocol {
+    public init(_ snowflake: UInt64) {
+        self.init(snowflake.description)
+    }
+
     /// Initializes a snowflake from another snowflake.
     public init(_ snowflake: any SnowflakeProtocol) {
         self.init(snowflake.rawValue)
@@ -83,6 +87,13 @@ public struct Snowflake<Tag>: SnowflakeProtocol {
     }
 }
 
+/// FIXME: This should be in SnowflakeProtocol in a future major version
+extension Snowflake: ExpressibleByIntegerLiteral {
+    public init(integerLiteral snowflake: UInt64) {
+        self.init(snowflake.description)
+    }
+}
+
 extension Snowflake: CodingKeyRepresentable {
     public var codingKey: any CodingKey {
         self.rawValue.codingKey
@@ -112,6 +123,13 @@ public struct AnySnowflake: SnowflakeProtocol {
 
     public var description: String {
         #"AnySnowflake("\#(rawValue)")"#
+    }
+}
+
+/// FIXME: This should be in SnowflakeProtocol in a future major version
+extension AnySnowflake: ExpressibleByIntegerLiteral {
+    public init(integerLiteral snowflake: UInt64) {
+        self.init(snowflake.description)
     }
 }
 
