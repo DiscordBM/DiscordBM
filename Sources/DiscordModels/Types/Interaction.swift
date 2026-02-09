@@ -1177,6 +1177,9 @@ extension Interaction {
             }
         }
 
+        /// FIXME: In a future major version, `Component` might want to also contain the `id` field which
+        /// all its sub-types have and Discord documents it as so.
+
         public enum Component: Sendable, Codable, ValidatablePayload {
             case button(Button)
             case stringSelect(StringSelectMenu)
