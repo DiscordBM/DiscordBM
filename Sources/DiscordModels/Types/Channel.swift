@@ -261,6 +261,7 @@ extension DiscordChannel {
             case suppressNotifications  // 12
             case isVoiceMessage  // 13
             case hasSnapshot  // 14
+            case isComponentsV2  // 15
             #if Non64BitSystemsCompatibility
             case __undocumented(UInt64)
             #else

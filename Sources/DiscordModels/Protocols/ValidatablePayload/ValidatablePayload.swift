@@ -175,6 +175,52 @@ extension ValidatablePayload {
         }
         return nil
     }
+
+    @inlinable
+    func validateComponentsV2Payload(
+        flags: IntBitField<DiscordChannel.Message.Flag>?,
+        hasContent: Bool,
+        hasEmbeds: Bool,
+        hasStickers: Bool,
+        hasPoll: Bool
+    ) -> [ValidationFailure] {
+        guard flags?.contains(.isComponentsV2) ?? false else { return [] }
+
+        var failures: [ValidationFailure] = []
+        if hasContent {
+            failures.append(
+                .disallowedField(
+                    name: "content",
+                    reason: "`content` is incompatible with `isComponentsV2` flag"
+                )
+            )
+        }
+        if hasEmbeds {
+            failures.append(
+                .disallowedField(
+                    name: "embeds",
+                    reason: "`embeds` is incompatible with `isComponentsV2` flag"
+                )
+            )
+        }
+        if hasStickers {
+            failures.append(
+                .disallowedField(
+                    name: "sticker_ids",
+                    reason: "`sticker_ids` is incompatible with `isComponentsV2` flag"
+                )
+            )
+        }
+        if hasPoll {
+            failures.append(
+                .disallowedField(
+                    name: "poll",
+                    reason: "`poll` is incompatible with `isComponentsV2` flag"
+                )
+            )
+        }
+        return failures
+    }
 }
 
 // MARK: - +Array
