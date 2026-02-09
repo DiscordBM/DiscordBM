@@ -13,6 +13,8 @@ public enum ValidationFailure: Sendable, CustomStringConvertible {
     case containsProhibitedValues(name: String, reason: String, valuesRepresentation: String)
     /// Precondition needs to be met first.
     case hasPrecondition(name: String, reason: String)
+    /// Field is not allowed to be present. Remove it.
+    case disallowedField(name: String, reason: String)
     /// Field can't be empty.
     case cantBeEmpty(name: String)
     /// The number is too big or too small.
@@ -35,6 +37,8 @@ public enum ValidationFailure: Sendable, CustomStringConvertible {
                 "ValidationFailure.containsProhibitedValues(name: \(name), reason: \(reason), valuesRepresentation: \(valuesRepresentation))"
         case let .hasPrecondition(name, reason):
             return "ValidationFailure.hasPrecondition(name: \(name), reason: \(reason))"
+        case let .disallowedField(name, reason):
+            return "ValidationFailure.disallowedField(name: \(name), reason: \(reason))"
         case let .cantBeEmpty(name):
             return "ValidationFailure.cantBeEmpty(name: \(name))"
         case let .numberOutOfRange(name, number, min, max):
