@@ -275,6 +275,7 @@ public struct Interaction: Sendable, Codable {
     public var entitlements: [Entitlement]
     public var authorizing_integration_owners: [DiscordApplication.IntegrationKind: AnySnowflake]?
     public var context: ContextKind?
+    public var attachment_size_limit: Int?
 
     @available(
         *,
@@ -304,6 +305,7 @@ public struct Interaction: Sendable, Codable {
         case entitlements
         case authorizing_integration_owners
         case context
+        case attachment_size_limit
     }
 
     public init(from decoder: any Decoder) throws {
@@ -363,6 +365,10 @@ public struct Interaction: Sendable, Codable {
             ContextKind.self,
             forKey: .context
         )
+        self.attachment_size_limit = try container.decodeIfPresent(
+            Int.self,
+            forKey: .attachment_size_limit
+        )
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -392,6 +398,7 @@ public struct Interaction: Sendable, Codable {
         try container.encodeIfPresent(self.guild_locale, forKey: .guild_locale)
         try container.encodeIfPresent(self.app_permissions, forKey: .app_permissions)
         try container.encode(self.entitlements, forKey: .entitlements)
+        try container.encodeIfPresent(self.attachment_size_limit, forKey: .attachment_size_limit)
     }
 }
 
@@ -434,13 +441,13 @@ public struct MessageInteraction: Sendable, Codable {
 }
 
 extension Interaction {
-    /// https://discord.com/developers/docs/interactions/message-components#action-rows
+    /// https://discord.com/developers/docs/components/reference
     /// `ActionRow` is an attempt to simplify/beautify Discord's messy components.
     /// Anything inside `ActionRow` must not be used on its own for decoding/encoding purposes.
     /// For example you always need to use `[ActionRow]` instead of `[ActionRow.Component]`.
     public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral, ValidatablePayload {
 
-        /// https://discord.com/developers/docs/interactions/message-components#component-object-component-types
+        /// https://discord.com/developers/docs/components/reference#component-object-component-types
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case actionRow  // 1
@@ -451,13 +458,22 @@ extension Interaction {
             case roleSelect  // 6
             case mentionableSelect  // 7
             case channelSelect  // 8
+            case section  // 9
+            case textDisplay  // 10
+            case thumbnail  // 11
+            case mediaGallery  // 12
+            case file  // 13
+            case separator  // 14
+            case container  // 17
+            case label  // 18
+            case fileUpload  // 19
             case __undocumented(Int)
         }
 
-        /// https://discord.com/developers/docs/interactions/message-components#button-object-button-structure
+        /// https://discord.com/developers/docs/components/reference#button
         public struct Button: Sendable, Codable, ValidatablePayload {
 
-            /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
+            /// https://discord.com/developers/docs/components/reference#button-button-styles
             @UnstableEnum<Int>
             public enum Style: Sendable, Codable {
                 case primary  // 1
@@ -470,7 +486,7 @@ extension Interaction {
             }
 
             /// The same as ``Style``, but has no `link`.
-            /// https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
+            /// https://discord.com/developers/docs/components/reference#button-button-styles
             public enum NonLinkStyle: Sendable {
                 case primary
                 case secondary
@@ -508,6 +524,7 @@ extension Interaction {
                 }
             }
 
+            public var id: Int?
             public var style: Style
             public var label: String?
             public var emoji: Emoji?
@@ -516,40 +533,49 @@ extension Interaction {
             public var url: String?
             public var disabled: Bool?
 
+            /// FIXME: Most button below don't need `sku_id`.
+
             /// Makes a non-link button.
             public init(
+                id: Int? = nil,
                 style: NonLinkStyle,
                 label: String,
                 custom_id: String,
                 sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
+                self.id = id
                 self.style = style.toStyle()
                 self.label = label
                 self.emoji = nil
                 self.custom_id = custom_id
                 self.sku_id = sku_id
+                self.url = nil
                 self.disabled = disabled
             }
 
             /// Makes a non-link button.
             public init(
+                id: Int? = nil,
                 style: NonLinkStyle,
                 emoji: Emoji,
                 custom_id: String,
                 sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
+                self.id = id
                 self.style = style.toStyle()
                 self.label = nil
                 self.emoji = emoji
                 self.custom_id = custom_id
                 self.sku_id = sku_id
+                self.url = nil
                 self.disabled = disabled
             }
 
             /// Makes a non-link button.
             public init(
+                id: Int? = nil,
                 style: NonLinkStyle,
                 label: String,
                 emoji: Emoji,
@@ -557,57 +583,84 @@ extension Interaction {
                 sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
+                self.id = id
                 self.style = style.toStyle()
                 self.label = label
                 self.emoji = emoji
                 self.custom_id = custom_id
                 self.sku_id = sku_id
+                self.url = nil
                 self.disabled = disabled
             }
 
             /// Makes a link button.
             public init(
+                id: Int? = nil,
                 label: String,
                 url: String,
                 sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
+                self.id = id
                 self.style = .link
                 self.label = label
                 self.emoji = nil
-                self.url = url
+                self.custom_id = nil
                 self.sku_id = sku_id
+                self.url = url
                 self.disabled = disabled
             }
 
             /// Makes a link button.
             public init(
+                id: Int? = nil,
                 emoji: Emoji,
                 url: String,
                 sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
+                self.id = id
                 self.style = .link
                 self.label = nil
                 self.emoji = emoji
-                self.url = url
+                self.custom_id = nil
                 self.sku_id = sku_id
+                self.url = url
                 self.disabled = disabled
             }
 
             /// Makes a link button.
             public init(
+                id: Int? = nil,
                 label: String,
                 emoji: Emoji,
                 url: String,
                 sku_id: SKUSnowflake? = nil,
                 disabled: Bool? = nil
             ) {
+                self.id = id
                 self.style = .link
                 self.label = label
                 self.emoji = emoji
-                self.url = url
+                self.custom_id = nil
                 self.sku_id = sku_id
+                self.url = url
+                self.disabled = disabled
+            }
+
+            /// Makes a premium button.
+            public init(
+                id: Int? = nil,
+                sku_id: SKUSnowflake,
+                disabled: Bool? = nil
+            ) {
+                self.id = id
+                self.style = .premium
+                self.label = nil
+                self.emoji = nil
+                self.custom_id = nil
+                self.sku_id = sku_id
+                self.url = nil
                 self.disabled = disabled
             }
 
@@ -617,10 +670,10 @@ extension Interaction {
             }
         }
 
-        /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
+        /// https://discord.com/developers/docs/components/reference#string-select
         public struct StringSelectMenu: Sendable, Codable, ValidatablePayload {
 
-            /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure
+            /// https://discord.com/developers/docs/components/reference#string-select-select-option-structure
             public struct Option: Sendable, Codable, ValidatablePayload {
                 public var label: String
                 public var value: String
@@ -649,31 +702,39 @@ extension Interaction {
                 }
             }
 
+            public var id: Int?
             public var custom_id: String
             public var options: [Option]
             public var placeholder: String?
             public var min_values: Int?
             public var max_values: Int?
+            public var required: Bool?
             public var disabled: Bool?
+            public var values: [String]?
 
             public init(
+                id: Int? = nil,
                 custom_id: String,
                 options: [Option],
                 placeholder: String? = nil,
                 min_values: Int? = nil,
                 max_values: Int? = nil,
+                required: Bool? = nil,
                 disabled: Bool? = nil
             ) {
+                self.id = id
                 self.custom_id = custom_id
                 self.options = options
                 self.placeholder = placeholder
                 self.min_values = min_values
                 self.max_values = max_values
+                self.required = required
                 self.disabled = disabled
+                self.values = nil
             }
 
             public func validate() -> [ValidationFailure] {
-                validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
+                validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
                 validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
                 validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
                 validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
@@ -682,10 +743,10 @@ extension Interaction {
             }
         }
 
-        /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-default-value-structure
+        /// https://discord.com/developers/docs/components/reference#user-select-select-default-value-structure
         public struct DefaultValue: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-default-value-structure
+            /// https://discord.com/developers/docs/components/reference#user-select-select-default-value-structure
             public enum Kind: String, Sendable, Codable {
                 case user
                 case role
@@ -711,69 +772,44 @@ extension Interaction {
             }
         }
 
-        /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
+        /// https://discord.com/developers/docs/components/reference#channel-select
         public struct ChannelSelectMenu: Sendable, Codable, ValidatablePayload {
+            public var id: Int?
             public var custom_id: String
             public var channel_types: [DiscordChannel.Kind]?
             public var placeholder: String?
             public var default_values: [DefaultValue]?
             public var min_values: Int?
             public var max_values: Int?
+            public var required: Bool?
             public var disabled: Bool?
+            public var values: [String]?
 
             public init(
+                id: Int? = nil,
                 custom_id: String,
                 channel_types: [DiscordChannel.Kind]? = nil,
                 placeholder: String? = nil,
                 default_values: [DefaultValue]? = nil,
                 min_values: Int? = nil,
                 max_values: Int? = nil,
+                required: Bool? = nil,
                 disabled: Bool? = nil
             ) {
+                self.id = id
                 self.custom_id = custom_id
                 self.channel_types = channel_types
                 self.placeholder = placeholder
                 self.default_values = default_values
                 self.min_values = min_values
                 self.max_values = max_values
+                self.required = required
                 self.disabled = disabled
+                self.values = nil
             }
 
             public func validate() -> [ValidationFailure] {
-                validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
-                validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
-                validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
-                validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
-            }
-        }
-
-        /// https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure
-        public struct SelectMenu: Sendable, Codable, ValidatablePayload {
-            public var custom_id: String
-            public var placeholder: String?
-            public var default_values: [DefaultValue]?
-            public var min_values: Int?
-            public var max_values: Int?
-            public var disabled: Bool?
-
-            public init(
-                custom_id: String,
-                placeholder: String? = nil,
-                default_values: [DefaultValue]? = nil,
-                min_values: Int? = nil,
-                max_values: Int? = nil,
-                disabled: Bool? = nil
-            ) {
-                self.custom_id = custom_id
-                self.placeholder = placeholder
-                self.default_values = default_values
-                self.min_values = min_values
-                self.max_values = max_values
-                self.disabled = disabled
-            }
-
-            public func validate() -> [ValidationFailure] {
-                validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
+                validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
                 validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
                 validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
                 validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
@@ -786,10 +822,57 @@ extension Interaction {
             }
         }
 
-        /// https://discord.com/developers/docs/interactions/message-components#text-inputs
+        /// https://discord.com/developers/docs/components/reference#user-select
+        public struct SelectMenu: Sendable, Codable, ValidatablePayload {
+            public var id: Int?
+            public var custom_id: String
+            public var placeholder: String?
+            public var default_values: [DefaultValue]?
+            public var min_values: Int?
+            public var max_values: Int?
+            public var required: Bool?
+            public var disabled: Bool?
+            public var values: [String]?
+
+            public init(
+                id: Int? = nil,
+                custom_id: String,
+                placeholder: String? = nil,
+                default_values: [DefaultValue]? = nil,
+                min_values: Int? = nil,
+                max_values: Int? = nil,
+                required: Bool? = nil,
+                disabled: Bool? = nil
+            ) {
+                self.id = id
+                self.custom_id = custom_id
+                self.placeholder = placeholder
+                self.default_values = default_values
+                self.min_values = min_values
+                self.max_values = max_values
+                self.required = required
+                self.disabled = disabled
+                self.values = nil
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
+                validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
+                validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
+                validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
+                validateElementCountInRange(
+                    default_values,
+                    min: min_values ?? 0,
+                    max: max_values ?? .max,
+                    name: "default_values"
+                )
+            }
+        }
+
+        /// https://discord.com/developers/docs/components/reference#text-input
         public struct TextInput: Sendable, Codable, ValidatablePayload {
 
-            /// https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles
+            /// https://discord.com/developers/docs/components/reference#text-input-text-input-styles
             @UnstableEnum<Int>
             public enum Style: Sendable, Codable {
                 case short  // 1
@@ -797,6 +880,7 @@ extension Interaction {
                 case __undocumented(Int)
             }
 
+            public var id: Int?
             public var custom_id: String
             public var style: Style?
             public var label: String?
@@ -807,6 +891,7 @@ extension Interaction {
             public var placeholder: String?
 
             public init(
+                id: Int? = nil,
                 custom_id: String,
                 style: Style? = nil,
                 label: String? = nil,
@@ -816,6 +901,7 @@ extension Interaction {
                 value: String? = nil,
                 placeholder: String? = nil
             ) {
+                self.id = id
                 self.custom_id = custom_id
                 self.style = style
                 self.label = label
@@ -827,14 +913,272 @@ extension Interaction {
             }
 
             public func validate() -> [ValidationFailure] {
-                validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
+                validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
                 validateCharacterCountDoesNotExceed(label, max: 45, name: "label")
                 validateNumberInRangeOrNil(min_length, min: 0, max: 4_000, name: "min_length")
                 validateNumberInRangeOrNil(max_length, min: 1, max: 4_000, name: "max_length")
                 validateCharacterCountDoesNotExceed(value, max: 4_000, name: "value")
-                validateCharacterCountDoesNotExceed(placeholder, max: 100, name: "value")
+                validateCharacterCountDoesNotExceed(placeholder, max: 100, name: "placeholder")
             }
         }
+
+        /// https://discord.com/developers/docs/components/reference#section
+        public struct Section: Sendable, Codable, ValidatablePayload {
+            public var id: Int?
+            public var components: [Component]
+            public var accessory: Component
+
+            public init(
+                id: Int? = nil,
+                components: [Component],
+                accessory: Component
+            ) {
+                self.id = id
+                self.components = components
+                self.accessory = accessory
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateElementCountInRange(components, min: 1, max: 3, name: "components")
+                components.validate()
+                accessory.validate()
+            }
+        }
+
+        /// https://discord.com/developers/docs/components/reference#text-display
+        public struct TextDisplay: Sendable, Codable, ValidatablePayload {
+            public var id: Int?
+            public var content: String
+
+            public init(id: Int? = nil, content: String) {
+                self.id = id
+                self.content = content
+            }
+
+            public func validate() -> [ValidationFailure] {}
+        }
+
+        /// https://discord.com/developers/docs/components/reference#unfurled-media-item
+        public struct UnfurledMediaItem: Sendable, Codable {
+            public var url: String
+            public var proxy_url: String?
+            public var height: Int?
+            public var width: Int?
+            public var content_type: String?
+            public var attachment_id: AttachmentSnowflake?
+
+            public init(
+                url: String,
+                proxy_url: String? = nil,
+                height: Int? = nil,
+                width: Int? = nil,
+                content_type: String? = nil,
+                attachment_id: AttachmentSnowflake? = nil
+            ) {
+                self.url = url
+                self.proxy_url = proxy_url
+                self.height = height
+                self.width = width
+                self.content_type = content_type
+                self.attachment_id = attachment_id
+            }
+        }
+
+        /// https://discord.com/developers/docs/components/reference#thumbnail
+        public struct Thumbnail: Sendable, Codable, ValidatablePayload {
+            public var id: Int?
+            public var media: UnfurledMediaItem
+            public var description: String?
+            public var spoiler: Bool?
+
+            public init(
+                id: Int? = nil,
+                media: UnfurledMediaItem,
+                description: String? = nil,
+                spoiler: Bool? = nil
+            ) {
+                self.id = id
+                self.media = media
+                self.description = description
+                self.spoiler = spoiler
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountDoesNotExceed(description, max: 1_024, name: "description")
+            }
+        }
+
+        /// https://discord.com/developers/docs/components/reference#media-gallery
+        public struct MediaGallery: Sendable, Codable, ValidatablePayload {
+
+            /// https://discord.com/developers/docs/components/reference#media-gallery-media-gallery-item-structure
+            public struct Item: Sendable, Codable, ValidatablePayload {
+                public var media: UnfurledMediaItem
+                public var description: String?
+                public var spoiler: Bool?
+
+                public init(
+                    media: UnfurledMediaItem,
+                    description: String? = nil,
+                    spoiler: Bool? = nil
+                ) {
+                    self.media = media
+                    self.description = description
+                    self.spoiler = spoiler
+                }
+
+                public func validate() -> [ValidationFailure] {
+                    validateCharacterCountDoesNotExceed(description, max: 1_024, name: "description")
+                }
+            }
+
+            public var id: Int?
+            public var items: [Item]
+
+            public init(id: Int? = nil, items: [Item]) {
+                self.id = id
+                self.items = items
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateElementCountInRange(items, min: 1, max: 10, name: "items")
+                items.validate()
+            }
+        }
+
+        /// https://discord.com/developers/docs/components/reference#file
+        public struct File: Sendable, Codable, ValidatablePayload {
+            public var id: Int?
+            public var file: UnfurledMediaItem
+            public var spoiler: Bool?
+            public var name: String?
+            public var size: Int?
+
+            public init(
+                id: Int? = nil,
+                file: UnfurledMediaItem,
+                spoiler: Bool? = nil,
+                name: String? = nil,
+                size: Int? = nil
+            ) {
+                self.id = id
+                self.file = file
+                self.spoiler = spoiler
+                self.name = name
+                self.size = size
+            }
+
+            public func validate() -> [ValidationFailure] {}
+        }
+
+        /// https://discord.com/developers/docs/components/reference#separator
+        public struct Separator: Sendable, Codable, ValidatablePayload {
+
+            /// https://discord.com/developers/docs/components/reference#separator
+            @UnstableEnum<Int>
+            public enum Spacing: Sendable, Codable {
+                case small  // 1
+                case large  // 2
+                case __undocumented(Int)
+            }
+
+            public var id: Int?
+            public var divider: Bool?
+            public var spacing: Spacing?
+
+            public init(id: Int? = nil, divider: Bool? = nil, spacing: Spacing? = nil) {
+                self.id = id
+                self.divider = divider
+                self.spacing = spacing
+            }
+
+            public func validate() -> [ValidationFailure] {}
+        }
+
+        /// https://discord.com/developers/docs/components/reference#container
+        public struct Container: Sendable, Codable, ValidatablePayload {
+            public var id: Int?
+            public var components: [Component]
+            public var accent_color: DiscordColor?
+            public var spoiler: Bool?
+
+            public init(
+                id: Int? = nil,
+                components: [Component],
+                accent_color: DiscordColor? = nil,
+                spoiler: Bool? = nil
+            ) {
+                self.id = id
+                self.components = components
+                self.accent_color = accent_color
+                self.spoiler = spoiler
+            }
+
+            public func validate() -> [ValidationFailure] {
+                components.validate()
+            }
+        }
+
+        /// https://discord.com/developers/docs/components/reference#label
+        public struct Label: Sendable, Codable, ValidatablePayload {
+            public var id: Int?
+            public var label: String
+            public var description: String?
+            public var component: Component
+
+            public init(
+                id: Int? = nil,
+                label: String,
+                description: String? = nil,
+                component: Component
+            ) {
+                self.id = id
+                self.label = label
+                self.description = description
+                self.component = component
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountDoesNotExceed(label, max: 45, name: "label")
+                validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
+                component.validate()
+            }
+        }
+
+        /// https://discord.com/developers/docs/components/reference#file-upload
+        public struct FileUpload: Sendable, Codable, ValidatablePayload {
+            public var id: Int?
+            public var custom_id: String
+            public var min_values: Int?
+            public var max_values: Int?
+            public var required: Bool?
+            public var values: [String]?
+
+            public init(
+                id: Int? = nil,
+                custom_id: String,
+                min_values: Int? = nil,
+                max_values: Int? = nil,
+                required: Bool? = nil
+            ) {
+                self.id = id
+                self.custom_id = custom_id
+                self.min_values = min_values
+                self.max_values = max_values
+                self.required = required
+                self.values = nil
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
+                validateNumberInRangeOrNil(min_values, min: 0, max: 10, name: "min_values")
+                validateNumberInRangeOrNil(max_values, min: 1, max: 10, name: "max_values")
+                validateElementCountDoesNotExceed(values, max: 10, name: "values")
+            }
+        }
+
+        /// FIXME: In a future major version, `Component` might want to also contain the `id` field which
+        /// all its sub-types have and Discord documents it as so.
 
         public enum Component: Sendable, Codable, ValidatablePayload {
             case button(Button)
@@ -844,6 +1188,15 @@ extension Interaction {
             case roleSelect(SelectMenu)
             case mentionableSelect(SelectMenu)
             case channelSelect(ChannelSelectMenu)
+            indirect case section(Section)
+            case textDisplay(TextDisplay)
+            case thumbnail(Thumbnail)
+            case mediaGallery(MediaGallery)
+            case file(File)
+            case separator(Separator)
+            case container(Container)
+            indirect case label(Label)
+            case fileUpload(FileUpload)
             case __undocumented
 
             public var customId: String? {
@@ -862,7 +1215,8 @@ extension Interaction {
                     return value.custom_id
                 case let .channelSelect(value):
                     return value.custom_id
-                case .__undocumented:
+                case .section, .textDisplay, .thumbnail, .mediaGallery, .file,
+                    .separator, .container, .label, .fileUpload, .__undocumented:
                     return nil
                 }
             }
@@ -891,6 +1245,24 @@ extension Interaction {
                     self = try .channelSelect(.init(from: decoder))
                 case .textInput:
                     self = try .textInput(.init(from: decoder))
+                case .section:
+                    self = try .section(.init(from: decoder))
+                case .textDisplay:
+                    self = try .textDisplay(.init(from: decoder))
+                case .thumbnail:
+                    self = try .thumbnail(.init(from: decoder))
+                case .mediaGallery:
+                    self = try .mediaGallery(.init(from: decoder))
+                case .file:
+                    self = try .file(.init(from: decoder))
+                case .separator:
+                    self = try .separator(.init(from: decoder))
+                case .container:
+                    self = try .container(.init(from: decoder))
+                case .label:
+                    self = try .label(.init(from: decoder))
+                case .fileUpload:
+                    self = try .fileUpload(.init(from: decoder))
                 case .__undocumented:
                     self = .__undocumented
                 }
@@ -920,7 +1292,35 @@ extension Interaction {
                 case let .channelSelect(selectMenu):
                     try container.encode(Kind.channelSelect, forKey: .type)
                     try selectMenu.encode(to: encoder)
-                case .__undocumented: break
+                case let .section(section):
+                    try container.encode(Kind.section, forKey: .type)
+                    try section.encode(to: encoder)
+                case let .textDisplay(textDisplay):
+                    try container.encode(Kind.textDisplay, forKey: .type)
+                    try textDisplay.encode(to: encoder)
+                case let .thumbnail(thumbnail):
+                    try container.encode(Kind.thumbnail, forKey: .type)
+                    try thumbnail.encode(to: encoder)
+                case let .mediaGallery(mediaGallery):
+                    try container.encode(Kind.mediaGallery, forKey: .type)
+                    try mediaGallery.encode(to: encoder)
+                case let .file(file):
+                    try container.encode(Kind.file, forKey: .type)
+                    try file.encode(to: encoder)
+                case let .separator(separator):
+                    try container.encode(Kind.separator, forKey: .type)
+                    try separator.encode(to: encoder)
+                case let .container(containerValue):
+                    try container.encode(Kind.container, forKey: .type)
+                    try containerValue.encode(to: encoder)
+                case let .label(label):
+                    try container.encode(Kind.label, forKey: .type)
+                    try label.encode(to: encoder)
+                case let .fileUpload(fileUpload):
+                    try container.encode(Kind.fileUpload, forKey: .type)
+                    try fileUpload.encode(to: encoder)
+                case .__undocumented:
+                    break
                 }
             }
 
@@ -1008,6 +1408,114 @@ extension Interaction {
                 }
             }
 
+            /// Returns the associated value if the component case is `section`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireSection() throws -> Section {
+                switch self {
+                case let .section(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "section", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `textDisplay`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireTextDisplay() throws -> TextDisplay {
+                switch self {
+                case let .textDisplay(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "textDisplay", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `thumbnail`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireThumbnail() throws -> Thumbnail {
+                switch self {
+                case let .thumbnail(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "thumbnail", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `mediaGallery`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireMediaGallery() throws -> MediaGallery {
+                switch self {
+                case let .mediaGallery(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "mediaGallery", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `file`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireFile() throws -> File {
+                switch self {
+                case let .file(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "file", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `separator`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireSeparator() throws -> Separator {
+                switch self {
+                case let .separator(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "separator", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `container`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireContainer() throws -> Container {
+                switch self {
+                case let .container(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "container", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `label`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireLabel() throws -> Label {
+                switch self {
+                case let .label(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "label", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `fileUpload`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireFileUpload() throws -> FileUpload {
+                switch self {
+                case let .fileUpload(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "fileUpload", component: self)
+                }
+            }
+
             public func validate() -> [ValidationFailure] {
                 switch self {
                 case .button(let button):
@@ -1024,6 +1532,24 @@ extension Interaction {
                     selectMenu.validate()
                 case .channelSelect(let channelSelectMenu):
                     channelSelectMenu.validate()
+                case .section(let section):
+                    section.validate()
+                case .textDisplay(let textDisplay):
+                    textDisplay.validate()
+                case .thumbnail(let thumbnail):
+                    thumbnail.validate()
+                case .mediaGallery(let mediaGallery):
+                    mediaGallery.validate()
+                case .file(let file):
+                    file.validate()
+                case .separator(let separator):
+                    separator.validate()
+                case .container(let containerValue):
+                    containerValue.validate()
+                case .label(let label):
+                    label.validate()
+                case .fileUpload(let fileUpload):
+                    fileUpload.validate()
                 case .__undocumented:
                     Optional<ValidationFailure>.none
                 }

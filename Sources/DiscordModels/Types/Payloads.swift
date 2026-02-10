@@ -170,10 +170,17 @@ public enum Payloads {
                 validateOnlyContains(
                     flags,
                     name: "flags",
-                    reason: "Can only contain 'suppressEmbeds', 'ephemeral', and 'suppressNotifications'",
-                    allowed: [.suppressEmbeds, .ephemeral, .suppressNotifications]
+                    reason:
+                        "Can only contain 'suppressEmbeds', 'ephemeral', 'suppressNotifications', and 'isComponentsV2'",
+                    allowed: [.suppressEmbeds, .ephemeral, .suppressNotifications, .isComponentsV2]
                 )
-                validateElementCountDoesNotExceed(components, max: 5, name: "components")
+                validateComponentsV2Payload(
+                    flags: flags,
+                    hasContent: !(content?.isEmpty ?? true),
+                    hasEmbeds: !(embeds?.isEmpty ?? true),
+                    hasStickers: false,
+                    hasPoll: poll != nil
+                )
                 components?.validate()
                 attachments?.validate()
                 embeds?.validate()
@@ -502,9 +509,17 @@ public enum Payloads {
             validateOnlyContains(
                 flags,
                 name: "flags",
-                reason: "Can only contain 'suppressEmbeds' or 'suppressNotifications'",
-                allowed: [.suppressEmbeds, .suppressNotifications]
+                reason: "Can only contain 'suppressEmbeds', 'suppressNotifications', or 'isComponentsV2'",
+                allowed: [.suppressEmbeds, .suppressNotifications, .isComponentsV2]
             )
+            validateComponentsV2Payload(
+                flags: flags,
+                hasContent: !(content?.isEmpty ?? true),
+                hasEmbeds: !(embeds?.isEmpty ?? true),
+                hasStickers: !(sticker_ids?.isEmpty ?? true),
+                hasPoll: poll != nil
+            )
+            components?.validate()
             attachments?.validate()
             embeds?.validate()
             poll?.validate()
@@ -559,12 +574,20 @@ public enum Payloads {
             validateOnlyContains(
                 flags,
                 name: "flags",
-                reason: "Can only contain 'suppressEmbeds'",
-                allowed: [.suppressEmbeds]
+                reason: "Can only contain 'suppressEmbeds' or 'isComponentsV2'",
+                allowed: [.suppressEmbeds, .isComponentsV2]
+            )
+            validateComponentsV2Payload(
+                flags: flags,
+                hasContent: !(content?.isEmpty ?? true),
+                hasEmbeds: !(embeds?.isEmpty ?? true),
+                hasStickers: false,
+                hasPoll: false
             )
             allowed_mentions?.validate()
             attachments?.validate()
             embeds?.validate()
+            components?.validate()
         }
     }
 
@@ -652,9 +675,17 @@ public enum Payloads {
             validateOnlyContains(
                 flags,
                 name: "flags",
-                reason: "Can only contain 'suppressEmbeds' or 'suppressNotifications'",
-                allowed: [.suppressEmbeds, .suppressNotifications]
+                reason: "Can only contain 'suppressEmbeds', 'suppressNotifications', or 'isComponentsV2'",
+                allowed: [.suppressEmbeds, .suppressNotifications, .isComponentsV2]
             )
+            validateComponentsV2Payload(
+                flags: flags,
+                hasContent: !(content?.isEmpty ?? true),
+                hasEmbeds: !(embeds?.isEmpty ?? true),
+                hasStickers: false,
+                hasPoll: poll != nil
+            )
+            components?.validate()
             allowed_mentions?.validate()
             attachments?.validate()
             embeds?.validate()
@@ -894,9 +925,17 @@ public enum Payloads {
                 validateOnlyContains(
                     flags,
                     name: "flags",
-                    reason: "Can only contain 'suppressEmbeds' or 'suppressNotifications'",
-                    allowed: [.suppressEmbeds, .suppressNotifications]
+                    reason: "Can only contain 'suppressEmbeds', 'suppressNotifications', or 'isComponentsV2'",
+                    allowed: [.suppressEmbeds, .suppressNotifications, .isComponentsV2]
                 )
+                validateComponentsV2Payload(
+                    flags: flags,
+                    hasContent: !(content?.isEmpty ?? true),
+                    hasEmbeds: !(embeds?.isEmpty ?? true),
+                    hasStickers: !(sticker_ids?.isEmpty ?? true),
+                    hasPoll: poll != nil
+                )
+                components?.validate()
                 attachments?.validate()
                 embeds?.validate()
                 poll?.validate()

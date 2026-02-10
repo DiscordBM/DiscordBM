@@ -388,6 +388,378 @@ class DiscordModelsTests: XCTestCase {
         _ = try decoder.decode(Interaction.ApplicationCommand.ResolvedData.self, from: encoded)
     }
 
+    func testComponentsV2() throws {
+        func canonicalJSONData(_ data: Data) throws -> Data {
+            let object = try JSONSerialization.jsonObject(with: data)
+            return try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
+        }
+
+        func assertEncodedJSONEquals<T: Encodable>(
+            _ value: T,
+            json: String,
+            file: StaticString = #filePath,
+            line: UInt = #line
+        ) throws {
+            let encodedData = try JSONEncoder().encode(value)
+            let canonicalEncoded = try canonicalJSONData(encodedData)
+            let canonicalExpected = try canonicalJSONData(Data(json.utf8))
+            XCTAssertEqual(canonicalEncoded, canonicalExpected, file: file, line: line)
+        }
+
+        func assertActionRowsJSONMatchesConstructed(
+            json: String,
+            _ constructed: [Interaction.ActionRow],
+            file: StaticString = #filePath,
+            line: UInt = #line
+        ) throws {
+            let decoded = try JSONDecoder().decode([Interaction.ActionRow].self, from: Data(json.utf8))
+            try assertEncodedJSONEquals(decoded, json: json, file: file, line: line)
+            try assertEncodedJSONEquals(constructed, json: json, file: file, line: line)
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 9,
+                        "components": [
+                          {
+                            "type": 10,
+                            "content": "# Real Game v7.3"
+                          }
+                        ],
+                        "accessory": {
+                          "type": 11,
+                          "media": {
+                            "url": "https://websitewithopensourceimages/gamepreview.webp"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let actionRows: [Interaction.ActionRow] = [
+                .init(
+                    components: [
+                        .section(
+                            .init(
+                                components: [.textDisplay(.init(content: "# Real Game v7.3"))],
+                                accessory: .thumbnail(
+                                    .init(media: .init(url: "https://websitewithopensourceimages/gamepreview.webp"))
+                                )
+                            )
+                        )
+                    ]
+                )
+            ]
+
+            try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 10,
+                        "content": "# This is a Text Display\\nAll the regular markdown rules apply"
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let actionRows: [Interaction.ActionRow] = [
+                .init(
+                    components: [
+                        .textDisplay(
+                            .init(content: "# This is a Text Display\nAll the regular markdown rules apply")
+                        )
+                    ]
+                )
+            ]
+
+            try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 11,
+                        "media": {
+                          "url": "https://websitewithopensourceimages/gamepreview.webp"
+                        }
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let actionRows: [Interaction.ActionRow] = [
+                .init(
+                    components: [
+                        .thumbnail(
+                            .init(media: .init(url: "https://websitewithopensourceimages/gamepreview.webp"))
+                        )
+                    ]
+                )
+            ]
+
+            try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 12,
+                        "items": [
+                          {
+                            "media": {
+                              "url": "https://livevideofeedconvertedtoimage/webcam1.webp"
+                            },
+                            "description": "An aerial view looking down on older industrial complex buildings. The main building is white with many windows and pipes running up the walls."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let actionRows: [Interaction.ActionRow] = [
+                .init(
+                    components: [
+                        .mediaGallery(
+                            .init(
+                                items: [
+                                    .init(
+                                        media: .init(url: "https://livevideofeedconvertedtoimage/webcam1.webp"),
+                                        description:
+                                            "An aerial view looking down on older industrial complex buildings. The main building is white with many windows and pipes running up the walls."
+                                    )
+                                ]
+                            )
+                        )
+                    ]
+                )
+            ]
+
+            try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 13,
+                        "file": {
+                          "url": "attachment://game.zip"
+                        }
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let actionRows: [Interaction.ActionRow] = [
+                .init(components: [.file(.init(file: .init(url: "attachment://game.zip")))])
+            ]
+
+            try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 14,
+                        "divider": true,
+                        "spacing": 1
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let actionRows: [Interaction.ActionRow] = [
+                .init(components: [.separator(.init(divider: true, spacing: .small))])
+            ]
+
+            try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 17,
+                        "accent_color": 703487,
+                        "components": [
+                          {
+                            "type": 10,
+                            "content": "# You have encountered a wild coyote!"
+                          },
+                          {
+                            "type": 12,
+                            "items": [
+                              {
+                                "media": {
+                                  "url": "https://websitewithopensourceimages/coyote.webp"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": 10,
+                            "content": "What would you like to do?"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let actionRows: [Interaction.ActionRow] = [
+                .init(
+                    components: [
+                        .container(
+                            .init(
+                                components: [
+                                    .textDisplay(.init(content: "# You have encountered a wild coyote!")),
+                                    .mediaGallery(
+                                        .init(
+                                            items: [
+                                                .init(
+                                                    media: .init(url: "https://websitewithopensourceimages/coyote.webp")
+                                                )
+                                            ]
+                                        )
+                                    ),
+                                    .textDisplay(.init(content: "What would you like to do?")),
+                                ],
+                                accent_color: .init(value: 703_487)
+                            )
+                        )
+                    ]
+                )
+            ]
+
+            try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 18,
+                        "label": "What did you find interesting about the game?",
+                        "description": "Please give us as much detail as possible so we can improve the game!",
+                        "component": {
+                          "type": 4,
+                          "custom_id": "game_feedback",
+                          "style": 2,
+                          "min_length": 100,
+                          "max_length": 4000,
+                          "placeholder": "Write your feedback here...",
+                          "required": true
+                        }
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let actionRows: [Interaction.ActionRow] = [
+                .init(
+                    components: [
+                        .label(
+                            .init(
+                                label: "What did you find interesting about the game?",
+                                description: "Please give us as much detail as possible so we can improve the game!",
+                                component: .textInput(
+                                    .init(
+                                        custom_id: "game_feedback",
+                                        style: .paragraph,
+                                        min_length: 100,
+                                        max_length: 4_000,
+                                        required: true,
+                                        placeholder: "Write your feedback here..."
+                                    )
+                                )
+                            )
+                        )
+                    ]
+                )
+            ]
+
+            try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 19,
+                        "custom_id": "file_upload",
+                        "min_values": 1,
+                        "max_values": 10,
+                        "required": true
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let actionRows: [Interaction.ActionRow] = [
+                .init(
+                    components: [
+                        .fileUpload(
+                            .init(
+                                custom_id: "file_upload",
+                                min_values: 1,
+                                max_values: 10,
+                                required: true
+                            )
+                        )
+                    ]
+                )
+            ]
+
+            try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+        }
+    }
+
     func testInteractionDataUtilities() throws {
         let applicationCommand: Interaction.Data = .applicationCommand(
             .init(id: "", name: "", type: .applicationCommand)
