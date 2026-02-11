@@ -75,6 +75,7 @@ public struct DiscordApplication: Sendable, Codable {
     public var flags: IntBitField<Flag>?
     public var approximate_guild_count: Int?
     public var approximate_user_install_count: Int?
+    public var approximate_user_authorization_count: Int?
     public var redirect_uris: [String]?
     public var interactions_endpoint_url: String?
     public var role_connections_verification_url: String?
@@ -108,6 +109,7 @@ public struct PartialApplication: Sendable, Codable {
     public var flags: IntBitField<DiscordApplication.Flag>?
     public var approximate_guild_count: Int?
     public var approximate_user_install_count: Int?
+    public var approximate_user_authorization_count: Int?
     public var redirect_uris: [String]?
     public var interactions_endpoint_url: String?
     public var role_connections_verification_url: String?
