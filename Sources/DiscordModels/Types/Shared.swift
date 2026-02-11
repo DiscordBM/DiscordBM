@@ -17,7 +17,11 @@ public enum StringIntDoubleBool: Sendable, Codable {
     }
 
     case string(String)
+    #if Non64BitSystemsCompatibility
+    case int(Int64)
+    #else
     case int(Int)
+    #endif
     case double(Double)
     case bool(Bool)
 
@@ -39,7 +43,16 @@ public enum StringIntDoubleBool: Sendable, Codable {
         }
     }
 
-    /// Requires a `Int` or throws `StringIntDoubleBool.Error`.
+    #if Non64BitSystemsCompatibility
+    /// Requires a `Int64` or throws `StringIntDoubleBool.Error`.
+    @inlinable
+    public func requireInt() throws -> Int64 {
+        switch self {
+        case .int(let int): return int
+        default: throw Error.valueIsNotOfType(Int64.self, value: self)
+        }
+    }
+    #else
     @inlinable
     public func requireInt() throws -> Int {
         switch self {
@@ -47,6 +60,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
         default: throw Error.valueIsNotOfType(Int.self, value: self)
         }
     }
+    #endif
 
     /// Requires a `Double` or throws `StringIntDoubleBool.Error`.
     @inlinable
@@ -100,7 +114,11 @@ public enum StringIntDoubleBool: Sendable, Codable {
 /// To dynamically decode/encode String or Int.
 public enum StringOrInt: Sendable, Codable {
     case string(String)
+    #if Non64BitSystemsCompatibility
+    case int(Int64)
+    #else
     case int(Int)
+    #endif
 
     public var asString: String {
         switch self {
@@ -114,8 +132,13 @@ public enum StringOrInt: Sendable, Codable {
         if let string = try? container.decode(String.self) {
             self = .string(string)
         } else {
+            #if Non64BitSystemsCompatibility
+            let int = try container.decode(Int64.self)
+            self = .int(int)
+            #else
             let int = try container.decode(Int.self)
             self = .int(int)
+            #endif
         }
     }
 
@@ -133,17 +156,28 @@ public enum StringOrInt: Sendable, Codable {
 //MARK: - IntOrDouble
 
 public enum IntOrDouble: Sendable, Codable {
+    #if Non64BitSystemsCompatibility
+    case int(Int64)
+    #else
     case int(Int)
+    #endif
     case double(Double)
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
+        #if Non64BitSystemsCompatibility
+        if let int = try? container.decode(Int64.self) {
+            self = .int(int)
+            return
+        }
+        #else
         if let int = try? container.decode(Int.self) {
             self = .int(int)
-        } else {
-            let double = try container.decode(Double.self)
-            self = .double(double)
+            return
         }
+        #endif
+        let double = try container.decode(Double.self)
+        self = .double(double)
     }
 
     public func encode(to encoder: any Encoder) throws {

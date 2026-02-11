@@ -254,6 +254,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case messageBlockedByHarmfulLinksFilter  // 240000
     case cannotEnableOnboardingRequirementsAreNotMet  // 350000
     case cannotUpdateOnboardingWhileBelowRequirements  // 350001
+    case accessToFileUploadsHasBeenLimitedForThisGuild  // 400001
     case failedToBanUsers  // 500000
     case pollVotingBlocked  // 520000
     case pollExpired  // 520001

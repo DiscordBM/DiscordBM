@@ -1929,9 +1929,20 @@ public enum Payloads {
     /// https://docs.discord.com/developers/resources/guild#modify-current-member-json-params
     public struct ModifyCurrentMember: Sendable, Encodable, ValidatablePayload {
         public var nick: String?
+        public var banner: ImageData?
+        public var avatar: ImageData?
+        public var bio: String?
 
-        public init(nick: String? = nil) {
+        public init(
+            nick: String? = nil,
+            banner: ImageData? = nil,
+            avatar: ImageData? = nil,
+            bio: String? = nil
+        ) {
             self.nick = nick
+            self.banner = banner
+            self.avatar = avatar
+            self.bio = bio
         }
 
         public func validate() -> [ValidationFailure] {}

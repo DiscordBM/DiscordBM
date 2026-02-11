@@ -54,6 +54,7 @@ public enum Permission: Sendable, Codable {
     case sendVoiceMessages  // 46
     case sendPolls  // 49
     case useExternalApps  // 50
+    case pinMessages  // 51
     #if Non64BitSystemsCompatibility
     case __undocumented(UInt64)
     #else

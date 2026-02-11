@@ -91,10 +91,48 @@ public struct ApplicationCommand: Sendable, Codable {
         public var channel_types: [DiscordChannel.Kind]?
         public var min_value: IntOrDouble?
         public var max_value: IntOrDouble?
+        #if Non64BitSystemsCompatibility
+        public var min_length: Int64?
+        public var max_length: Int64?
+        #else
         public var min_length: Int?
         public var max_length: Int?
+        #endif
         public var autocomplete: Bool?
 
+        #if Non64BitSystemsCompatibility
+        public init(
+            type: Kind,
+            name: String,
+            name_localizations: [DiscordLocale: String]? = nil,
+            description: String,
+            description_localizations: [DiscordLocale: String]? = nil,
+            required: Bool? = nil,
+            choices: [Choice]? = nil,
+            options: [Option]? = nil,
+            channel_types: [DiscordChannel.Kind]? = nil,
+            min_value: IntOrDouble? = nil,
+            max_value: IntOrDouble? = nil,
+            min_length: Int64? = nil,
+            max_length: Int64? = nil,
+            autocomplete: Bool? = nil
+        ) {
+            self.type = type
+            self.name = name
+            self.name_localizations = .init(name_localizations)
+            self.description = description
+            self.description_localizations = .init(description_localizations)
+            self.required = required
+            self.choices = choices
+            self.options = options
+            self.channel_types = channel_types == nil ? nil : .init(channel_types!)
+            self.min_value = min_value
+            self.max_value = max_value
+            self.min_length = min_length
+            self.max_length = max_length
+            self.autocomplete = autocomplete
+        }
+        #else
         public init(
             type: Kind,
             name: String,
@@ -126,6 +164,7 @@ public struct ApplicationCommand: Sendable, Codable {
             self.max_length = max_length
             self.autocomplete = autocomplete
         }
+        #endif
 
         public func validate() -> [ValidationFailure] {
             validateNumberInRangeOrNil(min_length, min: 0, max: 6_000, name: "min_length")
