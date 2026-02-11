@@ -43,6 +43,8 @@ public struct Gateway: Sendable, Codable {
             case resumed
             /// https://discord.com/developers/docs/topics/gateway-events#invalid-session
             case invalidSession(canResume: Bool)
+            /// https://discord.com/developers/docs/events/gateway-events#rate-limited
+            case rateLimited(RateLimited)
 
             case channelCreate(DiscordChannel)
             case channelUpdate(DiscordChannel)
@@ -155,10 +157,10 @@ public struct Gateway: Sendable, Codable {
             public var correspondingIntents: [Intent] {
                 switch self {
                 case .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers,
-                    .requestSoundboardSounds, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate,
-                    .entitlementCreate, .entitlementUpdate, .entitlementDelete, .subscriptionCreate,
-                    .subscriptionUpdate, .subscriptionDelete, .applicationCommandPermissionsUpdate, .userUpdate,
-                    .voiceServerUpdate:
+                    .requestSoundboardSounds, .requestPresenceUpdate, .requestVoiceStateUpdate, .rateLimited,
+                    .interactionCreate, .entitlementCreate, .entitlementUpdate, .entitlementDelete,
+                    .subscriptionCreate, .subscriptionUpdate, .subscriptionDelete,
+                    .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
                     return []
                 case .guildCreate, .guildUpdate, .guildDelete, .guildMembersChunk, .guildRoleCreate, .guildRoleUpdate,
                     .guildRoleDelete, .channelCreate, .channelUpdate, .channelDelete, .threadCreate, .threadUpdate,
@@ -286,6 +288,8 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .ready(decodeData())
                 case "RESUMED":
                     self.data = .resumed
+                case "RATE_LIMITED":
+                    self.data = try .rateLimited(decodeData())
                 case "CHANNEL_CREATE":
                     self.data = try .channelCreate(decodeData())
                 case "CHANNEL_UPDATE":
@@ -1018,6 +1022,69 @@ public struct Gateway: Sendable, Codable {
             self.presences = presences
             self.user_ids = user_ids
             self.nonce = nonce
+        }
+    }
+
+    /// https://discord.com/developers/docs/events/gateway-events#rate-limited
+    public struct RateLimited: Sendable, Codable {
+
+        public enum Metadata: Sendable {
+            /// https://discord.com/developers/docs/events/gateway-events#rate-limited-request-guild-member-rate-limit-metadata-structure
+            public struct RequestGuildMemberMetadata: Sendable, Codable {
+                public var guild_id: GuildSnowflake
+                public var nonce: String?
+
+                public init(guild_id: GuildSnowflake, nonce: String? = nil) {
+                    self.guild_id = guild_id
+                    self.nonce = nonce
+                }
+            }
+
+            case requestGuildMembers(RequestGuildMemberMetadata)
+            case __undocumented
+        }
+
+        enum CodingKeys: String, CodingKey {
+            case opcode
+            case retry_after
+            case meta
+        }
+
+        public var opcode: Opcode
+        public var retry_after: Double
+        public var meta: Metadata
+
+        public init(opcode: Opcode, retry_after: Double, meta: Metadata) {
+            self.opcode = opcode
+            self.retry_after = retry_after
+            self.meta = meta
+        }
+
+        public init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            self.opcode = try container.decode(Opcode.self, forKey: .opcode)
+            self.retry_after = try container.decode(Double.self, forKey: .retry_after)
+
+            switch self.opcode {
+            case .requestGuildMembers:
+                let metadata = try container.decode(Metadata.RequestGuildMemberMetadata.self, forKey: .meta)
+                self.meta = .requestGuildMembers(metadata)
+            default:
+                self.meta = .__undocumented
+            }
+        }
+
+        public func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(self.opcode, forKey: .opcode)
+            try container.encode(self.retry_after, forKey: .retry_after)
+
+            switch self.meta {
+            case let .requestGuildMembers(metadata):
+                try container.encode(metadata, forKey: .meta)
+            case .__undocumented:
+                try container.encode([String: StringIntDoubleBool](), forKey: .meta)
+            }
         }
     }
 

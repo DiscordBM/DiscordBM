@@ -43,6 +43,7 @@ public protocol GatewayEventHandler: Sendable {
     func onReady(_ payload: Gateway.Ready) async throws
     func onResumed() async throws
     func onInvalidSession(canResume: Bool) async throws
+    func onRateLimited(_ payload: Gateway.RateLimited) async throws
 
     /// MARK: Events
     func onChannelCreate(_ payload: DiscordChannel) async throws
@@ -148,6 +149,7 @@ extension GatewayEventHandler {
     public func onReady(_: Gateway.Ready) async throws {}
     public func onResumed() async throws {}
     public func onInvalidSession(canResume _: Bool) async throws {}
+    public func onRateLimited(_: Gateway.RateLimited) async throws {}
     public func onChannelCreate(_: DiscordChannel) async throws {}
     public func onChannelUpdate(_: DiscordChannel) async throws {}
     public func onChannelDelete(_: DiscordChannel) async throws {}
@@ -261,6 +263,10 @@ extension GatewayEventHandler {
         case let .invalidSession(canResume):
             await withLogging(for: "onInvalidSession") {
                 try await onInvalidSession(canResume: canResume)
+            }
+        case let .rateLimited(payload):
+            await withLogging(for: "onRateLimited") {
+                try await onRateLimited(payload)
             }
         case let .channelCreate(payload):
             await withLogging(for: "onChannelCreate") {

@@ -74,7 +74,15 @@ public struct Interaction: Sendable, Codable {
                 public var type: DiscordChannel.Kind
                 public var name: String?
                 public var permissions: StringBitField<Permission>?
+                public var last_message_id: MessageSnowflake?
+                public var last_pin_timestamp: DiscordTimestamp?
+                public var nsfw: Bool?
                 public var parent_id: AnySnowflake?
+                public var guild_id: GuildSnowflake?
+                public var flags: IntBitField<DiscordChannel.Flag>?
+                public var rate_limit_per_user: Int?
+                public var topic: String?
+                public var position: Int?
                 public var thread_metadata: ThreadMetadata?
             }
 
