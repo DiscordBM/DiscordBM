@@ -188,6 +188,7 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationBlockMessage  // 143
             case autoModerationFlagToChannel  // 144
             case autoModerationUserCommunicationDisabled  // 145
+            case autoModerationQuarantineUser  // 146
             case creatorMonetizationRequestCreated  // 150
             case creatorMonetizationTermsAccepted  // 151
             case onboardingPromptCreate  // 163
@@ -261,6 +262,7 @@ public struct AuditLog: Sendable, Codable {
             case autoModerationBlockMessage(AutoModerationInfo)
             case autoModerationFlagToChannel(AutoModerationInfo)
             case autoModerationUserCommunicationDisabled(AutoModerationInfo)
+            case autoModerationQuarantineUser(AutoModerationInfo)
             case creatorMonetizationRequestCreated
             case creatorMonetizationTermsAccepted
             case onboardingPromptCreate
@@ -553,6 +555,9 @@ public struct AuditLog: Sendable, Codable {
                 case .autoModerationUserCommunicationDisabled:
                     let moderationInfo = try container.decode(AutoModerationInfo.self, forKey: .options)
                     self = .autoModerationUserCommunicationDisabled(moderationInfo)
+                case .autoModerationQuarantineUser:
+                    let moderationInfo = try container.decode(AutoModerationInfo.self, forKey: .options)
+                    self = .autoModerationQuarantineUser(moderationInfo)
                 case .creatorMonetizationRequestCreated: self = .creatorMonetizationRequestCreated
                 case .creatorMonetizationTermsAccepted: self = .creatorMonetizationTermsAccepted
                 case .onboardingPromptCreate: self = .onboardingPromptCreate
@@ -664,6 +669,8 @@ public struct AuditLog: Sendable, Codable {
                 case let .autoModerationFlagToChannel(moderationInfo):
                     try container.encode(moderationInfo, forKey: .options)
                 case let .autoModerationUserCommunicationDisabled(moderationInfo):
+                    try container.encode(moderationInfo, forKey: .options)
+                case let .autoModerationQuarantineUser(moderationInfo):
                     try container.encode(moderationInfo, forKey: .options)
                 case .creatorMonetizationRequestCreated: break
                 case .creatorMonetizationTermsAccepted: break
@@ -795,6 +802,7 @@ extension AuditLog.Entry.ActionKind {
         case .autoModerationBlockMessage: self = .autoModerationBlockMessage
         case .autoModerationFlagToChannel: self = .autoModerationFlagToChannel
         case .autoModerationUserCommunicationDisabled: self = .autoModerationUserCommunicationDisabled
+        case .autoModerationQuarantineUser: self = .autoModerationQuarantineUser
         case .creatorMonetizationTermsAccepted:
             self = .creatorMonetizationTermsAccepted
         case .creatorMonetizationRequestCreated:

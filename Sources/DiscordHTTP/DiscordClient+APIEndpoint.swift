@@ -1690,6 +1690,7 @@ extension DiscordClient {
         )
     }
 
+    /// https://docs.discord.com/developers/resources/guild
     @inlinable
     public func updateGuildRole(
         guildId: GuildSnowflake,
@@ -1708,6 +1709,7 @@ extension DiscordClient {
     }
 
     /// https://docs.discord.com/developers/resources/guild#modify-guild-mfa-level
+    @available(*, deprecated, message: "Deprecated by Discord.")
     @inlinable
     public func setGuildMfaLevel(
         guildId: GuildSnowflake,

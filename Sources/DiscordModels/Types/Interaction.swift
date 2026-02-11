@@ -667,6 +667,7 @@ extension Interaction {
             public func validate() -> [ValidationFailure] {
                 validateCharacterCountDoesNotExceed(label, max: 80, name: "label")
                 validateCharacterCountDoesNotExceed(custom_id, max: 100, name: "custom_id")
+                validateCharacterCountDoesNotExceed(url, max: 512, name: "url")
             }
         }
 

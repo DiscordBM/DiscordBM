@@ -19,6 +19,7 @@ public struct Guild: Sendable, Codable {
             case completedHomeActions  // 6
             case automodQuarantinedUsername  // 7
             case dmSettingsUpsellAcknowledged  // 9
+            case automodQuarantinedGuildTag  // 10
             #if Non64BitSystemsCompatibility
             case __undocumented(UInt64)
             #else
@@ -541,7 +542,8 @@ extension Guild.Member.Flag {
     public var isEditable: Bool {
         switch self {
         case .didRejoin, .completedOnboarding, .startedOnboarding, .isGuest, .startedHomeActions,
-            .completedHomeActions, .automodQuarantinedUsername, .dmSettingsUpsellAcknowledged:
+            .completedHomeActions, .automodQuarantinedUsername, .dmSettingsUpsellAcknowledged,
+            .automodQuarantinedGuildTag:
             return false
         case .bypassVerification:
             return true

@@ -1446,6 +1446,7 @@ public enum Payloads {
         public var afk_channel_id: ChannelSnowflake?
         public var afk_timeout: Guild.AFKTimeout?
         public var icon: ImageData?
+        @available(*, deprecated, message: "Deprecated by Discord. Bots no longer can modify guild owner.")
         public var owner_id: UserSnowflake?
         public var splash: ImageData?
         public var discovery_splash: ImageData?
@@ -1459,6 +1460,12 @@ public enum Payloads {
         public var description: String?
         public var premium_progress_bar_enabled: Bool?
 
+        @available(
+            *,
+            deprecated,
+            message: "Deprecated by Discord. Avoid passing `owner_id`: Bots no longer can modify guild owner."
+        )
+        @_disfavoredOverload
         public init(
             name: String? = nil,
             verification_level: Guild.VerificationLevel? = nil,
@@ -1487,7 +1494,48 @@ public enum Payloads {
             self.afk_channel_id = afk_channel_id
             self.afk_timeout = afk_timeout
             self.icon = icon
-            self.owner_id = owner_id
+            self.owner_id = nil
+            self.splash = splash
+            self.discovery_splash = discovery_splash
+            self.banner = banner
+            self.system_channel_id = system_channel_id
+            self.system_channel_flags = system_channel_flags
+            self.rules_channel_id = rules_channel_id
+            self.public_updates_channel_id = public_updates_channel_id
+            self.preferred_locale = preferred_locale
+            self.features = features
+            self.description = description
+            self.premium_progress_bar_enabled = premium_progress_bar_enabled
+        }
+
+        public init(
+            name: String? = nil,
+            verification_level: Guild.VerificationLevel? = nil,
+            default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil,
+            explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil,
+            afk_channel_id: ChannelSnowflake? = nil,
+            afk_timeout: Guild.AFKTimeout? = nil,
+            icon: ImageData? = nil,
+            splash: ImageData? = nil,
+            discovery_splash: ImageData? = nil,
+            banner: ImageData? = nil,
+            system_channel_id: ChannelSnowflake? = nil,
+            system_channel_flags: IntBitField<Guild.SystemChannelFlag>? = nil,
+            rules_channel_id: ChannelSnowflake? = nil,
+            public_updates_channel_id: ChannelSnowflake? = nil,
+            preferred_locale: DiscordLocale? = nil,
+            features: [Guild.Feature]? = nil,
+            description: String? = nil,
+            premium_progress_bar_enabled: Bool? = nil
+        ) {
+            self.name = name
+            self.verification_level = verification_level
+            self.default_message_notifications = default_message_notifications
+            self.explicit_content_filter = explicit_content_filter
+            self.afk_channel_id = afk_channel_id
+            self.afk_timeout = afk_timeout
+            self.icon = icon
+            self.owner_id = nil
             self.splash = splash
             self.discovery_splash = discovery_splash
             self.banner = banner
