@@ -112,7 +112,7 @@ public struct Role: Sendable, Codable {
     public var description: String?
     @available(*, deprecated, message: "Deprecated by Discord. Use `colors` instead.")
     public var color: DiscordColor
-    public var colors: Colors
+    public var colors: Colors?
     public var hoist: Bool
     public var icon: String?
     public var unicode_emoji: String?

@@ -181,6 +181,7 @@ public enum Payloads {
                     ]
                 )
                 validateComponentsV2Payload(
+                    components: components,
                     flags: flags,
                     hasContent: !(content?.isEmpty ?? true),
                     hasEmbeds: !(embeds?.isEmpty ?? true),
@@ -520,6 +521,7 @@ public enum Payloads {
                 allowed: [.suppressEmbeds, .suppressNotifications, .isVoiceMessage, .isComponentsV2]
             )
             validateComponentsV2Payload(
+                components: components,
                 flags: flags,
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
@@ -585,6 +587,7 @@ public enum Payloads {
                 allowed: [.suppressEmbeds, .isComponentsV2]
             )
             validateComponentsV2Payload(
+                components: components,
                 flags: flags,
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
@@ -686,6 +689,7 @@ public enum Payloads {
                 allowed: [.suppressEmbeds, .suppressNotifications, .isComponentsV2]
             )
             validateComponentsV2Payload(
+                components: components,
                 flags: flags,
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
@@ -936,6 +940,7 @@ public enum Payloads {
                     allowed: [.suppressEmbeds, .suppressNotifications, .isComponentsV2]
                 )
                 validateComponentsV2Payload(
+                    components: components,
                     flags: flags,
                     hasContent: !(content?.isEmpty ?? true),
                     hasEmbeds: !(embeds?.isEmpty ?? true),

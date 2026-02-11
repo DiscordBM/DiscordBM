@@ -178,6 +178,7 @@ extension ValidatablePayload {
 
     @inlinable
     func validateComponentsV2Payload(
+        components: [Interaction.ActionRow]?,
         flags: IntBitField<DiscordChannel.Message.Flag>?,
         hasContent: Bool,
         hasEmbeds: Bool,
@@ -186,7 +187,29 @@ extension ValidatablePayload {
     ) -> [ValidationFailure] {
         guard flags?.contains(.isComponentsV2) ?? false else { return [] }
 
+        func componentsCount(_ components: [Interaction.ActionRow.Component]?) -> Int {
+            (components ?? []).reduce(into: 0) { result, element in
+                switch element {
+                case .button, .stringSelect, .textInput, .userSelect, .roleSelect, .mentionableSelect,
+                    .channelSelect, .textDisplay, .thumbnail, .mediaGallery, .file, .separator,
+                    .container, .label, .fileUpload, .__undocumented:
+                    result += 1
+                case .section(let section):
+                    result += componentsCount(section.components)
+                }
+            }
+        }
+
+        let componentsCount = (components ?? []).reduce(into: 0) { result, element in
+            result += componentsCount(element.components)
+        }
+
         var failures: [ValidationFailure] = []
+
+        if let failure = validateNumberInRangeOrNil(componentsCount, min: 0, max: 40, name: "components.count") {
+            failures.append(failure)
+        }
+
         if hasContent {
             failures.append(
                 .disallowedField(
