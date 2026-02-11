@@ -1,7 +1,7 @@
-/// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object
+/// https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object
 public struct AutoModerationRule: Sendable, Codable {
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-event-types
+    /// https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-event-types
     @UnstableEnum<Int>
     public enum EventKind: Sendable, Codable {
         case messageSend  // 1
@@ -9,7 +9,7 @@ public struct AutoModerationRule: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types
+    /// https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-trigger-types
     @UnstableEnum<Int>
     public enum TriggerKind: Sendable, Codable {
         case keyword  // 1
@@ -20,10 +20,10 @@ public struct AutoModerationRule: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata
+    /// https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata
     public struct TriggerMetadata: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-preset-types
+        /// https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-keyword-preset-types
         @UnstableEnum<Int>
         public enum KeywordPreset: Sendable, Codable {
             case profanity  // 1
@@ -56,7 +56,7 @@ public struct AutoModerationRule: Sendable, Codable {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object
+    /// https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-action-object
     public enum Action: Sendable, Codable, ValidatablePayload {
         case blockMessage(customMessage: String?)
         case sendAlertMessage(channelId: ChannelSnowflake)

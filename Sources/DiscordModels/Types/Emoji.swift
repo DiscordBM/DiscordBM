@@ -2,7 +2,7 @@ import Foundation
 
 /// An Emoji with all fields marked as optional.
 /// The same as a `Partial Emoji`.
-/// https://discord.com/developers/docs/resources/emoji#emoji-object
+/// https://docs.discord.com/developers/resources/emoji#emoji-object
 public struct Emoji: Sendable, Codable {
     public var id: EmojiSnowflake?
     public var name: String?

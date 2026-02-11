@@ -739,7 +739,7 @@ public struct Gateway: Sendable, Codable {
     public struct ThreadMembersUpdate: Sendable, Codable {
 
         /// A ``ThreadMember`` with some extra fields.
-        /// https://discord.com/developers/docs/resources/channel#thread-member-object-thread-member-structure
+        /// https://docs.discord.com/developers/resources/channel#thread-member-object-thread-member-structure
         /// https://discord.com/developers/docs/topics/gateway-events#thread-members-update-thread-members-update-event-fields
         public struct ThreadMember: Sendable, Codable {
 
@@ -774,7 +774,7 @@ public struct Gateway: Sendable, Codable {
     }
 
     /// A `Guild` object with extra fields.
-    /// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
+    /// https://docs.discord.com/developers/resources/guild#guild-object-guild-structure
     /// https://discord.com/developers/docs/topics/gateway-events#guild-create-guild-create-extra-fields
     public struct GuildCreate: Sendable, Codable {
         public var id: GuildSnowflake
@@ -924,7 +924,7 @@ public struct Gateway: Sendable, Codable {
     }
 
     /// A ``Guild.Member`` with an extra `guild_id` field.
-    /// https://discord.com/developers/docs/resources/guild#guild-member-object
+    /// https://docs.discord.com/developers/resources/guild#guild-member-object
     public struct GuildMemberAdd: Sendable, Codable {
         public var guild_id: GuildSnowflake
         public var roles: [RoleSnowflake]
@@ -1066,7 +1066,7 @@ public struct Gateway: Sendable, Codable {
 
     /// An ``Integration`` with an extra `guild_id` field.
     /// https://discord.com/developers/docs/topics/gateway-events#integration-create
-    /// https://discord.com/developers/docs/resources/guild#integration-object
+    /// https://docs.discord.com/developers/resources/guild#integration-object
     public struct IntegrationCreate: Sendable, Codable {
         public var id: IntegrationSnowflake
         public var name: String
@@ -1124,7 +1124,7 @@ public struct Gateway: Sendable, Codable {
 
     /// A ``Message`` object with a few extra fields.
     /// https://discord.com/developers/docs/topics/gateway-events#message-create
-    /// https://discord.com/developers/docs/resources/channel#message-object
+    /// https://docs.discord.com/developers/resources/channel#message-object
     public struct MessageCreate: Sendable, Codable {
         public var id: MessageSnowflake
         public var channel_id: ChannelSnowflake

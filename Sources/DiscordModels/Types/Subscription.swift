@@ -1,7 +1,7 @@
-/// https://discord.com/developers/docs/resources/subscription#subscription-object
+/// https://docs.discord.com/developers/resources/subscription#subscription-object
 public struct Subscription: Sendable, Codable {
 
-    /// https://discord.com/developers/docs/resources/subscription#subscription-statuses
+    /// https://docs.discord.com/developers/resources/subscription#subscription-statuses
     @UnstableEnum<Int>
     public enum Status: Sendable, Codable {
         case active  // 0

@@ -1,7 +1,7 @@
-/// https://discord.com/developers/docs/resources/application#application-object-application-structure
+/// https://docs.discord.com/developers/resources/application#application-object-application-structure
 public struct DiscordApplication: Sendable, Codable {
 
-    /// https://discord.com/developers/docs/resources/application#application-object-application-flags
+    /// https://docs.discord.com/developers/resources/application#application-object-application-flags
     #if Non64BitSystemsCompatibility
     @UnstableEnum<UInt64>
     #else
@@ -25,7 +25,7 @@ public struct DiscordApplication: Sendable, Codable {
         #endif
     }
 
-    /// https://discord.com/developers/docs/resources/application#install-params-object
+    /// https://docs.discord.com/developers/resources/application#install-params-object
     public struct InstallParams: Sendable, Codable {
         public var scopes: [OAuth2Scope]
         public var permissions: StringBitField<Permission>
@@ -36,7 +36,7 @@ public struct DiscordApplication: Sendable, Codable {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/application#application-object-application-integration-types
+    /// https://docs.discord.com/developers/resources/application#application-object-application-integration-types
     @UnstableEnum<Int>
     public enum IntegrationKind: Sendable, Codable, CodingKeyRepresentable {
         case guildInstall  // 0
@@ -44,7 +44,7 @@ public struct DiscordApplication: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/application#application-object-application-integration-type-configuration-object
+    /// https://docs.discord.com/developers/resources/application#application-object-application-integration-type-configuration-object
     public struct IntegrationKindConfiguration: Sendable, Codable {
         public var oauth2_install_params: InstallParams?
 
@@ -84,7 +84,7 @@ public struct DiscordApplication: Sendable, Codable {
     public var custom_install_url: String?
 }
 
-/// https://discord.com/developers/docs/resources/application#application-object-application-structure
+/// https://docs.discord.com/developers/resources/application#application-object-application-structure
 public struct PartialApplication: Sendable, Codable {
     public var id: ApplicationSnowflake
     public var name: String?

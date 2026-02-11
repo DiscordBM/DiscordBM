@@ -1,7 +1,7 @@
-/// https://discord.com/developers/docs/resources/audit-log#audit-log-object-audit-log-structure
+/// https://docs.discord.com/developers/resources/audit-log#audit-log-object-audit-log-structure
 public struct AuditLog: Sendable, Codable {
 
-    /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-entry-structure
+    /// https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-audit-log-entry-structure
     public struct Entry: Sendable, Codable {
 
         public enum Mixed: Sendable, Codable, CustomStringConvertible {
@@ -121,14 +121,14 @@ public struct AuditLog: Sendable, Codable {
             }
         }
 
-        /// https://discord.com/developers/docs/resources/audit-log#audit-log-change-object-audit-log-change-structure
+        /// https://docs.discord.com/developers/resources/audit-log#audit-log-change-object-audit-log-change-structure
         public struct Change: Sendable, Codable {
             public var new_value: Mixed?
             public var old_value: Mixed?
             public var key: String
         }
 
-        /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
+        /// https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-audit-log-events
         @UnstableEnum<Int>
         public enum ActionKind: Sendable, Codable {
             case guildUpdate  // 1
@@ -201,8 +201,8 @@ public struct AuditLog: Sendable, Codable {
         }
 
         /// A mix of the below two types.
-        /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
-        /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
+        /// https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-audit-log-events
+        /// https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
         public enum Action: Sendable, Codable {
             case guildUpdate
             case channelCreate

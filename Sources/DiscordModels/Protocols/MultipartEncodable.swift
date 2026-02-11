@@ -658,4 +658,7 @@ let fileExtensionMediaTypeMapping: [String: (String, String)] = [
     "ice": ("x-conference", "x-cooltalk"),
     "sisx": ("x-epoc", "x-sisx-app"),
     "vrm": ("x-world", "x-vrml"),
+    "gif": ("image", "gif"),
+    "webp": ("image", "webp"),
+    "lottie": ("application", "lottie+json"),
 ]

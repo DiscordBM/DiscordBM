@@ -228,9 +228,9 @@ extension DiscordClient {
     }
 
     // MARK: Application Role Connection Metadata
-    /// https://discord.com/developers/docs/resources/application-role-connection-metadata
+    /// https://docs.discord.com/developers/resources/application-role-connection-metadata
 
-    /// https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records
+    /// https://docs.discord.com/developers/resources/application-role-connection-metadata#get-application-role-connection-metadata-records
     @inlinable
     public func listApplicationRoleConnectionMetadata(
         appId: ApplicationSnowflake? = nil
@@ -243,7 +243,7 @@ extension DiscordClient {
 
     /// Note: At the time of writing this, Discord docs mistakenly don't mention that
     /// this endpoint takes a payload of type `[ApplicationRoleConnectionMetadata]`.
-    /// https://discord.com/developers/docs/resources/application-role-connection-metadata#update-application-role-connection-metadata-records
+    /// https://docs.discord.com/developers/resources/application-role-connection-metadata#update-application-role-connection-metadata-records
     @inlinable
     public func bulkOverwriteApplicationRoleConnectionMetadata(
         appId: ApplicationSnowflake? = nil,
@@ -259,10 +259,10 @@ extension DiscordClient {
     }
 
     // MARK: Audit Logs
-    /// https://discord.com/developers/docs/resources/audit-log
+    /// https://docs.discord.com/developers/resources/audit-log
 
     /// NOTE: `limit`, if provided, must be between `1` and `1_000`.
-    /// https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
+    /// https://docs.discord.com/developers/resources/audit-log#get-guild-audit-log
     @inlinable
     public func listGuildAuditLogEntries(
         guildId: GuildSnowflake,
@@ -289,9 +289,9 @@ extension DiscordClient {
     }
 
     // MARK: Auto Moderation
-    /// https://discord.com/developers/docs/resources/auto-moderation
+    /// https://docs.discord.com/developers/resources/auto-moderation
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#list-auto-moderation-rules-for-guild
+    /// https://docs.discord.com/developers/resources/auto-moderation#list-auto-moderation-rules-for-guild
     @inlinable
     public func listAutoModerationRules(
         guildId: GuildSnowflake
@@ -300,7 +300,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#get-auto-moderation-rule
+    /// https://docs.discord.com/developers/resources/auto-moderation#get-auto-moderation-rule
     @inlinable
     public func getAutoModerationRule(
         guildId: GuildSnowflake,
@@ -310,7 +310,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#create-auto-moderation-rule
+    /// https://docs.discord.com/developers/resources/auto-moderation#create-auto-moderation-rule
     @inlinable
     public func createAutoModerationRule(
         guildId: GuildSnowflake,
@@ -327,7 +327,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#modify-auto-moderation-rule
+    /// https://docs.discord.com/developers/resources/auto-moderation#modify-auto-moderation-rule
     @inlinable
     public func updateAutoModerationRule(
         guildId: GuildSnowflake,
@@ -345,7 +345,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#delete-auto-moderation-rule
+    /// https://docs.discord.com/developers/resources/auto-moderation#delete-auto-moderation-rule
     @inlinable
     public func deleteAutoModerationRule(
         guildId: GuildSnowflake,
@@ -362,9 +362,9 @@ extension DiscordClient {
     }
 
     // MARK: Channels
-    /// https://discord.com/developers/docs/resources/channel
+    /// https://docs.discord.com/developers/resources/channel
 
-    /// https://discord.com/developers/docs/resources/channel#get-channel
+    /// https://docs.discord.com/developers/resources/channel#get-channel
     @inlinable
     public func getChannel(
         id: ChannelSnowflake
@@ -376,7 +376,7 @@ extension DiscordClient {
     /// This endpoint doesn't have a test since we can't create group DMs easily,
     /// but still should work fine if you actually needed it, because there are two similar
     /// functions down below for updating other types of channels, and those do have tests.
-    /// https://discord.com/developers/docs/resources/channel#modify-channel
+    /// https://docs.discord.com/developers/resources/channel#modify-channel
     @inlinable
     public func updateGroupDMChannel(
         id: ChannelSnowflake,
@@ -393,7 +393,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#modify-channel
+    /// https://docs.discord.com/developers/resources/channel#modify-channel
     @inlinable
     public func updateGuildChannel(
         id: ChannelSnowflake,
@@ -410,7 +410,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#modify-channel
+    /// https://docs.discord.com/developers/resources/channel#modify-channel
     @inlinable
     public func updateThreadChannel(
         id: ChannelSnowflake,
@@ -427,7 +427,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#deleteclose-channel
+    /// https://docs.discord.com/developers/resources/channel#deleteclose-channel
     @inlinable
     public func deleteChannel(
         id: ChannelSnowflake,
@@ -443,7 +443,7 @@ extension DiscordClient {
     }
 
     /// NOTE: `around`, `before` and `after` are mutually exclusive.
-    /// https://discord.com/developers/docs/resources/channel#get-channel-messages
+    /// https://docs.discord.com/developers/resources/channel#get-channel-messages
     @inlinable
     public func listMessages(
         channelId: ChannelSnowflake,
@@ -471,7 +471,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#get-channel-message
+    /// https://docs.discord.com/developers/resources/channel#get-channel-message
     @inlinable
     public func getMessage(
         channelId: ChannelSnowflake,
@@ -484,7 +484,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#create-message
+    /// https://docs.discord.com/developers/resources/channel#create-message
     @inlinable
     public func createMessage(
         channelId: ChannelSnowflake,
@@ -494,7 +494,7 @@ extension DiscordClient {
         return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
 
-    /// https://discord.com/developers/docs/resources/channel#crosspost-message
+    /// https://docs.discord.com/developers/resources/channel#crosspost-message
     @inlinable
     public func crosspostMessage(
         channelId: ChannelSnowflake,
@@ -504,7 +504,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#create-reaction
+    /// https://docs.discord.com/developers/resources/channel#create-reaction
     @inlinable
     public func addMessageReaction(
         channelId: ChannelSnowflake,
@@ -519,7 +519,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#delete-own-reaction
+    /// https://docs.discord.com/developers/resources/channel#delete-own-reaction
     @inlinable
     public func deleteOwnMessageReaction(
         channelId: ChannelSnowflake,
@@ -534,7 +534,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#delete-user-reaction
+    /// https://docs.discord.com/developers/resources/channel#delete-user-reaction
     @inlinable
     public func deleteUserMessageReaction(
         channelId: ChannelSnowflake,
@@ -551,7 +551,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#get-reactions
+    /// https://docs.discord.com/developers/resources/channel#get-reactions
     @inlinable
     public func listMessageReactionsByEmoji(
         channelId: ChannelSnowflake,
@@ -579,7 +579,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#delete-all-reactions
+    /// https://docs.discord.com/developers/resources/channel#delete-all-reactions
     @inlinable
     public func deleteAllMessageReactions(
         channelId: ChannelSnowflake,
@@ -592,7 +592,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji
+    /// https://docs.discord.com/developers/resources/channel#delete-all-reactions-for-emoji
     @inlinable
     public func deleteAllMessageReactionsByEmoji(
         channelId: ChannelSnowflake,
@@ -607,7 +607,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#edit-message
+    /// https://docs.discord.com/developers/resources/channel#edit-message
     @inlinable
     public func updateMessage(
         channelId: ChannelSnowflake,
@@ -618,7 +618,7 @@ extension DiscordClient {
         return try await self.sendMultipart(request: .init(to: endpoint), payload: payload)
     }
 
-    /// https://discord.com/developers/docs/resources/channel#delete-message
+    /// https://docs.discord.com/developers/resources/channel#delete-message
     @inlinable
     public func deleteMessage(
         channelId: ChannelSnowflake,
@@ -634,7 +634,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#bulk-delete-messages
+    /// https://docs.discord.com/developers/resources/channel#bulk-delete-messages
     @inlinable
     public func bulkDeleteMessages(
         channelId: ChannelSnowflake,
@@ -651,7 +651,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#edit-channel-permissions
+    /// https://docs.discord.com/developers/resources/channel#edit-channel-permissions
     @inlinable
     public func setChannelPermissionOverwrite(
         channelId: ChannelSnowflake,
@@ -672,7 +672,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#get-channel-invites
+    /// https://docs.discord.com/developers/resources/channel#get-channel-invites
     @inlinable
     public func listChannelInvites(
         channelId: ChannelSnowflake
@@ -681,7 +681,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#create-channel-invite
+    /// https://docs.discord.com/developers/resources/channel#create-channel-invite
     @inlinable
     public func createChannelInvite(
         channelId: ChannelSnowflake,
@@ -698,7 +698,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#delete-channel-permission
+    /// https://docs.discord.com/developers/resources/channel#delete-channel-permission
     @inlinable
     public func deleteChannelPermissionOverwrite(
         channelId: ChannelSnowflake,
@@ -717,7 +717,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#follow-announcement-channel
+    /// https://docs.discord.com/developers/resources/channel#follow-announcement-channel
     @inlinable
     public func followAnnouncementChannel(
         id: ChannelSnowflake,
@@ -734,14 +734,33 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
+    /// https://docs.discord.com/developers/resources/channel#trigger-typing-indicator
     @inlinable
     public func triggerTypingIndicator(channelId: ChannelSnowflake) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.triggerTypingIndicator(channelId: channelId)
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#get-pinned-messages
+    /// https://docs.discord.com/developers/resources/message#get-channel-pins
+    public func listChannelPins(
+        channelId: ChannelSnowflake,
+        before: DiscordTimestamp? = nil,
+        limit: Int? = nil
+    ) async throws -> DiscordClientResponse<Responses.ListMessagePins> {
+        try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 50)
+        let endpoint = APIEndpoint.listChannelPins(channelId: channelId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("before", before.map(\.date).map(iso8601DateFormatter.string(from:))),
+                    ("limit", limit.map { "\($0)" }),
+                ]
+            )
+        )
+    }
+
+    /// https://docs.discord.com/developers/resources/channel#get-pinned-messages
     @inlinable
     public func listPinnedMessages(
         channelId: ChannelSnowflake
@@ -750,7 +769,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#pin-message
+    /// https://docs.discord.com/developers/resources/channel#pin-message
     @inlinable
     public func pinMessage(
         channelId: ChannelSnowflake,
@@ -766,7 +785,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#unpin-message
+    /// https://docs.discord.com/developers/resources/channel#unpin-message
     @inlinable
     public func unpinMessage(
         channelId: ChannelSnowflake,
@@ -782,7 +801,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#group-dm-add-recipient
+    /// https://docs.discord.com/developers/resources/channel#group-dm-add-recipient
     @inlinable
     public func addGroupDmUser(
         channelId: ChannelSnowflake,
@@ -796,7 +815,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#group-dm-remove-recipient
+    /// https://docs.discord.com/developers/resources/channel#group-dm-remove-recipient
     @inlinable
     public func deleteGroupDmUser(
         channelId: ChannelSnowflake,
@@ -807,9 +826,9 @@ extension DiscordClient {
     }
 
     // MARK: Threads
-    /// https://discord.com/developers/docs/resources/channel#start-thread-from-message
+    /// https://docs.discord.com/developers/resources/channel#start-thread-from-message
 
-    /// https://discord.com/developers/docs/resources/channel#start-thread-from-message
+    /// https://docs.discord.com/developers/resources/channel#start-thread-from-message
     @inlinable
     public func createThreadFromMessage(
         channelId: ChannelSnowflake,
@@ -827,7 +846,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#start-thread-without-message
+    /// https://docs.discord.com/developers/resources/channel#start-thread-without-message
     @inlinable
     public func createThread(
         channelId: ChannelSnowflake,
@@ -844,7 +863,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-or-media-channel
+    /// https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel
     @available(*, deprecated, renamed: "startThreadInForumOrMediaChannel(channelId:reason:payload:)")
     @inlinable
     public func startThreadInForumChannel(
@@ -862,7 +881,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-or-media-channel
+    /// https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel
     @inlinable
     public func startThreadInForumOrMediaChannel(
         channelId: ChannelSnowflake,
@@ -879,14 +898,14 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#join-thread
+    /// https://docs.discord.com/developers/resources/channel#join-thread
     @inlinable
     public func joinThread(id: ChannelSnowflake) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.joinThread(channelId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#add-thread-member
+    /// https://docs.discord.com/developers/resources/channel#add-thread-member
     @inlinable
     public func addThreadMember(
         threadId: ChannelSnowflake,
@@ -896,14 +915,14 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#leave-thread
+    /// https://docs.discord.com/developers/resources/channel#leave-thread
     @inlinable
     public func leaveThread(id: ChannelSnowflake) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.leaveThread(channelId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#remove-thread-member
+    /// https://docs.discord.com/developers/resources/channel#remove-thread-member
     @inlinable
     public func deleteThreadMember(
         threadId: ChannelSnowflake,
@@ -913,7 +932,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#get-thread-member
+    /// https://docs.discord.com/developers/resources/channel#get-thread-member
     @inlinable
     public func getThreadMember(
         threadId: ChannelSnowflake,
@@ -923,7 +942,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#get-thread-member
+    /// https://docs.discord.com/developers/resources/channel#get-thread-member
     @inlinable
     public func getThreadMemberWithMember(
         threadId: ChannelSnowflake,
@@ -938,7 +957,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#list-thread-members
+    /// https://docs.discord.com/developers/resources/channel#list-thread-members
     @inlinable
     public func listThreadMembers(
         threadId: ChannelSnowflake
@@ -947,7 +966,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/channel#list-thread-members
+    /// https://docs.discord.com/developers/resources/channel#list-thread-members
     @inlinable
     public func listThreadMembersWithMember(
         threadId: ChannelSnowflake,
@@ -968,7 +987,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#list-public-archived-threads
+    /// https://docs.discord.com/developers/resources/channel#list-public-archived-threads
     public func listPublicArchivedThreads(
         channelId: ChannelSnowflake,
         before: Date? = nil,
@@ -988,7 +1007,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#list-private-archived-threads
+    /// https://docs.discord.com/developers/resources/channel#list-private-archived-threads
     public func listPrivateArchivedThreads(
         channelId: ChannelSnowflake,
         before: Date? = nil,
@@ -1008,7 +1027,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/channel#list-joined-private-archived-threads
+    /// https://docs.discord.com/developers/resources/channel#list-joined-private-archived-threads
     @inlinable
     public func listOwnPrivateArchivedThreads(
         channelId: ChannelSnowflake,
@@ -1030,9 +1049,9 @@ extension DiscordClient {
     }
 
     // MARK: Emojis
-    /// https://discord.com/developers/docs/resources/emoji
+    /// https://docs.discord.com/developers/resources/emoji
 
-    /// https://discord.com/developers/docs/resources/emoji#list-guild-emojis
+    /// https://docs.discord.com/developers/resources/emoji#list-guild-emojis
     @inlinable
     public func listGuildEmojis(
         guildId: GuildSnowflake
@@ -1041,7 +1060,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#get-guild-emoji
+    /// https://docs.discord.com/developers/resources/emoji#get-guild-emoji
     @inlinable
     public func getGuildEmoji(
         guildId: GuildSnowflake,
@@ -1051,7 +1070,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#create-guild-emoji
+    /// https://docs.discord.com/developers/resources/emoji#create-guild-emoji
     @inlinable
     public func createGuildEmoji(
         guildId: GuildSnowflake,
@@ -1068,7 +1087,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#create-guild-emoji
+    /// https://docs.discord.com/developers/resources/emoji#create-guild-emoji
     @inlinable
     public func updateGuildEmoji(
         guildId: GuildSnowflake,
@@ -1086,7 +1105,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#delete-guild-emoji
+    /// https://docs.discord.com/developers/resources/emoji#delete-guild-emoji
     @inlinable
     public func deleteGuildEmoji(
         guildId: GuildSnowflake,
@@ -1102,7 +1121,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#list-application-emojis
+    /// https://docs.discord.com/developers/resources/emoji#list-application-emojis
     @inlinable
     public func listApplicationEmojis(
         appId: ApplicationSnowflake? = nil
@@ -1111,7 +1130,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#get-application-emoji
+    /// https://docs.discord.com/developers/resources/emoji#get-application-emoji
     @inlinable
     public func getApplicationEmoji(
         emojiId: EmojiSnowflake,
@@ -1124,7 +1143,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#create-application-emoji
+    /// https://docs.discord.com/developers/resources/emoji#create-application-emoji
     @inlinable
     public func createApplicationEmoji(
         payload: Payloads.CreateApplicationEmoji,
@@ -1137,7 +1156,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#modify-application-emoji
+    /// https://docs.discord.com/developers/resources/emoji#modify-application-emoji
     @inlinable
     public func updateApplicationEmoji(
         emojiId: EmojiSnowflake,
@@ -1154,7 +1173,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#delete-application-emoji
+    /// https://docs.discord.com/developers/resources/emoji#delete-application-emoji
     @inlinable
     public func deleteApplicationEmoji(
         emojiId: EmojiSnowflake,
@@ -1206,7 +1225,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/entitlement#get-entitlement
+    /// https://docs.discord.com/developers/resources/entitlement#get-entitlement
     @inlinable
     public func getEntitlement(
         entitlementId: EntitlementSnowflake,
@@ -1259,9 +1278,9 @@ extension DiscordClient {
     }
 
     // MARK: Guilds
-    /// https://discord.com/developers/docs/resources/guild
+    /// https://docs.discord.com/developers/resources/guild
 
-    /// https://discord.com/developers/docs/resources/guild#create-guild
+    /// https://docs.discord.com/developers/resources/guild#create-guild
     @inlinable
     public func createGuild(
         payload: Payloads.CreateGuild
@@ -1273,7 +1292,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild
+    /// https://docs.discord.com/developers/resources/guild#get-guild
     @inlinable
     public func getGuild(
         id: GuildSnowflake,
@@ -1288,7 +1307,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-preview
+    /// https://docs.discord.com/developers/resources/guild#get-guild-preview
     @inlinable
     public func getGuildPreview(
         guildId: GuildSnowflake
@@ -1297,7 +1316,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild
+    /// https://docs.discord.com/developers/resources/guild#modify-guild
     @inlinable
     public func updateGuild(
         id: GuildSnowflake,
@@ -1314,7 +1333,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-incident-actions
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-incident-actions
     @inlinable
     public func updateGuildIncidentActions(
         guildId: GuildSnowflake,
@@ -1327,14 +1346,14 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#delete-guild
+    /// https://docs.discord.com/developers/resources/guild#delete-guild
     @inlinable
     public func deleteGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.deleteGuild(guildId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-channels
+    /// https://docs.discord.com/developers/resources/guild#get-guild-channels
     @inlinable
     public func listGuildChannels(
         guildId: GuildSnowflake
@@ -1343,7 +1362,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#create-guild-channel
+    /// https://docs.discord.com/developers/resources/guild#create-guild-channel
     @inlinable
     public func createGuildChannel(
         guildId: GuildSnowflake,
@@ -1360,7 +1379,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-channel-positions
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-channel-positions
     @inlinable
     public func updateGuildChannelPositions(
         guildId: GuildSnowflake,
@@ -1373,7 +1392,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#list-active-guild-threads
+    /// https://docs.discord.com/developers/resources/guild#list-active-guild-threads
     @inlinable
     public func listActiveGuildThreads(
         guildId: GuildSnowflake
@@ -1382,7 +1401,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-member
+    /// https://docs.discord.com/developers/resources/guild#get-guild-member
     @inlinable
     public func getGuildMember(
         guildId: GuildSnowflake,
@@ -1392,7 +1411,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#list-guild-members
+    /// https://docs.discord.com/developers/resources/guild#list-guild-members
     @inlinable
     public func listGuildMembers(
         guildId: GuildSnowflake,
@@ -1413,7 +1432,7 @@ extension DiscordClient {
     }
 
     /// NOTE: `limit`, if provided, must be between `1` and `1_000`.
-    /// https://discord.com/developers/docs/resources/guild#search-guild-members
+    /// https://docs.discord.com/developers/resources/guild#search-guild-members
     @inlinable
     public func searchGuildMembers(
         guildId: GuildSnowflake,
@@ -1434,7 +1453,7 @@ extension DiscordClient {
     }
 
     /// NOTE: Sometimes doesn't return a guild member object. Read the docs.
-    /// https://discord.com/developers/docs/resources/guild#add-guild-member
+    /// https://docs.discord.com/developers/resources/guild#add-guild-member
     @inlinable
     public func addGuildMember(
         guildId: GuildSnowflake,
@@ -1448,7 +1467,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-member
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-member
     @inlinable
     public func updateGuildMember(
         guildId: GuildSnowflake,
@@ -1466,7 +1485,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-current-member
+    /// https://docs.discord.com/developers/resources/guild#modify-current-member
     @inlinable
     public func updateOwnGuildMember(
         guildId: GuildSnowflake,
@@ -1483,7 +1502,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#add-guild-member-role
+    /// https://docs.discord.com/developers/resources/guild#add-guild-member-role
     @inlinable
     public func addGuildMemberRole(
         guildId: GuildSnowflake,
@@ -1504,7 +1523,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#remove-guild-member-role
+    /// https://docs.discord.com/developers/resources/guild#remove-guild-member-role
     @inlinable
     public func deleteGuildMemberRole(
         guildId: GuildSnowflake,
@@ -1525,7 +1544,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#remove-guild-member
+    /// https://docs.discord.com/developers/resources/guild#remove-guild-member
     @inlinable
     public func deleteGuildMember(
         guildId: GuildSnowflake,
@@ -1541,7 +1560,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-bans
+    /// https://docs.discord.com/developers/resources/guild#get-guild-bans
     @inlinable
     public func listGuildBans(
         guildId: GuildSnowflake,
@@ -1563,7 +1582,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-ban
+    /// https://docs.discord.com/developers/resources/guild#get-guild-ban
     @inlinable
     public func getGuildBan(
         guildId: GuildSnowflake,
@@ -1573,7 +1592,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#create-guild-ban
+    /// https://docs.discord.com/developers/resources/guild#create-guild-ban
     @inlinable
     public func banUserFromGuild(
         guildId: GuildSnowflake,
@@ -1591,7 +1610,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#bulk-guild-ban
+    /// https://docs.discord.com/developers/resources/guild#bulk-guild-ban
     @inlinable
     public func bulkBanUsersFromGuild(
         guildId: GuildSnowflake,
@@ -1608,7 +1627,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#remove-guild-ban
+    /// https://docs.discord.com/developers/resources/guild#remove-guild-ban
     @inlinable
     public func unbanUserFromGuild(
         guildId: GuildSnowflake,
@@ -1619,14 +1638,14 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-roles
+    /// https://docs.discord.com/developers/resources/guild#get-guild-roles
     @inlinable
     public func listGuildRoles(id: GuildSnowflake) async throws -> DiscordClientResponse<[Role]> {
         let endpoint = APIEndpoint.listGuildRoles(guildId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-role
+    /// https://docs.discord.com/developers/resources/guild#get-guild-role
     @inlinable
     public func getGuildRole(
         guildId: GuildSnowflake,
@@ -1636,7 +1655,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#create-guild-role
+    /// https://docs.discord.com/developers/resources/guild#create-guild-role
     @inlinable
     public func createGuildRole(
         guildId: GuildSnowflake,
@@ -1653,7 +1672,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-role-positions
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-role-positions
     @inlinable
     public func updateGuildRolePositions(
         guildId: GuildSnowflake,
@@ -1687,7 +1706,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-mfa-level
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-mfa-level
     @inlinable
     public func setGuildMfaLevel(
         guildId: GuildSnowflake,
@@ -1704,7 +1723,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#delete-guild-role
+    /// https://docs.discord.com/developers/resources/guild#delete-guild-role
     @inlinable
     public func deleteGuildRole(
         guildId: GuildSnowflake,
@@ -1721,7 +1740,7 @@ extension DiscordClient {
     }
 
     /// NOTE: `days`, if provided, must be between `1` and `30`.
-    /// https://discord.com/developers/docs/resources/guild#get-guild-prune-count
+    /// https://docs.discord.com/developers/resources/guild#get-guild-prune-count
     @inlinable
     public func previewPruneGuild(
         guildId: GuildSnowflake,
@@ -1741,7 +1760,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#begin-guild-prune
+    /// https://docs.discord.com/developers/resources/guild#begin-guild-prune
     @inlinable
     public func pruneGuild(
         guildId: GuildSnowflake,
@@ -1758,7 +1777,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-voice-regions
+    /// https://docs.discord.com/developers/resources/guild#get-guild-voice-regions
     @inlinable
     public func listGuildVoiceRegions(
         guildId: GuildSnowflake
@@ -1767,7 +1786,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-invites
+    /// https://docs.discord.com/developers/resources/guild#get-guild-invites
     @inlinable
     public func listGuildInvites(
         guildId: GuildSnowflake
@@ -1776,7 +1795,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-integrations
+    /// https://docs.discord.com/developers/resources/guild#get-guild-integrations
     @inlinable
     public func listGuildIntegrations(
         guildId: GuildSnowflake
@@ -1785,7 +1804,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#delete-guild-integration
+    /// https://docs.discord.com/developers/resources/guild#delete-guild-integration
     @inlinable
     public func deleteGuildIntegration(
         guildId: GuildSnowflake,
@@ -1804,7 +1823,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-widget-settings
+    /// https://docs.discord.com/developers/resources/guild#get-guild-widget-settings
     @inlinable
     public func getGuildWidgetSettings(
         guildId: GuildSnowflake
@@ -1813,7 +1832,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-widget
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-widget
     @inlinable
     public func updateGuildWidgetSettings(
         guildId: GuildSnowflake,
@@ -1830,7 +1849,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-widget
+    /// https://docs.discord.com/developers/resources/guild#get-guild-widget
     @inlinable
     public func getGuildWidget(
         guildId: GuildSnowflake
@@ -1839,7 +1858,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-vanity-url
+    /// https://docs.discord.com/developers/resources/guild#get-guild-vanity-url
     @inlinable
     public func getGuildVanityUrl(
         guildId: GuildSnowflake
@@ -1848,7 +1867,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-widget-image
+    /// https://docs.discord.com/developers/resources/guild#get-guild-widget-image
     @inlinable
     public func getGuildWidgetPng(
         guildId: GuildSnowflake,
@@ -1864,7 +1883,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-welcome-screen
+    /// https://docs.discord.com/developers/resources/guild#get-guild-welcome-screen
     @inlinable
     public func getGuildWelcomeScreen(
         guildId: GuildSnowflake,
@@ -1879,7 +1898,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-welcome-screen
     @inlinable
     public func updateGuildWelcomeScreen(
         guildId: GuildSnowflake,
@@ -1896,7 +1915,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-onboarding
+    /// https://docs.discord.com/developers/resources/guild#get-guild-onboarding
     @inlinable
     public func getGuildOnboarding(
         guildId: GuildSnowflake
@@ -1905,7 +1924,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-onboarding
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-onboarding
     @inlinable
     public func updateGuildOnboarding(
         guildId: GuildSnowflake,
@@ -1922,7 +1941,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-current-user-voice-state
+    /// https://docs.discord.com/developers/resources/guild#modify-current-user-voice-state
     @inlinable
     public func updateSelfVoiceState(
         guildId: GuildSnowflake,
@@ -1935,7 +1954,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-user-voice-state
+    /// https://docs.discord.com/developers/resources/guild#get-user-voice-state
     @inlinable
     public func getVoiceState(
         guildId: GuildSnowflake,
@@ -1947,7 +1966,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/voice#get-current-user-voice-state
+    /// https://docs.discord.com/developers/resources/voice#get-current-user-voice-state
     @inlinable
     public func getOwnVoiceState(
         guildId: GuildSnowflake
@@ -1956,7 +1975,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-user-voice-state
+    /// https://docs.discord.com/developers/resources/guild#modify-user-voice-state
     @inlinable
     public func updateVoiceState(
         guildId: GuildSnowflake,
@@ -1971,9 +1990,9 @@ extension DiscordClient {
     }
 
     // MARK: Guild Scheduled Events
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#list-scheduled-events-for-guild
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#list-scheduled-events-for-guild
     @inlinable
     public func listGuildScheduledEvents(
         guildId: GuildSnowflake,
@@ -1988,7 +2007,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#create-guild-scheduled-event
     @inlinable
     public func createGuildScheduledEvent(
         guildId: GuildSnowflake,
@@ -2005,7 +2024,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event
     @inlinable
     public func getGuildScheduledEvent(
         guildId: GuildSnowflake,
@@ -2024,7 +2043,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#modify-guild-scheduled-event
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#modify-guild-scheduled-event
     @inlinable
     public func updateGuildScheduledEvent(
         guildId: GuildSnowflake,
@@ -2045,7 +2064,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#delete-guild-scheduled-event
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#delete-guild-scheduled-event
     @inlinable
     public func deleteGuildScheduledEvent(
         guildId: GuildSnowflake,
@@ -2058,7 +2077,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event-users
     @inlinable
     public func listGuildScheduledEventUsers(
         guildId: GuildSnowflake,
@@ -2104,16 +2123,16 @@ extension DiscordClient {
     }
 
     // MARK: Guild Templates
-    /// https://discord.com/developers/docs/resources/guild-template
+    /// https://docs.discord.com/developers/resources/guild-template
 
-    /// https://discord.com/developers/docs/resources/guild-template#get-guild-template
+    /// https://docs.discord.com/developers/resources/guild-template#get-guild-template
     @inlinable
     public func getGuildTemplate(code: String) async throws -> DiscordClientResponse<GuildTemplate> {
         let endpoint = APIEndpoint.getGuildTemplate(code: code)
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild-template#create-guild-from-guild-template
+    /// https://docs.discord.com/developers/resources/guild-template#create-guild-from-guild-template
     @inlinable
     public func createGuildFromTemplate(
         code: String,
@@ -2126,7 +2145,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild-template#get-guild-templates
+    /// https://docs.discord.com/developers/resources/guild-template#get-guild-templates
     @inlinable
     public func listGuildTemplates(
         guildId: GuildSnowflake
@@ -2135,7 +2154,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild-template#create-guild-template
+    /// https://docs.discord.com/developers/resources/guild-template#create-guild-template
     @inlinable
     public func createGuildTemplate(
         guildId: GuildSnowflake,
@@ -2148,7 +2167,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild-template#sync-guild-template
+    /// https://docs.discord.com/developers/resources/guild-template#sync-guild-template
     @inlinable
     public func syncGuildTemplate(
         guildId: GuildSnowflake,
@@ -2158,7 +2177,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/guild-template#modify-guild-template
+    /// https://docs.discord.com/developers/resources/guild-template#modify-guild-template
     @inlinable
     public func updateGuildTemplate(
         guildId: GuildSnowflake,
@@ -2172,7 +2191,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/guild-template#delete-guild-template
+    /// https://docs.discord.com/developers/resources/guild-template#delete-guild-template
     @inlinable
     public func deleteGuildTemplate(
         guildId: GuildSnowflake,
@@ -2312,9 +2331,9 @@ extension DiscordClient {
     }
 
     // MARK: Invites
-    /// https://discord.com/developers/docs/resources/invite
+    /// https://docs.discord.com/developers/resources/invite
 
-    /// https://discord.com/developers/docs/resources/invite#get-invite
+    /// https://docs.discord.com/developers/resources/invite#get-invite
     @inlinable
     public func resolveInvite(
         code: String,
@@ -2335,7 +2354,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/invite#delete-invite
+    /// https://docs.discord.com/developers/resources/invite#delete-invite
     @inlinable
     public func revokeInvite(
         code: String,
@@ -2372,7 +2391,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/subscription#list-sku-subscriptions
+    /// https://docs.discord.com/developers/resources/subscription#list-sku-subscriptions
     @inlinable
     public func listSkuSubscriptions(
         skuId: SKUSnowflake,
@@ -2400,7 +2419,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/subscription#get-sku-subscription
+    /// https://docs.discord.com/developers/resources/subscription#get-sku-subscription
     @inlinable
     public func getSkuSubscription(
         skuId: SKUSnowflake,
@@ -2414,9 +2433,9 @@ extension DiscordClient {
     }
 
     // MARK: Stage Instances
-    /// https://discord.com/developers/docs/resources/stage-instance
+    /// https://docs.discord.com/developers/resources/stage-instance
 
-    /// https://discord.com/developers/docs/resources/stage-instance#create-stage-instance
+    /// https://docs.discord.com/developers/resources/stage-instance#create-stage-instance
     @inlinable
     public func createStageInstance(
         reason: String? = nil,
@@ -2432,7 +2451,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/stage-instance#get-stage-instance
+    /// https://docs.discord.com/developers/resources/stage-instance#get-stage-instance
     @inlinable
     public func getStageInstance(
         channelId: ChannelSnowflake
@@ -2441,7 +2460,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/stage-instance#modify-stage-instance
+    /// https://docs.discord.com/developers/resources/stage-instance#modify-stage-instance
     @inlinable
     public func updateStageInstance(
         channelId: ChannelSnowflake,
@@ -2458,7 +2477,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/stage-instance#delete-stage-instance
+    /// https://docs.discord.com/developers/resources/stage-instance#delete-stage-instance
     @inlinable
     public func deleteStageInstance(
         channelId: ChannelSnowflake,
@@ -2474,23 +2493,23 @@ extension DiscordClient {
     }
 
     // MARK: Stickers
-    /// https://discord.com/developers/docs/resources/sticker
+    /// https://docs.discord.com/developers/resources/sticker
 
-    /// https://discord.com/developers/docs/resources/sticker#get-sticker
+    /// https://docs.discord.com/developers/resources/sticker#get-sticker
     @inlinable
     public func getSticker(id: StickerSnowflake) async throws -> DiscordClientResponse<Sticker> {
         let endpoint = APIEndpoint.getSticker(stickerId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs
+    /// https://docs.discord.com/developers/resources/sticker#list-nitro-sticker-packs
     @inlinable
     public func listStickerPacks() async throws -> DiscordClientResponse<Responses.ListStickerPacks> {
         let endpoint = APIEndpoint.listStickerPacks
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#get-sticker-pack
+    /// https://docs.discord.com/developers/resources/sticker#get-sticker-pack
     @inlinable
     public func getStickerPack(
         id: StickerPackSnowflake
@@ -2499,7 +2518,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#list-guild-stickers
+    /// https://docs.discord.com/developers/resources/sticker#list-guild-stickers
     @inlinable
     public func listGuildStickers(
         guildId: GuildSnowflake
@@ -2508,7 +2527,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#get-guild-sticker
+    /// https://docs.discord.com/developers/resources/sticker#get-guild-sticker
     @inlinable
     public func getGuildSticker(
         guildId: GuildSnowflake,
@@ -2518,7 +2537,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#create-guild-sticker
+    /// https://docs.discord.com/developers/resources/sticker#create-guild-sticker
     @inlinable
     public func createGuildSticker(
         guildId: GuildSnowflake,
@@ -2535,7 +2554,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#modify-guild-sticker
+    /// https://docs.discord.com/developers/resources/sticker#modify-guild-sticker
     @inlinable
     public func updateGuildSticker(
         guildId: GuildSnowflake,
@@ -2553,7 +2572,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#delete-guild-sticker
+    /// https://docs.discord.com/developers/resources/sticker#delete-guild-sticker
     @inlinable
     public func deleteGuildSticker(
         guildId: GuildSnowflake,
@@ -2570,9 +2589,9 @@ extension DiscordClient {
     }
 
     // MARK: User
-    /// https://discord.com/developers/docs/resources/user
+    /// https://docs.discord.com/developers/resources/user
 
-    /// https://discord.com/developers/docs/resources/user#get-current-user
+    /// https://docs.discord.com/developers/resources/user#get-current-user
     @inlinable
     public func getOwnUser() async throws -> DiscordClientResponse<DiscordUser> {
         let endpoint = APIEndpoint.getOwnUser
@@ -2586,7 +2605,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/application#edit-current-application
+    /// https://docs.discord.com/developers/resources/application#edit-current-application
     @inlinable
     public func updateOwnApplication(
         payload: Payloads.UpdateOwnApplication
@@ -2598,14 +2617,14 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/user#get-user
+    /// https://docs.discord.com/developers/resources/user#get-user
     @inlinable
     public func getUser(id: UserSnowflake) async throws -> DiscordClientResponse<DiscordUser> {
         let endpoint = APIEndpoint.getUser(userId: id)
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/user#modify-current-user
+    /// https://docs.discord.com/developers/resources/user#modify-current-user
     @inlinable
     public func updateOwnUser(
         payload: Payloads.ModifyCurrentUser
@@ -2617,7 +2636,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/user#get-current-user-guilds
+    /// https://docs.discord.com/developers/resources/user#get-current-user-guilds
     @inlinable
     public func listOwnGuilds(
         before: GuildSnowflake? = nil,
@@ -2642,7 +2661,7 @@ extension DiscordClient {
 
     /// This endpoint requires a `DiscordClient` with an OAuth token.
     /// By default the authentication method is by a bot token, and not an OAuth one.
-    /// https://discord.com/developers/docs/resources/user#get-current-user-guild-member
+    /// https://docs.discord.com/developers/resources/user#get-current-user-guild-member
     @inlinable
     public func getOwnGuildMember(
         guildId: GuildSnowflake
@@ -2651,7 +2670,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/user#leave-guild
+    /// https://docs.discord.com/developers/resources/user#leave-guild
     @inlinable
     public func leaveGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.leaveGuild(guildId: id)
@@ -2659,7 +2678,7 @@ extension DiscordClient {
     }
 
     /// You can use this function to create a new **or** retrieve an existing DM channel.
-    /// https://discord.com/developers/docs/resources/user#create-dm
+    /// https://docs.discord.com/developers/resources/user#create-dm
     @inlinable
     public func createDm(
         payload: Payloads.CreateDM
@@ -2671,7 +2690,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/user#create-group-dm
+    /// https://docs.discord.com/developers/resources/user#create-group-dm
     @inlinable
     public func createGroupDm(
         payload: Payloads.CreateGroupDM
@@ -2683,7 +2702,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/user#get-user-connections
+    /// https://docs.discord.com/developers/resources/user#get-user-connections
     @inlinable
     public func listOwnConnections() async throws -> DiscordClientResponse<[DiscordUser.Connection]> {
         let endpoint = APIEndpoint.listOwnConnections
@@ -2692,7 +2711,7 @@ extension DiscordClient {
 
     /// This endpoint requires a `DiscordClient` with an OAuth token.
     /// By default the authentication method is by a bot token, and not an OAuth one.
-    /// https://discord.com/developers/docs/resources/user#get-user-application-role-connection
+    /// https://docs.discord.com/developers/resources/user#get-user-application-role-connection
     @inlinable
     public func getApplicationUserRoleConnection(
         appId: ApplicationSnowflake? = nil
@@ -2705,7 +2724,7 @@ extension DiscordClient {
 
     /// This endpoint requires a `DiscordClient` with an OAuth token.
     /// By default the authentication method is by a bot token, and not an OAuth one.
-    /// https://discord.com/developers/docs/resources/user#update-user-application-role-connection
+    /// https://docs.discord.com/developers/resources/user#update-user-application-role-connection
     @inlinable
     public func updateApplicationUserRoleConnection(
         appId: ApplicationSnowflake? = nil,
@@ -2721,9 +2740,9 @@ extension DiscordClient {
     }
 
     // MARK: Polls
-    /// https://discord.com/developers/docs/resources/poll
+    /// https://docs.discord.com/developers/resources/poll
 
-    /// https://discord.com/developers/docs/resources/poll#get-answer-voters
+    /// https://docs.discord.com/developers/resources/poll#get-answer-voters
     @inlinable
     public func listPollAnswerVotes(
         channelId: ChannelSnowflake,
@@ -2749,7 +2768,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/poll#end-poll
+    /// https://docs.discord.com/developers/resources/poll#end-poll
     @inlinable
     public func endPoll(
         channelId: ChannelSnowflake,
@@ -2763,9 +2782,9 @@ extension DiscordClient {
     }
 
     // MARK: Soundboard
-    /// https://discord.com/developers/docs/resources/soundboard
+    /// https://docs.discord.com/developers/resources/soundboard
 
-    /// https://discord.com/developers/docs/resources/soundboard#send-soundboard-sound
+    /// https://docs.discord.com/developers/resources/soundboard#send-soundboard-sound
     @inlinable
     public func sendSoundboardSound(
         channelId: ChannelSnowflake,
@@ -2778,14 +2797,14 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/soundboard#list-default-soundboard-sounds
+    /// https://docs.discord.com/developers/resources/soundboard#list-default-soundboard-sounds
     @inlinable
     public func listDefaultSoundboardSounds() async throws -> DiscordClientResponse<[SoundboardSound]> {
         let endpoint = APIEndpoint.listDefaultSoundboardSounds
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/soundboard#list-guild-soundboard-sounds
+    /// https://docs.discord.com/developers/resources/soundboard#list-guild-soundboard-sounds
     @inlinable
     public func listGuildSoundboardSounds(
         guildId: GuildSnowflake
@@ -2794,7 +2813,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/soundboard#get-guild-soundboard-sound
+    /// https://docs.discord.com/developers/resources/soundboard#get-guild-soundboard-sound
     @inlinable
     public func getGuildSoundboardSound(
         guildId: GuildSnowflake,
@@ -2807,7 +2826,7 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/soundboard#create-guild-soundboard-sound
+    /// https://docs.discord.com/developers/resources/soundboard#create-guild-soundboard-sound
     @inlinable
     public func createGuildSoundboardSound(
         guildId: GuildSnowflake,
@@ -2824,7 +2843,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/soundboard#modify-guild-soundboard-sound
+    /// https://docs.discord.com/developers/resources/soundboard#modify-guild-soundboard-sound
     @inlinable
     public func updateGuildSoundboardSound(
         guildId: GuildSnowflake,
@@ -2845,7 +2864,7 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/soundboard#delete-guild-soundboard-sound
+    /// https://docs.discord.com/developers/resources/soundboard#delete-guild-soundboard-sound
     @inlinable
     public func deleteGuildSoundboardSound(
         guildId: GuildSnowflake,
@@ -2865,9 +2884,9 @@ extension DiscordClient {
     }
 
     // MARK: Voice
-    /// https://discord.com/developers/docs/resources/voice
+    /// https://docs.discord.com/developers/resources/voice
 
-    /// https://discord.com/developers/docs/resources/voice#list-voice-regions
+    /// https://docs.discord.com/developers/resources/voice#list-voice-regions
     @inlinable
     public func listVoiceRegions() async throws -> DiscordClientResponse<[VoiceRegion]> {
         let endpoint = APIEndpoint.listVoiceRegions
@@ -2875,9 +2894,9 @@ extension DiscordClient {
     }
 
     // MARK: Webhook
-    /// https://discord.com/developers/docs/resources/webhook
+    /// https://docs.discord.com/developers/resources/webhook
 
-    /// https://discord.com/developers/docs/resources/webhook#create-webhook
+    /// https://docs.discord.com/developers/resources/webhook#create-webhook
     @inlinable
     public func createWebhook(
         channelId: ChannelSnowflake,
@@ -2894,14 +2913,14 @@ extension DiscordClient {
         )
     }
 
-    /// https://discord.com/developers/docs/resources/webhook#get-channel-webhooks
+    /// https://docs.discord.com/developers/resources/webhook#get-channel-webhooks
     @inlinable
     public func listChannelWebhooks(channelId: ChannelSnowflake) async throws -> DiscordClientResponse<[Webhook]> {
         let endpoint = APIEndpoint.listChannelWebhooks(channelId: channelId)
         return try await self.send(request: .init(to: endpoint))
     }
 
-    /// https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
+    /// https://docs.discord.com/developers/resources/webhook#get-guild-webhooks
     @inlinable
     public func getGuildWebhooks(guildId: GuildSnowflake) async throws -> DiscordClientResponse<[Webhook]> {
         let endpoint = APIEndpoint.getGuildWebhooks(guildId: guildId)
@@ -2909,7 +2928,7 @@ extension DiscordClient {
     }
 
     /// Requires authentication using an authorized bot-token.
-    /// https://discord.com/developers/docs/resources/webhook#get-webhook
+    /// https://docs.discord.com/developers/resources/webhook#get-webhook
     @inlinable
     public func getWebhook(id: WebhookSnowflake) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = APIEndpoint.getWebhook(webhookId: id)
@@ -2917,7 +2936,7 @@ extension DiscordClient {
     }
 
     /// Doesn't require authentication using bot-token.
-    /// https://discord.com/developers/docs/resources/webhook#get-webhook-with-token
+    /// https://docs.discord.com/developers/resources/webhook#get-webhook-with-token
     @inlinable
     public func getWebhook(address: WebhookAddress) async throws -> DiscordClientResponse<Webhook> {
         let endpoint = APIEndpoint.getWebhookByToken(
@@ -2928,7 +2947,7 @@ extension DiscordClient {
     }
 
     /// Requires authentication using an authorized bot-token.
-    /// https://discord.com/developers/docs/resources/webhook#modify-webhook
+    /// https://docs.discord.com/developers/resources/webhook#modify-webhook
     @inlinable
     public func updateWebhook(
         id: WebhookSnowflake,
@@ -2946,7 +2965,7 @@ extension DiscordClient {
     }
 
     /// Doesn't require authentication using bot-token.
-    /// https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
+    /// https://docs.discord.com/developers/resources/webhook#modify-webhook-with-token
     @inlinable
     public func updateWebhook(
         address: WebhookAddress,
@@ -2967,7 +2986,7 @@ extension DiscordClient {
     }
 
     /// Requires authentication using an authorized bot-token.
-    /// https://discord.com/developers/docs/resources/webhook#delete-webhook
+    /// https://docs.discord.com/developers/resources/webhook#delete-webhook
     @inlinable
     public func deleteWebhook(
         id: WebhookSnowflake,
@@ -2983,7 +3002,7 @@ extension DiscordClient {
     }
 
     /// Doesn't require authentication using bot-token.
-    /// https://discord.com/developers/docs/resources/webhook#delete-webhook-with-token
+    /// https://docs.discord.com/developers/resources/webhook#delete-webhook-with-token
     @inlinable
     public func deleteWebhook(
         address: WebhookAddress,
@@ -3004,7 +3023,7 @@ extension DiscordClient {
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     ///   - withComponents: Allows sending non-interactive components for non-application-owned webhooks.
-    /// https://discord.com/developers/docs/resources/webhook#execute-webhook
+    /// https://docs.discord.com/developers/resources/webhook#execute-webhook
     @inlinable
     public func executeWebhook(
         address: WebhookAddress,
@@ -3031,7 +3050,7 @@ extension DiscordClient {
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     ///   - withComponents: Allows sending non-interactive components for non-application-owned webhooks.
-    /// https://discord.com/developers/docs/resources/webhook#execute-webhook
+    /// https://docs.discord.com/developers/resources/webhook#execute-webhook
     @inlinable
     public func executeWebhookWithResponse(
         address: WebhookAddress,
@@ -3058,7 +3077,7 @@ extension DiscordClient {
 
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
-    /// https://discord.com/developers/docs/resources/webhook#get-webhook-message
+    /// https://docs.discord.com/developers/resources/webhook#get-webhook-message
     @inlinable
     public func getWebhookMessage(
         address: WebhookAddress,
@@ -3081,7 +3100,7 @@ extension DiscordClient {
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
     ///   - withComponents: Allows sending non-interactive components for non-application-owned webhooks.
-    /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message
+    /// https://docs.discord.com/developers/resources/webhook#edit-webhook-message
     @inlinable
     public func updateWebhookMessage(
         address: WebhookAddress,
@@ -3109,7 +3128,7 @@ extension DiscordClient {
 
     /// - Parameters:
     ///   - threadId: Required if the message is in a thread.
-    /// https://discord.com/developers/docs/resources/webhook#delete-webhook-message
+    /// https://docs.discord.com/developers/resources/webhook#delete-webhook-message
     @inlinable
     public func deleteWebhookMessage(
         address: WebhookAddress,

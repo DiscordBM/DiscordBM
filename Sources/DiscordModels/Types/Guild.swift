@@ -368,7 +368,7 @@ public struct PartialGuild: Sendable, Codable {
 
 extension Guild {
     /// A partial ``Guild.Member`` object.
-    /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
+    /// https://docs.discord.com/developers/resources/guild#guild-member-object
     public struct PartialMember: Sendable, Codable {
         public var user: DiscordUser?
         public var nick: String?

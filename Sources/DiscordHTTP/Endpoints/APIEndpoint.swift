@@ -10,13 +10,13 @@ import NIOHTTP1
 public enum APIEndpoint: Endpoint {
 
     // MARK: Polls
-    /// https://discord.com/developers/docs/resources/poll
+    /// https://docs.discord.com/developers/resources/poll
 
     case listPollAnswerVoters(channelId: ChannelSnowflake, messageId: MessageSnowflake, answerId: Int)
     case endPoll(channelId: ChannelSnowflake, messageId: MessageSnowflake)
 
     // MARK: AutoMod
-    /// https://discord.com/developers/docs/resources/auto-moderation
+    /// https://docs.discord.com/developers/resources/auto-moderation
 
     case getAutoModerationRule(guildId: GuildSnowflake, ruleId: RuleSnowflake)
     case listAutoModerationRules(guildId: GuildSnowflake)
@@ -25,12 +25,12 @@ public enum APIEndpoint: Endpoint {
     case deleteAutoModerationRule(guildId: GuildSnowflake, ruleId: RuleSnowflake)
 
     // MARK: Audit Log
-    /// https://discord.com/developers/docs/resources/audit-log
+    /// https://docs.discord.com/developers/resources/audit-log
 
     case listGuildAuditLogEntries(guildId: GuildSnowflake)
 
     // MARK: Channels
-    /// https://discord.com/developers/docs/resources/channel
+    /// https://docs.discord.com/developers/resources/channel
 
     case getChannel(channelId: ChannelSnowflake)
     case listPinnedMessages(channelId: ChannelSnowflake)
@@ -88,7 +88,7 @@ public enum APIEndpoint: Endpoint {
     )
 
     // MARK: Emoji
-    /// https://discord.com/developers/docs/resources/emoji
+    /// https://docs.discord.com/developers/resources/emoji
 
     case getApplicationEmoji(applicationId: ApplicationSnowflake, emojiId: EmojiSnowflake)
     case getGuildEmoji(guildId: GuildSnowflake, emojiId: EmojiSnowflake)
@@ -117,7 +117,7 @@ public enum APIEndpoint: Endpoint {
     case getGateway
 
     // MARK: Guilds
-    /// https://discord.com/developers/docs/resources/guild
+    /// https://docs.discord.com/developers/resources/guild
 
     case getGuild(guildId: GuildSnowflake)
     case getGuildBan(guildId: GuildSnowflake, userId: UserSnowflake)
@@ -157,7 +157,7 @@ public enum APIEndpoint: Endpoint {
     case unbanUserFromGuild(guildId: GuildSnowflake, userId: UserSnowflake)
 
     // MARK: Guild Templates
-    /// https://discord.com/developers/docs/resources/guild-template
+    /// https://docs.discord.com/developers/resources/guild-template
 
     case getGuildTemplate(code: String)
     case listGuildTemplates(guildId: GuildSnowflake)
@@ -188,7 +188,7 @@ public enum APIEndpoint: Endpoint {
     case deleteOriginalInteractionResponse(applicationId: ApplicationSnowflake, interactionToken: String)
 
     // MARK: Invites
-    /// https://discord.com/developers/docs/resources/invite
+    /// https://docs.discord.com/developers/resources/invite
 
     case listChannelInvites(channelId: ChannelSnowflake)
     case listGuildInvites(guildId: GuildSnowflake)
@@ -197,7 +197,7 @@ public enum APIEndpoint: Endpoint {
     case revokeInvite(code: String)
 
     // MARK: Members
-    /// https://discord.com/developers/docs/resources/guild
+    /// https://docs.discord.com/developers/resources/guild
 
     case getGuildMember(guildId: GuildSnowflake, userId: UserSnowflake)
     case getOwnGuildMember(guildId: GuildSnowflake)
@@ -209,7 +209,7 @@ public enum APIEndpoint: Endpoint {
     case deleteGuildMember(guildId: GuildSnowflake, userId: UserSnowflake)
 
     // MARK: Messages
-    /// https://discord.com/developers/docs/resources/channel
+    /// https://docs.discord.com/developers/resources/channel
 
     case getMessage(channelId: ChannelSnowflake, messageId: MessageSnowflake)
     case listMessageReactionsByEmoji(channelId: ChannelSnowflake, messageId: MessageSnowflake, emojiName: String)
@@ -236,7 +236,7 @@ public enum APIEndpoint: Endpoint {
     case getOwnOauth2Application
 
     // MARK: Roles
-    /// https://discord.com/developers/docs/resources/guild
+    /// https://docs.discord.com/developers/resources/guild
 
     case getGuildRole(guildId: GuildSnowflake, roleId: RoleSnowflake)
     case listGuildRoles(guildId: GuildSnowflake)
@@ -248,7 +248,7 @@ public enum APIEndpoint: Endpoint {
     case deleteGuildRole(guildId: GuildSnowflake, roleId: RoleSnowflake)
 
     // MARK: Role Connections
-    /// https://discord.com/developers/docs/resources/user
+    /// https://docs.discord.com/developers/resources/user
 
     case getApplicationUserRoleConnection(applicationId: ApplicationSnowflake)
     case listApplicationRoleConnectionMetadata(applicationId: ApplicationSnowflake)
@@ -256,7 +256,7 @@ public enum APIEndpoint: Endpoint {
     case updateApplicationUserRoleConnection(applicationId: ApplicationSnowflake)
 
     // MARK: Scheduled Events
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event
 
     case getGuildScheduledEvent(guildId: GuildSnowflake, guildScheduledEventId: GuildScheduledEventSnowflake)
     case listGuildScheduledEventUsers(guildId: GuildSnowflake, guildScheduledEventId: GuildScheduledEventSnowflake)
@@ -273,7 +273,7 @@ public enum APIEndpoint: Endpoint {
     case listSkuSubscriptions(skuId: SKUSnowflake)
 
     // MARK: Stages
-    /// https://discord.com/developers/docs/resources/stage-instance
+    /// https://docs.discord.com/developers/resources/stage-instance
 
     case getStageInstance(channelId: ChannelSnowflake)
     case createStageInstance
@@ -281,7 +281,7 @@ public enum APIEndpoint: Endpoint {
     case deleteStageInstance(channelId: ChannelSnowflake)
 
     // MARK: Stickers
-    /// https://discord.com/developers/docs/resources/sticker
+    /// https://docs.discord.com/developers/resources/sticker
 
     case getGuildSticker(guildId: GuildSnowflake, stickerId: StickerSnowflake)
     case getSticker(stickerId: StickerSnowflake)
@@ -293,7 +293,7 @@ public enum APIEndpoint: Endpoint {
     case deleteGuildSticker(guildId: GuildSnowflake, stickerId: StickerSnowflake)
 
     // MARK: Threads
-    /// https://discord.com/developers/docs/resources/channel
+    /// https://docs.discord.com/developers/resources/channel
 
     case getThreadMember(channelId: ChannelSnowflake, userId: UserSnowflake)
     case listActiveGuildThreads(guildId: GuildSnowflake)
@@ -310,7 +310,7 @@ public enum APIEndpoint: Endpoint {
     case leaveThread(channelId: ChannelSnowflake)
 
     // MARK: Users
-    /// https://discord.com/developers/docs/resources/user
+    /// https://docs.discord.com/developers/resources/user
 
     case getOwnApplication
     case getOwnUser
@@ -320,7 +320,7 @@ public enum APIEndpoint: Endpoint {
     case updateOwnUser
 
     // MARK: Voice
-    /// https://discord.com/developers/docs/resources/voice#list-voice-regions
+    /// https://docs.discord.com/developers/resources/voice#list-voice-regions
 
     case getOwnVoiceState(guildId: GuildSnowflake)
     case getVoiceState(guildId: GuildSnowflake, userId: UserSnowflake)
@@ -330,7 +330,7 @@ public enum APIEndpoint: Endpoint {
     case updateVoiceState(guildId: GuildSnowflake, userId: UserSnowflake)
 
     // MARK: Webhooks
-    /// https://discord.com/developers/docs/resources/webhook
+    /// https://docs.discord.com/developers/resources/webhook
 
     case getGuildWebhooks(guildId: GuildSnowflake)
     case getWebhook(webhookId: WebhookSnowflake)
@@ -3477,23 +3477,23 @@ public enum APIEndpoint: Endpoint {
 public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertible {
 
     // MARK: Polls
-    /// https://discord.com/developers/docs/resources/poll
+    /// https://docs.discord.com/developers/resources/poll
 
     case listPollAnswerVoters
 
     // MARK: AutoMod
-    /// https://discord.com/developers/docs/resources/auto-moderation
+    /// https://docs.discord.com/developers/resources/auto-moderation
 
     case getAutoModerationRule
     case listAutoModerationRules
 
     // MARK: Audit Log
-    /// https://discord.com/developers/docs/resources/audit-log
+    /// https://docs.discord.com/developers/resources/audit-log
 
     case listGuildAuditLogEntries
 
     // MARK: Channels
-    /// https://discord.com/developers/docs/resources/channel
+    /// https://docs.discord.com/developers/resources/channel
 
     case getChannel
     case listPinnedMessages
@@ -3509,7 +3509,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case listGuildApplicationCommands
 
     // MARK: Emoji
-    /// https://discord.com/developers/docs/resources/emoji
+    /// https://docs.discord.com/developers/resources/emoji
 
     case getApplicationEmoji
     case getGuildEmoji
@@ -3529,7 +3529,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case getGateway
 
     // MARK: Guilds
-    /// https://discord.com/developers/docs/resources/guild
+    /// https://docs.discord.com/developers/resources/guild
 
     case getGuild
     case getGuildBan
@@ -3550,7 +3550,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case previewPruneGuild
 
     // MARK: Guild Templates
-    /// https://discord.com/developers/docs/resources/guild-template
+    /// https://docs.discord.com/developers/resources/guild-template
 
     case getGuildTemplate
     case listGuildTemplates
@@ -3562,14 +3562,14 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case getOriginalInteractionResponse
 
     // MARK: Invites
-    /// https://discord.com/developers/docs/resources/invite
+    /// https://docs.discord.com/developers/resources/invite
 
     case listChannelInvites
     case listGuildInvites
     case resolveInvite
 
     // MARK: Members
-    /// https://discord.com/developers/docs/resources/guild
+    /// https://docs.discord.com/developers/resources/guild
 
     case getGuildMember
     case getOwnGuildMember
@@ -3577,7 +3577,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case searchGuildMembers
 
     // MARK: Messages
-    /// https://discord.com/developers/docs/resources/channel
+    /// https://docs.discord.com/developers/resources/channel
 
     case getMessage
     case listMessageReactionsByEmoji
@@ -3589,19 +3589,19 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case getOwnOauth2Application
 
     // MARK: Roles
-    /// https://discord.com/developers/docs/resources/guild
+    /// https://docs.discord.com/developers/resources/guild
 
     case getGuildRole
     case listGuildRoles
 
     // MARK: Role Connections
-    /// https://discord.com/developers/docs/resources/user
+    /// https://docs.discord.com/developers/resources/user
 
     case getApplicationUserRoleConnection
     case listApplicationRoleConnectionMetadata
 
     // MARK: Scheduled Events
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event
 
     case getGuildScheduledEvent
     case listGuildScheduledEventUsers
@@ -3615,12 +3615,12 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case listSkuSubscriptions
 
     // MARK: Stages
-    /// https://discord.com/developers/docs/resources/stage-instance
+    /// https://docs.discord.com/developers/resources/stage-instance
 
     case getStageInstance
 
     // MARK: Stickers
-    /// https://discord.com/developers/docs/resources/sticker
+    /// https://docs.discord.com/developers/resources/sticker
 
     case getGuildSticker
     case getSticker
@@ -3629,7 +3629,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case listStickerPacks
 
     // MARK: Threads
-    /// https://discord.com/developers/docs/resources/channel
+    /// https://docs.discord.com/developers/resources/channel
 
     case getThreadMember
     case listActiveGuildThreads
@@ -3639,7 +3639,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case listThreadMembers
 
     // MARK: Users
-    /// https://discord.com/developers/docs/resources/user
+    /// https://docs.discord.com/developers/resources/user
 
     case getOwnApplication
     case getOwnUser
@@ -3647,7 +3647,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case listOwnConnections
 
     // MARK: Voice
-    /// https://discord.com/developers/docs/resources/voice#list-voice-regions
+    /// https://docs.discord.com/developers/resources/voice#list-voice-regions
 
     case getOwnVoiceState
     case getVoiceState
@@ -3655,7 +3655,7 @@ public enum CacheableAPIEndpointIdentity: Int, Sendable, Hashable, CustomStringC
     case listVoiceRegions
 
     // MARK: Webhooks
-    /// https://discord.com/developers/docs/resources/webhook
+    /// https://docs.discord.com/developers/resources/webhook
 
     case getGuildWebhooks
     case getWebhook

@@ -1,4 +1,4 @@
-/// https://discord.com/developers/docs/resources/soundboard#soundboard-sound-object
+/// https://docs.discord.com/developers/resources/soundboard#soundboard-sound-object
 public struct SoundboardSound: Sendable, Codable {
     public var name: String
     public var sound_id: SoundboardSoundSnowflake

@@ -1,7 +1,7 @@
-/// https://discord.com/developers/docs/resources/poll#poll-object-poll-object-structure
+/// https://docs.discord.com/developers/resources/poll#poll-object-poll-object-structure
 public struct Poll: Sendable, Codable {
 
-    /// https://discord.com/developers/docs/resources/poll#poll-media-object-poll-media-object-structure
+    /// https://docs.discord.com/developers/resources/poll#poll-media-object-poll-media-object-structure
     public struct Media: Sendable, Codable, ValidatablePayload {
         /// "text should always be non-null for both questions and answers, but please do not depend on that in the future."
         public var text: String?
@@ -30,7 +30,7 @@ public struct Poll: Sendable, Codable {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/poll#poll-answer-object-poll-answer-object-structure
+    /// https://docs.discord.com/developers/resources/poll#poll-answer-object-poll-answer-object-structure
     public struct Answer: Sendable, Codable {
         public var answer_id: Int?
         public var poll_media: Media
@@ -41,17 +41,17 @@ public struct Poll: Sendable, Codable {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/poll#layout-type
+    /// https://docs.discord.com/developers/resources/poll#layout-type
     @UnstableEnum<Int>
     public enum LayoutKind: Sendable, Codable {
         case `default`  // 1
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/poll#poll-results-object-poll-results-object-structure
+    /// https://docs.discord.com/developers/resources/poll#poll-results-object-poll-results-object-structure
     public struct Results: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/poll#poll-results-object-poll-answer-count-object-structure
+        /// https://docs.discord.com/developers/resources/poll#poll-results-object-poll-answer-count-object-structure
         public struct AnswerCount: Sendable, Codable {
             public var id: Int
             public var count: Int

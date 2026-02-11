@@ -1,4 +1,4 @@
-/// https://discord.com/developers/docs/resources/voice#voice-state-object-voice-state-structure
+/// https://docs.discord.com/developers/resources/voice#voice-state-object-voice-state-structure
 public struct VoiceState: Sendable, Codable {
     public var guild_id: GuildSnowflake
     public var channel_id: ChannelSnowflake?
@@ -15,7 +15,7 @@ public struct VoiceState: Sendable, Codable {
     public var request_to_speak_timestamp: DiscordTimestamp?
 }
 
-/// https://discord.com/developers/docs/resources/voice#voice-state-object-voice-state-structure
+/// https://docs.discord.com/developers/resources/voice#voice-state-object-voice-state-structure
 public struct PartialVoiceState: Sendable, Codable {
     public var channel_id: ChannelSnowflake?
     public var user_id: UserSnowflake
@@ -46,7 +46,7 @@ public struct PartialVoiceState: Sendable, Codable {
     }
 }
 
-/// https://discord.com/developers/docs/resources/voice#voice-region-object-voice-region-structure
+/// https://docs.discord.com/developers/resources/voice#voice-region-object-voice-region-structure
 public struct VoiceRegion: Sendable, Codable {
     public var id: String
     public var name: String

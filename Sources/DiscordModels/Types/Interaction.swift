@@ -67,7 +67,7 @@ public struct Interaction: Sendable, Codable {
         /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
         public struct ResolvedData: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
+            /// https://docs.discord.com/developers/resources/channel#channel-object-channel-structure
             /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure
             public struct PartialChannel: Sendable, Codable {
                 public var id: ChannelSnowflake
@@ -1057,15 +1057,13 @@ extension Interaction {
             public init(
                 id: Int? = nil,
                 file: UnfurledMediaItem,
-                spoiler: Bool? = nil,
-                name: String? = nil,
-                size: Int? = nil
+                spoiler: Bool? = nil
             ) {
                 self.id = id
                 self.file = file
                 self.spoiler = spoiler
-                self.name = name
-                self.size = size
+                self.name = nil
+                self.size = nil
             }
 
             public func validate() -> [ValidationFailure] {}
