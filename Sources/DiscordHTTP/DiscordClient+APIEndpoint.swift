@@ -761,7 +761,7 @@ extension DiscordClient {
     }
 
     /// https://docs.discord.com/developers/resources/channel#get-pinned-messages
-    @available(*, deprecated, reason: "Deprecated by Discord. Use `listChannelPins(channelId:before:limit:)` instead.")
+    @available(*, deprecated, message: "Deprecated by Discord. Use `listChannelPins(channelId:before:limit:)` instead.")
     @inlinable
     public func listPinnedMessages(
         channelId: ChannelSnowflake
