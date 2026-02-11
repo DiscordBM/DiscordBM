@@ -1,7 +1,7 @@
-/// https://discord.com/developers/docs/resources/user#user-object-user-structure
+/// https://docs.discord.com/developers/resources/user#user-object-user-structure
 public struct DiscordUser: Sendable, Codable {
 
-    /// https://discord.com/developers/docs/resources/user#user-object-premium-types
+    /// https://docs.discord.com/developers/resources/user#user-object-premium-types
     @UnstableEnum<Int>
     public enum PremiumKind: Sendable, Codable {
         case none  // 0
@@ -11,7 +11,7 @@ public struct DiscordUser: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/user#user-object-user-flags
+    /// https://docs.discord.com/developers/resources/user#user-object-user-flags
     #if Non64BitSystemsCompatibility
     @UnstableEnum<UInt64>
     #else
@@ -40,10 +40,50 @@ public struct DiscordUser: Sendable, Codable {
         #endif
     }
 
-    /// https://discord.com/developers/docs/resources/user#avatar-decoration-data-object
+    /// https://docs.discord.com/developers/resources/user#avatar-decoration-data-object
     public struct AvatarDecoration: Sendable, Codable {
         public var asset: String
         public var sku_id: SKUSnowflake
+    }
+
+    /// https://docs.discord.com/developers/resources/user#collectibles
+    public struct Collectibles: Sendable, Codable {
+
+        /// https://docs.discord.com/developers/resources/user#nameplate-nameplate-structure
+        public struct Nameplate: Sendable, Codable {
+
+            /// https://docs.discord.com/developers/resources/user#nameplate-nameplate-structure
+            @UnstableEnum<String>
+            public enum Palette: Sendable, Codable {
+                case crimson
+                case berry
+                case sky
+                case teal
+                case forest
+                case bubble_gum
+                case violet
+                case cobalt
+                case clover
+                case lemon
+                case white
+                case __undocumented(String)
+            }
+
+            public var sku_id: SKUSnowflake
+            public var asset: String
+            public var label: String
+            public var palette: Palette
+        }
+
+        public var nameplate: Nameplate?
+    }
+
+    /// https://docs.discord.com/developers/resources/user#user-object-user-primary-guild
+    public struct PrimaryGuild: Sendable, Codable {
+        public var identity_guild_id: GuildSnowflake?
+        public var identity_enabled: Bool?
+        public var tag: String?
+        public var badge: String?
     }
 
     public var id: UserSnowflake
@@ -65,10 +105,12 @@ public struct DiscordUser: Sendable, Codable {
     @available(*, deprecated, renamed: "avatar_decoration_data")
     public var avatar_decoration: String?
     public var avatar_decoration_data: AvatarDecoration?
+    public var collectibles: Collectibles?
+    public var primary_guild: PrimaryGuild?
 }
 
 /// A partial ``DiscordUser`` object.
-/// https://discord.com/developers/docs/resources/user#user-object-user-structure
+/// https://docs.discord.com/developers/resources/user#user-object-user-structure
 public struct PartialUser: Sendable, Codable {
     public var id: UserSnowflake
     public var username: String?
@@ -89,11 +131,13 @@ public struct PartialUser: Sendable, Codable {
     @available(*, deprecated, renamed: "avatar_decoration_data")
     public var avatar_decoration: String?
     public var avatar_decoration_data: DiscordUser.AvatarDecoration?
+    public var collectibles: DiscordUser.Collectibles?
+    public var primary_guild: DiscordUser.PrimaryGuild?
 }
 
 /// A ``DiscordUser`` with an extra `member` field.
 /// https://discord.com/developers/docs/topics/gateway-events#message-create-message-create-extra-fields
-/// https://discord.com/developers/docs/resources/user#user-object-user-structure
+/// https://docs.discord.com/developers/resources/user#user-object-user-structure
 public struct MentionUser: Sendable, Codable {
     public var id: UserSnowflake
     public var username: String
@@ -114,14 +158,16 @@ public struct MentionUser: Sendable, Codable {
     @available(*, deprecated, renamed: "avatar_decoration_data")
     public var avatar_decoration: String?
     public var avatar_decoration_data: DiscordUser.AvatarDecoration?
+    public var collectibles: DiscordUser.Collectibles?
+    public var primary_guild: DiscordUser.PrimaryGuild?
     public var member: Guild.PartialMember?
 }
 
 extension DiscordUser {
-    /// https://discord.com/developers/docs/resources/user#connection-object-connection-structure
+    /// https://docs.discord.com/developers/resources/user#connection-object-connection-structure
     public struct Connection: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/user#connection-object-services
+        /// https://docs.discord.com/developers/resources/user#connection-object-services
         ///
         /// FIXME: I'm not sure, maybe the values of cases are wrong?
         /// E.g.: `case epicGames`'s value should be just `epicgames` like in the docs?
@@ -156,7 +202,7 @@ extension DiscordUser {
             case __undocumented(String)
         }
 
-        /// https://discord.com/developers/docs/resources/user#connection-object-visibility-types
+        /// https://docs.discord.com/developers/resources/user#connection-object-visibility-types
         @UnstableEnum<Int>
         public enum VisibilityKind: Sendable, Codable {
             case none  // 0
@@ -176,7 +222,7 @@ extension DiscordUser {
         public var visibility: VisibilityKind
     }
 
-    /// https://discord.com/developers/docs/resources/user#application-role-connection-object
+    /// https://docs.discord.com/developers/resources/user#application-role-connection-object
     public struct ApplicationRoleConnection: Sendable, Codable, ValidatablePayload {
         public var platform_name: String?
         public var platform_username: String?

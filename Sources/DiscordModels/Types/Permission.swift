@@ -77,6 +77,21 @@ public struct Role: Sendable, Codable {
         //        public var guild_connections: Null
     }
 
+    /// https://discord.com/developers/docs/topics/permissions#role-object-role-colors-object
+    public struct Colors: Sendable, Codable {
+        public var primary_color: DiscordColor
+        public var secondary_color: DiscordColor?
+        public var tertiary_color: DiscordColor?
+
+        public static var `default`: Colors {
+            Colors(primary_color: 0, secondary_color: nil, tertiary_color: nil)
+        }
+
+        public var isDefault: Bool {
+            self.primary_color.value == 0
+        }
+    }
+
     /// https://discord.com/developers/docs/topics/permissions#role-object-role-flags
     #if Non64BitSystemsCompatibility
     @UnstableEnum<UInt64>
@@ -95,7 +110,9 @@ public struct Role: Sendable, Codable {
     public var id: RoleSnowflake
     public var name: String
     public var description: String?
+    @available(*, deprecated, message: "Deprecated by Discord. Use `colors` instead.")
     public var color: DiscordColor
+    public var colors: Colors?
     public var hoist: Bool
     public var icon: String?
     public var unicode_emoji: String?

@@ -1,4 +1,4 @@
-/// https://discord.com/developers/docs/resources/guild-template#guild-template-object-guild-template-structure
+/// https://docs.discord.com/developers/resources/guild-template#guild-template-object-guild-template-structure
 public struct GuildTemplate: Codable, Sendable {
 
     /// `GuildTemplate` has a weird look.
@@ -12,7 +12,9 @@ public struct GuildTemplate: Codable, Sendable {
         public var id: Int
         public var name: String
         public var description: String?
+        @available(*, deprecated, message: "Deprecated by Discord. Use `colors` instead.")
         public var color: DiscordColor
+        public var colors: DiscordModels.Role.Colors?
         public var hoist: Bool
         public var icon: String?
         public var unicode_emoji: String?
@@ -24,7 +26,7 @@ public struct GuildTemplate: Codable, Sendable {
         public var version: Int?
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
+    /// https://docs.discord.com/developers/resources/guild#guild-object-guild-structure
     /// A partial guild with probably no `id`.
     /// + `system_channel_id` of type integer.
     public struct PartialGuild: Sendable, Codable {

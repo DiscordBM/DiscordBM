@@ -1,14 +1,14 @@
-/// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object
+/// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object
 public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
     @UnstableEnum<Int>
     public enum PrivacyLevel: Sendable, Codable {
         case guildOnly  // 2
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
     @UnstableEnum<Int>
     public enum Status: Sendable, Codable {
         case scheduled  // 1
@@ -18,7 +18,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
     @UnstableEnum<Int>
     public enum EntityKind: Sendable, Codable {
         case stageInstance  // 1
@@ -27,7 +27,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-metadata
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-metadata
     public struct EntityMetadata: Sendable, Codable, ValidatablePayload {
         public var location: String?
 
@@ -40,10 +40,10 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-structure
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-structure
     public struct RecurrenceRule: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-frequency
+        /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-frequency
         @UnstableEnum<Int>
         public enum Frequency: Sendable, Codable {
             case yearly  // 0
@@ -53,7 +53,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
             case __undocumented(Int)
         }
 
-        /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-weekday
+        /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-weekday
         @UnstableEnum<Int>
         public enum Weekday: Sendable, Codable {
             case monday  // 0
@@ -66,7 +66,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
             case __undocumented(Int)
         }
 
-        /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-weekday
+        /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-weekday
         public enum WeekdaySet: Sendable, Codable {
             case mondayToFriday
             case tuesdayToSaturday
@@ -98,7 +98,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
             }
         }
 
-        /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-nweekday-structure
+        /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-nweekday-structure
         public struct NWeekday: Sendable, Codable {
             public var n: Int
             public var day: Weekday
@@ -109,7 +109,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
             }
         }
 
-        /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-month
+        /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-month
         @UnstableEnum<Int>
         public enum Month: Sendable, Codable {
             case january  // 1
@@ -244,7 +244,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
 }
 
 extension GuildScheduledEvent {
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-user-object-guild-scheduled-event-user-structure
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-user-object-guild-scheduled-event-user-structure
     public struct User: Sendable, Codable {
         public var guild_scheduled_event_id: GuildScheduledEventSnowflake
         public var user: DiscordUser

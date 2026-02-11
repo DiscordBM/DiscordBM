@@ -1,11 +1,11 @@
 import Foundation
 
-/// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
+/// https://docs.discord.com/developers/resources/channel#channel-object-channel-structure
 /// The same as what the Discord API docs call "partial channel".
 /// Also the same as a "thread object".
 public struct DiscordChannel: Sendable, Codable {
 
-    /// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
+    /// https://docs.discord.com/developers/resources/channel#channel-object-channel-types
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
         case guildText  // 0
@@ -23,10 +23,10 @@ public struct DiscordChannel: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/channel#overwrite-object
+    /// https://docs.discord.com/developers/resources/channel#overwrite-object
     public struct Overwrite: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/channel#overwrite-object
+        /// https://docs.discord.com/developers/resources/channel#overwrite-object
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case role  // 0
@@ -40,7 +40,7 @@ public struct DiscordChannel: Sendable, Codable {
         public var deny: StringBitField<Permission>
     }
 
-    /// https://discord.com/developers/docs/resources/channel#channel-object-sort-order-types
+    /// https://docs.discord.com/developers/resources/channel#channel-object-sort-order-types
     @UnstableEnum<Int>
     public enum SortOrder: Sendable, Codable {
         case latestActivity  // 0
@@ -48,7 +48,7 @@ public struct DiscordChannel: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types
+    /// https://docs.discord.com/developers/resources/channel#channel-object-forum-layout-types
     @UnstableEnum<Int>
     public enum ForumLayout: Sendable, Codable {
         case notSet  // 0
@@ -57,7 +57,7 @@ public struct DiscordChannel: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
+    /// https://docs.discord.com/developers/resources/channel#channel-object-channel-flags
     #if Non64BitSystemsCompatibility
     @UnstableEnum<UInt64>
     #else
@@ -73,7 +73,7 @@ public struct DiscordChannel: Sendable, Codable {
         #endif
     }
 
-    /// https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
+    /// https://docs.discord.com/developers/resources/channel#channel-object-video-quality-modes
     @UnstableEnum<Int>
     public enum VideoQualityMode: Sendable, Codable {
         case auto  // 1
@@ -83,7 +83,7 @@ public struct DiscordChannel: Sendable, Codable {
 
     /// Not exactly documented, but they do mention these times in a few different places.
     /// Times are in minutes.
-    /// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
+    /// https://docs.discord.com/developers/resources/channel#channel-object-channel-structure
     @UnstableEnum<Int>
     public enum AutoArchiveDuration: Sendable, Codable {
         case oneHour  // 60
@@ -93,7 +93,7 @@ public struct DiscordChannel: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/channel#default-reaction-object-default-reaction-structure
+    /// https://docs.discord.com/developers/resources/channel#default-reaction-object-default-reaction-structure
     public struct DefaultReaction: Sendable, Codable {
         public var emoji_id: EmojiSnowflake?
         public var emoji_name: String?
@@ -109,7 +109,7 @@ public struct DiscordChannel: Sendable, Codable {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
+    /// https://docs.discord.com/developers/resources/channel#forum-tag-object-forum-tag-structure
     public struct ForumTag: Sendable, Codable {
         public var id: ForumTagSnowflake
         public var name: String
@@ -164,13 +164,13 @@ public struct DiscordChannel: Sendable, Codable {
 }
 
 extension DiscordChannel {
-    /// https://discord.com/developers/docs/resources/message#message-object
+    /// https://docs.discord.com/developers/resources/message#message-object
     public struct Message: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/message#message-reference-object-message-reference-structure
+        /// https://docs.discord.com/developers/resources/message#message-reference-object-message-reference-structure
         public struct MessageReference: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/message#message-reference-types
+            /// https://docs.discord.com/developers/resources/message#message-reference-types
             @UnstableEnum<Int>
             public enum Kind: Sendable, Codable {
                 case `default`  // 0
@@ -199,7 +199,13 @@ extension DiscordChannel {
             }
         }
 
-        /// https://discord.com/developers/docs/resources/message#message-object-message-types
+        /// https://docs.discord.com/developers/resources/message#message-pin-object
+        public struct Pin: Sendable, Codable {
+            public var pinned_at: DiscordTimestamp
+            public var message: DiscordChannel.Message
+        }
+
+        /// https://docs.discord.com/developers/resources/message#message-object-message-types
         @UnstableEnum<Int>
         public enum Kind: Sendable, Codable {
             case `default`  // 0
@@ -242,7 +248,7 @@ extension DiscordChannel {
             case __undocumented(Int)
         }
 
-        /// https://discord.com/developers/docs/resources/message#message-object-message-flags
+        /// https://docs.discord.com/developers/resources/message#message-object-message-flags
         #if Non64BitSystemsCompatibility
         @UnstableEnum<UInt64>
         #else
@@ -269,7 +275,7 @@ extension DiscordChannel {
             #endif
         }
 
-        /// https://discord.com/developers/docs/resources/message#channel-mention-object
+        /// https://docs.discord.com/developers/resources/message#channel-mention-object
         public struct ChannelMention: Sendable, Codable {
             public var id: ChannelSnowflake
             public var guild_id: GuildSnowflake
@@ -277,10 +283,10 @@ extension DiscordChannel {
             public var name: String
         }
 
-        /// https://discord.com/developers/docs/resources/message#attachment-object
+        /// https://docs.discord.com/developers/resources/message#attachment-object
         public struct Attachment: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/message#attachment-object-attachment-flags
+            /// https://docs.discord.com/developers/resources/message#attachment-object-attachment-flags
             #if Non64BitSystemsCompatibility
             @UnstableEnum<UInt64>
             #else
@@ -311,10 +317,10 @@ extension DiscordChannel {
             public var flags: IntBitField<Flag>?
         }
 
-        /// https://discord.com/developers/docs/resources/message#reaction-object
+        /// https://docs.discord.com/developers/resources/message#reaction-object
         public struct Reaction: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/message#reaction-object-reaction-count-details-structure
+            /// https://docs.discord.com/developers/resources/message#reaction-object-reaction-count-details-structure
             public struct CountDetails: Sendable, Codable {
                 public var burst: Int
                 public var normal: Int
@@ -396,10 +402,10 @@ extension DiscordChannel {
             }
         }
 
-        /// https://discord.com/developers/docs/resources/message#message-object-message-activity-structure
+        /// https://docs.discord.com/developers/resources/message#message-object-message-activity-structure
         public struct Activity: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/message#message-object-message-activity-types
+            /// https://docs.discord.com/developers/resources/message#message-object-message-activity-types
             @UnstableEnum<Int>
             public enum Kind: Sendable, Codable {
                 case join  // 1
@@ -414,7 +420,7 @@ extension DiscordChannel {
             public var party_id: String?
         }
 
-        /// https://discord.com/developers/docs/resources/message#message-interaction-metadata-object-application-command-interaction-metadata-structure
+        /// https://docs.discord.com/developers/resources/message#message-interaction-metadata-object-application-command-interaction-metadata-structure
         public struct InteractionMetadata: Sendable, Codable {
             public var id: InteractionSnowflake
             public var type: Interaction.Kind
@@ -425,13 +431,13 @@ extension DiscordChannel {
             public var target_message_id: MessageSnowflake?
         }
 
-        /// https://discord.com/developers/docs/resources/message#message-call-object-message-call-object-structure
+        /// https://docs.discord.com/developers/resources/message#message-call-object-message-call-object-structure
         public struct Call: Sendable, Codable {
             public var participants: [UserSnowflake]
             public var ended_timestamp: DiscordTimestamp?
         }
 
-        /// https://discord.com/developers/docs/resources/message#message-snapshot-structure
+        /// https://docs.discord.com/developers/resources/message#message-snapshot-structure
         public struct MessageSnapshot: Sendable, Codable {
             public var message: PartialMessage
         }
@@ -525,7 +531,7 @@ extension DiscordChannel {
     }
 }
 
-/// https://discord.com/developers/docs/resources/channel#thread-metadata-object-thread-metadata-structure
+/// https://docs.discord.com/developers/resources/channel#thread-metadata-object-thread-metadata-structure
 public struct ThreadMetadata: Sendable, Codable {
     public var archived: Bool
     public var auto_archive_duration: DiscordChannel.AutoArchiveDuration
@@ -535,7 +541,7 @@ public struct ThreadMetadata: Sendable, Codable {
     public var create_timestamp: DiscordTimestamp?
 }
 
-/// https://discord.com/developers/docs/resources/channel#thread-member-object-thread-member-structure
+/// https://docs.discord.com/developers/resources/channel#thread-member-object-thread-member-structure
 public struct ThreadMember: Sendable, Codable {
     public var id: ChannelSnowflake?
     public var user_id: UserSnowflake?
@@ -556,7 +562,7 @@ public struct ThreadMember: Sendable, Codable {
 }
 
 /// For a limited amount of endpoints which return the `member` object too.
-/// https://discord.com/developers/docs/resources/channel#thread-member-object-thread-member-structure
+/// https://docs.discord.com/developers/resources/channel#thread-member-object-thread-member-structure
 public struct ThreadMemberWithMember: Sendable, Codable {
     public var id: ChannelSnowflake?
     public var user_id: UserSnowflake?
@@ -571,7 +577,7 @@ public struct ThreadMemberWithMember: Sendable, Codable {
 }
 
 /// Thread-related subset of `DiscordChannel.Kind`
-/// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
+/// https://docs.discord.com/developers/resources/channel#channel-object-channel-types
 @UnstableEnum<Int>
 public enum ThreadKind: Sendable, Codable {
     case announcementThread  // 10
@@ -581,10 +587,10 @@ public enum ThreadKind: Sendable, Codable {
 }
 
 extension DiscordChannel {
-    /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
+    /// https://docs.discord.com/developers/resources/channel#allowed-mentions-object
     public struct AllowedMentions: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
+        /// https://docs.discord.com/developers/resources/channel#allowed-mentions-object-allowed-mention-types
         @UnstableEnum<String>
         public enum Kind: Sendable, Codable {
             case roles
@@ -600,10 +606,10 @@ extension DiscordChannel {
     }
 }
 
-/// https://discord.com/developers/docs/resources/channel#embed-object
+/// https://docs.discord.com/developers/resources/channel#embed-object
 public struct Embed: Sendable, Codable, ValidatablePayload {
 
-    /// https://discord.com/developers/docs/resources/message#embed-object-embed-types
+    /// https://docs.discord.com/developers/resources/message#embed-object-embed-types
     @UnstableEnum<String>
     public enum Kind: Sendable, Codable {
         case rich  // "rich"
@@ -661,7 +667,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-footer-structure
+    /// https://docs.discord.com/developers/resources/channel#embed-object-embed-footer-structure
     public struct Footer: Sendable, Codable {
         public var text: String
         public var icon_url: DynamicURL?
@@ -674,7 +680,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-image-structure
+    /// https://docs.discord.com/developers/resources/channel#embed-object-embed-image-structure
     public struct Media: Sendable, Codable {
         public var url: DynamicURL
         public var proxy_url: String?
@@ -689,7 +695,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-provider-structure
+    /// https://docs.discord.com/developers/resources/channel#embed-object-embed-provider-structure
     public struct Provider: Sendable, Codable {
         public var name: String?
         public var url: String?
@@ -700,7 +706,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-author-structure
+    /// https://docs.discord.com/developers/resources/channel#embed-object-embed-author-structure
     public struct Author: Sendable, Codable {
         public var name: String
         public var url: String?
@@ -715,7 +721,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#embed-object-embed-field-structure
+    /// https://docs.discord.com/developers/resources/channel#embed-object-embed-field-structure
     public struct Field: Sendable, Codable {
         public var name: String
         public var value: String
@@ -795,7 +801,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
     }
 }
 
-/// https://discord.com/developers/docs/resources/channel#role-subscription-data-object-role-subscription-data-object-structure
+/// https://docs.discord.com/developers/resources/channel#role-subscription-data-object-role-subscription-data-object-structure
 public struct RoleSubscriptionData: Sendable, Codable {
     // FIXME: use `Snowflake<Type>` instead
     public var role_subscription_listing_id: AnySnowflake

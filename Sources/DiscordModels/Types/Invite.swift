@@ -1,4 +1,4 @@
-/// https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
+/// https://docs.discord.com/developers/resources/invite#invite-object-invite-structure
 public struct Invite: Sendable, Codable {
 
     @UnstableEnum<Int>
@@ -9,12 +9,27 @@ public struct Invite: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
+    /// https://docs.discord.com/developers/resources/invite#invite-object-invite-target-types
     @UnstableEnum<Int>
     public enum TargetKind: Sendable, Codable {
         case stream  // 1
         case embeddedApplication  // 2
         case __undocumented(Int)
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#invite-object-guild-invite-flags
+    #if Non64BitSystemsCompatibility
+    @UnstableEnum<UInt64>
+    #else
+    @UnstableEnum<UInt>
+    #endif
+    public enum Flag: Sendable {
+        case isGuestInvite  // 0
+        #if Non64BitSystemsCompatibility
+        case __undocumented(UInt64)
+        #else
+        case __undocumented(UInt)
+        #endif
     }
 
     public var type: Kind
@@ -29,10 +44,11 @@ public struct Invite: Sendable, Codable {
     public var approximate_member_count: Int?
     public var expires_at: DiscordTimestamp?
     public var guild_scheduled_event: GuildScheduledEvent?
+    public var flags: IntBitField<Flag>?
 }
 
-/// https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
-/// https://discord.com/developers/docs/resources/invite#invite-metadata-object-invite-metadata-structure
+/// https://docs.discord.com/developers/resources/invite#invite-object-invite-structure
+/// https://docs.discord.com/developers/resources/invite#invite-metadata-object-invite-metadata-structure
 public struct InviteWithMetadata: Sendable, Codable {
     public var type: Invite.Kind
     public var code: String
@@ -46,6 +62,7 @@ public struct InviteWithMetadata: Sendable, Codable {
     public var approximate_member_count: Int?
     public var expires_at: DiscordTimestamp?
     public var guild_scheduled_event: GuildScheduledEvent?
+    public var flags: IntBitField<Invite.Flag>?
     public var uses: Int
     public var max_uses: Int
     public var max_age: Int
@@ -53,7 +70,7 @@ public struct InviteWithMetadata: Sendable, Codable {
     public var created_at: DiscordTimestamp
 }
 
-/// https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
+/// https://docs.discord.com/developers/resources/invite#invite-object-invite-structure
 public struct PartialInvite: Sendable, Codable {
     public var type: Invite.Kind?
     public var code: String?
@@ -67,4 +84,5 @@ public struct PartialInvite: Sendable, Codable {
     public var approximate_member_count: Int?
     public var expires_at: DiscordTimestamp?
     public var guild_scheduled_event: GuildScheduledEvent?
+    public var flags: IntBitField<Invite.Flag>?
 }

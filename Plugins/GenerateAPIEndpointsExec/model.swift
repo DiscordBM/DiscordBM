@@ -156,55 +156,55 @@ struct API: Decodable {
                 var link: String {
                     switch self {
                     case .polls:
-                        return "https://discord.com/developers/docs/resources/poll"
+                        return "https://docs.discord.com/developers/resources/poll"
                     case .autoMod:
-                        return "https://discord.com/developers/docs/resources/auto-moderation"
+                        return "https://docs.discord.com/developers/resources/auto-moderation"
                     case .auditLog:
-                        return "https://discord.com/developers/docs/resources/audit-log"
+                        return "https://docs.discord.com/developers/resources/audit-log"
                     case .channels:
-                        return "https://discord.com/developers/docs/resources/channel"
+                        return "https://docs.discord.com/developers/resources/channel"
                     case .commands:
                         return "https://discord.com/developers/docs/interactions/application-commands"
                     case .emoji:
-                        return "https://discord.com/developers/docs/resources/emoji"
+                        return "https://docs.discord.com/developers/resources/emoji"
                     case .entitlements:
                         return "https://discord.com/developers/docs/monetization/entitlements"
                     case .gateway:
                         return "https://discord.com/developers/docs/topics/gateway"
                     case .guilds:
-                        return "https://discord.com/developers/docs/resources/guild"
+                        return "https://docs.discord.com/developers/resources/guild"
                     case .guildTemplates:
-                        return "https://discord.com/developers/docs/resources/guild-template"
+                        return "https://docs.discord.com/developers/resources/guild-template"
                     case .interactions:
                         return "https://discord.com/developers/docs/interactions/receiving-and-responding"
                     case .invites:
-                        return "https://discord.com/developers/docs/resources/invite"
+                        return "https://docs.discord.com/developers/resources/invite"
                     case .members:
-                        return "https://discord.com/developers/docs/resources/guild"
+                        return "https://docs.discord.com/developers/resources/guild"
                     case .messages:
-                        return "https://discord.com/developers/docs/resources/channel"
+                        return "https://docs.discord.com/developers/resources/channel"
                     case .oAuth:
                         return "https://discord.com/developers/docs/topics/oauth2"
                     case .roles:
-                        return "https://discord.com/developers/docs/resources/guild"
+                        return "https://docs.discord.com/developers/resources/guild"
                     case .roleConnections:
-                        return "https://discord.com/developers/docs/resources/user"
+                        return "https://docs.discord.com/developers/resources/user"
                     case .scheduledEvents:
-                        return "https://discord.com/developers/docs/resources/guild-scheduled-event"
+                        return "https://docs.discord.com/developers/resources/guild-scheduled-event"
                     case .skus:
                         return "https://discord.com/developers/docs/monetization/skus"
                     case .stages:
-                        return "https://discord.com/developers/docs/resources/stage-instance"
+                        return "https://docs.discord.com/developers/resources/stage-instance"
                     case .stickers:
-                        return "https://discord.com/developers/docs/resources/sticker"
+                        return "https://docs.discord.com/developers/resources/sticker"
                     case .threads:
-                        return "https://discord.com/developers/docs/resources/channel"
+                        return "https://docs.discord.com/developers/resources/channel"
                     case .users:
-                        return "https://discord.com/developers/docs/resources/user"
+                        return "https://docs.discord.com/developers/resources/user"
                     case .voice:
-                        return "https://discord.com/developers/docs/resources/voice#list-voice-regions"
+                        return "https://docs.discord.com/developers/resources/voice#list-voice-regions"
                     case .webhooks:
-                        return "https://discord.com/developers/docs/resources/webhook"
+                        return "https://docs.discord.com/developers/resources/webhook"
                     }
                 }
             }

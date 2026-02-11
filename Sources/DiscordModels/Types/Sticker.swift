@@ -1,7 +1,7 @@
-/// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-structure
+/// https://docs.discord.com/developers/resources/sticker#sticker-object-sticker-structure
 public struct Sticker: Sendable, Codable {
 
-    /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types
+    /// https://docs.discord.com/developers/resources/sticker#sticker-object-sticker-types
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
         case standard  // 1
@@ -9,7 +9,7 @@ public struct Sticker: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-format-types
+    /// https://docs.discord.com/developers/resources/sticker#sticker-object-sticker-format-types
     @UnstableEnum<Int>
     public enum FormatKind: Sendable, Codable {
         case png  // 1
@@ -41,14 +41,14 @@ public struct Sticker: Sendable, Codable {
     public var sort_value: Int?
 }
 
-/// https://discord.com/developers/docs/resources/sticker#sticker-item-object
+/// https://docs.discord.com/developers/resources/sticker#sticker-item-object
 public struct StickerItem: Sendable, Codable {
     public var id: StickerSnowflake
     public var name: String
     public var format_type: Sticker.FormatKind
 }
 
-/// https://discord.com/developers/docs/resources/sticker#sticker-pack-object-sticker-pack-structure
+/// https://docs.discord.com/developers/resources/sticker#sticker-pack-object-sticker-pack-structure
 public struct StickerPack: Sendable, Codable {
     public var id: StickerPackSnowflake
     public var stickers: [Sticker]

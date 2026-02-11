@@ -612,7 +612,7 @@ paths:
               schema:
                 type: string
               example: ""
-  /channels/{channel_id}/pins/{message_id}:
+  /channels/{channel_id}/messages/pins/{message_id}:
     put:
       tags:
         - Channels
@@ -660,6 +660,42 @@ paths:
           description: "(Required) "
           example: <snowflake>
         - name: message_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
+  /channels/{channel_id}/messages/pins:
+    get:
+      tags:
+        - Channels
+      summary: list channel pins
+      parameters:
+        - name: before
+          in: query
+          schema:
+            type: string
+          example: <string,null-iso8601 timestamp>
+        - name: limit
+          in: query
+          schema:
+            type: string
+          example: <integer,null>
+        - name: channel_id
           in: path
           schema:
             type: string
@@ -2315,42 +2351,6 @@ paths:
               schema:
                 type: string
               example: ""
-  /users/@me/guilds:
-    get:
-      tags:
-        - Guilds
-      summary: list own guilds
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: before
-          in: query
-          schema:
-            type: string
-          example: <string,null-snowflake>
-        - name: after
-          in: query
-          schema:
-            type: string
-          example: <string,null-snowflake>
-        - name: limit
-          in: query
-          schema:
-            type: string
-          example: <integer,null>
-      responses:
-        "200":
-          description: OK
-          headers:
-            Content-Type:
-              schema:
-                type: string
-                example: text/plain
-          content:
-            text/plain:
-              schema:
-                type: string
-              example: ""
   /guilds:
     post:
       tags:
@@ -2386,6 +2386,42 @@ paths:
           schema:
             type: string
           example: application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
+  /users/@me/guilds:
+    get:
+      tags:
+        - Guilds
+      summary: list own guilds
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: before
+          in: query
+          schema:
+            type: string
+          example: <string,null-snowflake>
+        - name: after
+          in: query
+          schema:
+            type: string
+          example: <string,null-snowflake>
+        - name: limit
+          in: query
+          schema:
+            type: string
+          example: <integer,null>
       responses:
         "200":
           description: OK

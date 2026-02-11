@@ -1,40 +1,46 @@
 public enum Responses {
 
-    /// https://discord.com/developers/docs/resources/emoji#list-application-emojis
+    /// https://docs.discord.com/developers/resources/emoji#list-application-emojis
     public struct ListApplicationEmojis: Sendable, Codable {
         public var items: [Emoji]
     }
 
-    /// https://discord.com/developers/docs/resources/channel#list-public-archived-threads-response-body
+    /// https://docs.discord.com/developers/resources/channel#list-public-archived-threads-response-body
     public struct ListArchivedThreads: Sendable, Codable {
         public var threads: [DiscordChannel]
         public var members: [ThreadMember]
         public var has_more: Bool
     }
 
-    /// https://discord.com/developers/docs/resources/guild#list-active-guild-threads-response-body
+    /// https://docs.discord.com/developers/resources/guild#list-active-guild-threads-response-body
     public struct ListActiveGuildThreads: Sendable, Codable {
         public var threads: [DiscordChannel]
         public var members: [ThreadMember]
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs-response-structure
+    /// https://docs.discord.com/developers/resources/message#get-channel-pins
+    public struct ListMessagePins: Sendable, Codable {
+        public var items: [DiscordChannel.Message.Pin]
+        public var has_more: Bool
+    }
+
+    /// https://docs.discord.com/developers/resources/sticker#list-nitro-sticker-packs-response-structure
     public struct ListStickerPacks: Sendable, Codable {
         public var sticker_packs: [StickerPack]
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-prune-count
+    /// https://docs.discord.com/developers/resources/guild#get-guild-prune-count
     public struct GuildPrune: Sendable, Codable {
         public var pruned: Int
     }
 
-    /// https://discord.com/developers/docs/resources/guild#bulk-guild-ban-bulk-ban-response
+    /// https://docs.discord.com/developers/resources/guild#bulk-guild-ban-bulk-ban-response
     public struct GuildBulkBan: Sendable, Codable {
         public var banned_users: [UserSnowflake]
         public var failed_users: [UserSnowflake]
     }
 
-    /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-or-media-channel
+    /// https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel
     public struct ChannelWithMessage: Sendable, Codable {
         public var channel: DiscordChannel
         public var message: DiscordChannel.Message
@@ -58,12 +64,12 @@ public enum Responses {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/poll#get-answer-voters-response-body
+    /// https://docs.discord.com/developers/resources/poll#get-answer-voters-response-body
     public struct ListPollAnswerVoters: Sendable, Codable {
         public var users: [DiscordUser]
     }
 
-    /// https://discord.com/developers/docs/resources/soundboard#list-guild-soundboard-sounds
+    /// https://docs.discord.com/developers/resources/soundboard#list-guild-soundboard-sounds
     public struct ListGuildSoundboardSounds: Sendable, Codable {
         public var items: [SoundboardSound]
     }

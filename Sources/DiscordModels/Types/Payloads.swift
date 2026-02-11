@@ -7,7 +7,7 @@ import NIOFoundationCompat
 /// unless we actually need them to be `Decodable` as well.
 public enum Payloads {
     /// An attachment object, but for sending.
-    /// https://discord.com/developers/docs/resources/channel#attachment-object
+    /// https://docs.discord.com/developers/resources/channel#attachment-object
     public struct Attachment: Sendable, Encodable, ValidatablePayload {
         /// When sending, `id` is the index of this attachment in the `files` you provide.
         public var id: String
@@ -55,7 +55,7 @@ public enum Payloads {
     }
 
     /// A allowed-mentions object, but for sending.
-    /// https://discord.com/developers/docs/resources/channel#allowed-mentions-object
+    /// https://docs.discord.com/developers/resources/channel#allowed-mentions-object
     public struct AllowedMentions: Sendable, Codable, ValidatablePayload {
         public var parse: [DiscordChannel.AllowedMentions.Kind]?
         public var roles: [RoleSnowflake]?
@@ -171,10 +171,17 @@ public enum Payloads {
                     flags,
                     name: "flags",
                     reason:
-                        "Can only contain 'suppressEmbeds', 'ephemeral', 'suppressNotifications', and 'isComponentsV2'",
-                    allowed: [.suppressEmbeds, .ephemeral, .suppressNotifications, .isComponentsV2]
+                        "Can only contain 'suppressEmbeds', 'ephemeral', 'suppressNotifications', 'isVoiceMessage', and 'isComponentsV2'",
+                    allowed: [
+                        .suppressEmbeds,
+                        .ephemeral,
+                        .suppressNotifications,
+                        .isVoiceMessage,
+                        .isComponentsV2,
+                    ]
                 )
                 validateComponentsV2Payload(
+                    components: components,
                     flags: flags,
                     hasContent: !(content?.isEmpty ?? true),
                     hasEmbeds: !(embeds?.isEmpty ?? true),
@@ -420,7 +427,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#create-message-jsonform-params
+    /// https://docs.discord.com/developers/resources/channel#create-message-jsonform-params
     public struct CreateMessage: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var nonce: StringOrInt?
@@ -509,10 +516,12 @@ public enum Payloads {
             validateOnlyContains(
                 flags,
                 name: "flags",
-                reason: "Can only contain 'suppressEmbeds', 'suppressNotifications', or 'isComponentsV2'",
-                allowed: [.suppressEmbeds, .suppressNotifications, .isComponentsV2]
+                reason:
+                    "Can only contain 'suppressEmbeds', 'suppressNotifications', 'isVoiceMessage', or 'isComponentsV2'",
+                allowed: [.suppressEmbeds, .suppressNotifications, .isVoiceMessage, .isComponentsV2]
             )
             validateComponentsV2Payload(
+                components: components,
                 flags: flags,
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
@@ -526,7 +535,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#edit-message-jsonform-params
+    /// https://docs.discord.com/developers/resources/channel#edit-message-jsonform-params
     public struct EditMessage: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var embeds: [Embed]?
@@ -578,6 +587,7 @@ public enum Payloads {
                 allowed: [.suppressEmbeds, .isComponentsV2]
             )
             validateComponentsV2Payload(
+                components: components,
                 flags: flags,
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
@@ -591,7 +601,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/webhook#execute-webhook-jsonform-params
+    /// https://docs.discord.com/developers/resources/webhook#execute-webhook-jsonform-params
     public struct ExecuteWebhook: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var username: String?
@@ -679,6 +689,7 @@ public enum Payloads {
                 allowed: [.suppressEmbeds, .suppressNotifications, .isComponentsV2]
             )
             validateComponentsV2Payload(
+                components: components,
                 flags: flags,
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
@@ -693,7 +704,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/webhook#create-webhook-json-params
+    /// https://docs.discord.com/developers/resources/webhook#create-webhook-json-params
     public struct CreateWebhook: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var avatar: ImageData?
@@ -714,7 +725,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
+    /// https://docs.discord.com/developers/resources/webhook#modify-webhook-with-token
     public struct ModifyWebhook: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var avatar: ImageData?
@@ -727,7 +738,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/webhook#modify-webhook-json-params
+    /// https://docs.discord.com/developers/resources/webhook#modify-webhook-json-params
     public struct ModifyGuildWebhook: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var avatar: ImageData?
@@ -742,7 +753,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/webhook#edit-webhook-message-jsonform-params
+    /// https://docs.discord.com/developers/resources/webhook#edit-webhook-message-jsonform-params
     public struct EditWebhookMessage: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var embeds: [Embed]?
@@ -853,7 +864,7 @@ public enum Payloads {
 
     public struct CreateThreadInForumChannel: Sendable, MultipartEncodable, ValidatablePayload {
 
-        /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel-forum-thread-message-params-object
+        /// https://docs.discord.com/developers/resources/channel#start-thread-in-forum-channel-forum-thread-message-params-object
         public struct ForumMessage: Sendable, MultipartEncodable, ValidatablePayload {
             public var content: String?
             public var embeds: [Embed]?
@@ -929,6 +940,7 @@ public enum Payloads {
                     allowed: [.suppressEmbeds, .suppressNotifications, .isComponentsV2]
                 )
                 validateComponentsV2Payload(
+                    components: components,
                     flags: flags,
                     hasContent: !(content?.isEmpty ?? true),
                     hasEmbeds: !(embeds?.isEmpty ?? true),
@@ -1111,7 +1123,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/channel#modify-channel-json-params-group-dm
+    /// https://docs.discord.com/developers/resources/channel#modify-channel-json-params-group-dm
     public struct ModifyGroupDMChannel: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var icon: ImageData?
@@ -1126,7 +1138,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#overwrite-object
+    /// https://docs.discord.com/developers/resources/channel#overwrite-object
     public struct PartialChannelOverwrite: Sendable, Encodable {
         public var id: AnySnowflake
         public var type: DiscordChannel.Overwrite.Kind
@@ -1146,7 +1158,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#forum-tag-object-forum-tag-structure
+    /// https://docs.discord.com/developers/resources/channel#forum-tag-object-forum-tag-structure
     public struct PartialForumTag: Sendable, Encodable, ValidatablePayload {
         public var id: ForumTagSnowflake?
         public var name: String
@@ -1174,7 +1186,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#modify-channel-json-params-guild-channel
+    /// https://docs.discord.com/developers/resources/channel#modify-channel-json-params-guild-channel
     public struct ModifyGuildChannel: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var type: DiscordChannel.Kind?
@@ -1260,7 +1272,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#modify-channel-json-params-thread
+    /// https://docs.discord.com/developers/resources/channel#modify-channel-json-params-thread
     public struct ModifyThreadChannel: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var archived: Bool?
@@ -1310,7 +1322,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild#create-guild-channel-json-params
+    /// https://docs.discord.com/developers/resources/guild#create-guild-channel-json-params
     public struct CreateGuildChannel: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var type: DiscordChannel.Kind?
@@ -1439,6 +1451,7 @@ public enum Payloads {
         public var afk_channel_id: ChannelSnowflake?
         public var afk_timeout: Guild.AFKTimeout?
         public var icon: ImageData?
+        @available(*, deprecated, message: "Deprecated by Discord. Bots no longer can modify guild owner.")
         public var owner_id: UserSnowflake?
         public var splash: ImageData?
         public var discovery_splash: ImageData?
@@ -1452,6 +1465,12 @@ public enum Payloads {
         public var description: String?
         public var premium_progress_bar_enabled: Bool?
 
+        @available(
+            *,
+            deprecated,
+            message: "Deprecated by Discord. Avoid passing `owner_id`: Bots no longer can modify guild owner."
+        )
+        @_disfavoredOverload
         public init(
             name: String? = nil,
             verification_level: Guild.VerificationLevel? = nil,
@@ -1480,7 +1499,48 @@ public enum Payloads {
             self.afk_channel_id = afk_channel_id
             self.afk_timeout = afk_timeout
             self.icon = icon
-            self.owner_id = owner_id
+            self.owner_id = nil
+            self.splash = splash
+            self.discovery_splash = discovery_splash
+            self.banner = banner
+            self.system_channel_id = system_channel_id
+            self.system_channel_flags = system_channel_flags
+            self.rules_channel_id = rules_channel_id
+            self.public_updates_channel_id = public_updates_channel_id
+            self.preferred_locale = preferred_locale
+            self.features = features
+            self.description = description
+            self.premium_progress_bar_enabled = premium_progress_bar_enabled
+        }
+
+        public init(
+            name: String? = nil,
+            verification_level: Guild.VerificationLevel? = nil,
+            default_message_notifications: Guild.DefaultMessageNotificationLevel? = nil,
+            explicit_content_filter: Guild.ExplicitContentFilterLevel? = nil,
+            afk_channel_id: ChannelSnowflake? = nil,
+            afk_timeout: Guild.AFKTimeout? = nil,
+            icon: ImageData? = nil,
+            splash: ImageData? = nil,
+            discovery_splash: ImageData? = nil,
+            banner: ImageData? = nil,
+            system_channel_id: ChannelSnowflake? = nil,
+            system_channel_flags: IntBitField<Guild.SystemChannelFlag>? = nil,
+            rules_channel_id: ChannelSnowflake? = nil,
+            public_updates_channel_id: ChannelSnowflake? = nil,
+            preferred_locale: DiscordLocale? = nil,
+            features: [Guild.Feature]? = nil,
+            description: String? = nil,
+            premium_progress_bar_enabled: Bool? = nil
+        ) {
+            self.name = name
+            self.verification_level = verification_level
+            self.default_message_notifications = default_message_notifications
+            self.explicit_content_filter = explicit_content_filter
+            self.afk_channel_id = afk_channel_id
+            self.afk_timeout = afk_timeout
+            self.icon = icon
+            self.owner_id = nil
             self.splash = splash
             self.discovery_splash = discovery_splash
             self.banner = banner
@@ -1499,7 +1559,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-incident-actions
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-incident-actions
     public struct ModifyGuildIncidentActions: Sendable, Encodable, ValidatablePayload {
         public var invites_disabled_until: DiscordTimestamp?
         public var dms_disabled_until: DiscordTimestamp?
@@ -1515,7 +1575,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#create-auto-moderation-rule-json-params
+    /// https://docs.discord.com/developers/resources/auto-moderation#create-auto-moderation-rule-json-params
     public struct CreateAutoModerationRule: Sendable, Codable, ValidatablePayload {
         public var name: String
         public var event_type: AutoModerationRule.EventKind
@@ -1552,7 +1612,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/auto-moderation#modify-auto-moderation-rule
+    /// https://docs.discord.com/developers/resources/auto-moderation#modify-auto-moderation-rule
     public struct ModifyAutoModerationRule: Sendable, Codable, ValidatablePayload {
         public var name: String?
         public var event_type: AutoModerationRule.EventKind?
@@ -1589,7 +1649,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#bulk-delete-messages-json-params
+    /// https://docs.discord.com/developers/resources/channel#bulk-delete-messages-json-params
     public struct BulkDeleteMessages: Sendable, Codable, ValidatablePayload {
         public var messages: [MessageSnowflake]
 
@@ -1602,7 +1662,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#edit-channel-permissions-json-params
+    /// https://docs.discord.com/developers/resources/channel#edit-channel-permissions-json-params
     public struct EditChannelPermissions: Sendable, Codable, ValidatablePayload {
         public var type: DiscordChannel.Overwrite.Kind
         public var allow: StringBitField<Permission>?
@@ -1644,7 +1704,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#create-channel-invite-json-params
+    /// https://docs.discord.com/developers/resources/channel#create-channel-invite-json-params
     public struct CreateChannelInvite: Sendable, Encodable, ValidatablePayload {
         public var max_age: Count?
         public var max_uses: Count?
@@ -1704,7 +1764,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/channel#follow-announcement-channel-json-params
+    /// https://docs.discord.com/developers/resources/channel#follow-announcement-channel-json-params
     public struct FollowAnnouncementChannel: Sendable, Encodable, ValidatablePayload {
         public var webhook_channel_id: ChannelSnowflake
 
@@ -1715,7 +1775,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/channel#group-dm-add-recipient-json-params
+    /// https://docs.discord.com/developers/resources/channel#group-dm-add-recipient-json-params
     public struct AddGroupDMUser: Sendable, Encodable, ValidatablePayload {
         public var access_token: String
         public var nick: String
@@ -1728,7 +1788,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#create-guild-emoji-json-params
+    /// https://docs.discord.com/developers/resources/emoji#create-guild-emoji-json-params
     public struct CreateGuildEmoji: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var image: ImageData
@@ -1743,7 +1803,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#create-application-emoji-json-params
+    /// https://docs.discord.com/developers/resources/emoji#create-application-emoji-json-params
     public struct CreateApplicationEmoji: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var image: ImageData
@@ -1756,7 +1816,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#create-guild-emoji-json-params
+    /// https://docs.discord.com/developers/resources/emoji#create-guild-emoji-json-params
     public struct ModifyGuildEmoji: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var roles: [RoleSnowflake]
@@ -1769,7 +1829,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/emoji#modify-application-emoji-json-params
+    /// https://docs.discord.com/developers/resources/emoji#modify-application-emoji-json-params
     public struct ModifyApplicationEmoji: Sendable, Encodable, ValidatablePayload {
         public var name: String
 
@@ -1780,7 +1840,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-channel-positions-json-params
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-channel-positions-json-params
     public struct ModifyGuildChannelPositions: Sendable, Encodable, ValidatablePayload {
         public var id: ChannelSnowflake
         public var position: Int?
@@ -1802,7 +1862,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild#add-guild-member-json-params
+    /// https://docs.discord.com/developers/resources/guild#add-guild-member-json-params
     public struct AddGuildMember: Sendable, Encodable, ValidatablePayload {
         public var access_token: String
         public var nick: String?
@@ -1827,7 +1887,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-member-json-params
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-member-json-params
     public struct ModifyGuildMember: Sendable, Encodable, ValidatablePayload {
         public var nick: String?
         public var roles: [RoleSnowflake]?
@@ -1866,7 +1926,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-current-member-json-params
+    /// https://docs.discord.com/developers/resources/guild#modify-current-member-json-params
     public struct ModifyCurrentMember: Sendable, Encodable, ValidatablePayload {
         public var nick: String?
 
@@ -1877,7 +1937,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild#create-guild-ban-json-params
+    /// https://docs.discord.com/developers/resources/guild#create-guild-ban-json-params
     public struct CreateGuildBan: Sendable, Encodable, ValidatablePayload {
         public var delete_message_seconds: Int?
 
@@ -1890,7 +1950,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild#bulk-guild-ban-json-params
+    /// https://docs.discord.com/developers/resources/guild#bulk-guild-ban-json-params
     public struct CreateBulkGuildBan: Sendable, Encodable, ValidatablePayload {
         public var user_ids: [UserSnowflake]
         public var delete_message_seconds: Int?
@@ -1906,12 +1966,14 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-role-json-params
+    /// https://docs.discord.com/developers/resources/guild#create-guild-role-json-params
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-role-json-params
     public struct GuildRole: Sendable, Codable, ValidatablePayload {
         public var name: String?
         public var permissions: StringBitField<Permission>?
+        @available(*, deprecated, message: "Deprecated by Discord. Use `colors` instead.")
         public var color: DiscordColor?
+        public var colors: DiscordModels.Role.Colors?
         public var hoist: Bool?
         public var icon: ImageData?
         public var unicode_emoji: String?
@@ -1925,6 +1987,7 @@ public enum Payloads {
             name: String? = nil,
             permissions: StringBitField<Permission>? = nil,
             color: DiscordColor? = nil,
+            colors: DiscordModels.Role.Colors? = nil,
             hoist: Bool? = nil,
             icon: ImageData? = nil,
             unicode_emoji: String? = nil,
@@ -1933,6 +1996,7 @@ public enum Payloads {
             self.name = name
             self.permissions = permissions
             self.color = color
+            self.colors = colors
             self.hoist = hoist
             self.icon = icon
             self.unicode_emoji = unicode_emoji
@@ -1944,7 +2008,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-role-positions-json-params
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-role-positions-json-params
     public struct ModifyGuildRolePositions: Sendable, Encodable, ValidatablePayload {
         public var id: RoleSnowflake
         public var position: Int?
@@ -1957,7 +2021,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-mfa-level-json-params
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-mfa-level-json-params
     public struct ModifyGuildMFALevel: Sendable, Encodable, ValidatablePayload {
         public var level: Guild.MFALevel
 
@@ -1968,7 +2032,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild#begin-guild-prune-json-params
+    /// https://docs.discord.com/developers/resources/guild#begin-guild-prune-json-params
     public struct BeginGuildPrune: Sendable, Encodable, ValidatablePayload {
         public var days: Int
         public var compute_prune_count: Bool
@@ -1985,7 +2049,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild#get-guild-widget-image-widget-style-options
+    /// https://docs.discord.com/developers/resources/guild#get-guild-widget-image-widget-style-options
     /// Cases show sizes from small to big.
     /// See Discord docs for examples.
     public enum WidgetStyle: String, Sendable {
@@ -1998,7 +2062,7 @@ public enum Payloads {
         public static let `default`: WidgetStyle = .shield
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-widget
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-widget
     public struct ModifyWidgetSettings: Sendable, Encodable, ValidatablePayload {
         public var enabled: Bool?
         public var channel_id: ChannelSnowflake?
@@ -2011,7 +2075,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen-json-params
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-welcome-screen-json-params
     public struct ModifyGuildWelcomeScreen: Sendable, Encodable, ValidatablePayload {
         public var enabled: Bool?
         public var welcome_channels: [Guild.WelcomeScreen.Channel]?
@@ -2030,7 +2094,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-current-user-voice-state-json-params
+    /// https://docs.discord.com/developers/resources/guild#modify-current-user-voice-state-json-params
     public struct ModifyCurrentUserVoiceState: Sendable, Encodable, ValidatablePayload {
         public var channel_id: ChannelSnowflake?
         public var suppress: Bool?
@@ -2049,7 +2113,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-user-voice-state-json-params
+    /// https://docs.discord.com/developers/resources/guild#modify-user-voice-state-json-params
     public struct ModifyUserVoiceState: Sendable, Encodable, ValidatablePayload {
         public var channel_id: ChannelSnowflake?
         public var suppress: Bool?
@@ -2062,7 +2126,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/soundboard#send-soundboard-sound-json-params
+    /// https://docs.discord.com/developers/resources/soundboard#send-soundboard-sound-json-params
     public struct SendSoundboardSound: Sendable, Encodable, ValidatablePayload {
         public var sound_id: SoundboardSoundSnowflake
         public var source_guild_id: GuildSnowflake?
@@ -2078,7 +2142,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/soundboard#create-guild-soundboard-sound-json-params
+    /// https://docs.discord.com/developers/resources/soundboard#create-guild-soundboard-sound-json-params
     public struct CreateGuildSoundboardSound: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var sound: ImageData
@@ -2106,7 +2170,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/soundboard#modify-guild-soundboard-sound-json-params
+    /// https://docs.discord.com/developers/resources/soundboard#modify-guild-soundboard-sound-json-params
     public struct ModifyGuildSoundboardSound: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var volume: Double?
@@ -2131,7 +2195,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event-json-params
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#create-guild-scheduled-event-json-params
     public struct CreateGuildScheduledEvent: Sendable, Encodable, ValidatablePayload {
         public var channel_id: ChannelSnowflake?
         public var entity_metadata: GuildScheduledEvent.EntityMetadata?
@@ -2171,7 +2235,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild-scheduled-event#modify-guild-scheduled-event-json-params
+    /// https://docs.discord.com/developers/resources/guild-scheduled-event#modify-guild-scheduled-event-json-params
     public struct ModifyGuildScheduledEvent: Sendable, Encodable, ValidatablePayload {
         public var channel_id: ChannelSnowflake?
         public var entity_metadata: GuildScheduledEvent.EntityMetadata?
@@ -2214,7 +2278,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/guild-template#create-guild-from-guild-template-json-params
+    /// https://docs.discord.com/developers/resources/guild-template#create-guild-from-guild-template-json-params
     public struct CreateGuildFromGuildTemplate: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var icon: ImageData?
@@ -2229,7 +2293,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild-template#create-guild-template-json-params
+    /// https://docs.discord.com/developers/resources/guild-template#create-guild-template-json-params
     public struct CreateGuildTemplate: Sendable, Encodable, ValidatablePayload {
         public var name: String
         public var description: String?
@@ -2245,7 +2309,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild-template#modify-guild-template-json-params
+    /// https://docs.discord.com/developers/resources/guild-template#modify-guild-template-json-params
     public struct ModifyGuildTemplate: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var description: String?
@@ -2261,7 +2325,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/stage-instance#create-stage-instance-json-params
+    /// https://docs.discord.com/developers/resources/stage-instance#create-stage-instance-json-params
     public struct CreateStageInstance: Sendable, Encodable, ValidatablePayload {
         public var channel_id: ChannelSnowflake
         public var topic: String
@@ -2288,7 +2352,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/stage-instance#modify-stage-instance-json-params
+    /// https://docs.discord.com/developers/resources/stage-instance#modify-stage-instance-json-params
     public struct ModifyStageInstance: Sendable, Encodable, ValidatablePayload {
         public var topic: String?
         public var privacy_level: StageInstance.PrivacyLevel?
@@ -2303,7 +2367,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#create-guild-sticker-form-params
+    /// https://docs.discord.com/developers/resources/sticker#create-guild-sticker-form-params
     public struct CreateGuildSticker: Sendable, Encodable, MultipartEncodable, ValidatablePayload {
         public var name: String
         public var description: String
@@ -2329,7 +2393,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/sticker#modify-guild-sticker-json-params
+    /// https://docs.discord.com/developers/resources/sticker#modify-guild-sticker-json-params
     public struct ModifyGuildSticker: Sendable, Encodable, ValidatablePayload {
         public var name: String?
         public var description: String?
@@ -2348,7 +2412,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/user#modify-current-user-json-params
+    /// https://docs.discord.com/developers/resources/user#modify-current-user-json-params
     public struct ModifyCurrentUser: Sendable, Encodable, ValidatablePayload {
         public var username: String?
         public var avatar: ImageData?
@@ -2363,7 +2427,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/user#create-dm-json-params
+    /// https://docs.discord.com/developers/resources/user#create-dm-json-params
     public struct CreateDM: Sendable, Encodable, ValidatablePayload {
         public var recipient_id: UserSnowflake
 
@@ -2375,7 +2439,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/user#create-group-dm-json-params
+    /// https://docs.discord.com/developers/resources/user#create-group-dm-json-params
     public struct CreateGroupDM: Sendable, Encodable, ValidatablePayload {
         public var access_tokens: [String]
         public var nicks: [String: String]
@@ -2392,7 +2456,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/user#update-user-application-role-connection-json-params
+    /// https://docs.discord.com/developers/resources/user#update-user-application-role-connection-json-params
     public struct UpdateUserApplicationRoleConnection: Sendable, Encodable, ValidatablePayload {
         public var platform_name: String?
         public var platform_username: String?
@@ -2419,7 +2483,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild#modify-guild-onboarding-json-params
+    /// https://docs.discord.com/developers/resources/guild#modify-guild-onboarding-json-params
     public struct UpdateGuildOnboarding: Sendable, Encodable, ValidatablePayload {
         public var prompts: [Guild.Onboarding.Prompt]?
         public var default_channel_ids: [ChannelSnowflake]?
@@ -2468,7 +2532,7 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://discord.com/developers/docs/resources/application#edit-current-application-json-params
+    /// https://docs.discord.com/developers/resources/application#edit-current-application-json-params
     public struct UpdateOwnApplication: Sendable, Encodable, ValidatablePayload {
         public var custom_install_url: String?
         public var description: String?
@@ -2525,7 +2589,7 @@ public enum Payloads {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/poll#poll-create-request-object
+    /// https://docs.discord.com/developers/resources/poll#poll-create-request-object
     public struct CreatePollRequest: Sendable, Codable, ValidatablePayload {
         public var question: Poll.Media
         public var answers: [Poll.Answer]

@@ -485,7 +485,7 @@ public struct DiscordColor: Sendable, Codable, Equatable, ExpressibleByIntegerLi
 extension DiscordColor {
 
     /// Light mode or dark mode.
-    public enum ColorScheme {
+    public enum ColorScheme: Sendable {
         case light
         case dark
     }

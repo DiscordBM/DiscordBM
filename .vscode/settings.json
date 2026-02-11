@@ -1,0 +1,3 @@
+{
+  "swift.buildArguments": ["--build-system=swiftbuild"]
+}

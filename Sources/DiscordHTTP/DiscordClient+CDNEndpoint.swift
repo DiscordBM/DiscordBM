@@ -2,10 +2,18 @@
 extension DiscordClient {
     /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
     @inlinable
-    public func getCDNCustomEmoji(emojiId: EmojiSnowflake) async throws -> DiscordCDNResponse {
+    public func getCDNCustomEmoji(
+        emojiId: EmojiSnowflake,
+        animated: Bool? = nil
+    ) async throws -> DiscordCDNResponse {
         let endpoint = CDNEndpoint.customEmoji(emojiId: emojiId)
         return try await self.send(
-            request: .init(to: endpoint),
+            request: .init(
+                to: endpoint,
+                queries: [
+                    ("animated", animated.map { "\($0)" })
+                ]
+            ),
             fallbackFileName: emojiId.rawValue
         )
     }

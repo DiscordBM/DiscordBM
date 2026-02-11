@@ -1,7 +1,7 @@
-/// https://discord.com/developers/docs/resources/application-role-connection-metadata#application-role-connection-metadata-object-application-role-connection-metadata-structure
+/// https://docs.discord.com/developers/resources/application-role-connection-metadata#application-role-connection-metadata-object-application-role-connection-metadata-structure
 public struct ApplicationRoleConnectionMetadata: Sendable, Codable, ValidatablePayload {
 
-    /// https://discord.com/developers/docs/resources/application-role-connection-metadata#application-role-connection-metadata-object-application-role-connection-metadata-type
+    /// https://docs.discord.com/developers/resources/application-role-connection-metadata#application-role-connection-metadata-object-application-role-connection-metadata-type
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
         case integerLessThanOrEqual  // 1

@@ -1,7 +1,7 @@
-/// https://discord.com/developers/docs/resources/guild#integration-object
+/// https://docs.discord.com/developers/resources/guild#integration-object
 public struct Integration: Sendable, Codable {
 
-    /// https://discord.com/developers/docs/resources/guild#integration-object-integration-structure
+    /// https://docs.discord.com/developers/resources/guild#integration-object-integration-structure
     @UnstableEnum<String>
     public enum Kind: Sendable, Codable {
         case twitch
@@ -11,7 +11,7 @@ public struct Integration: Sendable, Codable {
         case __undocumented(String)
     }
 
-    /// https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors
+    /// https://docs.discord.com/developers/resources/guild#integration-object-integration-expire-behaviors
     @UnstableEnum<Int>
     public enum ExpireBehavior: Sendable, Codable {
         case removeRole  // 0
@@ -56,7 +56,7 @@ public struct Integration: Sendable, Codable {
     }
 }
 
-/// https://discord.com/developers/docs/resources/guild#integration-object
+/// https://docs.discord.com/developers/resources/guild#integration-object
 public struct PartialIntegration: Sendable, Codable {
     public var id: IntegrationSnowflake
     public var name: String?
