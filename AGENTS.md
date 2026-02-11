@@ -2,6 +2,7 @@
 
 - Make a plan and ask for confirmation before proceeding with the changes.
 - List all related commits from the Discord docs repo @ https://github.com/discord/discord-api-docs.
+  - If asked for specific commits, only consider those specific commits.
 - The changes that will need to be made are very similar to this commit: https://github.com/DiscordBM/DiscordBM/commit/c860b84a25aca6b64701dc5ac326426beabd17a6.
 - Use curl GET requests outside sandbox so you receive no DNS errors.
 - Only run non-integration tests, to confirm your changes are functional: `swiftly run swift test --skip IntegrationTests`.

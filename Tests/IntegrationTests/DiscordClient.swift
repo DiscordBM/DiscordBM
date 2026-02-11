@@ -274,6 +274,16 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertEqual(first.id, message.id)
 
+        /// List Channel Pins
+        let channelPins = try await client.listChannelPins(
+            channelId: Constants.Channels.general.id
+        ).decode()
+
+        XCTAssertTrue(
+            channelPins.items.contains(where: { $0.message.id == message.id }),
+            "\(channelPins)"
+        )
+
         /// Unpin Message
         try await client.unpinMessage(
             channelId: Constants.Channels.general.id,
