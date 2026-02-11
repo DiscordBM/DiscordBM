@@ -106,6 +106,7 @@ public struct DiscordUser: Sendable, Codable {
     public var avatar_decoration: String?
     public var avatar_decoration_data: AvatarDecoration?
     public var collectibles: Collectibles?
+    public var primary_guild: PrimaryGuild?
 }
 
 /// A partial ``DiscordUser`` object.
@@ -131,6 +132,7 @@ public struct PartialUser: Sendable, Codable {
     public var avatar_decoration: String?
     public var avatar_decoration_data: DiscordUser.AvatarDecoration?
     public var collectibles: DiscordUser.Collectibles?
+    public var primary_guild: DiscordUser.PrimaryGuild?
 }
 
 /// A ``DiscordUser`` with an extra `member` field.
@@ -157,6 +159,7 @@ public struct MentionUser: Sendable, Codable {
     public var avatar_decoration: String?
     public var avatar_decoration_data: DiscordUser.AvatarDecoration?
     public var collectibles: DiscordUser.Collectibles?
+    public var primary_guild: DiscordUser.PrimaryGuild?
     public var member: Guild.PartialMember?
 }
 

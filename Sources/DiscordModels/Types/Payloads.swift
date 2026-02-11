@@ -171,8 +171,14 @@ public enum Payloads {
                     flags,
                     name: "flags",
                     reason:
-                        "Can only contain 'suppressEmbeds', 'ephemeral', 'suppressNotifications', and 'isComponentsV2'",
-                    allowed: [.suppressEmbeds, .ephemeral, .suppressNotifications, .isComponentsV2]
+                        "Can only contain 'suppressEmbeds', 'ephemeral', 'suppressNotifications', 'isVoiceMessage', and 'isComponentsV2'",
+                    allowed: [
+                        .suppressEmbeds,
+                        .ephemeral,
+                        .suppressNotifications,
+                        .isVoiceMessage,
+                        .isComponentsV2,
+                    ]
                 )
                 validateComponentsV2Payload(
                     flags: flags,
@@ -509,8 +515,9 @@ public enum Payloads {
             validateOnlyContains(
                 flags,
                 name: "flags",
-                reason: "Can only contain 'suppressEmbeds', 'suppressNotifications', or 'isComponentsV2'",
-                allowed: [.suppressEmbeds, .suppressNotifications, .isComponentsV2]
+                reason:
+                    "Can only contain 'suppressEmbeds', 'suppressNotifications', 'isVoiceMessage', or 'isComponentsV2'",
+                allowed: [.suppressEmbeds, .suppressNotifications, .isVoiceMessage, .isComponentsV2]
             )
             validateComponentsV2Payload(
                 flags: flags,
@@ -1911,7 +1918,9 @@ public enum Payloads {
     public struct GuildRole: Sendable, Codable, ValidatablePayload {
         public var name: String?
         public var permissions: StringBitField<Permission>?
+        @available(*, deprecated, message: "Deprecated by Discord. Use `colors` instead.")
         public var color: DiscordColor?
+        public var colors: DiscordModels.Role.Colors?
         public var hoist: Bool?
         public var icon: ImageData?
         public var unicode_emoji: String?
@@ -1925,6 +1934,7 @@ public enum Payloads {
             name: String? = nil,
             permissions: StringBitField<Permission>? = nil,
             color: DiscordColor? = nil,
+            colors: DiscordModels.Role.Colors? = nil,
             hoist: Bool? = nil,
             icon: ImageData? = nil,
             unicode_emoji: String? = nil,
@@ -1933,6 +1943,7 @@ public enum Payloads {
             self.name = name
             self.permissions = permissions
             self.color = color
+            self.colors = colors
             self.hoist = hoist
             self.icon = icon
             self.unicode_emoji = unicode_emoji

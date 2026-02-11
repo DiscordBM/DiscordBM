@@ -932,7 +932,7 @@ public struct Gateway: Sendable, Codable {
         public var nick: String?
         public var avatar: String?
         public var banner: String?
-        public var joined_at: DiscordTimestamp
+        public var joined_at: DiscordTimestamp?
         public var premium_since: DiscordTimestamp?
         public var deaf: Bool?
         public var mute: Bool?
@@ -1469,19 +1469,28 @@ public struct Gateway: Sendable, Codable {
         public struct Assets: Sendable, Codable {
             public var large_image: String?
             public var large_text: String?
+            public var large_url: String?
             public var small_image: String?
             public var small_text: String?
+            public var small_url: String?
+            public var invite_cover_image: String?
 
             public init(
                 large_image: String? = nil,
                 large_text: String? = nil,
+                large_url: String? = nil,
                 small_image: String? = nil,
-                small_text: String? = nil
+                small_text: String? = nil,
+                small_url: String? = nil,
+                invite_cover_image: String? = nil
             ) {
                 self.large_image = large_image
                 self.large_text = large_text
+                self.large_url = large_url
                 self.small_image = small_image
                 self.small_text = small_text
+                self.small_url = small_url
+                self.invite_cover_image = invite_cover_image
             }
         }
 
@@ -1549,7 +1558,9 @@ public struct Gateway: Sendable, Codable {
         public var timestamps: Timestamps?
         public var application_id: ApplicationSnowflake?
         public var details: String?
+        public var details_url: String?
         public var state: String?
+        public var state_url: String?
         public var emoji: ActivityEmoji?
         public var party: Party?
         public var assets: Assets?
@@ -1566,7 +1577,9 @@ public struct Gateway: Sendable, Codable {
             self.created_at = try container.decodeIfPresent(Int.self, forKey: .created_at)
             self.timestamps = try container.decodeIfPresent(Timestamps.self, forKey: .timestamps)
             self.details = try container.decodeIfPresent(String.self, forKey: .details)
+            self.details_url = try container.decodeIfPresent(String.self, forKey: .details_url)
             self.state = try container.decodeIfPresent(String.self, forKey: .state)
+            self.state_url = try container.decodeIfPresent(String.self, forKey: .state_url)
             self.emoji = try container.decodeIfPresent(ActivityEmoji.self, forKey: .emoji)
             self.party = try container.decodeIfPresent(Party.self, forKey: .party)
             self.assets = try container.decodeIfPresent(Assets.self, forKey: .assets)

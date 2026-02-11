@@ -44,6 +44,7 @@ public struct Invite: Sendable, Codable {
     public var approximate_member_count: Int?
     public var expires_at: DiscordTimestamp?
     public var guild_scheduled_event: GuildScheduledEvent?
+    public var flags: IntBitField<Flag>?
 }
 
 /// https://docs.discord.com/developers/resources/invite#invite-object-invite-structure
@@ -61,6 +62,7 @@ public struct InviteWithMetadata: Sendable, Codable {
     public var approximate_member_count: Int?
     public var expires_at: DiscordTimestamp?
     public var guild_scheduled_event: GuildScheduledEvent?
+    public var flags: IntBitField<Invite.Flag>?
     public var uses: Int
     public var max_uses: Int
     public var max_age: Int
@@ -82,4 +84,5 @@ public struct PartialInvite: Sendable, Codable {
     public var approximate_member_count: Int?
     public var expires_at: DiscordTimestamp?
     public var guild_scheduled_event: GuildScheduledEvent?
+    public var flags: IntBitField<Invite.Flag>?
 }

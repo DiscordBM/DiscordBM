@@ -1,9 +1,9 @@
-/// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
+/// https://docs.discord.com/developers/resources/guild#guild-object-guild-structure
 public struct Guild: Sendable, Codable {
 
-    /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-structure
+    /// https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-structure
     public struct Member: Sendable, Codable {
-        /// https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags
+        /// https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-flags
         #if Non64BitSystemsCompatibility
         @UnstableEnum<UInt64>
         #else
@@ -31,7 +31,7 @@ public struct Guild: Sendable, Codable {
         public var avatar: String?
         public var banner: String?
         public var roles: [RoleSnowflake]
-        public var joined_at: DiscordTimestamp
+        public var joined_at: DiscordTimestamp?
         public var premium_since: DiscordTimestamp?
         public var deaf: Bool?
         public var mute: Bool?
@@ -94,7 +94,7 @@ public struct Guild: Sendable, Codable {
         }
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-object-verification-level
+    /// https://docs.discord.com/developers/resources/guild#guild-object-verification-level
     @UnstableEnum<Int>
     public enum VerificationLevel: Sendable, Codable {
         case none  // 0
@@ -105,7 +105,7 @@ public struct Guild: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-object-default-message-notification-level
+    /// https://docs.discord.com/developers/resources/guild#guild-object-default-message-notification-level
     @UnstableEnum<Int>
     public enum DefaultMessageNotificationLevel: Sendable, Codable {
         case allMessages  // 0
@@ -113,7 +113,7 @@ public struct Guild: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-object-explicit-content-filter-level
+    /// https://docs.discord.com/developers/resources/guild#guild-object-explicit-content-filter-level
     @UnstableEnum<Int>
     public enum ExplicitContentFilterLevel: Sendable, Codable {
         case disabled  // 0
@@ -122,7 +122,7 @@ public struct Guild: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-object-guild-features
+    /// https://docs.discord.com/developers/resources/guild#guild-object-guild-features
     @UnstableEnum<String>
     public enum Feature: Sendable, Codable {
         case animatedBanner  // "ANIMATED_BANNER"
@@ -135,7 +135,10 @@ public struct Guild: Sendable, Codable {
         case creatorStorePage  // "CREATOR_STORE_PAGE"
         case developerSupportServer  // "DEVELOPER_SUPPORT_SERVER"
         case discoverable  // "DISCOVERABLE"
+        case enhancedRoleColors  // "ENHANCED_ROLE_COLORS"
         case featurable  // "FEATURABLE"
+        case guestsEnabled  // "GUESTS_ENABLED"
+        case guildTags  // "GUILD_TAGS"
         case invitesDisabled  // "INVITES_DISABLED"
         case inviteSplash  // "INVITE_SPLASH"
         case memberVerificationGateEnabled  // "MEMBER_VERIFICATION_GATE_ENABLED"
@@ -174,7 +177,7 @@ public struct Guild: Sendable, Codable {
         //        case monetizationEnabled = "MONETIZATION_ENABLED"
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
+    /// https://docs.discord.com/developers/resources/guild#guild-object-mfa-level
     @UnstableEnum<Int>
     public enum MFALevel: Sendable, Codable {
         case none  // 0
@@ -182,7 +185,7 @@ public struct Guild: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-object-system-channel-flags
+    /// https://docs.discord.com/developers/resources/guild#guild-object-system-channel-flags
     #if Non64BitSystemsCompatibility
     @UnstableEnum<UInt64>
     #else
@@ -202,7 +205,7 @@ public struct Guild: Sendable, Codable {
         #endif
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-object-premium-tier
+    /// https://docs.discord.com/developers/resources/guild#guild-object-premium-tier
     @UnstableEnum<Int>
     public enum PremiumTier: Sendable, Codable {
         case none  // 0
@@ -212,10 +215,10 @@ public struct Guild: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-structure
+    /// https://docs.discord.com/developers/resources/guild#welcome-screen-object-welcome-screen-structure
     public struct WelcomeScreen: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-channel-structure
+        /// https://docs.discord.com/developers/resources/guild#welcome-screen-object-welcome-screen-channel-structure
         public struct Channel: Sendable, Codable {
             public var channel_id: ChannelSnowflake
             public var description: String
@@ -239,7 +242,7 @@ public struct Guild: Sendable, Codable {
         public var welcome_channels: [Channel]
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-object-guild-nsfw-level
+    /// https://docs.discord.com/developers/resources/guild#guild-object-guild-nsfw-level
     @UnstableEnum<Int>
     public enum NSFWLevel: Sendable, Codable {
         case `default`  // 0
@@ -249,7 +252,7 @@ public struct Guild: Sendable, Codable {
         case __undocumented(Int)
     }
 
-    /// https://discord.com/developers/docs/resources/guild#create-guild-json-params
+    /// https://docs.discord.com/developers/resources/guild#create-guild-json-params
     @UnstableEnum<Int>
     public enum AFKTimeout: Sendable, Codable {
         case oneMinute  // 60
@@ -312,7 +315,7 @@ public struct Guild: Sendable, Codable {
     public var guild_id: GuildSnowflake?
 }
 
-/// https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
+/// https://docs.discord.com/developers/resources/guild#guild-object-guild-structure
 public struct PartialGuild: Sendable, Codable {
     public var id: GuildSnowflake
     public var name: String?
@@ -386,13 +389,13 @@ extension Guild {
         public var avatar_decoration_data: DiscordUser.AvatarDecoration?
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-guild-onboarding-structure
+    /// https://docs.discord.com/developers/resources/guild#guild-onboarding-object-guild-onboarding-structure
     public struct Onboarding: Sendable, Codable {
 
-        /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-onboarding-prompt-structure
+        /// https://docs.discord.com/developers/resources/guild#guild-onboarding-object-onboarding-prompt-structure
         public struct Prompt: Sendable, Codable {
 
-            /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-option-structure
+            /// https://docs.discord.com/developers/resources/guild#guild-onboarding-object-prompt-option-structure
             public struct Option: Sendable, Codable {
                 public var id: OnboardingPromptOptionSnowflake
                 public var channel_ids: [ChannelSnowflake]
@@ -418,7 +421,7 @@ extension Guild {
                 }
             }
 
-            /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-types
+            /// https://docs.discord.com/developers/resources/guild#guild-onboarding-object-prompt-types
             @UnstableEnum<Int>
             public enum Kind: Sendable, Codable {
                 case multipleChoice  // 0
@@ -453,7 +456,7 @@ extension Guild {
             }
         }
 
-        /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-onboarding-mode
+        /// https://docs.discord.com/developers/resources/guild#guild-onboarding-object-onboarding-mode
         public enum Mode: Int, Codable, Sendable {
             case onboardingDefault = 0
             case onboardingAdvanced = 1
@@ -466,7 +469,7 @@ extension Guild {
         public var mode: Mode
     }
 
-    /// https://discord.com/developers/docs/resources/guild#incidents-data-object
+    /// https://docs.discord.com/developers/resources/guild#incidents-data-object
     public struct IncidentsData: Sendable, Codable {
         public var invites_disabled_until: DiscordTimestamp?
         public var dms_disabled_until: DiscordTimestamp?
@@ -474,7 +477,7 @@ extension Guild {
         public var raid_detected_at: DiscordTimestamp?
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-preview-object-guild-preview-structure
+    /// https://docs.discord.com/developers/resources/guild#guild-preview-object-guild-preview-structure
     public struct Preview: Sendable, Codable {
         public var id: GuildSnowflake
         public var name: String
@@ -489,19 +492,19 @@ extension Guild {
         public var stickers: [Sticker]
     }
 
-    /// https://discord.com/developers/docs/resources/guild#ban-object-ban-structure
+    /// https://docs.discord.com/developers/resources/guild#ban-object-ban-structure
     public struct Ban: Sendable, Codable {
         public var reason: String?
         public var user: DiscordUser
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-widget-settings-object-guild-widget-settings-structure
+    /// https://docs.discord.com/developers/resources/guild#guild-widget-settings-object-guild-widget-settings-structure
     public struct WidgetSettings: Sendable, Codable {
         public var enabled: Bool
         public var channel_id: ChannelSnowflake?
     }
 
-    /// https://discord.com/developers/docs/resources/guild#guild-widget-object-guild-widget-structure
+    /// https://docs.discord.com/developers/resources/guild#guild-widget-object-guild-widget-structure
     public struct Widget: Sendable, Codable {
         public var id: GuildSnowflake
         public var name: String
@@ -512,20 +515,20 @@ extension Guild {
     }
 }
 
-/// https://discord.com/developers/docs/resources/guild#unavailable-guild-object
+/// https://docs.discord.com/developers/resources/guild#unavailable-guild-object
 public struct UnavailableGuild: Sendable, Codable {
     public var id: GuildSnowflake
     public var unavailable: Bool?
 }
 
-/// https://discord.com/developers/docs/resources/guild#integration-account-object
+/// https://docs.discord.com/developers/resources/guild#integration-account-object
 public struct IntegrationAccount: Sendable, Codable {
     /// Not a snowflake.
     public var id: String
     public var name: String
 }
 
-/// https://discord.com/developers/docs/resources/guild#integration-application-object-integration-application-structure
+/// https://docs.discord.com/developers/resources/guild#integration-application-object-integration-application-structure
 public struct IntegrationApplication: Sendable, Codable {
     public var id: ApplicationSnowflake
     public var name: String
