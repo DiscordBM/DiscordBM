@@ -89,6 +89,30 @@ class DiscordUtilsTests: XCTestCase {
             XCTAssertEqual(string2, string3)
             XCTAssertEqual(string3, string1)
         }
+
+        do {
+            let email = "nelly@discord.com"
+            let string = DiscordUtils.email(address: email)
+            XCTAssertEqual(string, "<mailto:nelly@discord.com>")
+        }
+
+        do {
+            let email = "nelly@discord.com"
+            let string = DiscordUtils.email(
+                address: email,
+                headers: [
+                    ("subject", "Message Title"),
+                    ("body", "Message Content"),
+                ]
+            )
+            XCTAssertEqual(string, "<mailto:nelly@discord.com?subject=Message%20Title&body=Message%20Content>")
+        }
+
+        do {
+            let number = "+1 (555) 123 4567"
+            let string = DiscordUtils.phoneNumber(number)
+            XCTAssertEqual(string, "<tel:+1 (555) 123 4567>")
+        }
     }
 
     func testEscapingSpecialCharacters() throws {
