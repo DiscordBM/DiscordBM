@@ -27,7 +27,7 @@ jobs:
       with_tsan: true
       with_api_check: true
       test_filter: "^DiscordBMTests"
-      extra_flags: "--traits Non64BitSystemsCompatibility --explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable --disable-experimental-prebuilts"
+      extra_flags: "--traits ExperimentalNon64BitSystemsCompatibility --explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable --disable-experimental-prebuilts"
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -49,6 +49,6 @@ jobs:
       with_tsan: true
       with_api_check: false
       test_filter: "^MacroTests"
-      extra_flags: "--traits Non64BitSystemsCompatibility --explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable --disable-experimental-prebuilts"
+      extra_flags: "--traits ExperimentalNon64BitSystemsCompatibility --explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable --disable-experimental-prebuilts"
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

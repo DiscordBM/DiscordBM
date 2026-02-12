@@ -17,11 +17,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
     }
 
     case string(String)
-    #if Non64BitSystemsCompatibility
-    case int(Int64)
-    #else
-    case int(Int)
-    #endif
+    case int(_CompatibilityIntTypeAlias)
     case double(Double)
     case bool(Bool)
 
@@ -43,24 +39,13 @@ public enum StringIntDoubleBool: Sendable, Codable {
         }
     }
 
-    #if Non64BitSystemsCompatibility
-    /// Requires a `Int64` or throws `StringIntDoubleBool.Error`.
     @inlinable
-    public func requireInt() throws -> Int64 {
+    public func requireInt() throws -> _CompatibilityIntTypeAlias {
         switch self {
         case .int(let int): return int
-        default: throw Error.valueIsNotOfType(Int64.self, value: self)
+        default: throw Error.valueIsNotOfType(_CompatibilityIntTypeAlias.self, value: self)
         }
     }
-    #else
-    @inlinable
-    public func requireInt() throws -> Int {
-        switch self {
-        case .int(let int): return int
-        default: throw Error.valueIsNotOfType(Int.self, value: self)
-        }
-    }
-    #endif
 
     /// Requires a `Double` or throws `StringIntDoubleBool.Error`.
     @inlinable
@@ -114,11 +99,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
 /// To dynamically decode/encode String or Int.
 public enum StringOrInt: Sendable, Codable {
     case string(String)
-    #if Non64BitSystemsCompatibility
-    case int(Int64)
-    #else
-    case int(Int)
-    #endif
+    case int(_CompatibilityIntTypeAlias)
 
     public var asString: String {
         switch self {
@@ -132,13 +113,8 @@ public enum StringOrInt: Sendable, Codable {
         if let string = try? container.decode(String.self) {
             self = .string(string)
         } else {
-            #if Non64BitSystemsCompatibility
-            let int = try container.decode(Int64.self)
+            let int = try container.decode(_CompatibilityIntTypeAlias.self)
             self = .int(int)
-            #else
-            let int = try container.decode(Int.self)
-            self = .int(int)
-            #endif
         }
     }
 
@@ -156,26 +132,15 @@ public enum StringOrInt: Sendable, Codable {
 //MARK: - IntOrDouble
 
 public enum IntOrDouble: Sendable, Codable {
-    #if Non64BitSystemsCompatibility
-    case int(Int64)
-    #else
-    case int(Int)
-    #endif
+    case int(_CompatibilityIntTypeAlias)
     case double(Double)
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
-        #if Non64BitSystemsCompatibility
-        if let int = try? container.decode(Int64.self) {
+        if let int = try? container.decode(_CompatibilityIntTypeAlias.self) {
             self = .int(int)
             return
         }
-        #else
-        if let int = try? container.decode(Int.self) {
-            self = .int(int)
-            return
-        }
-        #endif
         let double = try container.decode(Double.self)
         self = .double(double)
     }

@@ -3,12 +3,12 @@ import Foundation
 /// https://docs.discord.com/developers/resources/webhook#webhook-object-webhook-structure
 public struct Webhook: Sendable, Codable {
     /// https://docs.discord.com/developers/resources/webhook#webhook-object-webhook-types
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum Kind: Sendable, Codable {
         case incoming  // 1
         case channelFollower  // 2
         case application  // 3
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
     }
 
     public var id: WebhookSnowflake

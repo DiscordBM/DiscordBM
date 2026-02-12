@@ -123,7 +123,7 @@ public struct UnstableEnum: MemberMacro {
             if values.allSatisfy({ Int($0) != nil }) {
                 throw MacroError.enumSeemsToHaveIntValuesButGenericArgumentSpecifiesString
             }
-        case .Int, .UInt, .UInt8, .UInt64:
+        case ._CompatibilityIntTypeAlias, ._CompatibilityUIntTypeAlias, .UInt8:
             /// All values must be integer
             if !values.allSatisfy({ Int($0.filter({ $0 != "_" })) != nil }) {
                 throw MacroError.intEnumMustOnlyHaveIntValues

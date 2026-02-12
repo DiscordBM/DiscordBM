@@ -2,30 +2,22 @@
 public struct SKU: Sendable, Codable {
 
     /// https://discord.com/developers/docs/monetization/skus#sku-object-sku-types
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum Kind: Sendable, Codable {
         case durable  // 2
         case consumable  // 3
         case subscription  // 5
         case subscriptionGroup  // 6
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
     }
 
     /// https://discord.com/developers/docs/monetization/skus#sku-object-sku-flags
-    #if Non64BitSystemsCompatibility
-    @UnstableEnum<UInt64>
-    #else
-    @UnstableEnum<UInt>
-    #endif
+    @UnstableEnum<_CompatibilityUIntTypeAlias>
     public enum Flag: Sendable {
         case available  // 2
         case guildSubscription  // 7
         case userSubscription  // 8
-        #if Non64BitSystemsCompatibility
-        case __undocumented(UInt64)
-        #else
-        case __undocumented(UInt)
-        #endif
+        case __undocumented(_CompatibilityUIntTypeAlias)
     }
 
     public var id: SKUSnowflake

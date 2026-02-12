@@ -6,7 +6,7 @@ public struct AuditLog: Sendable, Codable {
 
         public enum Mixed: Sendable, Codable, CustomStringConvertible {
             case string(String)
-            case int(Int)
+            case int(_CompatibilityIntTypeAlias)
             case double(Double)
             case bool(Bool)
             case strings([String])
@@ -50,7 +50,7 @@ public struct AuditLog: Sendable, Codable {
                 let container = try decoder.singleValueContainer()
                 if let string = try? container.decode(String.self) {
                     self = .string(string)
-                } else if let int = try? container.decode(Int.self) {
+                } else if let int = try? container.decode(_CompatibilityIntTypeAlias.self) {
                     self = .int(int)
                 } else if let bool = try? container.decode(Bool.self) {
                     self = .bool(bool)
@@ -129,7 +129,7 @@ public struct AuditLog: Sendable, Codable {
         }
 
         /// https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-audit-log-events
-        @UnstableEnum<Int>
+        @UnstableEnum<_CompatibilityIntTypeAlias>
         public enum ActionKind: Sendable, Codable {
             case guildUpdate  // 1
             case channelCreate  // 10
@@ -198,7 +198,7 @@ public struct AuditLog: Sendable, Codable {
             case onboardingUpdate  // 167
             case homeSettingsCreate  // 190
             case homeSettingsUpdate  // 191
-            case __undocumented(Int)
+            case __undocumented(_CompatibilityIntTypeAlias)
         }
 
         /// A mix of the below two types.

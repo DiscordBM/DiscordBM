@@ -2,12 +2,12 @@
 public struct Subscription: Sendable, Codable {
 
     /// https://docs.discord.com/developers/resources/subscription#subscription-statuses
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum Status: Sendable, Codable {
         case active  // 0
         case ending  // 1
         case inactive  // 2
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
     }
 
     public var id: SubscriptionSnowflake

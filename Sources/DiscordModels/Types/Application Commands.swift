@@ -5,20 +5,12 @@ public struct ApplicationCommand: Sendable, Codable {
 
     /// FIXME: If Codable, then should not use `UInt` and should instead use `Int`?
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
-    #if Non64BitSystemsCompatibility
-    @UnstableEnum<UInt64>
-    #else
-    @UnstableEnum<UInt>
-    #endif
+    @UnstableEnum<_CompatibilityUIntTypeAlias>
     public enum Kind: Sendable, Codable {
         case chatInput  // 1
         case user  // 2
         case message  // 3
-        #if Non64BitSystemsCompatibility
-        case __undocumented(UInt64)
-        #else
-        case __undocumented(UInt)
-        #endif
+        case __undocumented(_CompatibilityUIntTypeAlias)
     }
 
     /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure
@@ -26,11 +18,7 @@ public struct ApplicationCommand: Sendable, Codable {
 
         /// FIXME: If Codable, then should not use `UInt` and should instead use `Int`?
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
-        #if Non64BitSystemsCompatibility
-        @UnstableEnum<UInt64>
-        #else
-        @UnstableEnum<UInt>
-        #endif
+        @UnstableEnum<_CompatibilityUIntTypeAlias>
         public enum Kind: Sendable, Codable {
             case subCommand  // 1
             case subCommandGroup  // 2
@@ -43,11 +31,7 @@ public struct ApplicationCommand: Sendable, Codable {
             case mentionable  // 9
             case number  // 10
             case attachment  // 11
-            #if Non64BitSystemsCompatibility
-            case __undocumented(UInt64)
-            #else
-            case __undocumented(UInt)
-            #endif
+            case __undocumented(_CompatibilityUIntTypeAlias)
         }
 
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-choice-structure
@@ -91,16 +75,10 @@ public struct ApplicationCommand: Sendable, Codable {
         public var channel_types: [DiscordChannel.Kind]?
         public var min_value: IntOrDouble?
         public var max_value: IntOrDouble?
-        #if Non64BitSystemsCompatibility
-        public var min_length: Int64?
-        public var max_length: Int64?
-        #else
-        public var min_length: Int?
-        public var max_length: Int?
-        #endif
+        public var min_length: _CompatibilityIntTypeAlias?
+        public var max_length: _CompatibilityIntTypeAlias?
         public var autocomplete: Bool?
 
-        #if Non64BitSystemsCompatibility
         public init(
             type: Kind,
             name: String,
@@ -113,8 +91,8 @@ public struct ApplicationCommand: Sendable, Codable {
             channel_types: [DiscordChannel.Kind]? = nil,
             min_value: IntOrDouble? = nil,
             max_value: IntOrDouble? = nil,
-            min_length: Int64? = nil,
-            max_length: Int64? = nil,
+            min_length: _CompatibilityIntTypeAlias? = nil,
+            max_length: _CompatibilityIntTypeAlias? = nil,
             autocomplete: Bool? = nil
         ) {
             self.type = type
@@ -132,39 +110,6 @@ public struct ApplicationCommand: Sendable, Codable {
             self.max_length = max_length
             self.autocomplete = autocomplete
         }
-        #else
-        public init(
-            type: Kind,
-            name: String,
-            name_localizations: [DiscordLocale: String]? = nil,
-            description: String,
-            description_localizations: [DiscordLocale: String]? = nil,
-            required: Bool? = nil,
-            choices: [Choice]? = nil,
-            options: [Option]? = nil,
-            channel_types: [DiscordChannel.Kind]? = nil,
-            min_value: IntOrDouble? = nil,
-            max_value: IntOrDouble? = nil,
-            min_length: Int? = nil,
-            max_length: Int? = nil,
-            autocomplete: Bool? = nil
-        ) {
-            self.type = type
-            self.name = name
-            self.name_localizations = .init(name_localizations)
-            self.description = description
-            self.description_localizations = .init(description_localizations)
-            self.required = required
-            self.choices = choices
-            self.options = options
-            self.channel_types = channel_types == nil ? nil : .init(channel_types!)
-            self.min_value = min_value
-            self.max_value = max_value
-            self.min_length = min_length
-            self.max_length = max_length
-            self.autocomplete = autocomplete
-        }
-        #endif
 
         public func validate() -> [ValidationFailure] {
             validateNumberInRangeOrNil(min_length, min: 0, max: 6_000, name: "min_length")
@@ -236,12 +181,12 @@ public struct GuildApplicationCommandPermissions: Sendable, Codable {
     public struct Permission: Sendable, Codable {
 
         /// https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-application-command-permission-type
-        @UnstableEnum<Int>
+        @UnstableEnum<_CompatibilityIntTypeAlias>
         public enum Kind: Sendable, Codable {
             case role  // 1
             case user  // 2
             case channel  // 3
-            case __undocumented(Int)
+            case __undocumented(_CompatibilityIntTypeAlias)
         }
 
         public var type: Kind

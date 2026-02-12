@@ -42,10 +42,10 @@ public struct Poll: Sendable, Codable {
     }
 
     /// https://docs.discord.com/developers/resources/poll#layout-type
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum LayoutKind: Sendable, Codable {
         case `default`  // 1
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
     }
 
     /// https://docs.discord.com/developers/resources/poll#poll-results-object-poll-results-object-structure

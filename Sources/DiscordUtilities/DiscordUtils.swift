@@ -90,19 +90,19 @@ public enum DiscordUtils {
         headers: [(String, String)] = []
     ) -> String {
         if headers.isEmpty {
-            return "<mailto:\(address)>"
+            return "<\(address)>"
         }
         let headersString = headers.map { key, value in
             let encodedValue = value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
             return "\(key)=\(encodedValue ?? value)"
         }.joined(separator: "&")
-        return "<mailto:\(address)?\(headersString)>"
+        return "<\(address)?\(headersString)>"
     }
 
     /// When used in a Discord message, shows up as a phone number.
     @inlinable
     public static func phoneNumber(_ number: String) -> String {
-        "<tel:\(number)>"
+        "<\(number)>"
     }
 
     /// Escapes the special characters in the text, for the specified channel type.

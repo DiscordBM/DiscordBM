@@ -42,23 +42,23 @@ public struct Interaction: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum Kind: Sendable, Codable {
         case ping  // 1
         case applicationCommand  // 2
         case messageComponent  // 3
         case applicationCommandAutocomplete  // 4
         case modalSubmit  // 5
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-context-types
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum ContextKind: Sendable, Codable {
         case guild  // 0
         case botDm  // 1
         case privateChannel  // 2
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
@@ -456,7 +456,7 @@ extension Interaction {
     public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral, ValidatablePayload {
 
         /// https://discord.com/developers/docs/components/reference#component-object-component-types
-        @UnstableEnum<Int>
+        @UnstableEnum<_CompatibilityIntTypeAlias>
         public enum Kind: Sendable, Codable {
             case actionRow  // 1
             case button  // 2
@@ -475,14 +475,14 @@ extension Interaction {
             case container  // 17
             case label  // 18
             case fileUpload  // 19
-            case __undocumented(Int)
+            case __undocumented(_CompatibilityIntTypeAlias)
         }
 
         /// https://discord.com/developers/docs/components/reference#button
         public struct Button: Sendable, Codable, ValidatablePayload {
 
             /// https://discord.com/developers/docs/components/reference#button-button-styles
-            @UnstableEnum<Int>
+            @UnstableEnum<_CompatibilityIntTypeAlias>
             public enum Style: Sendable, Codable {
                 case primary  // 1
                 case secondary  // 2
@@ -490,7 +490,7 @@ extension Interaction {
                 case danger  // 4
                 case link  // 5
                 case premium  // 6
-                case __undocumented(Int)
+                case __undocumented(_CompatibilityIntTypeAlias)
             }
 
             /// The same as ``Style``, but has no `link`.
@@ -882,11 +882,11 @@ extension Interaction {
         public struct TextInput: Sendable, Codable, ValidatablePayload {
 
             /// https://discord.com/developers/docs/components/reference#text-input-text-input-styles
-            @UnstableEnum<Int>
+            @UnstableEnum<_CompatibilityIntTypeAlias>
             public enum Style: Sendable, Codable {
                 case short  // 1
                 case paragraph  // 2
-                case __undocumented(Int)
+                case __undocumented(_CompatibilityIntTypeAlias)
             }
 
             public var id: Int?
@@ -1082,11 +1082,11 @@ extension Interaction {
         public struct Separator: Sendable, Codable, ValidatablePayload {
 
             /// https://discord.com/developers/docs/components/reference#separator
-            @UnstableEnum<Int>
+            @UnstableEnum<_CompatibilityIntTypeAlias>
             public enum Spacing: Sendable, Codable {
                 case small  // 1
                 case large  // 2
-                case __undocumented(Int)
+                case __undocumented(_CompatibilityIntTypeAlias)
             }
 
             public var id: Int?

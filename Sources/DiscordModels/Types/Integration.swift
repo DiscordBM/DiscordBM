@@ -12,11 +12,11 @@ public struct Integration: Sendable, Codable {
     }
 
     /// https://docs.discord.com/developers/resources/guild#integration-object-integration-expire-behaviors
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum ExpireBehavior: Sendable, Codable {
         case removeRole  // 0
         case kick  // 1
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
     }
 
     public var id: IntegrationSnowflake

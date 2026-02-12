@@ -45,7 +45,7 @@ extension [EnumCaseElementSyntax] {
                 context.diagnose(diagnostic)
                 return nil
             } else if element.trailingTrivia.pieces.isEmpty {
-                if rawType == .Int {
+                if rawType.isInteger {
                     let diagnostic = Diagnostic(
                         node: Syntax(element),
                         message: MacroError.allEnumCasesWithIntTypeMustHaveACommentForValue

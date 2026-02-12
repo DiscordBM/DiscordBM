@@ -93,7 +93,7 @@ class DiscordUtilsTests: XCTestCase {
         do {
             let email = "nelly@discord.com"
             let string = DiscordUtils.email(address: email)
-            XCTAssertEqual(string, "<mailto:nelly@discord.com>")
+            XCTAssertEqual(string, "<nelly@discord.com>")
         }
 
         do {
@@ -105,13 +105,13 @@ class DiscordUtilsTests: XCTestCase {
                     ("body", "Message Content"),
                 ]
             )
-            XCTAssertEqual(string, "<mailto:nelly@discord.com?subject=Message%20Title&body=Message%20Content>")
+            XCTAssertEqual(string, "<nelly@discord.com?subject=Message%20Title&body=Message%20Content>")
         }
 
         do {
             let number = "+1 (555) 123 4567"
             let string = DiscordUtils.phoneNumber(number)
-            XCTAssertEqual(string, "<tel:+1 (555) 123 4567>")
+            XCTAssertEqual(string, "<+1 (555) 123 4567>")
         }
     }
 

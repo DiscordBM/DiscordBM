@@ -2,21 +2,17 @@
 public struct DiscordUser: Sendable, Codable {
 
     /// https://docs.discord.com/developers/resources/user#user-object-premium-types
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum PremiumKind: Sendable, Codable {
         case none  // 0
         case nitroClassic  // 1
         case nitro  // 2
         case nitroBasic  // 3
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
     }
 
     /// https://docs.discord.com/developers/resources/user#user-object-user-flags
-    #if Non64BitSystemsCompatibility
-    @UnstableEnum<UInt64>
-    #else
-    @UnstableEnum<UInt>
-    #endif
+    @UnstableEnum<_CompatibilityUIntTypeAlias>
     public enum Flag: Sendable {
         case staff  // 0
         case partner  // 1
@@ -33,11 +29,7 @@ public struct DiscordUser: Sendable, Codable {
         case certifiedModerator  // 18
         case botHttpInteractions  // 19
         case activeDeveloper  // 22
-        #if Non64BitSystemsCompatibility
-        case __undocumented(UInt64)
-        #else
-        case __undocumented(UInt)
-        #endif
+        case __undocumented(_CompatibilityUIntTypeAlias)
     }
 
     /// https://docs.discord.com/developers/resources/user#avatar-decoration-data-object
@@ -203,11 +195,11 @@ extension DiscordUser {
         }
 
         /// https://docs.discord.com/developers/resources/user#connection-object-visibility-types
-        @UnstableEnum<Int>
+        @UnstableEnum<_CompatibilityIntTypeAlias>
         public enum VisibilityKind: Sendable, Codable {
             case none  // 0
             case everyone  // 1
-            case __undocumented(Int)
+            case __undocumented(_CompatibilityIntTypeAlias)
         }
 
         public var id: String
