@@ -34,6 +34,18 @@ public struct DiscordApplication: Sendable, Codable {
         case guildInstall  // 0
         case userInstall  // 1
         case __undocumented(_CompatibilityIntTypeAlias)
+
+        public var codingKey: any CodingKey {
+            Int(self.rawValue).codingKey
+        }
+
+        public init?(codingKey: any CodingKey) {
+            if let int = Int(codingKey: codingKey) {
+                self.init(rawValue: _CompatibilityIntTypeAlias(int))
+            } else {
+                return nil
+            }
+        }
     }
 
     /// https://docs.discord.com/developers/resources/application#application-object-application-integration-type-configuration-object
