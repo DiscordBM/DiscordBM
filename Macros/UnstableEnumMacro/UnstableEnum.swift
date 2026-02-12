@@ -23,10 +23,11 @@ import SwiftSyntaxMacros
 /// which can too easily result in code breakage.
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
 /// If `CaseIterable`, repairs the `static var allCases` requirement.
-public struct UnstableEnum: MemberMacro {
+public struct UnstableEnum: Sendable, MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
+        conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         if declaration.hasError { return [] }
