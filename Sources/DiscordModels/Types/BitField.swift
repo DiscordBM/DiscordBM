@@ -1,8 +1,8 @@
 public protocol BitField: OptionSet, CustomStringConvertible
-where RawValue == _CompatibilityUIntTypeAlias {
+where RawValue == _UInt_CompatibilityTypealias {
     associatedtype R: RawRepresentable & LosslessRawRepresentable
-    where R: Hashable, R.RawValue == _CompatibilityUIntTypeAlias
-    var rawValue: _CompatibilityUIntTypeAlias { get set }
+    where R: Hashable, R.RawValue == _UInt_CompatibilityTypealias
+    var rawValue: _UInt_CompatibilityTypealias { get set }
 }
 
 extension BitField {
@@ -49,7 +49,7 @@ extension BitField {
     public func representableValues() -> Set<R> {
         var bitValue = self.rawValue
         var values: [R] = []
-        var counter: _CompatibilityUIntTypeAlias = 0
+        var counter: _UInt_CompatibilityTypealias = 0
         while bitValue != 0 {
             if (bitValue & 1) == 1 {
                 /// `R` is ``LosslessRawRepresentable``. Safe to force-unwrap.
@@ -82,8 +82,8 @@ extension BitField {
 
 /// A bit-field that decode/encodes itself as an integer.
 public struct IntBitField<R>: BitField
-where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == _CompatibilityUIntTypeAlias {
-    public var rawValue: _CompatibilityUIntTypeAlias
+where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == _UInt_CompatibilityTypealias {
+    public var rawValue: _UInt_CompatibilityTypealias
 
     #if ExperimentalNon64BitSystemsCompatibility
     @_disfavoredOverload
@@ -102,7 +102,7 @@ where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == _
 
 extension IntBitField: Codable {
     public init(from decoder: any Decoder) throws {
-        self.rawValue = try _CompatibilityUIntTypeAlias(from: decoder)
+        self.rawValue = try _UInt_CompatibilityTypealias(from: decoder)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -114,8 +114,8 @@ extension IntBitField: Sendable where R: Sendable {}
 
 /// A bit-field that decode/encodes itself as a string.
 public struct StringBitField<R>: BitField
-where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == _CompatibilityUIntTypeAlias {
-    public var rawValue: _CompatibilityUIntTypeAlias
+where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == _UInt_CompatibilityTypealias {
+    public var rawValue: _UInt_CompatibilityTypealias
 
     #if ExperimentalNon64BitSystemsCompatibility
     @_disfavoredOverload
@@ -148,7 +148,7 @@ extension StringBitField: Codable {
 
     public init(from decoder: any Decoder) throws {
         let string = try String(from: decoder)
-        guard let int = _CompatibilityUIntTypeAlias(string) else {
+        guard let int = _UInt_CompatibilityTypealias(string) else {
             throw DecodingError.notRepresentingUInt(string)
         }
         self.rawValue = int

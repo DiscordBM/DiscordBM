@@ -42,23 +42,23 @@ public struct Interaction: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum Kind: Sendable, Codable {
         case ping  // 1
         case applicationCommand  // 2
         case messageComponent  // 3
         case applicationCommandAutocomplete  // 4
         case modalSubmit  // 5
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-context-types
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum ContextKind: Sendable, Codable {
         case guild  // 0
         case botDm  // 1
         case privateChannel  // 2
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-application-command-data-structure
@@ -120,7 +120,7 @@ public struct Interaction: Sendable, Codable {
                 file: String = #file,
                 function: String = #function,
                 line: UInt = #line
-            ) throws -> _CompatibilityIntTypeAlias {
+            ) throws -> _Int_CompatibilityTypealias {
                 try self.value
                     .requireValue(file: file, function: function, line: line)
                     .requireInt()
@@ -456,7 +456,7 @@ extension Interaction {
     public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral, ValidatablePayload {
 
         /// https://discord.com/developers/docs/components/reference#component-object-component-types
-        @UnstableEnum<_CompatibilityIntTypeAlias>
+        @UnstableEnum<_Int_CompatibilityTypealias>
         public enum Kind: Sendable, Codable {
             case actionRow  // 1
             case button  // 2
@@ -475,14 +475,14 @@ extension Interaction {
             case container  // 17
             case label  // 18
             case fileUpload  // 19
-            case __undocumented(_CompatibilityIntTypeAlias)
+            case __undocumented(_Int_CompatibilityTypealias)
         }
 
         /// https://discord.com/developers/docs/components/reference#button
         public struct Button: Sendable, Codable, ValidatablePayload {
 
             /// https://discord.com/developers/docs/components/reference#button-button-styles
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             public enum Style: Sendable, Codable {
                 case primary  // 1
                 case secondary  // 2
@@ -490,7 +490,7 @@ extension Interaction {
                 case danger  // 4
                 case link  // 5
                 case premium  // 6
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
 
             /// The same as ``Style``, but has no `link`.
@@ -882,11 +882,11 @@ extension Interaction {
         public struct TextInput: Sendable, Codable, ValidatablePayload {
 
             /// https://discord.com/developers/docs/components/reference#text-input-text-input-styles
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             public enum Style: Sendable, Codable {
                 case short  // 1
                 case paragraph  // 2
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
 
             public var id: Int?
@@ -1082,11 +1082,11 @@ extension Interaction {
         public struct Separator: Sendable, Codable, ValidatablePayload {
 
             /// https://discord.com/developers/docs/components/reference#separator
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             public enum Spacing: Sendable, Codable {
                 case small  // 1
                 case large  // 2
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
 
             public var id: Int?

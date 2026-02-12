@@ -2,29 +2,29 @@
 public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
 
     /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum PrivacyLevel: Sendable, Codable {
         case guildOnly  // 2
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum Status: Sendable, Codable {
         case scheduled  // 1
         case active  // 2
         case completed  // 3
         case canceled  // 4
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum EntityKind: Sendable, Codable {
         case stageInstance  // 1
         case voice  // 2
         case external  // 3
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-metadata
@@ -44,17 +44,17 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
     public struct RecurrenceRule: Sendable, Codable {
 
         /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-frequency
-        @UnstableEnum<_CompatibilityIntTypeAlias>
+        @UnstableEnum<_Int_CompatibilityTypealias>
         public enum Frequency: Sendable, Codable {
             case yearly  // 0
             case monthly  // 1
             case weekly  // 2
             case daily  // 3
-            case __undocumented(_CompatibilityIntTypeAlias)
+            case __undocumented(_Int_CompatibilityTypealias)
         }
 
         /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-weekday
-        @UnstableEnum<_CompatibilityIntTypeAlias>
+        @UnstableEnum<_Int_CompatibilityTypealias>
         public enum Weekday: Sendable, Codable {
             case monday  // 0
             case tuesday  // 1
@@ -63,7 +63,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
             case friday  // 4
             case saturday  // 5
             case sunday  // 6
-            case __undocumented(_CompatibilityIntTypeAlias)
+            case __undocumented(_Int_CompatibilityTypealias)
         }
 
         /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-weekday
@@ -110,7 +110,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
         }
 
         /// https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-month
-        @UnstableEnum<_CompatibilityIntTypeAlias>
+        @UnstableEnum<_Int_CompatibilityTypealias>
         public enum Month: Sendable, Codable {
             case january  // 1
             case february  // 2
@@ -124,7 +124,7 @@ public struct GuildScheduledEvent: Sendable, Codable, ValidatablePayload {
             case october  // 10
             case november  // 11
             case december  // 12
-            case __undocumented(_CompatibilityIntTypeAlias)
+            case __undocumented(_Int_CompatibilityTypealias)
         }
 
         public var start: DiscordTimestamp

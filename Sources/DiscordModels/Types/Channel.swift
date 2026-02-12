@@ -6,7 +6,7 @@ import Foundation
 public struct DiscordChannel: Sendable, Codable {
 
     /// https://docs.discord.com/developers/resources/channel#channel-object-channel-types
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum Kind: Sendable, Codable {
         case guildText  // 0
         case dm  // 1
@@ -20,18 +20,18 @@ public struct DiscordChannel: Sendable, Codable {
         case guildStageVoice  // 13
         case guildDirectory  // 14
         case guildForum  // 15
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/channel#overwrite-object
     public struct Overwrite: Sendable, Codable {
 
         /// https://docs.discord.com/developers/resources/channel#overwrite-object
-        @UnstableEnum<_CompatibilityIntTypeAlias>
+        @UnstableEnum<_Int_CompatibilityTypealias>
         public enum Kind: Sendable, Codable {
             case role  // 0
             case member  // 1
-            case __undocumented(_CompatibilityIntTypeAlias)
+            case __undocumented(_Int_CompatibilityTypealias)
         }
 
         public var id: AnySnowflake
@@ -41,48 +41,48 @@ public struct DiscordChannel: Sendable, Codable {
     }
 
     /// https://docs.discord.com/developers/resources/channel#channel-object-sort-order-types
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum SortOrder: Sendable, Codable {
         case latestActivity  // 0
         case creationDate  // 1
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/channel#channel-object-forum-layout-types
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum ForumLayout: Sendable, Codable {
         case notSet  // 0
         case listView  // 1
         case galleryView  // 2
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/channel#channel-object-channel-flags
-    @UnstableEnum<_CompatibilityUIntTypeAlias>
+    @UnstableEnum<_UInt_CompatibilityTypealias>
     public enum Flag: Sendable {
         case pinned  // 1
         case requireTag  // 4
-        case __undocumented(_CompatibilityUIntTypeAlias)
+        case __undocumented(_UInt_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/channel#channel-object-video-quality-modes
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum VideoQualityMode: Sendable, Codable {
         case auto  // 1
         case full  // 2
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// Not exactly documented, but they do mention these times in a few different places.
     /// Times are in minutes.
     /// https://docs.discord.com/developers/resources/channel#channel-object-channel-structure
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum AutoArchiveDuration: Sendable, Codable {
         case oneHour  // 60
         case oneDay  // 1_440
         case threeDays  // 4_320
         case sevenDays  // 10_080
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/channel#default-reaction-object-default-reaction-structure
@@ -163,11 +163,11 @@ extension DiscordChannel {
         public struct MessageReference: Sendable, Codable {
 
             /// https://docs.discord.com/developers/resources/message#message-reference-types
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             public enum Kind: Sendable, Codable {
                 case `default`  // 0
                 case forward  // 1
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
 
             public var type: Kind?
@@ -198,7 +198,7 @@ extension DiscordChannel {
         }
 
         /// https://docs.discord.com/developers/resources/message#message-object-message-types
-        @UnstableEnum<_CompatibilityIntTypeAlias>
+        @UnstableEnum<_Int_CompatibilityTypealias>
         public enum Kind: Sendable, Codable {
             case `default`  // 0
             case recipientAdd  // 1
@@ -237,11 +237,11 @@ extension DiscordChannel {
             case guildIncidentReportFalseAlarm  // 39
             case purchaseNotification  // 44
             case pollResult  // 46
-            case __undocumented(_CompatibilityIntTypeAlias)
+            case __undocumented(_Int_CompatibilityTypealias)
         }
 
         /// https://docs.discord.com/developers/resources/message#message-object-message-flags
-        @UnstableEnum<_CompatibilityUIntTypeAlias>
+        @UnstableEnum<_UInt_CompatibilityTypealias>
         public enum Flag: Sendable {
             case crossposted  // 0
             case isCrosspost  // 1
@@ -256,7 +256,7 @@ extension DiscordChannel {
             case isVoiceMessage  // 13
             case hasSnapshot  // 14
             case isComponentsV2  // 15
-            case __undocumented(_CompatibilityUIntTypeAlias)
+            case __undocumented(_UInt_CompatibilityTypealias)
         }
 
         /// https://docs.discord.com/developers/resources/message#channel-mention-object
@@ -271,10 +271,10 @@ extension DiscordChannel {
         public struct Attachment: Sendable, Codable {
 
             /// https://docs.discord.com/developers/resources/message#attachment-object-attachment-flags
-            @UnstableEnum<_CompatibilityUIntTypeAlias>
+            @UnstableEnum<_UInt_CompatibilityTypealias>
             public enum Flag: Sendable {
                 case isRemix  // 2
-                case __undocumented(_CompatibilityUIntTypeAlias)
+                case __undocumented(_UInt_CompatibilityTypealias)
             }
 
             public var id: AttachmentSnowflake
@@ -382,13 +382,13 @@ extension DiscordChannel {
         public struct Activity: Sendable, Codable {
 
             /// https://docs.discord.com/developers/resources/message#message-object-message-activity-types
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             public enum Kind: Sendable, Codable {
                 case join  // 1
                 case spectate  // 2
                 case listen  // 3
                 case joinRequest  // 5
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
 
             public var type: Kind
@@ -554,12 +554,12 @@ public struct ThreadMemberWithMember: Sendable, Codable {
 
 /// Thread-related subset of `DiscordChannel.Kind`
 /// https://docs.discord.com/developers/resources/channel#channel-object-channel-types
-@UnstableEnum<_CompatibilityIntTypeAlias>
+@UnstableEnum<_Int_CompatibilityTypealias>
 public enum ThreadKind: Sendable, Codable {
     case announcementThread  // 10
     case publicThread  // 11
     case privateThread  // 12
-    case __undocumented(_CompatibilityIntTypeAlias)
+    case __undocumented(_Int_CompatibilityTypealias)
 }
 
 extension DiscordChannel {

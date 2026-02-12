@@ -975,11 +975,11 @@ class DiscordModelsTests: XCTestCase {
 
 private struct CodableContainer: Codable {
 
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     enum UnstableEnumCodableTester: Codable {
         case a  // 12
         case h  // 100
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     var some: UnstableEnumCodableTester

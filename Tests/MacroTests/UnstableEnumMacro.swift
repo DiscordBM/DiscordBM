@@ -182,11 +182,11 @@ class UnstableEnumMacroTests: XCTestCase {
     func testIntEnum() throws {
         assertMacroExpansion(
             """
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 5
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
             """,
             expandedSource: #"""
@@ -194,7 +194,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 enum MyEnum: RawRepresentable {
                     case a // 1
                     case b // 5
-                    case __undocumented(_CompatibilityIntTypeAlias)
+                    case __undocumented(_Int_CompatibilityTypealias)
 
                     var description: String {
                         switch self {
@@ -207,7 +207,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         }
                     }
 
-                    var rawValue: _CompatibilityIntTypeAlias {
+                    var rawValue: _Int_CompatibilityTypealias {
                         switch self {
                         case .a:
                             return 1
@@ -218,7 +218,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         }
                     }
 
-                    init?(rawValue: _CompatibilityIntTypeAlias) {
+                    init?(rawValue: _Int_CompatibilityTypealias) {
                         switch rawValue {
                         case 1:
                             self = .a
@@ -240,11 +240,11 @@ class UnstableEnumMacroTests: XCTestCase {
     func testIntEnumWithAVariable() throws {
         assertMacroExpansion(
             """
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 5
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
 
                 var extraVar: Int {
                     0
@@ -256,7 +256,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 enum MyEnum: RawRepresentable {
                     case a // 1
                     case b // 5
-                    case __undocumented(_CompatibilityIntTypeAlias)
+                    case __undocumented(_Int_CompatibilityTypealias)
 
                     var extraVar: Int {
                         0
@@ -273,7 +273,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         }
                     }
 
-                    var rawValue: _CompatibilityIntTypeAlias {
+                    var rawValue: _Int_CompatibilityTypealias {
                         switch self {
                         case .a:
                             return 1
@@ -284,7 +284,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         }
                     }
 
-                    init?(rawValue: _CompatibilityIntTypeAlias) {
+                    init?(rawValue: _Int_CompatibilityTypealias) {
                         switch rawValue {
                         case 1:
                             self = .a
@@ -306,11 +306,11 @@ class UnstableEnumMacroTests: XCTestCase {
     func testUIntEnumWithCompilerFlaggedUndocumentedCase() throws {
         assertMacroExpansion(
             """
-            @UnstableEnum<_CompatibilityUIntTypeAlias>
+            @UnstableEnum<_UInt_CompatibilityTypealias>
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b // 5
-                case __undocumented(_CompatibilityUIntTypeAlias)
+                case __undocumented(_UInt_CompatibilityTypealias)
             }
             """,
             expandedSource: #"""
@@ -318,7 +318,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 enum MyEnum: RawRepresentable {
                     case a // 1
                     case b // 5
-                    case __undocumented(_CompatibilityUIntTypeAlias)
+                    case __undocumented(_UInt_CompatibilityTypealias)
 
                     var description: String {
                         switch self {
@@ -331,7 +331,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         }
                     }
 
-                    var rawValue: _CompatibilityUIntTypeAlias {
+                    var rawValue: _UInt_CompatibilityTypealias {
                         switch self {
                         case .a:
                             return 1
@@ -342,7 +342,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         }
                     }
 
-                    init?(rawValue: _CompatibilityUIntTypeAlias) {
+                    init?(rawValue: _UInt_CompatibilityTypealias) {
                         switch rawValue {
                         case 1:
                             self = .a
@@ -364,11 +364,11 @@ class UnstableEnumMacroTests: XCTestCase {
     func testDecodableEnum() throws {
         assertMacroExpansion(
             """
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             enum MyEnum: RawRepresentable, Codable {
                 case a // 1
                 case b // 5
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
             """,
             expandedSource: #"""
@@ -376,7 +376,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 enum MyEnum: RawRepresentable, Codable {
                     case a // 1
                     case b // 5
-                    case __undocumented(_CompatibilityIntTypeAlias)
+                    case __undocumented(_Int_CompatibilityTypealias)
 
                     var description: String {
                         switch self {
@@ -389,7 +389,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         }
                     }
 
-                    var rawValue: _CompatibilityIntTypeAlias {
+                    var rawValue: _Int_CompatibilityTypealias {
                         switch self {
                         case .a:
                             return 1
@@ -400,7 +400,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         }
                     }
 
-                    init?(rawValue: _CompatibilityIntTypeAlias) {
+                    init?(rawValue: _Int_CompatibilityTypealias) {
                         switch rawValue {
                         case 1:
                             self = .a
@@ -413,7 +413,7 @@ class UnstableEnumMacroTests: XCTestCase {
 
                     init(from decoder: any Decoder) throws {
                         let container = try decoder.singleValueContainer()
-                        let rawValue = try container.decode(_CompatibilityIntTypeAlias.self)
+                        let rawValue = try container.decode(_Int_CompatibilityTypealias.self)
                         self.init(rawValue: rawValue)!
                         #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
                         if case let .__undocumented(rawValue) = self {
@@ -438,11 +438,11 @@ class UnstableEnumMacroTests: XCTestCase {
 
         assertMacroExpansion(
             """
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             enum MyEnum: RawRepresentable, Decodable, SomethingElse {
                 case a // 1
                 case b // 5
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
             """,
             expandedSource: #"""
@@ -450,7 +450,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 enum MyEnum: RawRepresentable, Decodable, SomethingElse {
                     case a // 1
                     case b // 5
-                    case __undocumented(_CompatibilityIntTypeAlias)
+                    case __undocumented(_Int_CompatibilityTypealias)
 
                     var description: String {
                         switch self {
@@ -463,7 +463,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         }
                     }
 
-                    var rawValue: _CompatibilityIntTypeAlias {
+                    var rawValue: _Int_CompatibilityTypealias {
                         switch self {
                         case .a:
                             return 1
@@ -474,7 +474,7 @@ class UnstableEnumMacroTests: XCTestCase {
                         }
                     }
 
-                    init?(rawValue: _CompatibilityIntTypeAlias) {
+                    init?(rawValue: _Int_CompatibilityTypealias) {
                         switch rawValue {
                         case 1:
                             self = .a
@@ -487,7 +487,7 @@ class UnstableEnumMacroTests: XCTestCase {
 
                     init(from decoder: any Decoder) throws {
                         let container = try decoder.singleValueContainer()
-                        let rawValue = try container.decode(_CompatibilityIntTypeAlias.self)
+                        let rawValue = try container.decode(_Int_CompatibilityTypealias.self)
                         self.init(rawValue: rawValue)!
                         #if DISCORDBM_ENABLE_LOGGING_DURING_DECODE
                         if case let .__undocumented(rawValue) = self {
@@ -698,11 +698,11 @@ class UnstableEnumMacroTests: XCTestCase {
     func testBadIntEnum() throws {
         assertMacroExpansion(
             """
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             enum MyEnum: RawRepresentable {
                 case a // 1
                 case b
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
             """,
             expandedSource: """
@@ -710,7 +710,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 enum MyEnum: RawRepresentable {
                     case a // 1
                     case b
-                    case __undocumented(_CompatibilityIntTypeAlias)
+                    case __undocumented(_Int_CompatibilityTypealias)
                 }
 
                 extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
@@ -730,11 +730,11 @@ class UnstableEnumMacroTests: XCTestCase {
     func testProgrammerErrorWrongArgumentType() throws {
         assertMacroExpansion(
             """
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             enum MyEnum: RawRepresentable {
                 case a // bb
                 case b // 1
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
             """,
             expandedSource: """
@@ -742,7 +742,7 @@ class UnstableEnumMacroTests: XCTestCase {
                 enum MyEnum: RawRepresentable {
                     case a // bb
                     case b // 1
-                    case __undocumented(_CompatibilityIntTypeAlias)
+                    case __undocumented(_Int_CompatibilityTypealias)
                 }
 
                 extension MyEnum: CustomStringConvertible, RawRepresentable, LosslessRawRepresentable, Hashable {
@@ -938,15 +938,15 @@ class UnstableEnumMacroTests: XCTestCase {
 }
 
 #if ExperimentalNon64BitSystemsCompatibility
-public typealias _CompatibilityIntTypeAlias = Int64
+public typealias _Int_CompatibilityTypealias = Int64
 #else
-public typealias _CompatibilityIntTypeAlias = Int
+public typealias _Int_CompatibilityTypealias = Int
 #endif
 
-@UnstableEnum<_CompatibilityIntTypeAlias>
+@UnstableEnum<_Int_CompatibilityTypealias>
 enum MyEnum: Sendable, Codable {
     case a  // 1
     case b  // 7
     case c  // 9
-    case __undocumented(_CompatibilityIntTypeAlias)
+    case __undocumented(_Int_CompatibilityTypealias)
 }

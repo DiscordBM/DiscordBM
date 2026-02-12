@@ -1,7 +1,7 @@
 /// https://discord.com/developers/docs/monetization/entitlements#entitlement-object-entitlement-structure
 public struct Entitlement: Sendable, Codable {
 
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum Kind: Sendable, Codable {
         case purchase  // 1
         case premiumSubscription  // 2
@@ -11,7 +11,7 @@ public struct Entitlement: Sendable, Codable {
         case userGift  // 6
         case premiumPurchase  // 7
         case applicationSubscription  // 8
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     public var id: EntitlementSnowflake

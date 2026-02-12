@@ -5,11 +5,11 @@ public struct Team: Sendable, Codable {
     public struct Member: Sendable, Codable {
 
         /// https://discord.com/developers/docs/topics/teams#data-models-membership-state-enum
-        @UnstableEnum<_CompatibilityIntTypeAlias>
+        @UnstableEnum<_Int_CompatibilityTypealias>
         public enum State: Sendable, Codable {
             case invited  // 1
             case accepted  // 2
-            case __undocumented(_CompatibilityIntTypeAlias)
+            case __undocumented(_Int_CompatibilityTypealias)
         }
 
         /// https://discord.com/developers/docs/topics/teams#data-models-team-member-role-types

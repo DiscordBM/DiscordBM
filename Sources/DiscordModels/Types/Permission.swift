@@ -1,5 +1,5 @@
 /// https://discord.com/developers/docs/topics/permissions#permissions-bitwise-permission-flags
-@UnstableEnum<_CompatibilityUIntTypeAlias>
+@UnstableEnum<_UInt_CompatibilityTypealias>
 public enum Permission: Sendable, Codable {
     case createInstantInvite  // 0
     case kickMembers  // 1
@@ -51,7 +51,7 @@ public enum Permission: Sendable, Codable {
     case sendPolls  // 49
     case useExternalApps  // 50
     case pinMessages  // 51
-    case __undocumented(_CompatibilityUIntTypeAlias)
+    case __undocumented(_UInt_CompatibilityTypealias)
 }
 
 /// https://discord.com/developers/docs/topics/permissions#role-object
@@ -86,10 +86,10 @@ public struct Role: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/topics/permissions#role-object-role-flags
-    @UnstableEnum<_CompatibilityUIntTypeAlias>
+    @UnstableEnum<_UInt_CompatibilityTypealias>
     public enum Flag: Sendable {
         case inPrompt  // 0
-        case __undocumented(_CompatibilityUIntTypeAlias)
+        case __undocumented(_UInt_CompatibilityTypealias)
     }
 
     public var id: RoleSnowflake
@@ -97,7 +97,7 @@ public struct Role: Sendable, Codable {
     public var description: String?
     @available(*, deprecated, message: "Deprecated by Discord. Use `colors` instead.")
     public var color: DiscordColor
-    public var colors: Colors?
+    public var colors: Colors
     public var hoist: Bool
     public var icon: String?
     public var unicode_emoji: String?

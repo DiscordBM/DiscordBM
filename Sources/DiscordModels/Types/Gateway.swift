@@ -634,7 +634,7 @@ public struct Gateway: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
-    @UnstableEnum<_CompatibilityUIntTypeAlias>
+    @UnstableEnum<_UInt_CompatibilityTypealias>
     public enum Intent: Sendable, Codable, CaseIterable {
         case guilds  // 0
         case guildMembers  // 1
@@ -657,7 +657,7 @@ public struct Gateway: Sendable, Codable {
         case autoModerationExecution  // 21
         case guildMessagePolls  // 24
         case directMessagePolls  // 25
-        case __undocumented(_CompatibilityUIntTypeAlias)
+        case __undocumented(_UInt_CompatibilityTypealias)
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#resume-resume-structure
@@ -1326,12 +1326,12 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: GuildSnowflake?
     }
 
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum ReactionKind: Sendable, Codable {
         case normal  // 0
         /// FIXME: Discord calls this 'burst'. Can't change it to not break API
         case `super`  // 1
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
 
         /// The same as ``.super``.
         public static var burst: Self {
@@ -1484,7 +1484,7 @@ public struct Gateway: Sendable, Codable {
     public struct Activity: Sendable, Codable {
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
-        @UnstableEnum<_CompatibilityIntTypeAlias>
+        @UnstableEnum<_Int_CompatibilityTypealias>
         public enum Kind: Sendable, Codable {
             /// FIXME: "game" has been renamed to "playing"
             case game  // 0
@@ -1493,7 +1493,7 @@ public struct Gateway: Sendable, Codable {
             case watching  // 3
             case custom  // 4
             case competing  // 5
-            case __undocumented(_CompatibilityIntTypeAlias)
+            case __undocumented(_Int_CompatibilityTypealias)
 
             /// "game" has been renamed to "playing":
             /// https://github.com/discord/discord-api-docs/commit/3cad69757ad24ecb5affc3024f008d186022ec91
@@ -1578,7 +1578,7 @@ public struct Gateway: Sendable, Codable {
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-flags
-        @UnstableEnum<_CompatibilityUIntTypeAlias>
+        @UnstableEnum<_UInt_CompatibilityTypealias>
         public enum Flag: Sendable {
             case instance  // 0
             case join  // 1
@@ -1589,7 +1589,7 @@ public struct Gateway: Sendable, Codable {
             case partyPrivacyFriends  // 6
             case partyPrivacyVoiceChannel  // 7
             case embedded  // 8
-            case __undocumented(_CompatibilityUIntTypeAlias)
+            case __undocumented(_UInt_CompatibilityTypealias)
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-buttons
@@ -1698,11 +1698,11 @@ public struct Gateway: Sendable, Codable {
     public struct VoiceChannelEffectSend: Sendable, Codable {
 
         /// https://discord.com/developers/docs/topics/gateway-events#voice-channel-effect-send-animation-types
-        @UnstableEnum<_CompatibilityIntTypeAlias>
+        @UnstableEnum<_Int_CompatibilityTypealias>
         public enum AnimationKind: Sendable, Codable {
             case premium  // 0
             case basic  // 1
-            case __undocumented(_CompatibilityIntTypeAlias)
+            case __undocumented(_Int_CompatibilityTypealias)
         }
 
         public var channel_id: ChannelSnowflake

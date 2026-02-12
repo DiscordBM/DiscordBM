@@ -2,7 +2,7 @@
 public struct DiscordApplication: Sendable, Codable {
 
     /// https://docs.discord.com/developers/resources/application#application-object-application-flags
-    @UnstableEnum<_CompatibilityUIntTypeAlias>
+    @UnstableEnum<_UInt_CompatibilityTypealias>
     public enum Flag: Sendable {
         case applicationAutoModerationRuleCreateBadge  // 6
         case gatewayPresence  // 12
@@ -14,7 +14,7 @@ public struct DiscordApplication: Sendable, Codable {
         case gatewayMessageContent  // 18
         case gatewayMessageContentLimited  // 19
         case applicationCommandBadge  // 23
-        case __undocumented(_CompatibilityUIntTypeAlias)
+        case __undocumented(_UInt_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/application#install-params-object
@@ -29,11 +29,11 @@ public struct DiscordApplication: Sendable, Codable {
     }
 
     /// https://docs.discord.com/developers/resources/application#application-object-application-integration-types
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum IntegrationKind: Sendable, Codable, CodingKeyRepresentable {
         case guildInstall  // 0
         case userInstall  // 1
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
 
         public var codingKey: any CodingKey {
             Int(self.rawValue).codingKey
@@ -41,7 +41,7 @@ public struct DiscordApplication: Sendable, Codable {
 
         public init?(codingKey: some CodingKey) {
             if let int = Int(codingKey: codingKey) {
-                self.init(rawValue: _CompatibilityIntTypeAlias(int))
+                self.init(rawValue: _Int_CompatibilityTypealias(int))
             } else {
                 return nil
             }

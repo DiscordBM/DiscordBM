@@ -77,7 +77,7 @@ public struct UnstableEnum: Sendable, MemberMacro {
             if values.allSatisfy({ Int($0) != nil }) {
                 throw MacroError.enumSeemsToHaveIntValuesButGenericArgumentSpecifiesString
             }
-        case ._CompatibilityIntTypeAlias, ._CompatibilityUIntTypeAlias, .UInt8:
+        case ._Int_CompatibilityTypealias, ._UInt_CompatibilityTypealias, .UInt8:
             /// All values must be integer
             if !values.allSatisfy({ Int($0.filter({ $0 != "_" })) != nil }) {
                 throw MacroError.intEnumMustOnlyHaveIntValues

@@ -1,27 +1,27 @@
 /// https://docs.discord.com/developers/resources/invite#invite-object-invite-structure
 public struct Invite: Sendable, Codable {
 
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum Kind: Sendable, Codable {
         case guild  // 0
         case groupDm  // 1
         case friend  // 2
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/invite#invite-object-invite-target-types
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum TargetKind: Sendable, Codable {
         case stream  // 1
         case embeddedApplication  // 2
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/invite#invite-object-guild-invite-flags
-    @UnstableEnum<_CompatibilityUIntTypeAlias>
+    @UnstableEnum<_UInt_CompatibilityTypealias>
     public enum Flag: Sendable {
         case isGuestInvite  // 0
-        case __undocumented(_CompatibilityUIntTypeAlias)
+        case __undocumented(_UInt_CompatibilityTypealias)
     }
 
     public var type: Kind

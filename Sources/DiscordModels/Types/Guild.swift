@@ -4,7 +4,7 @@ public struct Guild: Sendable, Codable {
     /// https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-structure
     public struct Member: Sendable, Codable {
         /// https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-flags
-        @UnstableEnum<_CompatibilityUIntTypeAlias>
+        @UnstableEnum<_UInt_CompatibilityTypealias>
         public enum Flag: Sendable {
             case didRejoin  // 0
             case completedOnboarding  // 1
@@ -16,7 +16,7 @@ public struct Guild: Sendable, Codable {
             case automodQuarantinedUsername  // 7
             case dmSettingsUpsellAcknowledged  // 9
             case automodQuarantinedGuildTag  // 10
-            case __undocumented(_CompatibilityUIntTypeAlias)
+            case __undocumented(_UInt_CompatibilityTypealias)
         }
 
         public var user: DiscordUser?
@@ -88,31 +88,31 @@ public struct Guild: Sendable, Codable {
     }
 
     /// https://docs.discord.com/developers/resources/guild#guild-object-verification-level
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum VerificationLevel: Sendable, Codable {
         case none  // 0
         case low  // 1
         case medium  // 2
         case high  // 3
         case veryHigh  // 4
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/guild#guild-object-default-message-notification-level
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum DefaultMessageNotificationLevel: Sendable, Codable {
         case allMessages  // 0
         case onlyMentions  // 1
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/guild#guild-object-explicit-content-filter-level
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum ExplicitContentFilterLevel: Sendable, Codable {
         case disabled  // 0
         case memberWithoutRoles  // 1
         case allMembers  // 2
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/guild#guild-object-guild-features
@@ -171,15 +171,15 @@ public struct Guild: Sendable, Codable {
     }
 
     /// https://docs.discord.com/developers/resources/guild#guild-object-mfa-level
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum MFALevel: Sendable, Codable {
         case none  // 0
         case elevated  // 1
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/guild#guild-object-system-channel-flags
-    @UnstableEnum<_CompatibilityUIntTypeAlias>
+    @UnstableEnum<_UInt_CompatibilityTypealias>
     public enum SystemChannelFlag: Sendable {
         case suppressJoinNotifications  // 0
         case suppressPremiumSubscriptions  // 1
@@ -187,17 +187,17 @@ public struct Guild: Sendable, Codable {
         case suppressJoinNotificationReplies  // 3
         case suppressRoleSubscriptionPurchaseNotifications  // 4
         case suppressRoleSubscriptionPurchaseNotificationReplies  // 5
-        case __undocumented(_CompatibilityUIntTypeAlias)
+        case __undocumented(_UInt_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/guild#guild-object-premium-tier
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum PremiumTier: Sendable, Codable {
         case none  // 0
         case tier1  // 1
         case tier2  // 2
         case tier3  // 3
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/guild#welcome-screen-object-welcome-screen-structure
@@ -228,24 +228,24 @@ public struct Guild: Sendable, Codable {
     }
 
     /// https://docs.discord.com/developers/resources/guild#guild-object-guild-nsfw-level
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum NSFWLevel: Sendable, Codable {
         case `default`  // 0
         case explicit  // 1
         case safe  // 2
         case ageRestricted  // 3
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     /// https://docs.discord.com/developers/resources/guild#create-guild-json-params
-    @UnstableEnum<_CompatibilityIntTypeAlias>
+    @UnstableEnum<_Int_CompatibilityTypealias>
     public enum AFKTimeout: Sendable, Codable {
         case oneMinute  // 60
         case fiveMinutes  // 300
         case fifteenMinutes  // 900
         case halfAnHour  // 1800
         case anHour  // 3600
-        case __undocumented(_CompatibilityIntTypeAlias)
+        case __undocumented(_Int_CompatibilityTypealias)
     }
 
     public var id: GuildSnowflake
@@ -407,11 +407,11 @@ extension Guild {
             }
 
             /// https://docs.discord.com/developers/resources/guild#guild-onboarding-object-prompt-types
-            @UnstableEnum<_CompatibilityIntTypeAlias>
+            @UnstableEnum<_Int_CompatibilityTypealias>
             public enum Kind: Sendable, Codable {
                 case multipleChoice  // 0
                 case dropdown  // 1
-                case __undocumented(_CompatibilityIntTypeAlias)
+                case __undocumented(_Int_CompatibilityTypealias)
             }
 
             public var id: OnboardingPromptSnowflake
