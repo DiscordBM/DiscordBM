@@ -2,21 +2,21 @@
 public struct Sticker: Sendable, Codable {
 
     /// https://docs.discord.com/developers/resources/sticker#sticker-object-sticker-types
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum Kind: Sendable, Codable {
         case standard  // 1
         case guild  // 2
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
     }
 
     /// https://docs.discord.com/developers/resources/sticker#sticker-object-sticker-format-types
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum FormatKind: Sendable, Codable {
         case png  // 1
         case apng  // 2
         case lottie  // 3
         case gif  // 4
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
     }
 
     public var id: StickerSnowflake

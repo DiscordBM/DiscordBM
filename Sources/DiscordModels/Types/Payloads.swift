@@ -501,12 +501,14 @@ public enum Payloads {
                 components?.isEmpty,
                 files?.isEmpty,
                 poll?.answers.isEmpty,
+                message_reference == nil,
                 names: "content",
                 "embeds",
                 "sticker_ids",
                 "components",
                 "files",
-                "poll"
+                "poll",
+                "message_reference"
             )
             validateCombinedCharacterCountDoesNotExceed(
                 embeds?.reduce(into: 0, { $0 += $1.contentLength }),
@@ -862,6 +864,7 @@ public enum Payloads {
         }
     }
 
+    /// https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel
     public struct CreateThreadInForumChannel: Sendable, MultipartEncodable, ValidatablePayload {
 
         /// https://docs.discord.com/developers/resources/channel#start-thread-in-forum-channel-forum-thread-message-params-object
@@ -1929,9 +1932,20 @@ public enum Payloads {
     /// https://docs.discord.com/developers/resources/guild#modify-current-member-json-params
     public struct ModifyCurrentMember: Sendable, Encodable, ValidatablePayload {
         public var nick: String?
+        public var banner: ImageData?
+        public var avatar: ImageData?
+        public var bio: String?
 
-        public init(nick: String? = nil) {
+        public init(
+            nick: String? = nil,
+            banner: ImageData? = nil,
+            avatar: ImageData? = nil,
+            bio: String? = nil
+        ) {
             self.nick = nick
+            self.banner = banner
+            self.avatar = avatar
+            self.bio = bio
         }
 
         public func validate() -> [ValidationFailure] {}

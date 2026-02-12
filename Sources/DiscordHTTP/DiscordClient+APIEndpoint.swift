@@ -2344,13 +2344,14 @@ extension DiscordClient {
         withExpiration: Bool? = nil,
         guildScheduledEventId: GuildScheduledEventSnowflake? = nil
     ) async throws -> DiscordClientResponse<Invite> {
+        // Discord removed support for this query parameter.
+        _ = withExpiration
         let endpoint = APIEndpoint.resolveInvite(code: code)
         return try await self.send(
             request: .init(
                 to: endpoint,
                 queries: [
                     ("with_counts", withCounts.map { "\($0)" }),
-                    ("with_expiration", withExpiration.map { "\($0)" }),
                     ("guild_scheduled_event_id", guildScheduledEventId.map { "\($0.rawValue)" }),
                 ]
             )

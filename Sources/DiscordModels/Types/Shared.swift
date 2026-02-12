@@ -17,7 +17,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
     }
 
     case string(String)
-    case int(Int)
+    case int(_CompatibilityIntTypeAlias)
     case double(Double)
     case bool(Bool)
 
@@ -39,12 +39,11 @@ public enum StringIntDoubleBool: Sendable, Codable {
         }
     }
 
-    /// Requires a `Int` or throws `StringIntDoubleBool.Error`.
     @inlinable
-    public func requireInt() throws -> Int {
+    public func requireInt() throws -> _CompatibilityIntTypeAlias {
         switch self {
         case .int(let int): return int
-        default: throw Error.valueIsNotOfType(Int.self, value: self)
+        default: throw Error.valueIsNotOfType(_CompatibilityIntTypeAlias.self, value: self)
         }
     }
 
@@ -70,7 +69,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
         let container = try decoder.singleValueContainer()
         if let string = try? container.decode(String.self) {
             self = .string(string)
-        } else if let int = try? container.decode(Int.self) {
+        } else if let int = try? container.decode(_CompatibilityIntTypeAlias.self) {
             self = .int(int)
         } else if let bool = try? container.decode(Bool.self) {
             self = .bool(bool)
@@ -100,7 +99,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
 /// To dynamically decode/encode String or Int.
 public enum StringOrInt: Sendable, Codable {
     case string(String)
-    case int(Int)
+    case int(_CompatibilityIntTypeAlias)
 
     public var asString: String {
         switch self {
@@ -114,7 +113,7 @@ public enum StringOrInt: Sendable, Codable {
         if let string = try? container.decode(String.self) {
             self = .string(string)
         } else {
-            let int = try container.decode(Int.self)
+            let int = try container.decode(_CompatibilityIntTypeAlias.self)
             self = .int(int)
         }
     }
@@ -133,17 +132,17 @@ public enum StringOrInt: Sendable, Codable {
 //MARK: - IntOrDouble
 
 public enum IntOrDouble: Sendable, Codable {
-    case int(Int)
+    case int(_CompatibilityIntTypeAlias)
     case double(Double)
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
-        if let int = try? container.decode(Int.self) {
+        if let int = try? container.decode(_CompatibilityIntTypeAlias.self) {
             self = .int(int)
-        } else {
-            let double = try container.decode(Double.self)
-            self = .double(double)
+            return
         }
+        let double = try container.decode(Double.self)
+        self = .double(double)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -676,7 +675,7 @@ extension DiscordColor {
 
     /// The gray levels in Apple's color HIG.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-gray-colors
-    public enum ColorLevel {
+    public enum ColorLevel: Sendable {
         case level1
         case level2
         case level3

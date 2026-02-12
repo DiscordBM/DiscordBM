@@ -43,6 +43,8 @@ public struct Gateway: Sendable, Codable {
             case resumed
             /// https://discord.com/developers/docs/topics/gateway-events#invalid-session
             case invalidSession(canResume: Bool)
+            /// https://discord.com/developers/docs/events/gateway-events#rate-limited
+            case rateLimited(RateLimited)
 
             case channelCreate(DiscordChannel)
             case channelUpdate(DiscordChannel)
@@ -155,10 +157,10 @@ public struct Gateway: Sendable, Codable {
             public var correspondingIntents: [Intent] {
                 switch self {
                 case .heartbeat, .identify, .hello, .ready, .resume, .resumed, .invalidSession, .requestGuildMembers,
-                    .requestSoundboardSounds, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate,
-                    .entitlementCreate, .entitlementUpdate, .entitlementDelete, .subscriptionCreate,
-                    .subscriptionUpdate, .subscriptionDelete, .applicationCommandPermissionsUpdate, .userUpdate,
-                    .voiceServerUpdate:
+                    .requestSoundboardSounds, .requestPresenceUpdate, .requestVoiceStateUpdate, .rateLimited,
+                    .interactionCreate, .entitlementCreate, .entitlementUpdate, .entitlementDelete,
+                    .subscriptionCreate, .subscriptionUpdate, .subscriptionDelete,
+                    .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
                     return []
                 case .guildCreate, .guildUpdate, .guildDelete, .guildMembersChunk, .guildRoleCreate, .guildRoleUpdate,
                     .guildRoleDelete, .channelCreate, .channelUpdate, .channelDelete, .threadCreate, .threadUpdate,
@@ -286,6 +288,8 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .ready(decodeData())
                 case "RESUMED":
                     self.data = .resumed
+                case "RATE_LIMITED":
+                    self.data = try .rateLimited(decodeData())
                 case "CHANNEL_CREATE":
                     self.data = try .channelCreate(decodeData())
                 case "CHANNEL_UPDATE":
@@ -630,11 +634,7 @@ public struct Gateway: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/topics/gateway#gateway-intents
-    #if Non64BitSystemsCompatibility
-    @UnstableEnum<UInt64>
-    #else
-    @UnstableEnum<UInt>
-    #endif
+    @UnstableEnum<_CompatibilityUIntTypeAlias>
     public enum Intent: Sendable, Codable, CaseIterable {
         case guilds  // 0
         case guildMembers  // 1
@@ -657,11 +657,7 @@ public struct Gateway: Sendable, Codable {
         case autoModerationExecution  // 21
         case guildMessagePolls  // 24
         case directMessagePolls  // 25
-        #if Non64BitSystemsCompatibility
-        case __undocumented(UInt64)
-        #else
-        case __undocumented(UInt)
-        #endif
+        case __undocumented(_CompatibilityUIntTypeAlias)
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#resume-resume-structure
@@ -1021,6 +1017,79 @@ public struct Gateway: Sendable, Codable {
         }
     }
 
+    /// https://discord.com/developers/docs/events/gateway-events#rate-limited
+    public struct RateLimited: Sendable, Codable {
+
+        public enum Metadata: Sendable {
+            /// https://discord.com/developers/docs/events/gateway-events#rate-limited-request-guild-member-rate-limit-metadata-structure
+            public struct RequestGuildMemberMetadata: Sendable, Codable {
+                public var guild_id: GuildSnowflake
+                public var nonce: String?
+
+                public init(guild_id: GuildSnowflake, nonce: String? = nil) {
+                    self.guild_id = guild_id
+                    self.nonce = nonce
+                }
+            }
+
+            case requestGuildMembers(RequestGuildMemberMetadata)
+            case __undocumented(Opcode)
+
+            public var opcode: Opcode {
+                switch self {
+                case .requestGuildMembers:
+                    return .requestGuildMembers
+                case .__undocumented(let opcode):
+                    return opcode
+                }
+            }
+        }
+
+        enum CodingKeys: String, CodingKey {
+            case opcode
+            case retry_after
+            case meta
+        }
+
+        public var opcode: Opcode {
+            self.meta.opcode
+        }
+        public var retry_after: Double
+        public var meta: Metadata
+
+        public init(retry_after: Double, meta: Metadata) {
+            self.retry_after = retry_after
+            self.meta = meta
+        }
+
+        public init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let opcode = try container.decode(Opcode.self, forKey: .opcode)
+            self.retry_after = try container.decode(Double.self, forKey: .retry_after)
+
+            switch opcode {
+            case .requestGuildMembers:
+                let metadata = try container.decode(Metadata.RequestGuildMemberMetadata.self, forKey: .meta)
+                self.meta = .requestGuildMembers(metadata)
+            default:
+                self.meta = .__undocumented(opcode)
+            }
+        }
+
+        public func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(self.retry_after, forKey: .retry_after)
+
+            switch self.meta {
+            case let .requestGuildMembers(metadata):
+                try container.encode(Opcode.requestGuildMembers, forKey: .opcode)
+                try container.encode(metadata, forKey: .meta)
+            case let .__undocumented(opcode):
+                try container.encode(opcode, forKey: .opcode)
+            }
+        }
+    }
+
     /// https://discord.com/developers/docs/topics/gateway-events#request-soundboard-sounds
     public struct RequestSoundboardSounds: Sendable, Codable {
         public var guild_ids: [GuildSnowflake]
@@ -1113,6 +1182,7 @@ public struct Gateway: Sendable, Codable {
         public var target_application: PartialApplication?
         public var temporary: Bool
         public var uses: Int
+        public var expires_at: DiscordTimestamp?
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#invite-delete
@@ -1256,12 +1326,12 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: GuildSnowflake?
     }
 
-    @UnstableEnum<Int>
+    @UnstableEnum<_CompatibilityIntTypeAlias>
     public enum ReactionKind: Sendable, Codable {
         case normal  // 0
         /// FIXME: Discord calls this 'burst'. Can't change it to not break API
         case `super`  // 1
-        case __undocumented(Int)
+        case __undocumented(_CompatibilityIntTypeAlias)
 
         /// The same as ``.super``.
         public static var burst: Self {
@@ -1414,7 +1484,7 @@ public struct Gateway: Sendable, Codable {
     public struct Activity: Sendable, Codable {
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
-        @UnstableEnum<Int>
+        @UnstableEnum<_CompatibilityIntTypeAlias>
         public enum Kind: Sendable, Codable {
             /// FIXME: "game" has been renamed to "playing"
             case game  // 0
@@ -1423,7 +1493,7 @@ public struct Gateway: Sendable, Codable {
             case watching  // 3
             case custom  // 4
             case competing  // 5
-            case __undocumented(Int)
+            case __undocumented(_CompatibilityIntTypeAlias)
 
             /// "game" has been renamed to "playing":
             /// https://github.com/discord/discord-api-docs/commit/3cad69757ad24ecb5affc3024f008d186022ec91
@@ -1508,11 +1578,7 @@ public struct Gateway: Sendable, Codable {
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-flags
-        #if Non64BitSystemsCompatibility
-        @UnstableEnum<UInt64>
-        #else
-        @UnstableEnum<UInt>
-        #endif
+        @UnstableEnum<_CompatibilityUIntTypeAlias>
         public enum Flag: Sendable {
             case instance  // 0
             case join  // 1
@@ -1523,11 +1589,7 @@ public struct Gateway: Sendable, Codable {
             case partyPrivacyFriends  // 6
             case partyPrivacyVoiceChannel  // 7
             case embedded  // 8
-            #if Non64BitSystemsCompatibility
-            case __undocumented(UInt64)
-            #else
-            case __undocumented(UInt)
-            #endif
+            case __undocumented(_CompatibilityUIntTypeAlias)
         }
 
         /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-buttons
@@ -1636,11 +1698,11 @@ public struct Gateway: Sendable, Codable {
     public struct VoiceChannelEffectSend: Sendable, Codable {
 
         /// https://discord.com/developers/docs/topics/gateway-events#voice-channel-effect-send-animation-types
-        @UnstableEnum<Int>
+        @UnstableEnum<_CompatibilityIntTypeAlias>
         public enum AnimationKind: Sendable, Codable {
             case premium  // 0
             case basic  // 1
-            case __undocumented(Int)
+            case __undocumented(_CompatibilityIntTypeAlias)
         }
 
         public var channel_id: ChannelSnowflake

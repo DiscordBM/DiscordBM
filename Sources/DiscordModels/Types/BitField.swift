@@ -1,9 +1,3 @@
-#if Non64BitSystemsCompatibility
-public typealias _CompatibilityUIntTypeAlias = UInt64
-#else
-public typealias _CompatibilityUIntTypeAlias = UInt
-#endif
-
 public protocol BitField: OptionSet, CustomStringConvertible
 where RawValue == _CompatibilityUIntTypeAlias {
     associatedtype R: RawRepresentable & LosslessRawRepresentable
@@ -91,14 +85,14 @@ public struct IntBitField<R>: BitField
 where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == _CompatibilityUIntTypeAlias {
     public var rawValue: _CompatibilityUIntTypeAlias
 
-    #if Non64BitSystemsCompatibility
+    #if ExperimentalNon64BitSystemsCompatibility
     @_disfavoredOverload
     #endif
     public init(rawValue: UInt = 0) {
         self.rawValue = .init(rawValue)
     }
 
-    #if !Non64BitSystemsCompatibility
+    #if !ExperimentalNon64BitSystemsCompatibility
     @_disfavoredOverload
     #endif
     public init(rawValue: UInt64 = 0) {
@@ -123,14 +117,14 @@ public struct StringBitField<R>: BitField
 where R: RawRepresentable & LosslessRawRepresentable & Hashable, R.RawValue == _CompatibilityUIntTypeAlias {
     public var rawValue: _CompatibilityUIntTypeAlias
 
-    #if Non64BitSystemsCompatibility
+    #if ExperimentalNon64BitSystemsCompatibility
     @_disfavoredOverload
     #endif
     public init(rawValue: UInt = 0) {
         self.rawValue = .init(rawValue)
     }
 
-    #if !Non64BitSystemsCompatibility
+    #if !ExperimentalNon64BitSystemsCompatibility
     @_disfavoredOverload
     #endif
     public init(rawValue: UInt64 = 0) {

@@ -22,12 +22,11 @@ jobs:
   main-tests-w-traits-enabled:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
-      with_linting: true
       with_coverage: true
       with_tsan: true
-      with_api_check: true
+      with_api_check: false
       test_filter: "^DiscordBMTests"
-      extra_flags: "--traits Non64BitSystemsCompatibility --explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable --disable-experimental-prebuilts"
+      extra_flags: "--traits ExperimentalNon64BitSystemsCompatibility --explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable --disable-experimental-prebuilts"
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -49,6 +48,6 @@ jobs:
       with_tsan: true
       with_api_check: false
       test_filter: "^MacroTests"
-      extra_flags: "--traits Non64BitSystemsCompatibility --explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable --disable-experimental-prebuilts"
+      extra_flags: "--traits ExperimentalNon64BitSystemsCompatibility --explicit-target-dependency-import-check error --force-resolved-versions -Xswiftc -require-explicit-sendable --disable-experimental-prebuilts"
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

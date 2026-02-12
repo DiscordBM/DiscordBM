@@ -407,7 +407,7 @@ public actor DiscordCache {
             .requestSoundboardSounds, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate,
             .subscriptionCreate, .subscriptionUpdate, .subscriptionDelete, .guildSoundboardSoundCreate,
             .guildSoundboardSoundUpdate, .guildSoundboardSoundDelete, .guildSoundboardSoundsUpdate, .soundboardSounds,
-            .voiceChannelEffectSend:
+            .voiceChannelEffectSend, .rateLimited:
             break
         case let .ready(ready):
             self.application = ready.application

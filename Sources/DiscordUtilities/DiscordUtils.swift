@@ -83,6 +83,28 @@ public enum DiscordUtils {
         fatalError("unavailable")
     }
 
+    /// When used in a Discord message, shows up as an email address.
+    @inlinable
+    public static func email(
+        address: String,
+        headers: [(String, String)] = []
+    ) -> String {
+        if headers.isEmpty {
+            return "<\(address)>"
+        }
+        let headersString = headers.map { key, value in
+            let encodedValue = value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+            return "\(key)=\(encodedValue ?? value)"
+        }.joined(separator: "&")
+        return "<\(address)?\(headersString)>"
+    }
+
+    /// When used in a Discord message, shows up as a phone number.
+    @inlinable
+    public static func phoneNumber(_ number: String) -> String {
+        "<\(number)>"
+    }
+
     /// Escapes the special characters in the text, for the specified channel type.
     /// - Parameters:
     ///   - text: The text to be escaped.
@@ -134,8 +156,14 @@ public enum TimestampStyle: String {
     case shortDateTime = "f"
     /// `Tuesday, 20 April 2021 16:20`
     case longDateTime = "F"
+    /// `20/04/2021, 16:20`
+    case shortDateShortTime = "s"
+    /// `20/04/2021, 16:20:30`
+    case shortDateMediumTime = "S"
     /// `2 months ago` / `in 2 months`
     case relativeTime = "R"
+    /// This case serves as a way of discouraging exhaustive switch statements
+    case __DO_NOT_USE_THIS_CASE = "__DO_NOT_USE_THIS_CASE"
 }
 
 /// Options for escaping special characters.

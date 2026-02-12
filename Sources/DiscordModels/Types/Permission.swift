@@ -1,9 +1,5 @@
 /// https://discord.com/developers/docs/topics/permissions#permissions-bitwise-permission-flags
-#if Non64BitSystemsCompatibility
-@UnstableEnum<UInt64>
-#else
-@UnstableEnum<UInt>
-#endif
+@UnstableEnum<_CompatibilityUIntTypeAlias>
 public enum Permission: Sendable, Codable {
     case createInstantInvite  // 0
     case kickMembers  // 1
@@ -54,11 +50,8 @@ public enum Permission: Sendable, Codable {
     case sendVoiceMessages  // 46
     case sendPolls  // 49
     case useExternalApps  // 50
-    #if Non64BitSystemsCompatibility
-    case __undocumented(UInt64)
-    #else
-    case __undocumented(UInt)
-    #endif
+    case pinMessages  // 51
+    case __undocumented(_CompatibilityUIntTypeAlias)
 }
 
 /// https://discord.com/developers/docs/topics/permissions#role-object
@@ -93,18 +86,10 @@ public struct Role: Sendable, Codable {
     }
 
     /// https://discord.com/developers/docs/topics/permissions#role-object-role-flags
-    #if Non64BitSystemsCompatibility
-    @UnstableEnum<UInt64>
-    #else
-    @UnstableEnum<UInt>
-    #endif
+    @UnstableEnum<_CompatibilityUIntTypeAlias>
     public enum Flag: Sendable {
         case inPrompt  // 0
-        #if Non64BitSystemsCompatibility
-        case __undocumented(UInt64)
-        #else
-        case __undocumented(UInt)
-        #endif
+        case __undocumented(_CompatibilityUIntTypeAlias)
     }
 
     public var id: RoleSnowflake
