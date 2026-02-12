@@ -1033,7 +1033,16 @@ public struct Gateway: Sendable, Codable {
             }
 
             case requestGuildMembers(RequestGuildMemberMetadata)
-            case __undocumented
+            case __undocumented(Opcode)
+
+            public var opcode: Opcode {
+                switch self {
+                case .requestGuildMembers:
+                    return .requestGuildMembers
+                case .__undocumented(let opcode):
+                    return opcode
+                }
+            }
         }
 
         enum CodingKeys: String, CodingKey {
@@ -1042,40 +1051,41 @@ public struct Gateway: Sendable, Codable {
             case meta
         }
 
-        public var opcode: Opcode
+        public var opcode: Opcode {
+            self.meta.opcode
+        }
         public var retry_after: Double
         public var meta: Metadata
 
-        public init(opcode: Opcode, retry_after: Double, meta: Metadata) {
-            self.opcode = opcode
+        public init(retry_after: Double, meta: Metadata) {
             self.retry_after = retry_after
             self.meta = meta
         }
 
         public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
-            self.opcode = try container.decode(Opcode.self, forKey: .opcode)
+            let opcode = try container.decode(Opcode.self, forKey: .opcode)
             self.retry_after = try container.decode(Double.self, forKey: .retry_after)
 
-            switch self.opcode {
+            switch opcode {
             case .requestGuildMembers:
                 let metadata = try container.decode(Metadata.RequestGuildMemberMetadata.self, forKey: .meta)
                 self.meta = .requestGuildMembers(metadata)
             default:
-                self.meta = .__undocumented
+                self.meta = .__undocumented(opcode)
             }
         }
 
         public func encode(to encoder: any Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(self.opcode, forKey: .opcode)
             try container.encode(self.retry_after, forKey: .retry_after)
 
             switch self.meta {
             case let .requestGuildMembers(metadata):
+                try container.encode(Opcode.requestGuildMembers, forKey: .opcode)
                 try container.encode(metadata, forKey: .meta)
-            case .__undocumented:
-                try container.encode([String: StringIntDoubleBool](), forKey: .meta)
+            case let .__undocumented(opcode):
+                try container.encode(opcode, forKey: .opcode)
             }
         }
     }
