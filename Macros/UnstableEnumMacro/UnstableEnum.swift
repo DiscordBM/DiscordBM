@@ -51,55 +51,8 @@ public struct UnstableEnum: Sendable, MemberMacro {
         }
 
         let members = enumDecl.memberBlock.members
-        let caseDecls = try members.compactMap { item -> EnumCaseDeclSyntax? in
-            let decl = item.decl
-            switch decl.kind {
-            case .enumCaseDecl:
-                return decl.as(EnumCaseDeclSyntax.self)
-            case .ifConfigDecl:
-                let ifConfig = decl.as(IfConfigDeclSyntax.self)!
-                let clauses = ifConfig.clauses
-                guard clauses.count == 2 else {
-                    throw MacroError.expectedExactly2ClausesInIfConfigClause
-                }
-                func clauseAsEnumCaseDecl(_ clause: IfConfigClauseSyntax) -> EnumCaseDeclSyntax? {
-                    clause.elements?
-                        .as(MemberBlockItemListSyntax.self)?
-                        .first?
-                        .decl
-                        .as(EnumCaseDeclSyntax.self)
-                }
-                guard
-                    let firstEnumDeclSyntax = clauseAsEnumCaseDecl(clauses.first!),
-                    let secondEnumDeclSyntax = clauseAsEnumCaseDecl(clauses.last!)
-                else {
-                    throw MacroError.expectedEnumDeclSyntaxesInIfConfigClause
-                }
-                guard
-                    let firstElements = firstEnumDeclSyntax.elements.first,
-                    let secondElements = secondEnumDeclSyntax.elements.first,
-                    firstElements.name.identifier?.name == "__undocumented",
-                    secondElements.name.identifier?.name == "__undocumented"
-                else {
-                    throw MacroError.expectedTheUndocumentedEnumInIfConfigEnumDecl
-                }
-                guard
-                    let firstParameter = firstElements.parameterClause?.parameters.first,
-                    let secondParameter = secondElements.parameterClause?.parameters.first,
-                    let firstRawType = RawKind(rawValue: firstParameter.trimmedDescription),
-                    let secondRawType = RawKind(rawValue: secondParameter.trimmedDescription)
-                else {
-                    throw MacroError.invalidRawValueTypeInIfConfigClause
-                }
-                if firstRawType == rawType {
-                    return firstEnumDeclSyntax
-                } else if secondRawType == rawType {
-                    return secondEnumDeclSyntax
-                } else {
-                    throw MacroError.noCasesMatchTheRawValueTypeInIfConfigClause
-                }
-            default: return nil
-            }
+        let caseDecls = members.compactMap { item -> EnumCaseDeclSyntax? in
+            item.decl.as(EnumCaseDeclSyntax.self)
         }
         let elements = caseDecls.flatMap { $0.elements }
 
