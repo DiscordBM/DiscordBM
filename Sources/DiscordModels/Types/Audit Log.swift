@@ -344,7 +344,7 @@ public struct AuditLog: Sendable, Codable {
                         String.self,
                         forKey: .auto_moderation_rule_trigger_type
                     )
-                    if let intTrigger = Int(triggerType),
+                    if let intTrigger = _CompatibilityIntTypeAlias(triggerType),
                         let type = AutoModerationRule.TriggerKind(rawValue: intTrigger)
                     {
                         self.auto_moderation_rule_trigger_type = type

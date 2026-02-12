@@ -120,7 +120,7 @@ public struct Interaction: Sendable, Codable {
                 file: String = #file,
                 function: String = #function,
                 line: UInt = #line
-            ) throws -> Int {
+            ) throws -> _CompatibilityIntTypeAlias {
                 try self.value
                     .requireValue(file: file, function: function, line: line)
                     .requireInt()

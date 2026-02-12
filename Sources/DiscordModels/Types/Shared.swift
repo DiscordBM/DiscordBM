@@ -69,7 +69,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
         let container = try decoder.singleValueContainer()
         if let string = try? container.decode(String.self) {
             self = .string(string)
-        } else if let int = try? container.decode(Int.self) {
+        } else if let int = try? container.decode(_CompatibilityIntTypeAlias.self) {
             self = .int(int)
         } else if let bool = try? container.decode(Bool.self) {
             self = .bool(bool)
@@ -675,7 +675,7 @@ extension DiscordColor {
 
     /// The gray levels in Apple's color HIG.
     /// https://developer.apple.com/design/human-interface-guidelines/color#iOS-iPadOS-system-gray-colors
-    public enum ColorLevel {
+    public enum ColorLevel: Sendable {
         case level1
         case level2
         case level3

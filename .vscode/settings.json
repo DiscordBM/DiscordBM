@@ -1,3 +1,6 @@
 {
-  "swift.buildArguments": ["--build-system=swiftbuild"]
+  "swift.buildArguments": [
+    "--build-system=swiftbuild",
+    "--traits=ExperimentalNon64BitSystemsCompatibility"
+  ]
 }

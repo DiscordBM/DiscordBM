@@ -39,7 +39,7 @@ public struct DiscordApplication: Sendable, Codable {
             Int(self.rawValue).codingKey
         }
 
-        public init?(codingKey: any CodingKey) {
+        public init?(codingKey: some CodingKey) {
             if let int = Int(codingKey: codingKey) {
                 self.init(rawValue: _CompatibilityIntTypeAlias(int))
             } else {

@@ -937,7 +937,6 @@ class UnstableEnumMacroTests: XCTestCase {
     }
 }
 
-
 #if ExperimentalNon64BitSystemsCompatibility
 public typealias _CompatibilityIntTypeAlias = Int64
 #else
