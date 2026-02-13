@@ -84,6 +84,8 @@ public enum JSONErrorCode: Sendable, Codable {
     case unknownGuildScheduledEventUser  // 10071
     case unknownTag  // 10087
     case unknownSound  // 10097
+    case unknownInviteTargetUsersJob  // 10124
+    case unknownInviteTargetUsers  // 10129
     case botsCannotUseEndpoint  // 20001
     case onlyBotsCanUseEndpoint  // 20002
     case explicitContentCannotBeSentToRecipients  // 20009
@@ -262,6 +264,13 @@ public enum JSONErrorCode: Sendable, Codable {
     case cannotEditPollMessage  // 520003
     case cannotUseEmojiIncludedWithThePoll  // 520004
     case cannotExpireNonPollMessage  // 520006
+    case yourApplicationHasNotBeenGrantedPermissionToUseProvisionalAccounts  // 530000
+    case providedIDTokenJWTIsExpired  // 530001
+    case providedIDTokenJWTIssuerDoesNotMatchConfiguredIssuer  // 530002
+    case providedIDTokenJWTAudienceDoesNotMatchConfiguredAudience  // 530003
+    case providedIDTokenWasIssuedTooLongAgo  // 530004
+    case discordFailedToGenerateUniqueUsernameInTime  // 530006
+    case yourClientSecretIsInvalid  // 530007
     case __undocumented(_Int_CompatibilityTypealias)
 }
 

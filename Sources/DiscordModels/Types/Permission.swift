@@ -51,6 +51,7 @@ public enum Permission: Sendable, Codable {
     case sendPolls  // 49
     case useExternalApps  // 50
     case pinMessages  // 51
+    case bypassSlowmode  // 52
     case __undocumented(_UInt_CompatibilityTypealias)
 }
 

@@ -192,7 +192,8 @@ extension ValidatablePayload {
                 switch element {
                 case .button, .stringSelect, .textInput, .userSelect, .roleSelect, .mentionableSelect,
                     .channelSelect, .textDisplay, .thumbnail, .mediaGallery, .file, .separator,
-                    .container, .label, .fileUpload, .__undocumented:
+                    .container, .label, .fileUpload, .radioGroup, .checkboxGroup, .checkbox,
+                    .__undocumented:
                     result += 1
                 case .section(let section):
                     result += componentsCount(section.components)

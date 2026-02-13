@@ -598,7 +598,7 @@ class DiscordClientTests: XCTestCase {
         switch leaveGuildError {
         case let .jsonError(jsonError) where jsonError.code == .invalidGuild:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: leaveGuildError))")
         }
 
@@ -763,6 +763,61 @@ class DiscordClientTests: XCTestCase {
 
         XCTAssertEqual(resolved.code, invite.code)
 
+        let initialTargetUsersError = try await client.getInviteTargetUsers(
+            code: invite.code
+        ).asError()
+        switch initialTargetUsersError {
+        case let .jsonError(jsonError) where jsonError.code == .unknownInviteTargetUsers:
+            break
+        default:
+            XCTFail("Unexpected error: \(String(describing: initialTargetUsersError))")
+        }
+
+        let initialTargetUsersJobStatusError = try await client.getInviteTargetUsersJobStatus(
+            code: invite.code
+        ).asError()
+        switch initialTargetUsersJobStatusError {
+        case let .jsonError(jsonError) where jsonError.code == .unknownInviteTargetUsersJob:
+            break
+        default:
+            XCTFail("Unexpected error: \(String(describing: initialTargetUsersJobStatusError))")
+        }
+
+        let targetUsersCSV = "user_id\n\(Constants.personalId.rawValue)\n"
+        try await client.updateInviteTargetUsers(
+            code: invite.code,
+            payload: .init(
+                target_users_file: .init(
+                    data: .init(string: targetUsersCSV),
+                    filename: "target-users.csv"
+                )
+            )
+        ).guardSuccess()
+
+        var didComplete = false
+        jobStatusLoop: for _ in 0..<10 {
+            let jobStatus = try await client.getInviteTargetUsersJobStatus(
+                code: invite.code
+            ).decode()
+            switch jobStatus.status {
+            case .unspecified, .processing:
+                try await Task.sleep(for: .milliseconds(250))
+            case .completed:
+                didComplete = true
+                break jobStatusLoop
+            case .failed, .__undocumented:
+                XCTFail("Target users job failed. Payload: \(jobStatus)")
+                break jobStatusLoop
+            }
+        }
+        XCTAssertTrue(didComplete)
+
+        let targetUsersResponseFile = try await client.getInviteTargetUsers(
+            code: invite.code
+        ).getFile()
+        let fileString = String(buffer: targetUsersResponseFile.data)
+        XCTAssertTrue(fileString.contains(Constants.personalId.rawValue), fileString)
+
         try await client.revokeInvite(code: invite.code).guardSuccess()
     }
 
@@ -833,7 +888,7 @@ class DiscordClientTests: XCTestCase {
         switch addMemberError {
         case let .jsonError(jsonError) where jsonError.code == .invalidOAuth2AccessToken:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: addMemberError))")
         }
 
@@ -846,7 +901,7 @@ class DiscordClientTests: XCTestCase {
         switch deleteMemberError {
         case let .jsonError(jsonError) where jsonError.code == .unknownUser:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: deleteMemberError))")
         }
 
@@ -1010,6 +1065,12 @@ class DiscordClientTests: XCTestCase {
             userId: Constants.personalId,
             roleId: role.id
         ).guardSuccess()
+
+        let roleMemberCounts = try await client.getGuildRoleMemberCounts(
+            guildId: Constants.guildId
+        ).decode()
+        XCTAssertGreaterThan(roleMemberCounts[role.id] ?? 0, 0)
+        XCTAssertGreaterThan(roleMemberCounts.count, 0)
 
         try await client.deleteGuildMemberRole(
             guildId: Constants.guildId,
@@ -1277,7 +1338,7 @@ class DiscordClientTests: XCTestCase {
         switch integrationDeleteError {
         case let .jsonError(jsonError) where jsonError.code == .unknownIntegration:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: integrationDeleteError))")
         }
     }
@@ -1511,7 +1572,7 @@ class DiscordClientTests: XCTestCase {
         /// The actual problem is that the server doesn't have a vanity url (requires boosts)
         case let .jsonError(jsonError) where jsonError.code == .missingAccess:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: vanityError))")
         }
 
@@ -1731,7 +1792,7 @@ class DiscordClientTests: XCTestCase {
         switch selfVoiceStateError {
         case .jsonError(let jsonError) where jsonError.code == .unknownVoiceState:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: selfVoiceStateError))")
         }
 
@@ -1759,7 +1820,7 @@ class DiscordClientTests: XCTestCase {
         switch voiceStateError {
         case .jsonError(let jsonError) where jsonError.code == .unknownVoiceState:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: voiceStateError))")
         }
     }
@@ -1786,7 +1847,7 @@ class DiscordClientTests: XCTestCase {
             switch getError {
             case .jsonError(let jsonError) where jsonError.code == .unknownSound:
                 break
-            case .none, .badStatusCode, .jsonError:
+            default:
                 XCTFail("Unexpected error: \(String(describing: getError))")
             }
         }
@@ -1799,7 +1860,7 @@ class DiscordClientTests: XCTestCase {
         /// "User must be in voice channel to send voice channel effect"
         case .jsonError(let jsonError) where jsonError.code?.rawValue == 50168:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: sendError))")
         }
     }
@@ -2380,7 +2441,7 @@ class DiscordClientTests: XCTestCase {
         switch createError {
         case .jsonError(let jsonError) where jsonError.code == .unknownSKU:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: createError))")
         }
 
@@ -2391,7 +2452,7 @@ class DiscordClientTests: XCTestCase {
         switch consumeError {
         case .jsonError(let jsonError) where jsonError.code == .unknownEntitlement:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: consumeError))")
         }
 
@@ -2402,7 +2463,7 @@ class DiscordClientTests: XCTestCase {
         switch getError {
         case .jsonError(let jsonError) where jsonError.code == .unknownEntitlement:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: getError))")
         }
 
@@ -2413,7 +2474,7 @@ class DiscordClientTests: XCTestCase {
         switch deleteError {
         case .jsonError(let jsonError) where jsonError.code == .unknownEntitlement:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: deleteError))")
         }
 
@@ -2428,7 +2489,7 @@ class DiscordClientTests: XCTestCase {
         switch listSubscriptionsError {
         case .jsonError(let jsonError) where jsonError.code == .unknownSKU:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: listSubscriptionsError))")
         }
 
@@ -2440,7 +2501,7 @@ class DiscordClientTests: XCTestCase {
         switch getSubscriptionError {
         case .jsonError(let jsonError) where jsonError.code == .unknownUser:
             break
-        case .none, .badStatusCode, .jsonError:
+        default:
             XCTFail("Unexpected error: \(String(describing: getSubscriptionError))")
         }
     }
