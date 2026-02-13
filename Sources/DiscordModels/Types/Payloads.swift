@@ -214,6 +214,9 @@ public enum Payloads {
             public var title: String
             public var components: [Interaction.ActionRow]
 
+            /// Previously you could only send text-inputs. Now a few more new types of components are supported.
+            /// Outdated comments below:
+            ///
             /// Discord docs says currently you can only send text-inputs.
             /// To send other types of components, use a normal message's `components`:
             /// `Payloads.InteractionResponse.Message(components: [...])`
@@ -224,9 +227,16 @@ public enum Payloads {
                 self.components = textInputs.map { [.textInput($0)] }
             }
 
+            public init(custom_id: String, title: String, components: [Interaction.ActionRow]) {
+                self.custom_id = custom_id
+                self.title = title
+                self.components = components
+            }
+
             public func validate() -> [ValidationFailure] {
                 validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
                 validateElementCountInRange(components, min: 1, max: 5, name: "components")
+                components.validate()
             }
         }
 

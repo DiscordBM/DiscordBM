@@ -475,6 +475,9 @@ extension Interaction {
             case container  // 17
             case label  // 18
             case fileUpload  // 19
+            case radioGroup  // 21
+            case checkboxGroup  // 22
+            case checkbox  // 23
             case __undocumented(_Int_CompatibilityTypealias)
         }
 
@@ -1180,7 +1183,154 @@ extension Interaction {
                 validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
                 validateNumberInRangeOrNil(min_values, min: 0, max: 10, name: "min_values")
                 validateNumberInRangeOrNil(max_values, min: 1, max: 10, name: "max_values")
-                validateElementCountDoesNotExceed(values, max: 10, name: "values")
+            }
+        }
+
+        /// https://discord.com/developers/docs/components/reference#radio-group
+        public struct RadioGroup: Sendable, Codable, ValidatablePayload {
+
+            /// https://discord.com/developers/docs/components/reference#radio-group-option-structure
+            public struct Option: Sendable, Codable, ValidatablePayload {
+                public var value: String
+                public var label: String
+                public var description: String?
+                public var `default`: Bool?
+
+                public init(
+                    value: String,
+                    label: String,
+                    description: String? = nil,
+                    `default`: Bool? = nil
+                ) {
+                    self.value = value
+                    self.label = label
+                    self.description = description
+                    self.`default` = `default`
+                }
+
+                public func validate() -> [ValidationFailure] {
+                    validateCharacterCountDoesNotExceed(value, max: 100, name: "value")
+                    validateCharacterCountDoesNotExceed(label, max: 100, name: "label")
+                    validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
+                }
+            }
+
+            public var id: Int?
+            public var custom_id: String
+            public var options: [Option]?
+            public var required: Bool?
+            public var value: String?
+
+            public init(
+                id: Int? = nil,
+                custom_id: String,
+                options: [Option],
+                required: Bool? = nil
+            ) {
+                self.id = id
+                self.custom_id = custom_id
+                self.options = options
+                self.required = required
+                self.value = nil
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
+                validateElementCountInRange(options, min: 2, max: 10, name: "options")
+                validateCharacterCountDoesNotExceed(value, max: 100, name: "value")
+                options?.validate()
+            }
+        }
+
+        /// https://discord.com/developers/docs/components/reference#checkbox-group
+        public struct CheckboxGroup: Sendable, Codable, ValidatablePayload {
+
+            /// https://discord.com/developers/docs/components/reference#checkbox-group-option-structure
+            public struct Option: Sendable, Codable, ValidatablePayload {
+                public var value: String
+                public var label: String
+                public var description: String?
+                public var `default`: Bool?
+
+                public init(
+                    value: String,
+                    label: String,
+                    description: String? = nil,
+                    `default`: Bool? = nil
+                ) {
+                    self.value = value
+                    self.label = label
+                    self.description = description
+                    self.`default` = `default`
+                }
+
+                public func validate() -> [ValidationFailure] {
+                    validateCharacterCountDoesNotExceed(value, max: 100, name: "value")
+                    validateCharacterCountDoesNotExceed(label, max: 100, name: "label")
+                    validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
+                }
+            }
+
+            public var id: Int?
+            public var custom_id: String
+            public var options: [Option]?
+            public var min_values: Int?
+            public var max_values: Int?
+            public var required: Bool?
+            public var values: [String]?
+
+            public init(
+                id: Int? = nil,
+                custom_id: String,
+                options: [Option],
+                min_values: Int? = nil,
+                max_values: Int? = nil,
+                required: Bool? = nil
+            ) {
+                self.id = id
+                self.custom_id = custom_id
+                self.options = options
+                self.min_values = min_values
+                self.max_values = max_values
+                self.required = required
+                self.values = nil
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
+                validateElementCountInRange(options, min: 1, max: 10, name: "options")
+                validateNumberInRangeOrNil(min_values, min: 0, max: 10, name: "min_values")
+                validateNumberInRangeOrNil(max_values, min: 1, max: 10, name: "max_values")
+                validateHasPrecondition(
+                    condition: min_values == 0,
+                    allowedIf: required == false,
+                    name: "required",
+                    reason: "`required` must be `false` when `min_values` is `0`"
+                )
+                options?.validate()
+            }
+        }
+
+        /// https://discord.com/developers/docs/components/reference#checkbox
+        public struct Checkbox: Sendable, Codable, ValidatablePayload {
+            public var id: Int?
+            public var custom_id: String
+            public var `default`: Bool?
+            public var value: Bool?
+
+            public init(
+                id: Int? = nil,
+                custom_id: String,
+                `default`: Bool? = nil
+            ) {
+                self.id = id
+                self.custom_id = custom_id
+                self.`default` = `default`
+                self.value = nil
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
             }
         }
 
@@ -1204,6 +1354,9 @@ extension Interaction {
             case container(Container)
             indirect case label(Label)
             case fileUpload(FileUpload)
+            case radioGroup(RadioGroup)
+            case checkboxGroup(CheckboxGroup)
+            case checkbox(Checkbox)
             case __undocumented
 
             public var customId: String? {
@@ -1221,6 +1374,12 @@ extension Interaction {
                 case let .mentionableSelect(value):
                     return value.custom_id
                 case let .channelSelect(value):
+                    return value.custom_id
+                case let .radioGroup(value):
+                    return value.custom_id
+                case let .checkboxGroup(value):
+                    return value.custom_id
+                case let .checkbox(value):
                     return value.custom_id
                 case .section, .textDisplay, .thumbnail, .mediaGallery, .file,
                     .separator, .container, .label, .fileUpload, .__undocumented:
@@ -1270,6 +1429,12 @@ extension Interaction {
                     self = try .label(.init(from: decoder))
                 case .fileUpload:
                     self = try .fileUpload(.init(from: decoder))
+                case .radioGroup:
+                    self = try .radioGroup(.init(from: decoder))
+                case .checkboxGroup:
+                    self = try .checkboxGroup(.init(from: decoder))
+                case .checkbox:
+                    self = try .checkbox(.init(from: decoder))
                 case .__undocumented:
                     self = .__undocumented
                 }
@@ -1326,6 +1491,15 @@ extension Interaction {
                 case let .fileUpload(fileUpload):
                     try container.encode(Kind.fileUpload, forKey: .type)
                     try fileUpload.encode(to: encoder)
+                case let .radioGroup(radioGroup):
+                    try container.encode(Kind.radioGroup, forKey: .type)
+                    try radioGroup.encode(to: encoder)
+                case let .checkboxGroup(checkboxGroup):
+                    try container.encode(Kind.checkboxGroup, forKey: .type)
+                    try checkboxGroup.encode(to: encoder)
+                case let .checkbox(checkbox):
+                    try container.encode(Kind.checkbox, forKey: .type)
+                    try checkbox.encode(to: encoder)
                 case .__undocumented:
                     break
                 }
@@ -1523,6 +1697,42 @@ extension Interaction {
                 }
             }
 
+            /// Returns the associated value if the component case is `radioGroup`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireRadioGroup() throws -> RadioGroup {
+                switch self {
+                case let .radioGroup(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "radioGroup", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `checkboxGroup`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireCheckboxGroup() throws -> CheckboxGroup {
+                switch self {
+                case let .checkboxGroup(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "checkboxGroup", component: self)
+                }
+            }
+
+            /// Returns the associated value if the component case is `checkbox`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireCheckbox() throws -> Checkbox {
+                switch self {
+                case let .checkbox(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "checkbox", component: self)
+                }
+            }
+
             public func validate() -> [ValidationFailure] {
                 switch self {
                 case .button(let button):
@@ -1557,6 +1767,12 @@ extension Interaction {
                     label.validate()
                 case .fileUpload(let fileUpload):
                     fileUpload.validate()
+                case .radioGroup(let radioGroup):
+                    radioGroup.validate()
+                case .checkboxGroup(let checkboxGroup):
+                    checkboxGroup.validate()
+                case .checkbox(let checkbox):
+                    checkbox.validate()
                 case .__undocumented:
                     Optional<ValidationFailure>.none
                 }
