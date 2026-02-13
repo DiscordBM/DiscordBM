@@ -979,20 +979,13 @@ extension Interaction {
             public var content_type: String?
             public var attachment_id: AttachmentSnowflake?
 
-            public init(
-                url: String,
-                proxy_url: String? = nil,
-                height: Int? = nil,
-                width: Int? = nil,
-                content_type: String? = nil,
-                attachment_id: AttachmentSnowflake? = nil
-            ) {
-                self.url = url
-                self.proxy_url = proxy_url
-                self.height = height
-                self.width = width
-                self.content_type = content_type
-                self.attachment_id = attachment_id
+            public init(url: DynamicURL) {
+                self.url = url.asString
+                self.proxy_url = nil
+                self.height = nil
+                self.width = nil
+                self.content_type = nil
+                self.attachment_id = nil
             }
         }
 
