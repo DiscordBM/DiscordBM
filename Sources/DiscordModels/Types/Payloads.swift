@@ -225,6 +225,7 @@ public enum Payloads {
             }
 
             public func validate() -> [ValidationFailure] {
+                validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
                 validateElementCountInRange(components, min: 1, max: 5, name: "components")
             }
         }
@@ -1707,8 +1708,8 @@ public enum Payloads {
         }
     }
 
-    /// https://docs.discord.com/developers/resources/channel#create-channel-invite-json-params
-    public struct CreateChannelInvite: Sendable, Encodable, ValidatablePayload {
+    /// https://docs.discord.com/developers/resources/channel#create-channel-invite-jsonform-params
+    public struct CreateChannelInvite: Sendable, Encodable, MultipartEncodable, ValidatablePayload {
         public var max_age: Count?
         public var max_uses: Count?
         public var temporary: Bool?
@@ -1716,6 +1717,12 @@ public enum Payloads {
         public var target_type: Invite.TargetKind?
         public var target_user_id: UserSnowflake?
         public var target_application_id: ApplicationSnowflake?
+        public var target_users_file: RawFile?
+        public var role_ids: [RoleSnowflake]?
+
+        public var files: [RawFile]? {
+            self.target_users_file.map { [$0] }
+        }
 
         public init(
             max_age: Count? = nil,
@@ -1724,7 +1731,9 @@ public enum Payloads {
             unique: Bool? = nil,
             target_type: Invite.TargetKind? = nil,
             target_user_id: UserSnowflake? = nil,
-            target_application_id: ApplicationSnowflake? = nil
+            target_application_id: ApplicationSnowflake? = nil,
+            target_users_file: RawFile? = nil,
+            role_ids: [RoleSnowflake]? = nil
         ) {
             self.max_age = max_age
             self.max_uses = max_uses
@@ -1733,6 +1742,8 @@ public enum Payloads {
             self.target_type = target_type
             self.target_user_id = target_user_id
             self.target_application_id = target_application_id
+            self.target_users_file = target_users_file
+            self.role_ids = role_ids
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1760,10 +1771,39 @@ public enum Payloads {
                 validateHasPrecondition(
                     condition: target_application_id != nil,
                     allowedIf: target_type == .embeddedApplication,
-                    name: "target_user_id",
+                    name: "target_application_id",
                     reason: "'target_application_id' & 'target_type == .embeddedApplication' require each other"
                 )
             }
+            validateHasPrecondition(
+                condition: target_users_file != nil,
+                allowedIf: target_users_file?.extension == "csv",
+                name: "target_users_file",
+                reason: "'target_users_file' extension must be 'csv'"
+            )
+        }
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#update-target-users-form-params
+    public struct UpdateInviteTargetUsers: Sendable, Encodable, MultipartEncodable, ValidatablePayload {
+        public var target_users_file: RawFile
+
+        public static var rawEncodable: Bool { true }
+        public var files: [RawFile]? {
+            [self.target_users_file]
+        }
+
+        public init(target_users_file: RawFile) {
+            self.target_users_file = target_users_file
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateHasPrecondition(
+                condition: true,
+                allowedIf: target_users_file.extension == "csv",
+                name: "target_users_file",
+                reason: "'target_users_file' extension must be 'csv'"
+            )
         }
     }
 

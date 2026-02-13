@@ -24,6 +24,16 @@ public struct Invite: Sendable, Codable {
         case __undocumented(_UInt_CompatibilityTypealias)
     }
 
+    /// https://docs.discord.com/developers/resources/invite#invite-object-invite-structure
+    public struct PartialRole: Sendable, Codable {
+        public var id: RoleSnowflake
+        public var name: String
+        public var colors: Role.Colors
+        public var icon: String?
+        public var unicode_emoji: String?
+        public var position: Int
+    }
+
     public var type: Kind
     public var code: String
     public var guild: PartialGuild?
@@ -37,6 +47,7 @@ public struct Invite: Sendable, Codable {
     public var expires_at: DiscordTimestamp?
     public var guild_scheduled_event: GuildScheduledEvent?
     public var flags: IntBitField<Flag>?
+    public var roles: [PartialRole]?
 }
 
 /// https://docs.discord.com/developers/resources/invite#invite-object-invite-structure
@@ -55,6 +66,7 @@ public struct InviteWithMetadata: Sendable, Codable {
     public var expires_at: DiscordTimestamp?
     public var guild_scheduled_event: GuildScheduledEvent?
     public var flags: IntBitField<Invite.Flag>?
+    public var roles: [Invite.PartialRole]?
     public var uses: Int
     public var max_uses: Int
     public var max_age: Int
@@ -77,4 +89,5 @@ public struct PartialInvite: Sendable, Codable {
     public var expires_at: DiscordTimestamp?
     public var guild_scheduled_event: GuildScheduledEvent?
     public var flags: IntBitField<Invite.Flag>?
+    public var roles: [Invite.PartialRole]?
 }

@@ -73,4 +73,25 @@ public enum Responses {
     public struct ListGuildSoundboardSounds: Sendable, Codable {
         public var items: [SoundboardSound]
     }
+
+    /// https://docs.discord.com/developers/resources/invite#get-target-users-job-status
+    public struct GetTargetUsersJobStatus: Sendable, Codable {
+
+        /// https://docs.discord.com/developers/resources/invite#get-target-users-job-status
+        @UnstableEnum<_Int_CompatibilityTypealias>
+        public enum Status: Sendable, Codable {
+            case unspecified  // 0
+            case processing  // 1
+            case completed  // 2
+            case failed  // 3
+            case __undocumented(_Int_CompatibilityTypealias)
+        }
+
+        public var status: Status
+        public var total_users: Int?
+        public var processed_users: Int?
+        public var created_at: DiscordTimestamp?
+        public var completed_at: DiscordTimestamp?
+        public var error_message: String?
+    }
 }

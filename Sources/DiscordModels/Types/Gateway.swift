@@ -1183,6 +1183,7 @@ public struct Gateway: Sendable, Codable {
         public var temporary: Bool
         public var uses: Int
         public var expires_at: DiscordTimestamp?
+        public var role_ids: [RoleSnowflake]?
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#invite-delete

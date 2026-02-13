@@ -689,7 +689,7 @@ extension DiscordClient {
         payload: Payloads.CreateChannelInvite
     ) async throws -> DiscordClientResponse<Invite> {
         let endpoint = APIEndpoint.createChannelInvite(channelId: channelId)
-        return try await self.send(
+        return try await self.sendMultipart(
             request: .init(
                 to: endpoint,
                 headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
@@ -1656,6 +1656,15 @@ extension DiscordClient {
         return try await self.send(request: .init(to: endpoint))
     }
 
+    /// https://docs.discord.com/developers/resources/guild#get-guild-role-member-counts
+    @inlinable
+    public func getGuildRoleMemberCounts(
+        guildId: GuildSnowflake
+    ) async throws -> DiscordClientResponse<[RoleSnowflake: Int]> {
+        let endpoint = APIEndpoint.getGuildRoleMemberCounts(guildId: guildId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     /// https://docs.discord.com/developers/resources/guild#create-guild-role
     @inlinable
     public func createGuildRole(
@@ -2356,6 +2365,40 @@ extension DiscordClient {
                 ]
             )
         )
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#get-target-users
+    @inlinable
+    public func getInviteTargetUsers(
+        code: String
+    ) async throws -> DiscordCDNResponse {
+        let endpoint = APIEndpoint.getInviteTargetUsers(code: code)
+        return try await self.send(
+            request: .init(to: endpoint),
+            fallbackFileName: "get-invite-target-users-\(code).csv"
+        )
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#update-target-users
+    @inlinable
+    public func updateInviteTargetUsers(
+        code: String,
+        payload: Payloads.UpdateInviteTargetUsers
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.updateInviteTargetUsers(code: code)
+        return try await self.sendMultipart(
+            request: .init(to: endpoint),
+            payload: payload
+        )
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#get-target-users-job-status
+    @inlinable
+    public func getInviteTargetUsersJobStatus(
+        code: String
+    ) async throws -> DiscordClientResponse<Responses.GetTargetUsersJobStatus> {
+        let endpoint = APIEndpoint.getInviteTargetUsersJobStatus(code: code)
+        return try await self.send(request: .init(to: endpoint))
     }
 
     /// https://docs.discord.com/developers/resources/invite#delete-invite

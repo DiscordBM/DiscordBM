@@ -237,6 +237,30 @@ public struct DiscordCDNResponse: Sendable, CustomStringConvertible {
         try self.httpResponse.guardSuccess()
     }
 
+    /// Makes sure the response is a success response, or tries to find a `JSONError`
+    /// so you have a chance to process the error and try to recover.
+    ///
+    /// Returns `.none` if the response is a success response.
+    /// Returns `.jsonError` if it's a recognizable error.
+    /// Otherwise returns `.badStatusCode`.
+    ///
+    /// The `JSONError` does not contain the full Discord error response.
+    /// For manual debugging, it's better to directly read the contents of the response:
+    /// ```
+    /// let httpResponse: DiscordHTTPResponse = ...
+    /// print(httpResponse.description)
+    /// ```
+    @inlinable
+    public func asError() -> DiscordHTTPErrorResponse? {
+        self.httpResponse.asError()
+    }
+
+    /// Decodes the response into `JSONError` or throws.
+    @inlinable
+    public func decodeJSONError() throws -> JSONError {
+        try self.httpResponse.decodeJSONError()
+    }
+
     @inlinable
     public func getFile(overrideName: String? = nil) throws -> RawFile {
         try self.guardSuccess()
