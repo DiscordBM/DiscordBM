@@ -945,6 +945,7 @@ public struct Gateway: Sendable, Codable {
             self.nick = try container.decodeIfPresent(String.self, forKey: .nick)
             self.avatar = try container.decodeIfPresent(String.self, forKey: .avatar)
             self.banner = try container.decodeIfPresent(String.self, forKey: .banner)
+            /// FIXME: why is this coalesced to `distantFuture`? See git history, likely related to a Discord bug.
             self.joined_at =
                 try container.decodeIfPresent(
                     DiscordTimestamp.self,
