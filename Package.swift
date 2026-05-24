@@ -45,12 +45,12 @@ let package = Package(
         "ExperimentalNon64BitSystemsCompatibility"
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.49.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.100.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.21.0"),
         .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.3"),
-        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.5"),
-        .package(url: "https://github.com/apple/swift-syntax.git", "509.0.0"..<"604.0.0"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "6.2.1"),
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", "509.0.0"..<"605.0.0"),
         .package(url: "https://github.com/facebook/zstd.git", from: "1.5.7"),
         .package(url: "https://github.com/hummingbird-project/swift-websocket.git", from: "1.4.0"),
     ],

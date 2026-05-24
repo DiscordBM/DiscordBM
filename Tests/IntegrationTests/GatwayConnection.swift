@@ -401,17 +401,9 @@ private class TestingLogHandler: @unchecked Sendable, LogHandler {
         self.expectation = expectation
     }
 
-    func log(
-        level: Logger.Level,
-        message: Logger.Message,
-        metadata: Logger.Metadata?,
-        source: String,
-        file: String,
-        function: String,
-        line: UInt
-    ) {
+    func log(event: LogEvent) {
         queue.sync {
-            self.messages.append(message.description)
+            self.messages.append(event.message.description)
             self.expectation?.fulfill()
             self.expectation = nil
         }
