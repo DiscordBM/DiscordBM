@@ -52,7 +52,7 @@ let package = Package(
         .package(url: "https://github.com/jpsim/Yams.git", from: "6.2.1"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "509.0.0"..<"605.0.0"),
         .package(url: "https://github.com/facebook/zstd.git", from: "1.5.7"),
-        .package(url: "https://github.com/hummingbird-project/swift-websocket.git", from: "1.4.0"),
+        .package(url: "https://github.com/hummingbird-project/swift-websocket.git", from: "1.6.1"),
     ],
     targets: [
         .target(

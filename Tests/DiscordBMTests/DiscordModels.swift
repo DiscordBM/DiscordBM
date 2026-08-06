@@ -417,6 +417,148 @@ class DiscordModelsTests: XCTestCase {
             try assertEncodedJSONEquals(constructed, json: json, file: file, line: line)
         }
 
+        func assertComponentsV2Payload<T: Encodable>(_ payload: T) throws {
+            try assertEncodedJSONEquals(
+                payload,
+                json: """
+                    {
+                      "flags": 32768,
+                      "components": [
+                        {
+                          "type": 10,
+                          "content": "Hello"
+                        }
+                      ]
+                    }
+                    """
+            )
+        }
+
+        func assertMessageLayoutComponentsJSONMatchesConstructed(
+            json: String,
+            _ constructed: [Interaction.MessageLayoutComponent],
+            file: StaticString = #filePath,
+            line: UInt = #line
+        ) throws {
+            let decoded = try JSONDecoder().decode(
+                [Interaction.MessageLayoutComponent].self,
+                from: Data(json.utf8)
+            )
+            try assertEncodedJSONEquals(decoded, json: json, file: file, line: line)
+            try assertEncodedJSONEquals(constructed, json: json, file: file, line: line)
+            try assertEncodedJSONEquals(
+                Payloads.CreateMessage(componentsV2: constructed),
+                json: """
+                    {
+                      "flags": 32768,
+                      "components": \(json)
+                    }
+                    """,
+                file: file,
+                line: line
+            )
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 9,
+                    "components": [
+                      {
+                        "type": 10,
+                        "content": "Choose an action"
+                      }
+                    ],
+                    "accessory": {
+                      "type": 2,
+                      "style": 1,
+                      "label": "Continue",
+                      "custom_id": "continue"
+                    }
+                  },
+                  {
+                    "type": 12,
+                    "items": [
+                      {
+                        "media": {
+                          "url": "https://example.com/image.png"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": 13,
+                    "file": {
+                      "url": "attachment://report.pdf"
+                    }
+                  },
+                  {
+                    "type": 14,
+                    "divider": true
+                  },
+                  {
+                    "type": 17,
+                    "components": [
+                      {
+                        "type": 10,
+                        "content": "Grouped content"
+                      },
+                      {
+                        "type": 1,
+                        "components": [
+                          {
+                            "type": 2,
+                            "style": 2,
+                            "label": "Cancel",
+                            "custom_id": "cancel"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let constructed: [Interaction.MessageLayoutComponent] = [
+                .section(
+                    .init(
+                        components: [.textDisplay(.init(content: "Choose an action"))],
+                        accessory: .button(
+                            .init(style: .primary, label: "Continue", custom_id: "continue")
+                        )
+                    )
+                ),
+                .mediaGallery(
+                    .init(items: [.init(media: .init(url: "https://example.com/image.png"))])
+                ),
+                .file(.init(file: .init(url: "attachment://report.pdf"))),
+                .separator(.init(divider: true)),
+                .container(
+                    .init(
+                        componentsV2: [
+                            .textDisplay(.init(content: "Grouped content")),
+                            .actionRow(
+                                .init(
+                                    components: [
+                                        .button(
+                                            .init(
+                                                style: .secondary,
+                                                label: "Cancel",
+                                                custom_id: "cancel"
+                                            )
+                                        )
+                                    ]
+                                )
+                            ),
+                        ]
+                    )
+                ),
+            ]
+
+            try assertMessageLayoutComponentsJSONMatchesConstructed(json: json, constructed)
+        }
+
         do {
             let json = """
                 [
@@ -758,6 +900,478 @@ class DiscordModelsTests: XCTestCase {
 
             try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
         }
+
+        do {
+            let payload = Payloads.CreateMessage(
+                componentsV2: [
+                    .container(
+                        .init(components: [.textDisplay(.init(content: "Hello"))])
+                    ),
+                    .separator(.init(divider: true)),
+                ]
+            )
+
+            try assertEncodedJSONEquals(
+                payload,
+                json: """
+                    {
+                      "flags": 32768,
+                      "components": [
+                        {
+                          "type": 17,
+                          "components": [
+                            {
+                              "type": 10,
+                              "content": "Hello"
+                            }
+                          ]
+                        },
+                        {
+                          "type": 14,
+                          "divider": true
+                        }
+                      ]
+                    }
+                    """
+            )
+        }
+
+        do {
+            let payload = Payloads.InteractionResponse.Modal(
+                custom_id: "feedback",
+                title: "Feedback",
+                componentsV2: [
+                    .label(
+                        .init(
+                            label: "How was your experience?",
+                            component: .textInput(.init(custom_id: "experience"))
+                        )
+                    )
+                ]
+            )
+
+            try assertEncodedJSONEquals(
+                payload,
+                json: """
+                    {
+                      "custom_id": "feedback",
+                      "title": "Feedback",
+                      "components": [
+                        {
+                          "type": 18,
+                          "label": "How was your experience?",
+                          "component": {
+                            "type": 4,
+                            "custom_id": "experience"
+                          }
+                        }
+                      ]
+                    }
+                    """
+            )
+        }
+
+        do {
+            let payload = Payloads.InteractionResponse.Modal(
+                custom_id: "feedback",
+                title: "Feedback",
+                componentsV2: [
+                    .label(
+                        .init(
+                            label: "How was your experience?",
+                            component: .textInput(
+                                .init(custom_id: "experience", label: "Experience")
+                            )
+                        )
+                    )
+                ]
+            )
+
+            XCTAssertFalse(payload.validate().isEmpty)
+        }
+
+        do {
+            let payload = Payloads.InteractionResponse.Message(
+                componentsV2: [.textDisplay(.init(content: "Hello"))]
+            )
+
+            try assertEncodedJSONEquals(
+                payload,
+                json: """
+                    {
+                      "flags": 32768,
+                      "components": [
+                        {
+                          "type": 10,
+                          "content": "Hello"
+                        }
+                      ]
+                    }
+                    """
+            )
+        }
+
+        do {
+            let payload = Payloads.CreateMessage(
+                componentsV2: [
+                    .container(
+                        .init(
+                            componentsV2: [
+                                .textDisplay(.init(content: "Choose an action.")),
+                                .actionRow(
+                                    .init(
+                                        components: [
+                                            .button(
+                                                .init(
+                                                    style: .primary,
+                                                    label: "Continue",
+                                                    custom_id: "continue"
+                                                )
+                                            )
+                                        ]
+                                    )
+                                ),
+                            ]
+                        )
+                    )
+                ]
+            )
+
+            try assertEncodedJSONEquals(
+                payload,
+                json: """
+                    {
+                      "flags": 32768,
+                      "components": [
+                        {
+                          "type": 17,
+                          "components": [
+                            {
+                              "type": 10,
+                              "content": "Choose an action."
+                            },
+                            {
+                              "type": 1,
+                              "components": [
+                                {
+                                  "type": 2,
+                                  "label": "Continue",
+                                  "custom_id": "continue",
+                                  "style": 1
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                    """
+            )
+        }
+
+        do {
+            let payload = Payloads.CreateMessage(
+                componentsV2: [
+                    .component(.button(.init(style: .primary, label: "Continue", custom_id: "continue")))
+                ]
+            )
+
+            XCTAssertFalse(payload.validate().isEmpty)
+        }
+
+        do {
+            let actionRow = Interaction.ActionRow(
+                components: (0..<6).map {
+                    .button(
+                        .init(style: .primary, label: "Button \($0)", custom_id: "button-\($0)")
+                    )
+                }
+            )
+
+            XCTAssertTrue(actionRow.validate().isEmpty)
+
+            let payload = Payloads.CreateMessage(componentsV2: [.actionRow(actionRow)])
+            XCTAssertFalse(payload.validate().isEmpty)
+        }
+
+        do {
+            let payload = Payloads.CreateMessage(
+                componentsV2: (0..<40).map { .textDisplay(.init(content: "Text \($0)")) }
+            )
+
+            XCTAssertTrue(payload.validate().isEmpty)
+        }
+
+        do {
+            let payload = Payloads.CreateMessage(
+                componentsV2: [
+                    .section(
+                        .init(
+                            components: [
+                                .button(
+                                    .init(style: .primary, label: "Not text", custom_id: "not-text")
+                                )
+                            ],
+                            accessory: .textDisplay(.init(content: "Not an accessory"))
+                        )
+                    )
+                ]
+            )
+
+            XCTAssertFalse(payload.validate().isEmpty)
+        }
+
+        do {
+            let payload = Payloads.CreateMessage(
+                componentsV2: [
+                    .textDisplay(.init(id: 1, content: "First")),
+                    .textDisplay(.init(id: 1, content: "Second")),
+                ]
+            )
+
+            XCTAssertFalse(payload.validate().isEmpty)
+        }
+
+        do {
+            var components = IncomingMessageComponents(
+                componentsV2: [.textDisplay(.init(content: "Components V2"))]
+            )
+            components.wrappedValue = []
+
+            XCTAssertNil(components.componentsV2)
+        }
+
+        do {
+            let payload = Payloads.EditWebhookMessage(
+                componentsV2: [.textDisplay(.init(content: "Hello"))]
+            )
+
+            try assertComponentsV2Payload(payload)
+            try assertComponentsV2Payload(
+                Payloads.EditMessage(componentsV2: [.textDisplay(.init(content: "Hello"))])
+            )
+            try assertComponentsV2Payload(
+                Payloads.ExecuteWebhook(componentsV2: [.textDisplay(.init(content: "Hello"))])
+            )
+            try assertComponentsV2Payload(
+                Payloads.CreateThreadInForumChannel.ForumMessage(
+                    componentsV2: [.textDisplay(.init(content: "Hello"))]
+                )
+            )
+        }
+
+        do {
+            let json = """
+                {
+                  "id": "1",
+                  "channel_id": "2",
+                  "content": "",
+                  "timestamp": "2026-08-05T00:00:00.000000+00:00",
+                  "tts": false,
+                  "mention_everyone": false,
+                  "mentions": [],
+                  "mention_roles": [],
+                  "attachments": [],
+                  "embeds": [],
+                  "pinned": false,
+                  "type": 0,
+                  "flags": 32768,
+                  "components": [
+                    {
+                      "type": 17,
+                      "components": [
+                        {
+                          "type": 10,
+                          "content": "Hello"
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """
+
+            let message = try JSONDecoder().decode(DiscordChannel.Message.self, from: Data(json.utf8))
+            XCTAssertNil(message.components)
+            let componentsV2 = try XCTUnwrap(message.componentsV2)
+            XCTAssertEqual(componentsV2.count, 1)
+            guard case let .component(.container(container)) = componentsV2[0] else {
+                return XCTFail("Expected a Container component")
+            }
+            XCTAssertEqual(container.componentsV2?.count, 1)
+
+            let actionRowJSON = """
+                {
+                  "id": "5",
+                  "channel_id": "2",
+                  "content": "",
+                  "timestamp": "2026-08-05T00:00:00.000000+00:00",
+                  "tts": false,
+                  "mention_everyone": false,
+                  "mentions": [],
+                  "mention_roles": [],
+                  "attachments": [],
+                  "embeds": [],
+                  "pinned": false,
+                  "type": 0,
+                  "flags": 32768,
+                  "components": [
+                    {
+                      "type": 1,
+                      "components": [
+                        {
+                          "type": 2,
+                          "style": 1,
+                          "custom_id": "continue"
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """
+            let actionRowMessage = try JSONDecoder().decode(
+                DiscordChannel.Message.self,
+                from: Data(actionRowJSON.utf8)
+            )
+            XCTAssertEqual(actionRowMessage.componentsV2?.count, 1)
+
+            let interactionJSON = """
+                {
+                  "id": "3",
+                  "application_id": "4",
+                  "type": 3,
+                  "data": {
+                    "custom_id": "continue",
+                    "component_type": 2
+                  },
+                  "token": "token",
+                  "version": 1,
+                  "entitlements": [],
+                  "message": \(json)
+                }
+                """
+            let interaction = try JSONDecoder().decode(Interaction.self, from: Data(interactionJSON.utf8))
+            XCTAssertEqual(try XCTUnwrap(interaction.message?.componentsV2).count, 1)
+
+            let encodedComponents = try JSONEncoder().encode(IncomingMessageComponents(componentsV2: componentsV2))
+            XCTAssertEqual(
+                try canonicalJSONData(encodedComponents),
+                try canonicalJSONData(
+                    Data(
+                        """
+                        [
+                          {
+                            "type": 17,
+                            "components": [
+                              {
+                                "type": 10,
+                                "content": "Hello"
+                              }
+                            ]
+                          }
+                        ]
+                        """.utf8
+                    )
+                )
+            )
+        }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 2,
+                        "style": 1,
+                        "label": "Continue",
+                        "custom_id": "continue"
+                      }
+                    ]
+                  }
+                ]
+                """
+            let components = try JSONDecoder().decode(
+                IncomingMessageComponents.self,
+                from: Data(json.utf8)
+            )
+            XCTAssertEqual(components.wrappedValue?.count, 1)
+            XCTAssertEqual(components.componentsV2?.count, 1)
+        }
+    }
+
+    func testComponentsV2ModalSubmissionDecoding() throws {
+        let json = """
+            {
+              "id": "1",
+              "application_id": "2",
+              "type": 5,
+              "data": {
+                "custom_id": "modal",
+                "components": [
+                  {
+                    "type": 18,
+                    "id": 1,
+                    "component": {
+                      "type": 21,
+                      "id": 2,
+                      "custom_id": "payment-method",
+                      "value": "bank"
+                    }
+                  },
+                  {
+                    "type": 18,
+                    "id": 3,
+                    "component": {
+                      "type": 22,
+                      "id": 4,
+                      "custom_id": "report-options",
+                      "values": ["payout"]
+                    }
+                  },
+                  {
+                    "type": 18,
+                    "id": 5,
+                    "component": {
+                      "type": 23,
+                      "id": 6,
+                      "custom_id": "confirm",
+                      "value": true
+                    }
+                  },
+                  {
+                    "type": 18,
+                    "id": 7,
+                    "component": {
+                      "type": 3,
+                      "id": 8,
+                      "custom_id": "favourite-colour",
+                      "values": ["blue"]
+                    }
+                  }
+                ]
+              },
+              "token": "token",
+              "version": 1,
+              "entitlements": []
+            }
+            """
+
+        let interaction = try JSONDecoder().decode(Interaction.self, from: Data(json.utf8))
+        let data = try XCTUnwrap(interaction.data)
+        let submission = try data.requireModalSubmit()
+
+        XCTAssertTrue(submission.components.isEmpty)
+        let components = try XCTUnwrap(submission.componentsV2)
+        XCTAssertEqual(components.count, 4)
+
+        guard case let .label(label) = components[3],
+            case let .stringSelect(stringSelect) = label.component
+        else {
+            return XCTFail("Expected a String Select in the final label")
+        }
+        XCTAssertTrue(stringSelect.options.isEmpty)
+        XCTAssertEqual(stringSelect.values, ["blue"])
     }
 
     func testInteractionDataUtilities() throws {

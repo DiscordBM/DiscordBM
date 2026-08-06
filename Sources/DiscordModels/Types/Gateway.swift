@@ -1226,7 +1226,10 @@ public struct Gateway: Sendable, Codable {
         public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
-        public var components: [Interaction.ActionRow]?
+        @IncomingMessageComponents public var components: [Interaction.ActionRow]?
+        public var componentsV2: [Interaction.MessageLayoutComponent]? {
+            $components.componentsV2
+        }
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
@@ -1294,7 +1297,7 @@ public struct Gateway: Sendable, Codable {
             }
             self.interaction = partialMessage.interaction
             self.thread = partialMessage.thread
-            self.components = partialMessage.components
+            self.$components = partialMessage.$components
             self.sticker_items = partialMessage.sticker_items
             self.stickers = partialMessage.stickers
             self.position = partialMessage.position

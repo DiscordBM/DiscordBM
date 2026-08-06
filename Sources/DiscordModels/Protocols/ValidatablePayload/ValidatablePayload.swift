@@ -177,8 +177,33 @@ extension ValidatablePayload {
     }
 
     @inlinable
+    func validateUniqueCustomIDs(_ customIDs: [String]) -> ValidationFailure? {
+        guard Set(customIDs).count == customIDs.count else {
+            return .containsProhibitedValues(
+                name: "custom_id",
+                reason: "Must be unique within the message or modal",
+                valuesRepresentation: "\(customIDs)"
+            )
+        }
+        return nil
+    }
+
+    @inlinable
+    func validateUniqueComponentIDs(_ componentIDs: [Int]) -> ValidationFailure? {
+        guard Set(componentIDs).count == componentIDs.count else {
+            return .containsProhibitedValues(
+                name: "id",
+                reason: "Must be unique within the message or modal",
+                valuesRepresentation: "\(componentIDs)"
+            )
+        }
+        return nil
+    }
+
+    @inlinable
     func validateComponentsV2Payload(
         components: [Interaction.ActionRow]?,
+        componentsV2: [Interaction.MessageLayoutComponent]? = nil,
         flags: IntBitField<DiscordChannel.Message.Flag>?,
         hasContent: Bool,
         hasEmbeds: Bool,
@@ -189,25 +214,54 @@ extension ValidatablePayload {
 
         func componentsCount(_ components: [Interaction.ActionRow.Component]?) -> Int {
             (components ?? []).reduce(into: 0) { result, element in
+                result += 1
                 switch element {
                 case .button, .stringSelect, .textInput, .userSelect, .roleSelect, .mentionableSelect,
                     .channelSelect, .textDisplay, .thumbnail, .mediaGallery, .file, .separator,
-                    .container, .label, .fileUpload, .radioGroup, .checkboxGroup, .checkbox,
+                    .label, .fileUpload, .radioGroup, .checkboxGroup, .checkbox,
                     .__undocumented:
-                    result += 1
+                    break
                 case .section(let section):
                     result += componentsCount(section.components)
+                    result += componentsCount([section.accessory])
+                case .container(let container):
+                    if let containerComponents = container.componentsV2 {
+                        result += componentsCount(containerComponents)
+                    } else {
+                        result += componentsCount(container.components)
+                    }
                 }
             }
         }
 
-        let componentsCount = (components ?? []).reduce(into: 0) { result, element in
-            result += componentsCount(element.components)
+        func componentsCount(_ components: [Interaction.MessageLayoutComponent]) -> Int {
+            components.reduce(into: 0) { result, element in
+                switch element {
+                case let .actionRow(actionRow):
+                    result += 1 + componentsCount(actionRow.components)
+                case let .component(component):
+                    result += componentsCount([component])
+                }
+            }
+        }
+
+        let totalComponentCount: Int
+        if let componentsV2 {
+            totalComponentCount = componentsCount(componentsV2)
+        } else {
+            totalComponentCount = (components ?? []).reduce(into: 0) { result, element in
+                result += 1 + componentsCount(element.components)
+            }
         }
 
         var failures: [ValidationFailure] = []
 
-        if let failure = validateNumberInRangeOrNil(componentsCount, min: 0, max: 40, name: "components.count") {
+        if let failure = validateNumberInRangeOrNil(
+            totalComponentCount,
+            min: 0,
+            max: 40,
+            name: "components.count"
+        ) {
             failures.append(failure)
         }
 

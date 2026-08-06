@@ -445,7 +445,10 @@ extension DiscordChannel {
         public var referenced_message: DereferenceBox<Message>?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
-        public var components: [Interaction.ActionRow]?
+        @IncomingMessageComponents public var components: [Interaction.ActionRow]?
+        public var componentsV2: [Interaction.MessageLayoutComponent]? {
+            $components.componentsV2
+        }
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
@@ -493,7 +496,10 @@ extension DiscordChannel {
         public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
-        public var components: [Interaction.ActionRow]?
+        @IncomingMessageComponents public var components: [Interaction.ActionRow]?
+        public var componentsV2: [Interaction.MessageLayoutComponent]? {
+            $components.componentsV2
+        }
         public var sticker_items: [StickerItem]?
         public var stickers: [Sticker]?
         public var position: Int?
@@ -504,6 +510,60 @@ extension DiscordChannel {
         /// Extra fields:
         public var member: Guild.PartialMember?
         public var guild_id: GuildSnowflake?
+    }
+}
+
+@propertyWrapper
+public struct IncomingMessageComponents: Sendable, Codable {
+    public var wrappedValue: [Interaction.ActionRow]? {
+        didSet {
+            componentsV2 = nil
+        }
+    }
+    public var projectedValue: Self {
+        get { self }
+        set { self = newValue }
+    }
+    public private(set) var componentsV2: [Interaction.MessageLayoutComponent]?
+
+    public init(wrappedValue: [Interaction.ActionRow]?) {
+        self.wrappedValue = wrappedValue
+        self.componentsV2 = nil
+    }
+
+    public init(componentsV2: [Interaction.MessageLayoutComponent]) {
+        self.wrappedValue = nil
+        self.componentsV2 = componentsV2
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let components = try [Interaction.MessageLayoutComponent](from: decoder)
+        if components.allSatisfy({
+            if case .actionRow = $0 { return true }
+            return false
+        }) {
+            self.wrappedValue = components.compactMap {
+                guard case let .actionRow(actionRow) = $0 else { return nil }
+                return actionRow
+            }
+        } else {
+            self.wrappedValue = nil
+        }
+        self.componentsV2 = components
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        if let componentsV2 {
+            try componentsV2.encode(to: encoder)
+        } else {
+            try wrappedValue.encode(to: encoder)
+        }
+    }
+}
+
+extension KeyedDecodingContainer {
+    func decode(_ type: IncomingMessageComponents.Type, forKey key: Key) throws -> IncomingMessageComponents {
+        try decodeIfPresent(type, forKey: key) ?? IncomingMessageComponents(wrappedValue: nil)
     }
 }
 
