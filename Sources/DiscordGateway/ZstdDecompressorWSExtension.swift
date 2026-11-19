@@ -166,15 +166,20 @@ final class ZstdStreamingDecompressor {
                     throw DecompressionError.decompressionError(description: description)
                 }
 
+                if output.pos == output.size {
+                    /// The output buffer is full. `ZSTD_decompressStream` stops in this case even
+                    /// when the frame is intact, and expects to be called again with more output
+                    /// space, so this must be checked before the incomplete-frame guard below.
+                    return .continue(newOffset: input.pos)
+                }
+
                 if input.pos < input.size {
+                    /// Output space is left but the input was not fully consumed, which only
+                    /// happens when the frame itself is incomplete.
                     throw DecompressionError.incompleteFrame
                 }
 
-                if output.pos < output.size {
-                    return .ok
-                } else {
-                    return .continue(newOffset: input.pos)
-                }
+                return .ok
             }
         }
 
