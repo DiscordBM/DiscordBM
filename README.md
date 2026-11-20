@@ -23,7 +23,7 @@
 
 ## Notable Features
 * Everything with async/await. Full integration with the latest Server-Side Swift packages.
-* Access the full Discord API for bots, except Voice (for now).
+* Access the full Discord API for bots.
 * Connect to the Discord Gateway and receive all events easily.
 * Send requests to the Discord API using library's Discord client.
 * Hard-typed APIs. All Gateway events and API responses have their own type and can be decoded easily.
@@ -633,6 +633,82 @@ let bot: any GatewayManager = await ShardingGatewayManager(
     ...
 )
 ```
+</details>
+
+### Voice
+<details>
+  <summary> Click to expand </summary>
+
+`DiscordBM` provides Discord Voice (v8) support with end-to-end encryption (**DAVE protocol**) via `DiscordVoice`.
+
+To use `DiscordVoice`, add it to your target's dependencies in `Package.swift`:
+```swift
+.product(name: "DiscordVoice", package: "DiscordBM"),
+```
+
+#### Setting Up VoiceManager
+
+Initialize a `VoiceManager` and route Gateway events to it:
+
+```swift
+import DiscordBM
+import DiscordVoice
+
+let bot: BotGatewayManager = <#GatewayManager#>
+let currentUserID = try await bot.client.getOwnUser().decode().id
+
+let voiceManager = VoiceManager(
+    gateway: bot,
+    userID: currentUserID
+)
+
+/// In your Gateway event loop:
+for await event in await bot.events {
+    /// Forward events to VoiceManager to handle voice server and voice state updates
+    await voiceManager.handleEvent(event)
+}
+```
+
+#### Joining a Voice Channel and Sending Audio
+
+```swift
+/// Join a voice channel
+let connection = try await voiceManager.join(
+    guildID: <#Guild ID#>,
+    channelID: <#Channel ID#>,
+    selfMute: false,
+    selfDeaf: false
+)
+
+/// Provide Opus-encoded frames (20ms each)
+final class AudioStreamer: OpusFrameProvider, @unchecked Sendable {
+    func nextFrame() async -> [UInt8]? {
+        /// Return next 20ms Opus frame, or `nil` when finished
+        <#Next Opus Frame#>
+    }
+}
+
+/// Attach provider to start audio streaming
+await connection.setFrameProvider(AudioStreamer())
+
+/// Leave when done
+await voiceManager.leave(guildID: <#Guild ID#>)
+```
+
+#### Receiving Audio
+
+You can also receive decrypted audio frames from other participants in the voice channel:
+
+```swift
+final class AudioListener: OpusFrameReceiver, @unchecked Sendable {
+    func receive(frame: [UInt8], from userID: UserSnowflake) async {
+        /// Process decrypted Opus frame received from a specific user
+    }
+}
+
+await connection.setFrameReceiver(AudioListener())
+```
+
 </details>
 
 ## Related Projects
