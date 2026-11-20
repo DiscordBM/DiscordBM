@@ -40,6 +40,10 @@ let package = Package(
             name: "DiscordAuth",
             targets: ["DiscordAuth"]
         ),
+        .library(
+            name: "DiscordVoice",
+            targets: ["DiscordVoice"]
+        ),
     ],
     traits: [
         "ExperimentalNon64BitSystemsCompatibility"
@@ -47,12 +51,14 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.100.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.21.0"),
         .package(url: "https://github.com/vapor/multipart-kit.git", from: "4.5.3"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "6.2.1"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "509.0.0"..<"605.0.0"),
         .package(url: "https://github.com/facebook/zstd.git", from: "1.5.7"),
         .package(url: "https://github.com/hummingbird-project/swift-websocket.git", from: "1.4.0"),
+        .package(url: "https://github.com/waris4ly/swift-dave.git", from: "0.1.0"),
     ],
     targets: [
         .target(
@@ -115,6 +121,19 @@ let package = Package(
             name: "DiscordAuth",
             dependencies: [
                 .target(name: "DiscordModels")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .target(
+            name: "DiscordVoice",
+            dependencies: [
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOPosix", package: "swift-nio"),
+                .product(name: "WSClient", package: "swift-websocket"),
+                .product(name: "Crypto", package: "swift-crypto"),
+                .product(name: "Dave", package: "swift-dave"),
+                .target(name: "DiscordGateway"),
+                .target(name: "DiscordModels"),
             ],
             swiftSettings: swiftSettings
         ),

@@ -1,5 +1,5 @@
 {
-  "originHash" : "d8bd976809f0efba27302df39f046fc0e4909f4943e684d73e3a24356160e6df",
+  "originHash" : "533df7cd1ab96ffd740d6452ceef1dc4c2e18a07b84b97f1d59d01fdbe2dda54",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -96,8 +96,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-crypto.git",
       "state" : {
-        "revision" : "f8fad2f95ad67b45f6340c0960e2396094d67e07",
-        "version" : "5.1.1"
+        "revision" : "95ba0316a9b733e92bb6b071255ff46263bbe7dc",
+        "version" : "3.15.1"
+      }
+    },
+    {
+      "identity" : "swift-dave",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/waris4ly/swift-dave.git",
+      "state" : {
+        "revision" : "d68ea40b9ea507f3f60c6f3b70f1fd24c7622846",
+        "version" : "0.1.0"
       }
     },
     {
