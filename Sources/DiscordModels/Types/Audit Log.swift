@@ -198,6 +198,8 @@ public struct AuditLog: Sendable, Codable {
             case onboardingUpdate  // 167
             case homeSettingsCreate  // 190
             case homeSettingsUpdate  // 191
+            case voiceChannelStatusUpdate  // 192
+            case voiceChannelStatusDelete  // 193
             case __undocumented(_Int_CompatibilityTypealias)
         }
 
@@ -272,6 +274,8 @@ public struct AuditLog: Sendable, Codable {
             case onboardingUpdate
             case homeSettingsCreate
             case homeSettingsUpdate
+            case voiceChannelStatusUpdate(channel_id: ChannelSnowflake, status: String)
+            case voiceChannelStatusDelete(channel_id: ChannelSnowflake)
             case __undocumented
 
             public struct OverwriteInfo: Sendable, Codable {
@@ -394,6 +398,7 @@ public struct AuditLog: Sendable, Codable {
                 case count
                 case application_id
                 case integration_type
+                case status
             }
 
             public init(from decoder: any Decoder) throws {
@@ -567,6 +572,21 @@ public struct AuditLog: Sendable, Codable {
                 case .onboardingUpdate: self = .onboardingUpdate
                 case .homeSettingsCreate: self = .homeSettingsCreate
                 case .homeSettingsUpdate: self = .homeSettingsUpdate
+                case .voiceChannelStatusUpdate:
+                    let container = try optionsNestedContainer()
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
+                    let status = try container.decode(String.self, forKey: .status)
+                    self = .voiceChannelStatusUpdate(channel_id: channel_id, status: status)
+                case .voiceChannelStatusDelete:
+                    let container = try optionsNestedContainer()
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
+                    self = .voiceChannelStatusDelete(channel_id: channel_id)
                 case .__undocumented:
                     self = .__undocumented
                 }
@@ -681,6 +701,13 @@ public struct AuditLog: Sendable, Codable {
                 case .onboardingUpdate: break
                 case .homeSettingsCreate: break
                 case .homeSettingsUpdate: break
+                case let .voiceChannelStatusUpdate(channel_id, status):
+                    var container = try optionsNestedContainer()
+                    try container.encode(channel_id, forKey: .channel_id)
+                    try container.encode(status, forKey: .status)
+                case let .voiceChannelStatusDelete(channel_id):
+                    var container = try optionsNestedContainer()
+                    try container.encode(channel_id, forKey: .channel_id)
                 case .__undocumented: break
                 }
             }
@@ -821,6 +848,10 @@ extension AuditLog.Entry.ActionKind {
             self = .homeSettingsCreate
         case .homeSettingsUpdate:
             self = .homeSettingsUpdate
+        case .voiceChannelStatusUpdate:
+            self = .voiceChannelStatusUpdate
+        case .voiceChannelStatusDelete:
+            self = .voiceChannelStatusDelete
         case .__undocumented:
             self = .__undocumented(-1)
         }

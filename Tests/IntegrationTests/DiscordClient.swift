@@ -1863,6 +1863,17 @@ class DiscordClientTests: XCTestCase {
         default:
             XCTFail("Unexpected error: \(String(describing: voiceStateError))")
         }
+
+        try await client.setVoiceChannelStatus(
+            channelId: Constants.Channels.voice.id,
+            reason: "Testing Set Voice Channel Status!",
+            payload: .init(status: "Integration test status")
+        ).guardSuccess()
+
+        try await client.setVoiceChannelStatus(
+            channelId: Constants.Channels.voice.id,
+            payload: .init(status: nil)
+        ).guardSuccess()
     }
 
     func testSoundboard() async throws {

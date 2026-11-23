@@ -1369,6 +1369,28 @@ public enum Payloads {
         }
     }
 
+    /// https://docs.discord.com/developers/resources/channel#set-voice-channel-status
+    public struct SetVoiceChannelStatus: Sendable, Encodable, ValidatablePayload {
+        public var status: String?
+
+        enum CodingKeys: String, CodingKey {
+            case status
+        }
+
+        public init(status: String?) {
+            self.status = status
+        }
+
+        public func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(self.status, forKey: .status)
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountDoesNotExceed(status, max: 500, name: "status")
+        }
+    }
+
     /// https://docs.discord.com/developers/resources/guild#create-guild-channel-json-params
     public struct CreateGuildChannel: Sendable, Encodable, ValidatablePayload {
         public var name: String

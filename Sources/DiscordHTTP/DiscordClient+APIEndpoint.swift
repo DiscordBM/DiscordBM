@@ -427,6 +427,23 @@ extension DiscordClient {
         )
     }
 
+    /// https://docs.discord.com/developers/resources/channel#set-voice-channel-status
+    @inlinable
+    public func setVoiceChannelStatus(
+        channelId: ChannelSnowflake,
+        reason: String? = nil,
+        payload: Payloads.SetVoiceChannelStatus
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.setVoiceChannelStatus(channelId: channelId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
     /// https://docs.discord.com/developers/resources/channel#deleteclose-channel
     @inlinable
     public func deleteChannel(

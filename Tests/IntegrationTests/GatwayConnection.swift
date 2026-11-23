@@ -312,6 +312,13 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
             )
         )
 
+        await bot.requestChannelInfo(
+            payload: .init(
+                guild_id: Constants.guildId,
+                fields: [.status, .voiceStartTime]
+            )
+        )
+
         /// To make sure it doesn't mess up other connections,
         /// and to make sure we aren't getting invalid-session-ed.
         /// And also to wait for propagation of the presence update to us through DiscordCache.

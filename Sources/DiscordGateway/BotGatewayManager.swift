@@ -406,6 +406,19 @@ public actor BotGatewayManager: GatewayManager {
         )
     }
 
+    /// https://docs.discord.com/developers/events/gateway-events#request-channel-info
+    public func requestChannelInfo(payload: Gateway.RequestChannelInfo) {
+        self.send(
+            message: .init(
+                payload: .init(
+                    opcode: .requestChannelInfo,
+                    data: .requestChannelInfo(payload)
+                ),
+                opcode: .text
+            )
+        )
+    }
+
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     public func updatePresence(payload: Gateway.Identify.Presence) {
         self.send(
@@ -1026,7 +1039,8 @@ extension Gateway.Opcode {
     var isSentForConnectionEstablishment: Bool {
         switch self {
         case .dispatch, .presenceUpdate, .voiceStateUpdate, .reconnect, .requestGuildMembers,
-            .requestSoundboardSounds, .invalidSession, .hello, .heartbeatAccepted, .heartbeat, .__undocumented:
+            .requestSoundboardSounds, .requestChannelInfo, .invalidSession, .hello, .heartbeatAccepted, .heartbeat,
+            .__undocumented:
             false
         case .identify, .resume: true
         }

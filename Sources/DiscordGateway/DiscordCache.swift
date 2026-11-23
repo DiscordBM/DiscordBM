@@ -394,10 +394,11 @@ public actor DiscordCache {
 
         switch event.data {
         case .none, .heartbeat, .identify, .hello, .resume, .resumed, .invalidSession, .requestGuildMembers,
-            .requestSoundboardSounds, .requestPresenceUpdate, .requestVoiceStateUpdate, .interactionCreate,
-            .subscriptionCreate, .subscriptionUpdate, .subscriptionDelete, .guildSoundboardSoundCreate,
-            .guildSoundboardSoundUpdate, .guildSoundboardSoundDelete, .guildSoundboardSoundsUpdate, .soundboardSounds,
-            .voiceChannelEffectSend, .rateLimited:
+            .requestSoundboardSounds, .requestChannelInfo, .requestPresenceUpdate, .requestVoiceStateUpdate,
+            .interactionCreate, .subscriptionCreate, .subscriptionUpdate, .subscriptionDelete,
+            .guildSoundboardSoundCreate, .guildSoundboardSoundUpdate, .guildSoundboardSoundDelete,
+            .guildSoundboardSoundsUpdate, .soundboardSounds, .channelInfo, .voiceChannelEffectSend,
+            .voiceChannelStatusUpdate, .voiceChannelStartTimeUpdate, .rateLimited:
             break
         case let .ready(ready):
             self.application = ready.application
