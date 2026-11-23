@@ -240,6 +240,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case threadLocked  // 160005
     case maxNumberOfActiveThreadsReached  // 160006
     case maxNumberOfActiveAnnouncementThreadsReached  // 160007
+    case youCannotForwardAMessageWhoseContentYouCannotRead  // 160014
     case invalidJSONForUploadedLottieFile  // 170001
     case uploadedLottiesCannotContainRasterizedImagesSuchAsPNGOrJPEG  // 170002
     case stickerMaxFrameRateExceeded  // 170003
