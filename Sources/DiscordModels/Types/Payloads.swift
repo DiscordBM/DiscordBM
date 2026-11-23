@@ -770,6 +770,7 @@ public enum Payloads {
     public struct EditWebhookMessage: Sendable, MultipartEncodable, ValidatablePayload {
         public var content: String?
         public var embeds: [Embed]?
+        public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var allowed_mentions: AllowedMentions?
         public var components: [Interaction.ActionRow]?
         public var files: [RawFile]?
@@ -779,6 +780,7 @@ public enum Payloads {
         enum CodingKeys: String, CodingKey {
             case content
             case embeds
+            case flags
             case allowed_mentions
             case components
             case attachments
@@ -788,6 +790,7 @@ public enum Payloads {
         public init(
             content: String? = nil,
             embeds: [Embed]? = nil,
+            flags: IntBitField<DiscordChannel.Message.Flag>? = nil,
             allowed_mentions: AllowedMentions? = nil,
             components: [Interaction.ActionRow]? = nil,
             files: [RawFile]? = nil,
@@ -796,6 +799,7 @@ public enum Payloads {
         ) {
             self.content = content
             self.embeds = embeds
+            self.flags = flags
             self.allowed_mentions = allowed_mentions
             self.components = components
             self.files = files
@@ -811,9 +815,25 @@ public enum Payloads {
                 max: 6_000,
                 names: "embeds"
             )
+            validateOnlyContains(
+                flags,
+                name: "flags",
+                reason: "Can only contain 'suppressEmbeds' or 'isComponentsV2'",
+                allowed: [.suppressEmbeds, .isComponentsV2]
+            )
+            validateComponentsV2Payload(
+                components: components,
+                flags: flags,
+                hasContent: !(content?.isEmpty ?? true),
+                hasEmbeds: !(embeds?.isEmpty ?? true),
+                hasStickers: false,
+                hasPoll: poll != nil
+            )
             allowed_mentions?.validate()
             attachments?.validate()
             embeds?.validate()
+            components?.validate()
+            poll?.validate()
         }
     }
 

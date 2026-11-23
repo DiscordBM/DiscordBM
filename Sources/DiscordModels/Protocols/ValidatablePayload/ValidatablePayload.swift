@@ -89,6 +89,21 @@ extension ValidatablePayload {
     }
 
     @inlinable
+    func validateElementCountInRangeOrNil<T>(
+        _ array: [T]?,
+        min: Int,
+        max: Int,
+        name: String
+    ) -> ValidationFailure? {
+        guard let array else { return nil }
+        let count = array.count
+        guard min <= count, count <= max else {
+            return ValidationFailure.elementCountOutOfRange(name: name, min: min, max: max)
+        }
+        return nil
+    }
+
+    @inlinable
     func validateOnlyContains<Field: BitField>(
         _ field: Field?,
         name: String,
@@ -187,23 +202,7 @@ extension ValidatablePayload {
     ) -> [ValidationFailure] {
         guard flags?.contains(.isComponentsV2) ?? false else { return [] }
 
-        func componentsCount(_ components: [Interaction.ActionRow.Component]?) -> Int {
-            (components ?? []).reduce(into: 0) { result, element in
-                switch element {
-                case .button, .stringSelect, .textInput, .userSelect, .roleSelect, .mentionableSelect,
-                    .channelSelect, .textDisplay, .thumbnail, .mediaGallery, .file, .separator,
-                    .container, .label, .fileUpload, .radioGroup, .checkboxGroup, .checkbox,
-                    .__undocumented:
-                    result += 1
-                case .section(let section):
-                    result += componentsCount(section.components)
-                }
-            }
-        }
-
-        let componentsCount = (components ?? []).reduce(into: 0) { result, element in
-            result += componentsCount(element.components)
-        }
+        let componentsCount = (components ?? []).flatMap(\.allComponents).count
 
         var failures: [ValidationFailure] = []
 

@@ -111,6 +111,28 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
         }
     }
 
+    func testValidateElementCountInRangeOrNil() throws {
+        try validateElementCountInRangeOrNil(
+            Optional<[String]>.none,
+            min: 20,
+            max: 40,
+            name: "a"
+        ).throw()
+        try validateElementCountInRangeOrNil([String](), min: 0, max: 0, name: "a").throw()
+        try validateElementCountInRangeOrNil(
+            ["a", "b", "c", "d", "e"],
+            min: 5,
+            max: 5,
+            name: "a"
+        ).throw()
+        XCTAssertThrowsError(
+            try validateElementCountInRangeOrNil([String](), min: 1, max: 1, name: "a").throw()
+        ) { error in
+            let error = error as! ValidationError
+            XCTAssertErrorsEqual(error, .elementCountOutOfRange(name: "a", min: 1, max: 1))
+        }
+    }
+
     func testValidateCombinedCharacterCountDoesNotExceed() throws {
         try validateCombinedCharacterCountDoesNotExceed(nil, max: 0, names: "a").throw()
         try validateCombinedCharacterCountDoesNotExceed(nil, max: 1, names: "a").throw()
@@ -285,6 +307,51 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
                 .numberOutOfRange(name: "oewo", number: "934129139", min: "10", max: "21")
             )
         }
+    }
+
+    func testComponentsValidation() throws {
+        let button: Interaction.ActionRow.Component = .button(.init(style: .primary, label: "a", custom_id: "a"))
+        let textDisplay: Interaction.ActionRow.Component = .textDisplay(.init(content: "a"))
+
+        XCTAssertEqual(Interaction.ActionRow(components: [button, button, button, button, button]).validate(), [])
+        XCTAssertEqual(Interaction.ActionRow(components: [textDisplay]).validate(), [])
+        XCTAssertEqual(
+            Interaction.ActionRow(components: []).validate(),
+            [.elementCountOutOfRange(name: "components", min: 1, max: 5)]
+        )
+        XCTAssertEqual(
+            Interaction.ActionRow(components: [button, button, button, button, button, button]).validate(),
+            [.elementCountOutOfRange(name: "components", min: 1, max: 5)]
+        )
+        XCTAssertEqual(
+            Interaction.ActionRow(components: [textDisplay, textDisplay]).validate(),
+            [
+                .hasPrecondition(
+                    name: "components",
+                    reason: "Can only contain up to 5 buttons, or a single other component"
+                )
+            ]
+        )
+
+        /// 40 components: The container, its 36 text displays, the action row and its 2 buttons.
+        let container: Interaction.ActionRow.Component = .container(
+            .init(components: .init(repeating: textDisplay, count: 36) + [.actionRow([button, button])])
+        )
+        XCTAssertEqual(Payloads.CreateMessage(components: [[container]], flags: [.isComponentsV2]).validate(), [])
+        XCTAssertEqual(
+            Payloads.CreateMessage(components: [[container], [textDisplay]], flags: [.isComponentsV2]).validate(),
+            [.numberOutOfRange(name: "components.count", number: "41", min: "0", max: "40")]
+        )
+
+        XCTAssertEqual(
+            Interaction.ActionRow.SelectMenu(custom_id: "a", min_values: 1, max_values: 1, required: true).validate(),
+            []
+        )
+        XCTAssertEqual(
+            Interaction.ActionRow.SelectMenu(custom_id: "a", default_values: [], min_values: 1, max_values: 1)
+                .validate(),
+            [.elementCountOutOfRange(name: "default_values", min: 1, max: 1)]
+        )
     }
 
     func testValidationsThrowsMultiple() throws {
