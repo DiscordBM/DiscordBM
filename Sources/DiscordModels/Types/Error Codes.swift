@@ -231,6 +231,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case cannotSendVoiceMessagesInThisChannel  // 50173
     case theUserAccountMustFirstBeVerified  // 50178
     case providedFileDoesNotHaveAValidDuration  // 50192
+    case inviteIsExpired  // 50270
     case cannotSendMessagesToThisUserDueToHavingNoMutualGuilds  // 50278
     case missingPermissionToSendSticker  // 50600
     case twoFactorRequiredForOperation  // 60003
