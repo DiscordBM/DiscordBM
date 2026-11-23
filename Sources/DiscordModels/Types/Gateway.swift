@@ -604,13 +604,6 @@ public struct Gateway: Sendable, Codable {
             }
         }
 
-        /// https://docs.discord.com/developers/events/gateway-events#identify-gateway-capabilities
-        @UnstableEnum<_UInt_CompatibilityTypealias>
-        public enum Capability: Sendable {
-            case channelObfuscation  // 15
-            case __undocumented(_UInt_CompatibilityTypealias)
-        }
-
         public var token: Secret
         public var properties: ConnectionProperties
         /// DiscordBM supports the better "Transport Compression", but not "Payload Compression".
@@ -621,7 +614,6 @@ public struct Gateway: Sendable, Codable {
         public var shard: IntPair?
         public var presence: Presence?
         public var intents: IntBitField<Intent>
-        public var capabilities: IntBitField<Capability>?
 
         public init(
             token: Secret,
@@ -629,8 +621,7 @@ public struct Gateway: Sendable, Codable {
             large_threshold: Int? = nil,
             shard: IntPair? = nil,
             presence: Presence? = nil,
-            intents: [Intent],
-            capabilities: [Capability]? = nil
+            intents: [Intent]
         ) {
             self.token = token
             self.properties = properties
@@ -638,7 +629,6 @@ public struct Gateway: Sendable, Codable {
             self.shard = shard
             self.presence = presence
             self.intents = .init(intents)
-            self.capabilities = capabilities.map { .init($0) }
         }
 
         public init(
@@ -647,8 +637,7 @@ public struct Gateway: Sendable, Codable {
             large_threshold: Int? = nil,
             shard: IntPair? = nil,
             presence: Presence? = nil,
-            intents: [Intent],
-            capabilities: [Capability]? = nil
+            intents: [Intent]
         ) {
             self.token = Secret(token)
             self.properties = properties
@@ -656,7 +645,6 @@ public struct Gateway: Sendable, Codable {
             self.shard = shard
             self.presence = presence
             self.intents = .init(intents)
-            self.capabilities = capabilities.map { .init($0) }
         }
     }
 
