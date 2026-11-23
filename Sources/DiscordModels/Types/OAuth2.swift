@@ -19,6 +19,7 @@ public enum OAuth2Scope: Sendable, Codable {
     case guildsJoin  // "guilds.join"
     case guildsMembersRead  // "guilds.members.read"
     case identify  // "identify"
+    case identifyPremium  // "identify.premium"
     case messagesRead  // "messages.read"
     case relationshipsRead  // "relationships.read"
     case rpc  // "rpc"
