@@ -879,6 +879,7 @@ public struct Gateway: Sendable, Codable {
             self.system_channel_id = new.system_channel_id
             self.system_channel_flags = new.system_channel_flags
             self.rules_channel_id = new.rules_channel_id
+            self.safety_alerts_channel_id = new.safety_alerts_channel_id
             self.max_presences = new.max_presences
             self.max_members = new.max_members
             self.vanity_url_code = new.vanity_url_code
@@ -895,6 +896,7 @@ public struct Gateway: Sendable, Codable {
             self.welcome_screen = new.welcome_screen
             self.nsfw_level = new.nsfw_level
             self.stickers = new.stickers
+            self.incidents_data = new.incidents_data
             self.premium_progress_bar_enabled = new.premium_progress_bar_enabled
             self.`lazy` = new.`lazy`
             self.hub_type = new.hub_type
@@ -1344,12 +1346,14 @@ public struct Gateway: Sendable, Codable {
             self.application_id = partialMessage.application_id
             self.message_reference = partialMessage.message_reference
             self.flags = partialMessage.flags
+            self.message_snapshots = partialMessage.message_snapshots
             if let referenced_message = partialMessage.referenced_message,
                 var value = self.referenced_message?.value
             {
                 value.update(with: referenced_message.value)
                 self.referenced_message = .init(value: value)
             }
+            self.interaction_metadata = partialMessage.interaction_metadata
             self.interaction = partialMessage.interaction
             self.thread = partialMessage.thread
             self.components = partialMessage.components
@@ -1357,6 +1361,7 @@ public struct Gateway: Sendable, Codable {
             self.stickers = partialMessage.stickers
             self.position = partialMessage.position
             self.role_subscription_data = partialMessage.role_subscription_data
+            self.call = partialMessage.call
             self.shared_client_theme = partialMessage.shared_client_theme
             if let poll = partialMessage.poll {
                 self.poll = poll
