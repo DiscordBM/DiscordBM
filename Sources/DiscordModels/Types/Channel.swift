@@ -427,6 +427,7 @@ extension DiscordChannel {
             /// https://docs.discord.com/developers/resources/message#base-theme-types
             @UnstableEnum<_Int_CompatibilityTypealias>
             public enum BaseTheme: Sendable, Codable {
+                case unset  // 0
                 case dark  // 1
                 case light  // 2
                 case darker  // 3
