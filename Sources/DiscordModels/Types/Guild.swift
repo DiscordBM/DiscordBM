@@ -146,6 +146,7 @@ public struct Guild: Sendable, Codable {
         case news  // "NEWS"
         case partnered  // "PARTNERED"
         case previewEnabled  // "PREVIEW_ENABLED"
+        case pruneRequiresAdmin  // "PRUNE_REQUIRES_ADMIN"
         case raidAlertsDisabled  // "RAID_ALERTS_DISABLED"
         case roleIcons  // "ROLE_ICONS"
         case roleSubscriptionsAvailableForPurchase  // "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE"
