@@ -23,6 +23,7 @@ public struct BotAuthManager: Sendable {
         renamed: "makeBotAuthorizationURL(permissions:guildId:disableGuildSelect:)",
         message: "'.applicationsCommands' OAuth scope is automatically included by Discord for bots"
     )
+    @_disfavoredOverload
     public func makeBotAuthorizationURL(
         withApplicationCommands: Bool = true,
         permissions: [Permission] = [],
@@ -49,7 +50,8 @@ public struct BotAuthManager: Sendable {
     public func makeBotAuthorizationURL(
         permissions: [Permission] = [],
         guildId: GuildSnowflake? = nil,
-        disableGuildSelect: Bool? = nil
+        disableGuildSelect: Bool? = nil,
+        integrationType: DiscordApplication.IntegrationKind? = nil
     ) -> String {
         let scopes: [OAuth2Scope] = [.bot]
         let permissions = IntBitField(permissions).rawValue
@@ -59,6 +61,7 @@ public struct BotAuthManager: Sendable {
             ("scope", scopes.map(\.rawValue).joined(separator: " ")),
             ("guild_id", guildId?.rawValue),
             ("disable_guild_select", disableGuildSelect?.description),
+            ("integration_type", integrationType.map { "\($0.rawValue)" }),
         ]
         return baseURLs.authorization + queries.makeForURLQuery()
     }
