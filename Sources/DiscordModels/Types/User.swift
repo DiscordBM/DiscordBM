@@ -219,11 +219,14 @@ extension DiscordUser {
     public struct ApplicationRoleConnection: Sendable, Codable, ValidatablePayload {
         public var platform_name: String?
         public var platform_username: String?
-        public var metadata: [String: ApplicationRoleConnectionMetadata]
+        public var metadata: [String: String]?
 
         public func validate() -> [ValidationFailure] {
             validateCharacterCountDoesNotExceed(platform_name, max: 50, name: "platform_name")
             validateCharacterCountDoesNotExceed(platform_username, max: 100, name: "platform_username")
+            for (key, value) in metadata ?? [:] {
+                validateCharacterCountDoesNotExceed(value, max: 100, name: "metadata[\(key)]")
+            }
         }
     }
 }

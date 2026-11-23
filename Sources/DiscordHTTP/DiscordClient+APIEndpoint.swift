@@ -2786,11 +2786,11 @@ extension DiscordClient {
 
     /// This endpoint requires a `DiscordClient` with an OAuth token.
     /// By default the authentication method is by a bot token, and not an OAuth one.
-    /// https://docs.discord.com/developers/resources/user#get-user-application-role-connection
+    /// https://docs.discord.com/developers/resources/user#get-current-user-application-role-connection
     @inlinable
     public func getApplicationUserRoleConnection(
         appId: ApplicationSnowflake? = nil
-    ) async throws -> DiscordClientResponse<DiscordUser.Connection> {
+    ) async throws -> DiscordClientResponse<DiscordUser.ApplicationRoleConnection> {
         let endpoint = APIEndpoint.getApplicationUserRoleConnection(
             applicationId: try requireAppId(appId)
         )
@@ -2799,12 +2799,12 @@ extension DiscordClient {
 
     /// This endpoint requires a `DiscordClient` with an OAuth token.
     /// By default the authentication method is by a bot token, and not an OAuth one.
-    /// https://docs.discord.com/developers/resources/user#update-user-application-role-connection
+    /// https://docs.discord.com/developers/resources/user#update-current-user-application-role-connection
     @inlinable
     public func updateApplicationUserRoleConnection(
         appId: ApplicationSnowflake? = nil,
         payload: Payloads.UpdateUserApplicationRoleConnection
-    ) async throws -> DiscordClientResponse<DiscordUser.Connection> {
+    ) async throws -> DiscordClientResponse<DiscordUser.ApplicationRoleConnection> {
         let endpoint = APIEndpoint.updateApplicationUserRoleConnection(
             applicationId: try requireAppId(appId)
         )

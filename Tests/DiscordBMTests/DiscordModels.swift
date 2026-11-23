@@ -1120,6 +1120,69 @@ class DiscordModelsTests: XCTestCase {
             ["10", "hello", "1", "2", "bot", "-webhook", "-link", "relevance"]
         )
     }
+
+    func testApplicationRoleConnectionCoding() throws {
+        let json = """
+            {
+                "platform_name": "Cookie Clicker",
+                "platform_username": "Mahdi",
+                "metadata": {
+                    "cookies_eaten": "1483",
+                    "allergic_to_nuts": "0"
+                }
+            }
+            """
+        let decoded = try JSONDecoder().decode(
+            DiscordUser.ApplicationRoleConnection.self,
+            from: Data(json.utf8)
+        )
+        XCTAssertEqual(decoded.platform_name, "Cookie Clicker")
+        XCTAssertEqual(decoded.platform_username, "Mahdi")
+        XCTAssertEqual(decoded.metadata, ["cookies_eaten": "1483", "allergic_to_nuts": "0"])
+
+        let empty = try JSONDecoder().decode(
+            DiscordUser.ApplicationRoleConnection.self,
+            from: Data(#"{"platform_name":null,"platform_username":null,"metadata":{}}"#.utf8)
+        )
+        XCTAssertNil(empty.platform_name)
+        XCTAssertNil(empty.platform_username)
+        XCTAssertEqual(empty.metadata, [:])
+
+        enum MetadataKey: String {
+            case cookiesEaten = "cookies_eaten"
+            case allergicToNuts = "allergic_to_nuts"
+            case firstCookieBaked = "first_cookie_baked"
+        }
+        let payload = Payloads.UpdateUserApplicationRoleConnection(
+            platform_name: "Cookie Clicker",
+            metadata: [
+                MetadataKey.cookiesEaten: .integer(1483),
+                .allergicToNuts: .boolean(false),
+                .firstCookieBaked: .dateTime(Date(timeIntervalSince1970: 1_071_878_400)),
+            ]
+        )
+        XCTAssertEqual(
+            payload.metadata,
+            [
+                "cookies_eaten": "1483",
+                "allergic_to_nuts": "0",
+                "first_cookie_baked": "2003-12-20T00:00:00Z",
+            ]
+        )
+        XCTAssertNoThrow(try payload.validate().throw(model: payload))
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let encoded = try encoder.encode(
+            Payloads.UpdateUserApplicationRoleConnection(metadata: ["level": "42"])
+        )
+        XCTAssertEqual(String(decoding: encoded, as: UTF8.self), #"{"metadata":{"level":"42"}}"#)
+
+        let tooLong = Payloads.UpdateUserApplicationRoleConnection(
+            metadata: ["level": String(repeating: "1", count: 101)]
+        )
+        XCTAssertThrowsError(try tooLong.validate().throw(model: tooLong))
+    }
 }
 
 private struct CodableContainer: Codable {

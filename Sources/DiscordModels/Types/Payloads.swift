@@ -2784,30 +2784,41 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://docs.discord.com/developers/resources/user#update-user-application-role-connection-json-params
+    /// https://docs.discord.com/developers/resources/user#update-current-user-application-role-connection-json-params
     public struct UpdateUserApplicationRoleConnection: Sendable, Encodable, ValidatablePayload {
         public var platform_name: String?
         public var platform_username: String?
-        public var metadata: [String: ApplicationRoleConnectionMetadata]?
+        public var metadata: [String: String]?
 
         public init(
             platform_name: String? = nil,
             platform_username: String? = nil,
-            metadata: [ApplicationRoleConnectionMetadata]? = nil
+            metadata: [String: String]? = nil
         ) {
             self.platform_name = platform_name
             self.platform_username = platform_username
-            self.metadata = metadata.map { meta in
-                Dictionary(
-                    meta.map({ ($0.key, $0) }),
-                    uniquingKeysWith: { l, _ in l }
-                )
-            }
+            self.metadata = metadata
+        }
+
+        public init<Key>(
+            platform_name: String? = nil,
+            platform_username: String? = nil,
+            metadata: [Key: ApplicationRoleConnectionMetadata.Value]
+        ) where Key: RawRepresentable, Key.RawValue == String {
+            self.platform_name = platform_name
+            self.platform_username = platform_username
+            self.metadata = Dictionary(
+                metadata.map({ ($0.key.rawValue, $0.value.stringValue) }),
+                uniquingKeysWith: { l, _ in l }
+            )
         }
 
         public func validate() -> [ValidationFailure] {
             validateCharacterCountDoesNotExceed(platform_name, max: 50, name: "platform_name")
             validateCharacterCountDoesNotExceed(platform_username, max: 100, name: "platform_username")
+            for (key, value) in metadata ?? [:] {
+                validateCharacterCountDoesNotExceed(value, max: 100, name: "metadata[\(key)]")
+            }
         }
     }
 
