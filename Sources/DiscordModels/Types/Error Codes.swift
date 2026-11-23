@@ -90,6 +90,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case onlyBotsCanUseEndpoint  // 20002
     case explicitContentCannotBeSentToRecipients  // 20009
     case notAuthorizedToPerformActionOnApplication  // 20012
+    case thisActionRequiresAPremiumSubscription  // 20015
     case cantPerformDueToSlowModeRateLimit  // 20016
     case onlyTheOwnerOfAccountCanPerformAction  // 20018
     case messageCannotBeEditedDueToAnnouncementRateLimits  // 20022
@@ -222,6 +223,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case voiceMessagesMustHaveSupportingMetadata  // 50161
     case voiceMessagesCannotBeEdited  // 50162
     case cannotDeleteGuildSubscriptionIntegration  // 50163
+    case cannotSendVoiceEffectWhenUserIsServerMutedDeafenedOrSuppressed  // 50167
     case cannotSendVoiceMessagesInThisChannel  // 50173
     case theUserAccountMustFirstBeVerified  // 50178
     case providedFileDoesNotHaveAValidDuration  // 50192
