@@ -57,6 +57,7 @@ public struct Guild: Sendable, Codable {
             self.user = try container.decodeIfPresent(DiscordUser.self, forKey: .user)
             self.nick = try container.decodeIfPresent(String.self, forKey: .nick)
             self.avatar = try container.decodeIfPresent(String.self, forKey: .avatar)
+            self.banner = try container.decodeIfPresent(String.self, forKey: .banner)
             self.roles = try container.decode([RoleSnowflake].self, forKey: .roles)
             self.joined_at =
                 try container.decodeIfPresent(
