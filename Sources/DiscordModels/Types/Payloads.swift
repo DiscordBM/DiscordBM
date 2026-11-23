@@ -9,11 +9,15 @@ public enum Payloads {
     /// An attachment object, but for sending.
     /// https://docs.discord.com/developers/resources/channel#attachment-object
     public struct Attachment: Sendable, Encodable, ValidatablePayload {
-        /// When sending, `id` is the index of this attachment in the `files` you provide.
+        /// When sending, `id` is the index of this attachment in the `files` you provide,
+        /// or the id of an attachment that the message already has.
         public var id: String
         public var filename: String?
         public var title: String?
         public var description: String?
+        public var duration_secs: Double?
+        public var waveform: String?
+        public var is_spoiler: Bool?
         public var content_type: String?
         public var size: Int?
         public var url: String?
@@ -28,6 +32,9 @@ public enum Payloads {
             filename: String? = nil,
             title: String? = nil,
             description: String? = nil,
+            duration_secs: Double? = nil,
+            waveform: String? = nil,
+            is_spoiler: Bool? = nil,
             content_type: String? = nil,
             size: Int? = nil,
             url: String? = nil,
@@ -40,6 +47,9 @@ public enum Payloads {
             self.filename = filename
             self.title = title
             self.description = description
+            self.duration_secs = duration_secs
+            self.waveform = waveform
+            self.is_spoiler = is_spoiler
             self.content_type = content_type
             self.size = size
             self.url = url
@@ -47,6 +57,29 @@ public enum Payloads {
             self.height = height
             self.width = width
             self.ephemeral = ephemeral
+        }
+
+        /// Keeps or edits an attachment that the message already has.
+        /// `id` is the id of that attachment.
+        public init(
+            id: AttachmentSnowflake,
+            description: String? = nil,
+            is_spoiler: Bool? = nil
+        ) {
+            self.id = id.rawValue
+            self.filename = nil
+            self.title = nil
+            self.description = description
+            self.duration_secs = nil
+            self.waveform = nil
+            self.is_spoiler = is_spoiler
+            self.content_type = nil
+            self.size = nil
+            self.url = nil
+            self.proxy_url = nil
+            self.height = nil
+            self.width = nil
+            self.ephemeral = nil
         }
 
         public func validate() -> [ValidationFailure] {
