@@ -22,6 +22,12 @@ public enum DiscordUtils {
         "<@&\(id.rawValue)>"
     }
 
+    /// When used in a Discord message, shows up as mentioning a game profile.
+    @inlinable
+    public static func gameProfile(gameId: AnySnowflake) -> String {
+        "<@$\(gameId.rawValue)>"
+    }
+
     /// When used in a Discord message, shows up as mentioning a slash command.
     @inlinable
     public static func slashCommand(

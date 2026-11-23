@@ -23,6 +23,11 @@ class DiscordUtilsTests: XCTestCase {
         }
 
         do {
+            let string = DiscordUtils.gameProfile(gameId: AnySnowflake("1402418491272986635"))
+            XCTAssertEqual(string, "<@$1402418491272986635>")
+        }
+
+        do {
             let id = "\(Int.random(in: 1_000_000_000_000_000...10_000_000_000_000_000))"
             let string = DiscordUtils.slashCommand(name: "abcd", id: Snowflake(id))
             XCTAssertEqual(string, "</abcd:\(id)>")
