@@ -50,7 +50,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         let connectionInfo = ConnectionInfo()
 
-        Task {
+        _ = Task {
             for await event in await bot.events {
                 if case let .ready(ready) = event.data {
                     await connectionInfo.setReady(ready)
@@ -63,7 +63,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
             }
         }
 
-        Task {
+        _ = Task {
             /// Trying to keep `.makeEventsParseFailureStream()` to make sure the func still works.
             /// Parsing failures are not the end of the world.
             /// They might even be acceptable.
@@ -88,7 +88,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         /// To make sure these 2 `Task`s are triggered in order
         try await Task.sleep(for: .milliseconds(200))
 
-        Task { await bot.connect() }
+        _ = Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation], timeout: 10)
 
@@ -162,7 +162,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         }
 
         /// To make sure these 2 `Task`s are triggered in order
-        try await Task.sleep(for: .milliseconds(200))
+        try? await Task.sleep(for: .milliseconds(200))
 
         Task { await bot.connect() }
 
@@ -197,7 +197,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         let didReceiveAnythingOtherThanHello = ManagedAtomic(false)
 
-        Task {
+        _ = Task {
             /// Trying to keep `.makeEventsStream()` to make sure the func still works.
             for await event in await bot.makeEventsStream() {
                 if case .hello = event.data {
@@ -211,7 +211,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         /// To make sure these 2 `Task`s are triggered in order
         try await Task.sleep(for: .milliseconds(200))
 
-        Task { await bot.connect() }
+        _ = Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation, criticalLogExpectation], timeout: 10)
 
@@ -259,7 +259,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         let expectation = Expectation(description: "Connected")
 
-        Task {
+        _ = Task {
             for await event in await bot.events {
                 if case .ready = event.data {
                     expectation.fulfill()
@@ -270,7 +270,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
         /// To make sure these 2 `Task`s are triggered in order
         try await Task.sleep(for: .milliseconds(200))
 
-        Task { await bot.connect() }
+        _ = Task { await bot.connect() }
 
         await waitFulfillment(of: [expectation], timeout: 10)
 
