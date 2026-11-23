@@ -10,25 +10,29 @@ jobs:
   tests:
     if: ${{ github.event_name == 'push' || (github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id && !github.event.pull_request.draft) }}
     runs-on: ubuntu-latest
-    container: swift:6.2-noble
+    container: swift:6.4-resolute
     timeout-minutes: 30
     steps:
       - name: Check out package
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install curl for codecov, zstd for the cache action
         run: |
           apt-get update
           apt-get install -y curl zstd
 
+      - name: Determine cache key prefix
+        id: "cache-key-prefix"
+        run: echo "prefix=${{ github.event.repository.name }}-integration-tests-build-${{ runner.os }}-${SWIFT_PLATFORM}-${SWIFT_VERSION}-" >> "${GITHUB_OUTPUT}"
+
       - name: Restore .build
         if: ${{ runner.debug != '1' }}
         id: "restore-cache"
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: .build
-          key: "${{ github.event.repository.name }}-integration-tests-build-${{ runner.os }}-${{ hashFiles('./Package.resolved') }}"
-          restore-keys: "${{ github.event.repository.name }}-integration-tests-build-${{ runner.os }}-"
+          key: "${{ steps.cache-key-prefix.outputs.prefix }}${{ hashFiles('./Package.resolved') }}"
+          restore-keys: "${{ steps.cache-key-prefix.outputs.prefix }}"
 
       - name: Build ${{ github.event.repository.name }}
         run: |
@@ -40,10 +44,10 @@ jobs:
 
       - name: Cache .build
         if: steps.restore-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: .build
-          key: "${{ github.event.repository.name }}-integration-tests-build-${{ runner.os }}-${{ hashFiles('./Package.resolved') }}"
+          key: "${{ steps.cache-key-prefix.outputs.prefix }}${{ hashFiles('./Package.resolved') }}"
 
       - name: Run tests
         env:
@@ -57,7 +61,7 @@ jobs:
             --disable-experimental-prebuilts
 
       - name: Upload code coverage
-        uses: vapor/swift-codecov-action@v0.3
+        uses: vapor/swift-codecov-action@v0.3.7
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: "SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH"

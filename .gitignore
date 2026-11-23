@@ -8,3 +8,5 @@ DerivedData/
 .netrc
 .swiftpm
 Package.resolved
+/Docs
+/AGENTS.md

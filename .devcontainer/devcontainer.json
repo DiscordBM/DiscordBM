@@ -1,13 +1,10 @@
 {
-  "name": "Swift 5.9",
-  "image": "swift:5.9-jammy",
-  // Install SwiftFormat
-  "postStartCommand": "apt update -y && apt install wget apt-utils -y && wget -O - https://github.com/MahdiBM/swift-format-repo/raw/main/install/swift-format-install.sh | bash",
+  "name": "Swift 6.4",
+  "image": "swift:6.4-resolute",
   "customizations": {
     "vscode": {
       "extensions": [
-        "sswg.swift-lang", // Swift
-        "vknabel.vscode-swiftformat", // SwiftFormat
+        "swiftlang.swift-vscode", // Swift
         "esbenp.prettier-vscode", // Prettier
         "usernamehw.errorlens", // Error Lens
         "GitHub.copilot", // GitHub Copilot

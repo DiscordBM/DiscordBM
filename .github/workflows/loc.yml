@@ -8,10 +8,10 @@ jobs:
     name: Post LOC
     steps:
       - name: Checkout out package
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install tokei
-        uses: giantswarm/install-binary-action@v1.1.0
+        uses: giantswarm/install-binary-action@v4.1.0
         with:
           binary: "tokei"
           version: "12.1.2"
@@ -27,10 +27,16 @@ jobs:
         run: echo "Line count is ${{ steps.loc.outputs.count }}"
 
       - name: "Post"
-        uses: indiesdev/curl@v1.1
-        with:
-          url: https://rapi.mahdibm.com/v1/loc/DiscordBM
-          method: "POST"
-          accept: 200
-          params: '{ "loc": "${{ steps.loc.outputs.count }}", "secret": "${{ secrets.GH_LOC_SECRET }}" }'
-          timeout: 5000
+        env:
+          LOC: ${{ steps.loc.outputs.count }}
+          GH_LOC_SECRET: ${{ secrets.GH_LOC_SECRET }}
+        run: |
+          curl \
+            --fail-with-body \
+            --silent \
+            --show-error \
+            --max-time 5 \
+            --url-query "loc=${LOC}" \
+            --url-query "secret=${GH_LOC_SECRET}" \
+            --data '' \
+            https://rapi.mahdibm.com/v1/loc/DiscordBM
