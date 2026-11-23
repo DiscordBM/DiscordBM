@@ -1056,6 +1056,7 @@ public enum Payloads {
         public var nsfw: Bool?
         public var integration_types: [DiscordApplication.IntegrationKind]?
         public var contexts: [Interaction.ContextKind]?
+        public var handler: ApplicationCommand.HandlerKind?
 
         public init(
             name: String,
@@ -1068,7 +1069,8 @@ public enum Payloads {
             type: ApplicationCommand.Kind? = nil,
             nsfw: Bool? = nil,
             integration_types: [DiscordApplication.IntegrationKind]? = nil,
-            contexts: [Interaction.ContextKind]? = nil
+            contexts: [Interaction.ContextKind]? = nil,
+            handler: ApplicationCommand.HandlerKind? = nil
         ) {
             self.name = name
             self.name_localizations = .init(name_localizations)
@@ -1081,6 +1083,7 @@ public enum Payloads {
             self.nsfw = nsfw
             self.integration_types = integration_types
             self.contexts = contexts
+            self.handler = handler
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1096,6 +1099,12 @@ public enum Payloads {
                 allowedIf: (type ?? .chatInput) == .chatInput,
                 name: "description+description_localizations",
                 reason: "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput'"
+            )
+            validateHasPrecondition(
+                condition: handler != nil,
+                allowedIf: type == .primaryEntryPoint,
+                name: "handler",
+                reason: "'handler' is only allowed if 'type' is 'primaryEntryPoint'"
             )
             validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
             validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
@@ -1121,6 +1130,7 @@ public enum Payloads {
         public var nsfw: Bool?
         public var integration_types: [DiscordApplication.IntegrationKind]?
         public var contexts: [Interaction.ContextKind]?
+        public var handler: ApplicationCommand.HandlerKind?
 
         public init(
             name: String? = nil,
@@ -1132,7 +1142,8 @@ public enum Payloads {
             dm_permission: Bool? = nil,
             nsfw: Bool? = nil,
             integration_types: [DiscordApplication.IntegrationKind]? = nil,
-            contexts: [Interaction.ContextKind]? = nil
+            contexts: [Interaction.ContextKind]? = nil,
+            handler: ApplicationCommand.HandlerKind? = nil
         ) {
             self.name = name
             self.name_localizations = .init(name_localizations)
@@ -1144,6 +1155,7 @@ public enum Payloads {
             self.nsfw = nsfw
             self.integration_types = integration_types
             self.contexts = contexts
+            self.handler = handler
         }
 
         public func validate() -> [ValidationFailure] {
