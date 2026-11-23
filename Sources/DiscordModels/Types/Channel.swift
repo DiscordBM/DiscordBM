@@ -20,6 +20,7 @@ public struct DiscordChannel: Sendable, Codable {
         case guildStageVoice  // 13
         case guildDirectory  // 14
         case guildForum  // 15
+        case guildMedia  // 16
         case __undocumented(_Int_CompatibilityTypealias)
     }
 
