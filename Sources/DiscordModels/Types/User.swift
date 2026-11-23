@@ -167,6 +167,11 @@ extension DiscordUser {
         @UnstableEnum<String>
         public enum Service: Sendable, Codable {
             case amazonMusic  // "Amazon Music"
+            @available(
+                *,
+                deprecated,
+                message: "Not available in Discord Docs so will be removed in a future major version"
+            )
             case battleNet  // "Battle.net"
             case bungie  // "Bungie.net"
             case bluesky  // "Bluesky"
