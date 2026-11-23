@@ -12,12 +12,12 @@
     </a>
     <a href="https://github.com/DiscordBM/DiscordBM/actions/workflows/integration-tests.yml">
         <img src="https://github.com/DiscordBM/DiscordBM/actions/workflows/integration-tests.yml/badge.svg" alt="Integration Tests Badge">
+    </a>
     <a href="https://github.com/DiscordBM/DiscordBM">
         <img src="https://img.shields.io/badge/dynamic/json?url=https://rapi.mahdibm.com/v1/loc/DiscordBM/count&query=$.count&label=Swift%20lines" alt="Swift lines of code">
     </a>
-    </a>
     <a href="https://swift.org">
-        <img src="https://img.shields.io/badge/swift-6.3%20%2F%206.2%20%2F%206.1-brightgreen.svg" alt="Latest/Minimum Swift Version">
+        <img src="https://img.shields.io/badge/swift-6.4%20%2F%206.3%20%2F%206.2-brightgreen.svg" alt="Latest/Minimum Swift Version">
     </a>
 </p>
 

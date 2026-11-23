@@ -138,7 +138,7 @@ class GatewayConnectionTests: XCTestCase, @unchecked Sendable {
 
         let counter = ShardCounter(shardCount: shardCount)
 
-        Task {
+        _ = Task {
             func handleEvent(_ event: Gateway.Event) async throws {
                 if case let .ready(ready) = event.data {
                     let shardIdx = try XCTUnwrap(ready.shard?.first)

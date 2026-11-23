@@ -330,15 +330,6 @@ public actor DiscordCache {
         didSet { checkItemsLimit() }
     }
 
-    #if compiler(<6.0)
-    /// Utility to access `Storage`.
-    public subscript<T: Sendable>(
-        dynamicMember path: WritableKeyPath<Storage, T>
-    ) -> T {
-        get { self.storage[keyPath: path] }
-        set { self.storage[keyPath: path] = newValue }
-    }
-    #else
     /// Utility to access `Storage`.
     public subscript<T: Sendable>(
         dynamicMember path: (any Sendable & WritableKeyPath<Storage, T>)
@@ -346,7 +337,6 @@ public actor DiscordCache {
         get { self.storage[keyPath: path] }
         set { self.storage[keyPath: path] = newValue }
     }
-    #endif
 
     /// - Parameters:
     ///   - gatewayManager: The gateway manager that this `DiscordCache` instance caches from.
@@ -1086,8 +1076,3 @@ public actor DiscordCache {
 private func == (lhs: Emoji, rhs: Emoji) -> Bool {
     lhs.id == rhs.id && lhs.name == rhs.name
 }
-
-//MARK: - WritableKeyPath + Sendable
-#if compiler(<6.0)
-extension WritableKeyPath: @unchecked Sendable where Root: Sendable, Value: Sendable {}
-#endif
