@@ -2708,6 +2708,18 @@ class DiscordClientTests: XCTestCase {
         }
 
         do {
+            let file = try await client.getCDNCustomEmoji(
+                emojiId: "1073704788400820324",
+                format: .webp,
+                size: .size64
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
+            XCTAssertEqual(file.extension, "webp")
+            XCTAssertEqual(file.type, "image/webp")
+            XCTAssertEqual(file.filename, "1073704788400820324.webp")
+        }
+
+        do {
             let file = try await client.getCDNGuildIcon(
                 guildId: "965874258054094878",
                 icon: "08b885eb2b03ee09fc906fa1a38cc1f8"
@@ -2715,6 +2727,20 @@ class DiscordClientTests: XCTestCase {
             XCTAssertGreaterThan(file.data.readableBytes, 100)
             XCTAssertEqual(file.extension, "png")
             XCTAssertEqual(file.filename, "guildIcon.png")
+        }
+
+        do {
+            let file = try await client.getCDNGuildIcon(
+                guildId: "965874258054094878",
+                icon: "08b885eb2b03ee09fc906fa1a38cc1f8",
+                format: .jpeg
+            ).getFile(overrideName: "guildIcon")
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
+            /// `image/jpeg` maps to multiple extensions and `RawFile` picks any of them.
+            let fileExtension = try XCTUnwrap(file.extension)
+            XCTAssertTrue(["jpeg", "jpg", "jpe"].contains(fileExtension), "Unexpected extension: \(fileExtension)")
+            XCTAssertEqual(file.type, "image/jpeg")
+            XCTAssertEqual(file.filename, "guildIcon.\(fileExtension)")
         }
 
         do {

@@ -356,7 +356,7 @@ public struct DefaultDiscordClient: DiscordClient {
                 await self.unlockRequestsInCache(
                     identity: identity,
                     requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
-                    parameters: req.endpoint.parameters,
+                    parameters: req.endpoint.cacheParameters,
                     queries: req.queries
                 )
             }
@@ -369,13 +369,13 @@ public struct DefaultDiscordClient: DiscordClient {
                 response: response,
                 identity: identity,
                 requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
-                parameters: req.endpoint.parameters,
+                parameters: req.endpoint.cacheParameters,
                 queries: req.queries
             )
             await self.unlockRequestsInCache(
                 identity: identity,
                 requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
-                parameters: req.endpoint.parameters,
+                parameters: req.endpoint.cacheParameters,
                 queries: req.queries
             )
         }
@@ -393,7 +393,7 @@ public struct DefaultDiscordClient: DiscordClient {
             if let cached = await self.getFromCache(
                 identity: identity,
                 requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
-                parameters: req.endpoint.parameters,
+                parameters: req.endpoint.cacheParameters,
                 queries: req.queries
             ) {
                 logger.debug(
@@ -471,7 +471,7 @@ public struct DefaultDiscordClient: DiscordClient {
             if let cached = await self.getFromCache(
                 identity: identity,
                 requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
-                parameters: req.endpoint.parameters,
+                parameters: req.endpoint.cacheParameters,
                 queries: req.queries
             ) {
                 return (cached, true)
@@ -479,7 +479,7 @@ public struct DefaultDiscordClient: DiscordClient {
             if let cached = await self.getFromCache(
                 identity: identity,
                 requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
-                parameters: req.endpoint.parameters,
+                parameters: req.endpoint.cacheParameters,
                 queries: req.queries
             ) {
                 logger.debug(
@@ -563,7 +563,7 @@ public struct DefaultDiscordClient: DiscordClient {
             if let cached = await self.getFromCache(
                 identity: identity,
                 requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
-                parameters: req.endpoint.parameters,
+                parameters: req.endpoint.cacheParameters,
                 queries: req.queries
             ) {
                 return (cached, true)
@@ -571,7 +571,7 @@ public struct DefaultDiscordClient: DiscordClient {
             if let cached = await self.getFromCache(
                 identity: identity,
                 requiresAuthHeader: req.endpoint.requiresAuthorizationHeader,
-                parameters: req.endpoint.parameters,
+                parameters: req.endpoint.cacheParameters,
                 queries: req.queries
             ) {
                 logger.debug(

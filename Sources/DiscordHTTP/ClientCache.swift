@@ -16,7 +16,7 @@ actor ClientCache {
         init(identity: CacheableEndpointIdentity, parameters: [String], queries: [(String, String?)]) {
             self.identity = identity
             self.parameters = parameters
-            self.queries = queries
+            self.queries = queries.filter { $0.1 != nil }
         }
 
         @usableFromInline

@@ -2,6 +2,7 @@ import DiscordModels
 import NIOHTTP1
 
 /// CDN Endpoints.
+/// Prefer to use `FormattedCDNEndpoint` for better support of CDN Endpoints.
 /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
 public enum CDNEndpoint: Endpoint {
     case customEmoji(emojiId: EmojiSnowflake)
@@ -260,6 +261,55 @@ public enum CDNEndpoint: Endpoint {
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
+    }
+}
+
+extension CDNEndpoint {
+    /// https://docs.discord.com/developers/reference#image-formatting-image-formats
+    public enum ImageFormat: String, Sendable {
+        case png
+        case jpeg
+        case webp
+        case gif
+
+        /// This case serves as a way of discouraging exhaustive switch statements
+        case __DO_NOT_USE_THIS_CASE
+    }
+
+    /// https://docs.discord.com/developers/reference#image-formatting-image-formats
+    public enum StaticImageFormat: String, Sendable {
+        case png
+        case jpeg
+        case webp
+
+        /// This case serves as a way of discouraging exhaustive switch statements
+        case __DO_NOT_USE_THIS_CASE
+    }
+
+    /// https://docs.discord.com/developers/reference#image-formatting-image-formats
+    public enum StickerFormat: String, Sendable {
+        case png
+        case gif
+        case lottie = "json"
+
+        /// This case serves as a way of discouraging exhaustive switch statements
+        case __DO_NOT_USE_THIS_CASE
+    }
+
+    /// https://docs.discord.com/developers/reference#image-formatting
+    public enum ImageSize: Int, Sendable {
+        case size16 = 16
+        case size32 = 32
+        case size64 = 64
+        case size128 = 128
+        case size256 = 256
+        case size512 = 512
+        case size1024 = 1024
+        case size2048 = 2048
+        case size4096 = 4096
+
+        /// This case serves as a way of discouraging exhaustive switch statements
+        case __DO_NOT_USE_THIS_CASE = 0
     }
 }
 
