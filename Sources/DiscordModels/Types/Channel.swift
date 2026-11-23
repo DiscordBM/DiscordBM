@@ -152,6 +152,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var app_permissions: StringBitField<Permission>?
     public var flags: IntBitField<Flag>?
     public var available_tags: [ForumTag]?
+    public var applied_tags: [ForumTagSnowflake]?
     public var template: String?
     public var member_ids_preview: [String]?
     public var version: Int?
