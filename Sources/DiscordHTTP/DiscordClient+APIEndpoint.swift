@@ -2814,6 +2814,19 @@ extension DiscordClient {
         )
     }
 
+    /// This endpoint requires a `DiscordClient` with an OAuth token.
+    /// By default the authentication method is by a bot token, and not an OAuth one.
+    /// https://docs.discord.com/developers/resources/user#delete-current-user-application-role-connection
+    @inlinable
+    public func deleteApplicationUserRoleConnection(
+        appId: ApplicationSnowflake? = nil
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.deleteApplicationUserRoleConnection(
+            applicationId: try requireAppId(appId)
+        )
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     // MARK: Polls
     /// https://docs.discord.com/developers/resources/poll
 

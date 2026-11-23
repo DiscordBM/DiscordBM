@@ -261,6 +261,7 @@ public enum APIEndpoint: Endpoint {
     case listApplicationRoleConnectionMetadata(applicationId: ApplicationSnowflake)
     case bulkOverwriteApplicationRoleConnectionMetadata(applicationId: ApplicationSnowflake)
     case updateApplicationUserRoleConnection(applicationId: ApplicationSnowflake)
+    case deleteApplicationUserRoleConnection(applicationId: ApplicationSnowflake)
 
     // MARK: Scheduled Events
     /// https://docs.discord.com/developers/resources/guild-scheduled-event
@@ -876,6 +877,9 @@ public enum APIEndpoint: Endpoint {
             let applicationId = applicationId.rawValue
             suffix = "applications/\(applicationId)/role-connections/metadata"
         case let .updateApplicationUserRoleConnection(applicationId):
+            let applicationId = applicationId.rawValue
+            suffix = "users/@me/applications/\(applicationId)/role-connection"
+        case let .deleteApplicationUserRoleConnection(applicationId):
             let applicationId = applicationId.rawValue
             suffix = "users/@me/applications/\(applicationId)/role-connection"
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
@@ -1588,6 +1592,9 @@ public enum APIEndpoint: Endpoint {
         case let .updateApplicationUserRoleConnection(applicationId):
             let applicationId = applicationId.rawValue
             suffix = "users/@me/applications/\(applicationId)/role-connection"
+        case let .deleteApplicationUserRoleConnection(applicationId):
+            let applicationId = applicationId.rawValue
+            suffix = "users/@me/applications/\(applicationId)/role-connection"
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
             let guildId = guildId.rawValue
             let guildScheduledEventId = guildScheduledEventId.rawValue
@@ -1941,6 +1948,7 @@ public enum APIEndpoint: Endpoint {
         case .listApplicationRoleConnectionMetadata: return .GET
         case .bulkOverwriteApplicationRoleConnectionMetadata: return .PUT
         case .updateApplicationUserRoleConnection: return .PUT
+        case .deleteApplicationUserRoleConnection: return .DELETE
         case .getGuildScheduledEvent: return .GET
         case .listGuildScheduledEventUsers: return .GET
         case .listGuildScheduledEvents: return .GET
@@ -2159,6 +2167,7 @@ public enum APIEndpoint: Endpoint {
         case .listApplicationRoleConnectionMetadata: return true
         case .bulkOverwriteApplicationRoleConnectionMetadata: return true
         case .updateApplicationUserRoleConnection: return true
+        case .deleteApplicationUserRoleConnection: return true
         case .getGuildScheduledEvent: return true
         case .listGuildScheduledEventUsers: return true
         case .listGuildScheduledEvents: return true
@@ -2377,6 +2386,7 @@ public enum APIEndpoint: Endpoint {
         case .listApplicationRoleConnectionMetadata: return true
         case .bulkOverwriteApplicationRoleConnectionMetadata: return true
         case .updateApplicationUserRoleConnection: return true
+        case .deleteApplicationUserRoleConnection: return true
         case .getGuildScheduledEvent: return true
         case .listGuildScheduledEventUsers: return true
         case .listGuildScheduledEvents: return true
@@ -2747,6 +2757,8 @@ public enum APIEndpoint: Endpoint {
             return [applicationId.rawValue]
         case let .updateApplicationUserRoleConnection(applicationId):
             return [applicationId.rawValue]
+        case let .deleteApplicationUserRoleConnection(applicationId):
+            return [applicationId.rawValue]
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
             return [guildId.rawValue, guildScheduledEventId.rawValue]
         case let .listGuildScheduledEventUsers(guildId, guildScheduledEventId):
@@ -3024,65 +3036,66 @@ public enum APIEndpoint: Endpoint {
         case .listApplicationRoleConnectionMetadata: return 150
         case .bulkOverwriteApplicationRoleConnectionMetadata: return 151
         case .updateApplicationUserRoleConnection: return 152
-        case .getGuildScheduledEvent: return 153
-        case .listGuildScheduledEventUsers: return 154
-        case .listGuildScheduledEvents: return 155
-        case .createGuildScheduledEvent: return 156
-        case .updateGuildScheduledEvent: return 157
-        case .deleteGuildScheduledEvent: return 158
-        case .getSkuSubscription: return 159
-        case .listSkus: return 160
-        case .listSkuSubscriptions: return 161
-        case .getStageInstance: return 162
-        case .createStageInstance: return 163
-        case .updateStageInstance: return 164
-        case .deleteStageInstance: return 165
-        case .getGuildSticker: return 166
-        case .getSticker: return 167
-        case .getStickerPack: return 168
-        case .listGuildStickers: return 169
-        case .listStickerPacks: return 170
-        case .createGuildSticker: return 171
-        case .updateGuildSticker: return 172
-        case .deleteGuildSticker: return 173
-        case .getThreadMember: return 174
-        case .listActiveGuildThreads: return 175
-        case .listOwnPrivateArchivedThreads: return 176
-        case .listPrivateArchivedThreads: return 177
-        case .listPublicArchivedThreads: return 178
-        case .listThreadMembers: return 179
-        case .addThreadMember: return 180
-        case .joinThread: return 181
-        case .createThread: return 182
-        case .createThreadFromMessage: return 183
-        case .createThreadInForumChannel: return 184
-        case .deleteThreadMember: return 185
-        case .leaveThread: return 186
-        case .getOwnApplication: return 187
-        case .getOwnUser: return 188
-        case .getUser: return 189
-        case .listOwnConnections: return 190
-        case .updateOwnApplication: return 191
-        case .updateOwnUser: return 192
-        case .getOwnVoiceState: return 193
-        case .getVoiceState: return 194
-        case .listGuildVoiceRegions: return 195
-        case .listVoiceRegions: return 196
-        case .updateSelfVoiceState: return 197
-        case .updateVoiceState: return 198
-        case .getGuildWebhooks: return 199
-        case .getWebhook: return 200
-        case .getWebhookByToken: return 201
-        case .getWebhookMessage: return 202
-        case .listChannelWebhooks: return 203
-        case .createWebhook: return 204
-        case .executeWebhook: return 205
-        case .updateWebhook: return 206
-        case .updateWebhookByToken: return 207
-        case .updateWebhookMessage: return 208
-        case .deleteWebhook: return 209
-        case .deleteWebhookByToken: return 210
-        case .deleteWebhookMessage: return 211
+        case .deleteApplicationUserRoleConnection: return 153
+        case .getGuildScheduledEvent: return 154
+        case .listGuildScheduledEventUsers: return 155
+        case .listGuildScheduledEvents: return 156
+        case .createGuildScheduledEvent: return 157
+        case .updateGuildScheduledEvent: return 158
+        case .deleteGuildScheduledEvent: return 159
+        case .getSkuSubscription: return 160
+        case .listSkus: return 161
+        case .listSkuSubscriptions: return 162
+        case .getStageInstance: return 163
+        case .createStageInstance: return 164
+        case .updateStageInstance: return 165
+        case .deleteStageInstance: return 166
+        case .getGuildSticker: return 167
+        case .getSticker: return 168
+        case .getStickerPack: return 169
+        case .listGuildStickers: return 170
+        case .listStickerPacks: return 171
+        case .createGuildSticker: return 172
+        case .updateGuildSticker: return 173
+        case .deleteGuildSticker: return 174
+        case .getThreadMember: return 175
+        case .listActiveGuildThreads: return 176
+        case .listOwnPrivateArchivedThreads: return 177
+        case .listPrivateArchivedThreads: return 178
+        case .listPublicArchivedThreads: return 179
+        case .listThreadMembers: return 180
+        case .addThreadMember: return 181
+        case .joinThread: return 182
+        case .createThread: return 183
+        case .createThreadFromMessage: return 184
+        case .createThreadInForumChannel: return 185
+        case .deleteThreadMember: return 186
+        case .leaveThread: return 187
+        case .getOwnApplication: return 188
+        case .getOwnUser: return 189
+        case .getUser: return 190
+        case .listOwnConnections: return 191
+        case .updateOwnApplication: return 192
+        case .updateOwnUser: return 193
+        case .getOwnVoiceState: return 194
+        case .getVoiceState: return 195
+        case .listGuildVoiceRegions: return 196
+        case .listVoiceRegions: return 197
+        case .updateSelfVoiceState: return 198
+        case .updateVoiceState: return 199
+        case .getGuildWebhooks: return 200
+        case .getWebhook: return 201
+        case .getWebhookByToken: return 202
+        case .getWebhookMessage: return 203
+        case .listChannelWebhooks: return 204
+        case .createWebhook: return 205
+        case .executeWebhook: return 206
+        case .updateWebhook: return 207
+        case .updateWebhookByToken: return 208
+        case .updateWebhookMessage: return 209
+        case .deleteWebhook: return 210
+        case .deleteWebhookByToken: return 211
+        case .deleteWebhookMessage: return 212
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
@@ -3438,6 +3451,8 @@ public enum APIEndpoint: Endpoint {
             return "bulkOverwriteApplicationRoleConnectionMetadata(applicationId.rawValue: \(applicationId.rawValue))"
         case let .updateApplicationUserRoleConnection(applicationId):
             return "updateApplicationUserRoleConnection(applicationId.rawValue: \(applicationId.rawValue))"
+        case let .deleteApplicationUserRoleConnection(applicationId):
+            return "deleteApplicationUserRoleConnection(applicationId.rawValue: \(applicationId.rawValue))"
         case let .getGuildScheduledEvent(guildId, guildScheduledEventId):
             return
                 "getGuildScheduledEvent(guildId.rawValue: \(guildId.rawValue), guildScheduledEventId.rawValue: \(guildScheduledEventId.rawValue))"

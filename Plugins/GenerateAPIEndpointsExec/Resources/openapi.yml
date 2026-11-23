@@ -5405,6 +5405,33 @@ paths:
               schema:
                 type: string
               example: ""
+    delete:
+      tags:
+        - Role Connections
+      summary: delete application user role connection
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: application_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
   /applications/{application_id}/role-connections/metadata:
     get:
       tags:
