@@ -177,11 +177,21 @@ extension DiscordUser {
             case facebook  // "Facebook"
             case github  // "GitHub"
             case instagram  // "Instagram"
+            @available(
+                *,
+                deprecated,
+                message: "Not available in Discord Docs so will be removed in a future major version"
+            )
             case leagueOfLegends  // "League of Legends"
             case mastodon  // "Mastodon"
             case paypal  // "PayPal"
             case playstation  // "PlayStation Network"
             case reddit  // "Reddit"
+            @available(
+                *,
+                deprecated,
+                message: "Not available in Discord Docs so will be removed in a future major version"
+            )
             case riotGames  // "Riot Games"
             case roblox  // "Roblox"
             case spotify  // "Spotify"
