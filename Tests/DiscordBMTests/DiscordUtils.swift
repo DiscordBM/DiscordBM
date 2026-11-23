@@ -91,6 +91,19 @@ class DiscordUtilsTests: XCTestCase {
         }
 
         do {
+            XCTAssertEqual(DiscordUtils.guildNavigation(.customize), "<id:customize>")
+            XCTAssertEqual(DiscordUtils.guildNavigation(.browse), "<id:browse>")
+            XCTAssertEqual(DiscordUtils.guildNavigation(.guide), "<id:guide>")
+            XCTAssertEqual(DiscordUtils.guildNavigation(.linkedRoles), "<id:linked-roles>")
+        }
+
+        do {
+            let id = "\(Int.random(in: 1_000_000_000_000_000...10_000_000_000_000_000))"
+            let string = DiscordUtils.guildNavigation(.linkedRole(RoleSnowflake(id)))
+            XCTAssertEqual(string, "<id:linked-roles:\(id)>")
+        }
+
+        do {
             let email = "nelly@discord.com"
             let string = DiscordUtils.email(address: email)
             XCTAssertEqual(string, "<nelly@discord.com>")
