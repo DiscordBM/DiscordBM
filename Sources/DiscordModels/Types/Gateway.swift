@@ -1505,6 +1505,7 @@ public struct Gateway: Sendable, Codable {
         public var desktop: Status?
         public var mobile: Status?
         public var web: Status?
+        public var vr: Status?
         public var embedded: Status?
     }
 
