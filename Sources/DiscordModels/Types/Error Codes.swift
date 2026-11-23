@@ -140,6 +140,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case requestEntityTooLarge  // 40005
     case featureTemporarilyDisabledOnServerSide  // 40006
     case userIsBannedFromGuild  // 40007
+    case onlyOneChannelCanHaveAParentIDModifiedAtATime  // 40009
     case connectionRevoked  // 40012
     case onlyConsumableSKUsCanBeConsumed  // 40018
     case youCanOnlyDeleteSandboxEntitlements  // 40019
