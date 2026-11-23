@@ -1173,6 +1173,23 @@ extension Interaction {
             public func validate() -> [ValidationFailure] {
                 validateCharacterCountDoesNotExceed(label, max: 45, name: "label")
                 validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
+                let selectMenuValues: (min_values: Int?, required: Bool?)? =
+                    switch component {
+                    case let .stringSelect(menu):
+                        (menu.min_values, menu.required)
+                    case let .userSelect(menu), let .roleSelect(menu), let .mentionableSelect(menu):
+                        (menu.min_values, menu.required)
+                    case let .channelSelect(menu):
+                        (menu.min_values, menu.required)
+                    default:
+                        nil
+                    }
+                validateHasPrecondition(
+                    condition: selectMenuValues?.min_values == 0,
+                    allowedIf: selectMenuValues?.required == false,
+                    name: "required",
+                    reason: "`required` must be `false` when `min_values` is `0`"
+                )
                 component.validate()
             }
         }
@@ -1205,6 +1222,12 @@ extension Interaction {
                 validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
                 validateNumberInRangeOrNil(min_values, min: 0, max: 10, name: "min_values")
                 validateNumberInRangeOrNil(max_values, min: 1, max: 10, name: "max_values")
+                validateHasPrecondition(
+                    condition: min_values == 0,
+                    allowedIf: required == false,
+                    name: "required",
+                    reason: "`required` must be `false` when `min_values` is `0`"
+                )
             }
         }
 
