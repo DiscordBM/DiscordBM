@@ -22,6 +22,7 @@ public enum OAuth2Scope: Sendable, Codable {
     case identifyPremium  // "identify.premium"
     case messagesRead  // "messages.read"
     case relationshipsRead  // "relationships.read"
+    case roleConnectionsWrite  // "role_connections.write"
     case rpc  // "rpc"
     case rpcActivitiesWrite  // "rpc.activities.write"
     case rpcNotificationsRead  // "rpc.notifications.read"
