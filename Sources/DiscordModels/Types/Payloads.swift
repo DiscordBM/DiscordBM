@@ -2266,20 +2266,17 @@ public enum Payloads {
         public var position: Int?
         public var lock_permissions: Bool?
         public var parent_id: ChannelSnowflake?
-        public var flags: IntBitField<DiscordChannel.Flag>?
 
         public init(
             id: ChannelSnowflake,
             position: Int? = nil,
             lock_permissions: Bool? = nil,
-            parent_id: ChannelSnowflake? = nil,
-            flags: IntBitField<DiscordChannel.Flag>? = nil
+            parent_id: ChannelSnowflake? = nil
         ) {
             self.id = id
             self.position = position
             self.lock_permissions = lock_permissions
             self.parent_id = parent_id
-            self.flags = flags
         }
 
         public func validate() -> [ValidationFailure] {}
