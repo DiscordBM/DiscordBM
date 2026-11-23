@@ -1412,11 +1412,15 @@ extension DiscordClient {
     @inlinable
     public func updateGuildChannelPositions(
         guildId: GuildSnowflake,
+        reason: String? = nil,
         payload: [Payloads.ModifyGuildChannelPositions]
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.updateGuildChannelPositions(guildId: guildId)
         return try await self.send(
-            request: .init(to: endpoint),
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
             payload: payload
         )
     }
