@@ -1068,6 +1068,38 @@ class DiscordModelsTests: XCTestCase {
         let array5: [String] = ["a"]
         XCTAssertEqual(array5.isNotEmpty, true)
     }
+
+    func testSharedClientThemeCoding() throws {
+        let json = """
+            {
+                "colors": ["5865F2", "7258F2", "9858F2", "BE58F2", "E558F2"],
+                "gradient_angle": 0,
+                "base_mix": 58,
+                "base_theme": 1
+            }
+            """
+        let decoded = try JSONDecoder().decode(
+            DiscordChannel.Message.SharedClientTheme.self,
+            from: Data(json.utf8)
+        )
+        XCTAssertEqual(decoded.colors, [0x5865F2, 0x7258F2, 0x9858F2, 0xBE58F2, 0xE558F2])
+        XCTAssertEqual(decoded.gradient_angle, 0)
+        XCTAssertEqual(decoded.base_mix, 58)
+        XCTAssertEqual(decoded.base_theme, .dark)
+
+        let theme = DiscordChannel.Message.SharedClientTheme(
+            colors: [0x5865F2, 0x0058F2, 0],
+            gradient_angle: 90,
+            base_mix: 100
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let encoded = try encoder.encode(theme)
+        XCTAssertEqual(
+            String(decoding: encoded, as: UTF8.self),
+            #"{"base_mix":100,"colors":["5865F2","0058F2","000000"],"gradient_angle":90}"#
+        )
+    }
 }
 
 private struct CodableContainer: Codable {

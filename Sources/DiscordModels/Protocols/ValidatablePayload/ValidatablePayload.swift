@@ -198,7 +198,8 @@ extension ValidatablePayload {
         hasContent: Bool,
         hasEmbeds: Bool,
         hasStickers: Bool,
-        hasPoll: Bool
+        hasPoll: Bool,
+        hasSharedClientTheme: Bool
     ) -> [ValidationFailure] {
         guard flags?.contains(.isComponentsV2) ?? false else { return [] }
 
@@ -239,6 +240,14 @@ extension ValidatablePayload {
                 .disallowedField(
                     name: "poll",
                     reason: "`poll` is incompatible with `isComponentsV2` flag"
+                )
+            )
+        }
+        if hasSharedClientTheme {
+            failures.append(
+                .disallowedField(
+                    name: "shared_client_theme",
+                    reason: "`shared_client_theme` is incompatible with `isComponentsV2` flag"
                 )
             )
         }

@@ -186,7 +186,8 @@ public enum Payloads {
                     hasContent: !(content?.isEmpty ?? true),
                     hasEmbeds: !(embeds?.isEmpty ?? true),
                     hasStickers: false,
-                    hasPoll: poll != nil
+                    hasPoll: poll != nil,
+                    hasSharedClientTheme: false
                 )
                 components?.validate()
                 attachments?.validate()
@@ -453,6 +454,7 @@ public enum Payloads {
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var enforce_nonce: Bool?
         public var poll: CreatePollRequest?
+        public var shared_client_theme: DiscordChannel.Message.SharedClientTheme?
 
         enum CodingKeys: String, CodingKey {
             case content
@@ -467,6 +469,7 @@ public enum Payloads {
             case flags
             case enforce_nonce
             case poll
+            case shared_client_theme
         }
 
         public init(
@@ -482,7 +485,8 @@ public enum Payloads {
             attachments: [Attachment]? = nil,
             flags: IntBitField<DiscordChannel.Message.Flag>? = nil,
             enforce_nonce: Bool? = nil,
-            poll: CreatePollRequest? = nil
+            poll: CreatePollRequest? = nil,
+            shared_client_theme: DiscordChannel.Message.SharedClientTheme? = nil
         ) {
             self.content = content
             self.nonce = nonce
@@ -497,6 +501,7 @@ public enum Payloads {
             self.flags = flags
             self.enforce_nonce = enforce_nonce
             self.poll = poll
+            self.shared_client_theme = shared_client_theme
         }
 
         public func validate() -> [ValidationFailure] {
@@ -512,6 +517,7 @@ public enum Payloads {
                 components?.isEmpty,
                 files?.isEmpty,
                 poll?.answers.isEmpty,
+                shared_client_theme == nil,
                 message_reference == nil,
                 names: "content",
                 "embeds",
@@ -519,6 +525,7 @@ public enum Payloads {
                 "components",
                 "files",
                 "poll",
+                "shared_client_theme",
                 "message_reference"
             )
             validateCombinedCharacterCountDoesNotExceed(
@@ -539,12 +546,14 @@ public enum Payloads {
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
                 hasStickers: !(sticker_ids?.isEmpty ?? true),
-                hasPoll: poll != nil
+                hasPoll: poll != nil,
+                hasSharedClientTheme: shared_client_theme != nil
             )
             components?.validate()
             attachments?.validate()
             embeds?.validate()
             poll?.validate()
+            shared_client_theme?.validate()
         }
     }
 
@@ -605,7 +614,8 @@ public enum Payloads {
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
                 hasStickers: false,
-                hasPoll: false
+                hasPoll: false,
+                hasSharedClientTheme: false
             )
             allowed_mentions?.validate()
             attachments?.validate()
@@ -707,7 +717,8 @@ public enum Payloads {
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
                 hasStickers: false,
-                hasPoll: poll != nil
+                hasPoll: poll != nil,
+                hasSharedClientTheme: false
             )
             components?.validate()
             allowed_mentions?.validate()
@@ -827,7 +838,8 @@ public enum Payloads {
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
                 hasStickers: false,
-                hasPoll: poll != nil
+                hasPoll: poll != nil,
+                hasSharedClientTheme: false
             )
             allowed_mentions?.validate()
             attachments?.validate()
@@ -979,7 +991,8 @@ public enum Payloads {
                     hasContent: !(content?.isEmpty ?? true),
                     hasEmbeds: !(embeds?.isEmpty ?? true),
                     hasStickers: !(sticker_ids?.isEmpty ?? true),
-                    hasPoll: poll != nil
+                    hasPoll: poll != nil,
+                    hasSharedClientTheme: false
                 )
                 components?.validate()
                 attachments?.validate()

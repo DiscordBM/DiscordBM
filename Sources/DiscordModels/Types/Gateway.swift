@@ -1239,6 +1239,7 @@ public struct Gateway: Sendable, Codable {
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
         public var poll: Poll?
         public var call: DiscordChannel.Message.Call?
+        public var shared_client_theme: DiscordChannel.Message.SharedClientTheme?
         /// Extra fields:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
@@ -1304,6 +1305,7 @@ public struct Gateway: Sendable, Codable {
             self.stickers = partialMessage.stickers
             self.position = partialMessage.position
             self.role_subscription_data = partialMessage.role_subscription_data
+            self.shared_client_theme = partialMessage.shared_client_theme
             if let poll = partialMessage.poll {
                 self.poll = poll
             }

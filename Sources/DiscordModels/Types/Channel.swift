@@ -421,6 +421,77 @@ extension DiscordChannel {
             public var message: PartialMessage
         }
 
+        /// https://docs.discord.com/developers/resources/message#shared-client-theme-object-shared-client-theme-object-structure
+        public struct SharedClientTheme: Sendable, Codable, ValidatablePayload {
+
+            /// https://docs.discord.com/developers/resources/message#base-theme-types
+            @UnstableEnum<_Int_CompatibilityTypealias>
+            public enum BaseTheme: Sendable, Codable {
+                case dark  // 1
+                case light  // 2
+                case darker  // 3
+                case midnight  // 4
+                case __undocumented(_Int_CompatibilityTypealias)
+            }
+
+            public var colors: [DiscordColor]
+            public var gradient_angle: Int
+            public var base_mix: Int
+            public var base_theme: BaseTheme?
+
+            enum CodingKeys: String, CodingKey {
+                case colors
+                case gradient_angle
+                case base_mix
+                case base_theme
+            }
+
+            public init(
+                colors: [DiscordColor],
+                gradient_angle: Int,
+                base_mix: Int,
+                base_theme: BaseTheme? = nil
+            ) {
+                self.colors = colors
+                self.gradient_angle = gradient_angle
+                self.base_mix = base_mix
+                self.base_theme = base_theme
+            }
+
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.colors = try container.decode(
+                    [String].self,
+                    forKey: .colors
+                ).compactMap {
+                    DiscordColor(hex: $0)
+                }
+                self.gradient_angle = try container.decode(Int.self, forKey: .gradient_angle)
+                self.base_mix = try container.decode(Int.self, forKey: .base_mix)
+                self.base_theme = try container.decodeIfPresent(BaseTheme.self, forKey: .base_theme)
+            }
+
+            public func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(
+                    self.colors.map {
+                        let hex = String($0.value, radix: 16, uppercase: true)
+                        return String(repeating: "0", count: max(0, 6 - hex.count)) + hex
+                    },
+                    forKey: .colors
+                )
+                try container.encode(self.gradient_angle, forKey: .gradient_angle)
+                try container.encode(self.base_mix, forKey: .base_mix)
+                try container.encodeIfPresent(self.base_theme, forKey: .base_theme)
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateElementCountDoesNotExceed(colors, max: 5, name: "colors")
+                validateNumberInRangeOrNil(gradient_angle, min: 0, max: 360, name: "gradient_angle")
+                validateNumberInRangeOrNil(base_mix, min: 0, max: 100, name: "base_mix")
+            }
+        }
+
         public var id: MessageSnowflake
         public var channel_id: ChannelSnowflake
         public var author: DiscordUser?
@@ -456,6 +527,7 @@ extension DiscordChannel {
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
         public var poll: Poll?
         public var call: Call?
+        public var shared_client_theme: SharedClientTheme?
         /// Extra fields, not sure why I've added them to this specific type:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
@@ -504,6 +576,7 @@ extension DiscordChannel {
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
         public var poll: Poll?
         public var call: DiscordChannel.Message.Call?
+        public var shared_client_theme: DiscordChannel.Message.SharedClientTheme?
         /// Extra fields:
         public var member: Guild.PartialMember?
         public var guild_id: GuildSnowflake?
