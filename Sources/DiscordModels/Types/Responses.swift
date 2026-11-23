@@ -142,4 +142,9 @@ public enum Responses {
         public var completed_at: DiscordTimestamp?
         public var error_message: String?
     }
+
+    /// https://docs.discord.com/developers/resources/channel#get-channel-member-permissions-permissions-response
+    public struct Permissions: Sendable, Codable {
+        public var permissions: StringBitField<Permission>
+    }
 }

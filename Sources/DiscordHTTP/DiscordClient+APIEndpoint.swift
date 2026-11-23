@@ -427,6 +427,38 @@ extension DiscordClient {
         )
     }
 
+    /// https://docs.discord.com/developers/resources/channel#get-channel-member-permissions
+    @inlinable
+    public func getChannelMemberPermissions(
+        channelId: ChannelSnowflake,
+        userId: UserSnowflake,
+        implicit: Bool? = nil
+    ) async throws -> DiscordClientResponse<Responses.Permissions> {
+        let endpoint = APIEndpoint.getChannelMemberPermissions(channelId: channelId, userId: userId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("implicit", implicit.map { "\($0)" })]
+            )
+        )
+    }
+
+    /// https://docs.discord.com/developers/resources/channel#get-channel-role-permissions
+    @inlinable
+    public func getChannelRolePermissions(
+        channelId: ChannelSnowflake,
+        roleId: RoleSnowflake,
+        implicit: Bool? = nil
+    ) async throws -> DiscordClientResponse<Responses.Permissions> {
+        let endpoint = APIEndpoint.getChannelRolePermissions(channelId: channelId, roleId: roleId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("implicit", implicit.map { "\($0)" })]
+            )
+        )
+    }
+
     /// https://docs.discord.com/developers/resources/channel#set-voice-channel-status
     @inlinable
     public func setVoiceChannelStatus(
@@ -1485,6 +1517,16 @@ extension DiscordClient {
         )
     }
 
+    /// https://docs.discord.com/developers/resources/guild#get-guild-member-permissions
+    @inlinable
+    public func getGuildMemberPermissions(
+        guildId: GuildSnowflake,
+        userId: UserSnowflake
+    ) async throws -> DiscordClientResponse<Responses.Permissions> {
+        let endpoint = APIEndpoint.getGuildMemberPermissions(guildId: guildId, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     /// NOTE: Sometimes doesn't return a guild member object. Read the docs.
     /// https://docs.discord.com/developers/resources/guild#add-guild-member
     @inlinable
@@ -1685,6 +1727,16 @@ extension DiscordClient {
         roleId: RoleSnowflake
     ) async throws -> DiscordClientResponse<Role> {
         let endpoint = APIEndpoint.getGuildRole(guildId: guildId, roleId: roleId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://docs.discord.com/developers/resources/guild#get-guild-role-permissions
+    @inlinable
+    public func getGuildRolePermissions(
+        guildId: GuildSnowflake,
+        roleId: RoleSnowflake
+    ) async throws -> DiscordClientResponse<Responses.Permissions> {
+        let endpoint = APIEndpoint.getGuildRolePermissions(guildId: guildId, roleId: roleId)
         return try await self.send(request: .init(to: endpoint))
     }
 

@@ -327,6 +327,82 @@ paths:
               schema:
                 type: string
               example: ""
+  /channels/{channel_id}/permissions/member/{user_id}:
+    get:
+      tags:
+        - Channels
+      summary: get channel member permissions
+      parameters:
+        - name: implicit
+          in: query
+          schema:
+            type: string
+          example: <boolean,null>
+        - name: channel_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: user_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
+  /channels/{channel_id}/permissions/role/{role_id}:
+    get:
+      tags:
+        - Channels
+      summary: get channel role permissions
+      parameters:
+        - name: implicit
+          in: query
+          schema:
+            type: string
+          example: <boolean,null>
+        - name: channel_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: role_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
   /channels/{channel_id}/permissions/{overwrite_id}:
     put:
       tags:
@@ -4262,6 +4338,39 @@ paths:
               schema:
                 type: string
               example: ""
+  /guilds/{guild_id}/permissions/member/{user_id}:
+    get:
+      tags:
+        - Members
+      summary: get guild member permissions
+      parameters:
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: user_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
   /guilds/{guild_id}/members/{user_id}:
     get:
       tags:
@@ -5370,6 +5479,39 @@ paths:
           schema:
             type: string
           example: application/json
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+        - name: role_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
+  /guilds/{guild_id}/permissions/role/{role_id}:
+    get:
+      tags:
+        - Roles
+      summary: get guild role permissions
+      parameters:
         - name: guild_id
           in: path
           schema:
