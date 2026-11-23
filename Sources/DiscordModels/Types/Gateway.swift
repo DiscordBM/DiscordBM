@@ -379,6 +379,8 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .guildSoundboardSoundDelete(decodeData())
                 case "GUILD_SOUNDBOARD_SOUNDS_UPDATE":
                     self.data = try .guildSoundboardSoundsUpdate(decodeData())
+                case "SOUNDBOARD_SOUNDS":
+                    self.data = try .soundboardSounds(decodeData())
                 case "GUILD_AUDIT_LOG_ENTRY_CREATE":
                     self.data = try .guildAuditLogEntryCreate(decodeData())
                 case "INTEGRATION_CREATE":
