@@ -282,7 +282,10 @@ extension DiscordChannel {
                 @available(*, deprecated, message: "Deprecated by Discord.")
                 case isRemix  // 2
                 case isSpoiler  // 3
+                case containsExplicitContent  // 4
                 case isAnimated  // 5
+                case containsGoreContent  // 6
+                case containsSelfHarmContent  // 7
                 case __undocumented(_UInt_CompatibilityTypealias)
             }
 
@@ -694,7 +697,10 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
     /// https://docs.discord.com/developers/resources/message#embed-object-embed-flags
     @UnstableEnum<_UInt_CompatibilityTypealias>
     public enum Flag: Sendable {
+        case containsExplicitContent  // 4
         case isContentInventoryEntry  // 5
+        case containsGoreContent  // 6
+        case containsSelfHarmContent  // 7
         case __undocumented(_UInt_CompatibilityTypealias)
     }
 

@@ -1002,6 +1002,21 @@ extension Interaction {
                 case __undocumented(_UInt_CompatibilityTypealias)
             }
 
+            /// https://docs.discord.com/developers/components/reference#unfurled-media-item-content-scan-metadata-structure
+            public struct ContentScanMetadata: Sendable, Codable {
+
+                /// https://docs.discord.com/developers/components/reference#unfurled-media-item-content-scan-metadata-flags
+                @UnstableEnum<_UInt_CompatibilityTypealias>
+                public enum Flag: Sendable {
+                    case isExplicitContent  // 0
+                    case isGoreContent  // 1
+                    case isSelfHarmContent  // 2
+                    case __undocumented(_UInt_CompatibilityTypealias)
+                }
+
+                public var flags: IntBitField<Flag>
+            }
+
             public var url: String
             public var proxy_url: String?
             public var height: Int?
@@ -1010,6 +1025,7 @@ extension Interaction {
             public var placeholder_version: Int?
             public var content_type: String?
             public var flags: IntBitField<Flag>?
+            public var content_scan_metadata: ContentScanMetadata?
             public var attachment_id: AttachmentSnowflake?
 
             public init(url: DynamicURL) {
@@ -1021,6 +1037,7 @@ extension Interaction {
                 self.placeholder_version = nil
                 self.content_type = nil
                 self.flags = nil
+                self.content_scan_metadata = nil
                 self.attachment_id = nil
             }
         }
