@@ -77,6 +77,7 @@ public struct DiscordApplication: Sendable, Codable {
     public var slug: String?
     public var cover_image: String?
     public var flags: IntBitField<Flag>?
+    public var flags_new: StringBitField<Flag>?
     public var approximate_guild_count: Int?
     public var approximate_user_install_count: Int?
     public var approximate_user_authorization_count: Int?
@@ -111,6 +112,7 @@ public struct PartialApplication: Sendable, Codable {
     public var slug: String?
     public var cover_image: String?
     public var flags: IntBitField<DiscordApplication.Flag>?
+    public var flags_new: StringBitField<DiscordApplication.Flag>?
     public var approximate_guild_count: Int?
     public var approximate_user_install_count: Int?
     public var approximate_user_authorization_count: Int?
