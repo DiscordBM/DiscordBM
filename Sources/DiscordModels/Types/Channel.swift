@@ -132,7 +132,9 @@ public struct DiscordChannel: Sendable, Codable {
     public var icon: String?
     public var owner_id: UserSnowflake?
     public var application_id: ApplicationSnowflake?
+    @available(*, deprecated, renamed: "managed")
     public var manage: Bool?
+    public var managed: Bool?
     public var parent_id: AnySnowflake?
     public var last_pin_timestamp: DiscordTimestamp?
     public var rtc_region: String?
