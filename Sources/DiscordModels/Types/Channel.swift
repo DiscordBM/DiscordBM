@@ -591,6 +591,7 @@ extension DiscordChannel {
         /// Extra fields:
         public var member: Guild.PartialMember?
         public var guild_id: GuildSnowflake?
+        public var channel_type: DiscordChannel.Kind?
     }
 }
 

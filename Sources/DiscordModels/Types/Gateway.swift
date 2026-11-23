@@ -1292,6 +1292,7 @@ public struct Gateway: Sendable, Codable {
         /// Extra fields:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
+        public var channel_type: DiscordChannel.Kind?
 
         public mutating func update(with partialMessage: DiscordChannel.PartialMessage) {
             self.id = partialMessage.id
@@ -1363,6 +1364,9 @@ public struct Gateway: Sendable, Codable {
             }
             if let guildId = partialMessage.guild_id {
                 self.guild_id = guildId
+            }
+            if let channelType = partialMessage.channel_type {
+                self.channel_type = channelType
             }
             if let resolved = partialMessage.resolved {
                 self.resolved = resolved
