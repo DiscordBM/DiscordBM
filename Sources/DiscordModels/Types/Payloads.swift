@@ -1709,6 +1709,215 @@ public enum Payloads {
         }
     }
 
+    /// https://docs.discord.com/developers/resources/message#search-guild-messages-query-string-params
+    public struct SearchGuildMessages: Sendable, ValidatablePayload {
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-author-types
+        @UnstableEnum<String>
+        public enum AuthorType: Sendable, Codable {
+            case user
+            case bot
+            case webhook
+            case __undocumented(String)
+        }
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-search-has-types
+        @UnstableEnum<String>
+        public enum HasType: Sendable, Codable {
+            case image
+            case sound
+            case video
+            case file
+            case sticker
+            case embed
+            case link
+            case poll
+            case snapshot
+            case __undocumented(String)
+        }
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-search-embed-types
+        @UnstableEnum<String>
+        public enum EmbedType: Sendable, Codable {
+            case image
+            case video
+            case gif
+            case sound
+            case article
+            case __undocumented(String)
+        }
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-search-sort-modes
+        @UnstableEnum<String>
+        public enum SortMode: Sendable, Codable {
+            case timestamp
+            case relevance
+            case __undocumented(String)
+        }
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-query-string-params
+        @UnstableEnum<String>
+        public enum SortOrder: Sendable, Codable {
+            case asc
+            case desc
+            case __undocumented(String)
+        }
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-query-string-params
+        public enum Filter<Value>: Sendable
+        where Value: Sendable, Value: RawRepresentable, Value.RawValue == String {
+            case include(Value)
+            case exclude(Value)
+
+            var urlQueryDescription: String {
+                switch self {
+                case let .include(value): return value.rawValue
+                case let .exclude(value): return "-\(value.rawValue)"
+                }
+            }
+        }
+
+        public var limit: Int?
+        public var offset: Int?
+        public var max_id: MessageSnowflake?
+        public var min_id: MessageSnowflake?
+        public var slop: Int?
+        public var content: String?
+        public var channel_id: [ChannelSnowflake]?
+        public var author_type: [Filter<AuthorType>]?
+        public var author_id: [UserSnowflake]?
+        public var mentions: [UserSnowflake]?
+        public var mentions_role_id: [RoleSnowflake]?
+        public var mention_everyone: Bool?
+        public var replied_to_user_id: [UserSnowflake]?
+        public var replied_to_message_id: [MessageSnowflake]?
+        public var pinned: Bool?
+        public var has: [Filter<HasType>]?
+        public var embed_type: [EmbedType]?
+        public var embed_provider: [String]?
+        public var link_hostname: [String]?
+        public var attachment_filename: [String]?
+        public var attachment_extension: [String]?
+        public var sort_by: SortMode?
+        public var sort_order: SortOrder?
+        public var include_nsfw: Bool?
+
+        public init(
+            limit: Int? = nil,
+            offset: Int? = nil,
+            max_id: MessageSnowflake? = nil,
+            min_id: MessageSnowflake? = nil,
+            slop: Int? = nil,
+            content: String? = nil,
+            channel_id: [ChannelSnowflake]? = nil,
+            author_type: [Filter<AuthorType>]? = nil,
+            author_id: [UserSnowflake]? = nil,
+            mentions: [UserSnowflake]? = nil,
+            mentions_role_id: [RoleSnowflake]? = nil,
+            mention_everyone: Bool? = nil,
+            replied_to_user_id: [UserSnowflake]? = nil,
+            replied_to_message_id: [MessageSnowflake]? = nil,
+            pinned: Bool? = nil,
+            has: [Filter<HasType>]? = nil,
+            embed_type: [EmbedType]? = nil,
+            embed_provider: [String]? = nil,
+            link_hostname: [String]? = nil,
+            attachment_filename: [String]? = nil,
+            attachment_extension: [String]? = nil,
+            sort_by: SortMode? = nil,
+            sort_order: SortOrder? = nil,
+            include_nsfw: Bool? = nil
+        ) {
+            self.limit = limit
+            self.offset = offset
+            self.max_id = max_id
+            self.min_id = min_id
+            self.slop = slop
+            self.content = content
+            self.channel_id = channel_id
+            self.author_type = author_type
+            self.author_id = author_id
+            self.mentions = mentions
+            self.mentions_role_id = mentions_role_id
+            self.mention_everyone = mention_everyone
+            self.replied_to_user_id = replied_to_user_id
+            self.replied_to_message_id = replied_to_message_id
+            self.pinned = pinned
+            self.has = has
+            self.embed_type = embed_type
+            self.embed_provider = embed_provider
+            self.link_hostname = link_hostname
+            self.attachment_filename = attachment_filename
+            self.attachment_extension = attachment_extension
+            self.sort_by = sort_by
+            self.sort_order = sort_order
+            self.include_nsfw = include_nsfw
+        }
+
+        public func makeQueries() -> [(String, String?)] {
+            var queries: [(String, String?)] = [
+                ("limit", self.limit.map({ "\($0)" })),
+                ("offset", self.offset.map({ "\($0)" })),
+                ("max_id", self.max_id?.rawValue),
+                ("min_id", self.min_id?.rawValue),
+                ("slop", self.slop.map({ "\($0)" })),
+                ("content", self.content),
+            ]
+            queries += self.channel_id?.map({ ("channel_id", $0.rawValue) }) ?? []
+            queries += self.author_type?.map({ ("author_type", $0.urlQueryDescription) }) ?? []
+            queries += self.author_id?.map({ ("author_id", $0.rawValue) }) ?? []
+            queries += self.mentions?.map({ ("mentions", $0.rawValue) }) ?? []
+            queries += self.mentions_role_id?.map({ ("mentions_role_id", $0.rawValue) }) ?? []
+            queries.append(("mention_everyone", self.mention_everyone.map({ "\($0)" })))
+            queries += self.replied_to_user_id?.map({ ("replied_to_user_id", $0.rawValue) }) ?? []
+            queries += self.replied_to_message_id?.map({ ("replied_to_message_id", $0.rawValue) }) ?? []
+            queries.append(("pinned", self.pinned.map({ "\($0)" })))
+            queries += self.has?.map({ ("has", $0.urlQueryDescription) }) ?? []
+            queries += self.embed_type?.map({ ("embed_type", $0.rawValue) }) ?? []
+            queries += self.embed_provider?.map({ ("embed_provider", $0) }) ?? []
+            queries += self.link_hostname?.map({ ("link_hostname", $0) }) ?? []
+            queries += self.attachment_filename?.map({ ("attachment_filename", $0) }) ?? []
+            queries += self.attachment_extension?.map({ ("attachment_extension", $0) }) ?? []
+            queries.append(("sort_by", self.sort_by?.rawValue))
+            queries.append(("sort_order", self.sort_order?.rawValue))
+            queries.append(("include_nsfw", self.include_nsfw.map({ "\($0)" })))
+            return queries
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateNumberInRangeOrNil(limit, min: 1, max: 25, name: "limit")
+            validateNumberInRangeOrNil(offset, min: 0, max: 9975, name: "offset")
+            validateNumberInRangeOrNil(slop, min: 0, max: 100, name: "slop")
+            validateCharacterCountDoesNotExceed(content, max: 1024, name: "content")
+            validateElementCountDoesNotExceed(channel_id, max: 500, name: "channel_id")
+            validateElementCountDoesNotExceed(author_id, max: 100, name: "author_id")
+            validateElementCountDoesNotExceed(mentions, max: 100, name: "mentions")
+            validateElementCountDoesNotExceed(mentions_role_id, max: 100, name: "mentions_role_id")
+            validateElementCountDoesNotExceed(replied_to_user_id, max: 100, name: "replied_to_user_id")
+            validateElementCountDoesNotExceed(replied_to_message_id, max: 100, name: "replied_to_message_id")
+            validateElementCountDoesNotExceed(embed_provider, max: 100, name: "embed_provider")
+            for (idx, provider) in (embed_provider ?? []).enumerated() {
+                validateCharacterCountDoesNotExceed(provider, max: 256, name: "embed_provider[\(idx)]")
+            }
+            validateElementCountDoesNotExceed(link_hostname, max: 100, name: "link_hostname")
+            for (idx, hostname) in (link_hostname ?? []).enumerated() {
+                validateCharacterCountDoesNotExceed(hostname, max: 256, name: "link_hostname[\(idx)]")
+            }
+            validateElementCountDoesNotExceed(attachment_filename, max: 100, name: "attachment_filename")
+            for (idx, filename) in (attachment_filename ?? []).enumerated() {
+                validateCharacterCountDoesNotExceed(filename, max: 1024, name: "attachment_filename[\(idx)]")
+            }
+            validateElementCountDoesNotExceed(attachment_extension, max: 100, name: "attachment_extension")
+            for (idx, fileExtension) in (attachment_extension ?? []).enumerated() {
+                validateCharacterCountDoesNotExceed(
+                    fileExtension,
+                    max: 256,
+                    name: "attachment_extension[\(idx)]"
+                )
+            }
+        }
+    }
+
     /// https://docs.discord.com/developers/resources/channel#edit-channel-permissions-json-params
     public struct EditChannelPermissions: Sendable, Codable, ValidatablePayload {
         public var type: DiscordChannel.Overwrite.Kind

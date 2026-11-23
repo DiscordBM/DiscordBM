@@ -471,6 +471,17 @@ extension DiscordClient {
         )
     }
 
+    /// https://docs.discord.com/developers/resources/message#search-guild-messages
+    @inlinable
+    public func searchGuildMessages(
+        guildId: GuildSnowflake,
+        payload: Payloads.SearchGuildMessages
+    ) async throws -> DiscordClientResponse<Responses.SearchGuildMessages> {
+        try payload.validate().throw(model: payload)
+        let endpoint = APIEndpoint.searchGuildMessages(guildId: guildId)
+        return try await self.send(request: .init(to: endpoint, queries: payload.makeQueries()))
+    }
+
     /// https://docs.discord.com/developers/resources/channel#get-channel-message
     @inlinable
     public func getMessage(

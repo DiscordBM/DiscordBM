@@ -4813,6 +4813,152 @@ paths:
               schema:
                 type: string
               example: ""
+  /guilds/{guild_id}/messages/search:
+    get:
+      tags:
+        - Messages
+      summary: search guild messages
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: string
+          example: <integer,null>
+        - name: offset
+          in: query
+          schema:
+            type: string
+          example: <integer,null>
+        - name: max_id
+          in: query
+          schema:
+            type: string
+          example: <string,null-snowflake>
+        - name: min_id
+          in: query
+          schema:
+            type: string
+          example: <string,null-snowflake>
+        - name: slop
+          in: query
+          schema:
+            type: string
+          example: <integer,null>
+        - name: content
+          in: query
+          schema:
+            type: string
+          example: <string,null>
+        - name: channel_id
+          in: query
+          schema:
+            type: string
+          example: <string,null-snowflake>
+        - name: author_type
+          in: query
+          schema:
+            type: string
+          example: <string,null>
+        - name: author_id
+          in: query
+          schema:
+            type: string
+          example: <string,null-snowflake>
+        - name: mentions
+          in: query
+          schema:
+            type: string
+          example: <string,null-snowflake>
+        - name: mentions_role_id
+          in: query
+          schema:
+            type: string
+          example: <string,null-snowflake>
+        - name: mention_everyone
+          in: query
+          schema:
+            type: string
+          example: <boolean,null>
+        - name: replied_to_user_id
+          in: query
+          schema:
+            type: string
+          example: <string,null-snowflake>
+        - name: replied_to_message_id
+          in: query
+          schema:
+            type: string
+          example: <string,null-snowflake>
+        - name: pinned
+          in: query
+          schema:
+            type: string
+          example: <boolean,null>
+        - name: has
+          in: query
+          schema:
+            type: string
+          example: <string,null>
+        - name: embed_type
+          in: query
+          schema:
+            type: string
+          example: <string,null>
+        - name: embed_provider
+          in: query
+          schema:
+            type: string
+          example: <string,null>
+        - name: link_hostname
+          in: query
+          schema:
+            type: string
+          example: <string,null>
+        - name: attachment_filename
+          in: query
+          schema:
+            type: string
+          example: <string,null>
+        - name: attachment_extension
+          in: query
+          schema:
+            type: string
+          example: <string,null>
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+          example: <string,null>
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+          example: <string,null>
+        - name: include_nsfw
+          in: query
+          schema:
+            type: string
+          example: <boolean,null>
+        - name: guild_id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "(Required) "
+          example: <snowflake>
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/plain
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ""
   /applications/@me:
     get:
       tags:

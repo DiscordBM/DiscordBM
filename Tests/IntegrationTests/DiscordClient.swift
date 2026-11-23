@@ -323,6 +323,46 @@ class DiscordClientTests: XCTestCase {
         ).guardSuccess()
     }
 
+    func testSearchGuildMessages() async throws {
+        let limit = 5
+        let response = try await client.searchGuildMessages(
+            guildId: Constants.guildId,
+            payload: .init(
+                limit: limit,
+                author_type: [.include(.bot), .exclude(.webhook)]
+            )
+        )
+
+        switch try response.decode() {
+        case let .results(results):
+            XCTAssertEqual(response.httpResponse.status.code, 200)
+            XCTAssertGreaterThanOrEqual(results.total_results, 0, "\(results)")
+            XCTAssertLessThanOrEqual(results.messages.count, limit, "\(results)")
+            if let documentsIndexed = results.documents_indexed {
+                XCTAssertGreaterThanOrEqual(documentsIndexed, 0, "\(results)")
+            }
+            for message in results.messages.joined() {
+                XCTAssertNil(message.reactions, "\(message)")
+                XCTAssertEqual(message.author?.bot, true, "\(message)")
+            }
+        case let .indexNotYetAvailable(indexNotYetAvailable):
+            XCTAssertEqual(response.httpResponse.status.code, 202)
+            XCTAssertEqual(
+                indexNotYetAvailable.code,
+                .indexNotYetAvailableTryAgainLater,
+                "\(indexNotYetAvailable)"
+            )
+            XCTAssertGreaterThanOrEqual(
+                indexNotYetAvailable.retry_after,
+                0,
+                "\(indexNotYetAvailable)"
+            )
+            if let documentsIndexed = indexNotYetAvailable.documents_indexed {
+                XCTAssertGreaterThanOrEqual(documentsIndexed, 0, "\(indexNotYetAvailable)")
+            }
+        }
+    }
+
     func testPolls() async throws {
         let message = try await client.createMessage(
             channelId: Constants.Channels.spam.id,
@@ -3302,7 +3342,7 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
-    private let totalTestCount = 43
+    private let totalTestCount = 44
     var isLastTest: Bool {
         self.testsRan == self.totalTestCount
     }

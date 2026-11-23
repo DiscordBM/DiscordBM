@@ -1100,6 +1100,26 @@ class DiscordModelsTests: XCTestCase {
             #"{"base_mix":100,"colors":["5865F2","0058F2","000000"],"gradient_angle":90}"#
         )
     }
+
+    func testSearchGuildMessagesQueries() throws {
+        let payload = Payloads.SearchGuildMessages(
+            limit: 10,
+            content: "hello",
+            channel_id: ["1", "2"],
+            author_type: [.include(.bot), .exclude(.webhook)],
+            has: [.exclude(.link)],
+            sort_by: .relevance
+        )
+        let queries = payload.makeQueries().filter { $0.1 != nil }
+        XCTAssertEqual(
+            queries.map { $0.0 },
+            ["limit", "content", "channel_id", "channel_id", "author_type", "author_type", "has", "sort_by"]
+        )
+        XCTAssertEqual(
+            queries.map { $0.1 },
+            ["10", "hello", "1", "2", "bot", "-webhook", "-link", "relevance"]
+        )
+    }
 }
 
 private struct CodableContainer: Codable {
