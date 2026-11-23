@@ -1216,6 +1216,7 @@ extension Interaction {
             public var min_values: Int?
             public var max_values: Int?
             public var required: Bool?
+            public var file_types: [String]?
             public var values: [String]?
 
             public init(
@@ -1223,13 +1224,15 @@ extension Interaction {
                 custom_id: String,
                 min_values: Int? = nil,
                 max_values: Int? = nil,
-                required: Bool? = nil
+                required: Bool? = nil,
+                file_types: [String]? = nil
             ) {
                 self.id = id
                 self.custom_id = custom_id
                 self.min_values = min_values
                 self.max_values = max_values
                 self.required = required
+                self.file_types = file_types
                 self.values = nil
             }
 
@@ -1237,6 +1240,7 @@ extension Interaction {
                 validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
                 validateNumberInRangeOrNil(min_values, min: 0, max: 10, name: "min_values")
                 validateNumberInRangeOrNil(max_values, min: 1, max: 10, name: "max_values")
+                validateElementCountDoesNotExceed(file_types, max: 10, name: "file_types")
                 validateHasPrecondition(
                     condition: min_values == 0,
                     allowedIf: required == false,

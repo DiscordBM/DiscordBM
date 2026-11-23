@@ -79,6 +79,7 @@ public struct ApplicationCommand: Sendable, Codable {
         public var min_length: _Int_CompatibilityTypealias?
         public var max_length: _Int_CompatibilityTypealias?
         public var autocomplete: Bool?
+        public var file_types: [String]?
 
         public init(
             type: Kind,
@@ -94,7 +95,8 @@ public struct ApplicationCommand: Sendable, Codable {
             max_value: IntOrDouble? = nil,
             min_length: _Int_CompatibilityTypealias? = nil,
             max_length: _Int_CompatibilityTypealias? = nil,
-            autocomplete: Bool? = nil
+            autocomplete: Bool? = nil,
+            file_types: [String]? = nil
         ) {
             self.type = type
             self.name = name
@@ -110,12 +112,14 @@ public struct ApplicationCommand: Sendable, Codable {
             self.min_length = min_length
             self.max_length = max_length
             self.autocomplete = autocomplete
+            self.file_types = file_types
         }
 
         public func validate() -> [ValidationFailure] {
             validateNumberInRangeOrNil(min_length, min: 0, max: 6_000, name: "min_length")
             validateNumberInRangeOrNil(max_length, min: 0, max: 6_000, name: "max_length")
             validateElementCountDoesNotExceed(choices, max: 25, name: "choices")
+            validateElementCountDoesNotExceed(file_types, max: 10, name: "file_types")
             validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
             validateCharacterCountInRange(description, min: 1, max: 100, name: "description")
             validateHasPrecondition(
@@ -147,6 +151,12 @@ public struct ApplicationCommand: Sendable, Codable {
                 allowedIf: [.string, .integer, .number].contains(type),
                 name: "choices",
                 reason: "'choices' is only allowed if 'type' is 'string' or 'integer' or 'number'"
+            )
+            validateHasPrecondition(
+                condition: file_types?.isEmpty == false,
+                allowedIf: type == .attachment,
+                name: "file_types",
+                reason: "'file_types' is only allowed if 'type' is 'attachment'"
             )
             choices?.validate()
             validateElementCountDoesNotExceed(options, max: 25, name: "options")
