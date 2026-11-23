@@ -685,6 +685,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         case article  // "article"
         case link  // "link"
         case pollResult  // "poll_result"
+        case components  // "components"
         @available(*, deprecated, message: "Not available in Discord Docs so will be removed in a future major version")
         case autoModerationMessage  // "auto_moderation_message"
         case __undocumented(String)
@@ -804,6 +805,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
     public var provider: Provider?
     public var author: Author?
     public var fields: [Field]?
+    public var components: [Interaction.ActionRow]?
     public var flags: IntBitField<Flag>?
 
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
@@ -844,6 +846,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         self.provider = provider
         self.author = author
         self.fields = fields
+        self.components = nil
         self.flags = nil
     }
 
