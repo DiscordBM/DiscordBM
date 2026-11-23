@@ -1129,9 +1129,10 @@ public enum Payloads {
             validateHasPrecondition(
                 condition: description.isNotEmpty
                     || (description_localizations?.values).isNotEmpty,
-                allowedIf: (type ?? .chatInput) == .chatInput,
+                allowedIf: [.chatInput, .primaryEntryPoint].contains(type ?? .chatInput),
                 name: "description+description_localizations",
-                reason: "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput'"
+                reason:
+                    "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput' or 'primaryEntryPoint'"
             )
             validateHasPrecondition(
                 condition: handler != nil,
