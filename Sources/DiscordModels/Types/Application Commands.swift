@@ -10,6 +10,7 @@ public struct ApplicationCommand: Sendable, Codable {
         case chatInput  // 1
         case user  // 2
         case message  // 3
+        case primaryEntryPoint  // 4
         case __undocumented(_UInt_CompatibilityTypealias)
     }
 
@@ -153,6 +154,14 @@ public struct ApplicationCommand: Sendable, Codable {
         }
     }
 
+    /// https://docs.discord.com/developers/interactions/application-commands#application-command-object-entry-point-command-handler-types
+    @UnstableEnum<_Int_CompatibilityTypealias>
+    public enum HandlerKind: Sendable, Codable {
+        case appHandler  // 1
+        case discordLaunchActivity  // 2
+        case __undocumented(_Int_CompatibilityTypealias)
+    }
+
     public var id: CommandSnowflake
     public var type: Kind?
     public var application_id: ApplicationSnowflake
@@ -172,6 +181,7 @@ public struct ApplicationCommand: Sendable, Codable {
     public var integration_types: [DiscordApplication.IntegrationKind]?
     public var contexts: [Interaction.ContextKind]?
     public var version: String?
+    public var handler: HandlerKind?
 }
 
 /// https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-guild-application-command-permissions-structure
