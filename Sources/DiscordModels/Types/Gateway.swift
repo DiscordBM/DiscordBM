@@ -936,6 +936,7 @@ public struct Gateway: Sendable, Codable {
         public var pending: Bool?
         public var communication_disabled_until: DiscordTimestamp?
         public var avatar_decoration_data: DiscordUser.AvatarDecoration?
+        public var collectibles: DiscordUser.Collectibles?
 
         public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -969,6 +970,10 @@ public struct Gateway: Sendable, Codable {
             self.avatar_decoration_data = try container.decodeIfPresent(
                 DiscordUser.AvatarDecoration.self,
                 forKey: .avatar_decoration_data
+            )
+            self.collectibles = try container.decodeIfPresent(
+                DiscordUser.Collectibles.self,
+                forKey: .collectibles
             )
         }
     }

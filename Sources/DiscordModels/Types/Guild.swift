@@ -33,6 +33,7 @@ public struct Guild: Sendable, Codable {
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
         public var avatar_decoration_data: DiscordUser.AvatarDecoration?
+        public var collectibles: DiscordUser.Collectibles?
 
         public init(guildMemberAdd: Gateway.GuildMemberAdd) {
             self.roles = guildMemberAdd.roles
@@ -48,6 +49,7 @@ public struct Guild: Sendable, Codable {
             self.flags = guildMemberAdd.flags
             self.communication_disabled_until = guildMemberAdd.communication_disabled_until
             self.avatar_decoration_data = guildMemberAdd.avatar_decoration_data
+            self.collectibles = guildMemberAdd.collectibles
         }
 
         public init(from decoder: any Decoder) throws {
@@ -83,6 +85,10 @@ public struct Guild: Sendable, Codable {
             self.avatar_decoration_data = try container.decodeIfPresent(
                 DiscordUser.AvatarDecoration.self,
                 forKey: .avatar_decoration_data
+            )
+            self.collectibles = try container.decodeIfPresent(
+                DiscordUser.Collectibles.self,
+                forKey: .collectibles
             )
         }
     }
@@ -372,6 +378,7 @@ extension Guild {
         public var permissions: StringBitField<Permission>?
         public var communication_disabled_until: DiscordTimestamp?
         public var avatar_decoration_data: DiscordUser.AvatarDecoration?
+        public var collectibles: DiscordUser.Collectibles?
     }
 
     /// https://docs.discord.com/developers/resources/guild#guild-onboarding-object-guild-onboarding-structure
