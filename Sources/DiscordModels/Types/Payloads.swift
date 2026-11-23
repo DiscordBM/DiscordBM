@@ -1356,8 +1356,14 @@ public enum Payloads {
             validateOnlyContains(
                 flags,
                 name: "flags",
-                reason: "Can only contain 'requireTag'",
-                allowed: [.requireTag]
+                reason: "Can only contain 'requireTag', 'hideMediaDownloadOptions', or 'isSpoilerChannel'",
+                allowed: [.requireTag, .hideMediaDownloadOptions, .isSpoilerChannel]
+            )
+            validateHasPrecondition(
+                condition: flags?.contains(.isSpoilerChannel) == true,
+                allowedIf: nsfw != true,
+                name: "flags",
+                reason: "'isSpoilerChannel' is only allowed if 'nsfw' is not 'true'"
             )
             validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
             available_tags?.validate()
@@ -1456,6 +1462,7 @@ public enum Payloads {
         public var default_sort_order: DiscordChannel.SortOrder?
         public var default_forum_layout: DiscordChannel.ForumLayout?
         public var default_thread_rate_limit_per_user: Int?
+        public var flags: IntBitField<DiscordChannel.Flag>?
 
         public init(
             name: String,
@@ -1475,7 +1482,8 @@ public enum Payloads {
             default_reaction_emoji: DiscordChannel.DefaultReaction? = nil,
             default_sort_order: DiscordChannel.SortOrder? = nil,
             default_forum_layout: DiscordChannel.ForumLayout? = nil,
-            default_thread_rate_limit_per_user: Int? = nil
+            default_thread_rate_limit_per_user: Int? = nil,
+            flags: IntBitField<DiscordChannel.Flag>? = nil
         ) {
             self.name = name
             self.type = type
@@ -1495,6 +1503,7 @@ public enum Payloads {
             self.default_sort_order = default_sort_order
             self.default_forum_layout = default_forum_layout
             self.default_thread_rate_limit_per_user = default_thread_rate_limit_per_user
+            self.flags = flags
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1508,6 +1517,18 @@ public enum Payloads {
             )
             validateNumberInRangeOrNil(bitrate, min: 8_000, max: 384_000, name: "bitrate")
             validateNumberInRangeOrNil(user_limit, min: 0, max: 10_000, name: "user_limit")
+            validateOnlyContains(
+                flags,
+                name: "flags",
+                reason: "Can only contain 'requireTag', 'hideMediaDownloadOptions', or 'isSpoilerChannel'",
+                allowed: [.requireTag, .hideMediaDownloadOptions, .isSpoilerChannel]
+            )
+            validateHasPrecondition(
+                condition: flags?.contains(.isSpoilerChannel) == true,
+                allowedIf: nsfw != true,
+                name: "flags",
+                reason: "'isSpoilerChannel' is only allowed if 'nsfw' is not 'true'"
+            )
             validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
             available_tags?.validate()
         }
@@ -2208,17 +2229,20 @@ public enum Payloads {
         public var position: Int?
         public var lock_permissions: Bool?
         public var parent_id: ChannelSnowflake?
+        public var flags: IntBitField<DiscordChannel.Flag>?
 
         public init(
             id: ChannelSnowflake,
             position: Int? = nil,
             lock_permissions: Bool? = nil,
-            parent_id: ChannelSnowflake? = nil
+            parent_id: ChannelSnowflake? = nil,
+            flags: IntBitField<DiscordChannel.Flag>? = nil
         ) {
             self.id = id
             self.position = position
             self.lock_permissions = lock_permissions
             self.parent_id = parent_id
+            self.flags = flags
         }
 
         public func validate() -> [ValidationFailure] {}
