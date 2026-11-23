@@ -276,7 +276,12 @@ extension DiscordChannel {
             /// https://docs.discord.com/developers/resources/message#attachment-object-attachment-flags
             @UnstableEnum<_UInt_CompatibilityTypealias>
             public enum Flag: Sendable {
+                case isClip  // 0
+                case isThumbnail  // 1
+                @available(*, deprecated, message: "Deprecated by Discord.")
                 case isRemix  // 2
+                case isSpoiler  // 3
+                case isAnimated  // 5
                 case __undocumented(_UInt_CompatibilityTypealias)
             }
 
@@ -290,10 +295,15 @@ extension DiscordChannel {
             public var proxy_url: String
             public var height: Int?
             public var width: Int?
+            public var placeholder: String?
+            public var placeholder_version: Int?
             public var ephemeral: Bool?
             public var duration_secs: Double?
             public var waveform: String?
             public var flags: IntBitField<Flag>?
+            public var clip_participants: [DiscordUser]?
+            public var clip_created_at: DiscordTimestamp?
+            public var application: PartialApplication?
         }
 
         /// https://docs.discord.com/developers/resources/message#reaction-object
@@ -677,6 +687,13 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         case __undocumented(String)
     }
 
+    /// https://docs.discord.com/developers/resources/message#embed-object-embed-flags
+    @UnstableEnum<_UInt_CompatibilityTypealias>
+    public enum Flag: Sendable {
+        case isContentInventoryEntry  // 5
+        case __undocumented(_UInt_CompatibilityTypealias)
+    }
+
     /// FIMXE: remove this typealias in a future major version
     public typealias DynamicURL = DiscordModels.DynamicURL
 
@@ -695,16 +712,40 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
 
     /// https://docs.discord.com/developers/resources/channel#embed-object-embed-image-structure
     public struct Media: Sendable, Codable {
+
+        /// https://docs.discord.com/developers/resources/message#embed-object-embed-media-flags
+        @UnstableEnum<_UInt_CompatibilityTypealias>
+        public enum Flag: Sendable {
+            case isAnimated  // 5
+            case __undocumented(_UInt_CompatibilityTypealias)
+        }
+
         public var url: DynamicURL
         public var proxy_url: String?
         public var height: Int?
         public var width: Int?
+        public var content_type: String?
+        public var placeholder: String?
+        public var placeholder_version: Int?
+        public var description: String?
+        public var flags: IntBitField<Flag>?
 
-        public init(url: DynamicURL, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil) {
+        public init(
+            url: DynamicURL,
+            proxy_url: String? = nil,
+            height: Int? = nil,
+            width: Int? = nil,
+            description: String? = nil
+        ) {
             self.url = url
             self.proxy_url = proxy_url
             self.height = height
             self.width = width
+            self.content_type = nil
+            self.placeholder = nil
+            self.placeholder_version = nil
+            self.description = description
+            self.flags = nil
         }
     }
 
@@ -760,6 +801,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
     public var provider: Provider?
     public var author: Author?
     public var fields: [Field]?
+    public var flags: IntBitField<Flag>?
 
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
     public var contentLength: Int {
@@ -799,6 +841,7 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         self.provider = provider
         self.author = author
         self.fields = fields
+        self.flags = nil
     }
 
     public func validate() -> [ValidationFailure] {
