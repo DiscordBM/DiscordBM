@@ -402,6 +402,7 @@ extension DiscordChannel {
                 case spectate  // 2
                 case listen  // 3
                 case joinRequest  // 5
+                case streamRequest  // 6
                 case __undocumented(_Int_CompatibilityTypealias)
             }
 
