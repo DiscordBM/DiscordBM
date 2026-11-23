@@ -28,6 +28,7 @@ public struct DiscordUser: Sendable, Codable {
         case verifiedDeveloper  // 17
         case certifiedModerator  // 18
         case botHttpInteractions  // 19
+        @available(*, deprecated, message: "Not available in Discord Docs so will be removed in a future major version")
         case activeDeveloper  // 22
         case __undocumented(_UInt_CompatibilityTypealias)
     }
