@@ -65,6 +65,19 @@ class CDNEndpointTests: XCTestCase {
         )
     }
 
+    func testGuildTagBadgePath() throws {
+        let endpoint = CDNEndpoint.guildTagBadge(guildId: guildId, badge: avatar)
+
+        XCTAssertEqual(
+            endpoint.url,
+            "https://cdn.discordapp.com/guild-tag-badges/922186320275722322/b94e12ce3debd281000d5291eec2b502"
+        )
+        XCTAssertEqual(
+            FormattedCDNEndpoint(endpoint, fileExtension: CDNEndpoint.StaticImageFormat.png.rawValue).url,
+            "https://cdn.discordapp.com/guild-tag-badges/922186320275722322/b94e12ce3debd281000d5291eec2b502.png"
+        )
+    }
+
     func testIdentityMatchesWrappedEndpoint() throws {
         let wrapped = CDNEndpoint.guildMemberAvatar(guildId: guildId, userId: userId, avatar: avatar)
         let formatted = FormattedCDNEndpoint(wrapped, fileExtension: "webp")

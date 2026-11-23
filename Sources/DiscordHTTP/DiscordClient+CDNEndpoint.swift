@@ -476,4 +476,22 @@ extension DiscordClient {
             fallbackFileName: banner
         )
     }
+
+    /// https://docs.discord.com/developers/reference#image-formatting-cdn-endpoints
+    @inlinable
+    public func getCDNGuildTagBadge(
+        guildId: GuildSnowflake,
+        badge: String,
+        format: CDNEndpoint.StaticImageFormat? = nil,
+        size: CDNEndpoint.ImageSize? = nil
+    ) async throws -> DiscordCDNResponse {
+        let endpoint = CDNEndpoint.guildTagBadge(guildId: guildId, badge: badge)
+        return try await self.send(
+            request: .init(
+                to: FormattedCDNEndpoint(endpoint, fileExtension: format?.rawValue),
+                queries: [("size", size.map { "\($0.rawValue)" })]
+            ),
+            fallbackFileName: badge
+        )
+    }
 }
