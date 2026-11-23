@@ -728,7 +728,7 @@ class DiscordClientTests: XCTestCase {
         let invite = try await client.createChannelInvite(
             channelId: Constants.Channels.spam.id,
             payload: .init(
-                max_age: 30,
+                max_age: 300,
                 max_uses: .unlimited,
                 temporary: true,
                 unique: true,

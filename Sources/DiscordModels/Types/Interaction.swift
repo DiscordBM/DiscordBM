@@ -453,6 +453,8 @@ extension Interaction {
     /// `ActionRow` is an attempt to simplify/beautify Discord's messy components.
     /// Anything inside `ActionRow` must not be used on its own for decoding/encoding purposes.
     /// For example you always need to use `[ActionRow]` instead of `[ActionRow.Component]`.
+    /// An `ActionRow` containing only one component that can't be in an action row, like a `container`,
+    /// is encoded as the component itself. This is how you send top-level components.
     public struct ActionRow: Sendable, Codable, ExpressibleByArrayLiteral, ValidatablePayload {
 
         /// https://discord.com/developers/docs/components/reference#component-object-component-types
@@ -745,6 +747,19 @@ extension Interaction {
                 self.values = nil
             }
 
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.id = try container.decodeIfPresent(Int.self, forKey: .id)
+                self.custom_id = try container.decode(String.self, forKey: .custom_id)
+                self.options = try container.decodeIfPresent([Option].self, forKey: .options) ?? []
+                self.placeholder = try container.decodeIfPresent(String.self, forKey: .placeholder)
+                self.min_values = try container.decodeIfPresent(Int.self, forKey: .min_values)
+                self.max_values = try container.decodeIfPresent(Int.self, forKey: .max_values)
+                self.required = try container.decodeIfPresent(Bool.self, forKey: .required)
+                self.disabled = try container.decodeIfPresent(Bool.self, forKey: .disabled)
+                self.values = try container.decodeIfPresent([String].self, forKey: .values)
+            }
+
             public func validate() -> [ValidationFailure] {
                 validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
                 validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
@@ -825,7 +840,7 @@ extension Interaction {
                 validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
                 validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
                 validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
-                validateElementCountInRange(
+                validateElementCountInRangeOrNil(
                     default_values,
                     min: min_values ?? 0,
                     max: max_values ?? .max,
@@ -872,7 +887,7 @@ extension Interaction {
                 validateCharacterCountDoesNotExceed(placeholder, max: 150, name: "placeholder")
                 validateNumberInRangeOrNil(min_values, min: 0, max: 25, name: "min_values")
                 validateNumberInRangeOrNil(max_values, min: 1, max: 25, name: "max_values")
-                validateElementCountInRange(
+                validateElementCountInRangeOrNil(
                     default_values,
                     min: min_values ?? 0,
                     max: max_values ?? .max,
@@ -965,6 +980,12 @@ extension Interaction {
             public init(id: Int? = nil, content: String) {
                 self.id = id
                 self.content = content
+            }
+
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.id = try container.decodeIfPresent(Int.self, forKey: .id)
+                self.content = try container.decodeIfPresent(String.self, forKey: .content) ?? ""
             }
 
             public func validate() -> [ValidationFailure] {}
@@ -1139,6 +1160,14 @@ extension Interaction {
                 self.label = label
                 self.description = description
                 self.component = component
+            }
+
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.id = try container.decodeIfPresent(Int.self, forKey: .id)
+                self.label = try container.decodeIfPresent(String.self, forKey: .label) ?? ""
+                self.description = try container.decodeIfPresent(String.self, forKey: .description)
+                self.component = try container.decode(Component.self, forKey: .component)
             }
 
             public func validate() -> [ValidationFailure] {
@@ -1331,6 +1360,7 @@ extension Interaction {
         /// all its sub-types have and Discord documents it as so.
 
         public enum Component: Sendable, Codable, ValidatablePayload {
+            case actionRow(ActionRow)
             case button(Button)
             case stringSelect(StringSelectMenu)
             case textInput(TextInput)
@@ -1374,9 +1404,75 @@ extension Interaction {
                     return value.custom_id
                 case let .checkbox(value):
                     return value.custom_id
-                case .section, .textDisplay, .thumbnail, .mediaGallery, .file,
+                case .actionRow, .section, .textDisplay, .thumbnail, .mediaGallery, .file,
                     .separator, .container, .label, .fileUpload, .__undocumented:
                     return nil
+                }
+            }
+
+            public var id: Int? {
+                switch self {
+                case let .actionRow(value):
+                    return value.id
+                case let .button(value):
+                    return value.id
+                case let .stringSelect(value):
+                    return value.id
+                case let .textInput(value):
+                    return value.id
+                case let .userSelect(value):
+                    return value.id
+                case let .roleSelect(value):
+                    return value.id
+                case let .mentionableSelect(value):
+                    return value.id
+                case let .channelSelect(value):
+                    return value.id
+                case let .section(value):
+                    return value.id
+                case let .textDisplay(value):
+                    return value.id
+                case let .thumbnail(value):
+                    return value.id
+                case let .mediaGallery(value):
+                    return value.id
+                case let .file(value):
+                    return value.id
+                case let .separator(value):
+                    return value.id
+                case let .container(value):
+                    return value.id
+                case let .label(value):
+                    return value.id
+                case let .fileUpload(value):
+                    return value.id
+                case let .radioGroup(value):
+                    return value.id
+                case let .checkboxGroup(value):
+                    return value.id
+                case let .checkbox(value):
+                    return value.id
+                case .__undocumented:
+                    return nil
+                }
+            }
+
+            /// This component and all of its nested components.
+            @usableFromInline
+            var allComponents: [Component] {
+                switch self {
+                case let .actionRow(actionRow):
+                    return actionRow.allComponents
+                case let .section(section):
+                    return [self] + section.components.flatMap(\.allComponents) + section.accessory.allComponents
+                case let .container(container):
+                    return [self] + container.components.flatMap(\.allComponents)
+                case let .label(label):
+                    return [self] + label.component.allComponents
+                case .button, .stringSelect, .textInput, .userSelect, .roleSelect, .mentionableSelect,
+                    .channelSelect, .textDisplay, .thumbnail, .mediaGallery, .file, .separator,
+                    .fileUpload, .radioGroup, .checkboxGroup, .checkbox, .__undocumented:
+                    return [self]
                 }
             }
 
@@ -1389,7 +1485,7 @@ extension Interaction {
                 let type = try container.decode(Kind.self, forKey: .type)
                 switch type {
                 case .actionRow:
-                    throw CodingError.actionRowIsSupposedToOnlyAppearAtTopLevel
+                    self = try .actionRow(.init(from: decoder))
                 case .button:
                     self = try .button(.init(from: decoder))
                 case .stringSelect:
@@ -1436,6 +1532,8 @@ extension Interaction {
             public func encode(to encoder: any Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 switch self {
+                case let .actionRow(actionRow):
+                    try actionRow.encode(to: encoder)
                 case let .button(button):
                     try container.encode(Kind.button, forKey: .type)
                     try button.encode(to: encoder)
@@ -1495,6 +1593,18 @@ extension Interaction {
                     try checkbox.encode(to: encoder)
                 case .__undocumented:
                     break
+                }
+            }
+
+            /// Returns the associated value if the component case is `actionRow`
+            /// or throws `Interaction.Error.componentWasNotOfKind`.
+            @inlinable
+            public func requireActionRow() throws -> ActionRow {
+                switch self {
+                case let .actionRow(value):
+                    return value
+                default:
+                    throw Error.componentWasNotOfKind(kind: "actionRow", component: self)
                 }
             }
 
@@ -1728,6 +1838,8 @@ extension Interaction {
 
             public func validate() -> [ValidationFailure] {
                 switch self {
+                case .actionRow(let actionRow):
+                    actionRow.validate()
                 case .button(let button):
                     button.validate()
                 case .stringSelect(let stringSelectMenu):
@@ -1772,6 +1884,7 @@ extension Interaction {
             }
         }
 
+        public var id: Int?
         public var components: [Component]
 
         public enum CodingError: Swift.Error, CustomStringConvertible {
@@ -1792,42 +1905,75 @@ extension Interaction {
 
         enum CodingKeys: String, CodingKey {
             case type
+            case id
             case components
         }
 
         public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let type = try container.decode(Kind.self, forKey: .type)
-            guard type == .actionRow else {
-                throw CodingError.unexpectedComponentKind(type)
+            if type == .actionRow {
+                self.id = try container.decodeIfPresent(Int.self, forKey: .id)
+                self.components = try container.decode([Component].self, forKey: .components)
+            } else {
+                self.id = nil
+                self.components = [try Component(from: decoder)]
             }
-            self.components = try container.decode([Component].self, forKey: .components)
         }
 
         public func encode(to encoder: any Encoder) throws {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(Kind.actionRow, forKey: .type)
-            try container.encode(self.components, forKey: .components)
+            if let component = self.standaloneComponent {
+                try component.encode(to: encoder)
+            } else {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(Kind.actionRow, forKey: .type)
+                try container.encodeIfPresent(self.id, forKey: .id)
+                try container.encode(self.components, forKey: .components)
+            }
         }
 
-        public init(components: [Component]) {
+        public init(id: Int? = nil, components: [Component]) {
+            self.id = id
             self.components = components
         }
 
         public init(arrayLiteral elements: Component...) {
+            self.id = nil
             self.components = elements
         }
 
-        /// Returns the component with the `customId`, or `nil`.
-        @inlinable
-        public func component(customId: String) -> Component? {
-            self.components.first(where: { $0.customId == customId })
+        /// The only component, if it can't be in an action row. Such `ActionRow`s are encoded as the component itself.
+        var standaloneComponent: Component? {
+            guard self.components.count == 1 else { return nil }
+            switch self.components[0] {
+            case .button, .stringSelect, .textInput, .userSelect, .roleSelect, .mentionableSelect, .channelSelect:
+                return nil
+            case .actionRow, .section, .textDisplay, .thumbnail, .mediaGallery, .file, .separator, .container,
+                .label, .fileUpload, .radioGroup, .checkboxGroup, .checkbox, .__undocumented:
+                return self.components[0]
+            }
         }
 
-        /// Returns the component with the `customId`, or throws `Interaction.Error`.
+        /// This `ActionRow` and all of its nested components, as they are encoded.
+        @usableFromInline
+        var allComponents: [Component] {
+            if let component = self.standaloneComponent {
+                return component.allComponents
+            } else {
+                return [.actionRow(self)] + self.components.flatMap(\.allComponents)
+            }
+        }
+
+        /// Returns the component with the `customId`, including nested components, or `nil`.
+        @inlinable
+        public func component(customId: String) -> Component? {
+            self.allComponents.first(where: { $0.customId == customId })
+        }
+
+        /// Returns the component with the `customId`, including nested components, or throws `Interaction.Error`.
         @inlinable
         public func requireComponent(customId: String) throws -> Component {
-            if let component = self.components.first(where: { $0.customId == customId }) {
+            if let component = self.allComponents.first(where: { $0.customId == customId }) {
                 return component
             } else {
                 throw Error.componentNotFoundInActionRow(customId: customId, actionRow: self)
@@ -1835,22 +1981,31 @@ extension Interaction {
         }
 
         public func validate() -> [ValidationFailure] {
+            validateElementCountInRange(components, min: 1, max: 5, name: "components")
+            validateHasPrecondition(
+                condition: components.count > 1,
+                allowedIf: components.allSatisfy {
+                    if case .button = $0 { true } else { false }
+                },
+                name: "components",
+                reason: "Can only contain up to 5 buttons, or a single other component"
+            )
             components.validate()
         }
     }
 }
 
 extension [Interaction.ActionRow] {
-    /// Returns the component with the `customId`, or `nil`.
+    /// Returns the component with the `customId`, including nested components, or `nil`.
     @inlinable
     public func component(customId: String) -> Interaction.ActionRow.Component? {
-        self.flatMap(\.components).first(where: { $0.customId == customId })
+        self.flatMap(\.allComponents).first(where: { $0.customId == customId })
     }
 
-    /// Returns the component with the `customId`, or throws `Interaction.Error`.
+    /// Returns the component with the `customId`, including nested components, or throws `Interaction.Error`.
     @inlinable
     public func requireComponent(customId: String) throws -> Interaction.ActionRow.Component {
-        if let component = self.flatMap(\.components).first(where: { $0.customId == customId }) {
+        if let component = self.flatMap(\.allComponents).first(where: { $0.customId == customId }) {
             return component
         } else {
             throw Interaction.Error.componentNotFoundInActionRows(
@@ -1862,16 +2017,16 @@ extension [Interaction.ActionRow] {
 }
 
 extension [Interaction.ActionRow.Component] {
-    /// Returns the component with the `customId`, or `nil`.
+    /// Returns the component with the `customId`, including nested components, or `nil`.
     @inlinable
     public func component(customId: String) -> Interaction.ActionRow.Component? {
-        self.first(where: { $0.customId == customId })
+        self.flatMap(\.allComponents).first(where: { $0.customId == customId })
     }
 
-    /// Returns the component with the `customId`, or throws `Interaction.Error`.
+    /// Returns the component with the `customId`, including nested components, or throws `Interaction.Error`.
     @inlinable
     public func requireComponent(customId: String) throws -> Interaction.ActionRow.Component {
-        if let component = self.first(where: { $0.customId == customId }) {
+        if let component = self.flatMap(\.allComponents).first(where: { $0.customId == customId }) {
             return component
         } else {
             throw Interaction.Error.componentNotFoundInComponents(

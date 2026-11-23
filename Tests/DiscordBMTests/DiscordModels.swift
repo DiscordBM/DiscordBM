@@ -421,24 +421,19 @@ class DiscordModelsTests: XCTestCase {
             let json = """
                 [
                   {
-                    "type": 1,
+                    "type": 9,
                     "components": [
                       {
-                        "type": 9,
-                        "components": [
-                          {
-                            "type": 10,
-                            "content": "# Real Game v7.3"
-                          }
-                        ],
-                        "accessory": {
-                          "type": 11,
-                          "media": {
-                            "url": "https://websitewithopensourceimages/gamepreview.webp"
-                          }
-                        }
+                        "type": 10,
+                        "content": "# Real Game v7.3"
                       }
-                    ]
+                    ],
+                    "accessory": {
+                      "type": 11,
+                      "media": {
+                        "url": "https://websitewithopensourceimages/gamepreview.webp"
+                      }
+                    }
                   }
                 ]
                 """
@@ -465,13 +460,8 @@ class DiscordModelsTests: XCTestCase {
             let json = """
                 [
                   {
-                    "type": 1,
-                    "components": [
-                      {
-                        "type": 10,
-                        "content": "# This is a Text Display\\nAll the regular markdown rules apply"
-                      }
-                    ]
+                    "type": 10,
+                    "content": "# This is a Text Display\\nAll the regular markdown rules apply"
                   }
                 ]
                 """
@@ -493,15 +483,10 @@ class DiscordModelsTests: XCTestCase {
             let json = """
                 [
                   {
-                    "type": 1,
-                    "components": [
-                      {
-                        "type": 11,
-                        "media": {
-                          "url": "https://websitewithopensourceimages/gamepreview.webp"
-                        }
-                      }
-                    ]
+                    "type": 11,
+                    "media": {
+                      "url": "https://websitewithopensourceimages/gamepreview.webp"
+                    }
                   }
                 ]
                 """
@@ -523,18 +508,13 @@ class DiscordModelsTests: XCTestCase {
             let json = """
                 [
                   {
-                    "type": 1,
-                    "components": [
+                    "type": 12,
+                    "items": [
                       {
-                        "type": 12,
-                        "items": [
-                          {
-                            "media": {
-                              "url": "https://livevideofeedconvertedtoimage/webcam1.webp"
-                            },
-                            "description": "An aerial view looking down on older industrial complex buildings. The main building is white with many windows and pipes running up the walls."
-                          }
-                        ]
+                        "media": {
+                          "url": "https://livevideofeedconvertedtoimage/webcam1.webp"
+                        },
+                        "description": "An aerial view looking down on older industrial complex buildings. The main building is white with many windows and pipes running up the walls."
                       }
                     ]
                   }
@@ -566,15 +546,10 @@ class DiscordModelsTests: XCTestCase {
             let json = """
                 [
                   {
-                    "type": 1,
-                    "components": [
-                      {
-                        "type": 13,
-                        "file": {
-                          "url": "attachment://game.zip"
-                        }
-                      }
-                    ]
+                    "type": 13,
+                    "file": {
+                      "url": "attachment://game.zip"
+                    }
                   }
                 ]
                 """
@@ -590,14 +565,9 @@ class DiscordModelsTests: XCTestCase {
             let json = """
                 [
                   {
-                    "type": 1,
-                    "components": [
-                      {
-                        "type": 14,
-                        "divider": true,
-                        "spacing": 1
-                      }
-                    ]
+                    "type": 14,
+                    "divider": true,
+                    "spacing": 1
                   }
                 ]
                 """
@@ -613,29 +583,47 @@ class DiscordModelsTests: XCTestCase {
             let json = """
                 [
                   {
-                    "type": 1,
+                    "type": 17,
+                    "accent_color": 703487,
                     "components": [
                       {
-                        "type": 17,
-                        "accent_color": 703487,
+                        "type": 10,
+                        "content": "# You have encountered a wild coyote!"
+                      },
+                      {
+                        "type": 12,
+                        "items": [
+                          {
+                            "media": {
+                              "url": "https://websitewithopensourceimages/coyote.webp"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": 10,
+                        "content": "What would you like to do?"
+                      },
+                      {
+                        "type": 1,
                         "components": [
                           {
-                            "type": 10,
-                            "content": "# You have encountered a wild coyote!"
+                            "type": 2,
+                            "custom_id": "pet_coyote",
+                            "label": "Pet it!",
+                            "style": 1
                           },
                           {
-                            "type": 12,
-                            "items": [
-                              {
-                                "media": {
-                                  "url": "https://websitewithopensourceimages/coyote.webp"
-                                }
-                              }
-                            ]
+                            "type": 2,
+                            "custom_id": "feed_coyote",
+                            "label": "Attempt to feed it",
+                            "style": 2
                           },
                           {
-                            "type": 10,
-                            "content": "What would you like to do?"
+                            "type": 2,
+                            "custom_id": "run_away",
+                            "label": "Run away!",
+                            "style": 4
                           }
                         ]
                       }
@@ -661,6 +649,17 @@ class DiscordModelsTests: XCTestCase {
                                         )
                                     ),
                                     .textDisplay(.init(content: "What would you like to do?")),
+                                    .actionRow([
+                                        .button(.init(style: .primary, label: "Pet it!", custom_id: "pet_coyote")),
+                                        .button(
+                                            .init(
+                                                style: .secondary,
+                                                label: "Attempt to feed it",
+                                                custom_id: "feed_coyote"
+                                            )
+                                        ),
+                                        .button(.init(style: .danger, label: "Run away!", custom_id: "run_away")),
+                                    ]),
                                 ],
                                 accent_color: .init(value: 703_487)
                             )
@@ -670,29 +669,28 @@ class DiscordModelsTests: XCTestCase {
             ]
 
             try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+            XCTAssertEqual(
+                try actionRows.requireComponent(customId: "feed_coyote").requireButton().label,
+                "Attempt to feed it"
+            )
         }
 
         do {
             let json = """
                 [
                   {
-                    "type": 1,
-                    "components": [
-                      {
-                        "type": 18,
-                        "label": "What did you find interesting about the game?",
-                        "description": "Please give us as much detail as possible so we can improve the game!",
-                        "component": {
-                          "type": 4,
-                          "custom_id": "game_feedback",
-                          "style": 2,
-                          "min_length": 100,
-                          "max_length": 4000,
-                          "placeholder": "Write your feedback here...",
-                          "required": true
-                        }
-                      }
-                    ]
+                    "type": 18,
+                    "label": "What did you find interesting about the game?",
+                    "description": "Please give us as much detail as possible so we can improve the game!",
+                    "component": {
+                      "type": 4,
+                      "custom_id": "game_feedback",
+                      "style": 2,
+                      "min_length": 100,
+                      "max_length": 4000,
+                      "placeholder": "Write your feedback here...",
+                      "required": true
+                    }
                   }
                 ]
                 """
@@ -727,16 +725,11 @@ class DiscordModelsTests: XCTestCase {
             let json = """
                 [
                   {
-                    "type": 1,
-                    "components": [
-                      {
-                        "type": 19,
-                        "custom_id": "file_upload",
-                        "min_values": 1,
-                        "max_values": 10,
-                        "required": true
-                      }
-                    ]
+                    "type": 19,
+                    "custom_id": "file_upload",
+                    "min_values": 1,
+                    "max_values": 10,
+                    "required": true
                   }
                 ]
                 """
@@ -758,6 +751,110 @@ class DiscordModelsTests: XCTestCase {
 
             try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
         }
+
+        do {
+            let json = """
+                [
+                  {
+                    "type": 10,
+                    "content": "This is a message with v2 components"
+                  },
+                  {
+                    "type": 1,
+                    "components": [
+                      {
+                        "type": 2,
+                        "style": 1,
+                        "label": "Click Me",
+                        "custom_id": "click_me_1"
+                      },
+                      {
+                        "type": 2,
+                        "style": 2,
+                        "label": "Click Me Too",
+                        "custom_id": "click_me_2"
+                      }
+                    ]
+                  }
+                ]
+                """
+
+            let actionRows: [Interaction.ActionRow] = [
+                .init(components: [.textDisplay(.init(content: "This is a message with v2 components"))]),
+                .init(
+                    components: [
+                        .button(.init(style: .primary, label: "Click Me", custom_id: "click_me_1")),
+                        .button(.init(style: .secondary, label: "Click Me Too", custom_id: "click_me_2")),
+                    ]
+                ),
+            ]
+
+            try assertActionRowsJSONMatchesConstructed(json: json, actionRows)
+        }
+    }
+
+    func testModalSubmitDecode() throws {
+        let json = """
+            {
+              "id": "1095661440997806172",
+              "application_id": "1016612301262041098",
+              "type": 5,
+              "token": "aW50ZXJhY3Rpb24",
+              "version": 1,
+              "entitlements": [],
+              "data": {
+                "custom_id": "game_feedback_modal",
+                "components": [
+                  {
+                    "type": 10,
+                    "id": 1
+                  },
+                  {
+                    "type": 18,
+                    "id": 2,
+                    "component": {
+                      "type": 4,
+                      "id": 3,
+                      "custom_id": "game_feedback",
+                      "value": "The recent changes to acceleration feel much better, but shadows still need help"
+                    }
+                  },
+                  {
+                    "type": 18,
+                    "id": 4,
+                    "component": {
+                      "type": 3,
+                      "id": 5,
+                      "custom_id": "favorite_bug",
+                      "values": ["butterfly"]
+                    }
+                  }
+                ]
+              }
+            }
+            """
+        let interaction = try JSONDecoder().decode(Interaction.self, from: Data(json.utf8))
+        let modalSubmit = try XCTUnwrap(interaction.data).requireModalSubmit()
+
+        XCTAssertEqual(modalSubmit.custom_id, "game_feedback_modal")
+        XCTAssertEqual(modalSubmit.components.count, 3)
+
+        let textDisplay = try XCTUnwrap(modalSubmit.components[0].components.first).requireTextDisplay()
+        XCTAssertEqual(textDisplay.id, 1)
+
+        let label = try XCTUnwrap(modalSubmit.components[1].components.first).requireLabel()
+        XCTAssertEqual(label.id, 2)
+
+        let textInput = try modalSubmit.components.requireComponent(customId: "game_feedback").requireTextInput()
+        XCTAssertEqual(textInput.id, 3)
+        XCTAssertEqual(
+            textInput.value,
+            "The recent changes to acceleration feel much better, but shadows still need help"
+        )
+
+        let stringSelect = try modalSubmit.components.requireComponent(customId: "favorite_bug").requireStringSelect()
+        XCTAssertEqual(stringSelect.id, 5)
+        XCTAssertEqual(stringSelect.values, ["butterfly"])
     }
 
     func testInteractionDataUtilities() throws {
