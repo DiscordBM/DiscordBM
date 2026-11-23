@@ -62,6 +62,9 @@ public struct DiscordChannel: Sendable, Codable {
     public enum Flag: Sendable {
         case pinned  // 1
         case requireTag  // 4
+        case hideMediaDownloadOptions  // 15
+        case channelObfuscated  // 17
+        case isSpoilerChannel  // 21
         case __undocumented(_UInt_CompatibilityTypealias)
     }
 
