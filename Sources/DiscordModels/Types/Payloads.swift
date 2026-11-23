@@ -1743,7 +1743,7 @@ public enum Payloads {
         }
 
         public func validate() -> [ValidationFailure] {
-            validateElementCountDoesNotExceed(exempt_roles, max: 50, name: "exempt_roles")
+            validateElementCountDoesNotExceed(exempt_roles, max: 20, name: "exempt_roles")
             validateElementCountDoesNotExceed(exempt_channels, max: 50, name: "exempt_channels")
         }
     }
@@ -1780,7 +1780,7 @@ public enum Payloads {
         }
 
         public func validate() -> [ValidationFailure] {
-            validateElementCountDoesNotExceed(exempt_roles, max: 50, name: "exempt_roles")
+            validateElementCountDoesNotExceed(exempt_roles, max: 20, name: "exempt_roles")
             validateElementCountDoesNotExceed(exempt_channels, max: 50, name: "exempt_channels")
         }
     }
