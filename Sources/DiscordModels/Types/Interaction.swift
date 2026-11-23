@@ -74,6 +74,7 @@ public struct Interaction: Sendable, Codable {
                 public var type: DiscordChannel.Kind
                 public var name: String?
                 public var permissions: StringBitField<Permission>?
+                public var app_permissions: StringBitField<Permission>?
                 public var last_message_id: MessageSnowflake?
                 public var last_pin_timestamp: DiscordTimestamp?
                 public var nsfw: Bool?

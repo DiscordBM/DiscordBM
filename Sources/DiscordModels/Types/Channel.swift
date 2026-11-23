@@ -146,6 +146,7 @@ public struct DiscordChannel: Sendable, Codable {
     public var default_sort_order: Int?
     public var default_forum_layout: ForumLayout?
     public var permissions: StringBitField<Permission>?
+    public var app_permissions: StringBitField<Permission>?
     public var flags: IntBitField<Flag>?
     public var available_tags: [ForumTag]?
     public var template: String?
