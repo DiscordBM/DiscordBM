@@ -534,6 +534,7 @@ extension DiscordChannel {
         public var flags: IntBitField<Flag>?
         public var message_snapshots: [MessageSnapshot]?
         public var referenced_message: DereferenceBox<Message>?
+        public var interaction_metadata: InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
         public var components: [Interaction.ActionRow]?
