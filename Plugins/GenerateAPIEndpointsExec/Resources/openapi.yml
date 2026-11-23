@@ -2460,6 +2460,16 @@ paths:
           schema:
             type: string
           example: <integer,null>
+        - name: shard
+          in: query
+          schema:
+            type: string
+          example: <integer,null>
+        - name: with_counts
+          in: query
+          schema:
+            type: string
+          example: <boolean,null>
       responses:
         "200":
           description: OK

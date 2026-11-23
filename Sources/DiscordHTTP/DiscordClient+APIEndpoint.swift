@@ -2717,6 +2717,7 @@ extension DiscordClient {
         before: GuildSnowflake? = nil,
         after: GuildSnowflake? = nil,
         limit: Int? = nil,
+        shard: Int? = nil,
         withCounts: Bool? = nil
     ) async throws -> DiscordClientResponse<[PartialGuild]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 200)
@@ -2728,6 +2729,7 @@ extension DiscordClient {
                     ("before", before?.rawValue),
                     ("after", after?.rawValue),
                     ("limit", limit.map { "\($0)" }),
+                    ("shard", shard.map { "\($0)" }),
                     ("with_counts", withCounts.map { "\($0)" }),
                 ]
             )
