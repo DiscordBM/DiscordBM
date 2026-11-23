@@ -257,6 +257,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case webhooksCanOnlyCreateThreadsInForumChannels  // 220003
     case webhookServicesCannotBeUsedInForumChannels  // 220004
     case messageBlockedByHarmfulLinksFilter  // 240000
+    case accessToJoiningNewServersHasBeenLimitedForTheUser  // 340015
     case cannotEnableOnboardingRequirementsAreNotMet  // 350000
     case cannotUpdateOnboardingWhileBelowRequirements  // 350001
     case accessToFileUploadsHasBeenLimitedForThisGuild  // 400001
