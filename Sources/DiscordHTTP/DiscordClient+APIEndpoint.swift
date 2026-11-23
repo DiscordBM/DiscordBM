@@ -2407,6 +2407,26 @@ extension DiscordClient {
         )
     }
 
+    /// https://docs.discord.com/developers/resources/invite#add-target-user
+    @inlinable
+    public func addInviteTargetUser(
+        code: String,
+        userId: UserSnowflake
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.addInviteTargetUser(code: code, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#remove-target-user
+    @inlinable
+    public func deleteInviteTargetUser(
+        code: String,
+        userId: UserSnowflake
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.deleteInviteTargetUser(code: code, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     /// https://docs.discord.com/developers/resources/invite#update-target-users
     @inlinable
     public func updateInviteTargetUsers(
@@ -2418,6 +2438,26 @@ extension DiscordClient {
             request: .init(to: endpoint),
             payload: payload
         )
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#bulk-add-target-users
+    @inlinable
+    public func bulkAddInviteTargetUsers(
+        code: String,
+        payload: Payloads.BulkAddInviteTargetUsers
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.bulkAddInviteTargetUsers(code: code)
+        return try await self.send(request: .init(to: endpoint), payload: payload)
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#bulk-delete-target-users
+    @inlinable
+    public func bulkDeleteInviteTargetUsers(
+        code: String,
+        payload: Payloads.BulkDeleteInviteTargetUsers
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.bulkDeleteInviteTargetUsers(code: code)
+        return try await self.send(request: .init(to: endpoint), payload: payload)
     }
 
     /// https://docs.discord.com/developers/resources/invite#get-target-users-job-status

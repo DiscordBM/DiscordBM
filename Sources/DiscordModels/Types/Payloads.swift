@@ -2059,6 +2059,7 @@ public enum Payloads {
         public var target_user_id: UserSnowflake?
         public var target_application_id: ApplicationSnowflake?
         public var target_users_file: RawFile?
+        public var target_user_ids: [UserSnowflake]?
         public var role_ids: [RoleSnowflake]?
 
         public var files: [RawFile]? {
@@ -2074,6 +2075,7 @@ public enum Payloads {
             target_user_id: UserSnowflake? = nil,
             target_application_id: ApplicationSnowflake? = nil,
             target_users_file: RawFile? = nil,
+            target_user_ids: [UserSnowflake]? = nil,
             role_ids: [RoleSnowflake]? = nil
         ) {
             self.max_age = max_age
@@ -2084,6 +2086,7 @@ public enum Payloads {
             self.target_user_id = target_user_id
             self.target_application_id = target_application_id
             self.target_users_file = target_users_file
+            self.target_user_ids = target_user_ids
             self.role_ids = role_ids
         }
 
@@ -2122,6 +2125,13 @@ public enum Payloads {
                 name: "target_users_file",
                 reason: "'target_users_file' extension must be 'csv'"
             )
+            validateElementCountDoesNotExceed(target_user_ids, max: 1_000, name: "target_user_ids")
+            validateHasPrecondition(
+                condition: target_user_ids != nil,
+                allowedIf: target_users_file == nil,
+                name: "target_user_ids",
+                reason: "'target_user_ids' and 'target_users_file' are mutually exclusive"
+            )
         }
     }
 
@@ -2145,6 +2155,32 @@ public enum Payloads {
                 name: "target_users_file",
                 reason: "'target_users_file' extension must be 'csv'"
             )
+        }
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#bulk-add-target-users-json-params
+    public struct BulkAddInviteTargetUsers: Sendable, Encodable, ValidatablePayload {
+        public var user_ids: [UserSnowflake]
+
+        public init(user_ids: [UserSnowflake]) {
+            self.user_ids = user_ids
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateElementCountDoesNotExceed(user_ids, max: 1_000, name: "user_ids")
+        }
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#bulk-delete-target-users-json-params
+    public struct BulkDeleteInviteTargetUsers: Sendable, Encodable, ValidatablePayload {
+        public var user_ids: [UserSnowflake]
+
+        public init(user_ids: [UserSnowflake]) {
+            self.user_ids = user_ids
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateElementCountDoesNotExceed(user_ids, max: 1_000, name: "user_ids")
         }
     }
 

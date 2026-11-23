@@ -133,6 +133,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case maxNumberOfWebhooksPerGuildReached  // 30058
     case maxNumberOfChannelPermissionOverwritesReached  // 30060
     case channelsForThisGuildAreTooLarge  // 30061
+    case targetUsersLimitForThisGuildReached  // 30084
     case UnauthorizedNeedToProvideValidToken  // 40001
     case needToVerifyYourAccountForAction  // 40002
     case openingDMsTooFast  // 40003
@@ -156,6 +157,8 @@ public enum JSONErrorCode: Sendable, Codable {
     case tagRequiredToCreateForumPostInChannel  // 40067
     case anEntitlementHasAlreadyBeenGrantedForThisResource  // 40074
     case thisInteractionHasHitTheMaximumNumberOfFollowUpMessage  // 40094
+    case targetUsersAreAlreadyBeingProcessedForThisInvite  // 40114
+    case targetUsersFileHasNotBeenProcessed  // 40115
     case cloudflareIsBlockingYourRequestThisCanOftenBeResolvedBySettingProperUserAgent  // 40333
     case missingAccess  // 50001
     case invalidAccountType  // 50002

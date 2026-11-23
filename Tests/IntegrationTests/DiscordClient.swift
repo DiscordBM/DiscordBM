@@ -858,6 +858,35 @@ class DiscordClientTests: XCTestCase {
         let fileString = String(buffer: targetUsersResponseFile.data)
         XCTAssertTrue(fileString.contains(Constants.personalId.rawValue), fileString)
 
+        try await client.bulkAddInviteTargetUsers(
+            code: invite.code,
+            payload: .init(user_ids: [Constants.personalId])
+        ).guardSuccess()
+
+        try await client.bulkDeleteInviteTargetUsers(
+            code: invite.code,
+            payload: .init(user_ids: [Constants.personalId])
+        ).guardSuccess()
+
+        try await client.addInviteTargetUser(
+            code: invite.code,
+            userId: Constants.personalId
+        ).guardSuccess()
+
+        let targetUsersAfterAddFile = try await client.getInviteTargetUsers(
+            code: invite.code
+        ).getFile()
+        let fileStringAfterAdd = String(buffer: targetUsersAfterAddFile.data)
+        XCTAssertTrue(
+            fileStringAfterAdd.contains(Constants.personalId.rawValue),
+            fileStringAfterAdd
+        )
+
+        try await client.deleteInviteTargetUser(
+            code: invite.code,
+            userId: Constants.personalId
+        ).guardSuccess()
+
         try await client.revokeInvite(code: invite.code).guardSuccess()
     }
 
