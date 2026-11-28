@@ -2920,6 +2920,7 @@ public enum Payloads {
             validateCharacterCountDoesNotExceed(platform_name, max: 50, name: "platform_name")
             validateCharacterCountDoesNotExceed(platform_username, max: 100, name: "platform_username")
             for (key, value) in metadata ?? [:] {
+                validateApplicationRoleConnectionMetadataKey(key, name: "metadata[\(key)]")
                 validateCharacterCountDoesNotExceed(value, max: 100, name: "metadata[\(key)]")
             }
         }

@@ -66,6 +66,7 @@ public struct ApplicationRoleConnectionMetadata: Sendable, Codable, ValidatableP
     }
 
     public func validate() -> [ValidationFailure] {
+        validateApplicationRoleConnectionMetadataKey(key, name: "key")
         validateCharacterCountInRange(name, min: 1, max: 100, name: "name")
         validateCharacterCountInRange(description, min: 1, max: 200, name: "description")
     }
