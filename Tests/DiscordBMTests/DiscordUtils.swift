@@ -23,6 +23,11 @@ class DiscordUtilsTests: XCTestCase {
         }
 
         do {
+            let string = DiscordUtils.gameProfile(gameId: AnySnowflake("1402418491272986635"))
+            XCTAssertEqual(string, "<@$1402418491272986635>")
+        }
+
+        do {
             let id = "\(Int.random(in: 1_000_000_000_000_000...10_000_000_000_000_000))"
             let string = DiscordUtils.slashCommand(name: "abcd", id: Snowflake(id))
             XCTAssertEqual(string, "</abcd:\(id)>")
@@ -88,6 +93,19 @@ class DiscordUtilsTests: XCTestCase {
             XCTAssertEqual(string1, string2)
             XCTAssertEqual(string2, string3)
             XCTAssertEqual(string3, string1)
+        }
+
+        do {
+            XCTAssertEqual(DiscordUtils.guildNavigation(.customize), "<id:customize>")
+            XCTAssertEqual(DiscordUtils.guildNavigation(.browse), "<id:browse>")
+            XCTAssertEqual(DiscordUtils.guildNavigation(.guide), "<id:guide>")
+            XCTAssertEqual(DiscordUtils.guildNavigation(.linkedRoles), "<id:linked-roles>")
+        }
+
+        do {
+            let id = "\(Int.random(in: 1_000_000_000_000_000...10_000_000_000_000_000))"
+            let string = DiscordUtils.guildNavigation(.linkedRole(RoleSnowflake(id)))
+            XCTAssertEqual(string, "<id:linked-roles:\(id)>")
         }
 
         do {

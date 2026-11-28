@@ -23,6 +23,8 @@ public protocol GatewayManager: AnyObject, Sendable {
     func requestGuildMembersChunk(payload: Gateway.RequestGuildMembers) async
     /// https://discord.com/developers/docs/topics/gateway-events#request-soundboard-sounds
     func requestSoundboardSounds(payload: Gateway.RequestSoundboardSounds) async
+    /// https://docs.discord.com/developers/events/gateway-events#request-channel-info
+    func requestChannelInfo(payload: Gateway.RequestChannelInfo) async
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     func updatePresence(payload: Gateway.Identify.Presence) async
     /// https://discord.com/developers/docs/topics/gateway-events#update-voice-state
@@ -52,4 +54,6 @@ extension GatewayManager {
     }
 
     public func requestSoundboardSounds(payload: Gateway.RequestSoundboardSounds) async {}
+
+    public func requestChannelInfo(payload: Gateway.RequestChannelInfo) async {}
 }

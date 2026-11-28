@@ -17,6 +17,7 @@ public struct Gateway: Sendable, Codable {
         case hello  // 10
         case heartbeatAccepted  // 11
         case requestSoundboardSounds  // 31
+        case requestChannelInfo  // 43
         case __undocumented(UInt8)
     }
 
@@ -50,6 +51,7 @@ public struct Gateway: Sendable, Codable {
             case channelUpdate(DiscordChannel)
             case channelDelete(DiscordChannel)
             case channelPinsUpdate(ChannelPinsUpdate)
+            case channelInfo(ChannelInfo)
 
             case threadCreate(DiscordChannel)
             case threadUpdate(DiscordChannel)
@@ -81,6 +83,7 @@ public struct Gateway: Sendable, Codable {
             case guildMembersChunk(GuildMembersChunk)
             case requestGuildMembers(RequestGuildMembers)
             case requestSoundboardSounds(RequestSoundboardSounds)
+            case requestChannelInfo(RequestChannelInfo)
 
             case guildRoleCreate(GuildRole)
             case guildRoleUpdate(GuildRole)
@@ -135,6 +138,8 @@ public struct Gateway: Sendable, Codable {
 
             case voiceStateUpdate(VoiceState)
             case voiceChannelEffectSend(VoiceChannelEffectSend)
+            case voiceChannelStatusUpdate(VoiceChannelStatusUpdate)
+            case voiceChannelStartTimeUpdate(VoiceChannelStartTimeUpdate)
             case requestVoiceStateUpdate(VoiceStateUpdate)
 
             case voiceServerUpdate(VoiceServerUpdate)
@@ -160,13 +165,15 @@ public struct Gateway: Sendable, Codable {
                     .requestSoundboardSounds, .requestPresenceUpdate, .requestVoiceStateUpdate, .rateLimited,
                     .interactionCreate, .entitlementCreate, .entitlementUpdate, .entitlementDelete,
                     .subscriptionCreate, .subscriptionUpdate, .subscriptionDelete,
-                    .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate:
+                    .applicationCommandPermissionsUpdate, .userUpdate, .voiceServerUpdate, .requestChannelInfo,
+                    .channelInfo:
                     return []
                 case .guildCreate, .guildUpdate, .guildDelete, .guildMembersChunk, .guildRoleCreate, .guildRoleUpdate,
                     .guildRoleDelete, .channelCreate, .channelUpdate, .channelDelete, .threadCreate, .threadUpdate,
                     .threadDelete, .threadSyncList, .threadMemberUpdate, .stageInstanceCreate, .stageInstanceDelete,
                     .stageInstanceUpdate, .guildSoundboardSoundCreate, .guildSoundboardSoundUpdate,
-                    .guildSoundboardSoundDelete, .guildSoundboardSoundsUpdate, .soundboardSounds:
+                    .guildSoundboardSoundDelete, .guildSoundboardSoundsUpdate, .soundboardSounds,
+                    .voiceChannelStatusUpdate, .voiceChannelStartTimeUpdate:
                     return [.guilds]
                 case .channelPinsUpdate:
                     return [.guilds, .directMessages]
@@ -271,7 +278,7 @@ public struct Gateway: Sendable, Codable {
                 }
                 self.data = nil
             case .identify, .presenceUpdate, .voiceStateUpdate, .resume, .requestGuildMembers,
-                .requestSoundboardSounds, .__undocumented:
+                .requestSoundboardSounds, .requestChannelInfo, .__undocumented:
                 throw DecodingError.dataCorrupted(
                     .init(
                         codingPath: container.codingPath,
@@ -298,6 +305,8 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .channelDelete(decodeData())
                 case "CHANNEL_PINS_UPDATE":
                     self.data = try .channelPinsUpdate(decodeData())
+                case "CHANNEL_INFO":
+                    self.data = try .channelInfo(decodeData())
                 case "THREAD_CREATE":
                     self.data = try .threadCreate(decodeData())
                 case "THREAD_UPDATE":
@@ -370,6 +379,8 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .guildSoundboardSoundDelete(decodeData())
                 case "GUILD_SOUNDBOARD_SOUNDS_UPDATE":
                     self.data = try .guildSoundboardSoundsUpdate(decodeData())
+                case "SOUNDBOARD_SOUNDS":
+                    self.data = try .soundboardSounds(decodeData())
                 case "GUILD_AUDIT_LOG_ENTRY_CREATE":
                     self.data = try .guildAuditLogEntryCreate(decodeData())
                 case "INTEGRATION_CREATE":
@@ -416,6 +427,10 @@ public struct Gateway: Sendable, Codable {
                     self.data = try .voiceStateUpdate(decodeData())
                 case "VOICE_CHANNEL_EFFECT_SEND":
                     self.data = try .voiceChannelEffectSend(decodeData())
+                case "VOICE_CHANNEL_STATUS_UPDATE":
+                    self.data = try .voiceChannelStatusUpdate(decodeData())
+                case "VOICE_CHANNEL_START_TIME_UPDATE":
+                    self.data = try .voiceChannelStartTimeUpdate(decodeData())
                 case "VOICE_SERVER_UPDATE":
                     self.data = try .voiceServerUpdate(decodeData())
                 case "WEBHOOKS_UPDATE":
@@ -488,6 +503,8 @@ public struct Gateway: Sendable, Codable {
             case let .requestGuildMembers(payload):
                 try container.encode(payload, forKey: .data)
             case let .requestSoundboardSounds(payload):
+                try container.encode(payload, forKey: .data)
+            case let .requestChannelInfo(payload):
                 try container.encode(payload, forKey: .data)
             case let .requestPresenceUpdate(payload):
                 try container.encode(payload, forKey: .data)
@@ -862,6 +879,7 @@ public struct Gateway: Sendable, Codable {
             self.system_channel_id = new.system_channel_id
             self.system_channel_flags = new.system_channel_flags
             self.rules_channel_id = new.rules_channel_id
+            self.safety_alerts_channel_id = new.safety_alerts_channel_id
             self.max_presences = new.max_presences
             self.max_members = new.max_members
             self.vanity_url_code = new.vanity_url_code
@@ -878,6 +896,7 @@ public struct Gateway: Sendable, Codable {
             self.welcome_screen = new.welcome_screen
             self.nsfw_level = new.nsfw_level
             self.stickers = new.stickers
+            self.incidents_data = new.incidents_data
             self.premium_progress_bar_enabled = new.premium_progress_bar_enabled
             self.`lazy` = new.`lazy`
             self.hub_type = new.hub_type
@@ -894,6 +913,20 @@ public struct Gateway: Sendable, Codable {
         public var guild_id: GuildSnowflake?
         public var channel_id: ChannelSnowflake
         public var last_pin_timestamp: DiscordTimestamp?
+    }
+
+    /// https://docs.discord.com/developers/events/gateway-events#channel-info
+    public struct ChannelInfo: Sendable, Codable {
+
+        /// https://docs.discord.com/developers/events/gateway-events#channel-info-channel-info-channel-structure
+        public struct Channel: Sendable, Codable {
+            public var id: ChannelSnowflake
+            public var status: String?
+            public var voice_start_time: Int?
+        }
+
+        public var guild_id: GuildSnowflake
+        public var channels: [Channel]
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#guild-ban-add-guild-ban-add-event-fields
@@ -936,6 +969,7 @@ public struct Gateway: Sendable, Codable {
         public var pending: Bool?
         public var communication_disabled_until: DiscordTimestamp?
         public var avatar_decoration_data: DiscordUser.AvatarDecoration?
+        public var collectibles: DiscordUser.Collectibles?
 
         public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -969,6 +1003,10 @@ public struct Gateway: Sendable, Codable {
             self.avatar_decoration_data = try container.decodeIfPresent(
                 DiscordUser.AvatarDecoration.self,
                 forKey: .avatar_decoration_data
+            )
+            self.collectibles = try container.decodeIfPresent(
+                DiscordUser.Collectibles.self,
+                forKey: .collectibles
             )
         }
     }
@@ -1097,6 +1135,26 @@ public struct Gateway: Sendable, Codable {
 
         public init(guild_ids: [GuildSnowflake]) {
             self.guild_ids = guild_ids
+        }
+    }
+
+    /// https://docs.discord.com/developers/events/gateway-events#request-channel-info
+    public struct RequestChannelInfo: Sendable, Codable {
+
+        /// https://docs.discord.com/developers/events/gateway-events#request-channel-info-request-channel-info-structure
+        @UnstableEnum<String>
+        public enum Field: Sendable, Codable {
+            case status
+            case voiceStartTime  // "voice_start_time"
+            case __undocumented(String)
+        }
+
+        public var guild_id: GuildSnowflake
+        public var fields: [Field]
+
+        public init(guild_id: GuildSnowflake, fields: [Field]) {
+            self.guild_id = guild_id
+            self.fields = fields
         }
     }
 
@@ -1234,9 +1292,11 @@ public struct Gateway: Sendable, Codable {
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
         public var poll: Poll?
         public var call: DiscordChannel.Message.Call?
+        public var shared_client_theme: DiscordChannel.Message.SharedClientTheme?
         /// Extra fields:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
+        public var channel_type: DiscordChannel.Kind?
 
         public mutating func update(with partialMessage: DiscordChannel.PartialMessage) {
             self.id = partialMessage.id
@@ -1286,12 +1346,14 @@ public struct Gateway: Sendable, Codable {
             self.application_id = partialMessage.application_id
             self.message_reference = partialMessage.message_reference
             self.flags = partialMessage.flags
+            self.message_snapshots = partialMessage.message_snapshots
             if let referenced_message = partialMessage.referenced_message,
                 var value = self.referenced_message?.value
             {
                 value.update(with: referenced_message.value)
                 self.referenced_message = .init(value: value)
             }
+            self.interaction_metadata = partialMessage.interaction_metadata
             self.interaction = partialMessage.interaction
             self.thread = partialMessage.thread
             self.components = partialMessage.components
@@ -1299,6 +1361,8 @@ public struct Gateway: Sendable, Codable {
             self.stickers = partialMessage.stickers
             self.position = partialMessage.position
             self.role_subscription_data = partialMessage.role_subscription_data
+            self.call = partialMessage.call
+            self.shared_client_theme = partialMessage.shared_client_theme
             if let poll = partialMessage.poll {
                 self.poll = poll
             }
@@ -1307,6 +1371,9 @@ public struct Gateway: Sendable, Codable {
             }
             if let guildId = partialMessage.guild_id {
                 self.guild_id = guildId
+            }
+            if let channelType = partialMessage.channel_type {
+                self.channel_type = channelType
             }
             if let resolved = partialMessage.resolved {
                 self.resolved = resolved
@@ -1445,6 +1512,7 @@ public struct Gateway: Sendable, Codable {
         public var desktop: Status?
         public var mobile: Status?
         public var web: Status?
+        public var vr: Status?
         public var embedded: Status?
     }
 
@@ -1715,6 +1783,20 @@ public struct Gateway: Sendable, Codable {
         public var animation_id: Int?
         public var sound_id: StringOrInt?
         public var sound_volume: Double?
+    }
+
+    /// https://docs.discord.com/developers/events/gateway-events#voice-channel-status-update
+    public struct VoiceChannelStatusUpdate: Sendable, Codable {
+        public var id: ChannelSnowflake
+        public var guild_id: GuildSnowflake
+        public var status: String?
+    }
+
+    /// https://docs.discord.com/developers/events/gateway-events#voice-channel-start-time-update
+    public struct VoiceChannelStartTimeUpdate: Sendable, Codable {
+        public var id: ChannelSnowflake
+        public var guild_id: GuildSnowflake
+        public var voice_start_time: Int?
     }
 
     /// https://discord.com/developers/docs/topics/gateway-events#voice-server-update-voice-server-update-event-fields

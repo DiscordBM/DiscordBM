@@ -28,6 +28,7 @@ public struct DiscordUser: Sendable, Codable {
         case verifiedDeveloper  // 17
         case certifiedModerator  // 18
         case botHttpInteractions  // 19
+        @available(*, deprecated, message: "Not available in Discord Docs so will be removed in a future major version")
         case activeDeveloper  // 22
         case __undocumented(_UInt_CompatibilityTypealias)
     }
@@ -166,6 +167,11 @@ extension DiscordUser {
         @UnstableEnum<String>
         public enum Service: Sendable, Codable {
             case amazonMusic  // "Amazon Music"
+            @available(
+                *,
+                deprecated,
+                message: "Not available in Discord Docs so will be removed in a future major version"
+            )
             case battleNet  // "Battle.net"
             case bungie  // "Bungie.net"
             case bluesky  // "Bluesky"
@@ -176,11 +182,21 @@ extension DiscordUser {
             case facebook  // "Facebook"
             case github  // "GitHub"
             case instagram  // "Instagram"
+            @available(
+                *,
+                deprecated,
+                message: "Not available in Discord Docs so will be removed in a future major version"
+            )
             case leagueOfLegends  // "League of Legends"
             case mastodon  // "Mastodon"
             case paypal  // "PayPal"
             case playstation  // "PlayStation Network"
             case reddit  // "Reddit"
+            @available(
+                *,
+                deprecated,
+                message: "Not available in Discord Docs so will be removed in a future major version"
+            )
             case riotGames  // "Riot Games"
             case roblox  // "Roblox"
             case spotify  // "Spotify"
@@ -218,11 +234,15 @@ extension DiscordUser {
     public struct ApplicationRoleConnection: Sendable, Codable, ValidatablePayload {
         public var platform_name: String?
         public var platform_username: String?
-        public var metadata: [String: ApplicationRoleConnectionMetadata]
+        public var metadata: [String: String]?
 
         public func validate() -> [ValidationFailure] {
             validateCharacterCountDoesNotExceed(platform_name, max: 50, name: "platform_name")
             validateCharacterCountDoesNotExceed(platform_username, max: 100, name: "platform_username")
+            for (key, value) in metadata ?? [:] {
+                validateApplicationRoleConnectionMetadataKey(key, name: "metadata[\(key)]")
+                validateCharacterCountDoesNotExceed(value, max: 100, name: "metadata[\(key)]")
+            }
         }
     }
 }

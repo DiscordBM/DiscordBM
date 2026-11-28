@@ -50,6 +50,7 @@ public protocol GatewayEventHandler: Sendable {
     func onChannelUpdate(_ payload: DiscordChannel) async throws
     func onChannelDelete(_ payload: DiscordChannel) async throws
     func onChannelPinsUpdate(_ payload: Gateway.ChannelPinsUpdate) async throws
+    func onChannelInfo(_ payload: Gateway.ChannelInfo) async throws
     func onThreadCreate(_ payload: DiscordChannel) async throws
     func onThreadUpdate(_ payload: DiscordChannel) async throws
     func onThreadDelete(_ payload: Gateway.ThreadDelete) async throws
@@ -73,6 +74,7 @@ public protocol GatewayEventHandler: Sendable {
     func onGuildMembersChunk(_ payload: Gateway.GuildMembersChunk) async throws
     func onRequestGuildMembers(_ payload: Gateway.RequestGuildMembers) async throws
     func onRequestSoundboardSounds(_ payload: Gateway.RequestSoundboardSounds) async throws
+    func onRequestChannelInfo(_ payload: Gateway.RequestChannelInfo) async throws
     func onGuildRoleCreate(_ payload: Gateway.GuildRole) async throws
     func onGuildRoleUpdate(_ payload: Gateway.GuildRole) async throws
     func onGuildRoleDelete(_ payload: Gateway.GuildRoleDelete) async throws
@@ -113,6 +115,8 @@ public protocol GatewayEventHandler: Sendable {
     func onUserUpdate(_ payload: DiscordUser) async throws
     func onVoiceStateUpdate(_ payload: VoiceState) async throws
     func onVoiceChannelEffectSend(_ payload: Gateway.VoiceChannelEffectSend) async throws
+    func onVoiceChannelStatusUpdate(_ payload: Gateway.VoiceChannelStatusUpdate) async throws
+    func onVoiceChannelStartTimeUpdate(_ payload: Gateway.VoiceChannelStartTimeUpdate) async throws
     func onRequestVoiceStateUpdate(_ payload: VoiceStateUpdate) async throws
     func onVoiceServerUpdate(_ payload: Gateway.VoiceServerUpdate) async throws
     func onWebhooksUpdate(_ payload: Gateway.WebhooksUpdate) async throws
@@ -154,6 +158,7 @@ extension GatewayEventHandler {
     public func onChannelUpdate(_: DiscordChannel) async throws {}
     public func onChannelDelete(_: DiscordChannel) async throws {}
     public func onChannelPinsUpdate(_: Gateway.ChannelPinsUpdate) async throws {}
+    public func onChannelInfo(_: Gateway.ChannelInfo) async throws {}
     public func onThreadCreate(_: DiscordChannel) async throws {}
     public func onThreadUpdate(_: DiscordChannel) async throws {}
     public func onThreadDelete(_: Gateway.ThreadDelete) async throws {}
@@ -177,6 +182,7 @@ extension GatewayEventHandler {
     public func onGuildMembersChunk(_: Gateway.GuildMembersChunk) async throws {}
     public func onRequestGuildMembers(_: Gateway.RequestGuildMembers) async throws {}
     public func onRequestSoundboardSounds(_: Gateway.RequestSoundboardSounds) async throws {}
+    public func onRequestChannelInfo(_: Gateway.RequestChannelInfo) async throws {}
     public func onGuildRoleCreate(_: Gateway.GuildRole) async throws {}
     public func onGuildRoleUpdate(_: Gateway.GuildRole) async throws {}
     public func onGuildRoleDelete(_: Gateway.GuildRoleDelete) async throws {}
@@ -217,6 +223,8 @@ extension GatewayEventHandler {
     public func onUserUpdate(_: DiscordUser) async throws {}
     public func onVoiceStateUpdate(_: VoiceState) async throws {}
     public func onVoiceChannelEffectSend(_: Gateway.VoiceChannelEffectSend) async throws {}
+    public func onVoiceChannelStatusUpdate(_: Gateway.VoiceChannelStatusUpdate) async throws {}
+    public func onVoiceChannelStartTimeUpdate(_: Gateway.VoiceChannelStartTimeUpdate) async throws {}
     public func onRequestVoiceStateUpdate(_: VoiceStateUpdate) async throws {}
     public func onVoiceServerUpdate(_: Gateway.VoiceServerUpdate) async throws {}
     public func onWebhooksUpdate(_: Gateway.WebhooksUpdate) async throws {}
@@ -283,6 +291,10 @@ extension GatewayEventHandler {
         case let .channelPinsUpdate(payload):
             await withLogging(for: "onChannelPinsUpdate") {
                 try await onChannelPinsUpdate(payload)
+            }
+        case let .channelInfo(payload):
+            await withLogging(for: "onChannelInfo") {
+                try await onChannelInfo(payload)
             }
         case let .threadCreate(payload):
             await withLogging(for: "onThreadCreate") {
@@ -375,6 +387,10 @@ extension GatewayEventHandler {
         case let .requestSoundboardSounds(payload):
             await withLogging(for: "onRequestSoundboardSounds") {
                 try await onRequestSoundboardSounds(payload)
+            }
+        case let .requestChannelInfo(payload):
+            await withLogging(for: "onRequestChannelInfo") {
+                try await onRequestChannelInfo(payload)
             }
         case let .guildRoleCreate(payload):
             await withLogging(for: "onGuildRoleCreate") {
@@ -535,6 +551,14 @@ extension GatewayEventHandler {
         case let .voiceChannelEffectSend(payload):
             await withLogging(for: "onVoiceChannelEffectSend") {
                 try await onVoiceChannelEffectSend(payload)
+            }
+        case let .voiceChannelStatusUpdate(payload):
+            await withLogging(for: "onVoiceChannelStatusUpdate") {
+                try await onVoiceChannelStatusUpdate(payload)
+            }
+        case let .voiceChannelStartTimeUpdate(payload):
+            await withLogging(for: "onVoiceChannelStartTimeUpdate") {
+                try await onVoiceChannelStartTimeUpdate(payload)
             }
         case let .requestVoiceStateUpdate(payload):
             await withLogging(for: "onRequestVoiceStateUpdate") {

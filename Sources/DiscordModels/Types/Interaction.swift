@@ -74,6 +74,7 @@ public struct Interaction: Sendable, Codable {
                 public var type: DiscordChannel.Kind
                 public var name: String?
                 public var permissions: StringBitField<Permission>?
+                public var app_permissions: StringBitField<Permission>?
                 public var last_message_id: MessageSnowflake?
                 public var last_pin_timestamp: DiscordTimestamp?
                 public var nsfw: Bool?
@@ -993,11 +994,38 @@ extension Interaction {
 
         /// https://discord.com/developers/docs/components/reference#unfurled-media-item
         public struct UnfurledMediaItem: Sendable, Codable {
+
+            /// https://docs.discord.com/developers/components/reference#unfurled-media-item-unfurled-media-item-flags
+            @UnstableEnum<_UInt_CompatibilityTypealias>
+            public enum Flag: Sendable {
+                case isAnimated  // 0
+                case __undocumented(_UInt_CompatibilityTypealias)
+            }
+
+            /// https://docs.discord.com/developers/components/reference#unfurled-media-item-content-scan-metadata-structure
+            public struct ContentScanMetadata: Sendable, Codable {
+
+                /// https://docs.discord.com/developers/components/reference#unfurled-media-item-content-scan-metadata-flags
+                @UnstableEnum<_UInt_CompatibilityTypealias>
+                public enum Flag: Sendable {
+                    case isExplicitContent  // 0
+                    case isGoreContent  // 1
+                    case isSelfHarmContent  // 2
+                    case __undocumented(_UInt_CompatibilityTypealias)
+                }
+
+                public var flags: IntBitField<Flag>
+            }
+
             public var url: String
             public var proxy_url: String?
             public var height: Int?
             public var width: Int?
+            public var placeholder: String?
+            public var placeholder_version: Int?
             public var content_type: String?
+            public var flags: IntBitField<Flag>?
+            public var content_scan_metadata: ContentScanMetadata?
             public var attachment_id: AttachmentSnowflake?
 
             public init(url: DynamicURL) {
@@ -1005,7 +1033,11 @@ extension Interaction {
                 self.proxy_url = nil
                 self.height = nil
                 self.width = nil
+                self.placeholder = nil
+                self.placeholder_version = nil
                 self.content_type = nil
+                self.flags = nil
+                self.content_scan_metadata = nil
                 self.attachment_id = nil
             }
         }
@@ -1173,6 +1205,23 @@ extension Interaction {
             public func validate() -> [ValidationFailure] {
                 validateCharacterCountDoesNotExceed(label, max: 45, name: "label")
                 validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
+                let selectMenuValues: (min_values: Int?, required: Bool?)? =
+                    switch component {
+                    case let .stringSelect(menu):
+                        (menu.min_values, menu.required)
+                    case let .userSelect(menu), let .roleSelect(menu), let .mentionableSelect(menu):
+                        (menu.min_values, menu.required)
+                    case let .channelSelect(menu):
+                        (menu.min_values, menu.required)
+                    default:
+                        nil
+                    }
+                validateHasPrecondition(
+                    condition: selectMenuValues?.min_values == 0,
+                    allowedIf: selectMenuValues?.required == false,
+                    name: "required",
+                    reason: "`required` must be `false` when `min_values` is `0`"
+                )
                 component.validate()
             }
         }
@@ -1184,6 +1233,7 @@ extension Interaction {
             public var min_values: Int?
             public var max_values: Int?
             public var required: Bool?
+            public var file_types: [String]?
             public var values: [String]?
 
             public init(
@@ -1191,13 +1241,15 @@ extension Interaction {
                 custom_id: String,
                 min_values: Int? = nil,
                 max_values: Int? = nil,
-                required: Bool? = nil
+                required: Bool? = nil,
+                file_types: [String]? = nil
             ) {
                 self.id = id
                 self.custom_id = custom_id
                 self.min_values = min_values
                 self.max_values = max_values
                 self.required = required
+                self.file_types = file_types
                 self.values = nil
             }
 
@@ -1205,6 +1257,13 @@ extension Interaction {
                 validateCharacterCountInRange(custom_id, min: 1, max: 100, name: "custom_id")
                 validateNumberInRangeOrNil(min_values, min: 0, max: 10, name: "min_values")
                 validateNumberInRangeOrNil(max_values, min: 1, max: 10, name: "max_values")
+                validateElementCountDoesNotExceed(file_types, max: 10, name: "file_types")
+                validateHasPrecondition(
+                    condition: min_values == 0,
+                    allowedIf: required == false,
+                    name: "required",
+                    reason: "`required` must be `false` when `min_values` is `0`"
+                )
             }
         }
 

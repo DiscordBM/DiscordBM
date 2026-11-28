@@ -309,6 +309,43 @@ class ValidatablePayloadTests: XCTestCase, @unchecked Sendable, ValidatablePaylo
         }
     }
 
+    func testValidateApplicationRoleConnectionMetadataKey() throws {
+        let charactersFailure = ValidationFailure.hasPrecondition(
+            name: "key",
+            reason: "Can only contain a-z, 0-9 and _ characters"
+        )
+        XCTAssertEqual(validateApplicationRoleConnectionMetadataKey("cookies_eaten_2", name: "key"), [])
+        XCTAssertEqual(
+            validateApplicationRoleConnectionMetadataKey(String(repeating: "a", count: 50), name: "key"),
+            []
+        )
+        XCTAssertEqual(
+            validateApplicationRoleConnectionMetadataKey("", name: "key"),
+            [.characterCountOutOfRange(name: "key", min: 1, max: 50)]
+        )
+        XCTAssertEqual(
+            validateApplicationRoleConnectionMetadataKey(String(repeating: "a", count: 51), name: "key"),
+            [.characterCountOutOfRange(name: "key", min: 1, max: 50)]
+        )
+        XCTAssertEqual(validateApplicationRoleConnectionMetadataKey("Cookies", name: "key"), [charactersFailure])
+        XCTAssertEqual(validateApplicationRoleConnectionMetadataKey("cookies-eaten", name: "key"), [charactersFailure])
+        XCTAssertEqual(validateApplicationRoleConnectionMetadataKey("cookiés", name: "key"), [charactersFailure])
+
+        let metadata = ApplicationRoleConnectionMetadata(
+            type: .integerGreaterThanOrEqual,
+            key: "cookies-eaten",
+            name: "Cookies Eaten",
+            description: "Cookies Eaten Greater Than"
+        )
+        XCTAssertEqual(metadata.validate(), [charactersFailure])
+
+        let payload = Payloads.UpdateUserApplicationRoleConnection(metadata: ["Cookies": "1"])
+        XCTAssertEqual(
+            payload.validate(),
+            [.hasPrecondition(name: "metadata[Cookies]", reason: "Can only contain a-z, 0-9 and _ characters")]
+        )
+    }
+
     func testComponentsValidation() throws {
         let button: Interaction.ActionRow.Component = .button(.init(style: .primary, label: "a", custom_id: "a"))
         let textDisplay: Interaction.ActionRow.Component = .textDisplay(.init(content: "a"))

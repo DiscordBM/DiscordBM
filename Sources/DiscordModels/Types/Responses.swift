@@ -24,6 +24,54 @@ public enum Responses {
         public var has_more: Bool
     }
 
+    /// https://docs.discord.com/developers/resources/message#search-guild-messages-response-body
+    public enum SearchGuildMessages: Sendable, Codable {
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-response-body
+        public struct Results: Sendable, Codable {
+            public var doing_deep_historical_index: Bool
+            public var documents_indexed: Int?
+            public var total_results: Int
+            public var messages: [[DiscordChannel.Message]]
+            public var threads: [DiscordChannel]?
+            public var members: [ThreadMember]?
+        }
+
+        /// Discord returns this with HTTP status 202 while the guild isn't indexed yet. Retry after `retry_after` seconds.
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages
+        public struct IndexNotYetAvailable: Sendable, Codable {
+            public var message: String
+            public var code: JSONErrorCode
+            public var documents_indexed: Int?
+            public var retry_after: Double
+        }
+
+        case results(Results)
+        case indexNotYetAvailable(IndexNotYetAvailable)
+
+        private enum CodingKeys: String, CodingKey {
+            case code
+        }
+
+        public init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            if container.contains(.code) {
+                self = .indexNotYetAvailable(try IndexNotYetAvailable(from: decoder))
+            } else {
+                self = .results(try Results(from: decoder))
+            }
+        }
+
+        public func encode(to encoder: any Encoder) throws {
+            switch self {
+            case let .results(results):
+                try results.encode(to: encoder)
+            case let .indexNotYetAvailable(indexNotYetAvailable):
+                try indexNotYetAvailable.encode(to: encoder)
+            }
+        }
+    }
+
     /// https://docs.discord.com/developers/resources/sticker#list-nitro-sticker-packs-response-structure
     public struct ListStickerPacks: Sendable, Codable {
         public var sticker_packs: [StickerPack]
@@ -93,5 +141,10 @@ public enum Responses {
         public var created_at: DiscordTimestamp?
         public var completed_at: DiscordTimestamp?
         public var error_message: String?
+    }
+
+    /// https://docs.discord.com/developers/resources/channel#get-channel-member-permissions-permissions-response
+    public struct Permissions: Sendable, Codable {
+        public var permissions: StringBitField<Permission>
     }
 }

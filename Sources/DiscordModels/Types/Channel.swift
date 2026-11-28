@@ -20,6 +20,7 @@ public struct DiscordChannel: Sendable, Codable {
         case guildStageVoice  // 13
         case guildDirectory  // 14
         case guildForum  // 15
+        case guildMedia  // 16
         case __undocumented(_Int_CompatibilityTypealias)
     }
 
@@ -131,7 +132,9 @@ public struct DiscordChannel: Sendable, Codable {
     public var icon: String?
     public var owner_id: UserSnowflake?
     public var application_id: ApplicationSnowflake?
+    @available(*, deprecated, renamed: "managed")
     public var manage: Bool?
+    public var managed: Bool?
     public var parent_id: AnySnowflake?
     public var last_pin_timestamp: DiscordTimestamp?
     public var rtc_region: String?
@@ -146,8 +149,10 @@ public struct DiscordChannel: Sendable, Codable {
     public var default_sort_order: Int?
     public var default_forum_layout: ForumLayout?
     public var permissions: StringBitField<Permission>?
+    public var app_permissions: StringBitField<Permission>?
     public var flags: IntBitField<Flag>?
     public var available_tags: [ForumTag]?
+    public var applied_tags: [ForumTagSnowflake]?
     public var template: String?
     public var member_ids_preview: [String]?
     public var version: Int?
@@ -276,7 +281,15 @@ extension DiscordChannel {
             /// https://docs.discord.com/developers/resources/message#attachment-object-attachment-flags
             @UnstableEnum<_UInt_CompatibilityTypealias>
             public enum Flag: Sendable {
+                case isClip  // 0
+                case isThumbnail  // 1
+                @available(*, deprecated, message: "Deprecated by Discord.")
                 case isRemix  // 2
+                case isSpoiler  // 3
+                case containsExplicitContent  // 4
+                case isAnimated  // 5
+                case containsGoreContent  // 6
+                case containsSelfHarmContent  // 7
                 case __undocumented(_UInt_CompatibilityTypealias)
             }
 
@@ -290,10 +303,15 @@ extension DiscordChannel {
             public var proxy_url: String
             public var height: Int?
             public var width: Int?
+            public var placeholder: String?
+            public var placeholder_version: Int?
             public var ephemeral: Bool?
             public var duration_secs: Double?
             public var waveform: String?
             public var flags: IntBitField<Flag>?
+            public var clip_participants: [DiscordUser]?
+            public var clip_created_at: DiscordTimestamp?
+            public var application: PartialApplication?
         }
 
         /// https://docs.discord.com/developers/resources/message#reaction-object
@@ -391,6 +409,7 @@ extension DiscordChannel {
                 case spectate  // 2
                 case listen  // 3
                 case joinRequest  // 5
+                case streamRequest  // 6
                 case __undocumented(_Int_CompatibilityTypealias)
             }
 
@@ -421,6 +440,78 @@ extension DiscordChannel {
             public var message: PartialMessage
         }
 
+        /// https://docs.discord.com/developers/resources/message#shared-client-theme-object-shared-client-theme-object-structure
+        public struct SharedClientTheme: Sendable, Codable, ValidatablePayload {
+
+            /// https://docs.discord.com/developers/resources/message#base-theme-types
+            @UnstableEnum<_Int_CompatibilityTypealias>
+            public enum BaseTheme: Sendable, Codable {
+                case unset  // 0
+                case dark  // 1
+                case light  // 2
+                case darker  // 3
+                case midnight  // 4
+                case __undocumented(_Int_CompatibilityTypealias)
+            }
+
+            public var colors: [DiscordColor]
+            public var gradient_angle: Int
+            public var base_mix: Int
+            public var base_theme: BaseTheme?
+
+            enum CodingKeys: String, CodingKey {
+                case colors
+                case gradient_angle
+                case base_mix
+                case base_theme
+            }
+
+            public init(
+                colors: [DiscordColor],
+                gradient_angle: Int,
+                base_mix: Int,
+                base_theme: BaseTheme? = nil
+            ) {
+                self.colors = colors
+                self.gradient_angle = gradient_angle
+                self.base_mix = base_mix
+                self.base_theme = base_theme
+            }
+
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.colors = try container.decode(
+                    [String].self,
+                    forKey: .colors
+                ).compactMap {
+                    DiscordColor(hex: $0)
+                }
+                self.gradient_angle = try container.decode(Int.self, forKey: .gradient_angle)
+                self.base_mix = try container.decode(Int.self, forKey: .base_mix)
+                self.base_theme = try container.decodeIfPresent(BaseTheme.self, forKey: .base_theme)
+            }
+
+            public func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(
+                    self.colors.map {
+                        let hex = String($0.value, radix: 16, uppercase: true)
+                        return String(repeating: "0", count: max(0, 6 - hex.count)) + hex
+                    },
+                    forKey: .colors
+                )
+                try container.encode(self.gradient_angle, forKey: .gradient_angle)
+                try container.encode(self.base_mix, forKey: .base_mix)
+                try container.encodeIfPresent(self.base_theme, forKey: .base_theme)
+            }
+
+            public func validate() -> [ValidationFailure] {
+                validateElementCountDoesNotExceed(colors, max: 5, name: "colors")
+                validateNumberInRangeOrNil(gradient_angle, min: 0, max: 360, name: "gradient_angle")
+                validateNumberInRangeOrNil(base_mix, min: 0, max: 100, name: "base_mix")
+            }
+        }
+
         public var id: MessageSnowflake
         public var channel_id: ChannelSnowflake
         public var author: DiscordUser?
@@ -446,6 +537,7 @@ extension DiscordChannel {
         public var flags: IntBitField<Flag>?
         public var message_snapshots: [MessageSnapshot]?
         public var referenced_message: DereferenceBox<Message>?
+        public var interaction_metadata: InteractionMetadata?
         public var interaction: MessageInteraction?
         public var thread: DiscordChannel?
         public var components: [Interaction.ActionRow]?
@@ -456,6 +548,7 @@ extension DiscordChannel {
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
         public var poll: Poll?
         public var call: Call?
+        public var shared_client_theme: SharedClientTheme?
         /// Extra fields, not sure why I've added them to this specific type:
         public var guild_id: GuildSnowflake?
         public var member: Guild.PartialMember?
@@ -504,9 +597,11 @@ extension DiscordChannel {
         public var resolved: Interaction.ApplicationCommand.ResolvedData?
         public var poll: Poll?
         public var call: DiscordChannel.Message.Call?
+        public var shared_client_theme: DiscordChannel.Message.SharedClientTheme?
         /// Extra fields:
         public var member: Guild.PartialMember?
         public var guild_id: GuildSnowflake?
+        public var channel_type: DiscordChannel.Kind?
     }
 }
 
@@ -598,9 +693,20 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         case article  // "article"
         case link  // "link"
         case pollResult  // "poll_result"
+        case components  // "components"
         @available(*, deprecated, message: "Not available in Discord Docs so will be removed in a future major version")
         case autoModerationMessage  // "auto_moderation_message"
         case __undocumented(String)
+    }
+
+    /// https://docs.discord.com/developers/resources/message#embed-object-embed-flags
+    @UnstableEnum<_UInt_CompatibilityTypealias>
+    public enum Flag: Sendable {
+        case containsExplicitContent  // 4
+        case isContentInventoryEntry  // 5
+        case containsGoreContent  // 6
+        case containsSelfHarmContent  // 7
+        case __undocumented(_UInt_CompatibilityTypealias)
     }
 
     /// FIMXE: remove this typealias in a future major version
@@ -621,16 +727,40 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
 
     /// https://docs.discord.com/developers/resources/channel#embed-object-embed-image-structure
     public struct Media: Sendable, Codable {
+
+        /// https://docs.discord.com/developers/resources/message#embed-object-embed-media-flags
+        @UnstableEnum<_UInt_CompatibilityTypealias>
+        public enum Flag: Sendable {
+            case isAnimated  // 5
+            case __undocumented(_UInt_CompatibilityTypealias)
+        }
+
         public var url: DynamicURL
         public var proxy_url: String?
         public var height: Int?
         public var width: Int?
+        public var content_type: String?
+        public var placeholder: String?
+        public var placeholder_version: Int?
+        public var description: String?
+        public var flags: IntBitField<Flag>?
 
-        public init(url: DynamicURL, proxy_url: String? = nil, height: Int? = nil, width: Int? = nil) {
+        public init(
+            url: DynamicURL,
+            proxy_url: String? = nil,
+            height: Int? = nil,
+            width: Int? = nil,
+            description: String? = nil
+        ) {
             self.url = url
             self.proxy_url = proxy_url
             self.height = height
             self.width = width
+            self.content_type = nil
+            self.placeholder = nil
+            self.placeholder_version = nil
+            self.description = description
+            self.flags = nil
         }
     }
 
@@ -686,6 +816,8 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
     public var provider: Provider?
     public var author: Author?
     public var fields: [Field]?
+    public var components: [Interaction.ActionRow]?
+    public var flags: IntBitField<Flag>?
 
     /// The length that matters towards the Discord limit (currently 6000 across all embeds).
     public var contentLength: Int {
@@ -725,6 +857,8 @@ public struct Embed: Sendable, Codable, ValidatablePayload {
         self.provider = provider
         self.author = author
         self.fields = fields
+        self.components = nil
+        self.flags = nil
     }
 
     public func validate() -> [ValidationFailure] {

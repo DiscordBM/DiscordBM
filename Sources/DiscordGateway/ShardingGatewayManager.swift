@@ -215,6 +215,13 @@ public actor ShardingGatewayManager: GatewayManager {
             .requestSoundboardSounds(payload: payload)
     }
 
+    /// https://docs.discord.com/developers/events/gateway-events#request-channel-info
+    public func requestChannelInfo(payload: Gateway.RequestChannelInfo) async {
+        await self.managers
+            .first(where: { $0.identifyPayload.intents.contains(.guilds) })?
+            .requestChannelInfo(payload: payload)
+    }
+
     /// https://discord.com/developers/docs/topics/gateway-events#update-presence
     public func updatePresence(payload: Gateway.Identify.Presence) async {
         await self.managers.first?.updatePresence(payload: payload)

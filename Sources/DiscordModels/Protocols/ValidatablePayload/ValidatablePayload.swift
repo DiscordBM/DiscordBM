@@ -192,13 +192,29 @@ extension ValidatablePayload {
     }
 
     @inlinable
+    func validateApplicationRoleConnectionMetadataKey(_ key: String, name: String) -> [ValidationFailure] {
+        var failures: [ValidationFailure] = []
+        if let failure = validateCharacterCountInRange(key, min: 1, max: 50, name: name) {
+            failures.append(failure)
+        }
+        let isAllowed = key.unicodeScalars.allSatisfy {
+            ("a"..."z").contains($0) || ("0"..."9").contains($0) || $0 == "_"
+        }
+        if !isAllowed {
+            failures.append(.hasPrecondition(name: name, reason: "Can only contain a-z, 0-9 and _ characters"))
+        }
+        return failures
+    }
+
+    @inlinable
     func validateComponentsV2Payload(
         components: [Interaction.ActionRow]?,
         flags: IntBitField<DiscordChannel.Message.Flag>?,
         hasContent: Bool,
         hasEmbeds: Bool,
         hasStickers: Bool,
-        hasPoll: Bool
+        hasPoll: Bool,
+        hasSharedClientTheme: Bool
     ) -> [ValidationFailure] {
         guard flags?.contains(.isComponentsV2) ?? false else { return [] }
 
@@ -239,6 +255,14 @@ extension ValidatablePayload {
                 .disallowedField(
                     name: "poll",
                     reason: "`poll` is incompatible with `isComponentsV2` flag"
+                )
+            )
+        }
+        if hasSharedClientTheme {
+            failures.append(
+                .disallowedField(
+                    name: "shared_client_theme",
+                    reason: "`shared_client_theme` is incompatible with `isComponentsV2` flag"
                 )
             )
         }

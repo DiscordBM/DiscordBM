@@ -34,6 +34,16 @@ public struct DiscordHTTPRequest: Sendable {
         self.headers = headers
     }
 
+    public init(
+        to endpoint: FormattedCDNEndpoint,
+        queries: [(String, String?)] = [],
+        headers: HTTPHeaders = [:]
+    ) {
+        self.endpoint = .formattedCDN(endpoint)
+        self.queries = queries
+        self.headers = headers
+    }
+
     public init(to endpoint: LooseEndpoint) {
         self.endpoint = .loose(endpoint)
         self.queries = []

@@ -19,6 +19,8 @@ public enum CacheableEndpointIdentity: Sendable, Hashable, CustomStringConvertib
             }
         case let .cdn(endpoint):
             self = .cdn(CDNEndpointIdentity(endpoint: endpoint))
+        case let .formattedCDN(endpoint):
+            self = .cdn(CDNEndpointIdentity(endpoint: endpoint.endpoint))
         case let .loose(endpoint):
             self = .loose(endpoint)
         case .__DO_NOT_USE_THIS_CASE:

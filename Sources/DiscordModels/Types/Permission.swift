@@ -48,6 +48,7 @@ public enum Permission: Sendable, Codable {
     case createEvents  // 44
     case useExternalSounds  // 45
     case sendVoiceMessages  // 46
+    case setVoiceChannelStatus  // 48
     case sendPolls  // 49
     case useExternalApps  // 50
     case pinMessages  // 51

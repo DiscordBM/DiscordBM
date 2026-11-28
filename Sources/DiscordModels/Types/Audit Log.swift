@@ -138,6 +138,7 @@ public struct AuditLog: Sendable, Codable {
             case channelOverwriteCreate  // 13
             case channelOverwriteUpdate  // 14
             case channelOverwriteDelete  // 15
+            case channelPositionUpdate  // 16
             case memberKick  // 20
             case memberPrune  // 21
             case memberBanAdd  // 22
@@ -150,6 +151,7 @@ public struct AuditLog: Sendable, Codable {
             case roleCreate  // 30
             case roleUpdate  // 31
             case roleDelete  // 32
+            case rolePositionUpdate  // 33
             case inviteCreate  // 40
             case inviteUpdate  // 41
             case inviteDelete  // 42
@@ -198,6 +200,8 @@ public struct AuditLog: Sendable, Codable {
             case onboardingUpdate  // 167
             case homeSettingsCreate  // 190
             case homeSettingsUpdate  // 191
+            case voiceChannelStatusCreate  // 192
+            case voiceChannelStatusDelete  // 193
             case __undocumented(_Int_CompatibilityTypealias)
         }
 
@@ -212,6 +216,7 @@ public struct AuditLog: Sendable, Codable {
             case channelOverwriteCreate(OverwriteInfo)
             case channelOverwriteUpdate(OverwriteInfo)
             case channelOverwriteDelete(OverwriteInfo)
+            case channelPositionUpdate(count: String)
             case memberKick(integration_type: Integration.Kind)
             case memberPrune(delete_member_days: String)
             case memberBanAdd
@@ -224,6 +229,7 @@ public struct AuditLog: Sendable, Codable {
             case roleCreate
             case roleUpdate
             case roleDelete
+            case rolePositionUpdate(count: String)
             case inviteCreate
             case inviteUpdate
             case inviteDelete
@@ -272,6 +278,8 @@ public struct AuditLog: Sendable, Codable {
             case onboardingUpdate
             case homeSettingsCreate
             case homeSettingsUpdate
+            case voiceChannelStatusCreate(channel_id: ChannelSnowflake, status: String)
+            case voiceChannelStatusDelete(channel_id: ChannelSnowflake)
             case __undocumented
 
             public struct OverwriteInfo: Sendable, Codable {
@@ -394,6 +402,7 @@ public struct AuditLog: Sendable, Codable {
                 case count
                 case application_id
                 case integration_type
+                case status
             }
 
             public init(from decoder: any Decoder) throws {
@@ -419,6 +428,10 @@ public struct AuditLog: Sendable, Codable {
                 case .channelOverwriteDelete:
                     let info = try container.decode(OverwriteInfo.self, forKey: .options)
                     self = .channelOverwriteDelete(info)
+                case .channelPositionUpdate:
+                    let container = try optionsNestedContainer()
+                    let count = try container.decode(String.self, forKey: .count)
+                    self = .channelPositionUpdate(count: count)
                 case .memberKick:
                     let container = try optionsNestedContainer()
                     let integration_type = try container.decode(
@@ -459,6 +472,10 @@ public struct AuditLog: Sendable, Codable {
                 case .roleCreate: self = .roleCreate
                 case .roleUpdate: self = .roleUpdate
                 case .roleDelete: self = .roleDelete
+                case .rolePositionUpdate:
+                    let container = try optionsNestedContainer()
+                    let count = try container.decode(String.self, forKey: .count)
+                    self = .rolePositionUpdate(count: count)
                 case .inviteCreate: self = .inviteCreate
                 case .inviteUpdate: self = .inviteUpdate
                 case .inviteDelete: self = .inviteDelete
@@ -567,6 +584,21 @@ public struct AuditLog: Sendable, Codable {
                 case .onboardingUpdate: self = .onboardingUpdate
                 case .homeSettingsCreate: self = .homeSettingsCreate
                 case .homeSettingsUpdate: self = .homeSettingsUpdate
+                case .voiceChannelStatusCreate:
+                    let container = try optionsNestedContainer()
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
+                    let status = try container.decode(String.self, forKey: .status)
+                    self = .voiceChannelStatusCreate(channel_id: channel_id, status: status)
+                case .voiceChannelStatusDelete:
+                    let container = try optionsNestedContainer()
+                    let channel_id = try container.decode(
+                        ChannelSnowflake.self,
+                        forKey: .channel_id
+                    )
+                    self = .voiceChannelStatusDelete(channel_id: channel_id)
                 case .__undocumented:
                     self = .__undocumented
                 }
@@ -590,6 +622,9 @@ public struct AuditLog: Sendable, Codable {
                     try container.encode(overwriteInfo, forKey: .options)
                 case let .channelOverwriteDelete(overwriteInfo):
                     try container.encode(overwriteInfo, forKey: .options)
+                case let .channelPositionUpdate(count):
+                    var container = try optionsNestedContainer()
+                    try container.encode(count, forKey: .count)
                 case .memberKick: break
                 case let .memberPrune(delete_member_days):
                     var container = try optionsNestedContainer()
@@ -609,6 +644,9 @@ public struct AuditLog: Sendable, Codable {
                 case .roleCreate: break
                 case .roleUpdate: break
                 case .roleDelete: break
+                case let .rolePositionUpdate(count):
+                    var container = try optionsNestedContainer()
+                    try container.encode(count, forKey: .count)
                 case .inviteCreate: break
                 case .inviteUpdate: break
                 case .inviteDelete: break
@@ -681,6 +719,13 @@ public struct AuditLog: Sendable, Codable {
                 case .onboardingUpdate: break
                 case .homeSettingsCreate: break
                 case .homeSettingsUpdate: break
+                case let .voiceChannelStatusCreate(channel_id, status):
+                    var container = try optionsNestedContainer()
+                    try container.encode(channel_id, forKey: .channel_id)
+                    try container.encode(status, forKey: .status)
+                case let .voiceChannelStatusDelete(channel_id):
+                    var container = try optionsNestedContainer()
+                    try container.encode(channel_id, forKey: .channel_id)
                 case .__undocumented: break
                 }
             }
@@ -752,6 +797,7 @@ extension AuditLog.Entry.ActionKind {
         case .channelOverwriteCreate: self = .channelOverwriteCreate
         case .channelOverwriteUpdate: self = .channelOverwriteUpdate
         case .channelOverwriteDelete: self = .channelOverwriteDelete
+        case .channelPositionUpdate: self = .channelPositionUpdate
         case .memberKick: self = .memberKick
         case .memberPrune: self = .memberPrune
         case .memberBanAdd: self = .memberBanAdd
@@ -764,6 +810,7 @@ extension AuditLog.Entry.ActionKind {
         case .roleCreate: self = .roleCreate
         case .roleUpdate: self = .roleUpdate
         case .roleDelete: self = .roleDelete
+        case .rolePositionUpdate: self = .rolePositionUpdate
         case .inviteCreate: self = .inviteCreate
         case .inviteUpdate: self = .inviteUpdate
         case .inviteDelete: self = .inviteDelete
@@ -821,6 +868,10 @@ extension AuditLog.Entry.ActionKind {
             self = .homeSettingsCreate
         case .homeSettingsUpdate:
             self = .homeSettingsUpdate
+        case .voiceChannelStatusCreate:
+            self = .voiceChannelStatusCreate
+        case .voiceChannelStatusDelete:
+            self = .voiceChannelStatusDelete
         case .__undocumented:
             self = .__undocumented(-1)
         }

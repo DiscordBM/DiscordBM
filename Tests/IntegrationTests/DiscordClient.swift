@@ -323,6 +323,46 @@ class DiscordClientTests: XCTestCase {
         ).guardSuccess()
     }
 
+    func testSearchGuildMessages() async throws {
+        let limit = 5
+        let response = try await client.searchGuildMessages(
+            guildId: Constants.guildId,
+            payload: .init(
+                limit: limit,
+                author_type: [.include(.bot), .exclude(.webhook)]
+            )
+        )
+
+        switch try response.decode() {
+        case let .results(results):
+            XCTAssertEqual(response.httpResponse.status.code, 200)
+            XCTAssertGreaterThanOrEqual(results.total_results, 0, "\(results)")
+            XCTAssertLessThanOrEqual(results.messages.count, limit, "\(results)")
+            if let documentsIndexed = results.documents_indexed {
+                XCTAssertGreaterThanOrEqual(documentsIndexed, 0, "\(results)")
+            }
+            for message in results.messages.joined() {
+                XCTAssertNil(message.reactions, "\(message)")
+                XCTAssertEqual(message.author?.bot, true, "\(message)")
+            }
+        case let .indexNotYetAvailable(indexNotYetAvailable):
+            XCTAssertEqual(response.httpResponse.status.code, 202)
+            XCTAssertEqual(
+                indexNotYetAvailable.code,
+                .indexNotYetAvailableTryAgainLater,
+                "\(indexNotYetAvailable)"
+            )
+            XCTAssertGreaterThanOrEqual(
+                indexNotYetAvailable.retry_after,
+                0,
+                "\(indexNotYetAvailable)"
+            )
+            if let documentsIndexed = indexNotYetAvailable.documents_indexed {
+                XCTAssertGreaterThanOrEqual(documentsIndexed, 0, "\(indexNotYetAvailable)")
+            }
+        }
+    }
+
     func testPolls() async throws {
         let message = try await client.createMessage(
             channelId: Constants.Channels.spam.id,
@@ -704,6 +744,68 @@ class DiscordClientTests: XCTestCase {
     }
 
     func testChannelPermissions() async throws {
+        let channelId = Constants.Channels.general.id
+
+        /// Get channel member permissions
+        let botPermissions = try await client.getChannelMemberPermissions(
+            channelId: channelId,
+            userId: Constants.botId
+        ).decode()
+        XCTAssertTrue(botPermissions.permissions.contains(.viewChannel), "\(botPermissions)")
+
+        /// Implicit permission masking is not applied when the target member is a bot.
+        let botPermissionsWithoutImplicit = try await client.getChannelMemberPermissions(
+            channelId: channelId,
+            userId: Constants.botId,
+            implicit: false
+        ).decode()
+        XCTAssertEqual(
+            botPermissionsWithoutImplicit.permissions.rawValue,
+            botPermissions.permissions.rawValue
+        )
+
+        /// Get channel role permissions
+        let everyoneRoleId = RoleSnowflake(Constants.guildId)
+        let guildRoles = try await client.listGuildRoles(id: Constants.guildId).decode()
+        let everyoneRole = try XCTUnwrap(guildRoles.first(where: { $0.id == everyoneRoleId }))
+        let channel = try await client.getChannel(id: channelId).decode()
+        let everyoneOverwrite = channel.permission_overwrites?.first(where: {
+            $0.type == .role && $0.id == AnySnowflake(everyoneRoleId)
+        })
+        let everyoneAllowed = everyoneOverwrite?.allow ?? []
+        let everyoneDenied = (everyoneOverwrite?.deny ?? []).subtracting(everyoneAllowed)
+
+        let everyonePermissions = try await client.getChannelRolePermissions(
+            channelId: channelId,
+            roleId: everyoneRoleId
+        ).decode()
+        let everyonePermissionsWithImplicit = try await client.getChannelRolePermissions(
+            channelId: channelId,
+            roleId: everyoneRoleId,
+            implicit: true
+        ).decode()
+        XCTAssertEqual(
+            everyonePermissions.permissions.rawValue,
+            everyonePermissionsWithImplicit.permissions.rawValue
+        )
+
+        let everyonePermissionsWithoutImplicit = try await client.getChannelRolePermissions(
+            channelId: channelId,
+            roleId: everyoneRoleId,
+            implicit: false
+        ).decode()
+        XCTAssertTrue(
+            everyonePermissionsWithoutImplicit.permissions.isSubset(
+                of: everyoneRole.permissions.union(everyoneAllowed)
+            ),
+            "\(everyonePermissionsWithoutImplicit) had more than \(everyoneRole) and \(everyoneAllowed)"
+        )
+        XCTAssertEqual(
+            everyonePermissionsWithoutImplicit.permissions.intersection(everyoneDenied).rawValue,
+            0,
+            "\(everyonePermissionsWithoutImplicit) had denied \(everyoneDenied)"
+        )
+
         let overwriteId = AnySnowflake(Constants.secondAccountId)
 
         try await client.setChannelPermissionOverwrite(
@@ -817,6 +919,35 @@ class DiscordClientTests: XCTestCase {
         ).getFile()
         let fileString = String(buffer: targetUsersResponseFile.data)
         XCTAssertTrue(fileString.contains(Constants.personalId.rawValue), fileString)
+
+        try await client.bulkAddInviteTargetUsers(
+            code: invite.code,
+            payload: .init(user_ids: [Constants.personalId])
+        ).guardSuccess()
+
+        try await client.bulkDeleteInviteTargetUsers(
+            code: invite.code,
+            payload: .init(user_ids: [Constants.personalId])
+        ).guardSuccess()
+
+        try await client.addInviteTargetUser(
+            code: invite.code,
+            userId: Constants.personalId
+        ).guardSuccess()
+
+        let targetUsersAfterAddFile = try await client.getInviteTargetUsers(
+            code: invite.code
+        ).getFile()
+        let fileStringAfterAdd = String(buffer: targetUsersAfterAddFile.data)
+        XCTAssertTrue(
+            fileStringAfterAdd.contains(Constants.personalId.rawValue),
+            fileStringAfterAdd
+        )
+
+        try await client.deleteInviteTargetUser(
+            code: invite.code,
+            userId: Constants.personalId
+        ).guardSuccess()
 
         try await client.revokeInvite(code: invite.code).guardSuccess()
     }
@@ -1058,6 +1189,47 @@ class DiscordClientTests: XCTestCase {
         let guildRoles = try await client.listGuildRoles(id: Constants.guildId).decode()
         let rolesWithName = guildRoles.filter({ $0.name == role.name })
         XCTAssertGreaterThanOrEqual(rolesWithName.count, 1)
+
+        /// Get guild role permissions
+        let everyoneRoleId = RoleSnowflake(Constants.guildId)
+        let everyoneRole = try XCTUnwrap(guildRoles.first(where: { $0.id == everyoneRoleId }))
+
+        let everyoneRolePermissions = try await client.getGuildRolePermissions(
+            guildId: Constants.guildId,
+            roleId: everyoneRoleId
+        ).decode()
+        XCTAssertEqual(
+            everyoneRolePermissions.permissions.rawValue,
+            everyoneRole.permissions.rawValue
+        )
+
+        let rolePermissions = try await client.getGuildRolePermissions(
+            guildId: Constants.guildId,
+            roleId: role.id
+        ).decode()
+        XCTAssertEqual(
+            rolePermissions.permissions.rawValue,
+            role.permissions.union(everyoneRole.permissions).rawValue
+        )
+
+        /// Get guild member permissions
+        let botMember = try await client.getGuildMember(
+            guildId: Constants.guildId,
+            userId: Constants.botId
+        ).decode()
+        var botExpectedPermissions = everyoneRole.permissions
+        for botRole in guildRoles where botMember.roles.contains(botRole.id) {
+            botExpectedPermissions.formUnion(botRole.permissions)
+        }
+
+        let botPermissions = try await client.getGuildMemberPermissions(
+            guildId: Constants.guildId,
+            userId: Constants.botId
+        ).decode()
+        XCTAssertTrue(
+            botPermissions.permissions.isSuperset(of: botExpectedPermissions),
+            "\(botPermissions) did not contain \(botExpectedPermissions)"
+        )
 
         /// Add role to member
         try await client.addGuildMemberRole(
@@ -1823,6 +1995,17 @@ class DiscordClientTests: XCTestCase {
         default:
             XCTFail("Unexpected error: \(String(describing: voiceStateError))")
         }
+
+        try await client.setVoiceChannelStatus(
+            channelId: Constants.Channels.voice.id,
+            reason: "Testing Set Voice Channel Status!",
+            payload: .init(status: "Integration test status")
+        ).guardSuccess()
+
+        try await client.setVoiceChannelStatus(
+            channelId: Constants.Channels.voice.id,
+            payload: .init(status: nil)
+        ).guardSuccess()
     }
 
     func testSoundboard() async throws {
@@ -2708,6 +2891,18 @@ class DiscordClientTests: XCTestCase {
         }
 
         do {
+            let file = try await client.getCDNCustomEmoji(
+                emojiId: "1073704788400820324",
+                format: .webp,
+                size: .size64
+            ).getFile()
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
+            XCTAssertEqual(file.extension, "webp")
+            XCTAssertEqual(file.type, "image/webp")
+            XCTAssertEqual(file.filename, "1073704788400820324.webp")
+        }
+
+        do {
             let file = try await client.getCDNGuildIcon(
                 guildId: "965874258054094878",
                 icon: "08b885eb2b03ee09fc906fa1a38cc1f8"
@@ -2715,6 +2910,20 @@ class DiscordClientTests: XCTestCase {
             XCTAssertGreaterThan(file.data.readableBytes, 100)
             XCTAssertEqual(file.extension, "png")
             XCTAssertEqual(file.filename, "guildIcon.png")
+        }
+
+        do {
+            let file = try await client.getCDNGuildIcon(
+                guildId: "965874258054094878",
+                icon: "08b885eb2b03ee09fc906fa1a38cc1f8",
+                format: .jpeg
+            ).getFile(overrideName: "guildIcon")
+            XCTAssertGreaterThan(file.data.readableBytes, 100)
+            /// `image/jpeg` maps to multiple extensions and `RawFile` picks any of them.
+            let fileExtension = try XCTUnwrap(file.extension)
+            XCTAssertTrue(["jpeg", "jpg", "jpe"].contains(fileExtension), "Unexpected extension: \(fileExtension)")
+            XCTAssertEqual(file.type, "image/jpeg")
+            XCTAssertEqual(file.filename, "guildIcon.\(fileExtension)")
         }
 
         do {
@@ -3276,7 +3485,7 @@ private actor GatewayTester {
     var bot: BotGatewayManager? = nil
     var cache: DiscordCache? = nil
     var testsRan = 0
-    private let totalTestCount = 43
+    private let totalTestCount = 44
     var isLastTest: Bool {
         self.testsRan == self.totalTestCount
     }

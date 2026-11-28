@@ -2,6 +2,7 @@ import DiscordModels
 import NIOHTTP1
 
 /// CDN Endpoints.
+/// Prefer to use `FormattedCDNEndpoint` for better support of CDN Endpoints.
 /// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
 public enum CDNEndpoint: Endpoint {
     case customEmoji(emojiId: EmojiSnowflake)
@@ -42,6 +43,7 @@ public enum CDNEndpoint: Endpoint {
         userId: UserSnowflake,
         banner: String
     )
+    case guildTagBadge(guildId: GuildSnowflake, badge: String)
 
     /// This case serves as a way of discouraging exhaustive switch statements
     case __DO_NOT_USE_THIS_CASE
@@ -95,6 +97,8 @@ public enum CDNEndpoint: Endpoint {
             suffix = "guild-events/\(eventId.rawValue)/\(cover)"
         case let .guildMemberBanner(guildId, userId, banner):
             suffix = "guilds/\(guildId.rawValue)/users/\(userId.rawValue)/banners/\(banner)"
+        case let .guildTagBadge(guildId, badge):
+            suffix = "guild-tag-badges/\(guildId.rawValue)/\(badge)"
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
@@ -177,6 +181,8 @@ public enum CDNEndpoint: Endpoint {
             return [eventId.rawValue, cover]
         case .guildMemberBanner(let guildId, let userId, let banner):
             return [guildId.rawValue, userId.rawValue, banner]
+        case .guildTagBadge(let guildId, let badge):
+            return [guildId.rawValue, badge]
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
@@ -206,6 +212,7 @@ public enum CDNEndpoint: Endpoint {
         case .roleIcon: return 20
         case .guildScheduledEventCover: return 21
         case .guildMemberBanner: return 22
+        case .guildTagBadge: return 23
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
@@ -257,9 +264,60 @@ public enum CDNEndpoint: Endpoint {
             return "guildScheduledEventCover(eventId: \(eventId), cover: \(cover))"
         case let .guildMemberBanner(guildId, userId, banner):
             return "guildMemberBanner(guildId: \(guildId), userId: \(userId), banner: \(banner))"
+        case let .guildTagBadge(guildId, badge):
+            return "guildTagBadge(guildId: \(guildId), badge: \(badge))"
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
+    }
+}
+
+extension CDNEndpoint {
+    /// https://docs.discord.com/developers/reference#image-formatting-image-formats
+    public enum ImageFormat: String, Sendable {
+        case png
+        case jpeg
+        case webp
+        case gif
+
+        /// This case serves as a way of discouraging exhaustive switch statements
+        case __DO_NOT_USE_THIS_CASE
+    }
+
+    /// https://docs.discord.com/developers/reference#image-formatting-image-formats
+    public enum StaticImageFormat: String, Sendable {
+        case png
+        case jpeg
+        case webp
+
+        /// This case serves as a way of discouraging exhaustive switch statements
+        case __DO_NOT_USE_THIS_CASE
+    }
+
+    /// https://docs.discord.com/developers/reference#image-formatting-image-formats
+    public enum StickerFormat: String, Sendable {
+        case png
+        case gif
+        case lottie = "json"
+
+        /// This case serves as a way of discouraging exhaustive switch statements
+        case __DO_NOT_USE_THIS_CASE
+    }
+
+    /// https://docs.discord.com/developers/reference#image-formatting
+    public enum ImageSize: Int, Sendable {
+        case size16 = 16
+        case size32 = 32
+        case size64 = 64
+        case size128 = 128
+        case size256 = 256
+        case size512 = 512
+        case size1024 = 1024
+        case size2048 = 2048
+        case size4096 = 4096
+
+        /// This case serves as a way of discouraging exhaustive switch statements
+        case __DO_NOT_USE_THIS_CASE = 0
     }
 }
 
@@ -286,6 +344,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
     case roleIcon
     case guildScheduledEventCover
     case guildMemberBanner
+    case guildTagBadge
 
     /// This case serves as a way of discouraging exhaustive switch statements
     case __DO_NOT_USE_THIS_CASE
@@ -314,6 +373,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
         case .roleIcon: return "roleIcon"
         case .guildScheduledEventCover: return "guildScheduledEventCover"
         case .guildMemberBanner: return "guildMemberBanner"
+        case .guildTagBadge: return "guildTagBadge"
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }
@@ -343,6 +403,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable, CustomStringConvertibl
         case .roleIcon: self = .roleIcon
         case .guildScheduledEventCover: self = .guildScheduledEventCover
         case .guildMemberBanner: self = .guildMemberBanner
+        case .guildTagBadge: self = .guildTagBadge
         case .__DO_NOT_USE_THIS_CASE:
             fatalError("If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used")
         }

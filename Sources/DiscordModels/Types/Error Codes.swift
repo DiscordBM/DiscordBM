@@ -90,6 +90,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case onlyBotsCanUseEndpoint  // 20002
     case explicitContentCannotBeSentToRecipients  // 20009
     case notAuthorizedToPerformActionOnApplication  // 20012
+    case thisActionRequiresAPremiumSubscription  // 20015
     case cantPerformDueToSlowModeRateLimit  // 20016
     case onlyTheOwnerOfAccountCanPerformAction  // 20018
     case messageCannotBeEditedDueToAnnouncementRateLimits  // 20022
@@ -132,6 +133,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case maxNumberOfWebhooksPerGuildReached  // 30058
     case maxNumberOfChannelPermissionOverwritesReached  // 30060
     case channelsForThisGuildAreTooLarge  // 30061
+    case targetUsersLimitForThisGuildReached  // 30084
     case UnauthorizedNeedToProvideValidToken  // 40001
     case needToVerifyYourAccountForAction  // 40002
     case openingDMsTooFast  // 40003
@@ -139,6 +141,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case requestEntityTooLarge  // 40005
     case featureTemporarilyDisabledOnServerSide  // 40006
     case userIsBannedFromGuild  // 40007
+    case onlyOneChannelCanHaveAParentIDModifiedAtATime  // 40009
     case connectionRevoked  // 40012
     case onlyConsumableSKUsCanBeConsumed  // 40018
     case youCanOnlyDeleteSandboxEntitlements  // 40019
@@ -154,6 +157,8 @@ public enum JSONErrorCode: Sendable, Codable {
     case tagRequiredToCreateForumPostInChannel  // 40067
     case anEntitlementHasAlreadyBeenGrantedForThisResource  // 40074
     case thisInteractionHasHitTheMaximumNumberOfFollowUpMessage  // 40094
+    case targetUsersAreAlreadyBeingProcessedForThisInvite  // 40114
+    case targetUsersFileHasNotBeenProcessed  // 40115
     case cloudflareIsBlockingYourRequestThisCanOftenBeResolvedBySettingProperUserAgent  // 40333
     case missingAccess  // 50001
     case invalidAccountType  // 50002
@@ -222,14 +227,18 @@ public enum JSONErrorCode: Sendable, Codable {
     case voiceMessagesMustHaveSupportingMetadata  // 50161
     case voiceMessagesCannotBeEdited  // 50162
     case cannotDeleteGuildSubscriptionIntegration  // 50163
+    case cannotSendVoiceEffectWhenUserIsServerMutedDeafenedOrSuppressed  // 50167
     case cannotSendVoiceMessagesInThisChannel  // 50173
     case theUserAccountMustFirstBeVerified  // 50178
     case providedFileDoesNotHaveAValidDuration  // 50192
+    case inviteIsExpired  // 50270
+    case cannotSendMessagesToThisUserDueToHavingNoMutualGuilds  // 50278
     case missingPermissionToSendSticker  // 50600
     case twoFactorRequiredForOperation  // 60003
     case noUsersWithDiscordTagExist  // 80004
     case reactionWasBlocked  // 90001
     case userCannotUseBurstReactions  // 90002
+    case indexNotYetAvailableTryAgainLater  // 110000
     case applicationNotYetAvailable  // 110001
     case APIResourceIsCurrentlyOverloaded  // 130000
     case stageIsAlreadyOpen  // 150006
@@ -238,6 +247,9 @@ public enum JSONErrorCode: Sendable, Codable {
     case threadLocked  // 160005
     case maxNumberOfActiveThreadsReached  // 160006
     case maxNumberOfActiveAnnouncementThreadsReached  // 160007
+    case cannotReferenceAMessageWithoutPermissionToReadMessageHistory  // 160009
+    case NSFWChannelMessageReferenceNotAllowed  // 160010
+    case youCannotForwardAMessageWhoseContentYouCannotRead  // 160014
     case invalidJSONForUploadedLottieFile  // 170001
     case uploadedLottiesCannotContainRasterizedImagesSuchAsPNGOrJPEG  // 170002
     case stickerMaxFrameRateExceeded  // 170003
@@ -254,6 +266,7 @@ public enum JSONErrorCode: Sendable, Codable {
     case webhooksCanOnlyCreateThreadsInForumChannels  // 220003
     case webhookServicesCannotBeUsedInForumChannels  // 220004
     case messageBlockedByHarmfulLinksFilter  // 240000
+    case accessToJoiningNewServersHasBeenLimitedForTheUser  // 340015
     case cannotEnableOnboardingRequirementsAreNotMet  // 350000
     case cannotUpdateOnboardingWhileBelowRequirements  // 350001
     case accessToFileUploadsHasBeenLimitedForThisGuild  // 400001

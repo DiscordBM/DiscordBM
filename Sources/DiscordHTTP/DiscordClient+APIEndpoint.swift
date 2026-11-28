@@ -427,6 +427,55 @@ extension DiscordClient {
         )
     }
 
+    /// https://docs.discord.com/developers/resources/channel#get-channel-member-permissions
+    @inlinable
+    public func getChannelMemberPermissions(
+        channelId: ChannelSnowflake,
+        userId: UserSnowflake,
+        implicit: Bool? = nil
+    ) async throws -> DiscordClientResponse<Responses.Permissions> {
+        let endpoint = APIEndpoint.getChannelMemberPermissions(channelId: channelId, userId: userId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("implicit", implicit.map { "\($0)" })]
+            )
+        )
+    }
+
+    /// https://docs.discord.com/developers/resources/channel#get-channel-role-permissions
+    @inlinable
+    public func getChannelRolePermissions(
+        channelId: ChannelSnowflake,
+        roleId: RoleSnowflake,
+        implicit: Bool? = nil
+    ) async throws -> DiscordClientResponse<Responses.Permissions> {
+        let endpoint = APIEndpoint.getChannelRolePermissions(channelId: channelId, roleId: roleId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                queries: [("implicit", implicit.map { "\($0)" })]
+            )
+        )
+    }
+
+    /// https://docs.discord.com/developers/resources/channel#set-voice-channel-status
+    @inlinable
+    public func setVoiceChannelStatus(
+        channelId: ChannelSnowflake,
+        reason: String? = nil,
+        payload: Payloads.SetVoiceChannelStatus
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.setVoiceChannelStatus(channelId: channelId)
+        return try await self.send(
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
+            payload: payload
+        )
+    }
+
     /// https://docs.discord.com/developers/resources/channel#deleteclose-channel
     @inlinable
     public func deleteChannel(
@@ -469,6 +518,17 @@ extension DiscordClient {
                 ]
             )
         )
+    }
+
+    /// https://docs.discord.com/developers/resources/message#search-guild-messages
+    @inlinable
+    public func searchGuildMessages(
+        guildId: GuildSnowflake,
+        payload: Payloads.SearchGuildMessages
+    ) async throws -> DiscordClientResponse<Responses.SearchGuildMessages> {
+        try payload.validate().throw(model: payload)
+        let endpoint = APIEndpoint.searchGuildMessages(guildId: guildId)
+        return try await self.send(request: .init(to: endpoint, queries: payload.makeQueries()))
     }
 
     /// https://docs.discord.com/developers/resources/channel#get-channel-message
@@ -1384,11 +1444,15 @@ extension DiscordClient {
     @inlinable
     public func updateGuildChannelPositions(
         guildId: GuildSnowflake,
+        reason: String? = nil,
         payload: [Payloads.ModifyGuildChannelPositions]
     ) async throws -> DiscordHTTPResponse {
         let endpoint = APIEndpoint.updateGuildChannelPositions(guildId: guildId)
         return try await self.send(
-            request: .init(to: endpoint),
+            request: .init(
+                to: endpoint,
+                headers: reason.map { ["X-Audit-Log-Reason": $0] } ?? [:]
+            ),
             payload: payload
         )
     }
@@ -1451,6 +1515,16 @@ extension DiscordClient {
                 ]
             )
         )
+    }
+
+    /// https://docs.discord.com/developers/resources/guild#get-guild-member-permissions
+    @inlinable
+    public func getGuildMemberPermissions(
+        guildId: GuildSnowflake,
+        userId: UserSnowflake
+    ) async throws -> DiscordClientResponse<Responses.Permissions> {
+        let endpoint = APIEndpoint.getGuildMemberPermissions(guildId: guildId, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
     }
 
     /// NOTE: Sometimes doesn't return a guild member object. Read the docs.
@@ -1653,6 +1727,16 @@ extension DiscordClient {
         roleId: RoleSnowflake
     ) async throws -> DiscordClientResponse<Role> {
         let endpoint = APIEndpoint.getGuildRole(guildId: guildId, roleId: roleId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://docs.discord.com/developers/resources/guild#get-guild-role-permissions
+    @inlinable
+    public func getGuildRolePermissions(
+        guildId: GuildSnowflake,
+        roleId: RoleSnowflake
+    ) async throws -> DiscordClientResponse<Responses.Permissions> {
+        let endpoint = APIEndpoint.getGuildRolePermissions(guildId: guildId, roleId: roleId)
         return try await self.send(request: .init(to: endpoint))
     }
 
@@ -2379,6 +2463,26 @@ extension DiscordClient {
         )
     }
 
+    /// https://docs.discord.com/developers/resources/invite#add-target-user
+    @inlinable
+    public func addInviteTargetUser(
+        code: String,
+        userId: UserSnowflake
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.addInviteTargetUser(code: code, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#remove-target-user
+    @inlinable
+    public func deleteInviteTargetUser(
+        code: String,
+        userId: UserSnowflake
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.deleteInviteTargetUser(code: code, userId: userId)
+        return try await self.send(request: .init(to: endpoint))
+    }
+
     /// https://docs.discord.com/developers/resources/invite#update-target-users
     @inlinable
     public func updateInviteTargetUsers(
@@ -2390,6 +2494,26 @@ extension DiscordClient {
             request: .init(to: endpoint),
             payload: payload
         )
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#bulk-add-target-users
+    @inlinable
+    public func bulkAddInviteTargetUsers(
+        code: String,
+        payload: Payloads.BulkAddInviteTargetUsers
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.bulkAddInviteTargetUsers(code: code)
+        return try await self.send(request: .init(to: endpoint), payload: payload)
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#bulk-delete-target-users
+    @inlinable
+    public func bulkDeleteInviteTargetUsers(
+        code: String,
+        payload: Payloads.BulkDeleteInviteTargetUsers
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.bulkDeleteInviteTargetUsers(code: code)
+        return try await self.send(request: .init(to: endpoint), payload: payload)
     }
 
     /// https://docs.discord.com/developers/resources/invite#get-target-users-job-status
@@ -2689,6 +2813,7 @@ extension DiscordClient {
         before: GuildSnowflake? = nil,
         after: GuildSnowflake? = nil,
         limit: Int? = nil,
+        shard: Int? = nil,
         withCounts: Bool? = nil
     ) async throws -> DiscordClientResponse<[PartialGuild]> {
         try checkInBounds(name: "limit", value: limit, lowerBound: 1, upperBound: 200)
@@ -2700,6 +2825,7 @@ extension DiscordClient {
                     ("before", before?.rawValue),
                     ("after", after?.rawValue),
                     ("limit", limit.map { "\($0)" }),
+                    ("shard", shard.map { "\($0)" }),
                     ("with_counts", withCounts.map { "\($0)" }),
                 ]
             )
@@ -2758,11 +2884,11 @@ extension DiscordClient {
 
     /// This endpoint requires a `DiscordClient` with an OAuth token.
     /// By default the authentication method is by a bot token, and not an OAuth one.
-    /// https://docs.discord.com/developers/resources/user#get-user-application-role-connection
+    /// https://docs.discord.com/developers/resources/user#get-current-user-application-role-connection
     @inlinable
     public func getApplicationUserRoleConnection(
         appId: ApplicationSnowflake? = nil
-    ) async throws -> DiscordClientResponse<DiscordUser.Connection> {
+    ) async throws -> DiscordClientResponse<DiscordUser.ApplicationRoleConnection> {
         let endpoint = APIEndpoint.getApplicationUserRoleConnection(
             applicationId: try requireAppId(appId)
         )
@@ -2771,12 +2897,12 @@ extension DiscordClient {
 
     /// This endpoint requires a `DiscordClient` with an OAuth token.
     /// By default the authentication method is by a bot token, and not an OAuth one.
-    /// https://docs.discord.com/developers/resources/user#update-user-application-role-connection
+    /// https://docs.discord.com/developers/resources/user#update-current-user-application-role-connection
     @inlinable
     public func updateApplicationUserRoleConnection(
         appId: ApplicationSnowflake? = nil,
         payload: Payloads.UpdateUserApplicationRoleConnection
-    ) async throws -> DiscordClientResponse<DiscordUser.Connection> {
+    ) async throws -> DiscordClientResponse<DiscordUser.ApplicationRoleConnection> {
         let endpoint = APIEndpoint.updateApplicationUserRoleConnection(
             applicationId: try requireAppId(appId)
         )
@@ -2784,6 +2910,19 @@ extension DiscordClient {
             request: .init(to: endpoint),
             payload: payload
         )
+    }
+
+    /// This endpoint requires a `DiscordClient` with an OAuth token.
+    /// By default the authentication method is by a bot token, and not an OAuth one.
+    /// https://docs.discord.com/developers/resources/user#delete-current-user-application-role-connection
+    @inlinable
+    public func deleteApplicationUserRoleConnection(
+        appId: ApplicationSnowflake? = nil
+    ) async throws -> DiscordHTTPResponse {
+        let endpoint = APIEndpoint.deleteApplicationUserRoleConnection(
+            applicationId: try requireAppId(appId)
+        )
+        return try await self.send(request: .init(to: endpoint))
     }
 
     // MARK: Polls

@@ -5,8 +5,8 @@ public struct Subscription: Sendable, Codable {
     @UnstableEnum<_Int_CompatibilityTypealias>
     public enum Status: Sendable, Codable {
         case active  // 0
-        case ending  // 1
-        case inactive  // 2
+        case inactive  // 1
+        case ending  // 2
         case __undocumented(_Int_CompatibilityTypealias)
     }
 

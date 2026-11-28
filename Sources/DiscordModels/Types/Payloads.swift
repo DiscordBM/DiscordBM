@@ -9,11 +9,15 @@ public enum Payloads {
     /// An attachment object, but for sending.
     /// https://docs.discord.com/developers/resources/channel#attachment-object
     public struct Attachment: Sendable, Encodable, ValidatablePayload {
-        /// When sending, `id` is the index of this attachment in the `files` you provide.
+        /// When sending, `id` is the index of this attachment in the `files` you provide,
+        /// or the id of an attachment that the message already has.
         public var id: String
         public var filename: String?
         public var title: String?
         public var description: String?
+        public var duration_secs: Double?
+        public var waveform: String?
+        public var is_spoiler: Bool?
         public var content_type: String?
         public var size: Int?
         public var url: String?
@@ -28,6 +32,9 @@ public enum Payloads {
             filename: String? = nil,
             title: String? = nil,
             description: String? = nil,
+            duration_secs: Double? = nil,
+            waveform: String? = nil,
+            is_spoiler: Bool? = nil,
             content_type: String? = nil,
             size: Int? = nil,
             url: String? = nil,
@@ -40,6 +47,9 @@ public enum Payloads {
             self.filename = filename
             self.title = title
             self.description = description
+            self.duration_secs = duration_secs
+            self.waveform = waveform
+            self.is_spoiler = is_spoiler
             self.content_type = content_type
             self.size = size
             self.url = url
@@ -47,6 +57,29 @@ public enum Payloads {
             self.height = height
             self.width = width
             self.ephemeral = ephemeral
+        }
+
+        /// Keeps or edits an attachment that the message already has.
+        /// `id` is the id of that attachment.
+        public init(
+            id: AttachmentSnowflake,
+            description: String? = nil,
+            is_spoiler: Bool? = nil
+        ) {
+            self.id = id.rawValue
+            self.filename = nil
+            self.title = nil
+            self.description = description
+            self.duration_secs = nil
+            self.waveform = nil
+            self.is_spoiler = is_spoiler
+            self.content_type = nil
+            self.size = nil
+            self.url = nil
+            self.proxy_url = nil
+            self.height = nil
+            self.width = nil
+            self.ephemeral = nil
         }
 
         public func validate() -> [ValidationFailure] {
@@ -186,7 +219,8 @@ public enum Payloads {
                     hasContent: !(content?.isEmpty ?? true),
                     hasEmbeds: !(embeds?.isEmpty ?? true),
                     hasStickers: false,
-                    hasPoll: poll != nil
+                    hasPoll: poll != nil,
+                    hasSharedClientTheme: false
                 )
                 components?.validate()
                 attachments?.validate()
@@ -453,6 +487,7 @@ public enum Payloads {
         public var flags: IntBitField<DiscordChannel.Message.Flag>?
         public var enforce_nonce: Bool?
         public var poll: CreatePollRequest?
+        public var shared_client_theme: DiscordChannel.Message.SharedClientTheme?
 
         enum CodingKeys: String, CodingKey {
             case content
@@ -467,6 +502,7 @@ public enum Payloads {
             case flags
             case enforce_nonce
             case poll
+            case shared_client_theme
         }
 
         public init(
@@ -482,7 +518,8 @@ public enum Payloads {
             attachments: [Attachment]? = nil,
             flags: IntBitField<DiscordChannel.Message.Flag>? = nil,
             enforce_nonce: Bool? = nil,
-            poll: CreatePollRequest? = nil
+            poll: CreatePollRequest? = nil,
+            shared_client_theme: DiscordChannel.Message.SharedClientTheme? = nil
         ) {
             self.content = content
             self.nonce = nonce
@@ -497,6 +534,7 @@ public enum Payloads {
             self.flags = flags
             self.enforce_nonce = enforce_nonce
             self.poll = poll
+            self.shared_client_theme = shared_client_theme
         }
 
         public func validate() -> [ValidationFailure] {
@@ -512,6 +550,7 @@ public enum Payloads {
                 components?.isEmpty,
                 files?.isEmpty,
                 poll?.answers.isEmpty,
+                shared_client_theme == nil,
                 message_reference == nil,
                 names: "content",
                 "embeds",
@@ -519,6 +558,7 @@ public enum Payloads {
                 "components",
                 "files",
                 "poll",
+                "shared_client_theme",
                 "message_reference"
             )
             validateCombinedCharacterCountDoesNotExceed(
@@ -539,12 +579,14 @@ public enum Payloads {
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
                 hasStickers: !(sticker_ids?.isEmpty ?? true),
-                hasPoll: poll != nil
+                hasPoll: poll != nil,
+                hasSharedClientTheme: shared_client_theme != nil
             )
             components?.validate()
             attachments?.validate()
             embeds?.validate()
             poll?.validate()
+            shared_client_theme?.validate()
         }
     }
 
@@ -605,7 +647,8 @@ public enum Payloads {
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
                 hasStickers: false,
-                hasPoll: false
+                hasPoll: false,
+                hasSharedClientTheme: false
             )
             allowed_mentions?.validate()
             attachments?.validate()
@@ -707,7 +750,8 @@ public enum Payloads {
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
                 hasStickers: false,
-                hasPoll: poll != nil
+                hasPoll: poll != nil,
+                hasSharedClientTheme: false
             )
             components?.validate()
             allowed_mentions?.validate()
@@ -827,7 +871,8 @@ public enum Payloads {
                 hasContent: !(content?.isEmpty ?? true),
                 hasEmbeds: !(embeds?.isEmpty ?? true),
                 hasStickers: false,
-                hasPoll: poll != nil
+                hasPoll: poll != nil,
+                hasSharedClientTheme: false
             )
             allowed_mentions?.validate()
             attachments?.validate()
@@ -979,7 +1024,8 @@ public enum Payloads {
                     hasContent: !(content?.isEmpty ?? true),
                     hasEmbeds: !(embeds?.isEmpty ?? true),
                     hasStickers: !(sticker_ids?.isEmpty ?? true),
-                    hasPoll: poll != nil
+                    hasPoll: poll != nil,
+                    hasSharedClientTheme: false
                 )
                 components?.validate()
                 attachments?.validate()
@@ -1043,6 +1089,7 @@ public enum Payloads {
         public var nsfw: Bool?
         public var integration_types: [DiscordApplication.IntegrationKind]?
         public var contexts: [Interaction.ContextKind]?
+        public var handler: ApplicationCommand.HandlerKind?
 
         public init(
             name: String,
@@ -1055,7 +1102,8 @@ public enum Payloads {
             type: ApplicationCommand.Kind? = nil,
             nsfw: Bool? = nil,
             integration_types: [DiscordApplication.IntegrationKind]? = nil,
-            contexts: [Interaction.ContextKind]? = nil
+            contexts: [Interaction.ContextKind]? = nil,
+            handler: ApplicationCommand.HandlerKind? = nil
         ) {
             self.name = name
             self.name_localizations = .init(name_localizations)
@@ -1068,6 +1116,7 @@ public enum Payloads {
             self.nsfw = nsfw
             self.integration_types = integration_types
             self.contexts = contexts
+            self.handler = handler
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1080,9 +1129,16 @@ public enum Payloads {
             validateHasPrecondition(
                 condition: description.isNotEmpty
                     || (description_localizations?.values).isNotEmpty,
-                allowedIf: (type ?? .chatInput) == .chatInput,
+                allowedIf: [.chatInput, .primaryEntryPoint].contains(type ?? .chatInput),
                 name: "description+description_localizations",
-                reason: "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput'"
+                reason:
+                    "'description' or 'description_localizations' are only allowed if 'type' is 'chatInput' or 'primaryEntryPoint'"
+            )
+            validateHasPrecondition(
+                condition: handler != nil,
+                allowedIf: type == .primaryEntryPoint,
+                name: "handler",
+                reason: "'handler' is only allowed if 'type' is 'primaryEntryPoint'"
             )
             validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
             validateCharacterCountDoesNotExceed(description, max: 100, name: "description")
@@ -1108,6 +1164,7 @@ public enum Payloads {
         public var nsfw: Bool?
         public var integration_types: [DiscordApplication.IntegrationKind]?
         public var contexts: [Interaction.ContextKind]?
+        public var handler: ApplicationCommand.HandlerKind?
 
         public init(
             name: String? = nil,
@@ -1119,7 +1176,8 @@ public enum Payloads {
             dm_permission: Bool? = nil,
             nsfw: Bool? = nil,
             integration_types: [DiscordApplication.IntegrationKind]? = nil,
-            contexts: [Interaction.ContextKind]? = nil
+            contexts: [Interaction.ContextKind]? = nil,
+            handler: ApplicationCommand.HandlerKind? = nil
         ) {
             self.name = name
             self.name_localizations = .init(name_localizations)
@@ -1131,6 +1189,7 @@ public enum Payloads {
             self.nsfw = nsfw
             self.integration_types = integration_types
             self.contexts = contexts
+            self.handler = handler
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1298,8 +1357,14 @@ public enum Payloads {
             validateOnlyContains(
                 flags,
                 name: "flags",
-                reason: "Can only contain 'requireTag'",
-                allowed: [.requireTag]
+                reason: "Can only contain 'requireTag', 'hideMediaDownloadOptions', or 'isSpoilerChannel'",
+                allowed: [.requireTag, .hideMediaDownloadOptions, .isSpoilerChannel]
+            )
+            validateHasPrecondition(
+                condition: flags?.contains(.isSpoilerChannel) == true,
+                allowedIf: nsfw != true,
+                name: "flags",
+                reason: "'isSpoilerChannel' is only allowed if 'nsfw' is not 'true'"
             )
             validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
             available_tags?.validate()
@@ -1356,6 +1421,28 @@ public enum Payloads {
         }
     }
 
+    /// https://docs.discord.com/developers/resources/channel#set-voice-channel-status
+    public struct SetVoiceChannelStatus: Sendable, Encodable, ValidatablePayload {
+        public var status: String?
+
+        enum CodingKeys: String, CodingKey {
+            case status
+        }
+
+        public init(status: String?) {
+            self.status = status
+        }
+
+        public func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(self.status, forKey: .status)
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateCharacterCountDoesNotExceed(status, max: 500, name: "status")
+        }
+    }
+
     /// https://docs.discord.com/developers/resources/guild#create-guild-channel-json-params
     public struct CreateGuildChannel: Sendable, Encodable, ValidatablePayload {
         public var name: String
@@ -1376,6 +1463,7 @@ public enum Payloads {
         public var default_sort_order: DiscordChannel.SortOrder?
         public var default_forum_layout: DiscordChannel.ForumLayout?
         public var default_thread_rate_limit_per_user: Int?
+        public var flags: IntBitField<DiscordChannel.Flag>?
 
         public init(
             name: String,
@@ -1395,7 +1483,8 @@ public enum Payloads {
             default_reaction_emoji: DiscordChannel.DefaultReaction? = nil,
             default_sort_order: DiscordChannel.SortOrder? = nil,
             default_forum_layout: DiscordChannel.ForumLayout? = nil,
-            default_thread_rate_limit_per_user: Int? = nil
+            default_thread_rate_limit_per_user: Int? = nil,
+            flags: IntBitField<DiscordChannel.Flag>? = nil
         ) {
             self.name = name
             self.type = type
@@ -1415,6 +1504,7 @@ public enum Payloads {
             self.default_sort_order = default_sort_order
             self.default_forum_layout = default_forum_layout
             self.default_thread_rate_limit_per_user = default_thread_rate_limit_per_user
+            self.flags = flags
         }
 
         public func validate() -> [ValidationFailure] {
@@ -1428,6 +1518,18 @@ public enum Payloads {
             )
             validateNumberInRangeOrNil(bitrate, min: 8_000, max: 384_000, name: "bitrate")
             validateNumberInRangeOrNil(user_limit, min: 0, max: 10_000, name: "user_limit")
+            validateOnlyContains(
+                flags,
+                name: "flags",
+                reason: "Can only contain 'requireTag', 'hideMediaDownloadOptions', or 'isSpoilerChannel'",
+                allowed: [.requireTag, .hideMediaDownloadOptions, .isSpoilerChannel]
+            )
+            validateHasPrecondition(
+                condition: flags?.contains(.isSpoilerChannel) == true,
+                allowedIf: nsfw != true,
+                name: "flags",
+                reason: "'isSpoilerChannel' is only allowed if 'nsfw' is not 'true'"
+            )
             validateElementCountDoesNotExceed(available_tags, max: 20, name: "available_tags")
             available_tags?.validate()
         }
@@ -1641,7 +1743,7 @@ public enum Payloads {
         }
 
         public func validate() -> [ValidationFailure] {
-            validateElementCountDoesNotExceed(exempt_roles, max: 50, name: "exempt_roles")
+            validateElementCountDoesNotExceed(exempt_roles, max: 20, name: "exempt_roles")
             validateElementCountDoesNotExceed(exempt_channels, max: 50, name: "exempt_channels")
         }
     }
@@ -1678,7 +1780,7 @@ public enum Payloads {
         }
 
         public func validate() -> [ValidationFailure] {
-            validateElementCountDoesNotExceed(exempt_roles, max: 50, name: "exempt_roles")
+            validateElementCountDoesNotExceed(exempt_roles, max: 20, name: "exempt_roles")
             validateElementCountDoesNotExceed(exempt_channels, max: 50, name: "exempt_channels")
         }
     }
@@ -1693,6 +1795,215 @@ public enum Payloads {
 
         public func validate() -> [ValidationFailure] {
             validateElementCountInRange(messages, min: 2, max: 100, name: "messages")
+        }
+    }
+
+    /// https://docs.discord.com/developers/resources/message#search-guild-messages-query-string-params
+    public struct SearchGuildMessages: Sendable, ValidatablePayload {
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-author-types
+        @UnstableEnum<String>
+        public enum AuthorType: Sendable, Codable {
+            case user
+            case bot
+            case webhook
+            case __undocumented(String)
+        }
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-search-has-types
+        @UnstableEnum<String>
+        public enum HasType: Sendable, Codable {
+            case image
+            case sound
+            case video
+            case file
+            case sticker
+            case embed
+            case link
+            case poll
+            case snapshot
+            case __undocumented(String)
+        }
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-search-embed-types
+        @UnstableEnum<String>
+        public enum EmbedType: Sendable, Codable {
+            case image
+            case video
+            case gif
+            case sound
+            case article
+            case __undocumented(String)
+        }
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-search-sort-modes
+        @UnstableEnum<String>
+        public enum SortMode: Sendable, Codable {
+            case timestamp
+            case relevance
+            case __undocumented(String)
+        }
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-query-string-params
+        @UnstableEnum<String>
+        public enum SortOrder: Sendable, Codable {
+            case asc
+            case desc
+            case __undocumented(String)
+        }
+
+        /// https://docs.discord.com/developers/resources/message#search-guild-messages-query-string-params
+        public enum Filter<Value>: Sendable
+        where Value: Sendable, Value: RawRepresentable, Value.RawValue == String {
+            case include(Value)
+            case exclude(Value)
+
+            var urlQueryDescription: String {
+                switch self {
+                case let .include(value): return value.rawValue
+                case let .exclude(value): return "-\(value.rawValue)"
+                }
+            }
+        }
+
+        public var limit: Int?
+        public var offset: Int?
+        public var max_id: MessageSnowflake?
+        public var min_id: MessageSnowflake?
+        public var slop: Int?
+        public var content: String?
+        public var channel_id: [ChannelSnowflake]?
+        public var author_type: [Filter<AuthorType>]?
+        public var author_id: [UserSnowflake]?
+        public var mentions: [UserSnowflake]?
+        public var mentions_role_id: [RoleSnowflake]?
+        public var mention_everyone: Bool?
+        public var replied_to_user_id: [UserSnowflake]?
+        public var replied_to_message_id: [MessageSnowflake]?
+        public var pinned: Bool?
+        public var has: [Filter<HasType>]?
+        public var embed_type: [EmbedType]?
+        public var embed_provider: [String]?
+        public var link_hostname: [String]?
+        public var attachment_filename: [String]?
+        public var attachment_extension: [String]?
+        public var sort_by: SortMode?
+        public var sort_order: SortOrder?
+        public var include_nsfw: Bool?
+
+        public init(
+            limit: Int? = nil,
+            offset: Int? = nil,
+            max_id: MessageSnowflake? = nil,
+            min_id: MessageSnowflake? = nil,
+            slop: Int? = nil,
+            content: String? = nil,
+            channel_id: [ChannelSnowflake]? = nil,
+            author_type: [Filter<AuthorType>]? = nil,
+            author_id: [UserSnowflake]? = nil,
+            mentions: [UserSnowflake]? = nil,
+            mentions_role_id: [RoleSnowflake]? = nil,
+            mention_everyone: Bool? = nil,
+            replied_to_user_id: [UserSnowflake]? = nil,
+            replied_to_message_id: [MessageSnowflake]? = nil,
+            pinned: Bool? = nil,
+            has: [Filter<HasType>]? = nil,
+            embed_type: [EmbedType]? = nil,
+            embed_provider: [String]? = nil,
+            link_hostname: [String]? = nil,
+            attachment_filename: [String]? = nil,
+            attachment_extension: [String]? = nil,
+            sort_by: SortMode? = nil,
+            sort_order: SortOrder? = nil,
+            include_nsfw: Bool? = nil
+        ) {
+            self.limit = limit
+            self.offset = offset
+            self.max_id = max_id
+            self.min_id = min_id
+            self.slop = slop
+            self.content = content
+            self.channel_id = channel_id
+            self.author_type = author_type
+            self.author_id = author_id
+            self.mentions = mentions
+            self.mentions_role_id = mentions_role_id
+            self.mention_everyone = mention_everyone
+            self.replied_to_user_id = replied_to_user_id
+            self.replied_to_message_id = replied_to_message_id
+            self.pinned = pinned
+            self.has = has
+            self.embed_type = embed_type
+            self.embed_provider = embed_provider
+            self.link_hostname = link_hostname
+            self.attachment_filename = attachment_filename
+            self.attachment_extension = attachment_extension
+            self.sort_by = sort_by
+            self.sort_order = sort_order
+            self.include_nsfw = include_nsfw
+        }
+
+        public func makeQueries() -> [(String, String?)] {
+            var queries: [(String, String?)] = [
+                ("limit", self.limit.map({ "\($0)" })),
+                ("offset", self.offset.map({ "\($0)" })),
+                ("max_id", self.max_id?.rawValue),
+                ("min_id", self.min_id?.rawValue),
+                ("slop", self.slop.map({ "\($0)" })),
+                ("content", self.content),
+            ]
+            queries += self.channel_id?.map({ ("channel_id", $0.rawValue) }) ?? []
+            queries += self.author_type?.map({ ("author_type", $0.urlQueryDescription) }) ?? []
+            queries += self.author_id?.map({ ("author_id", $0.rawValue) }) ?? []
+            queries += self.mentions?.map({ ("mentions", $0.rawValue) }) ?? []
+            queries += self.mentions_role_id?.map({ ("mentions_role_id", $0.rawValue) }) ?? []
+            queries.append(("mention_everyone", self.mention_everyone.map({ "\($0)" })))
+            queries += self.replied_to_user_id?.map({ ("replied_to_user_id", $0.rawValue) }) ?? []
+            queries += self.replied_to_message_id?.map({ ("replied_to_message_id", $0.rawValue) }) ?? []
+            queries.append(("pinned", self.pinned.map({ "\($0)" })))
+            queries += self.has?.map({ ("has", $0.urlQueryDescription) }) ?? []
+            queries += self.embed_type?.map({ ("embed_type", $0.rawValue) }) ?? []
+            queries += self.embed_provider?.map({ ("embed_provider", $0) }) ?? []
+            queries += self.link_hostname?.map({ ("link_hostname", $0) }) ?? []
+            queries += self.attachment_filename?.map({ ("attachment_filename", $0) }) ?? []
+            queries += self.attachment_extension?.map({ ("attachment_extension", $0) }) ?? []
+            queries.append(("sort_by", self.sort_by?.rawValue))
+            queries.append(("sort_order", self.sort_order?.rawValue))
+            queries.append(("include_nsfw", self.include_nsfw.map({ "\($0)" })))
+            return queries
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateNumberInRangeOrNil(limit, min: 1, max: 25, name: "limit")
+            validateNumberInRangeOrNil(offset, min: 0, max: 9975, name: "offset")
+            validateNumberInRangeOrNil(slop, min: 0, max: 100, name: "slop")
+            validateCharacterCountDoesNotExceed(content, max: 1024, name: "content")
+            validateElementCountDoesNotExceed(channel_id, max: 500, name: "channel_id")
+            validateElementCountDoesNotExceed(author_id, max: 100, name: "author_id")
+            validateElementCountDoesNotExceed(mentions, max: 100, name: "mentions")
+            validateElementCountDoesNotExceed(mentions_role_id, max: 100, name: "mentions_role_id")
+            validateElementCountDoesNotExceed(replied_to_user_id, max: 100, name: "replied_to_user_id")
+            validateElementCountDoesNotExceed(replied_to_message_id, max: 100, name: "replied_to_message_id")
+            validateElementCountDoesNotExceed(embed_provider, max: 100, name: "embed_provider")
+            for (idx, provider) in (embed_provider ?? []).enumerated() {
+                validateCharacterCountDoesNotExceed(provider, max: 256, name: "embed_provider[\(idx)]")
+            }
+            validateElementCountDoesNotExceed(link_hostname, max: 100, name: "link_hostname")
+            for (idx, hostname) in (link_hostname ?? []).enumerated() {
+                validateCharacterCountDoesNotExceed(hostname, max: 256, name: "link_hostname[\(idx)]")
+            }
+            validateElementCountDoesNotExceed(attachment_filename, max: 100, name: "attachment_filename")
+            for (idx, filename) in (attachment_filename ?? []).enumerated() {
+                validateCharacterCountDoesNotExceed(filename, max: 1024, name: "attachment_filename[\(idx)]")
+            }
+            validateElementCountDoesNotExceed(attachment_extension, max: 100, name: "attachment_extension")
+            for (idx, fileExtension) in (attachment_extension ?? []).enumerated() {
+                validateCharacterCountDoesNotExceed(
+                    fileExtension,
+                    max: 256,
+                    name: "attachment_extension[\(idx)]"
+                )
+            }
         }
     }
 
@@ -1748,6 +2059,7 @@ public enum Payloads {
         public var target_user_id: UserSnowflake?
         public var target_application_id: ApplicationSnowflake?
         public var target_users_file: RawFile?
+        public var target_user_ids: [UserSnowflake]?
         public var role_ids: [RoleSnowflake]?
 
         public var files: [RawFile]? {
@@ -1763,6 +2075,7 @@ public enum Payloads {
             target_user_id: UserSnowflake? = nil,
             target_application_id: ApplicationSnowflake? = nil,
             target_users_file: RawFile? = nil,
+            target_user_ids: [UserSnowflake]? = nil,
             role_ids: [RoleSnowflake]? = nil
         ) {
             self.max_age = max_age
@@ -1773,6 +2086,7 @@ public enum Payloads {
             self.target_user_id = target_user_id
             self.target_application_id = target_application_id
             self.target_users_file = target_users_file
+            self.target_user_ids = target_user_ids
             self.role_ids = role_ids
         }
 
@@ -1811,6 +2125,13 @@ public enum Payloads {
                 name: "target_users_file",
                 reason: "'target_users_file' extension must be 'csv'"
             )
+            validateElementCountDoesNotExceed(target_user_ids, max: 1_000, name: "target_user_ids")
+            validateHasPrecondition(
+                condition: target_user_ids != nil,
+                allowedIf: target_users_file == nil,
+                name: "target_user_ids",
+                reason: "'target_user_ids' and 'target_users_file' are mutually exclusive"
+            )
         }
     }
 
@@ -1834,6 +2155,32 @@ public enum Payloads {
                 name: "target_users_file",
                 reason: "'target_users_file' extension must be 'csv'"
             )
+        }
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#bulk-add-target-users-json-params
+    public struct BulkAddInviteTargetUsers: Sendable, Encodable, ValidatablePayload {
+        public var user_ids: [UserSnowflake]
+
+        public init(user_ids: [UserSnowflake]) {
+            self.user_ids = user_ids
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateElementCountDoesNotExceed(user_ids, max: 1_000, name: "user_ids")
+        }
+    }
+
+    /// https://docs.discord.com/developers/resources/invite#bulk-delete-target-users-json-params
+    public struct BulkDeleteInviteTargetUsers: Sendable, Encodable, ValidatablePayload {
+        public var user_ids: [UserSnowflake]
+
+        public init(user_ids: [UserSnowflake]) {
+            self.user_ids = user_ids
+        }
+
+        public func validate() -> [ValidationFailure] {
+            validateElementCountDoesNotExceed(user_ids, max: 1_000, name: "user_ids")
         }
     }
 
@@ -2540,30 +2887,42 @@ public enum Payloads {
         public func validate() -> [ValidationFailure] {}
     }
 
-    /// https://docs.discord.com/developers/resources/user#update-user-application-role-connection-json-params
+    /// https://docs.discord.com/developers/resources/user#update-current-user-application-role-connection-json-params
     public struct UpdateUserApplicationRoleConnection: Sendable, Encodable, ValidatablePayload {
         public var platform_name: String?
         public var platform_username: String?
-        public var metadata: [String: ApplicationRoleConnectionMetadata]?
+        public var metadata: [String: String]?
 
         public init(
             platform_name: String? = nil,
             platform_username: String? = nil,
-            metadata: [ApplicationRoleConnectionMetadata]? = nil
+            metadata: [String: String]? = nil
         ) {
             self.platform_name = platform_name
             self.platform_username = platform_username
-            self.metadata = metadata.map { meta in
-                Dictionary(
-                    meta.map({ ($0.key, $0) }),
-                    uniquingKeysWith: { l, _ in l }
-                )
-            }
+            self.metadata = metadata
+        }
+
+        public init<Key>(
+            platform_name: String? = nil,
+            platform_username: String? = nil,
+            metadata: [Key: ApplicationRoleConnectionMetadata.Value]
+        ) where Key: RawRepresentable, Key.RawValue == String {
+            self.platform_name = platform_name
+            self.platform_username = platform_username
+            self.metadata = Dictionary(
+                metadata.map({ ($0.key.rawValue, $0.value.stringValue) }),
+                uniquingKeysWith: { l, _ in l }
+            )
         }
 
         public func validate() -> [ValidationFailure] {
             validateCharacterCountDoesNotExceed(platform_name, max: 50, name: "platform_name")
             validateCharacterCountDoesNotExceed(platform_username, max: 100, name: "platform_username")
+            for (key, value) in metadata ?? [:] {
+                validateApplicationRoleConnectionMetadataKey(key, name: "metadata[\(key)]")
+                validateCharacterCountDoesNotExceed(value, max: 100, name: "metadata[\(key)]")
+            }
         }
     }
 

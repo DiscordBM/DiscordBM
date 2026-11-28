@@ -22,6 +22,12 @@ public enum DiscordUtils {
         "<@&\(id.rawValue)>"
     }
 
+    /// When used in a Discord message, shows up as mentioning a game profile.
+    @inlinable
+    public static func gameProfile(gameId: AnySnowflake) -> String {
+        "<@$\(gameId.rawValue)>"
+    }
+
     /// When used in a Discord message, shows up as mentioning a slash command.
     @inlinable
     public static func slashCommand(
@@ -81,6 +87,28 @@ public enum DiscordUtils {
     @inlinable
     public static func guildNavigation(type: Int) {
         fatalError("unavailable")
+    }
+
+    /// When used in a Discord message, shows up as a guild-navigation link.
+    /// See ``GuildNavigation`` for the destinations.
+    @inlinable
+    public static func guildNavigation(_ destination: GuildNavigation) -> String {
+        switch destination {
+        case .customize:
+            return "<id:customize>"
+        case .browse:
+            return "<id:browse>"
+        case .guide:
+            return "<id:guide>"
+        case .linkedRoles:
+            return "<id:linked-roles>"
+        case .linkedRole(let roleId):
+            return "<id:linked-roles:\(roleId.rawValue)>"
+        case .__DO_NOT_USE_THIS_CASE:
+            fatalError(
+                "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
+            )
+        }
     }
 
     /// When used in a Discord message, shows up as an email address.
@@ -164,6 +192,22 @@ public enum TimestampStyle: String {
     case relativeTime = "R"
     /// This case serves as a way of discouraging exhaustive switch statements
     case __DO_NOT_USE_THIS_CASE = "__DO_NOT_USE_THIS_CASE"
+}
+
+/// https://docs.discord.com/developers/reference#message-formatting
+public enum GuildNavigation: Sendable {
+    /// `<id:customize>`
+    case customize
+    /// `<id:browse>`
+    case browse
+    /// `<id:guide>`
+    case guide
+    /// `<id:linked-roles>`
+    case linkedRoles
+    /// `<id:linked-roles:ROLE_ID>`
+    case linkedRole(RoleSnowflake)
+    /// This case serves as a way of discouraging exhaustive switch statements
+    case __DO_NOT_USE_THIS_CASE
 }
 
 /// Options for escaping special characters.
